@@ -1,0 +1,255 @@
+rem /**
+rem * WebBrowserComponent
+rem *
+rem * Component to integrate either with Swing embedded browser or HTML View in BUI
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
+class public WebBrowserComponent implements UIWidget
+
+
+    field private BBjNumber             X
+    field private BBjNumber             Y
+    field private BBjNumber             W
+    field private BBjNumber             H
+
+    field private BBjWindow             ParentWnd!
+    field private BBjChildWindow        Wnd!
+
+    field private BBjString             Url$
+
+    rem Controls for GUI version
+
+    field private Object@               Browser!
+    field private BBjWrappedJComponent  Wrapper!
+
+    rem Controls for BUI version
+    field private BBjHtmlView           HtmlView!
+
+
+
+
+    rem /**
+    rem * Standard Constructor WebBrowserComponent disabled
+    rem */
+    method private WebBrowserComponent()
+
+
+    methodend
+
+
+
+
+    rem /**
+    rem * Constructor WebBrowserComponent disabled
+    rem * @param BBjChildWindow wnd!: existing childwindow to  hold the component
+    rem */
+    method public WebBrowserComponent(BBjChildWindow wnd!)
+
+        #ParentWnd! = BBjAPI().getSysGui().getWindow(wnd!.getContextID())
+        #Wnd! = wnd!
+        #X = wnd!.getX()
+        #Y = wnd!.getY()
+        #H = wnd!.getHeight()
+        #W = wnd!.getWidth()
+
+        #initialize()
+
+    methodend
+
+    rem /**
+    rem * Constructor WebBrowserComponent disabled
+    rem * @param BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h
+    rem */
+    method public WebBrowserComponent(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        #ParentWnd! = wnd!
+        #Wnd! = wnd!.addChildWindow(id,x,y,w,h,BBjAPI().getSysGui().getAvailableContext())
+
+        #X = x
+        #Y = y
+        #H = h
+        #W = w
+
+        #initialize()
+
+    methodend
+
+
+    method public void setLocation(BBjNumber x, BBjNumber y)
+
+        #Wnd!.setLocation(x,y)
+        #X = x
+        #Y = y
+
+    methodend
+
+    method public void setSize(BBjNumber w, BBjNumber h)
+
+        #Wnd!.setSize(w,h)
+
+        #W = w
+        #H = h
+
+        if  #HtmlView!<>null() then
+            rem BUI
+            #HtmlView!.setSize(w,h)
+        else
+
+            if #Wrapper! <> null() then
+                #Wrapper!.setSize(w,h)
+            endif
+
+        endif
+
+
+    methodend
+
+
+    method public BBjNumber getX()
+
+
+        methodret #X
+
+
+    methodend
+
+    method public BBjNumber getY()
+
+
+        methodret #Y
+
+
+    methodend
+
+    method public BBjNumber getWidth()
+
+
+        methodret #W
+
+
+    methodend
+
+    method public BBjNumber getHeight()
+
+
+        methodret #H
+
+
+    methodend
+
+    method public void setVisible(BBjNumber vis)
+
+        #Wnd!.setVisible(vis)
+
+    methodend
+
+    method public BBjNumber isVisible()
+
+
+        methodret #Wnd!.isVisible()
+
+
+    methodend
+
+
+    method public BBjNumber isFullBrowser()
+
+
+        if #HtmlView!=null() or info(3,6)="5" then
+            r=1
+        fi
+
+        methodret r
+
+    methodend
+
+    method private void initialize()
+
+        if info(3,6)="5" then
+            rem BUI
+            #HtmlView! = #Wnd!.addHtmlView(100,0,0,#W,#H,"")
+        else
+            seterr noJxbrowser
+            #Browser! = com.teamdev.jxbrowser.BrowserFactory@.createBrowser(err=*next)
+            noJxbrowser:
+            seterr 0
+
+            if #Browser! <> null() then
+                b! = #Browser!
+                #Wrapper! = #Wnd!.addWrappedJComponent(100,0,0,#W,#H,b!.getComponent())
+            else
+                #HtmlView! = #Wnd!.addHtmlView(100,0,0,#W,#H,"")
+                rem dummy! = #Wnd!.addStaticText(999,0,0,#W,#H,"Could not find com.teamdev.jxbrowser class")
+            fi
+
+        fi
+
+    methodend
+
+    method public void navigate(BBjString url$)
+
+        if  #HtmlView!<>null() then
+            rem BUI and "dumb" GUI
+            #HtmlView!.setUrl(url$)
+        else
+
+            if #Browser! <> null() then
+                b! = #Browser!
+                b!.navigate(url$)
+            fi
+
+        fi
+
+        #Url$ = url$
+
+    methodend
+
+    method public void refresh()
+
+        if #HtmlView!<>null() then
+            rem BUI and "dumb" GUI
+
+            if info(3,6)="5" then
+                #HtmlView!.setUrl(#Url$)
+            endif
+
+
+        else
+
+            if #Browser! <> null() then
+                b!=#Browser!
+                b!.refresh()
+            fi
+
+        fi
+
+    methodend
+
+    method public void refresh(BBjString html$)
+
+
+        if #HtmlView!<>null() then
+            #HtmlView!.setText(html$)
+        endif
+
+
+    methodend
+
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+

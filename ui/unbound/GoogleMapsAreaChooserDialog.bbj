@@ -1,0 +1,198 @@
+use ::components/ui/bound/form/GoogleMapsComponent.bbj::GoogleMapsComponent
+
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::components/i18n/i18n.bbj::i18n
+
+class public GoogleMapsAreaChooserDialog
+
+    field private BBjTopLevelWindow Wnd!
+    field private GoogleMapsComponent GoogleMapsComponent!
+    field private BBjButton BtnOk!
+    field private BBjButton BtnCancel!
+    field private BBjInputE IpeCenter!
+    field private BBjInputN IpnRadius!
+    field private BBjSlider SliderRadius!
+
+
+    field public BBjNumber Radius
+    field public BBjTemplatedString Marker!
+
+    field private static BBTranslator  Translator! = i18n.getTranslator()
+
+    method public GoogleMapsAreaChooserDialog()
+
+        GoogleMapsComponent.setApiKey("ABQIAAAAap0HEV-ixXMRUaYIBuBfmRT77L4N76s2HcFsGSkrxDTwKN97jRQmWLW6hTKLmlPz92AuJhUvgis35Q")
+
+    methodend
+
+
+    method public BBjNumber doModal()
+
+        declare BBjSysGui sg!
+        sg! = BBjAPI().getSysGui(err=*next)
+
+        if sg! = null() then
+            sg! = BBjAPI().openSysGui("X0")
+        fi
+
+        #Wnd! = sg!.addWindow(sg!.getAvailableContext(),20,20,480,600,#Translator!.getTranslation("SELECT_AREA"),$00080002$)
+
+        #GoogleMapsComponent!   = new GoogleMapsComponent(#Wnd!,100,0,80,460,460)
+        #BtnOk!                 = #Wnd!.addButton(1,460-220,600-50,100,25,#Translator!.getTranslation("OK"))
+        #BtnCancel!             = #Wnd!.addButton(2,460-110,600-50,100,25,#Translator!.getTranslation("CANCEL"))
+        #BtnOk!.setEnabled(0)
+
+        lbl1!                   = #Wnd!.addStaticText(200,10,20,80,25,#Translator!.getTranslation("LOCATION")+":")
+        #IpeCenter!             = #Wnd!.addInputE(201,100,20,200,25,"")
+        #IpeCenter!.focus()
+
+        lbl2!                   = #Wnd!.addStaticText(210,10,50,80,25,#Translator!.getTranslation("RADIUS")+":")
+        #SliderRadius!          = #Wnd!.addHorizontalSlider(211,100,50,200,20)
+        #SliderRadius!.setMinimum(0)
+        #SliderRadius!.setMaximum(1000)
+        #SliderRadius!.setMajorTickSpacing(100)
+        #SliderRadius!.setMinorTickSpacing(50)
+        #SliderRadius!.setValue(100)
+
+        #IpnRadius!             = #Wnd!.addInputN(212,310,50,50,22,"")
+        #IpnRadius!.setValue(100)
+        lbl!                    = #Wnd!.addStaticText(213,370,50,50,22,"km")
+
+        #Wnd!.setCallback(BBjAPI.ON_CLOSE,"cancel")
+        #Wnd!.setCallback(BBjAPI.ON_RESIZE,#this!,"onWndResize")
+
+        #BtnCancel!.setCallback(BBjAPI.ON_BUTTON_PUSH,"cancel")
+        #BtnOk!.setCallback(BBjAPI.ON_BUTTON_PUSH,"ok")
+
+
+        #IpeCenter!.setCallback(BBjAPI.ON_EDIT_MODIFY,#this!,"onModifyIpeCenter")
+        #IpnRadius!.setCallback(BBjAPI.ON_EDIT_MODIFY,#this!,"onModifyIpnRadius")
+        #SliderRadius!.setCallback(BBjAPI.ON_CONTROL_SCROLL,#this!,"onSliderScroll")
+
+        center$=BBjAPI().getThinClient().getUserProperty("LastGoogleMapsSearchCenter",err=*next)
+        #IpeCenter!.setText(center$)
+
+        if center$>"" then
+            wait 1
+            #updateMap(null())
+        fi
+
+        process_events
+
+        cancel:
+        retval=0
+        goto finalize
+
+
+        ok:
+        retval=1
+        goto finalize
+
+
+        finalize:
+        #Wnd!.destroy()
+        BBjAPI().removeTimer("UpdateMap",err=*next)
+
+        methodret retval
+
+    methodend
+
+    method public void onWndResize(BBjResizeEvent ev!)
+
+        w=ev!.getWidth()
+        h=ev!.getHeight()
+
+        #BtnOk!.setLocation(w-220,h-50)
+        #BtnCancel!.setLocation(w-110,h-50)
+        #GoogleMapsComponent!.setSize(w-20,h-220)
+
+    methodend
+
+    method public void onModifyIpeCenter(BBjEditModifyEvent ev!)
+
+        BBjAPI().removeTimer("UpdateMap",err=*next)
+        BBjAPI().createTimer("UpdateMap",1,#this!,"updateMap")
+
+    methodend
+
+    method public void onModifyIpnRadius(BBjEditModifyEvent ev!)
+
+        val = int(num(ev!.getText(),err=*next))
+
+        if val<0 val=0
+
+        if val>1000 val=1000
+
+        #IpnRadius!.setValue(val)
+        #SliderRadius!.setValue(val)
+
+        BBjAPI().removeTimer("UpdateMap",err=*next)
+        BBjAPI().createTimer("UpdateMap",1,#this!,"updateMap")
+
+    methodend
+
+    method public void onSliderScroll(BBjControlScrollEvent ev!)
+
+        val = #SliderRadius!.getValue()
+        #IpnRadius!.setValue(val)
+        #SliderRadius!.setValue(val)
+
+        BBjAPI().removeTimer("UpdateMap",err=*next)
+        BBjAPI().createTimer("UpdateMap",1,#this!,"updateMap")
+
+    methodend
+
+
+    method public void updateMap(BBjTimerEvent ev!)
+
+
+        BBjAPI().removeTimer("UpdateMap",err=*next)
+
+        address$ = #IpeCenter!.getText()
+
+        BBjAPI().getThinClient().setUserProperty("LastGoogleMapsSearchCenter",address$)
+
+        #Radius = #SliderRadius!.getValue()
+
+        #Marker! = null()
+
+        if address$>"" then
+
+            #Marker! = #GoogleMapsComponent!.getLatLong(address$,err=skip)
+        fi
+
+        if #Marker! = null() then
+            #BtnOk!.setEnabled(0)
+        else
+            #GoogleMapsComponent!.updateMap(#Marker!,#Radius)
+            #BtnOk!.setEnabled(1)
+        fi
+
+        methodret
+
+        skip:
+        a=msgbox(#Translator!.getTranslation("ERROR"))
+
+    methodend
+
+classend
+
+prefix "../../ "+pfx
+
+
+GoogleMapsComponent.setApiKey("ABQIAAAAap0HEV-ixXMRUaYIBuBfmRT77L4N76s2HcFsGSkrxDTwKN97jRQmWLW6hTKLmlPz92AuJhUvgis35Q")
+
+dlg! = new GoogleMapsAreaChooserDialog()
+dlg!.doModal()
+
+
+
+
+
+
+
+
+
+
+
+

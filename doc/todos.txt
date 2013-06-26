@@ -1,0 +1,24 @@
+
+
+
+Todo-List Grid Component
+
+Filter:
+- Filter auf Spalten mit Datum
+- Bereichsfilter
+
+Events
+- Callback für Cell-Query
+- Alle Callbacks auch für nicht-OO (Label-)Syntax (wie DoubleClick)
+
+Subreports
+- List-Controls befüllen
+- Merkmalliste: in einer Zelle, bei Hover Anzeige als Liste im Popup
+
+Issues:
+- Timestamp und SQL Date 
+
+
+Dokumentation
+
+

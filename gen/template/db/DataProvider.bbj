@@ -1,0 +1,99 @@
+use ::components/db/DataProvider.bbj::DataProvider
+use ::components/db/DataRow.bbj::DataRow
+
+use ::bl/(DB_NICE)(TBL_NICE)Entity.bbj::(DB_NICE)(TBL_NICE)Entity
+use ::generated/(DB_NICE)(TBL_NICE)DataProviderT.bbj::(DB_NICE)(TBL_NICE)DataProviderT
+
+rem /**
+rem * (DB_NICE)(TBL_NICE)DataProvider
+rem *
+rem * derived class from (DB_NICE)(TBL_NICE)DataProviderT
+rem * put all custom additions and method overrides in this class
+rem * to allow for iterative re-generation of (DB_NICE)(TBL_NICE)DataProviderT
+rem * override to implement custom behavior that belongs to application logic
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public (DB_NICE)(TBL_NICE)DataProvider extends (DB_NICE)(TBL_NICE)DataProviderT
+
+    rem place your own field definitions for the database access logic here:
+
+    rem /**
+    rem * Method (DB_NICE)(TBL_NICE)DataProvider():
+    rem * standard constructor
+    rem */
+    method public (DB_NICE)(TBL_NICE)DataProvider()
+
+        #super!()
+
+    methodend
+
+    rem /**
+    rem * Method setupDatabaseLink:
+    rem * this method does setup the database sql and the key information#
+    rem * override to implement a custom sql statement (like for adding JOINs)
+    rem * or to adjust the primary key information for the table
+    rem */
+    method protected void setupDatabaseLink()
+
+        rem override to adjust to special settings
+        rem generated super class does the following:
+
+        rem #setDataSource("(DB)")
+        rem #setSQL("SELECT * FROM (TBL)")
+        rem #setPrimaryTable("(TBL)")
+        <keyseg>
+        rem #addPrimaryKeySegment("(KEYSEG)")
+        </keyseg>
+        rem #setEntityClass((DB_NICE)(TBL_NICE)Entity.newInstance())
+
+        #super!.setupDatabaseLink()
+
+    methodend
+
+    rem /**
+    rem * Method buildSQLStatement:
+    rem * create the SELECT statement for a query based on the data
+    rem * override to implement a custom sql statement
+    rem * @param java.util.HashMap filterCond!: a Hashmap with filter conditions set in the user interface
+    rem * @param java.util.HashMap navigationCond!: a Hashmap with filter conditions set by the application logic (like key dependencies)
+    rem * @param BBjVector orderByCols!: a HashMap with the columns to be ordered by
+    rem */
+    method protected BBjString buildSQLStatement(java.util.HashMap filterCond!, java.util.HashMap navigationCond!, BBjVector orderByCols!)
+
+        methodret #super!.buildSQLStatement(filterCond!, navigationCond!, orderByCols!)
+
+    methodend
+
+    rem /**
+    rem * Method getDistinctValues:
+    rem * create the SELECT statement for a query based on the data
+    rem * override to implement a custom sql statement to determine the distinct values for a column
+    rem * @param BBjString fieldName$: the column of interest
+    rem * @return java.util.TreeMap distinct!: a map with the distinct values in a column
+    rem */
+    method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
+
+        methodret #super!.getDistinctValues(fieldName$)
+
+    methodend
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

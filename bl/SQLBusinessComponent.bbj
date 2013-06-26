@@ -1,0 +1,990 @@
+rem /**
+rem * SQLBusinessComponent
+rem *
+rem * Implementation of a core SQL-based Business Component
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+use ::components/bl/SoftLockController.bbj::SoftLockController
+use ::components/bl/SoftLockController.bbj::SoftLockRemoteEditEvent
+
+class public SQLBusinessComponent extends BusinessComponent
+
+    field private   BBjNumber   SQLChan
+    field public    BBjString   SQL$
+    field public    BBjString   DataSource$
+
+    field private    BBjVector   PrimaryKeySegments! = new BBjVector()
+    field private    BBjString   PrimaryTable$
+
+    field private   SoftLockController SoftLockController!
+
+
+
+
+    method public void  addPrimaryKeySegment(BBjString fieldName$)
+
+        #PrimaryKeySegments!.addItem(fieldName$)
+
+    methodend
+
+    method public void setPrimaryTable(BBjString primaryTable$)
+
+        #PrimaryTable$ = primaryTable$
+        #SoftLockController! = new SoftLockController(#PrimaryTable$)
+        #SoftLockController!.setCallbackForSoftlock(#this!, "onRemoteSoftLockStart",  "onRemoteSoftLockStop")
+        #SoftLockController!.setCallbackForRemoteEdit(#this!,"onRemoteEdit")
+
+    methodend
+
+
+    method public void onRemoteSoftLockStart(BBjCustomEvent ev!)
+
+        #broadcastSoftlockStatusChange(str(ev!.getObject()), 1)
+
+    methodend
+
+    method public void onRemoteSoftLockStop(BBjCustomEvent ev!)
+
+        #broadcastSoftlockStatusChange(str(ev!.getObject()), 0)
+
+    methodend
+
+    method public void onRemoteEdit(BBjCustomEvent ev!)
+
+        if #PrimaryKeySegments!.size()=0 then
+            throw "primary key segments in SQLBusinessComponent not defined!",13
+        fi
+
+        if #PrimaryTable$="" then
+            throw "primary table in SQLBusinessComponent not defined!",13
+        fi
+
+        declare auto SoftLockRemoteEditEvent t!
+        t! = ev!.getObject()
+        edrec = #super!.getEditingRecNo()
+
+        rem check if this is not coming from this bc having reported the edit
+
+        if edrec>-1 then
+            rec! = #getResultSet().getItem(edrec)
+            k$=""
+
+            for i=0 to #PrimaryKeySegments!.size()-1
+
+                seg$    = #PrimaryKeySegments!.getItem(i)
+                v$      = rec!.getFieldAsString(seg$)
+                k$=k$+v$
+
+            next
+
+            if k$=t!.getKeyValue() then
+                rem "it is the same"
+
+                methodret
+
+            fi
+
+        fi
+
+
+        if #getResultSet().size() then
+
+            for recno=0 to #getResultSet().size()-1
+
+                if recno = edrec then
+                    continue
+                fi
+
+                rec! = #getResultSet().getItem(recno)
+                k$=""
+
+                for i=0 to #PrimaryKeySegments!.size()-1
+
+                    seg$    = #PrimaryKeySegments!.getItem(i)
+                    v$      = rec!.getFieldAsString(seg$)
+                    k$=k$+v$
+
+                next
+
+                if k$=t!.getKeyValue() then
+
+                    ks! = t!.getEditedList().keySet()
+                    it! = ks!.iterator()
+
+                    while it!.hasNext()
+                        fieldname$  = it!.next()
+                        content$    = t!.getEditedList().get(fieldname$)
+                        #super!.broadcastEdit(recno,fieldname$, content$)
+                    wend
+
+                    break
+                fi
+
+            next
+
+        fi
+
+
+
+    methodend
+
+    rem /**
+    rem * Method broadcastSoftlockStatusChange
+    rem * broadcast the message that a softlock status has changed
+    rem * @param BBjNumber recno: the record number that changed the status
+    rem * @param BBjNumber isLocked: 1=record has been locked, 0=record has been unlocked
+    rem */
+    method public void broadcastSoftlockStatusChange(BBjString keyValue$, BBjNumber isLocked)
+
+
+        if #getResultSet().size() then
+
+            for recno=0 to #getResultSet().size()-1
+                rec! = #getResultSet().getItem(recno)
+                k$=""
+
+                for i=0 to #PrimaryKeySegments!.size()-1
+
+                    seg$    = #PrimaryKeySegments!.getItem(i)
+                    v$      = rec!.getFieldAsString(seg$)
+                    k$=k$+v$
+
+                next
+
+                if k$=keyValue$ then
+
+                    if isLocked=0 then
+                        #updateResultsetForSingleRecord(recno)
+                    fi
+
+                    #super!.broadcastSoftlockStatusChange(recno, isLocked)
+                    break
+                fi
+
+            next
+
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method getSQLStatement:
+    rem * generate and return the SQL statement to run a query to the database that reflects all filters, sort order, yada yada...
+    rem * @return BBjString sql$: the SQL statement
+    rem */
+    method private BBjString getSQLStatement()
+
+        sql$=#SQL$
+
+        if #super!.getQueryFilter() <>null() then
+
+            ks!=#super!.getQueryFilter().keySet()
+            it! = ks!.iterator()
+
+            while it!.hasNext()
+                k$=it!.next()
+                f! = #super!.getQueryFilter().get(k$)
+                w1$=""
+
+                for i=0 to f!.size()-1
+
+                    f1$=f!.getItem(i)
+
+                    if pos("%"=f1$)>0 then
+                        eq$=" LIKE "
+                    else
+                        eq$=" = "
+                    fi
+
+                    if w1$>"" then
+                        w1$=w1$+" OR "
+                    fi
+
+                    rem w1$=w1$ + k$ + eq$ + "'"+f1$+"'"
+                    w1$=w1$ + "UCASE("+k$+")" + eq$ + "'"+cvs(f1$,4)+"'"
+                    rem search case insensitive
+                    rem introduce option (set per column, or like Google?)
+
+                next
+
+                if wh$>"" then
+                    wh$=wh$+" AND "
+                fi
+
+                wh$=wh$+"("+w1$+")"
+
+
+            wend
+
+        fi
+
+
+        if #getControllerFilter().size() and #super!.getControllerFilterUnlock()=0 then
+
+            ks! = #getControllerFilter().keySet()
+            it! = ks!.iterator()
+
+            while it!.hasNext()
+
+                var$=it!.next()
+                sel! = #getControllerFilter().get(var$)
+
+                if sel! = null() then
+                    wh$="1=2"
+                    break
+                fi
+
+                if sel!.size()=0 then
+                    wh$="1=2"
+                    break
+                fi
+
+                w1$=""
+
+                for i=0 to sel!.size()-1
+
+                    f1$=sel!.getItem(i)
+
+                    if w1$>"" then
+                        w1$=w1$+" OR "
+                    fi
+
+                    w1$=w1$ + var$+" = '"+f1$+"'"
+
+                next
+
+                if wh$>"" then
+                    wh$=wh$+" AND "
+                fi
+
+                wh$=wh$+"("+w1$+")"
+
+            wend
+
+        fi
+
+
+        if wh$>"" then
+            w=pos("WHERE"=cvs(sql$,4))
+
+            if w>0 then
+                sql$=sql$(1,w+5)+" "+wh$+" AND ("+sql$(w+6)+")"
+            else
+                sql$=sql$ + " WHERE "+wh$
+            fi
+
+        fi
+
+
+
+        sortCol$= #super!.getSortField()
+
+        if sortCol$>"" then
+            orderby$=" ORDER BY "+sortCol$
+
+            if #super!.getSortAscending()=0 then
+                orderby$=orderby$+" DESC"
+            fi
+
+            w=pos("ORDER"=cvs(sql$,4))
+
+            if w>0
+            sql$=sql$(1,w-1)
+        fi
+
+        sql$=sql$+orderby$
+
+
+        methodret sql$
+
+    methodend
+
+
+    rem /**
+    rem * Method getDistinctValues:
+    rem * returns distinct values in a given column of the resultset
+    rem * these values are mainly used for filterin purpose
+    rem * @param BBjString fieldName$: the column name for which the distinct values are requested
+    rem * @return java.util.TreeMap distinct!: the distinct values
+    rem */
+    method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
+
+        ch=sqlunt
+        sqlopen (ch)#DataSource$
+
+        if #super!.getQueryFilter() <> null() then
+
+            x! = #super!.getQueryFilter().get(fieldName$)
+
+            if x!<>null() then
+                #super!.getQueryFilter().remove(fieldName$)
+            fi
+
+        fi
+
+        sqlprep (ch)"SELECT DISTINCT "+fieldName$+" AS D FROM ("+#getSQLStatement()+")"
+
+        if x!<>null() then
+            #super!.getQueryFilter().put(fieldName$,x!)
+        fi
+
+        sqlexec (ch)
+
+        tm! = new java.util.TreeMap()
+        dim row$:sqltmpl(ch)
+
+        while 1
+            row$=sqlfetch(ch,end=*break)
+            tm!.put(row.d$,1)
+        wend
+
+        sqlclose (ch)
+
+        methodret tm!
+
+    methodend
+
+
+    rem /**
+    rem * Method queryDataFull:
+    rem * compute the entire result set at once
+    rem */
+    method public void queryDataFull()
+
+        #super!.setQueryComplete(0)
+        #openDatabase()
+
+        sqlprep (#SQLChan) #getSQLStatement()
+        sqlexec (#SQLChan)
+
+        tpl$=sqltmpl(#SQLChan)
+
+
+        while 1
+            t! = new DataRow(tpl$,sqlfetch(#SQLChan,end=*break))
+            t! = #processRecord(t!)
+
+            if t! <> null() then
+                #super!.getResultSet().addItem(t!)
+            fi
+
+        wend
+
+        #closeDatabase()
+        #super!.setQueryComplete(1)
+
+    methodend
+
+    rem /**
+    rem * Method queryDataFull:
+    rem * compute first chunk of result set
+    rem */
+    method public void startQueryData()
+
+        #super!.setQueryComplete(0)
+
+        #super!.setProgress(1)
+
+        #openDatabase()
+        #super!.getResultSet().clear()
+
+        sqlprep (#SQLChan)#getSQLStatement()
+        sqlexec (#SQLChan)
+        tpl$=sqltmpl(#SQLChan)
+
+
+        i=1
+
+        while i< #super!.getBlockSize()
+            finished=1
+            t! = new DataRow(tpl$,sqlfetch(#SQLChan,end=*break))
+            finished=0
+
+            t! = #processRecord(t!)
+
+            if t! <> null() then
+                #super!.getResultSet().addItem(t!)
+                #super!.setProgress(int(i/#super!.getBlockSize()*100))
+                i=i+1
+            fi
+
+
+        wend
+
+        if finished then
+            #this!.setQueryComplete(1)
+            #closeDatabase()
+        fi
+
+        #super!.setProgress(0)
+
+    methodend
+
+    rem /**
+    rem * Method size:
+    rem * return size of result set
+    rem * @return BBjNumber size: the size of the whole result set
+    rem */
+    method public BBjNumber size()
+
+        rem methodret #super!.getResultSet().size()
+
+        if #this!.getQueryComplete() then
+            ret=#super!.getResultSet().size()
+        else
+            dim s$:sqltmpl(#SQLChan,ind=1)
+            s$=sqlfetch(#SQLChan,ind=1)
+            ret=s.rows_affected
+        fi
+
+
+        methodret ret
+
+    methodend
+
+    rem /**
+    rem * Method moreData:
+    rem * compute the next block of the resultset
+    rem */
+    method public void moreData()
+
+        #this!.moreData(#super!.getBlockSize())
+
+    methodend
+
+    rem /**
+    rem * Method moreData:
+    rem * compute the next block of the resultset
+    rem * @param BBjNumber count: number of records requested by UI
+    rem */
+    method public void moreData(BBjNumber count)
+
+
+        if #this!.getQueryComplete() or #SQLChan = 0 then
+
+            methodret
+
+        fi
+
+        oldsize = #super!.getResultSet().size()
+
+
+        BBjAPI().setCustomEventCallback("INTERRUPT","NOOP")
+
+        i=1
+        loop:
+
+
+        finished=1
+        t! = new DataRow(sqltmpl(#SQLChan),sqlfetch(#SQLChan,end=end_loop))
+        finished=0
+        t! = #processRecord(t!)
+
+        if t! <> null() then
+            #super!.getResultSet().addItem(t!)
+        fi
+
+
+
+        if mod(i,20)=0 then
+            BBjAPI().postCustomEvent("INTERRUPT","")
+            process_events,err=*next
+
+            if #super!.checkUserCancel() or #getQueryComplete() or #SQLChan = 0 then
+                goto end_loop
+            fi
+
+
+            #super!.setProgress(max(1,int(i/count*100)))
+
+
+        fi
+
+
+
+
+        if i<count then
+            i=i+1
+            goto loop
+        fi
+
+        rem workaround; process_events kills stack
+
+        end_loop:
+
+
+        if finished then
+            #super!.setQueryComplete(1)
+            #closeDatabase()
+        fi
+
+        #super!.setProgress(0)
+
+        newsize = #super!.getResultSet().size()
+
+        #super!.moreDataPulled(oldsize, newsize)
+
+    methodend
+
+
+    rem /**
+    rem * Method getColumnAttributes:
+    rem * return a data row holding all column-specific attributes
+    rem * override to enrich data by formatting rules
+    rem * in derived class, always call attr! = #super!.getColumnAttributes() first
+    rem * @return DataRow attributes!: DataRow holding the column-specific attributes
+    rem */
+    method public DataRow getColumnAttributes()
+
+        declare DataRow attr!
+
+        if #super!.hasSetColumnAttributes() then
+            attr! = #super!.getColumnAttributes()
+        else
+            attr! = #super!.getColumnAttributes()
+        fi
+
+        methodret attr!
+
+    methodend
+
+
+    rem /**
+    rem * Method processRecord:
+    rem * enrich each record by formatting rules
+    rem * @param DataRow attributes!: record passed into method
+    rem * @return DataRow attributes!: record with added formatting and calculated fields
+    rem */
+    method protected DataRow processRecord(DataRow row!)
+
+        row! = #super!.processRecord(row!)
+
+        methodret row!
+
+    methodend
+
+
+
+    rem /**
+    rem * Method openDatabase:
+    rem * open the connection to the database
+    rem */
+    method protected void openDatabase()
+
+        if #SQLChan =0 then
+            #SQLChan = sqlunt
+            sqlopen (#SQLChan) #DataSource$
+        fi
+
+    methodend
+
+    rem /**
+    rem * Method closeDatabase:
+    rem * close the connection to the database
+    rem */
+    method protected void closeDatabase()
+
+        sqlclose (#SQLChan)
+        #SQLChan=0
+
+    methodend
+
+
+
+    rem editing methods
+
+
+
+    rem /**
+    rem * Method canDeleteSelectedRecords:
+    rem * override to tell UI if delete of the currently selected records is allowed
+    rem * @return BBjNumber canDelete: 0=delete not allowed, 1=delete is allowed
+    rem */
+    method public BBjNumber canDeleteSelectedRecord()
+
+
+        methodret #PrimaryKeySegments!.size() AND #PrimaryTable$>""
+
+
+    methodend
+
+    rem /**
+    rem * Method deleteSelectedRecords:
+    rem * override to delete the currently selected records
+    rem * these values are mainly used for filterin purpose
+    rem */
+    method public void deleteSelectedRecords()
+
+        if #PrimaryKeySegments!.size()=0 then
+            throw "primary key segments in SQLBusinessComponent not defined!",13
+        fi
+
+        if #PrimaryTable$="" then
+            throw "primary table in SQLBusinessComponent not defined!",13
+        fi
+
+        if #getSelection().size()>0 then
+
+            for i=0 to #getSelection().size()-1
+                row=#getSelection().getItem(i)
+                row! = #getResultSet().getItem(row)
+
+                if i>0 then
+                    wh$=wh$+" OR "
+                fi
+
+                wh$=wh$+"("
+
+                for j=0 to #PrimaryKeySegments!.size()-1
+
+                    if j>0 then
+                        wh$=wh$+" AND "
+                    fi
+
+                    f$=#PrimaryKeySegments!.getItem(j)
+                    v$=row!.getFieldAsString(f$)
+
+                    wh$=wh$+f$+"= '"+v$+"'"
+
+
+                next j
+
+                wh$=wh$+")"
+
+            next i
+
+
+            sql$="DELETE FROM "+#PrimaryTable$+" WHERE "+wh$
+
+            ch=sqlunt
+            sqlopen (ch) #DataSource$
+            sqlprep (ch) sql$
+            sqlexec (ch)
+            sqlclose (ch)
+            #setEditedRecord(-1)
+            #refresh(0)
+
+        fi
+
+    methodend
+
+
+
+    rem /**
+    rem * Method saveRecord
+    rem * saves a record within the result set
+    rem * @param BBjNumber recno: the record number in the resultset; -2 = new record
+    rem * @param java.util.HashMap fields!: the fields
+    rem */
+    method public void saveRecord(BBjNumber recno, java.util.HashMap fields!)
+
+        if #PrimaryKeySegments!.size()=0 then
+            throw "primary key segments in SQLBusinessComponent not defined!",13
+        fi
+
+        if #PrimaryTable$="" then
+            throw "primary table in SQLBusinessComponent not defined!",13
+        fi
+
+
+        if recno = -2 then
+            rem insert
+
+            cf! = #getControllerFilter()
+
+            if cf!<>null() then
+
+                ks! = cf!.keySet()
+                it! = ks!.iterator()
+
+                while it!.hasNext()
+
+                    k$=it!.next()
+                    v!=cf!.get(k$)
+
+                    if v!.size() then
+
+                        fields!.put(k$,v!.getItem(0))
+                        rem flaw: when multiple selection it's always taking the first record
+
+                    fi
+
+                wend
+
+            fi
+
+            fields! = #beforeInsertRecord(fields!)
+
+            ks! = fields!.keySet()
+            it!=ks!.iterator()
+
+            while it!.hasNext()
+
+                f$=it!.next()
+                v$=fields!.get(f$)
+
+                if fields$>"" then
+                    fields$=fields$+", "
+                    values$=values$+", "
+                fi
+
+                fields$=fields$+f$
+
+                values$=values$+"'"+v$+"'"
+
+
+            wend
+
+            sql$="INSERT INTO "+#PrimaryTable$+" ( "+fields$+" ) VALUES ( "+values$+" ) "
+
+
+            ch=sqlunt
+            sqlopen (ch) #DataSource$
+            sqlprep (ch) sql$
+            sqlexec (ch)
+            sqlclose (ch)
+
+            #refresh()
+            #setEditedRecord(-1)
+
+        else
+            rem update
+
+            declare auto DataRow rec!
+            rec! = #getResultSet().getItem(recno)
+            fields! = #beforeUpdateRecord(fields!)
+
+            for i=0 to #PrimaryKeySegments!.size()-1
+
+                if i>0 then
+                    wh$=wh$+" AND "
+                fi
+
+                seg$    = #PrimaryKeySegments!.getItem(i)
+                v$      = rec!.getFieldAsString(seg$)
+
+                wh$=wh$+" ( "
+                wh$=wh$+seg$
+                wh$=wh$+" = '"
+                wh$=wh$+v$
+                wh$=wh$+"' ) "
+
+            next
+
+            ks! = fields!.keySet()
+            it!=ks!.iterator()
+
+            while it!.hasNext()
+
+                f$=it!.next()
+                v$=fields!.get(f$)
+
+                rem set the field values in the records to prepare for a reread, in case the primary key was also changed
+                rem rec!.setFieldValue(f$,v$,err=*next)
+
+
+                if set$>"" then
+                    set$=set$+", "
+                fi
+
+                set$=set$+f$
+                set$=set$+"="
+
+                if rec!.getFieldType(f$) = "N" then
+                    set$=set$+" "+v$+" "
+                else
+                    set$=set$+"'"+v$+"'"
+                fi
+
+
+            wend
+
+            sql$="UPDATE "+#PrimaryTable$+" SET "+set$+" WHERE "+wh$
+
+            ch=sqlunt
+            sqlopen (ch) #DataSource$
+            sqlprep (ch) sql$
+            sqlexec (ch)
+            sqlclose (ch)
+
+            #updateResultsetForSingleRecord(recno)
+            #setEditedRecord(-1)
+
+        fi
+
+
+    methodend
+
+
+    rem /**
+    rem * Method updateResultsetForSingleRecord
+    rem * updates a record within the result set
+    rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
+    rem */
+    method protected void updateResultsetForSingleRecord(BBjNumber recno)
+
+        if #PrimaryKeySegments!.size()=0 then
+            throw "primary key segments in SQLBusinessComponent not defined!",13
+        fi
+
+        if #PrimaryTable$="" then
+            throw "primary table in SQLBusinessComponent not defined!",13
+        fi
+
+        rec! = #getResultSet().getItem(recno)
+
+        for i=0 to #PrimaryKeySegments!.size()-1
+
+            if i>0 then
+                wh$=wh$+" AND "
+            fi
+
+            seg$    = #PrimaryKeySegments!.getItem(i)
+            v$      = rec!.getFieldAsString(seg$)
+
+            wh$=wh$+" ( "
+            wh$=wh$+seg$
+            wh$=wh$+" = '"
+            wh$=wh$+v$
+            wh$=wh$+"' ) "
+
+        next
+
+
+
+        ch=sqlunt
+        sqlopen (ch) #DataSource$
+
+        sql$=#getSQLStatement()
+
+        o=pos("ORDER BY"=cvs(sql$,4))
+
+        if o>0 then
+            sql$=sql$(1,o-1)
+        fi
+
+        w=pos("WHERE"=cvs(sql$,4))
+
+        if w>0 then
+            sql$=sql$(1,w+5)+" "+wh$+" AND "+sql$(w+6)
+            a=msgbox(sql$)
+        else
+            sql$=sql$ + " WHERE "+wh$
+        fi
+
+        sqlprep (ch) sql$
+        sqlexec (ch)
+        newRec! = new DataRow(sqltmpl(ch),sqlfetch(ch,end=*break))
+        newRec! = #processRecord(newRec!)
+        #getResultSet().setItem(recno,newRec!)
+        sqlclose (ch)
+
+        #broadcastPartialUpdate(recno)
+
+    methodend
+
+
+    rem /**
+    rem * Method setEditedRecord
+    rem * set the record number in the resultset of the record that is currently being edited
+    rem * @param BBjNumber recno: the record number being edited
+    rem */
+    method public void setEditedRecord(BBjNumber recno)
+
+        if #super!.getEditingRecNo() <> recno then
+            #super!.setEditedRecord(recno)
+
+            if recno < 0 then
+                #SoftLockController!.removeLock(err=*next)
+            else
+
+                rec! = #getResultSet().getItem(recno)
+
+                for i=0 to #PrimaryKeySegments!.size()-1
+
+                    seg$    = #PrimaryKeySegments!.getItem(i)
+                    v$      = rec!.getFieldAsString(seg$)
+                    k$=k$+v$
+
+                next
+
+
+                canLock=#SoftLockController!.setLock(k$,err=*next)
+
+                if canLock=0 then
+                    a=msgbox("can not soft-lock record!")
+                    #setEditedRecord(-1)
+                    #refresh(0)
+                fi
+
+            fi
+
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method isLocked
+    rem * check if a record number is locked
+    rem * @param BBjNumber recno: the record number to test
+    rem */
+    method public BBjNumber isLocked(BBjNumber recno)
+
+        rec! = #getResultSet().getItem(recno)
+
+        for i=0 to #PrimaryKeySegments!.size()-1
+
+            seg$    = #PrimaryKeySegments!.getItem(i)
+            v$      = rec!.getFieldAsString(seg$)
+            k$=k$+v$
+
+        next
+
+        locked= #SoftLockController!.isLocked(k$)
+
+        methodret locked
+
+
+    methodend
+
+
+    rem /**
+    rem * Method onSelectionChange:
+    rem * called after the selection changed, to notify UI components and UI Controller
+    rem */
+    method public void onSelectionChange()
+
+        #super!.onSelectionChange()
+
+    methodend
+
+    rem /**
+    rem * Method broadcastEdit:
+    rem * called by UI to notify the BC about an ongoing edit
+    rem * the BC will then draw responsible to notify the softlock controller
+    rem * @param BBjString fieldName$: the field name that just was edited
+    rem * @param BBjSting newContents$: the new Contents of the field
+    rem */
+    method public void broadcastEdit(BBjString fieldName$, BBjString newContent$)
+
+        #super!.broadcastEdit(fieldName$, newContent$)
+        #SoftLockController!.broadcastEdit(fieldName$,newContent$)
+
+
+    methodend
+
+classend
+
+
+
+
+
+
+

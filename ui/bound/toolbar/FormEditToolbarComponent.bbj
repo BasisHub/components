@@ -1,0 +1,340 @@
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/ui/bound/UIComponent.bbj::UIComponent
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::components/i18n/i18n.bbj::i18n
+
+class public FormEditToolbarComponent extends UIComponent implements UIWidget
+
+
+    field private BBjNumber IsFormLocked
+    field private BBjVector ControlList!
+
+    field private BBjToolButton BtnNew!
+    field private BBjToolButton BtnSave!
+    field private BBjToolButton BtnDel!
+    field private BBjToolButton BtnRestore!
+    field private BBjToolButton BtnRestoreAll!
+    field private BBjToolButton BtnLock!
+
+    field private BBjMenuItem MenuNew!
+    field private BBjMenuItem MenuSave!
+    field private BBjMenuItem MenuDel!
+    field private BBjMenuItem MenuRestore!
+    field private BBjMenuItem MenuRestoreAll!
+    
+    field private static BBTranslator  Translator! = i18n.getTranslator()
+
+
+    method public FormEditToolbarComponent (BBjChildWindow cw!)
+
+        #getLaf().prepareWindow(cw!)
+        #super!(cw!)
+        #initialize()
+
+    methodend
+
+    method public FormEditToolbarComponent (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        #super!(wnd!,id,x,y,w,h)
+        #initialize()
+
+    methodend
+
+
+    method private void initialize()
+
+        #getLaf().prepareWindow(#getWnd())
+        rem #getLaf().setStyle(#getWnd(), "ShadowedPanel")
+
+        imgMan! = BBjAPI().getSysGui().getImageManager()
+        offs=5
+        stepping=22
+
+        #BtnNew! = #getWnd().addToolButton(100,offs,0,22,22,"")
+        #BtnNew!.setImage(imgMan!.loadImageFromBytes(#getIconNew()))
+        #BtnNew!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnNew")
+        #BtnNew!.setOpaque(0)
+        offs=offs+stepping
+
+        #BtnSave! = #getWnd().addToolButton(101,offs,0,22,22,"")
+        #BtnSave!.setImage(imgMan!.loadImageFromBytes(#getIconSave()))
+        #BtnSave!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnSave")
+        #BtnSave!.setOpaque(0)
+        offs=offs+stepping
+
+        #BtnDel! = #getWnd().addToolButton(102,offs,0,22,22,"")
+        #BtnDel!.setImage(imgMan!.loadImageFromBytes(#getIconDel()))
+        #BtnDel!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnDel")
+        #BtnDel!.setOpaque(0)
+        offs=offs+stepping+5
+
+        #BtnRestore! = #getWnd().addToolButton(103,offs,0,22,22,"")
+        #BtnRestore!.setImage(imgMan!.loadImageFromBytes(#getIconRestore()))
+        #BtnRestore!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnRestore")
+        #BtnRestore!.setOpaque(0)
+        offs=offs+stepping
+
+        #BtnRestoreAll! = #getWnd().addToolButton(104,offs,0,22,22,"")
+        #BtnRestoreAll!.setImage(imgMan!.loadImageFromBytes(#getIconRestoreAll()))
+        #BtnRestoreAll!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnRestoreAll")
+        #BtnRestoreAll!.setOpaque(0)
+        offs=offs+stepping+5
+
+        #BtnLock! = #getWnd().addToolButton(105,offs,0,22,22,"")
+        #BtnLock!.setImage(imgMan!.loadImageFromBytes(#getIconLock()))
+        #BtnLock!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnLock")
+        #BtnLock!.setOpaque(0)
+        offs=offs+stepping
+
+        #setSavedState(1)
+        #setRecordLocked(0)
+        #setRecordLoaded(0)
+
+    methodend
+
+    method public void setSize(BBjNumber w, BBjNumber h)
+
+        #super!.setSize(w,h)
+
+    methodend
+
+    method public void setVisible(BBjNumber v)
+
+        #super!.setVisible(v)
+
+    methodend
+
+    method public void setBC(BusinessComponent bc!)
+
+        #super!.setBC(bc!)
+
+    methodend
+
+    method public void onBtnNew(BBjEvent ev!)
+
+        #getBC().broadcastNewRecord()
+
+    methodend
+
+    method public void onBtnSave(BBjEvent ev!)
+
+        #getBC().broadcastSaveRecord()
+
+    methodend
+
+    method public void onBtnDel(BBjEvent ev!)
+
+        msg$=iff(#getBC().getSelection().size()>1,#Translator!.getTranslation("DELETE_RECORDS_Q"),#Translator!.getTranslation("DELETE_RECORD_Q"))
+        a=msgbox(msg$,BBjAPI().getConstants().MB_ICONQUESTION+BBjAPI().getConstants().MB_YESNO,#Translator!.getTranslation("CONFIRM"))
+
+        if a=BBjAPI().getConstants().MB_SELECT_YES then
+            #getBC().deleteSelectedRecords()
+        fi
+
+    methodend
+
+    method public void onBtnRestore(BBjEvent ev!)
+
+        #getBC().restoreEditedField()
+
+    methodend
+
+    method public void onBtnRestoreAll(BBjEvent ev!)
+
+        #getBC().setEditedRecord(-1)
+
+    methodend
+
+    method public void onBtnLock(BBjEvent ev!)
+
+
+    methodend
+
+    method public void setSavedState(BBjNumber fSaved)
+
+        #BtnSave!.setEnabled(!fSaved)
+        #BtnRestore!.setEnabled(!fSaved)
+        #BtnRestoreAll!.setEnabled(!fSaved)
+        #BtnNew!.setEnabled(fSaved)
+        
+        if #MenuSave! <> null() then
+            #MenuSave!.setEnabled(!fSaved)
+            #MenuRestore!.setEnabled(!fSaved)
+            #MenuRestoreAll!.setEnabled(!fSaved)
+            #MenuNew!.setEnabled(fSaved)
+        fi
+
+    methodend
+
+    method public void setRecordLoaded(BBjNumber fLoaded)
+
+        #BtnDel!.setEnabled(fLoaded AND #getBC().canDeleteSelectedRecord())
+        if #MenuDel! <> null() then
+            #MenuDel!.setEnabled(fLoaded AND #getBC().canDeleteSelectedRecord())
+        fi
+
+    methodend
+
+    method public void setRecordLocked(BBjNumber fLocked)
+
+        #BtnLock!.setVisible(fLocked)
+        #BtnDel!.setEnabled(!fLocked)
+        if #MenuDel! <> null() then
+            #MenuDel!.setEnabled(!fLocked)
+        fi
+
+    methodend
+
+
+    method protected BBjString getIconSave()
+
+
+        methodret $89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000002264944415478DACD90DF6B92511CC6F76704D165128BB17EED65F39DBA74395FB237F475A1934408EF44229204B11F579150D04D5276918370ACACB5D25CCED9962DA88B0641E9566DD3AD0DC5B45126337CF29CF16E8863DD76E08103E7793EDFE77C5B5AFE8BB3775F2BDADA0F40D2BAFF76FDBEA3888778496613D07EF0105C2E179EC45F6F683C899158128F63AF101A9BC283E824869F27100CC761B7DBA997641A006EB71B37EF0D819C5AAD86F5F52ACAE5DFC87D2F22BB5AC0E7EC0AD2F34B6059161CC76D0F387FF91A0554AB55542A152CAFE69148BEC1445DE1F197083D8D422291D006668BB51970DD7F9F0272F9421DF20785D21AD20B4BF8F825830FB30B789FFA0A93C90487C381933AA11970EED25594D67EE1453C81B18949CC7C9AC5B3D8C6E4E1D108864622502814309BCDE851AA9A010ED745D4EA0DF2A59FF856F8814CAE8895621973CB79A4B239DC1D0C42A95442A3D1E07007D30C90C96460180656AB15168B0546A3113A9D8E2E8D04A55229955C2EDF7E8964394EA793FED166B3D1AA7ABD9E4E2400122443C8BDA1C169EB19040201F0FA7EB431DD3BAAB35B01B55A8D2E56B605E8370EC0E7F351C3D95B8F70C13F8A2B8351DC7898803F328DD0D40CDEA533906B05EAE179BE71897DDC7178BD5EFA48822AEE0495187C9B5AC49DF0347AF853D42308028EAA7AB70047984E783C1EFA48268A003148A0A4990830180C50F6AA3701DA5DBBF7048DA6817FFE5F94EA581F3ABA5802D0FE05B978CE17ACA564FC0000000049454E44AE426082$
+
+
+    methodend
+
+    method protected BBjString getIconNew()
+
+
+        methodret $89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001524944415478DADD92314BC34018866F12EBA288D6F63788E00F70724A712E824E4225BF413A9492216A2A2892B618B54D1BCC64FD031D9CBA3B54DC1CAA21838B5D8226E1F5BE0B15B121B5AB2F7C7C0777EF73EF7D1C63BF84E6E22A9B56D861EBC8B319B12ECD99A2E7590ABB6CED6F006E7E2CE5707B7D0ABFBA80CEC509FAE51C2AC74728168B50146528CBB2940821339ED380BB020CD208DF5F1004011CC741ABD542B7DB0D0A85C2767C8283D93DAFB61C9921F19E81575BC2FD990CD7750580D4EBF5420ED98C85DC5D56C4CD78CB467D381026DFF7056054AAAA7A713348F5CB5B3CF62B3EF579B4CF0FF15092605E19DF104A42CFA1998C03F8B4DB66136118029D7D44AE0FC079C24804A199689A86D827503C02DC54CBA8D7EB300C038D46039665C1B66D01A17DD334930149A27D3A9708D0757D2CC154807F906052C501B2BC367EFEB64945E77965C8FC050BBC04D42CA8D86E0000000049454E44AE426082$
+
+
+    methodend
+
+    method protected BBjString getIconDel()
+
+
+        methodret $89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF610000024C4944415478DADD52DD4B9A511C7E4314228A4A0C02090AFA009392220A05234ACA3E28687D504110041514D335A15DE4580B620C0632B6DAEBA53713166C835D6875E1C672D88750A86F9BE9F6CE77AFBE8E8475E1263D3BC66E34EA0FD8811F87C339CFF37BCEF37B28EAFF5CB7294A49CA4E8A25857F7BFAACBC1168A6288981A2EEDD97C97E7B2726706632E1626909427F3FDC7575B82B1627D3F7B7284A745D67CBABC646706B6B381C1CC4CF8505FC999D05AFD7E35369295EE7E4E0A944823B2291E50AD848519A47858588ACAEC2B7BC8CF8D1111C151570E5E7E35D5E1EBE6C6EC2D5DB8B2D42F0A4A000A6DC5C4D76779B87483D209D059F0F8944023F3C9E4BE9DF1D0EC462317CDBDB83ABA8085B6565782095DAB209587E6E0EECD4143E34358173BB210802E2F138789E074714315A2DA22A15A2CDCD782C97B3D904C9CFADAD085455E1582EC7B15A0D81E3C030CC25C1C9E424626D6DC0C000529D9D785E5D9DCC20581489D8F752290E4A4A70585383C8EE2E2291083842120E8711F67A11181A82D0DD8D5F84E4855299A960512CB6BD2560373132BCBD0D96651126DF60C6C670BAB383502884D3FD7DF8753AF8FBFA40AB54991EA45D7D269321585909863C0812E3023D3D88933CF8474610743A71623643181FC71B42626D68D05C19E5C3E2E275A742019E98146A69C1D9F030603020313F8FAFD3D38812933F8E8EC2AAD5AE5F9B444B79F90A5D5B9BF27575E19C187741C2746E34C23733035AAF4FD1EDED2B2F150AC98D91DE5028EA89443BAD567334191D0171569DCEBED1D1519FFDF62FF07554B319855BD50000000049454E44AE426082$
+
+
+    methodend
+
+    method protected BBjString getIconRestore()
+
+
+        methodret $89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001F64944415478DA6360180528203474157364DDCC6AB20D08A89A9E105835FD8F5FC55415087FAA0190DF02C4AB03ABA79F09A89CB622A87A7A204EDB5D8AA7DC587AF0CA7FD7E2C9BBDCCBA61EEC5E7DE0FFD93BCFFF3F7BF7E5FFDF7FFFFE3F7CF5F1FFCA8317FFFBD7CC38E454385D1AC500D39C09E13933B7FF7F0154B8E9CCFDFF1FBFFDFCFFF1FFFFFF3BDFFDFF3FFDCCC7FF95EB2EFF9F7CE2C5FF93AF5FFFBFF3FCCDFFB0D625D78CD33AF8E106A825755DDA7DFFF5FF863D4FFF9F066AACDA76FF7FD2BCE3FF73565CFC9F38F7D8FFC0DE6DFFC327EFF99FBAF0D4FFD28DB7FE6FBCF3E0BF79E1D4C560CDC211ED817E3D1BFEF75FFEFCDFBB7FDF7FB7AE9DFFC3669D04D39AB973FE0B8434FF170C6DB92A1CDEF616C407A9495971FD7FF8AC6DDFC10630FB369EECBFF6F0BFDBC4A3FFEDBBF68171C0ECF3FF59FC9A7E01E59219421BD82001B58A19C467F16FFE099237AC5EF79981C1B9CE55227BEEFFC025F7FEBBCDBC0CC61EB3AFFE8FDBF8FA3F6FC2F4FF0C2E75DE1821EE52D7A2DBB0EBBF54ECD4430C0C56950718AC2BFF6360AB8AFF0C96E520F679601431A318605DE9A754B81E24E747567A11706C48E2B4AEDD8B4B9E1188598018E46F0E20E606625E20E603E905622106EDBC1606C35C515C0670811531304801B112106B01B111105B01B10303339717838889034C31008F55FF2F83505A230000000049454E44AE426082$
+
+
+    methodend
+
+    method protected BBjString getIconRestoreAll()
+
+
+        methodret $89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000002614944415478DADD925B48D37114C77F1016B10C32A2C09885925241FA9026F990384DD426166B4104F39A5A6212CE95967F5B3353673357B6875AFDDBC2CDCDB4E6484B7CB0F28290A630ACBC4F8617D46E28D3F9EDB74952AC271F3BF0E17738BFF33D702E84FC7F1653AADFB56E7104A3D91F27D37639FD2829BB9757C4E647326CB3505E6B39AF6A44A2B2C11AC5B0DA48461DE8263EC0E8379E2CD5F7BDEA1F47F40DEDFB3273377AC666605F76E04F9BFEBE806CF68D234CF228EDAF024159AAAAD7C3D3685B5EC1E0E41C8669B2CE0614345B51D8624351EB24C4A621283F2E63746505190F5B70285B15E612FB2529F8570C1DD04E00A99A5E9C28D621D7340A91BA1331C546F0182D7885AC8BF8B27A243FEE8269620EBE299575649BA0841B90513D6B9CB323496341F4CD5A0CD8E671B6B201DAF601586C5FD7DA585872E0F3D40FDC6DEA05BFDC0CEF73F241B2294EDA765C6E4674C53B844B4DD07D1841ED14B048053D9427234049FB375C7AFE0959060BD4438095C6952DFDF04DAD9A22E418B3858417F039B1529DF07E23EAE60111DB8B0BC62FC8793906BEA21501190F667D92154FB9A20A894FA2A22FF296194D8B4BE08AEEFC74CD60AB80F1DA975E3DAE9FB5E362BD15E98611D71B7CB50E9EA764B94450B1796DDA02FD064EBCAC23E15E27769C299B590DF20A6B3809E5E0A6A8E19F5583C3F96644DC7E0BBEB21B24E2BAD06DE7E1D73283F25E80EA9EAD068E8AFD49A838988448D248489E84FA2A7224AF99D24D69732B40F3B6C796DA49A8C46F7D277B3047E1117839F35F5F1E1467BF9E142FCA4E8A37658FF35C2801CEA325BB4FA7FE16FC02B06D59BD18C7847F0000000049454E44AE426082$
+
+
+    methodend
+
+    method protected BBjString getIconLock()
+
+
+        methodret $89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000002314944415478DAADD06D4853511807F05159F44665CC9C53CAD2A2A037063AAE53BB5493B979F12DE7DE72732B756DA99745D4369B358D45242B36100BA40C1C8B0942615BF441893E54CB501B2811F4027D8898F461ABB07FB74B48C33BFAD2818703E79CE7C7FF3C3CDEFF5E9DF6EE1ADAEE0ADB2FF6C6FD7E3F988ADBDD57C296732EEA9FCDB4C3E5BE3E3088C9991892C924663E7C46383A0B7F700C66470FE41A833B6DB3ADAB473E70FB2E1289044623E3707ABC68B13961A4EDB0B83C5034B7425CA1808824E59C0013F5E5546C1683A107309FBD10D4596CF9BFCF8BA4D2FC7D92F22059A744B5B10D2532C5734E80F927C6A2733879C68963062BFFEFBB83A532BEA49282F59207D2FA46700226FA3C7CA108E46A3DE783A3B50DE8F2DD04A5357003B43E17EDDA1C9C6A14A0A56E0B9AABF8D05664427968236A88F5908BD642BA7735C85D2BB981CE2621809FF8F27182DD17BEBDC6FCA78778373D84574F43884547110958505E9806E8382EC4DBE9114C3D3231C002BEC77D989BA8C27D6F163C1DFBD1DF4DB040D98E0C6EA05D979302F8AF69201615C0EB2430DC472D0292ED2BB881D39A548094EC660192D889F140EB2250B22D0D60550B52801B5755306A48448694290988ADCBB9018B4AB06406971D2ACCBFA84D9981382F0D605666E3F1B01E6F9EF5B2C08FAFF7F07ED286270119EEF4E93072EB040B14E72E5B02E43145B43564C3549D85A6CACD501FD984FAD20DA08AD74176600D0EEF5985B2820C367E919005883F7DBC5FB3C56AA5F3C263AE0000000049454E44AE426082$
+
+
+    methodend
+
+
+    rem callback functions for Business Component
+
+    rem /**
+    rem * Method setEditing
+    rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
+    rem * @param BBjNumber isEditing: -1 = i
+    rem */
+    method public void setEditing(BBjNumber isEditing)
+
+        #setSavedState(!isEditing)
+
+    methodend
+
+
+    method public void onSelectionChange()
+
+        
+        if #getBC().getSelection() <> null() then
+            #setRecordLoaded(#getBC().getSelection().size())
+            #setSavedState(1)
+    
+            if #getBC().getSelection().size()=1 then
+                recno=#getBC().getSelection().getItem(0)
+                locked = #getBC().isLocked(recno)
+    
+                #setRecordLocked(locked)
+            fi
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method onPartialUpdate
+    rem * invoked from Business Component, broadcasting the change of a record
+    rem * @param BBjNumber recno: the record number within the resultset that has been updated
+    rem * @param BBjNumber isLocked: 1=record was locked, 0=record was unlocked
+    rem */
+    method public void onSoftlockStatusChange(BBjNumber recno, BBjNumber isLocked)
+
+        if #getBC().getSelection().size()=1 then
+
+            if recno=#getBC().getSelection().getItem(0) then
+                #setRecordLocked(isLocked)
+            fi
+
+        fi
+
+    methodend
+
+
+    method public void setupMenu(BBjMenu editMenu!)
+        
+        imgMan! = BBjAPI().getSysGui().getImageManager()
+        #MenuNew! = editMenu!.addMenuItem(-1,"&New")
+        #MenuNew!.setImage(imgMan!.loadImageFromBytes(#getIconNew()))
+        #MenuNew!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnNew")
+        
+        imgMan! = BBjAPI().getSysGui().getImageManager()
+        #MenuSave! = editMenu!.addMenuItem(-2,"&Save")
+        #MenuSave!.setImage(imgMan!.loadImageFromBytes(#getIconSave()))
+        #MenuSave!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnSave")
+
+        imgMan! = BBjAPI().getSysGui().getImageManager()
+        #MenuDel! = editMenu!.addMenuItem(-3,"&Delete")
+        #MenuDel!.setImage(imgMan!.loadImageFromBytes(#getIconDel()))
+        #MenuDel!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnDel")
+
+        imgMan! = BBjAPI().getSysGui().getImageManager()
+        #MenuRestore! = editMenu!.addMenuItem(-4,"&Undo")
+        #MenuRestore!.setImage(imgMan!.loadImageFromBytes(#getIconRestore()))
+        #MenuRestore!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnRestore")
+
+        imgMan! = BBjAPI().getSysGui().getImageManager()
+        #MenuRestoreAll! = editMenu!.addMenuItem(-5,"&Undo All")
+        #MenuRestoreAll!.setImage(imgMan!.loadImageFromBytes(#getIconRestoreAll()))
+        #MenuRestoreAll!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnRestoreAll")
+
+        #MenuSave!.setEnabled(0)
+        #MenuDel!.setEnabled(0)
+        #MenuRestore!.setEnabled(0)
+        #MenuRestoreAll!.setEnabled(0)
+        #MenuNew!.setEnabled(1)
+   
+    methodend
+    
+classend
+
+
+
+
+
+
+
+
+
+
+
+

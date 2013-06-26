@@ -1,0 +1,1534 @@
+class public DataField
+
+    field public  BBjString Name$
+    field private String StringValue!
+    field private java.sql.Date DateValue!
+    field private java.sql.Timestamp TimestampValue!
+    field private java.sql.Time TimeValue!
+    field private java.math.BigDecimal BigDecimalValue!
+    field private java.lang.Double DoubleValue!
+    field private java.lang.Integer IntegerValue!
+    field private java.lang.Boolean BooleanValue!
+    field private BBjNumber Length
+    field private BBjString Type$
+    field public  BBjNumber SQLType
+    field private java.util.HashMap Attributes!
+
+    method private DataField()
+
+        #Attributes! = new java.util.HashMap()
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, String Value!)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value!)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, BBjNumber Value)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, java.sql.Date Value!)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value!)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, java.sql.Timestamp Value!)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value!)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, java.lang.Double Value!)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value!)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, java.lang.Integer Value!)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value!)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, java.lang.Boolean Value!)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value!)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, java.math.BigDecimal Value!)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value!)
+
+    methodend
+
+    method public DataField(BBjString name$, BBjString type$, java.sql.Time Value!)
+
+        #this!()
+        #Name$=name$
+        #setType(type$)
+        #setValue(Value!)
+
+    methodend
+
+    method private void setType(BBjString type$)
+
+
+        if len(type$)<>1 then throw "Type must be one character",11
+
+        if pos(type$="CNDTXIBY")=0 then throw "Type unknown",11
+
+        #Type$=type$
+
+    methodend
+
+
+    method public BBjNumber getLength()
+
+
+        methodret #Length
+
+
+    methodend
+
+
+    method public void setLength(BBjNumber length)
+
+        #Length=length
+
+    methodend
+
+
+    method public BBjString getType()
+
+
+        methodret #Type$
+
+
+    methodend
+
+    method public void setValue(String value!)
+
+
+        if #Type$="C" then
+            #StringValue!=value!
+        fi
+
+
+        if #Type$="N" then
+
+            if value! = null() then
+                #DoubleValue! = null()
+            else
+                #DoubleValue! = num(value!)
+            fi
+
+        fi
+
+
+        if #Type$="I" then
+
+            if value! = null() then
+                #IntegerValue! = null()
+            else
+                #IntegerValue! = num(value!)
+            fi
+
+        fi
+
+
+        if #Type$="B" then
+
+            if pos(str(value!) = ".T. 1 true TRUE True") then
+                #BooleanValue! =BBjAPI.TRUE
+            else
+                #BooleanValue! = BBjAPI.FALSE
+            fi
+
+        fi
+
+        if #Type$="D" then
+
+            if value! = null() then
+                #DateValue! = null()
+            else
+                i=num(value!)
+
+                df! = new java.text.SimpleDateFormat("dd-MM-yyyy")
+                #DateValue! = new java.sql.Date( df!.parse(date(i:"%Dz-%Mz-%Yl")).getTime() )
+
+                ? date(num(value!))
+                ? #DateValue!.toString()
+                ? num(date(i:"%Yl")),int(num(date(i:"%Mz"))),num(date(i:"%Dz"))
+            fi
+
+        fi
+
+        if #Type$="X" then
+
+            if value! = null() then
+                #TimestampValue! = null()
+            else
+                #TimestampValue! = null()
+                #TimestampValue! = java.sql.Timestamp.valueOf(value!,err=*next)
+            fi
+
+        fi
+
+        if #Type$="Y" then
+
+            if value! = null() then
+                #BigDecimalValue! = null()
+            else
+
+                if value! = "" then value!="0"
+                #BigDecimalValue! = new java.math.BigDecimal(value!)
+            fi
+
+        fi
+
+
+        if #Type$="T" then
+
+            if value! = null() then
+                #TimeValue! = null()
+            else
+                #TimeValue! = new java.sql.Time(num(value!))
+            fi
+
+        fi
+
+        rem TODO DTB
+
+    methodend
+
+    method public void setValue(BBjNumber value)
+
+
+        if #Type$="C" then
+            #StringValue!=str(value)
+        fi
+
+
+        if #Type$="N" then
+            #DoubleValue! = value
+        fi
+
+
+        if #Type$="I" then
+            #IntegerValue! =  value
+        fi
+
+
+        if #Type$="B" then
+
+            if value then
+                #BooleanValue! =BBjAPI.TRUE
+            else
+                #BooleanValue! = BBjAPI.FALSE
+            fi
+
+        fi
+
+        if #Type$="D" then
+
+            if value=0 then
+                #DateValue! = java.sql.Date(new java.util.Date().getTime())
+            fi
+
+
+            if value<0 then
+                #DateValue! = null()
+            fi
+
+
+            if value>0 then
+                #DateValue! = new java.sql.Date(num(date(value:"%Yl")), num(date(value:"%Mz")), num(date(value:"%Dz")) )
+            fi
+
+        fi
+
+        if #Type$="X" then
+
+            if value=0 then
+                #TimestampValue! = java.sql.Date(new java.util.Date().getTime())
+            fi
+
+
+            if value<0 then
+                #TimestampValue! = null()
+            fi
+
+
+            if value>0 then
+                #TimestampValue! = new java.sql.Date(num(date(value:"%Yl")), num(date(value:"%Mz")), num(date(value:"%Dz")) )
+            fi
+
+        fi
+
+        if #Type$="Y" then
+            #BigDecimalValue! = value
+        fi
+
+
+        if #Type$="T" then
+            #TimeValue! = new java.sql.Time(value)
+        fi
+
+    methodend
+
+
+    method public void setValue(java.sql.Date value!)
+
+        rem todo throw errors if type does not match!
+        #DateValue!=value!
+
+    methodend
+
+    method public void setValue(java.sql.Timestamp value!)
+
+        #TimestampValue!=value!
+
+    methodend
+
+    method public void setValue(java.lang.Double  value!)
+
+        #DoubleValue!=value!
+
+    methodend
+
+    method public void setValue(java.lang.Integer  value!)
+
+        #IntegerValue!=value!
+
+    methodend
+
+    method public void setValue(java.lang.Boolean  value!)
+
+        #BooleanValue!=value!
+
+    methodend
+
+    method public void setValue(java.math.BigDecimal  value!)
+
+        #BigDecimalValue!=value!
+
+    methodend
+
+    method public void setValue(java.sql.Time value!)
+
+        #TimeValue!=value!
+
+    methodend
+
+    method public BBjString getValueAsString()
+
+        if #Type$="C" then
+
+            if #StringValue! = null() then
+                ret$=""
+            else
+                ret$=#StringValue!
+            fi
+
+        fi
+
+        if #Type$="N" then
+            ret$=str(#DoubleValue!)
+        fi
+
+        if #Type$="I" then
+            ret$=str(#IntegerValue!)
+        fi
+
+        if #Type$="B" then
+            ret$=str(#BooleanValue!)
+        fi
+
+        if #Type$="D" then
+            rem TODO: nice formatting honoring locale
+            ret$=str(#DateValue!)
+        fi
+
+        if #Type$="X" then
+            rem TODO: nice formatting honoring locale
+            ret$=str(#TimestampValue!)
+        fi
+
+        if #Type$="Y" then
+            rem TODO: nice formatting honoring locale
+            ret$=str(#BigDecimalValue!)
+        fi
+
+        if #Type$="T" then
+            rem TODO: nice formatting honoring locale
+            ret$=str(#TimeValue!)
+        fi
+
+        methodret ret$
+
+
+    methodend
+
+
+    method public BBjNumber isNull()
+
+        if #Type$="C" then
+
+            if #StringValue! = null() then
+
+                methodret 1
+
+            else
+
+                methodret 0
+
+            fi
+
+        fi
+
+
+        if #Type$="N" then
+
+            if #DoubleValue! = null() then
+
+                methodret 1
+
+            else
+
+                methodret 0
+
+            fi
+
+        fi
+
+
+        if #Type$="I" then
+
+            if #IntegerValue! = null() then
+
+                methodret 1
+
+            else
+
+                methodret 0
+
+            fi
+
+        fi
+
+
+        if #Type$="B" then
+
+            if #BooleanValue! = null() then
+
+                methodret 1
+
+            else
+
+                methodret 0
+
+            fi
+
+        fi
+
+
+        if #Type$="D" then
+
+            if #DateValue! = null() then
+
+                methodret 1
+
+            else
+
+                methodret 0
+
+            fi
+
+        fi
+
+
+        if #Type$="X" then
+
+            if #TimestampValue! = null() then
+
+                methodret 1
+
+            else
+
+                methodret 0
+
+            fi
+
+        fi
+
+
+        if #Type$="Y" then
+
+            if #BigDecimalValue! = null() then
+
+                methodret 1
+
+            else
+
+                methodret 0
+
+            fi
+
+        fi
+
+
+        if #Type$="T" then
+
+            if #TimeValue! = null() then
+
+                methodret 1
+
+            else
+
+                methodret 0
+
+            fi
+
+        fi
+
+        methodret ret$
+
+
+    methodend
+
+
+    method public BBjString getValueForSQL()
+
+        if #Type$="C" then
+
+            if #StringValue! = null() then
+
+                methodret "NULL"
+
+            else
+
+                methodret "'"+#StringValue!+"'"
+
+            fi
+
+        fi
+
+
+        if #Type$="N" then
+
+            if #DoubleValue! = null() then
+
+                methodret "NULL"
+
+            else
+
+                methodret str(#DoubleValue!)
+
+            fi
+
+        fi
+
+
+        if #Type$="I" then
+
+            if #IntegerValue! = null() then
+
+                methodret "NULL"
+
+            else
+
+                methodret str(#IntegerValue!)
+
+            fi
+
+        fi
+
+
+        if #Type$="B" then
+
+            if #BooleanValue! = null() then
+
+                methodret "NULL"
+
+            else
+
+                methodret STR(#BooleanValue! = BBjAPI.TRUE)
+
+            fi
+
+        fi
+
+
+        if #Type$="D" then
+
+            if #DateValue! = null() then
+
+                methodret "NULL"
+
+            else
+
+                methodret #DateValue!.toString()
+
+            fi
+
+        fi
+
+
+        if #Type$="X" then
+
+            if #TimestampValue! = null() then
+
+                methodret "NULL"
+
+            else
+
+                methodret "'"+#TimestampValue!.toString()+"'"
+
+            fi
+
+        fi
+
+
+        if #Type$="Y" then
+
+            if #BigDecimalValue! = null() then
+
+                methodret "NULL"
+
+            else
+
+                methodret str(#BigDecimalValue!)
+
+            fi
+
+        fi
+
+
+        if #Type$="T" then
+
+            if #TimeValue! = null() then
+
+                methodret "NULL"
+
+            else
+
+                methodret #TimeValue!.toString()
+
+            fi
+
+        fi
+
+        methodret ret$
+
+
+    methodend
+
+
+    method public Object getObject()
+
+        if #Type$="C" then
+            obj! = #StringValue!
+        fi
+
+
+        if #Type$="N" then
+            obj! = #DoubleValue!
+        fi
+
+
+        if #Type$="I" then
+            obj! = #IntegerValue!
+        fi
+
+
+        if #Type$="B" then
+            obj! = #BooleanValue!
+        fi
+
+
+        if #Type$="D" then
+            obj! = #DateValue!
+        fi
+
+
+        if #Type$="X" then
+            obj! = #TimestampValue!
+        fi
+
+
+        if #Type$="Y" then
+            obj! = #BigDecimalValue!
+        fi
+
+
+        if #Type$="T" then
+            obj! = #TimeValue!
+        fi
+
+        methodret obj!
+
+
+    methodend
+
+
+    method public BBjNumber getValueAsNumber()
+
+
+        if #Type$="C" then
+            ret=num(#StringValue!)
+        fi
+
+
+        if #Type$="N" then
+            ret=#DoubleValue!
+        fi
+
+
+        if #Type$="D" then
+
+            if #DateValue!=null() then
+                ret=-1
+            else
+                ret$=#DateValue!.toString()
+                ret=jul(num(ret$(1,4)),num(ret$(6,2)), num(ret$(9,2)))
+            fi
+
+        fi
+
+
+        if #Type$="X" then
+
+            if #TimestampValue!=null() then
+                ret=-1
+            else
+                ret=jul(#TimestampValue!.getYear(),#TimestampValue!.getMonth(), #TimestampValue!.getDay())
+            fi
+
+        fi
+
+        if #Type$="B" then
+
+            if #BooleanValue! then
+                ret=1
+            else
+                ret=0
+            fi
+
+        fi
+
+        if #Type$="I" then
+
+            if #IntegerValue!=null() then
+                ret=-1
+            else
+                ret=#IntegerValue!
+            fi
+
+        fi
+
+        if #Type$="Y" then
+
+            if #BigDecimalValue!=null() then
+                ret=-1
+            else
+                ret=#BigDecimalValue!
+            fi
+
+        fi
+
+
+        if #Type$="T" then
+
+            if #TimeValue!=null() then
+                ret=-1
+            else
+                ret=jul(#TimeValue!.getYear(),#TimeValue!.getMonth(), #TimeValue!.getDay())
+            fi
+
+        fi
+
+
+        methodret ret
+
+
+    methodend
+
+
+    method public void setAttribute(BBjString name$, BBjString value$)
+
+        #Attributes!.put(name$,value$)
+
+    methodend
+
+    method public BBjString getAttribute(BBjString name$)
+
+        r!=#Attributes!.get(name$,err=*next)
+
+        if r!<>null() then let r$=str(r!)
+
+        methodret r$
+
+    methodend
+
+    method public java.util.HashMap getAttributes()
+
+        methodret #Attributes!
+
+    methodend
+
+
+
+    method public void removeAttribute(BBjString name$)
+
+        #Attributes!.remove(name$,err=*next)
+
+    methodend
+
+
+    method public DataField clone()
+
+        if #Type$ = "N" then
+            f! = new DataField(#Name$,#Type$,#NumValue)
+        else
+            f! = new DataField(#Name$,#Type$,#StringValue!)
+        fi
+
+        rem TODO types TDB
+
+        ks! = #Attributes!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            k$=it!.next()
+            v$=#Attributes!.get(k$)
+            f!.setAttribute(k$,v$)
+        wend
+
+        methodret f!
+
+    methodend
+
+classend
+
+class public DataRow
+
+    field private java.util.HashMap FieldList!
+
+    field private BBjVector FieldNames!
+
+    field private BBjString Tpl$
+
+    method public DataRow()
+
+        #FieldList! = new java.util.HashMap()
+        #FieldNames! = new BBjVector()
+
+    methodend
+
+    method public DataRow(BBjString tpl$)
+
+        #this!()
+        #Tpl$=tpl$
+
+    methodend
+
+    method public DataRow(BBjString tpl$, BBjString rec$)
+
+        #this!()
+        #Tpl$=tpl$
+        #setString(rec$)
+
+    methodend
+
+
+    method public static DataRow newInstance()
+
+        methodret new DataRow()
+
+    methodend
+
+
+    method public void setString (BBjString rec$)
+
+        declare BBjTemplatedString x!
+        x!=BBjAPI().makeTemplatedString(#Tpl$)
+        x!.setString(rec$)
+        dim x1$:#Tpl$
+        fields$=fattr(x1$,"")
+
+        while fields$>""
+            p=pos($0a$=fields$)
+            f$=fields$(1,p-1)
+            fields$=fields$(p+1)
+
+            fieldtype=asc(fattr(x1$,f$)(1,1))
+
+            if fieldtype=1 or fieldtype=11 then
+                #setFieldValue(f$,x!.getFieldAsString(f$))
+            else
+                #setFieldValue(f$,x!.getFieldAsNumber(f$))
+            fi
+
+
+
+            x$=#Tpl$(pos(f$+":"=#Tpl$)+len(f$)+2)
+            x$=x$(pos("("=x$)+1)
+            x$=x$(1,pos(")"=x$)-1)
+
+            if pos("*"=x$)>0 then
+                x$=x$(1,pos("*"=x$)-1)
+            fi
+
+
+            if pos("+"=x$)>0 then
+                x$=x$(1,pos("+"=x$)-1)
+            fi
+
+            cast(DataField,#FieldList!.get(f$)).setLength(num(x$))
+
+        wend
+
+    methodend
+
+    method public String toString()
+
+        if #FieldNames!.size() then
+
+            for i=0 to #FieldNames!.size()-1
+
+                k$=#FieldNames!.getItem(i)
+
+                f$=#getFieldAsString(k$)
+
+                x$=x$+","+k$+"="+f$
+
+            next
+
+            x$="["+x$(2)+"]"
+
+        else
+            x$="(empty)"
+        fi
+
+        methodret x$
+
+    methodend
+
+    method public void setFieldValue(BBjString name$, String value!)
+
+        declare DataField field!
+
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"C",value!)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value!)
+
+        fi
+
+
+    methodend
+
+    method public void setFieldValue(BBjString name$, BBjNumber value)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"N",value)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value)
+
+        fi
+
+
+    methodend
+
+    method public void setFieldValue(BBjString name$, java.sql.Date value!)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"D",value!)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value!)
+
+        fi
+
+
+    methodend
+
+    method public void setFieldValue(BBjString name$, java.sql.Timestamp value!)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"X",value!)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value!)
+
+        fi
+
+
+    methodend
+
+    method public void setFieldValue(BBjString name$, java.lang.Double value!)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"N",value!)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value!)
+
+        fi
+
+
+    methodend
+
+
+    method public void setFieldValue(BBjString name$, java.lang.Integer value!)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"I",value!)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value!)
+
+        fi
+
+
+    methodend
+
+
+    method public void setFieldValue(BBjString name$, java.lang.Boolean value!)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"B",value!)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value!)
+
+        fi
+
+
+    methodend
+
+
+    method public void setFieldValue(BBjString name$, java.math.BigDecimal value!)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"Y",value!)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value!)
+
+        fi
+
+
+    methodend
+
+    method public void setFieldValue(BBjString name$, java.sql.Time value!)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+        if field! = null() then
+            field! = new DataField(name$,"T",value!)
+
+            #FieldList!.put(name$,field!)
+            #FieldNames!.addItem(name$)
+        else
+            field!.setValue(value!)
+
+        fi
+
+
+    methodend
+
+    method public BBjString getFieldAsString(BBjString name$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+
+        if field! = null() then
+            throw "Field "+name$+" does not exist",47
+        fi
+
+
+        methodret field!.getValueAsString()
+
+
+    methodend
+
+    method public BBjNumber getFieldAsNumber(BBjString name$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+
+        if field! = null() then
+            throw "Field "+name$+" does not exist",47
+        fi
+
+
+        methodret field!.getValueAsNumber()
+
+
+    methodend
+
+    method public BBjVector getFieldNames()
+
+        methodret #FieldNames!
+
+    methodend
+
+    method public java.lang.String toString()
+
+        methodret str(#FieldNames!)
+
+        rem TODO write nice toString method
+
+    methodend
+
+
+    method public BBjString getFieldType(BBjString fieldname$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(fieldname$))
+
+
+        if field! <> null() then
+            t$=field!.getType()
+
+            methodret t$
+
+        else
+            throw "getFieldAttribute: Field "+fieldname$+" does not exist",11
+        fi
+
+
+    methodend
+
+    method public BBjNumber getFieldLength(BBjString fieldname$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(fieldname$))
+
+
+        if field! <> null() then
+            l=field!.getLength()
+
+            methodret l
+
+        else
+            throw "getFieldLength: Field "+fieldname$+" does not exist",11
+        fi
+
+
+    methodend
+
+    method public void setFieldAttribute(BBjString fieldname$, BBjString attrname$, BBjString value$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(fieldname$))
+
+
+        if field! <> null() then
+            field!.setAttribute(attrname$,value$)
+
+        else
+
+            throw "setFieldAttribute: Field "+fieldname$+" does not exist",11
+        fi
+
+    methodend
+
+    method public void setSQLType(BBjString fieldname$, BBjNumber SQLType)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(fieldname$))
+
+
+        if field! <> null() then
+            field!.setSQLType(SQLType)
+
+        else
+
+            throw "setSQLType: Field "+fieldname$+" does not exist",11
+        fi
+
+    methodend
+
+
+    method public BBjString getFieldAttribute(BBjString fieldname$, BBjString attrname$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(fieldname$))
+
+
+        if field! <> null() then
+            r$=field!.getAttribute(attrname$)
+
+            methodret r$
+
+        else
+            throw "getFieldAttribute: Field "+fieldname$+" does not exist",11
+        fi
+
+
+    methodend
+
+
+
+    method public java.util.HashMap getFieldAttributes(BBjString fieldname$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(fieldname$))
+
+
+        if field! <> null() then
+            r!=field!.getAttributes()
+
+            methodret r!
+
+        else
+
+            throw "getFieldAttributes: Field "+fieldname$+" does not exist",11
+        fi
+
+
+    methodend
+
+
+
+
+    method public void removeFieldAttribute(BBjString fieldname$, BBjString attrname$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(fieldname$))
+
+
+        if field! <> null() then
+            field!.removeAttribute(attrname$)
+
+        fi
+
+    methodend
+
+    method public BBjVector getAttributeForFields(BBjString attrname$)
+
+
+        methodret #getAttributeForFields(attrname$,0)
+
+
+    methodend
+
+    method public BBjVector getAttributeForFields(BBjString attrname$,BBjNumber defaultToFieldname)
+
+        declare DataField field!
+        ret! = new BBjVector()
+
+        if #FieldNames!.size()>0 then
+
+            for i=0 to #FieldNames!.size()-1
+                field! = CAST(DataField,#FieldList!.get(#FieldNames!.get(i)))
+
+                r$=field!.getAttribute(attrname$)
+
+                if r$="" and defaultToFieldname then
+                    r$=field!.getName()
+                fi
+
+                ret!.addItem(r$)
+            next
+
+        fi
+
+
+        methodret ret!
+
+    methodend
+
+
+    method public BBjString replaceFields(BBjString Formula$)
+
+        ks! = #FieldList!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+
+            k$=it!.next()
+            k1$="$F{"+k$+"}"
+
+            while pos(k1$=Formula$)>0
+                p=pos(k1$=Formula$)
+
+                Formula$=Formula$(1,p-1)+#this!.getFieldAsString(k$)+Formula$(p+len(k1$))
+            wend
+
+        wend
+
+
+        methodret Formula$
+
+    methodend
+
+    method public BBjNumber equals(DataRow r!)
+
+        eq=1
+
+
+        fields! = r!.getFieldNames()
+
+
+        if fields!.size() <> #FieldList!.size() then
+            eq=0
+        else
+
+            for i=0 to fields!.size()-1
+
+                fieldname$=fields!.getItem(i)
+
+                f! = #FieldList!.get(fieldname$)
+
+                if f!=null() then
+                    eq=0
+                    break
+                fi
+
+                if r!.getFieldAsString(fieldname$)<> #this!.getFieldAsString(fieldname$) then
+                    eq=0
+                    break
+                fi
+
+            next
+
+        fi
+
+        methodret eq
+
+
+    methodend
+
+    method public void addDataField(DataField field!)
+
+        name$=field!.getName()
+        #FieldList!.put(name$,field!)
+        #FieldNames!.addItem(name$)
+
+    methodend
+
+    method public DataRow clone()
+
+        dRow! = new DataRow()
+
+        ks! = #FieldList!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+
+            k$=it!.next()
+            f!=#FieldList!.get(k$)
+            f1! = f!.clone()
+            dRow!.addDataField(f1!)
+
+        wend
+
+        methodret dRow!
+
+    methodend
+
+
+    method public BBjString getInsertStatement()
+
+        ks! = #FieldList!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+
+            k$=it!.next()
+
+            f!=#FieldList!.get(k$)
+
+            if f!.isNull() then
+                continue
+            fi
+
+            f$=f$+","+k$
+            v$=v$+","+f!.getValueForSQL()
+
+        wend
+
+        sql$="(" +f$(2)+ ") VALUES ("+v$(2)+")"
+
+        methodret sql$
+
+    methodend
+
+    method public BBjString getUpdateStatement()
+
+        ks! = #FieldList!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+
+            k$=it!.next()
+            f!=#FieldList!.get(k$)
+
+            if f!.isNull() then
+                continue
+            fi
+
+            x$=x$+", "+k$+"="+f!.getValueForSQL()
+
+        wend
+
+        methodret x$(2)
+
+    methodend
+
+    method public java.util.HashMap getObjects()
+
+        hm! = new java.util.HashMap()
+
+        ks! = #FieldList!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+
+            k$=it!.next()
+            f!=#FieldList!.get(k$)
+
+            if f!.isNull() then
+                continue
+            fi
+
+            hm!.put(k$,f!.getObject())
+
+        wend
+
+        methodret hm!
+
+    methodend
+
+
+classend
+
+declare DataRow r!
+r!=new DataRow()
+r!.setFieldValue("NAME","Wald")
+r!.setFieldAttribute("NAME","LABEL","Nachname")
+
+r!.setFieldValue("FIRST_NAME","Stephan")
+r!.setFieldAttribute("FIRST_NAME","LABEL","Vorname")
+
+
+
+declare DataRow r1!
+r1!=new DataRow()
+r1!.setFieldValue("NAME","Wald")
+r1!.setFieldAttribute("NAME","LABEL","Nachname")
+
+r1!.setFieldValue("FIRST_NAME","Stephan")
+r1!.setFieldAttribute("FIRST_NAME","LABEL","Vorname")
+
+declare DataRow r2!
+r2!=new DataRow()
+r2!.setFieldValue("NAME","Wald")
+r2!.setFieldAttribute("NAME","LABEL","Nachname")
+
+r2!.setFieldValue("FIRST_NAME","Stephan1")
+r2!.setFieldAttribute("FIRST_NAME","LABEL","Vorname")
+
+
+
+? r1!.equals(r!)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

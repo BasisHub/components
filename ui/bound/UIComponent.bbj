@@ -1,0 +1,758 @@
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/ui/bound/UIComponent.bbj::UIComponent
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
+
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::components/i18n/i18n.bbj::i18n
+
+
+use ::components/ui/laf/laffactory.bbj::laffactory
+use ::components/ui/laf/laffactory.bbj::laf
+
+rem /**
+rem * UIComponent
+rem *
+rem * Base class for UI Components that connect to a business component
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public UIComponent
+
+    field protected BBjChildWindow      Wnd!
+    field protected BusinessComponent   BC!
+
+    field protected BBjWindow           ParentWnd!
+    field protected BBjNumber           X
+    field protected BBjNumber           Y
+    field protected BBjNumber           W
+    field protected BBjNumber           H
+
+
+    field protected BBjNumber           IsStandalone
+    field private   BBjButton           C_BtnOk!
+    field private   BBjButton           C_BtnCancel!
+    field protected BBjNumber           ShowOkCancelButtons = 1
+    field protected BBjNumber           ShowMenuBar = 0
+    field protected BBjNumber           ShowStatusBar = 0
+    field private   BBjNumber           ShowToolBar = 0
+
+
+    field private   BBjString           WindowTitle$
+    field private   BBjString           WindowComment$
+    field protected BBjStatusBar        StatusBar!
+    field protected BBjMenuBar          MenuBar!
+
+    field private static BBTranslator  Translator! = i18n.getTranslator()
+
+    field private java.util.HashMap  ForeignKeyFormLinkList! = new java.util.HashMap()
+    field private java.util.HashMap  ForeignKeyFormClassList! = new java.util.HashMap()
+
+    field protected laf Laf! = laffactory.getLaf()
+
+    rem ****************************Constructors***********************
+
+
+    rem /**
+    rem * Constructor UIComponent - disabled
+    rem */
+    method public UIComponent()
+
+        sg! = BBjAPI().openSysGui("X0")
+        id=BBjAPI().getSysGui().getAvailableContext()
+        #UIComponent(CAST(BBjChildWindow,null()))
+        #UIComponent(CAST(BBjWindow,null()), 701, 10, 10, 800, 600)
+
+
+    methodend
+
+
+    rem /**
+    rem * Constructor UIComponent
+    rem * Creates the component by using a given existing BBjChildWindow
+    rem * @param BBjChildWindow wnd!: child window that the component shall occupy
+    rem */
+    method public UIComponent(BBjChildWindow cw!)
+
+        #Wnd! = cw!
+        #ParentWnd! = BBjAPI().getSysGui().getWindow(cw!.getParentWindow().getContextID())
+        #W = cw!.getWidth()
+        #H = cw!.getHeight()
+        #X = 0
+        #Y = 0
+
+    methodend
+
+
+    rem /**
+    rem * Constructor UIComponent
+    rem * Creates the component on a given Window using id and placement
+    rem * @param BBjWindow wnd!: the parent window to create the component on
+    rem * @param BBjNumber x: x-coordinate
+    rem * @param BBjNumber y: y-coordinate
+    rem * @param BBjNumber w: width
+    rem * @param BBjNumber h: height
+    rem * @param BBjString title$: Title string for the component
+    rem */
+    method public UIComponent(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h, BBjString title$)
+
+        #WindowTitle$=title$
+        #UIComponent(wnd!, id, x, y, w, h)
+
+    methodend
+
+    rem /**
+    rem * Constructor UIComponent
+    rem * Creates the component on a given Window using id and placement
+    rem * @param BBjWindow wnd!: the parent window to create the component on
+    rem * @param BBjNumber x: x-coordinate
+    rem * @param BBjNumber y: y-coordinate
+    rem * @param BBjNumber w: width
+    rem * @param BBjNumber h: height
+    rem * @param BBjString title$: Title string for the component
+    rem * @param BBjString comment$: Comment string / user info
+    rem */
+    method public UIComponent(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h, BBjString title$, BBjString comment$)
+
+        #WindowComment$=comment$
+        #WindowTitle$=title$
+        #UIComponent(wnd!, id, x, y, w, h)
+
+    methodend
+
+
+    rem /**
+    rem * Constructor UIComponent
+    rem * Creates the component on a given Window using id and placement
+    rem * @param BBjWindow wnd!: the parent window to create the component on; pass null() to have the component create it's standalone parent window
+    rem * @param BBjNumber x: x-coordinate
+    rem * @param BBjNumber y: y-coordinate
+    rem * @param BBjNumber w: width
+    rem * @param BBjNumber h: height
+    rem */
+    method public UIComponent(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        if wnd! = null() then
+
+            declare BBjSysGui sysgui!
+            sysgui!= BBjAPI().openSysGui("X0")
+            sysgui!.setContext(sysgui!.getAvailableContext())
+
+
+            realm$ = #this!.toString()
+            while pos("::"=realm$)
+                realm$=realm$(pos("::"=realm$)+2)
+            wend
+            c! = new ConfigBucket(realm$,info(3,2),"windowpos",err=skipConfigLoad)
+                c!.loadBucket(err=skipConfigLoad)            
+               
+                h=cast(BBjNumber,c!.getBBjNumber())
+                w=cast(BBjNumber,c!.getBBjNumber())
+                x=cast(BBjNumber,c!.getBBjNumber())
+                y=cast(BBjNumber,c!.getBBjNumber())
+                maxi = cast(BBjNumber,c!.getBBjNumber())
+
+            skipConfigLoad:
+
+            #ParentWnd! = sysgui!.addWindow(x,y,w,h,"",$00080093$)
+            #Laf!.prepareWindow(#ParentWnd!)
+
+            #X = 0
+            #Y = 0
+            #W = w
+            #H = h
+
+            #IsStandalone = 1
+
+        else
+
+            #ParentWnd! = wnd!
+            #X = x
+            #Y = y
+            #W = w
+            #H = h
+
+        fi
+
+        #Wnd!=#ParentWnd!.addChildWindow(id,#X,#Y,#W,#H,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+         #Laf!.prepareWindow(#Wnd!)
+        #Wnd!.setClientEdge(0)
+        #Wnd!.setOpaque(0)
+        #Wnd!.setRaisedEdge(0)
+
+    methodend
+
+    rem ***************************** set / get methods *********************************
+
+    rem /**
+    rem * Method setBC:
+    rem * set the business component to drive this UI component
+    rem * @BusinessComponent bc!: the business component
+    rem */
+    method public void setBC(BusinessComponent bc!)
+
+        #BC! = bc!
+        bc!.registerUI(#this!)
+
+    methodend
+
+    method public void destroy()
+
+        #BC!.unregisterUI(#this!)
+        #BC! = null()
+        #Wnd!.destroy()
+
+    methodend
+
+    method public void setShowOkCancelButtons(BBjNumber fShow)
+            #ShowOkCancelButtons = fShow
+    methodend
+    
+    method public void getShowOkCancelButtons()
+            methodret #ShowOkCancelButtons
+    methodend
+
+    method public void setShowMenuBar(BBjNumber fShow)
+        #ShowMenuBar = fShow
+        
+        if fShow then
+            wnd! = #getParentWnd()
+            #MenuBar! = cast(BBjMenuBar,wnd!.addMenuBar())
+            myMenu!=#MenuBar!.addMenu(-1,"&File")
+            item_exit! = myMenu!.addMenuItem(-2,"&Close")
+            item_exit!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onMenuExit")
+        fi
+        
+    methodend    
+
+    rem /**
+    rem * Method getWnd:
+    rem * returns the Child Window that represents / holds the component
+    rem * @return BBjChildWindow Wnd!: the child window
+    rem */
+    method public BBjChildWindow getWnd()
+
+        methodret #Wnd!
+
+    methodend
+
+
+
+    rem /**
+    rem * Method setWindowTitle
+    rem * sets the window title in standalone / modal mode
+    rem * @param BBjString title$: title string
+    rem */
+    method public void setWindowTitle(BBjString title$)
+
+        if #IsStandalone then
+            #WindowTitle$=title$
+            #ParentWnd!.setText(#WindowTitle$)
+        fi
+
+    methodend
+
+
+
+    rem /**
+    rem * Method setWindowComment
+    rem * sets the window comment in standalone / modal mode
+    rem * @param BBjString comment$: comment string
+    rem */
+    method public void setWindowComment(BBjString text$)
+
+        if #IsStandalone then
+
+            #WindowComment$=text$
+
+            if #StatusBar! = null() then
+                #StatusBar!=#ParentWnd!.addStatusBar(200)
+            fi
+
+            #StatusBar!.setText(#WindowComment$)
+
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method setSize
+    rem * set the size of the component on the parent window
+    rem * Can be overwritten to adjust contents of component to new size.
+    rem * Always call #super!.setSize(x,y) in overrides
+    rem * @param BBjNumber width: new width
+    rem * @param BBjNumber height: new height
+    rem */
+    method public void setSize(BBjNumber width, BBjNumber height)
+
+        #Wnd!.setSize(width,height)
+        #W=width
+        #H=height
+
+    methodend
+
+
+    rem /**
+    rem * Method setLocation
+    rem * set the location of the component on the parent window
+    rem * @param BBjNumber x: x-coordinate
+    rem * @param BBjNumber y: y-coordinate
+    rem */
+    method public void setLocation(BBjNumber x, BBjNumber y)
+
+        #Wnd!.setLocation(x,y)
+        #X=x
+        #Y=y
+
+    methodend
+
+    rem /**
+    rem * Method setVisible:
+    rem * make component visible or invisible
+    rem * @parem BBjNumber visible: 0=invisible, 1=visible
+    rem */
+    method public void setVisible(BBjNumber visible)
+
+        #Wnd!.setVisible(visible)
+
+    methodend
+
+    rem /**
+    rem * Method isVisible:
+    rem * check if component is currently visible
+    rem * @return BBjNumber visible: 0=invisible, 1=visible
+    rem */
+    method public BBjNumber isVisible()
+
+        methodret #Wnd!.isVisible()
+
+    methodend
+
+
+    method public void setShowToolBar(BBjNumber fShow)
+        #ShowToolBar = fShow
+    methodend
+    
+    method public BBjNumber getShowToolBar()
+        methodret #ShowToolBar
+    methodend
+    
+    
+
+    rem *********************** methods and event methods for standalone mode **************************************
+
+    rem /**
+    rem * Method doModal:
+    rem * show a modal dialog window holding the component
+    rem * @return BBjNumber ret: 1=user hit "OK", 0=user hit "Cancel" or closed / aborted the window
+    rem */
+    method public BBjNumber doModal()
+
+
+        if #getIsStandalone()=0 then
+            throw "Can only doModal in standalone-mode",250
+        fi
+
+
+        #ParentWnd!.setCallback(BBjAPI.ON_CLOSE,#this!,"Form__ON_CLOSE")
+        #ParentWnd!.setCallback(BBjAPI.ON_RESIZE,#this!,"Form__ON_RESIZE")
+
+        if #ShowStatusBar and #StatusBar! = null() then
+        
+            #StatusBar! = #ParentWnd!.addStatusBar(5)
+        
+        fi
+        
+        if #ShowOkCancelButtons and #C_BtnCancel! = null() then
+            
+            h=#ParentWnd!.getHeight()
+            w=#ParentWnd!.getWidth()
+
+            #setSize(w,h-40)
+
+            #C_BtnCancel! = #ParentWnd!.addButton(2,w-80,h-25,75,20,#Translator!.getTranslation("CANCEL"))
+            #C_BtnOk! = #ParentWnd!.addButton(3,w-160,h-25,75,20,#Translator!.getTranslation("OK"))
+            #C_BtnCancel!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onBtnCancel")
+            #C_BtnOk!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onBtnOk")
+        fi
+        
+
+
+        BBjAPI().setCustomEventCallback("ReturnAnswer","do_return")
+        BBjAPI().setCustomEventCallback("CancelAnswer","do_cancel")
+
+        #ParentWnd!.setVisible(1)
+
+        do_process_events:
+        process_events,err=*same
+
+        do_return:
+        #ParentWnd!.setVisible(0)
+        #saveConfig()
+        methodret 1
+
+        do_cancel:
+
+        #ParentWnd!.setVisible(0)
+        #saveConfig()
+        methodret 0
+
+    methodend
+
+
+
+    method private void saveConfig()
+        realm$ = #this!.toString()
+        while pos("::"=realm$)
+            realm$=realm$(pos("::"=realm$)+2)
+        wend
+        c! = new ConfigBucket(realm$,info(3,2),"windowpos")
+        
+        h=#ParentWnd!.getHeight()
+        if #StatusBar! <> null() then
+            h=h+#StatusBar!.getHeight()
+        fi
+        if #MenuBar! <> null() then
+            h=h+#MenuBar!.getHeight()
+        fi
+        
+        c!.put(h)
+
+        
+        
+        c!.put(#ParentWnd!.getWidth())
+        c!.put(#ParentWnd!.getX())
+        c!.put(#ParentWnd!.getY())
+        c!.put(cast(BBjTopLevelWindow,#ParentWnd!).isMaximized())
+        
+        c!.saveBucket()
+
+    methodend
+
+    rem /**
+    rem * Method Form__ON_CLOSE:
+    rem * event routine for BBjTopLevelWindow.ON_CLOSE event
+    rem * @param BBjCloseEvent pEvent!
+    rem */
+    method public void Form__ON_CLOSE(BBjCloseEvent pEvent!)
+
+        BBjAPI().postPriorityCustomEvent("CancelAnswer",null())
+
+    methodend
+
+
+    rem /**
+    rem * Method Form__ON_CLOSE:
+    rem * event routine for BBjTopLevelWindow.ON_RESIZE event
+    rem * @param BBjResizeEvent pEvent!
+    rem */
+    method public void Form__ON_RESIZE(BBjResizeEvent pEvent!)
+
+        w=pEvent!.getWidth()
+        h=pEvent!.getHeight()
+
+
+
+
+        if #ShowOkCancelButtons then
+            #C_BtnCancel!.setLocation(w-160,h-25)
+            #C_BtnOk!.setLocation(w-80,h-25)
+            #setSize(w,h-40)
+        else
+            #setSize(w,h)
+        fi
+        
+    methodend
+
+
+
+    rem /**
+    rem * Method onBtnOk:
+    rem * event routine for OK Button push
+    rem * @param BBjButtonPushEvent pEvent!
+    rem */
+    method public void onBtnOk(BBjButtonPushEvent pEvent!)
+
+        BBjAPI().postPriorityCustomEvent("ReturnAnswer",null())
+
+    methodend
+
+
+    rem /**
+    rem * Method onBtnCancel:
+    rem * event routine for Cancel Button push
+    rem * @param BBjButtonPushEvent pEvent!
+    rem */
+    method public void onBtnCancel(BBjButtonPushEvent pEvent!)
+
+        BBjAPI().postPriorityCustomEvent("CancelAnswer",null())
+
+    methodend
+
+
+    rem *********************virtual methods for steering from business component ****************
+    rem ********************* need overriding in implementation **********************************
+
+
+    rem /**
+    rem * Method refresh:
+    rem * this method is called from the business component when a refresh of the displayed data is required
+    rem * (needs overriding)
+    rem * @param BBjNumber resetFilter: if set to 1, the UI Component needs to clear any filtering defined on UI side
+    rem */
+    method public void refresh( BBjNumber resetFilter)
+
+    methodend
+
+    rem /**
+    rem * Method onSelectionChange:
+    rem * This method is called from the business component when the selection changed
+    rem * (needs overriding)
+    rem */
+    method public void onSelectionChange()
+
+    methodend
+
+
+    rem /**
+    rem * Method canSelectionChange:
+    rem * This method is called from the business component when the selection changed
+    rem * (needs overriding)
+    rem * @param force: if set to 1, enforce saving unsaved data as selection will undeniably change
+    rem * @return canChange: 0 = can't change, 1 = change is OK
+    rem */
+    method public BBjNumber canSelectionChange(BBjNumber force)
+
+        methodret 1
+
+    methodend
+
+
+
+    rem /**
+    rem * Method interruptQueryCallback:
+    rem * this method is called from the business component to determine if the user requested an interrupt of
+    rem * an ongoing process of a database query.The UI component can e.g. create a button on the window to cancel a request
+    rem * and set a variable accordingly so the next call to this method can return 1 and the business component
+    rem * knows that the query needs to be escaped
+    rem * (needs overriding)
+    rem * @return BBjNumber interrupt: 0=no interrupt, 1=user interrupted the process
+    rem */
+    method public BBjNumber interruptQueryCallback()
+
+        methodret 0
+
+    methodend
+
+
+    rem /**
+    rem * Method moreDataPulled:
+    rem * this method is called from the business component to notify the UI Component
+    rem * that the result now grew
+    rem * the interested UI component may now populate more data rows on the screen, i.e. a grid
+    rem * (needs overriding)
+    rem * @param BBjNumber oldsize: the prior size of the resultset
+    rem * @param BBjNumber newsize: the new size of the resultset
+    rem */
+    method public void moreDataPulled(BBjNumber oldsize, BBjNumber newsize)
+
+
+
+    methodend
+
+    rem /**
+    rem * Method setProgress:
+    rem * This method is called from the business component to report the progress of a query
+    rem * (needs overriding)
+    rem * @param BBjNumber percentage: the new percentage value, range between 0 and 100
+    rem */
+    method public void setProgress(BBjNumber percentage)
+
+    methodend
+
+
+    rem ********************************auxiliary methods*************************************
+
+    rem /**
+    rem * Method invokeCallback:
+    rem * invoke a method in a given class and pass an object with data
+    rem * @param Object obj!: the object that holds the method that will be called
+    rem * @param BBjString nethodName$: the name of the method
+    rem * @param Object payload!: the object that is passed to the method
+    rem */
+    method public static void invokeCallback(Object obj!, BBjString methodName$, Object payload!)
+
+        if obj!<>null() and methodName$>"" and payload! <> null() then
+
+            x$="obj!."+methodname$+"(payload!)"
+            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
+            ch=unt
+            open (ch)temp$
+            write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+            close (ch)
+            call temp$
+            erase temp$
+
+        fi
+
+    methodend
+    
+
+    method public static Object newInstance(BBjString class$)
+
+        x$="x! = new "+class$+"()"
+        temp$ = str(java.io.File.createTempFile("blabla", ".call"))
+        ch=unt
+        open (ch)temp$
+        write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+        close (ch)
+        call temp$
+        erase temp$
+        
+        methodret x!
+
+        REM searching for something like 
+        REM 
+        REM class! =  CustomObject.forName("::oeval.bbj::foo")
+        REM y! = class!.newInstance()
+        REM 
+        REM OR
+        REM 
+        REM y! = CustomObject.newInstance("::oeval.bbj::foo")
+
+    methodend    
+
+
+    rem **************************editing methods *******************************************
+
+    rem /**
+    rem * Method setEditing
+    rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
+    rem * @param BBjNumber isEditing: -1 = i
+    rem */
+    method public void setEditing(BBjNumber isEditing)
+
+
+    methodend
+
+
+    rem /**
+    rem * Method restoreEditedField
+    rem * invoked from BusinessComponent, broadcast that the user wants to restore the field currently being edited
+    rem */
+    method public void restoreEditedField()
+
+
+    methodend
+
+
+    rem /**
+    rem * Method newRecord
+    rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
+    rem */
+    method public void newRecord()
+
+
+    methodend
+
+
+    rem /**
+    rem * Method saveRecord
+    rem * invoked from BusinessComponent, broadcast that the user wants to save the record
+    rem */
+    method public BBjNumber saveRecord()
+
+
+        methodret 0
+
+
+    methodend
+
+    rem /**
+    rem * Method onPartialUpdate
+    rem * invoked from Business Component, broadcasting the change of a record
+    rem * @param BBjNumber recno: the record number within the resultset that has been updated
+    rem */
+    method public void onPartialUpdate(BBjNumber recno)
+
+
+    methodend
+
+    rem /**
+    rem * Method onPartialUpdate
+    rem * invoked from Business Component, broadcasting the change of a record
+    rem * @param BBjNumber recno: the record number within the resultset that has been updated
+    rem * @param BBjNumber isLocked: 1=record was locked, 0=record was unlocked
+    rem */
+    method public void onSoftlockStatusChange(BBjNumber recno, BBjNumber isLocked)
+
+
+    methodend
+
+    method public void onMenuExit(BBjEvent ev!)
+
+        BBjAPI().postPriorityCustomEvent("CancelAnswer",null())
+
+    methodend        
+
+    rem /**
+    rem * Method onBroadcastEdit:
+    rem * called by BC to notify the UI about an ongoing edit from a different side
+    rem * @param BBjNumber recNo: the record number that was edited
+    rem * @param BBjString fieldName$: the field name that just was edited
+    rem * @param BBjSting newContent$: the new Contents of the field
+    rem */
+    method public void onBroadcastEdit(BBjNumber recNo, BBjString fieldName$, BBjString newContent$)
+
+
+    methodend
+
+    method protected void registerForeignKeyFormClass(BBjString fieldName$, BBjString className$)
+
+        #ForeignKeyFormClassList!.put(fieldName$,className$)
+
+    methodend
+
+    rem /**
+    rem * deprecated because the form is created even in cases where it's never used
+    rem * use registerForeignKeyFormClass instead!
+    rem */
+    method protected void registerForeignKeyFormLink(BBjString fieldName$, UIComponent uic!)
+
+        #ForeignKeyFormLinkList!.put(fieldName$,uic!)
+
+    methodend
+
+    method protected UIComponent getForeignKeyFormLink(BBjString fieldName$)
+
+        form! = CAST(UIComponent,#ForeignKeyFormLinkList!.get(fieldName$))
+        
+        if form! = null() then
+            
+           class! = #ForeignKeyFormClassList!.get(fieldName$)
+           if class! <> null() then
+                form! = #this!.newInstance(str(class!))
+           fi
+        
+        fi
+        
+        methodret form!
+
+    methodend
+
+
+classend
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,228 @@
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+use ::components/bl/ValidationError.bbj::ValidationError
+
+use ::generated/(DB_NICE)(TBL_NICE)BusinessComponentT.bbj::(DB_NICE)(TBL_NICE)BusinessComponentT
+use ::bl/(DB_NICE)(TBL_NICE)Entity.bbj::(DB_NICE)(TBL_NICE)Entity
+
+rem /**
+rem * (DB_NICE)(TBL_NICE)BusinessComponentT
+rem *
+rem * Auto-generated business logic class
+rem * override to implement custom behavior that belongs to application logic
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)BusinessComponentT
+
+    rem place your own field definitions for the business logic here:
+
+    rem /**
+    rem * Method (DB_NICE)(TBL_NICE)BusinessComponent():
+    rem * standard constructor
+    rem * override to setup the business component
+    rem */
+    method public (DB_NICE)(TBL_NICE)BusinessComponent()
+
+        #super!()
+
+        #setAllowFilter(1)
+        #setAllowSort(1)
+
+        #setupImportedKeys()
+
+    methodend
+
+    rem /**
+    rem * Method setupImportedKeys:
+    rem * setup the foreign key relations for the fields in the entity
+    rem * override to set the foreign key relations that have not been determined from the database layout
+    rem */
+    method protected void setupImportedKeys()
+
+        rem remove the following statement to omit the auto-generated foreign key relations
+        #super!.setupImportedKeys()
+
+        rem TODO: add foreign key releations that may not have been defined in the database
+        rem (don't forget to set up the foreign key in (DB_NICE)(TBL_NICE)Form::setupImportedKeys() if you wish a linked form)
+        rem sample:
+
+        rem fk_bc! = new ::bl/xyzBusinessComponent.bbj::xyzBusinessComponent()
+        rem #setForeignKeyPointer("COLUMNNAME",fk_bc!,"KEY_COLUMN_NAME_IN_OTHER_TABLE")
+
+    methodend
+
+    rem /**
+    rem * Method getColumnAttributes:
+    rem * override to set your own column attributes
+    rem * @return DataRow attr!: an instance of a DataRow holding all attributes that are valid for all rows of this entity
+    rem */
+    method public DataRow getColumnAttributes()
+
+        declare auto DataRow attr!
+
+        if #super!.hasSetColumnAttributes() then
+
+            attr! = #super!.getColumnAttributes()
+
+        else
+
+            attr! = #super!.getColumnAttributes()
+            rem TODO: set column attributes here
+        fi
+
+        methodret attr!
+
+    methodend
+
+    rem /**
+    rem * Method processRecord:
+    rem * override to set your own field attributes for each row
+    rem * @param DataRow row!: the entity to be examined and enriched
+    rem * @return DataRow attr!: an instance of a DataRow holding all attributes that are valid for all rows of this entity
+    rem */
+    method protected DataRow processRecord(DataRow row!)
+
+        rem TODO: set attributes on row level here, and set contents for computed / derived fields
+
+        methodret row!
+
+    methodend
+
+    rem /**
+    rem * Method onBeforeInsert:
+    rem * called immediately before a row will be inserted
+    rem * @param DataRow row!: the row to be inserted
+    rem * @return DataRow row!: the row after preparation; null() to abort
+    rem */
+    method protected DataRow onBeforeInsert(DataRow row!)
+
+        rem override this method for final processing of a record before it's inserted
+        rem sample:
+        rem ts! = new java.sql.Timestamp(new java.util.Date().getTime())
+        rem row!.setFieldValue("created",ts!)
+        rem row!.setFieldValue("updated",ts!)
+        rem row!.setFieldValue("created_by",1)
+        rem row!.setFieldValue("updated_by",1)
+
+        methodret row!
+
+    methodend
+
+    rem /**
+    rem * Method onBeforeUpdate:
+    rem * called immediately before a row will be inserted
+    rem * @param DataRow row!: the row to be inserted
+    rem * @param DataRow orig_row!: the original row from the resultset
+    rem * @return DataRow row!: the row after preparation; null() to abort
+    rem */
+    method protected DataRow onBeforeUpdate(DataRow row!, DataRow orig_row!)
+
+        rem override this method for final processing of a record before it's updated
+        rem sample:
+        rem ts! = new java.sql.Timestamp(new java.util.Date().getTime())
+        rem row!.setFieldValue("updated",ts!)
+        rem row!.setFieldValue("updated_by",1)
+
+        methodret row!
+
+    methodend
+
+    rem /**
+    rem * Method validateRecord:
+    rem * override this method for validating a record before it's written
+    rem * @param DataRow row!: the row to be inserted
+    rem * @param DataRow orig_row!: the original row from the resultset; if null() the record is new
+    rem * @return BBjNumber fail: 0=passed, 1=errors were reported
+    rem */
+    method protected BBjNumber validateRecord(DataRow row!, DataRow orig_row!)
+
+        fail=#super!.validateRecord(row!, orig_row!)
+
+        rem put additional validation here
+        rem sample:
+
+        rem if row!.getFieldAsString("TITLE")="" then
+        rem  v_err! = new ValidationError(ValidationError.ERROR(),"TITLE","Title must not be empty!")
+        rem  #addValidationError(v_err!)
+        rem  fail=max(fail,ValidationError.ERROR())
+        rem fi
+
+        rem if row!.getFieldAsString("ARTIST")="" then
+        rem  v_err! = new ValidationError(ValidationError.NOTICE(),"ARTIST","Artist not set.")
+        rem  #addValidationError(v_err!)
+        rem  fail=max(fail,ValidationError.NOTICE())
+        rem fi
+
+        methodret fail
+
+    methodend
+
+    rem /**
+    rem * Method validateField:
+    rem * override this method for validating a record before it's written
+    rem * @param BBjString fieldName$: the field name
+    rem * @param BBjString fieldValue$: the field value to be validated
+    rem * @param DataRow origRow!: the original row from the resultset; if null() the record is new
+    rem * @param java.util.HashMap otherEdits: other edits that are currently unsaved
+    rem * @return BBjNumber fail: 0=passed, 1=errors were reported
+    rem */
+    method public BBjNumber validateField(BBjString fieldName$, BBjString fieldValue$, DataRow origRow!, java.util.HashMap otherEdits!)
+
+        fail=#super!.validateField(fieldName$, fieldValue$, origRow!, otherEdits!)
+
+        rem put additional validation here
+        rem sample:
+
+        rem  if fieldName$ = "RECORDINGTYPE" then
+        rem      if pos(fieldValue$="AAA AAD ADD DDD")=0 then
+        rem            v_err! = new ValidationError(ValidationError.WARN(),"RECORDINGTYPE","Unknown Recording Type!")
+        rem            #addValidationError(fieldName$,v_err!)
+        rem            fail=ValidationError.NOTICE()
+        rem      else
+        rem            #clearValidationError(fieldName$)
+        rem      fi
+        rem  fi
+
+        methodret fail
+
+    methodend
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

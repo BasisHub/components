@@ -1,0 +1,51 @@
+use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
+use ::components/ui/unbound/SplitPane.bbj::SplitPane
+
+use ::ui/(DB_NICE)(TBL_NICE)Form.bbj::(DB_NICE)(TBL_NICE)Form
+use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
+
+
+declare (DB_NICE)(TBL_NICE)Form        EditEditForm!
+declare NavigationGridComponent NavGrid!
+declare SplitPane SplitPane!
+
+sg! = BBjAPI().openSysGui("X0")
+
+bc! = new (DB_NICE)(TBL_NICE)BusinessComponent()
+
+wnd! = sg!.addWindow(0,0,1024,768,bc!.getTitle(),$00080013$ )
+wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
+
+SplitPane! = new SplitPane(wnd!,100,10,10,1000,700)
+
+NavGrid! = new NavigationGridComponent(SplitPane!.getTop())
+SplitPane!.setUiwTop(NavGrid!)
+NavGrid!.setBC(bc!)
+NavGrid!.setShowToolbar(1)
+NavGrid!.setMultipleSelection(0)
+
+EditForm! = new (DB_NICE)(TBL_NICE)Form(SplitPane!.getBottom())
+SplitPane!.setUiwBottom(EditForm!)
+EditForm!.setBC(bc!)
+EditForm!.setShowToolBar(1)
+
+
+
+bc!.refresh()
+
+wnd!.setCallback(BBjAPI.ON_RESIZE,"resize")
+wnd!.setVisible(1)
+
+process_events
+
+byebye:
+bye
+
+resize:
+    declare auto BBjResizeEvent ev!
+    ev! = BBjAPI().getLastEvent()
+    w = ev!.getWidth()
+    h = ev!.getHeight()
+    SplitPane!.setSize(w-24,h-68)
+return
+

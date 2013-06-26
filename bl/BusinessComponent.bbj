@@ -1,0 +1,1194 @@
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+use ::components/db/DataProvider.bbj::DataProvider
+use ::components/bl/ValidationError.bbj::ValidationError
+use ::components/ui/bound/UIComponent.bbj::UIComponent
+use ::components/ui/bound/UIController.bbj::UIController
+use ::components/ui/bound/form/GoogleMapsComponent.bbj::GoogleMapsComponent
+
+rem /**
+rem * BusinessComponent
+rem *
+rem * Base class for Business Components that connect to a UI component
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+
+class public BusinessComponent
+
+    field protected BBjVector           ResultSet! = new BBjVector()
+    field protected BBjVector           Selection! = new BBjVector()
+    field protected DataRow             ColumnAttributes!
+    field public    BBjVector           UIList! = new BBjVector()
+    field protected BBjNumber           QueryComplete =0
+    field protected BBjNumber           BlockSize = 20
+    field public    BBjNumber           AllowFilter = 0
+    field public    BBjNumber           AllowSort = 0
+    field protected BBjString           SortField$
+    field protected BBjNumber           SortAscending
+
+    field public    BBjString           Locale$
+    field public    BBjString           Title$
+
+    field protected java.util.HashMap   QueryFilter!
+
+    field protected java.util.HashMap   Controller!                 = new java.util.HashMap()
+    field protected java.util.HashMap   ControllerVars!             = new java.util.HashMap()
+    field protected java.util.HashMap   FullResultsetController!    = new java.util.HashMap()
+    field protected java.util.HashMap   FullResultsetControllerVars!= new java.util.HashMap()
+
+    field protected java.util.HashMap   ControllerFilter!           = new java.util.HashMap()
+    field protected java.util.HashMap   ControllerFilterUnlock!     = new java.util.HashMap()
+
+    field private   java.util.HashMap   ForeignKeyPointerBcList!    = new java.util.HashMap()
+    field private   java.util.HashMap   ForeignKeyPointerKeyFieldList!  = new java.util.HashMap()
+    field private   UIController        ForeignKeyPointerController! = new UIController()
+
+    field private   BBjNumber           EditingRecNo=-1
+    field private   BBjVector           ValidationErrors!           = new BBjVector()
+    field private   java.util.HashMap   FieldValidationErrors!      = new java.util.HashMap()
+
+    field protected DataProvider DataProvider!
+
+    rem *********************set / get methods ****************************
+
+
+    rem *********************** methods to interact with UIComponent ******************
+
+    rem /**
+    rem * Method registerUI:
+    rem * register a UI component
+    rem * note: a business component can deal with multiple UI components that are working
+    rem * on the same resultset of data
+    rem * @param UIComponent uic!: add a UI component to this business component
+    rem */
+    method public void registerUI(UIComponent uic!)
+
+        #UIList!.add(uic!)
+
+    methodend
+
+
+    method public void unregisterUI(UIComponent uic!)
+
+        #UIList!.removeItem(#UIList!.indexOf(uic!,err=*next),err=*next)
+
+    methodend
+
+    rem /**
+    rem * Method getResultSet:
+    rem * return the result set
+    rem * @return BBjVector resultset!: the current result set
+    rem */
+    method public BBjVector getResultSet()
+
+        methodret #ResultSet!
+
+    methodend
+
+    rem /**
+    rem * Method setBlockSize:
+    rem * set the size of blocks of data pulled from the data source and processed
+    rem * @param BBjNumber size: the new block size
+    rem */
+    method public void setBlockSize(BBjNumber size)
+
+        if size>=0 then
+            #BlockSize=int(size)
+        fi
+
+    methodend
+
+    method public void prepareResultSet(BBjNumber first, BBjNumber last)
+
+        #DataProvider!.prepareResultSet(first, last)
+
+    methodend
+
+
+    rem /**
+    rem * Method setSortOrder:
+    rem * set the sort order to one column
+    rem * @param BBjString col$: the column name
+    rem * @param BBjNumber size: 0=descending, 1=ascending
+    rem */
+    method public void setSortOrder(BBjString col$,BBjNumber sortAscending)
+
+        #SortField$=col$
+        #SortAscending = sortAscending
+        #refresh(0)
+
+    methodend
+
+    rem /**
+    rem * Method setQueryFilter:
+    rem * filters the result set
+    rem * @param java.util.HashMap filter!: a hash map that holds the filter information, key is the column, data is a BBjVector holding the values for the filter
+    rem */
+    method public void setQueryFilter(java.util.HashMap filter!)
+
+        #QueryFilter! = filter!
+        rem #refresh(0)
+
+    methodend
+
+    rem /**
+    rem * Method getQueryFilter:
+    rem * filters the result set
+    rem * @return java.util.HashMap filter!: a hash map that holds the filter information, key is the column, data is a BBjVector holding the values for the filter
+    rem */
+    method public java.util.HashMap getQueryFilter()
+
+        methodret #QueryFilter! 
+
+    methodend
+    
+    
+    rem /**
+    rem * Method checkRecordExists:
+    rem * checks if there's a record matching the filter!
+    rem * @param java.util.HashMap filter!: a hash map that holds the filter information, key is the column, data is a BBjVector holding the values for the filter
+    rem */
+    method public BBjNumber checkRecordExists(java.util.HashMap filter!)
+
+        declare auto java.util.HashMap tmp!
+
+        if #QueryFilter! <> null() then
+            tmp! = #QueryFilter!.clone()
+        fi
+        
+        #QueryFilter! = filter!
+        #DataProvider!.setQueryFilter(filter!)
+        rem #DataProvider!.prepareResultSet(first, last)
+        s = #size()
+        
+        
+        #QueryFilter! = tmp!
+        #DataProvider!.setQueryFilter(tmp!)
+        
+        methodret s
+        rem #refresh(0)
+
+    methodend
+    
+
+    rem /**
+    rem * Method refresh:
+    rem * refreshes the data and all connected UI controls
+    rem * filters get reset
+    rem */
+    method public void refresh()
+
+        #refresh(1)
+
+    methodend
+
+
+    rem /**
+    rem * Method refresh:
+    rem * refreshes the data and all connected UI controls
+    rem * @param: BBjNumber resetFilter: if set to 1, all filters set in UI components will be reset
+    rem */
+    method public void refresh (BBjNumber resetFilter)
+
+        #ColumnAttributes!=null()
+        #ResultSet!.clear()
+        #Selection!.clear()
+
+        declare UIComponent ui!
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.refresh(resetFilter)
+            next
+
+        fi
+
+        ks!=#FullResultsetController!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            k$=it!.next()
+            clist! = #FullResultsetController!.get(k$)
+            vlist! = #FullResultsetControllerVars!.get(k$)
+
+            v!=new BBjVector()
+            s! = #size()
+            #prepareResultSet(0,s!)
+
+            if #ResultSet!.size() then
+
+                for i= 0 to #ResultSet!.size()-1
+                    rec! = #ResultSet!.getItem(i)
+                    f$=rec!.getFieldAsString(k$)
+                    if f$="null" then
+                        v!.addItem(null())
+                    else
+                        v!.addItem(f$)
+                    fi
+                    rem TODO: deal correctly with null() and numeric fields
+                next
+
+            fi
+
+            if clist!.size() then
+
+                for i=0 to clist!.size()-1
+
+                    c! = clist!.getItem(i)
+                    v$ = vlist!.getItem(i)
+                    c!.drive(v$,v!)
+
+                next
+
+            fi
+
+        wend
+
+
+    methodend
+
+    rem /**
+    rem * Method checkUserCancel:
+    rem * check if the user requested a cancel of the query
+    rem * @return: BBjNumber cancel: the user requested to escape the query through one of the UI components
+    rem */
+    method public BBjNumber checkUserCancel()
+
+        declare UIComponent ui!
+        cancel=0
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+
+                if ui!.interruptQueryCallback() then
+                    cancel=1
+                    break
+                fi
+
+            next
+
+        fi
+
+        methodret cancel
+
+    methodend
+
+    rem /**
+    rem * Method setProgress:
+    rem * notify the connected UI components of the current progress
+    rem * @param: BBjNumber progress: the progress in percent in the range from 0 to 100
+    rem */
+    method public void setProgress(BBjNumber progress)
+
+        declare UIComponent ui!
+        cancel=0
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.setProgress(progress)
+            next
+
+        fi
+
+    methodend
+
+
+    rem **********************methods related to UIController and selection changes*************
+
+    rem /**
+    rem * Method setSelection:
+    rem * apply a new selection
+    rem * @param: BBjVector selection: Vector holding the index values of the new selection
+    rem */
+    method public void setSelection(BBjVector Selection!)
+
+        #Selection! = Selection!
+        #onSelectionChange()
+
+    methodend
+
+
+    rem /**
+    rem * Method selectRow:
+    rem * select a row
+    rem * @param: BBjNumber row: row to be selected
+    rem */
+    method public void selectRow(BBjNumber row)
+
+        #Selection!.addItem(row)
+        #onSelectionChange()
+
+    methodend
+
+    method public void deselectAll()
+
+        #Selection!.clear()
+        #onSelectionChange()
+
+    methodend
+
+    rem /**
+    rem * Method unSelectRow:
+    rem * deselect a row
+    rem * @param: BBjNumber row: row to be unselected
+    rem */
+    method public void unSelectRow(BBjNumber row)
+
+        i=0
+
+        while i<#Selection!.size()
+
+            if #Selection!.getItem(i)=row then
+                #Selection!.removeItem(i)
+            else
+                i=i+1
+            fi
+
+        wend
+
+        #onSelectionChange()
+
+    methodend
+
+    rem /**
+    rem * Method canSelectionChange:
+    rem * called before selection changed, returns true if selection can be changed
+    rem * @param BBjNumber force: selection must change after this call
+    rem * @return BBjNumber canChange: true if selection can be changed
+    rem */
+    method public BBjNumber canSelectionChange(BBjNumber force)
+
+        methodret #this!.canSelectionChange(force, null())
+
+    methodend
+
+    rem /**
+    rem * Method canSelectionChange:
+    rem * called before selection changed, returns true if selection can be changed
+    rem * @param UIComponentn sender!: the sender uic connected to this bc
+    rem * @param BBjNumber force: selection must change after this call
+    rem * @return BBjNumber canChange: true if selection can be changed
+    rem */
+    method public BBjNumber canSelectionChange(BBjNumber force,UIComponent sender!)
+
+        canChange=1
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+
+                if ui! = sender! then continue
+                canChange = canChange and ui!.canSelectionChange(force)
+
+                if !force and !canChange then
+                    break
+                fi
+
+            next
+
+        fi
+
+        if !force and !canChange then
+
+            methodret 0
+
+        fi
+
+        ks!=#Controller!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            k$=it!.next()
+            clist! = #Controller!.get(k$)
+            vlist! = #ControllerVars!.get(k$)
+
+            v!=new BBjVector()
+
+            if #Selection!.size() then
+
+                for i= 0 to #Selection!.size()-1
+                    k = #Selection!.getItem(i)
+                    rec! = #ResultSet!.getItem(k)
+                    f$=rec!.getFieldAsString(k$)
+                    v!.addItem(f$)
+                next
+
+            fi
+
+            if clist!.size() then
+
+                for i=0 to clist!.size()-1
+
+                    c! = clist!.getItem(i)
+                    v$ = vlist!.getItem(i)
+                    canChange = canChange AND c!.canDrive(v$,v!,force)
+
+                    if !force and !canChange then
+
+                        methodret 0
+
+                    fi
+
+                next
+
+            fi
+
+        wend
+
+
+
+        methodret canChange
+
+
+    methodend
+
+    rem /**
+    rem * Method onSelectionChange:
+    rem * called after the selection changed, to notify UI components and UI Controller
+    rem */
+    method public void onSelectionChange()
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.onSelectionChange()
+            next
+
+        fi
+
+        ks!=#Controller!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            k$=it!.next()
+            clist! = #Controller!.get(k$)
+            vlist! = #ControllerVars!.get(k$)
+
+            v!=new BBjVector()
+
+            if #Selection!.size() then
+
+                for i= 0 to #Selection!.size()-1
+                    k = #Selection!.getItem(i)
+                    rec! = #ResultSet!.getItem(k)
+                    f$=rec!.getFieldAsString(k$)
+                    if f$="null" then
+                        v!.addItem(null())
+                    else
+                        v!.addItem(f$)
+                    fi
+                    rem TODO: deal correctly with null() and numeric fields
+                   
+                next
+
+            fi
+
+            if clist!.size() then
+
+                for i=0 to clist!.size()-1
+
+                    c! = clist!.getItem(i)
+                    v$ = vlist!.getItem(i)
+                    c!.drive(v$,v!)
+
+                next
+
+            fi
+
+        wend
+
+    methodend
+
+
+    rem /**
+    rem * Method registerController:
+    rem * register a UIController that wants to get notified on changes of the selection
+    rem * @param UIController uc!: the controller object
+    rem * @param BBjString var$: the variable for which changes of selection should be be reported
+    rem * @param BBjString fieldname$: the field in the resultset that is reported through the variable
+    rem * @param BBjNumber fDriveWithFullResult: when true, the result set instead of the selection is reported
+    rem */
+    method public void registerController(UIController uc!, BBjString var$, BBjString fieldname$)
+
+        #registerController(uc!, var$, fieldname$, 0)
+
+    methodend
+
+
+
+    rem /**
+    rem * Method registerController:
+    rem * register a UIController that wants to get notified on changes of the selection
+    rem * @param UIController uc!: the controller object
+    rem * @param BBjString var$: the variable for which changes of selection should be be reported
+    rem * @param BBjString fieldname$: the field in the resultset that is reported through the variable
+    rem * @param BBjNumber fDriveWithFullResult: when true, the result set instead of the selection is reported
+    rem */
+    method public void registerController(UIController uc!, BBjString var$, BBjString fieldname$, BBjNumber fDriveWithFullResult)
+
+
+        if fDriveWithFullResult then
+
+            v! = #FullResultsetController!.get(fieldname$)
+            v1!= #FullResultsetControllerVars!.get(fieldname$)
+
+            if v!=null() then
+                v! = new BBjVector()
+                #FullResultsetController!.put(fieldname$,v!)
+
+                v1! = new BBjVector()
+                #FullResultsetControllerVars!.put(fieldname$,v1!)
+            fi
+
+            v!.addItem(uc!)
+            v1!.addItem(var$)
+
+        else
+
+            v! = #Controller!.get(fieldname$)
+            v1!= #ControllerVars!.get(fieldname$)
+
+            if v!=null() then
+                v! = new BBjVector()
+                #Controller!.put(fieldname$,v!)
+
+                v1! = new BBjVector()
+                #ControllerVars!.put(fieldname$,v1!)
+            fi
+
+            v!.addItem(uc!)
+            v1!.addItem(var$)
+
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method drive:
+    rem * called by the controller when a change of the selection occured (from outside)
+    rem * @param BBjString var$: the variable that changed
+    rem * @param BBjVector selection!: the new selection
+    rem */
+    method public void drive(BBjString var$, BBjVector selection!)
+
+        #ControllerFilter!.put(var$,selection!)
+
+    methodend
+
+    rem /**
+    rem * Method drive:
+    rem * called by the controller when a change of the selection occured (from outside)
+    rem * @param BBjString var$: the variable that changed
+    rem * @param BBjString selection$: the new selection (one item only)
+    rem */
+    method public void drive(BBjString var$, BBjString selection$)
+
+        v! = new BBjVector()
+        v!.addItem(selection$)
+        #ControllerFilter!.put(var$,v!)
+        
+        #prepareResultSet(0,0)
+        if #getResultSet().size()>0 then
+            v! = new BBjVector()
+            v!.addItem(0)
+            #setSelection(v!)
+        fi        
+
+    methodend
+
+    rem /**
+    rem * Method resetdrive:
+    rem * called by the controller when a change of the selection occured (from outside)
+    rem * @param BBjString var$: the variable that changed
+    rem */
+    method public void resetdrive(BBjString var$)
+
+        #ControllerFilter!.remove(var$)
+
+    methodend
+
+
+    method public java.util.HashMap getControllerFilter()
+
+        methodret #ControllerFilter!
+
+    methodend
+
+    rem /**
+    rem * Method canDrive:
+    rem * called by the controller before a change of the selection occurs (from outside)
+    rem * check if unsaved data needs saving
+
+    rem * @param BBjString var$: the variable that changed
+    rem * @param BBjVector selection!: the new selection
+    rem * @param BBjNumber force: notify the other components of a mandatory selection change with no option to veto
+    rem * @return BBjNumber canDrive: 0=change of selection denied, 1=change of selection allowed
+    rem */
+    method public BBjNumber canDrive (BBjString var$, BBjVector selection!, BBjNumber force)
+
+        methodret #this!.canSelectionChange(force)
+
+    methodend
+
+    rem /**
+    rem * Method setControllerFilterUnlock:
+    rem * called to (temporarily) unlock the business component from the UIController driver
+    rem * @param BBjString field$: the field to be unlocked
+    rem * @param BBjNumber f_unlock: 1=unlock, 0=lock
+
+    rem */
+    method public void setControllerFilterUnlock(BBjString field$, BBjNumber f_unlock)
+
+        if f_unlock then
+            #ControllerFilterUnlock!.put(field$,1)
+        else
+            #ControllerFilterUnlock!.remove(field$)
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method getSelection:
+    rem * return the current selection
+    rem * @return BBjVector selection!: vector holding the index values of the currently selected rows
+    rem */
+    method public BBjVector getSelection()
+
+        methodret #Selection!
+
+    methodend
+
+
+    method public void clearValidationErrors()
+
+        #ValidationErrors!.clear()
+
+    methodend
+
+    method public void clearValidationError(BBjString fieldName$)
+
+        #FieldValidationErrors!.remove(fieldName$)
+
+    methodend
+
+    method public void clearFieldValidationErrors()
+
+        #FieldValidationErrors!.clear()
+
+    methodend
+
+    method public void addValidationError(ValidationError v_err!)
+
+        #ValidationErrors!.addItem(v_err!)
+
+    methodend
+
+    method public void addValidationError(BBjString fieldName$,ValidationError v_err!)
+
+        #FieldValidationErrors!.put(fieldName$,v_err!)
+
+    methodend
+
+    method public BBjVector getValidationErrors()
+
+        v! = #ValidationErrors!.clone()
+        ks! = #FieldValidationErrors!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            v_err! = #FieldValidationErrors!.get(it!.next())
+            v!.addItem(v_err!)
+        wend
+
+        methodret v!
+
+
+    methodend
+
+    method public BBjNumber getFieldValidationErrorLevel()
+
+        declare auto ValidationError v_err!
+        ks! = #FieldValidationErrors!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            v_err! = #FieldValidationErrors!.get(it!.next())
+            level=max(level,v_err!.getLevel())
+        wend
+
+        methodret level
+
+    methodend
+
+    method public BBjString getValidationErrorMessage()
+
+        declare auto ValidationError v_err!
+
+        if #ValidationErrors!.size() then
+
+            for i=0 to #ValidationErrors!.size() -1
+                v_err! = #ValidationErrors!.getItem(i)
+                msg$ = msg$+v_err!.getMessage()+" "+v_err!.getFieldList().toString()+$0a$
+            next
+
+        fi
+
+        ks! = #FieldValidationErrors!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            v_err! = #FieldValidationErrors!.get(it!.next())
+            msg$ = msg$+v_err!.getMessage()+" "+v_err!.getFieldList().toString()+$0a$
+        wend
+
+
+        methodret msg$
+
+    methodend
+
+
+    rem ************************methods to be overridden in impolementation of BusinessComponent **********
+
+
+    rem /**
+    rem * Method hasSetColumnAttributes:
+    rem * reports if the column attributes need to be freshly set
+    rem * used in the overrideen getColumnAttributes method to see if you can use the cache or set newly
+    rem * @return BBjNumber isSet: 1 if column attributes are already set
+    rem */
+    method protected BBjNumber hasSetColumnAttributes()
+
+        methodret #ColumnAttributes!<>null()
+
+    methodend
+
+
+    rem /**
+    rem * Method getColumnAttributes:
+    rem * return a data row holding all column-specific attributes
+    rem * override to enrich data by formatting rules
+    rem * in derived class, always call attr! = #super!.getColumnAttributes() first
+    rem * @return DataRow attributes!: DataRow holding the column-specific attributes
+    rem */
+    method public DataRow getColumnAttributes()
+
+
+        if #ColumnAttributes! = null() then
+            r!=#getResultSet()
+
+            if r! = null() then throw "No Resultset",12
+
+            if r!.size() = 0 then throw "Empty Resultset",12
+
+            declare auto DataRow rec1!
+            rec1!   = r!.getItem(0)
+            fields! = rec1!.getFieldNames()
+
+            #ColumnAttributes! = new DataRow()
+
+            if fields!.size()>0 then
+
+                for i=0 to fields!.size()-1
+                    f$=fields!.getItem(i)
+                    #ColumnAttributes!.setFieldValue(f$,"")
+                next
+
+            fi
+
+        fi
+
+        methodret #ColumnAttributes!
+
+    methodend
+
+    rem /**
+    rem * Method processRecord:
+    rem * override to enrich each record by formatting rules
+    rem * in derived class, always call #super!.processRecord(row!) first
+    rem * @param DataRow attributes!: record passed into method
+    rem * @return DataRow attributes!: record with added formatting and calculated fields
+    rem */
+    method protected DataRow processRecord(DataRow row!)
+
+        methodret row!
+
+    methodend
+
+
+    rem /**
+    rem * Method size:
+    rem * override to return the total size of the resultset
+    rem * @return BBjNumber size: the number of records in the result set
+    rem */
+    method public BBjNumber size()
+
+
+    methodend
+
+    rem /**
+    rem * Method getDistinctValues:
+    rem * override to return distinct values in a given column of the resultset
+    rem * these values are mainly used for filterin purpose
+    rem * @param BBjString fieldName$: the column name for which the distinct values are requested
+    rem * @return java.util.TreeMap distinct!: the distinct values
+    rem */
+    method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
+
+
+    methodend
+
+
+
+    rem editing methods
+
+    rem /**
+    rem * Method canDeleteSelectedRecords:
+    rem * override to tell UI if delete of the currently selected records is allowed
+    rem * @return BBjNumber canDelete: 0=delete not allowed, 1=delete is allowed
+    rem */
+    method public BBjNumber canDeleteSelectedRecord()
+
+        methodret 1
+
+    methodend
+
+    rem /**
+    rem * Method deleteSelectedRecords:
+    rem * override to delete the currently selected records
+    rem */
+    method public void deleteSelectedRecords()
+
+
+    methodend
+
+    rem /**
+    rem * Method setEditedRecord
+    rem * set the record number in the resultset of the record that is currently being edited
+    rem * @param BBjNumber recno: the record number being edited
+    rem */
+    method public void setEditedRecord(BBjNumber recno)
+
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.setEditing(recno>-1 OR recno = -2)
+            next
+
+        fi
+
+        #EditingRecNo = recno
+
+    methodend
+
+    rem /**
+    rem * Method broadcastSaveRecord
+    rem * broadcast the message that the user wants to save the edited data
+    rem */
+    method public void broadcastSaveRecord()
+
+        fail=0
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                fail=fail+ui!.saveRecord()
+            next
+
+        fi
+
+        if fail=0 then
+            #setEditedRecord(-1)
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method broadcastNewRecord
+    rem * broadcast the message that the user wants to save the edited data
+    rem */
+    method public void broadcastNewRecord()
+
+        #this!.deselectAll()
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.newRecord()
+            next
+
+        fi
+
+        #setEditedRecord(-2)
+
+    methodend
+
+
+    rem /**
+    rem * Method broadcastPartialUpdate
+    rem * broadcast the message that a record has changed
+    rem * @param BBjNumber recno: the record number that changed
+    rem */
+    method public void broadcastPartialUpdate(BBjNumber recno)
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.onPartialUpdate(recno)
+            next
+
+        fi
+
+    methodend
+
+    rem /**
+    rem * Method broadcastSoftlockStatusChange
+    rem * broadcast the message that a softlock status has changed
+    rem * @param BBjNumber recno: the record number that changed the status
+    rem * @param BBjNumber isLocked: 1=record has been locked, 0=record has been unlocked
+    rem */
+    method public void broadcastSoftlockStatusChange(BBjNumber recno, BBjNumber isLocked)
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.onSoftlockStatusChange(recno, isLocked)
+            next
+
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method saveRecord
+    rem * saves a record within the result set
+    rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
+    rem * @param java.util.HashMap fields!: the fields
+    rem */
+    method public void saveRecord(BBjNumber recno, java.util.HashMap fields!)
+
+
+
+    methodend
+
+
+    rem /**
+    rem * Method restoreEditedField
+    rem * broadcast the message that the user wants to restore the field currently focused / being edited
+    rem */
+    method public void restoreEditedField()
+
+        if #UIList!.size() then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.restoreEditedField()
+            next
+
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method getEditingRecNo
+    rem * retrieve the record number within the result set currently being edited
+    rem * @return BBjNumber recno: -1 = no editing operation pending, >=0: the record number in the resultset
+    method public BBjNumber getEditingRecNo()
+
+
+        methodret #EditingRecNo
+
+
+    methodend
+
+    rem /**
+    rem * Method isLocked
+    rem * check if a record number is locked
+    rem * @param BBjNumber recno: the record number to test
+    rem */
+    method public BBjNumber isLocked(BBjNumber recno)
+
+
+        methodret 0
+
+
+    methodend
+
+    rem /**
+    rem * Method broadcastEdit:
+    rem * called by UI to notify the BC about an ongoing edit
+    rem * the BC will then draw responsible to notify the softlock controller
+    rem * @param BBjString fieldName$: the field name that just was edited
+    rem * @param BBjSting newContents$: the new Contents of the field
+    rem */
+    method public void broadcastEdit(BBjString fieldName$, BBjString newContent$)
+
+        #broadcastEdit(#EditingRecNo, fieldName$, newContent$)
+
+    methodend
+
+    rem /**
+    rem * Method broadcastEdit:
+    rem * called by UI to notify the BC about an ongoing edit
+    rem * the BC will then draw responsible to notify the softlock controller
+    rem * @param BBjNumber recno: the record number in the resultset that was remotely edited
+    rem * @param BBjString fieldName$: the field name that just was edited
+    rem * @param BBjSting newContents$: the new Contents of the field
+    rem */
+    method public void broadcastEdit(BBjNumber recno, BBjString fieldName$, BBjString newContent$)
+
+        if #UIList!.size() and recno >-1 then
+
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.onBroadcastEdit(recno, fieldName$, newContent$)
+            next
+
+        fi
+
+    methodend
+
+
+    method public java.util.HashMap beforeUpdateRecord(java.util.HashMap fields!)
+
+        methodret fields!
+
+    methodend
+
+    method public java.util.HashMap beforeInsertRecord(java.util.HashMap fields!)
+
+        methodret fields!
+
+    methodend
+
+
+    method public void setForeignKeyPointer(BBjString fieldname$, BusinessComponent bc!, BBjString fkfield$)
+
+        #ForeignKeyPointerBcList!           .put(fieldname$,bc!)
+        #ForeignKeyPointerKeyFieldList!     .put(fieldname$,fkfield$)
+
+        guid$ = java.util.UUID.randomUUID().toString()
+        #ForeignKeyPointerController!.registerDriver(#this!,guid$,fieldname$)
+        #ForeignKeyPointerController!.registerTarget(bc!,guid$,fkfield$)
+
+    methodend
+
+    method public BusinessComponent getForeignKeyBC(BBjString fieldname$)
+
+        methodret cast(BusinessComponent,#ForeignKeyPointerBcList!.get(fieldname$))
+
+    methodend
+
+    method public BBjString getForeignKeyFkField(BBjString fieldname$)
+
+        methodret cast(BBjString,#ForeignKeyPointerKeyFieldList!.get(fieldname$))
+
+    methodend
+
+
+
+    rem ----------------------callpoint stubs--------------------------------
+
+    rem /**
+    rem * Method onBeforeInsert:
+    rem * called immediately before a row will be inserted
+    rem * @param DataRow row!: the row to be inserted
+    rem * @return DataRow row!: the row after preparation; null() to abort
+    rem */
+    method protected DataRow onBeforeInsert(DataRow row!)
+
+        methodret row!
+
+    methodend
+
+    rem /**
+    rem * Method onBeforeUpdate:
+    rem * called immediately before a row will be inserted
+    rem * @param DataRow row!: the row to be inserted
+    rem * @param DataRow orig_row!: the original row from the resultset
+    rem * @return DataRow row!: the row after preparation; null() to abort
+    rem */
+    method protected DataRow onBeforeUpdate(DataRow row!, DataRow orig_row!)
+
+        methodret row!
+
+    methodend
+
+    rem /**
+    rem * Method validateField:
+    rem * override this method for validating a record before it's written
+    rem * @param BBjString fieldName$: the field name
+    rem * @param BBjString fieldValue$: the field value to be validated
+    rem * @param DataRow origRow!: the original row from the resultset; if null() the record is new
+    rem * @param java.util.HashMap otherEdits: other edits that are currently unsaved
+    rem * @return BBjNumber fail: 0=passed, 1=errors were reported
+    rem */
+    method public BBjNumber validateField(BBjString fieldName$, BBjString fieldValue$, DataRow origRow!, java.util.HashMap otherEdits!)
+
+        methodret 0
+
+    methodend
+
+    rem /**
+    rem * Method validateRecord:
+    rem * override this method for validating a record before it's written
+    rem * @param DataRow row!: the row to be inserted
+    rem * @param DataRow orig_row!: the original row from the resultset; if null() the record is new
+    rem * @return BBjNumber passed: 0= no errors, 1=errors were reported
+    rem */
+    method protected BBjNumber validateRecord(DataRow row!, DataRow orig_row!)
+
+        methodret 0
+
+    methodend
+
+
+    rem /**
+    rem * Method validateRecord
+    rem * saves a record within the result set
+    rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
+    rem * @param java.util.HashMap fields!: the fields
+    rem * @return BBjNumber passed: 0= no errors, 1=errors were reported
+    rem */
+    method public BBjNumber validateRecord(BBjNumber recno, java.util.HashMap fields!)
+
+        methodret 0
+
+    methodend
+
+
+    method public BBjVector getPrimaryKeySegments()
+
+ 
+    methodend
+
+classend
+
+
+
+
+
+
+
+
+

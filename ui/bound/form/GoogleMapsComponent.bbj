@@ -1,0 +1,690 @@
+use ::components/ui/unbound/WebBrowserComponent.bbj::WebBrowserComponent
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/ui/bound/UIComponent.bbj::UIComponent
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+
+use ::components/i18n/i18n.bbj::i18n
+use ::translations/bbtranslator.bbj::BBTranslator
+
+class public GoogleMapsComponent extends UIComponent implements UIWidget
+
+    field public static BBjString ApiKey$ ="ABQIAAAAap0HEV-ixXMRUaYIBuBfmRT77L4N76s2HcFsGSkrxDTwKN97jRQmWLW6hTKLmlPz92AuJhUvgis35Q"
+
+    field private WebBrowserComponent BrowserWidget!
+    field private BBjProgressBar      ProgressBar!
+
+    field private static BBjString MarkerTemplate$="LAT:N(10),LONG:N(10),CAPTION:C(10*)"
+
+    field private BBjString FileName$
+    field private BBjString Url$
+
+    field private BBjNumber RefreshPostponed = 0
+
+    field private DataRow  Attributes!
+
+    field private BBjNumber     ShowToolbar
+    field private BBjToolButton TbShowAllOrSelected!
+    field private BBjToolButton TbExternalBrowser!
+
+
+    field protected BBjString           GeoCountry$
+    field protected BBjString           GeoState$
+    field protected BBjString           GeoTown$
+    field protected BBjString           GeoZip$
+    field protected BBjString           GeoStreet$
+    field protected BBjString           GeoDisp_1$
+    field protected BBjString           GeoDisp_2$
+    field protected BBjString           GeoDisp_3$
+
+
+    field private BBjVector Markers!
+    field private BBjTemplatedString Center!
+    field private BBjNumber CircleRadius
+
+    field private static BBTranslator  Translator! = i18n.getTranslator()
+
+    method public GoogleMapsComponent (BBjChildWindow cw!)
+
+        #super!(cw!)
+        #initialize()
+
+    methodend
+
+    method public GoogleMapsComponent (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        #super!(wnd!,id,x,y,w,h)
+        #initialize()
+
+    methodend
+
+    method private void initialize()
+
+
+        #BrowserWidget! = new WebBrowserComponent(#super!.getWnd(),101,10,40,#getW()-20,#getH()-50)
+
+        port$ = java.lang.System.getProperty("com.basis.jetty.port")
+        host$ = java.lang.System.getProperty("com.basis.jetty.host")
+        d$    = java.lang.System.getProperty("com.basis.server.configDirectory")
+        d$=d$(1,pos("cfg"=d$)-1)
+
+        mkdir d$+"htdocs/deliver",err=*next
+
+        #FileName$=str(dec(info(3,0)))+"_"+date(0:"%Dz.%Mz.%Yl.%Hz%mz%Sz")+"_maps.html"
+        #Url$ = "http://"+host$+":"+port$+"/files/deliver/"+#FileName$
+        #FileName$=d$+"htdocs/deliver/"+#FileName$
+
+        ch=unt
+        open (ch,mode="O_CREATE,O_TRUNC")#FileName$
+        write (ch)"<html><body>...</body></html>"
+        close (ch)
+
+        #BrowserWidget!.navigate(#Url$)
+
+        #ProgressBar! = #super!.getWnd().addProgressBar(102,int(#getW()/4*3),10,int(#getW()/4),20)
+        #ProgressBar!.setVisible(0)
+
+    methodend
+
+    method public void setSize(BBjNumber w, BBjNumber h)
+
+        #super!.setSize(w,h)
+
+        #BrowserWidget!.setSize(w-20,h-50)
+        #ProgressBar!.setLocation(int(w/4*3),10)
+        #ProgressBar!.setSize(int(w/4),20)
+
+    methodend
+
+    method public void setVisible(BBjNumber v)
+
+        #super!.setVisible(v)
+
+        if #RefreshPostponed then
+            #onSelectionChange()
+        fi
+
+    methodend
+
+    method public void setBC(BusinessComponent bc!)
+
+        #super!.setBC(bc!)
+
+        if #TbShowAllOrSelected! <> null() then
+            #TbShowAllOrSelected!.setEnabled(0)
+        fi
+
+    methodend
+
+    method public void setShowToolbar(BBjNumber fShow)
+
+        #ShowToolbar = fshow
+
+        if #TbShowAllOrSelected!<> null() then
+            #TbShowAllOrSelected!.destroy()
+
+        fi
+
+        if #TbExternalBrowser!<> null() then
+            #TbExternalBrowser!.destroy()
+        fi
+
+        if fshow then
+
+            offs=0
+
+            #TbShowAllOrSelected! = #super!.getWnd().addToolButton(500,offs,1,22,22,"")
+            imgTbShowAllOrSelected! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001284944415478DA6360A006F0F7F7FF3F7BF6ECFFD3A74FC7C02071903C5E032C2C2CFE575656E2C42079BC06484848FC278489F6CE8CB98B92D317EEF94F2C460D839933FFCF9CB7F07FCC8C3DFF41E0321E3CF7E65FB03A7818D4D4D4FE9F366BEEFF4B37EEFCF7EDDEF2FF085051E9E63B3871DF99AF60756003A4A5A5FF57D635FD3F78F2FCFF37DFFEFDB7AE59FD7FD3E7FFFF93975CC6896BF6BE01AB031BD03763DECC8DFB8EFFBFFFE13718AB672FFC9FB1E611410C520736A0B267C6FFFD77DEFF3F70F7031833FBF6118DC106449575FD3FF1FAE7FF15573E61C57DBB6EFEDF7AE9F9FC892B77AE2E699BB623A9B8766552615D7252618312D800FDD092FF84B05B485CB74B707C987B688C0A03D5C180E7055122F38216102B82920D108B00311B48330095F1A5767E809A9C0000000049454E44AE426082$)
+            #TbShowAllOrSelected!.setImage(imgTbShowAllOrSelected!)
+            #TbShowAllOrSelected!.setToolTipText(#Translator!.getTranslation("SHOW_ONLY_SELECTED"))
+            #TbShowAllOrSelected!.setNoEdge(0)
+            #TbShowAllOrSelected!.setTabTraversable(0)
+            #TbShowAllOrSelected!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onTbShowAllOrSelected")
+            #TbShowAllOrSelected!.setToggleable(1)
+            #TbShowAllOrSelected!.setSelected(1)
+
+            if #getBC() = null() then
+                #TbShowAllOrSelected!.setEnabled(0)
+            fi
+
+            #TbShowAllOrSelected!.setOpaque(0)
+            offs=offs+27
+
+            #TbExternalBrowser! = #super!.getWnd().addToolButton(501,offs,1,22,22,"")
+            imgExternalBrowser! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF610000032A4944415478DAB5936B4C937714C6BBF861CB24E265554274F3421C2424338C99392EF2019CC325236857B15061A41BA8B4C01819376FE55264232DA568B1A3156495B7F5853A48608E0D5C402A4E3A262C2E644BBC04C4902D9A7809EACF97BA1917CDBEED24E7D33FCFEF9C3CE7F9CB64FF47C557085B3655B81B12F42EEFC603C2BDE852A7F7ADA2968675058E2DFF298CA914E49BAB44B1D0ED65ECDA5FDCBA3BCB0340B8304291A39624C3D784EB1C62484E93FC1971DC3E2124B1BA7DAAE7E2551E3CC45F6E5F0BC70753117DDB39712E99DA8E68D26BB5BCBEDB36B932DD12F444AC5008F3E2F5AEF36727A6710C14F1FD953C8666F6E2194FC1D6FF0EF53D111CEDDBC0A1F6502A84356435EC60B5A6517C02882A73EE28691FF64F750CE5E2B9A4A165E41BCA4F75915AB91EDDE1972877AFC0D81D46B56735E6D3E124EAAB08565B947E407499B373F4CA9F7EC06DA987AFDFC6E29DC2747612F517057CD66A4755F91A45CD0B317D1B8AF5CC3A4ADB5404EF6CE8F403DE2E6E9D9E33AC793883B6D15894FB5F20D7DE8C79F01A9B740168EAB514775C4469C825DBFCB204598BB93796656ACBA41F1059789CFB9273DE5B695CB89949EBC806B4D6202ABBC7C939BA8BAD6532123E7D8FEC63E748B5F4A06B5C2E01C2599A567FCF0F7823FFD8F4C49D596ABAC2691A8AC03D1E87E58730F6342A2814CE906D73A1329E406DEE25B1E64792F407D96591F38ACAFC7883B01C7BA7EDFC0D2A4E76A32C8FE0A02B08DB400406CFAB649964C4EC8E22D53A4CF2915F48B25EC2D0F53B1BB5E92C4EA97BEC4148962DED839A1EEA7A2F93D9F413EF16C4F3B97D31B55DA1E45B0388D9A342D33A41FEE959CABD523E7E83F5792D046E372AFF0E82306F95A67144F1E577E83BC6C990568DD9B980ACEA45C4A6BFC8FBFB5C7C7C7206E3188C4A57CA75FFC1C20F4DE2BF92B83CD312B2E2A323939BF5D2FDC5315425469646CA78535D4CA2A19FAF7E86813B0FC9137F9556374FCD573C95C47F2A28A34E2E9D468C2C709251DFCFDE361F254E1F998707F9C4EE23AAD443A034394051277FDE5F0A967ACD9CA70B12B4BA25DB0EF52D4931CD48D358A434CE042657F5CD8FD3EAE6DE9F6AD923243DE385D6DB69500000000049454E44AE426082$)
+            #TbExternalBrowser!.setImage(imgExternalBrowser!)
+            #TbExternalBrowser!.setToolTipText(#Translator!.getTranslation("SHOW_IN_BROWSER"))
+            #TbExternalBrowser!.setNoEdge(0)
+            #TbExternalBrowser!.setTabTraversable(0)
+            #TbExternalBrowser!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onTbExternalBrowser")
+            #TbExternalBrowser!.setToggleable(0)
+            #TbExternalBrowser!.setEnabled(1)
+            #TbExternalBrowser!.setOpaque(0)
+            offs=offs+27
+        fi
+
+    methodend
+
+    method public void onTbShowAllOrSelected(BBjToolButtonPushEvent ev!)
+
+        #displayData()
+
+    methodend
+
+    method public void onTbExternalBrowser(BBjToolButtonPushEvent ev!)
+
+        if #BrowserWidget!.isFullBrowser() = 0 then
+
+            HTML$=#getDynamicHtml()
+            ch=unt
+            open (ch,mode="O_CREATE,O_TRUNC")#FileName$
+            write (ch)HTML$
+            close (ch)
+
+        fi
+
+        BBjAPI().getThinClient().browse(#Url$)
+
+    methodend
+
+    method public void refresh( BBjNumber resetFilter)
+
+        #displayData()
+
+    methodend
+
+
+
+    method public void onSelectionChange()
+
+        if #TbShowAllOrSelected! <> null() and #TbShowAllOrSelected!.isSelected() then
+            #displayData()
+        fi
+
+    methodend
+
+    method private BBjTemplatedString getMarkerForDataRow(DataRow r!)
+
+
+        geostreet$  = r!.getFieldAsString(#GeoStreet$,err=*next)
+        geozip$     = r!.getFieldAsString(#GeoZip$,err=*next)
+        geotown$    = r!.getFieldAsString(#GeoTown$,err=*next)
+        geostate$   = r!.getFieldAsString(#GeoState$,err=*next)
+        getcountry$ = r!.getFieldAsString(#GeoCountry$,err=*next)
+
+
+        latlong! = #getLatLong(geostreet$, geozip$, geotown$, geostate$, getcountry$,err=*next)
+
+        if latlong! <> null() then
+
+            declare BBjTemplatedString marker!
+            marker! = BBjAPI().makeTemplatedString(#MarkerTemplate$)
+            marker!.setFieldValue("LAT",latlong!.getFieldAsNumber("LAT"))
+            marker!.setFieldValue("LONG",latlong!.getFieldAsNumber("LONG"))
+
+            disp1$=""
+            disp2$=""
+            disp3$=""
+
+            disp1$ = r!.getFieldAsString(disp_1$,err=*next)
+            disp2$ = r!.getFieldAsString(disp_2$,err=*next)
+            disp3$ = r!.getFieldAsString(disp_3$,err=*next)
+
+            marker!.setFieldValue("CAPTION",disp1$+"\n"+disp2$+"\n"+disp3$)
+
+        else
+
+            rem a=msgbox(#Translator!.getTranslation("COULD_NOT_FIND")+" "+geostreet$+","+ geozip$+","+ geotown$+","+ geostate$+","+ getcountry$)
+
+        fi
+
+        methodret marker!
+
+    methodend
+
+    method public void displayData()
+
+        if #super!.isVisible() then
+
+            #ProgressBar!.setValue(0)
+            #ProgressBar!.setVisible(1)
+
+            #Attributes! = null()
+            #Attributes! = cast(DataRow,#getBC().getColumnAttributes(err=*next))
+
+            if #Attributes! = null() then
+                #updateMap(new BBjVector(),cast(BBjTemplatedString,null()))
+                #BrowserWidget!.refresh()
+                #RefreshPostponed = 0
+
+                methodret
+
+            endif
+
+            a! =  #Attributes!.getAttributeForFields("GEO")
+            n! =  #Attributes!.getFieldNames()
+
+            for i=0 to a!.size()-1
+
+                if a!.getItem(i)="" then continue
+
+                if a!.getItem(i)="COUNTRY" then
+                    #GeoCountry$=str(n!.getItem(i))
+                fi
+
+                if a!.getItem(i)="STATE" then
+                    #GeoState$=str(n!.getItem(i))
+                fi
+
+                if a!.getItem(i)="TOWN" then
+                    #GeoTown$=str(n!.getItem(i))
+                fi
+
+                if a!.getItem(i)="ZIP" then
+                    #GeoZip$=str(n!.getItem(i))
+                fi
+
+                if a!.getItem(i)="STREET" then
+                    #GeoStreet$=str(n!.getItem(i))
+                fi
+
+                if a!.getItem(i)="DISP_1" then
+                    #GeoDisp_1$=str(n!.getItem(i))
+                fi
+
+                if a!.getItem(i)="DISP_2" then
+                    #GeoDisp_2$=str(n!.getItem(i))
+                fi
+
+                if a!.getItem(i)="DISP_3" then
+                    #GeoDisp_3$=str(n!.getItem(i))
+                fi
+
+            next
+
+            markers! = new BBjVector()
+
+            #ProgressBar!.setMinimum(0)
+
+            if #TbShowAllOrSelected!.isSelected() then
+
+                if #getBC().getSelection().size() then
+                    #ProgressBar!.setMaximum(#getBC().getSelection().size()-1)
+
+                    for i=0 to #getBC().getSelection().size()-1
+                        #ProgressBar!.setValue(i)
+                        declare DataRow r!
+                        sel=#getBC().getSelection().getItem(i)
+                        r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+
+                        marker! =  #getMarkerForDataRow(r!)
+
+                        if marker! <> null() then
+                            markers!.addItem(marker!)
+                        fi
+
+                    next
+
+                fi
+
+            else
+                s=#getBC().getResultSet().size()
+
+                if s then
+                    #ProgressBar!.setMaximum(s-1)
+
+                    for i=0 to s-1
+                        #ProgressBar!.setValue(i)
+
+                        declare DataRow r!
+                        r! = cast(DataRow,#getBC().getResultSet().getItem(i))
+
+                        marker! = #getMarkerForDataRow(r!)
+
+                        if marker! <> null() then
+                            markers!.addItem(marker!)
+                        fi
+
+                    next
+
+                fi
+
+            fi
+
+            if markers!.size() then
+                #updateMap(markers!,markers!.getItem(0))
+                #BrowserWidget!.refresh()
+            fi
+
+            #ProgressBar!.setVisible(0)
+
+            #RefreshPostponed = 0
+
+        else
+            #RefreshPostponed = 1
+        fi
+
+    methodend
+
+    method public BBjString getMarkerTemplate()
+
+
+        methodret #MarkerTemplate()
+
+
+    methodend
+
+    method public void updateMap(BBjTemplatedString marker!)
+
+        #updateMap(marker!,0)
+
+    methodend
+
+    method public void updateMap(BBjTemplatedString marker!, BBjNumber circleRadius)
+
+        markers! = new BBjVector()
+        markers!.addItem(marker!)
+        #updateMap(markers!,marker!,circleRadius)
+
+    methodend
+
+
+    method public void updateMap(BBjVector markers!, BBjTemplatedString center!)
+
+        #updateMap(markers!,center!,0)
+
+    methodend
+
+    method public void updateMap(BBjVector markers!, BBjTemplatedString center!, BBjNumber circleRadius)
+
+        #Markers! = markers!
+        #Center! = center!
+        #CircleRadius = circleRadius * 1000
+
+
+        if #BrowserWidget!.isFullBrowser() then
+
+            HTML$=#getDynamicHtml()
+
+        else
+
+            HTML$=#getStaticHtml()
+            #BrowserWidget!.refresh(HTML$)
+
+        fi
+
+
+        ch=unt
+        open (ch,mode="O_CREATE,O_TRUNC")#FileName$
+        write (ch)HTML$
+        close (ch)
+
+        wait .5
+        #BrowserWidget!.refresh()
+
+
+    methodend
+
+    method public BBjString getDynamicHtml()
+
+
+        HTML$="        <html>"
+        HTML$=HTML$+"      <head>"
+        HTML$=HTML$+"        <meta name=""viewport"" content=""initial-scale=1.0, user-scalable=no"" />"
+        HTML$=HTML$+"        <style type=""text/css"">"
+        HTML$=HTML$+"          html { height: 100% }"
+        HTML$=HTML$+"          body { height: 100%; margin: 0; padding: 0 }"
+        HTML$=HTML$+"          #map_canvas { height: 100% }"
+        HTML$=HTML$+"        </style>"
+        HTML$=HTML$+"        <script type=""text/javascript"""
+        HTML$=HTML$+"          src=""http://maps.googleapis.com/maps/api/js?sensor=false"">"
+        HTML$=HTML$+"        </script>"
+        HTML$=HTML$+"        <script type=""text/javascript"">"
+        HTML$=HTML$+"          function initialize() {"
+        HTML$=HTML$+"            var myOptions = {"
+        HTML$=HTML$+"              center: new google.maps.LatLng("+#Center!.getFieldAsString("LAT",err=*next)+","+#Center!.getFieldAsString("LONG",err=*next)+"),"
+        HTML$=HTML$+"              zoom: 5,"
+        HTML$=HTML$+"              mapTypeId: google.maps.MapTypeId.ROADMAP"
+        HTML$=HTML$+"            };"
+        HTML$=HTML$+"            var map = new google.maps.Map(document.getElementById(""map_canvas""),"
+        HTML$=HTML$+"                myOptions);"
+
+        if circleRadius>0 then
+            HTML$=HTML$+"     var circle = new google.maps.Circle({strokeColor: ""#FF0000"",strokeOpacity: 0.8,strokeWeight: 2,fillColor: ""#FF0000"",fillOpacity: 0.35,map: map,center: new google.maps.LatLng("+center!.getFieldAsString("LAT")+","+center!.getFieldAsString("LONG")+"), radius: "+str(circleRadius)+"});"
+        fi
+
+        HTML$=HTML$+"            var marker; "
+
+        if #Markers! <> null() and #Markers!.size() > 0 then
+
+            for i=0 to #Markers!.size()-1
+                marker! = #Markers!.getItem(i)
+                caption$ = ""
+                caption$ = #Marker!.getFieldAsString("CAPTION",err=*next)
+                HTML$=HTML$+"                marker = new google.maps.Marker({position: new google.maps.LatLng("+marker!.getFieldAsString("LAT")+","+marker!.getFieldAsString("LONG")+"),title:"""+caption$+"""}); marker.setMap(map); "
+            next
+
+        endif
+
+
+        HTML$=HTML$+"          }"
+        HTML$=HTML$+"        </script>"
+        HTML$=HTML$+"      </head>"
+        HTML$=HTML$+"      <body onload=""initialize()"">"
+        HTML$=HTML$+"        <div id=""map_canvas"" style=""width:100%; height:100%""></div>"
+        HTML$=HTML$+"      </body>"
+        HTML$=HTML$+"    </html>"
+
+        methodret html$
+
+    methodend
+
+    method public BBjString getStaticHtml()
+
+        w=#BrowserWidget!.getWidth()
+        h=#BrowserWidget!.getHeight()
+
+        HTML$="<HTML><BODY>"
+        HTML$=HTML$+"<IMG SRC='"
+        HTML$=HTML$+"http://maps.googleapis.com/maps/api/staticmap?"
+        rem HTML$=HTML$+"center="+cvs(#Center!.getFieldAsString("LAT"),3)+","+cvs(#Center!.getFieldAsString("LONG"),3)
+
+        if #Markers! <> null() and #Markers!.size() > 0 then
+
+            for i=0 to #Markers!.size()-1
+                marker! = #Markers!.getItem(i)
+                caption$ = ""
+                caption$ = marker!.getFieldAsString("CAPTION",err=*next)
+                HTML$=HTML$+"&markers="+cvs(marker!.getFieldAsString("LAT"),3)+","+cvs(marker!.getFieldAsString("LONG"),3)
+            next
+
+        endif
+
+        if #Markers!.size() = 1 then HTML$ = HTML$ + "&zoom=8" endif
+        HTML$=HTML$+"&size="+str(w-10)+"x"+str(h-10)+"&language="+STBL("!LOCALE")+"&sensor=false&key=ABQIAAAAap0HEV-ixXMRUaYIBuBfmRT77L4N76s2HcFsGSkrxDTwKN97jRQmWLW6hTKLmlPz92AuJhUvgis35Q"
+        HTML$=HTML$+"'>"
+        HTML$=HTML$+"      </body>"
+        HTML$=HTML$+"    </html>"
+
+        methodret html$
+
+    methodend
+
+    method public static BBjTemplatedString getLatLong(BBjString Street$, BBjString ZIP$, BBjString City$, BBjString State$, BBjString Country$)
+
+
+        methodret #getLatLong(cvs(Street$,3)+","+cvs(ZIP$,3)+" "+cvs(City$,3)+" "+cvs(State$,3)+" "+cvs(Country$,3))
+
+
+    methodend
+
+    method public static BBjTemplatedString getLatLong(BBjString Address$)
+
+        adr$=java.net.URLEncoder.encode(Address$,"UTF-8")
+        adrHash$ = hta(java.security.MessageDigest.getInstance("MD5").digest(adr$))
+
+
+        rem xkeyed "geo.cache",[0:1:32],0,64
+
+        ch=unt
+        geocache = 0
+        open (ch,err=*next)"geo.cache"; geocache = ch
+
+
+        declare BBjTemplatedString LatLong!
+
+        LatLong! = BBJAPI().makeTemplatedString("LAT:N(10),LONG:N(10)")
+
+        if geocache then
+
+            read (geocache,dom=*endif,key=adrHash$)LatLong$
+            close (geocache)
+            LatLong!.setString(LatLong$(33))
+
+            methodret LatLong!
+
+        fi
+
+        url$="http://maps.google.com/maps/geo?key="+#ApiKey$+"&output=csv&q="
+
+        if #ApiKey$="" then
+            throw "set Google API Key with .setApiKey first",18
+            rem url$="http://maps.google.com/maps/geo?sensor=false&output=csv&q="
+        fi
+
+
+
+
+        url$="http://maps.google.com/maps/geo?key="+#ApiKey$+"&output=csv&q="
+
+        url$=url$+adr$
+
+        wait 1
+
+        url! = new java.net.URL(url$)
+        yc! = url!.openConnection()
+        ir! = new java.io.InputStreamReader(yc!.getInputStream())
+        in! = new java.io.BufferedReader(ir!)
+
+        inputLine! = in!.readLine()
+        in!.close()
+
+
+        temp![] = inputLine!.split(",")
+
+        if num(temp![0]) = 200 then
+            lat$ = temp![2]
+            lng$ = temp![3]
+        else
+            a=msgbox(#Translator!.getTranslation("GOOGLE_RETURNED_ERROR")+" "+temp![0])
+
+            if geocache then
+                close (geocache)
+            fi
+
+            throw "Google returned Error "+temp![0],num(temp![0])
+        fi
+
+        LatLong!.setFieldValue("LAT",lat$)
+        LatLong!.setFieldValue("LONG",lng$)
+
+        if geocache then
+
+            latlong$ = LatLong!.getString()
+            write record (geocache)adrHash$+latlong$
+            close (geocache)
+
+        fi
+
+        methodret LatLong!
+
+    methodend
+
+
+    method public static BBjNumber getDistance(BBjNumber Lat1, BBjNumber Lon1, BBjNumber Lat2, BBjNumber Lon2, BBjNumber useMetric)
+
+
+        rem sources: http://www.movable-type.co.uk/scripts/latlong.html
+        rem          http://stackoverflow.com/questions/120283/working-with-latitude-longitude-values-in-java
+        rem          http://bigdatanerd.wordpress.com/2011/11/03/java-implementation-of-haversine-formula-for-distance-calculation-between-two-points/
+
+
+        prec = tcb(14); rem "save precision
+        floatingpoint
+
+        if useMetric then
+            earthRadius = 6371      ; rem km
+        else
+            earthRadius = 3958.75   ; rem miles
+        fi
+
+        use java.lang
+
+        lat1 = Math.toRadians(lat1)
+        lat2 = Math.toRadians(lat2)
+        lon1 = Math.toRadians(lon1)
+        lon2 = Math.toRadians(lon2)
+        dLat = lat2-lat1
+        dLon = lon2-lon1
+
+        a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2)
+
+        c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+
+        dist = earthRadius * c
+
+        precision prec
+
+        methodret dist
+
+    methodend
+
+
+classend
+
+
+
+prefix "../../../ "+pfx
+
+
+GoogleMapsComponent.setApiKey("ABQIAAAAap0HEV-ixXMRUaYIBuBfmRT77L4N76s2HcFsGSkrxDTwKN97jRQmWLW6hTKLmlPz92AuJhUvgis35Q")
+a1!= GoogleMapsComponent.getLatLong("Feldstr. 25","66127","Saarbrücken","","Deutschland")
+a2!= GoogleMapsComponent.getLatLong("5901 Jefferson Street NE","87109-3432","Albuquerque","NM","USA")
+a3!= GoogleMapsComponent.getLatLong("Treppenstraße 53","66787","Wadgassen","","Deutschland")
+rem print GoogleMapsComponent.getDistance(a1!.getFieldAsNumber("LAT"), a1!.getFieldAsNumber("LONG"), a2!.getFieldAsNumber("LAT") ,a2!.getFieldAsNumber("LONG"),1)
+
+
+v! = new BBjVector()
+v!.addItem(a2!)
+v!.addItem(a3!)
+v!.addItem(a1!)
+
+declare BBjSysGui sg!
+declare BBjTopLevelWindow wnd!
+
+
+sg! = BBjAPI().openSysGui("X0")
+wnd! = sg!.addWindow(10,10,800,600,"")
+wnd!.setCallback(BBjAPI.ON_CLOSE,"byebye")
+
+
+
+BrowserWidget! = new GoogleMapsComponent(wnd!,101,10,10,780,580)
+BrowserWidget!.setShowToolbar(1)
+
+BrowserWidget!.updateMap(v!,a1!,0)
+
+process_events
+
+
+
+
+
+
+
+
+
+
+
+

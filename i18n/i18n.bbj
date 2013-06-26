@@ -1,0 +1,29 @@
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::components/i18n/i18n.bbj::i18n
+
+class public i18n
+
+    field public static BBjString ClientLocale$ = BBjAPI().getThinClient().getClientLocale()
+    field public static BBTranslator Translator!
+
+    method public static BBTranslator getTranslator()
+
+        declare BBTranslator translator!
+
+        if #Translator! = null()  then
+
+            loc$=#ClientLocale$
+            loc$=stbl("!LOCALE",err=*next)
+            loc$=stbl("+USER_LOCALE",err=*next)
+
+            #Translator! = BBTranslator.getInstance("i18n",loc$,"en","components/i18n")
+
+        fi
+
+        methodret #Translator!
+
+    methodend
+
+classend
+
+

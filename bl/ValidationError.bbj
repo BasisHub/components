@@ -1,0 +1,54 @@
+class public ValidationError
+
+    field public BBjNumber Level
+    field public BBjVector FieldList!=new BBjVector()
+    field public String Message!
+
+
+    method public ValidationError(BBjNumber level, String fieldname!, String message!)
+
+        #Level = level
+        #FieldList!.addItem(fieldname!)
+        #Message! = message!
+
+    methodend
+
+
+    method public ValidationError(BBjNumber level, BBjVector fieldnames!, String message!)
+
+        #Level = level
+        #FieldList! = fieldnames!
+        #Message! = message!
+
+    methodend
+
+    method public static BBjNumber ERROR()
+
+        methodret 9
+
+    methodend
+
+    method public static BBjNumber WARN()
+
+        methodret 4
+
+    methodend
+
+    method public static BBjNumber NOTICE()
+
+        methodret 1
+
+    methodend
+
+classend
+
+
+
+
+
+
+
+
+
+
+

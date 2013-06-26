@@ -1,0 +1,24 @@
+interface public UIWidget
+
+    method public void setLocation(BBjNumber x, BBjNumber y)
+
+    method public void setSize(BBjNumber w, BBjNumber h)
+
+    method public BBjNumber getX()
+
+    method public BBjNumber getY()
+
+    method public BBjNumber getWidth()
+
+    method public BBjNumber getHeight()
+
+    method public void setVisible(BBjNumber visible)
+
+    method public BBjNumber isVisible()
+
+interfaceend
+
+
+
+
+

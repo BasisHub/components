@@ -1,0 +1,1110 @@
+rem /**
+rem * DataProvider
+rem *
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+use ::components/db/DataRow.bbj::DataRow
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::admin/admin.bbj::Admin
+use ::admin/admin.bbj::UserCredentials
+
+class public DataProvider
+
+    field private   BBjVector           ResultSet!                 = new BBjVector()
+    field protected BBjString           SQL$
+    field protected BBjString           DataSource$
+    field private   BBjVector           PrimaryKeySegments!        = new BBjVector()
+    field private   BBjString           PrimaryTable$
+
+    field protected BBjString           SortField$
+    field protected BBjNumber           SortAscending
+    field private   java.util.HashMap   QueryFilter!
+    field private   java.util.HashMap   ControllerFilter!           = new java.util.HashMap()
+    field private   java.util.HashMap   ControllerFilterUnlock!     = new java.util.HashMap()
+
+    field private   BBjNumber           Size                        =-1
+    field protected BusinessComponent   BC!
+    field protected java.sql.Connection Connection!
+    field protected java.sql.ResultSet  JDBCResultSet!
+    field protected BBjString           ConnMode$
+    field public    DataRow             EntityClass!                = new DataRow()
+    
+
+    method public void  addPrimaryKeySegment(BBjString fieldName$)
+
+        #PrimaryKeySegments!.addItem(fieldName$)
+
+    methodend
+
+    method public BBjVector getPrimaryKeySegments()
+
+        methodret #PrimaryKeySegments!
+
+    methodend
+
+    method public void setPrimaryTable(BBjString primaryTable$)
+
+        #PrimaryTable$ = primaryTable$
+
+    methodend
+
+    method public void setEntityClass(DataRow dr!)
+
+        #EntityClass! = dr!
+
+    methodend
+
+    method public DataRow getNewEntity()
+
+
+        methodret #getAttributesRecord()
+
+
+    methodend
+
+    method protected BBjString buildSQLStatement()
+
+        methodret #buildSQLStatement(0)
+
+    methodend
+
+    method protected BBjString buildSQLStatement(BBjNumber fIgnoreFilterAndOrder)
+
+        sql$=#getSQL()
+
+
+        if  #QueryFilter! <>null() and fIgnoreFilterAndOrder=0 then
+
+
+            ks!=#QueryFilter!.keySet()
+            it! = ks!.iterator()
+
+            while it!.hasNext()
+                k$=it!.next()
+                f! = #QueryFilter!.get(k$)
+                w1$=""
+
+                if f!.size() > 0 then
+                    for i=0 to f!.size()-1
+
+                        f1$=f!.getItem(i)
+
+                        if pos("%"=f1$)>0 then
+                            eq$=" LIKE "
+                        else
+                            eq$=" = "
+                        fi
+
+                        if w1$>"" then
+                            w1$=w1$+" OR "
+                        fi
+
+                        rem w1$=w1$ + k$ + eq$ + "'"+f1$+"'"
+                        w1$=w1$ + k$+ eq$ + "'"+f1$+"'"
+                        rem search case insensitive?
+                        rem introduce option (set per column, or like Google?)
+                        rem or leave it to the database setup?
+
+                    next
+                fi
+
+                if w1$>"" then
+                    if wh$>"" then
+                        wh$=wh$+" AND "
+                    fi
+
+                    wh$=wh$+"("+w1$+")"
+                fi
+
+            wend
+
+
+        fi
+
+        
+
+        rem if #QueryFilter...
+
+
+        if #ControllerFilter!.size()  then
+
+            
+
+            ks! = #ControllerFilter!.keySet()
+            it! = ks!.iterator()
+
+            while it!.hasNext()
+
+                var$=it!.next()
+
+                if #ControllerFilterUnlock!.get(var$)<> null() then
+                    continue
+                fi
+
+                sel! = #ControllerFilter!.get(var$)
+                
+                if sel! = null() then
+                    print "sel! = null() for var$=",var$
+                    wh$="1=2"
+                    break
+                fi
+
+                if sel!.size()=0 then
+                    print "sel!.size()=0 for var$=",var$
+                    wh$="1=2"
+                    break
+                fi
+
+                w1$=""
+
+                for i=0 to sel!.size()-1
+
+                    f1!=sel!.getItem(i)
+                    
+                    if f1! = null() then
+                        cond$="''"
+                        rem TODO: is that correct for null() ?
+                    else 
+                        cond$="'"+str(f1!)+"'"
+                    fi
+                    
+                    if w1$>"" then
+                        w1$=w1$+" OR "
+                    fi
+
+                    w1$=w1$ + var$+" = "+cond$
+
+                next
+
+                if wh$>"" then
+                    wh$=wh$+" AND "
+                fi
+
+                wh$=wh$+"("+w1$+")"
+
+            wend
+
+        fi
+
+        rem if #ControllerFilter
+
+        if wh$>"" then
+            w=pos("WHERE"=cvs(sql$,4))
+
+            if w>0 then
+                sql$=sql$(1,w+5)+" "+wh$+" AND ("+sql$(w+6)+")"
+            else
+
+                if pos("ORDER BY"=cvs(sql$,4))=0 then
+                    sql$=sql$ + " WHERE "+wh$
+                else
+                    sql$=sql$(1,pos("ORDER BY"=cvs(sql$,4))-1)+" WHERE "+wh$+" "+sql$(pos("ORDER BY"=cvs(sql$,4)))
+                fi
+            fi
+
+        fi
+
+
+        if #SortField$>"" and fIgnoreFilterAndOrder=0 then
+            orderby$=" ORDER BY "+#SortField$
+
+            if #SortAscending=0 then
+                orderby$=orderby$+" DESC"
+            fi
+
+            w=pos("ORDER BY"=cvs(sql$,4))
+
+            if w>0 then
+                sql$=sql$(1,w-1)
+            fi
+
+        fi
+
+        sql$=sql$+orderby$
+
+
+        methodret sql$
+
+    methodend
+
+    method public BBjVector getResultSet()
+
+
+        methodret #ResultSet!
+
+
+    methodend
+
+    method public BBjNumber size()
+
+
+        if #Size = -1 then
+            #openDatabase()
+            sql$=#buildSQLStatement()
+
+            if pos("1=2" =sql$) = 0 then 
+
+            
+
+                sql$="SELECT COUNT(*) AS COUNT FROM ("+sql$+") AS X"
+
+                stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+                #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+
+                print sql$
+
+                if #JDBCResultSet!.next() then
+                    size = #JDBCResultSet!.getInt("COUNT")
+                else
+                    size=-1
+                fi
+            else
+                size=-1
+            fi
+
+            #closeDatabase()
+
+            #Size=size
+        endif
+
+        methodret #Size
+
+    methodend
+
+    method public DataRow getAttributesRecord()
+
+
+        #openDatabase()
+
+        v! = new BBjVector()
+        md! = #Connection!.getMetaData()
+
+        declare auto DataRow row!
+        row! = #EntityClass!.newInstance()
+
+        JDBCResultSet! = md!.getColumns(null(),null(),#PrimaryTable$,"%")
+
+        while JDBCResultSet!.next()
+            col_type=JDBCResultSet!.getInt("DATA_TYPE")
+            col_name$=JDBCResultSet!.getString("COLUMN_NAME")
+
+            switch col_type
+                case java.sql.Types.VARCHAR
+                case java.sql.Types.CHAR
+                case java.sql.Types.LONGVARCHAR
+                case java.sql.Types.LONGNVARCHAR
+                case java.sql.Types.NCHAR
+                row!.setFieldValue(col_name$,cast(String,null()))
+                break
+
+                case java.sql.Types.NUMERIC
+                case java.sql.Types.DECIMAL
+                row!.setFieldValue(col_name$,cast(java.math.BigDecimal,null()))
+                break
+
+                case java.sql.Types.REAL
+                case java.sql.Types.DOUBLE
+                case java.sql.Types.FLOAT
+                row!.setFieldValue(col_name$,cast(java.lang.Double,null()))
+                break
+
+                case java.sql.Types.INTEGER
+                case java.sql.Types.SMALLINT
+                case java.sql.Types.TINYINT
+                row!.setFieldValue(col_name$,cast(java.lang.Integer,null()))
+                break
+
+                case 9
+                rem hack to compensate flaw in BBj ODBC driver
+                rem 9=BASIS Date
+                rem reported to jash 21.02.2013 SW
+                case java.sql.Types.DATE
+                row!.setFieldValue(col_name$,cast(java.sql.Date,null()))
+                break
+
+                case 11
+                rem hack for BASIS Timestamp
+                case java.sql.Types.TIMESTAMP
+                row!.setFieldValue(col_name$,cast(java.sql.Timestamp,null()))
+                break
+
+                case java.sql.Types.TIME
+                row!.setFieldValue(col_name$,cast(java.sql.Time,null()))
+                break
+
+                case java.sql.Types.BIT
+                case java.sql.Types.BOOLEAN
+                row!.setFieldValue(col_name$,cast(java.lang.Boolean,null()))
+                break
+
+
+                case java.sql.Types.BINARY
+                case java.sql.Types.VARBINARY
+                case java.sql.Types.BLOB
+                case java.sql.Types.CLOB
+                case java.sql.Types.LONGVARBINARY
+                rem these types tend to be blobs
+                rem dunno what to do with these TODO
+                rem simply skip...
+                continue
+                break
+
+                case default
+                row!.setFieldValue(col_name$,"")
+                print col_name$," unkown/unmapped type ",col_type
+                break
+            swend
+
+            row!.setSQLType(col_name$,col_type)
+
+            row!.setSQLType(col_name$,col_type)
+        wend
+
+        #closeDatabase()
+
+        methodret row!
+
+
+    methodend
+
+
+
+    method public BBjVector prepareResultSet(BBjNumber first, BBjNumber last)
+
+        v! = new BBjVector()
+
+        rem JDBC Resultset is not zero-based
+        first=max(1,first+1)
+
+        last = last+1
+
+        #openDatabase()
+        sql$=#buildSQLStatement()
+
+        if pos("1=2"=sql$)=0 then
+
+            stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+            #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+
+            print sql$
+
+            if #JDBCResultSet!.absolute(first) then
+
+                while #ResultSet!.size() < first-1
+                    #ResultSet!.addItem(null())
+                wend
+
+                while 1
+
+
+                    if #ResultSet!.size()=first+x-1 or #ResultSet!.getItem(first+x-1)=null() then
+
+                        declare auto DataRow row!
+                        row! = #EntityClass!.newInstance()
+
+                        for i=1 to #JDBCResultSet!.getMetaData().getColumnCount()
+                            col_name$ = #JDBCResultSet!.getMetaData().getColumnName(i)
+                            col_label$ = #JDBCResultSet!.getMetaData().getColumnName(i)
+                            col_type = #JDBCResultSet!.getMetaData().getColumnType(i)
+
+                            rem TODO: set / map all java.sql.Types and set additional attributes like maxlen...
+
+                            switch col_type
+                                case java.sql.Types.VARCHAR
+                                case java.sql.Types.CHAR
+                                case java.sql.Types.LONGVARCHAR
+                                case java.sql.Types.LONGNVARCHAR
+                                case java.sql.Types.NCHAR
+                                s!=#JDBCResultSet!.getString(col_name$)
+                                row!.setFieldValue(col_name$,cast(String,s!))
+                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+
+                                case java.sql.Types.NUMERIC
+                                case java.sql.Types.DECIMAL
+                                d!=#JDBCResultSet!.getBigDecimal(col_name$)
+                                row!.setFieldValue(col_name$,cast(java.math.BigDecimal,d!))
+                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+
+                                case java.sql.Types.REAL
+                                case java.sql.Types.DOUBLE
+                                case java.sql.Types.FLOAT
+                                d!=#JDBCResultSet!.getDouble(col_name$)
+                                row!.setFieldValue(col_name$,cast(java.lang.Double,d!))
+                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+
+                                case java.sql.Types.INTEGER
+                                case java.sql.Types.SMALLINT
+                                case java.sql.Types.TINYINT
+                                d!=#JDBCResultSet!.getInt(col_name$)
+                                row!.setFieldValue(col_name$,cast(java.lang.Integer,d!))
+                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+
+                                case java.sql.Types.DATE
+                                d!=#JDBCResultSet!.getDate(col_name$)
+                                row!.setFieldValue(col_name$,cast(java.sql.Date,d!))
+                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+
+                                case java.sql.Types.TIMESTAMP
+                                d!=#JDBCResultSet!.getTimestamp(col_name$)
+                                row!.setFieldValue(col_name$,cast(java.sql.Timestamp,d!))
+                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+
+                                case java.sql.Types.TIME
+                                d!=#JDBCResultSet!.getTimestamp(col_name$)
+                                row!.setFieldValue(col_name$,cast(java.sql.Time,d!))
+                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+
+                                case java.sql.Types.BIT
+                                case java.sql.Types.BOOLEAN
+                                d!=#JDBCResultSet!.getBoolean(col_name$)
+                                row!.setFieldValue(col_name$,cast(java.lang.Boolean,d!))
+                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+
+
+                                case java.sql.Types.BINARY
+                                case java.sql.Types.VARBINARY
+                                case java.sql.Types.BLOB
+                                case java.sql.Types.CLOB
+                                case java.sql.Types.LONGVARBINARY
+                                rem these types tend to be blobs
+                                rem dunno what to do with these TODO
+                                rem simply skip...
+                                continue
+                                break
+
+                                case default
+                                row!.setFieldValue(col_name$,#JDBCResultSet!.getString(col_name$))
+                                row!.setFieldAttribute(col_name$,"LABEL","<unkown type>"+col_label$)
+                                print col_name$," unkown/unmapped type ",col_type
+                                break
+                            swend
+
+                            row!.setSQLType(col_name$,col_type)
+
+                        next
+
+
+                        if #ResultSet!.size()=first+x-1 then
+                            #ResultSet!.addItem(row!)
+                        else
+                            #ResultSet!.setItem(first+x-1,row!)
+                        fi
+
+                        v!.addItem(first+x-1)
+
+                    fi
+
+                    x=x+1
+
+                    if #JDBCResultSet!.next() then
+
+                        if first+x<=last then
+                            continue
+                        fi
+
+                    fi
+
+                    break
+
+                wend
+
+            fi
+            
+            rem now determine size for later use - it's probably needed anyway
+            
+            sql$="SELECT COUNT(*) AS COUNT FROM ("+sql$+") AS X"
+            stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+            JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+
+            if JDBCResultSet!.next() then
+                #Size = int(JDBCResultSet!.getInt("COUNT"))
+            else
+                #Size=0
+            fi
+            
+        else
+
+            print "empty result set where was 1=2"
+            v! = new BBjVector()
+            #Size = 0
+
+        fi
+        print
+
+        #closeDatabase()
+
+        methodret v!
+
+    methodend
+
+    rem /**
+    rem * Method getConnMode:
+    rem * get the connection mode for the database and cache it for future use
+    rem */
+    method protected BBjString getConnMode()
+
+        if #ConnMode$="" then
+        
+            connect_user! = null()
+            connect_pwd! = null()
+
+            rem Get User Authentication Login, if applicable
+            user_auth$ = "NO"
+            auth_login$ = stbl("!DSUDDB",err=no_user_auth)
+            if pos(",passwd="=auth_login$) then
+                auth_login$(pos(",passwd="=auth_login$),1)=" "
+            endif
+            dim auth_tpl$:"LOGIN:C(1):"+auth_login$+":",err=no_user_auth
+            auth_user$ = fattr(auth_tpl$,"LOGIN","user",err=no_user_auth)
+            auth_passwd$ = fattr(auth_tpl$,"LOGIN","passwd",err=no_user_auth)
+            user_auth$ = "YES"
+            no_user_auth:
+
+            rem get user credentials
+            admin! = new Admin()
+            if user_auth$ = "YES" then
+                admin!.setUser(auth_user$)
+                admin!.setPassword(auth_passwd$)
+            endif
+            rem admin!.removeUserCredentialsCookie()
+            
+            userCredentials! = BBjAPI().getGroupNamespace().getValue("userCredentialsFromCookie",err=*next)
+            if  userCredentials! = null() then 
+                userCredentials! = admin!.getUserCredentials()
+                BBjAPI().getGroupNamespace().setValue("userCredentialsFromCookie",userCredentials! )
+            fi
+                if (userCredentials! <> null())
+                    connect_user! = userCredentials!.getUser()
+                    connect_pwd! = userCredentials!.getPassword()
+                else
+                    goto connectAuthError 
+                endif
+
+            
+            connMode$=""
+            if connect_user! <> null() and connect_user! <> "" then
+                connMode$ = connMode$ + "user=" + connect_user!
+            endif
+            if connect_pwd! <> null() and connect_pwd! <> "" then
+                connMode$ = connMode$ + fill(sgn(len(connMode$)),",") + "password=" + connect_pwd!
+            endif
+            
+            #ConnMode$ = connMode$
+
+        endif
+
+        methodret #ConnMode$
+    
+    methodend
+
+    rem /**
+    rem * Method openDatabase:
+    rem * open the connection to the database
+    rem */
+    method protected void openDatabase()
+
+        if #Connection! = null() then
+
+            connMode$=#getConnMode()
+
+            count = 0
+            while count < 3
+                #Connection! = BBjAPI().getJDBCConnection(#DataSource$,connMode$,err=*next); break
+                if err <> 12 then exitto connectError
+                count = count + 1
+            wend
+        endif
+
+        if #Connection! = null() then goto connectError
+
+        methodret
+
+        connectError:
+            throw "Could not connect to data source " + #DataSource$,12
+            methodret
+
+        connectAuthError:
+            throw "Failed to get connection authorization for user " + #DataSource$,12
+            methodret
+
+    methodend
+
+    rem /**
+    rem * Method closeDatabase:
+    rem * close the connection to the database
+    rem */
+    method protected void closeDatabase()
+
+        if #Connection! <> null() then
+            #Connection!.close()
+            #Connection! = null()
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method setSortOrder:
+    rem * set the sort order to one column
+    rem * @param BBjString col$: the column name
+    rem * @param BBjNumber size: 0=descending, 1=ascending
+    rem */
+    method public void setSortOrder(BBjString col$,BBjNumber sortAscending)
+
+        #SortField$=col$
+        #SortAscending = sortAscending
+
+    methodend
+
+
+    rem /**
+    rem * Method setQueryFilter:
+    rem * filters the result set
+    rem * @param java.util.HashMap filter!: a hash map that holds the filter information, key is the column, data is a BBjVector holding the values for the filter
+    rem */
+    method public void setQueryFilter(java.util.HashMap filter!)
+
+        #QueryFilter!=filter!
+        #Size=-1
+
+    methodend
+
+
+    rem /**
+    rem * Method setControllerFilterUnlock:
+    rem * called to (temporarily) unlock the business component from the UIController driver
+    rem * @param BBjString field$: the field to be unlocked
+    rem * @param BBjNumber f_unlock: 1=unlock, 0=lock
+    rem */
+    method public void setControllerFilterUnlock(BBjString field$, BBjNumber f_unlock)
+
+
+        if f_unlock then
+            #ControllerFilterUnlock!.put(field$,1)
+        else
+            #ControllerFilterUnlock!.remove(field$)
+        fi
+
+        #Size=-1
+
+    methodend
+
+    rem /**
+    rem * Method setControllerFilterUnlock:
+    rem * called to (temporarily) unlock the business component from the UIController driver
+    rem * @param BBjString var$: the variable on which is to be filtered
+    rem * @param BBjVector selection!: vector holding list of filter values
+
+    rem */
+    method public void putControllerFilter(BBjString var$,BBjVector selection!)
+
+        #ControllerFilter!.put(var$,selection!)
+        #Size=-1
+
+    methodend
+
+    rem /**
+    rem * Method clearControllerFilterUnlock:
+    rem * called to (temporarily) unlock the business component from the UIController driver
+    rem * @param BBjString var$: the variable on which is to be filtered
+    rem * @param BBjVector selection!: vector holding list of filter values
+
+    rem */
+    method public void clearControllerFilter(BBjString var$)
+
+        #ControllerFilter!.remove(var$)
+        #Size=-1
+
+    methodend
+
+    rem /**
+    rem * Method getDistinctValues:
+    rem * returns distinct values in a given column of the resultset
+    rem * these values are mainly used for filterin purpose
+    rem * @param BBjString fieldName$: the column name for which the distinct values are requested
+    rem * @return java.util.TreeMap distinct!: the distinct values
+    rem */
+    method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
+
+
+        #openDatabase()
+
+
+        sql$="SELECT DISTINCT "+fieldName$+" AS D FROM ("+#buildSQLStatement(1)+") AS X"
+
+
+        stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+        #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+        print sql$
+
+        tm! = new java.util.TreeMap()
+
+        while #JDBCResultSet!.next()
+            d! = #JDBCResultSet!.getString("D")
+            if d! <> null() then
+                tm!.put(str(d!),1)
+            fi
+        wend
+
+        #closeDatabase()
+
+        methodret tm!
+
+
+    methodend
+
+
+
+    rem /**
+    rem * Method insertRecord
+    rem * inserts a record to the table
+    rem * @param DataRow rec!: the fields
+    rem */
+    method public void insertRecord(DataRow rec!)
+
+        if #PrimaryKeySegments!.size()=0 then
+            throw "primary key segments in SQLBusinessComponent not defined!",13
+        fi
+
+        if #PrimaryTable$="" then
+            throw "primary table in SQLBusinessComponent not defined!",13
+        fi
+
+
+
+        if 0 then
+            rem TODO: wenn controller filter gesetzt dann die Feldwerte fest auch setzen
+
+            cf! = #getControllerFilter()
+
+            if cf!<>null() then
+
+                ks! = cf!.keySet()
+                it! = ks!.iterator()
+
+                while it!.hasNext()
+
+                    k$=it!.next()
+                    v!=cf!.get(k$)
+
+                    if v!.size() then
+
+                        fields!.put(k$,v!.getItem(0))
+
+                        rem flaw: when multiple selection it's always taking the first record
+
+                    fi
+
+                wend
+
+            fi
+
+        fi
+
+
+
+        hm! = rec!.getObjects()
+
+        ks! = hm!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+
+            k$=it!.next()
+            s$=s$+","+k$
+            v$=v$+",? "
+
+        wend
+
+        s$=s$(2)
+        v$=v$(2)
+
+        sql$="INSERT INTO "+#PrimaryTable$+" ("+s$+") VALUES ("+v$+")"
+        print sql$
+
+
+        #openDatabase()
+        declare java.sql.PreparedStatement stmt!
+        stmt! = #Connection!.prepareStatement(sql$)
+
+        ks! = hm!.keySet()
+        it! = ks!.iterator()
+        i=1
+
+        while it!.hasNext()
+            k$=it!.next()
+            obj! = hm!.get(k$)
+            type$=rec!.getFieldType(k$)
+
+
+            if type$="C" then
+                stmt!.setString(i,obj!)
+            fi
+
+            if type$="N" then
+                stmt!.setDouble(i,obj!)
+            fi
+
+
+            if type$="I" then
+                stmt!.setInt(i,obj!)
+            fi
+
+
+            if type$="B" then
+                stmt!.setBoolean(i,obj!)
+            fi
+
+
+            if type$="D" then
+                stmt!.setDate(i,obj!)
+            fi
+
+
+            if type$="X" then
+                stmt!.setTimestamp(i,obj!)
+            fi
+
+
+            if type$="Y" then
+                stmt!.setBigDecimal(i,obj!)
+            fi
+
+
+            if type$="T" then
+                stmt!.setTime(i,obj!)
+            fi
+
+            i=i+1
+
+        wend
+
+        rem TODO: catch error
+        ret=stmt!.executeUpdate(err=*next)
+
+        ? "(",ret,")"
+
+        if ret=0 then
+            a=msgbox(BBjAPI().getLastJavaException().toString(),0,"Error")
+        fi
+
+        #closeDatabase()
+
+        #Size=-1
+
+    methodend
+
+    rem /**
+    rem * Method insertRecord
+    rem * saves a record within the result set
+    rem * @param DataRow rec!: the row
+    rem * @param DataRow orig_rec!: the original row
+    rem */
+    method public void updateRecord(DataRow rec!, DataRow orig_rec!)
+
+        for i=0 to #PrimaryKeySegments!.size()-1
+
+            if i>0 then
+                wh$=wh$+" AND "
+            fi
+
+            seg$    = #PrimaryKeySegments!.getItem(i)
+            v$      = orig_rec!.getFieldAsString(seg$)
+
+            wh$=wh$+" ( "
+            wh$=wh$+seg$
+            wh$=wh$+" = '"
+            wh$=wh$+v$
+            wh$=wh$+"' ) "
+
+        next
+
+        hm! = rec!.getObjects()
+
+        ks! = hm!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+
+            k$=it!.next()
+            s$=s$+", "+k$+" = ? "
+
+        wend
+
+        s$=s$(2)
+
+
+        sql$="UPDATE "+#PrimaryTable$+" SET "+s$+" WHERE "+wh$
+        print sql$
+
+        #openDatabase()
+        declare java.sql.PreparedStatement stmt!
+        stmt! = #Connection!.prepareStatement(sql$)
+
+        ks! = hm!.keySet()
+        it! = ks!.iterator()
+        i=1
+
+        while it!.hasNext()
+            k$=it!.next()
+            obj! = hm!.get(k$)
+            type$=rec!.getFieldType(k$)
+
+
+            if type$="C" then
+                stmt!.setString(i,obj!)
+            fi
+
+            if type$="N" then
+                stmt!.setDouble(i,obj!)
+            fi
+
+
+            if type$="I" then
+                stmt!.setInt(i,obj!)
+            fi
+
+
+            if type$="B" then
+                stmt!.setBoolean(i,obj!)
+            fi
+
+
+            if type$="D" then
+                stmt!.setDate(i,obj!)
+            fi
+
+
+            if type$="X" then
+                stmt!.setTimestamp(i,obj!)
+            fi
+
+
+            if type$="Y" then
+                stmt!.setBigDecimal(i,obj!)
+            fi
+
+
+            if type$="T" then
+                stmt!.setTime(i,obj!)
+            fi
+
+            i=i+1
+
+        wend
+
+    
+
+        rem TODO: catch error
+        ret=stmt!.executeUpdate(err=*next)
+        ? "(",ret,")"
+
+        if ret=0 then
+            ex! = BBjAPI().getLastJavaException()
+
+            if ex! <> null() then
+                
+                a=msgbox(ex!.toString(),0,"Error")
+            fi
+
+        fi
+
+        stmt!.close()
+        #closeDatabase()
+
+
+
+
+    methodend
+
+    method public void deleteRecords(BBjVector indexList!)
+
+
+        if #PrimaryKeySegments!.size()=0 then
+            throw "primary key segments in SQLBusinessComponent not defined!",13
+        fi
+
+        if #PrimaryTable$="" then
+            throw "primary table in SQLBusinessComponent not defined!",13
+        fi
+
+        if indexList!.size()>0 then
+
+            for i=0 to indexList!.size()-1
+                row=indexList!.getItem(i)
+                row! = #getResultSet().getItem(row)
+
+                if i>0 then
+                    wh$=wh$+" OR "
+                fi
+
+                wh$=wh$+"("
+
+                for j=0 to #PrimaryKeySegments!.size()-1
+
+                    if j>0 then
+                        wh$=wh$+" AND "
+                    fi
+
+                    f$=#PrimaryKeySegments!.getItem(j)
+                    v$=row!.getFieldAsString(f$)
+
+                    rem wh$=wh$+"TRIM("+f$+")= '"+v$+"'"
+                    wh$=wh$+" "+f$+"= '"+v$+"'"
+
+
+                next j
+
+                wh$=wh$+")"
+
+            next i
+
+
+            sql$="DELETE FROM "+#PrimaryTable$+" WHERE "+wh$
+            print sql$
+
+            #openDatabase()
+            stmt! = #Connection!.createStatement()
+            rem TODO: catch error
+            ret=stmt!.executeUpdate(sql$,err=*next)
+            ? "(",ret,")"
+
+            if ret=0 then
+                a=msgbox(BBjAPI().getLastJavaException().toString(),0,"Error")
+            fi
+
+            #closeDatabase()
+            #Size=-1
+
+        fi
+
+    methodend
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

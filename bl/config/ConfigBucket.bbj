@@ -1,0 +1,1022 @@
+class public ConfigBucket
+
+    field private BBjVector Bucket!
+    field private BBjNumber pRec=0
+
+    field private BBjString Realm$
+    field private BBjString User$
+    field private BBjString Name$
+    field private static BBjString Template$="REALM:C(64),USER:C(64),NAME:C(64),CONFIGXML:C(1024*=0)"
+
+
+    method private ConfigBucket()
+
+        #Bucket! = new BBjVector()
+
+    methodend
+
+    method public ConfigBucket(BBjString Realm$, BBjString User$, BBjString Name$)
+
+        #this!()
+
+        if len(Realm$)>64 or len(Realm$)=0 then
+            throw "Realm needs to be between 1 and 64 characters long!",250
+        fi
+
+        if len(Name$)>64 or len(Name$)=0 then
+            throw "Name needs to be between 1 and 64 characters long!",250
+        fi
+
+        if len(User$)>64 then
+            throw "User needs to be between 0 and 64 characters long!",250
+        fi
+
+        #Realm$= Realm$
+        #User$ = User$
+        #Name$ = Name$
+
+    methodend
+
+    method public BBjString getName()
+
+        methodret cvs(#Name$,3)
+
+    methodend
+
+    method public BBjString getRealm()
+
+        methodret cvs(#Realm$,3)
+
+    methodend
+
+    method public BBjString getUser()
+
+        methodret cvs(#User$,3)
+
+    methodend
+
+    method private static BBjNumber openFile()
+
+        ch=unt
+
+        open (ch,err=doDefault)"ConfigBucket.cfb"
+
+        methodret ch
+
+        doDefault:
+        open (ch)"components/ConfigBucket.cfb"
+
+        methodret ch
+
+    methodend
+
+    method private static void closeFile(BBjNumber ch)
+
+
+        if ch>0 then
+            close (ch)
+        fi
+
+
+    methodend
+
+    method public void saveBucket()
+
+        ch=#openFile()
+        dim r$:#Template$
+
+        r.REALM$= #Realm$
+        r.USER$ = #User$
+        r.NAME$ = #Name$
+        r.CONFIGXML$ = #wrap()
+
+        WRITE RECORD (ch)r$
+
+        #closeFile(ch)
+
+    methodend
+
+
+    method public void loadBucket()
+
+        ch=#openFile()
+        dim r$:#Template$
+
+        r.REALM$= #Realm$
+        r.USER$ = #User$
+        r.NAME$ = #Name$
+        r.CONFIGXML$ = #wrap()
+        READ RECORD (ch,dom=dom_err,key=r.realm$+r.user$+r.name$)r$
+
+        #unWrap(r.CONFIGXML$)
+
+        #closeFile(ch)
+        #pRec=0
+
+        methodret
+
+        dom_err:
+        throw "ConfigBucket "+r.realm$+"."+r.user$+"."+r.name$+" not found!",11
+        #closeFile()
+
+    methodend
+
+
+
+    method public BBjVector getBBjVector()
+
+        if #pRec>=#Bucket!.size() then
+            throw "EOF",2
+        fi
+
+        #pRec=#pRec+1
+
+        methodret cast(BBjVector, #Bucket!.getItem(#pRec-1))
+
+    methodend
+
+    method public BBjString getBBjString()
+
+        if #pRec>=#Bucket!.size() then
+            throw "EOF",2
+        fi
+
+        #pRec=#pRec+1
+
+        methodret cast(BBjString, #Bucket!.getItem(#pRec-1))
+
+
+    methodend
+
+
+    method public BBjTemplatedString getBBjTemplatedString()
+
+        if #pRec>=#Bucket!.size() then
+            throw "EOF",2
+        fi
+
+        #pRec=#pRec+1
+
+        methodret cast(BBjTemplatedString, #Bucket!.getItem(#pRec-1))
+
+
+    methodend
+
+    method public BBjNumber getBBjNumber()
+
+        if #pRec>=#Bucket!.size() then
+            throw "EOF",2
+        fi
+
+        #pRec=#pRec+1
+
+        methodret cast(BBjNumber, #Bucket!.getItem(#pRec-1))
+
+    methodend
+
+    method public java.util.HashMap getHashMap()
+
+        if #pRec>=#Bucket!.size() then
+            throw "EOF",2
+        fi
+
+        #pRec=#pRec+1
+
+        methodret cast(java.util.HashMap, #Bucket!.getItem(#pRec-1))
+
+    methodend
+
+    method public java.util.TreeMap getTreeMap()
+
+        if #pRec>=#Bucket!.size() then
+            throw "EOF",2
+        fi
+
+        #pRec=#pRec+1
+
+        methodret cast(java.util.TreeMap, #Bucket!.getItem(#pRec-1))
+
+    methodend
+
+    method public void put(BBjVector Obj!)
+
+        #checkVector(Obj!)
+        #Bucket!.addItem(Obj!)
+
+
+    methodend
+
+    method public void put(BBjString Obj!)
+
+        #Bucket!.addItem(Obj!)
+
+    methodend
+
+    method public void put(BBjTemplatedString Obj!)
+
+        #Bucket!.addItem(Obj!)
+
+    methodend
+
+
+    method public void put(BBjNumber Obj!)
+
+        #Bucket!.addItem(Obj!)
+
+    methodend
+
+    method public void put(java.util.HashMap Obj!)
+
+        #checkHashMap(Obj!)
+        #Bucket!.addItem(Obj!)
+
+    methodend
+
+
+    method public void put(java.util.TreeMap Obj!)
+
+        #checkTreeMap(Obj!)
+        #Bucket!.addItem(Obj!)
+
+    methodend
+
+
+    method private void checkVector(BBjVector Obj!)
+
+        if Obj!.size() then
+
+            for i=0 to Obj!.size() -1
+
+
+                o!=Obj!.getItem(i)
+
+                if o!<>null() then
+
+                    c$=str(o!.getClass())
+
+
+                    dummy! = o!.fattr(err=*next); c$="BBjTemplatedString"
+
+                    if pos("BBjVector"=c$) then
+                        #checkVector(o!)
+                    fi
+
+                    if pos("HashMap"=c$) then
+                        #checkHashMap(o!)
+                    fi
+
+                    if pos("TreeMap"=c$) then
+                        #checkTreeMap(o!)
+                    fi
+
+                    if pos("BBjVector"=c$)+pos("BBjNumber"=c$)+pos("HashMap"=c$)+pos("TreeMap"=c$)+pos("BBjTemplatedString"=c$)+pos("String"=c$)=0 then
+                        throw "Vector contains unhandled Type "+c$,250
+                    fi
+
+                fi
+
+            next
+
+        fi
+
+
+    methodend
+
+    method private void checkHashMap(java.util.HashMap Obj!)
+
+
+        if Obj!.size() then
+
+            ks!=Obj!.keySet()
+            it!=ks!.iterator()
+
+            while it!.hasNext()
+
+                k! = it!.next()
+                o!=Obj!.get(k!)
+
+                if o!<>null() then
+                    c$=str(o!.getClass())
+
+                    dummy! = o!.fattr(err=*next); c$="BBjTemplatedString"
+
+                    if pos("BBjVector"=c$) then
+                        #checkVector(o!)
+                    fi
+
+                    if pos("HashMap"=c$) then
+                        #checkHashMap(o!)
+                    fi
+
+                    if pos("TreeMap"=c$) then
+                        #checkTreeMap(o!)
+                    fi
+
+
+                    if pos("BBjVector"=c$)+pos("BBjNumber"=c$)+pos("HashMap"=c$)+pos("TreeMap"=c$)+pos("BBjTemplatedString"=c$)+pos("String"=c$)=0 then
+                        throw "HashMap contains unhandled Type "+c$,250
+                    fi
+
+                fi
+
+                if k!<>null() then
+                    c$=str(k!.getClass())
+
+                    dummy! = k!.fattr(err=*next); c$="BBjTemplatedString"
+
+                    if pos("BBjVector"=c$) then
+                        #checkVector(k!)
+                    fi
+
+                    if pos("HashMap"=c$) then
+                        #checkHashMap(k!)
+                    fi
+
+                    if pos("TreeMap"=c$) then
+                        #checkTreeMap(k!)
+                    fi
+
+
+                    if pos("BBjVector"=c$)+pos("BBjNumber"=c$)+pos("HashMap"=c$)+pos("TreeMap"=c$)+pos("BBjTemplatedString"=c$)+pos("String"=c$)=0 then
+                        throw "HashMap contains unhandled Type "+c$+" in Key.",250
+                    fi
+
+                fi
+
+
+            wend
+
+        fi
+
+
+    methodend
+
+
+    method private void checkTreeMap(java.util.TreeMap Obj!)
+
+
+        if Obj!.size() then
+
+            ks!=Obj!.keySet()
+            it!=ks!.iterator()
+
+            while it!.hasNext()
+
+                k! = it!.next()
+                o!=Obj!.get(k!)
+
+                if o!<>null() then
+                    c$=str(o!.getClass())
+
+                    dummy! = o!.fattr(err=*next); c$="BBjTemplatedString"
+
+                    if pos("BBjVector"=c$) then
+                        #checkVector(o!)
+                    fi
+
+                    if pos("HashMap"=c$) then
+                        #checkHashMap(o!)
+                    fi
+
+                    if pos("TreeMap"=c$) then
+                        #checkTreeMap(o!)
+                    fi
+
+                    if pos("BBjVector"=c$)+pos("BBjNumber"=c$)+pos("TreeMap"=c$)+pos("HashMap"=c$)+pos("BBjTemplatedString"=c$)+pos("String"=c$)=0 then
+                        throw "TreeMap contains unhandled Type "+c$,250
+                    fi
+
+                fi
+
+                if k!<>null() then
+                    c$=str(k!.getClass())
+
+                    dummy! = k!.fattr(err=*next); c$="BBjTemplatedString"
+
+                    if pos("BBjVector"=c$) then
+                        #checkVector(k!)
+                    fi
+
+                    if pos("HashMap"=c$) then
+                        #checkHashMap(k!)
+                    fi
+
+                    if pos("TreeMap"=c$) then
+                        #checkTreeMap(k!)
+                    fi
+
+
+                    if pos("BBjVector"=c$)+pos("BBjNumber"=c$)+pos("HashMap"=c$)+pos("TreeMap"=c$)+pos("BBjTemplatedString"=c$)+pos("String"=c$)=0 then
+                        throw "HashMap contains unhandled Type "+c$+" in Key.",250
+                    fi
+
+                fi
+
+
+            wend
+
+        fi
+
+
+    methodend
+
+
+
+
+
+    method public void unWrap(java.lang.String xml!)
+
+        is!=new java.io.ByteArrayInputStream(xml!.getBytes())
+
+        declare auto javax.xml.parsers.DocumentBuilder docBuilder!
+        declare org.w3c.dom.Node node!
+        declare org.w3c.dom.Element root!
+        declare org.w3c.dom.Document doc!
+
+        dbfac! = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+        docBuilder! = dbfac!.newDocumentBuilder()
+        doc! = docBuilder!.parse(is!)
+
+
+        if doc!.getDocumentElement().getNodeName() <> "Bucket" then
+            throw "XML Root is not Bucket",250
+        fi
+
+        #Bucket!.clear()
+        root!= doc!.getDocumentElement()
+        node! = root!.getFirstChild()
+        repeat
+
+        if node!.getNodeType() = node!.ELEMENT_NODE then
+
+
+            element! = cast( org.w3c.dom.Element, node!)
+            o!=#unWrapNode(element!)
+
+            #Bucket!.addItem(o!)
+
+        fi
+
+        node! = node!.getNextSibling()
+
+
+        until node!=null()
+
+
+    methodend
+
+    method private Object unWrapNode( org.w3c.dom.Element node! )
+
+        type$=node!.getAttribute("type")
+
+        if type$="BBjString" then
+            cont! = node!.getChildNodes()
+            ret$=java.net.URLDecoder.decode(cont!.item(0).getNodeValue())
+
+            methodret ret$
+
+        fi
+
+        if type$="BBjTemplatedString" then
+
+            tpl$=""
+            s$=""
+
+            cont! = node!.getChildNodes()
+
+            child! = node!.getFirstChild()
+
+            repeat
+
+            if child! = null() then break
+
+            if child!.getNodeType() = child!.ELEMENT_NODE then
+                n$= child!.getNodeName()
+
+                if cvs(n$,4)="TPL" then
+                    let tpl$=java.net.URLDecoder.decode(child!.getChildNodes().item(0).getNodeValue())
+                fi
+
+
+                if cvs(n$,4)="STRING" then
+                    let s$=java.net.URLDecoder.decode(child!.getChildNodes().item(0).getNodeValue())
+                fi
+
+            fi
+
+            child! = child!.getNextSibling()
+
+
+            until child!=null()
+
+            if tpl$="" or s$="" then
+                throw "Error parsing Templated String Node",250
+            fi
+
+            t!=BBjAPI().makeTemplatedString(tpl$)
+            t!.setString(s$)
+
+            methodret t!
+
+        fi
+
+        if type$="BBjNumber" then
+            cont! = node!.getChildNodes()
+            ret$=java.net.URLDecoder.decode(cont!.item(0).getNodeValue())
+
+            methodret num(ret$)
+
+        fi
+
+        if type$="BBjVector" then
+
+            v!=new BBjVector()
+            child! = node!.getFirstChild()
+            repeat
+
+            if child! = null() then break
+
+            if child!.getNodeType() = child!.ELEMENT_NODE then
+
+
+                element! = cast( org.w3c.dom.Element, child!)
+                o!=#unWrapNode(element!)
+
+                v!.addItem(o!)
+
+            fi
+
+            child! = child!.getNextSibling()
+
+
+            until child!=null()
+
+            methodret v!
+
+        fi
+
+        if type$="HashMap" then
+
+            hm!=new java.util.HashMap()
+            child! = node!.getFirstChild()
+
+            repeat
+
+            if child! = null() then break
+
+            if child!.getNodeType() = child!.ELEMENT_NODE then
+
+                declare org.w3c.dom.Node rec!
+                declare org.w3c.dom.Element element!
+
+                rec! = cast(org.w3c.dom.Node,child!.getFirstChild())
+                k!=null()
+                v!=null()
+                repeat
+
+
+                if rec!.getNodeType() = rec!.ELEMENT_NODE  then
+
+                    t$=rec!.getNodeName()
+
+                    rec1! = rec!.getFirstChild()
+                    rec1! = rec1!.getNextSibling()
+
+
+                    element! = cast( org.w3c.dom.Element, rec1!)
+
+
+
+                    if cvs(t$,4)="KEY" then
+                        k!=#unWrapNode(element!)
+                    fi
+
+                    if cvs(t$,4)="VALUE" then
+                        v!=#unWrapNode(element!)
+                    fi
+
+                    hm!.put(k!,v!)
+
+                fi
+
+                rec! = rec!.getNextSibling()
+
+
+                until rec!=null()
+                print "-"
+
+            fi
+
+            child! = child!.getNextSibling()
+
+
+            until child!=null()
+
+            methodret hm!
+
+        fi
+
+
+        if type$="TreeMap" then
+
+            hm!=new java.util.TreeMap()
+            child! = node!.getFirstChild()
+
+            repeat
+
+            if child! = null() then break
+
+            if child!.getNodeType() = child!.ELEMENT_NODE then
+
+                declare org.w3c.dom.Node rec!
+                declare org.w3c.dom.Element element!
+
+                rec! = cast(org.w3c.dom.Node,child!.getFirstChild())
+                k!=null()
+                v!=null()
+                repeat
+
+
+                if rec!.getNodeType() = rec!.ELEMENT_NODE  then
+
+                    t$=rec!.getNodeName()
+
+                    rec1! = rec!.getFirstChild()
+                    rec1! = rec1!.getNextSibling()
+
+
+                    element! = cast( org.w3c.dom.Element, rec1!)
+
+
+
+                    if cvs(t$,4)="KEY" then
+                        k!=#unWrapNode(element!)
+                    fi
+
+                    if cvs(t$,4)="VALUE" then
+                        v!=#unWrapNode(element!)
+                    fi
+
+                    hm!.put(k!,v!)
+
+                fi
+
+                rec! = rec!.getNextSibling()
+
+
+                until rec!=null()
+                print "-"
+
+            fi
+
+            child! = child!.getNextSibling()
+
+
+            until child!=null()
+
+            methodret hm!
+
+        fi
+
+
+        methodret o!
+
+    methodend
+
+
+    method private BBjString wrap()
+
+
+        declare auto javax.xml.parsers.DocumentBuilder docBuilder!
+        declare org.w3c.dom.Element node!
+        declare org.w3c.dom.Document doc!
+
+        dbfac! = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+        docBuilder! = dbfac!.newDocumentBuilder()
+        doc! = docBuilder!.newDocument()
+
+        root! = doc!.createElement("Bucket")
+        doc!.appendChild(root!)
+
+        if #Bucket!.size()>0 then
+
+            for i=0 to #Bucket!.size()-1
+                o!=#Bucket!.getItem(i)
+                #wrap(doc!,root!,o!)
+            next
+
+        fi
+
+
+        transfac! = javax.xml.transform.TransformerFactory.newInstance()
+        trans! = transfac!.newTransformer()
+        trans!.setOutputProperty(javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "yes")
+        trans!.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "yes")
+
+        sw! = new java.io.StringWriter()
+        result! = new javax.xml.transform.stream.StreamResult(sw!)
+        source! = new javax.xml.transform.dom.DOMSource(doc!)
+        trans!.transform(source!, result!)
+        xml$ = sw!.toString()
+
+        methodret xml$
+
+
+    methodend
+
+    method private void wrap(org.w3c.dom.Document doc!, org.w3c.dom.Element node!, BBjString Obj!)
+
+        el! = doc!.createElement("Var")
+        el!.setAttribute("type","BBjString")
+        node!.appendChild(el!)
+
+        text! = doc!.createTextNode(java.net.URLEncoder.encode(str(obj!)))
+        el!.appendChild(text!)
+
+    methodend
+
+    method private void wrap(org.w3c.dom.Document doc!, org.w3c.dom.Element node!, BBjTemplatedString Obj!)
+
+        tpl$=java.net.URLEncoder.encode(Obj!.fattr())
+        s$=java.net.URLEncoder.encode(Obj!.getString())
+
+        el! = doc!.createElement("Var")
+        el!.setAttribute("type","BBjTemplatedString")
+        node!.appendChild(el!)
+
+        rec_k! = doc!.createElement("Tpl")
+        text! = doc!.createTextNode(tpl$)
+        rec_k!.appendChild(text!)
+
+        rec_v! = doc!.createElement("String")
+        text! = doc!.createTextNode(s$)
+        rec_v!.appendChild(text!)
+
+        el!.appendChild(rec_k!)
+        el!.appendChild(rec_v!)
+
+    methodend
+
+
+    method private void wrap(org.w3c.dom.Document doc!, org.w3c.dom.Element node!, BBjNumber Obj!)
+
+        el! = doc!.createElement("Var")
+        el!.setAttribute("type","BBjNumber")
+        node!.appendChild(el!)
+
+        text! = doc!.createTextNode(java.net.URLEncoder.encode(str(obj!)))
+        el!.appendChild(text!)
+
+    methodend
+
+    method private void wrap(org.w3c.dom.Document doc!, org.w3c.dom.Element node!, BBjVector Obj!)
+
+
+        el! = doc!.createElement("Var")
+        el!.setAttribute("type","BBjVector")
+
+        if Obj!.size() then
+
+            for i=0 to Obj!.size()-1
+                o!=Obj!.getItem(i)
+                #wrap(doc!,el!,o!)
+            next
+
+        fi
+
+        node!.appendChild(el!)
+
+    methodend
+
+
+
+    method private void wrap(org.w3c.dom.Document doc!, org.w3c.dom.Element node!, java.util.HashMap Obj!)
+
+
+        el! = doc!.createElement("Var")
+        el!.setAttribute("type","HashMap")
+        node!.appendChild(el!)
+
+        if Obj!.size() then
+
+            ks!=Obj!.keySet()
+            it!=ks!.iterator()
+
+            while it!.hasNext()
+
+                k! = it!.next()
+                v!=Obj!.get(k!)
+
+                rec! = doc!.createElement("Record")
+                el!.appendChild(rec!)
+
+                rec_k! = doc!.createElement("Key")
+                #wrap(doc!,rec_k!,k!)
+                rec!.appendChild(rec_k!)
+
+                rec_v! = doc!.createElement("Value")
+                #wrap(doc!,rec_v!,v!)
+                rec!.appendChild(rec_v!)
+
+            wend
+
+        fi
+
+    methodend
+
+    method private void wrap(org.w3c.dom.Document doc!, org.w3c.dom.Element node!, java.util.TreeMap Obj!)
+
+
+        el! = doc!.createElement("Var")
+        el!.setAttribute("type","TreeMap")
+        node!.appendChild(el!)
+
+        if Obj!.size() then
+
+            ks!=Obj!.keySet()
+            it!=ks!.iterator()
+
+            while it!.hasNext()
+
+                k! = it!.next()
+                v!=Obj!.get(k!)
+
+                rec! = doc!.createElement("Record")
+                el!.appendChild(rec!)
+
+                rec_k! = doc!.createElement("Key")
+                #wrap(doc!,rec_k!,k!)
+                rec!.appendChild(rec_k!)
+
+                rec_v! = doc!.createElement("Value")
+                #wrap(doc!,rec_v!,v!)
+                rec!.appendChild(rec_v!)
+
+            wend
+
+        fi
+
+    methodend
+
+    method public static BBjVector enumConfigBuckets(BBjString realm$, BBjString user$)
+
+        v!=new BBjVector()
+
+        ch=#openFile()
+
+        dim r$:#Template$
+
+        r.REALM$= realm$
+        r.USER$ = user$
+        READ (ch,dom=*next,key=r.realm$+r.user$)
+
+        while 1
+
+            READ RECORD (ch,end=*break)r$
+
+            if cvs(r.REALM$,3)<>realm$ or cvs(r.USER$,3) <> user$ then break
+
+            c! = new ConfigBucket(r.REALM$,r.USER$, r.NAME$)
+            v!.addItem(c!)
+
+        wend
+
+        #closeFile(ch)
+
+        methodret v!
+
+    methodend
+
+
+    method public static void deleteConfigBucket(BBjString realm$, BBjString user$, BBjString name$)
+
+        ch=#openFile()
+        dim r$:#Template$
+
+        r.REALM$= realm$
+        r.USER$ = user$
+        r.NAME$ = name$
+
+        REMOVE (ch,dom=*next,key=r.realm$+r.user$+r.name$)
+
+        #closeFile(ch)
+
+        methodret
+
+    methodend
+
+classend
+
+
+
+declare ConfigBucket b!
+b!=new ConfigBucket("TEST","TEST","TEST")
+
+
+
+rem ConfigBucket.deleteConfigBucket("TEST","TEST","TEST")
+
+v! = ConfigBucket.enumConfigBuckets("TEST","TEST")
+
+if v!.size() then
+
+    for i=0 to v!.size()-1
+        c!=v!.getItem(i)
+        print c!.getName()
+    next
+
+fi
+
+input *
+
+declare ConfigBucket b!
+b!=new ConfigBucket("TEST","TEST","TEST")
+
+b!.put("Simple String")
+b!.put(12345)
+
+x!=new BBjVector()
+x!.addItem("TEST")
+x!.addItem(123)
+
+y! = new BBjVector()
+y!.addItem("TEST")
+y!.addItem(123)
+
+
+z!=new java.util.HashMap()
+z!.put("1","one")
+z!.put("2",2)
+z!.put("3","22")
+z!.put(24,"TEST123")
+
+
+y!.addItem(z!)
+
+x!.addItem(y!)
+
+
+b!.put(x!)
+? x!
+
+z1!=new java.util.HashMap()
+z1!.put("1","one")
+z1!.put("2",2)
+z1!.put("3",new BBjVector())
+z1!.put("876876",new java.util.HashMap())
+z1!.put(24,"TEST123")
+
+
+b!.put(z1!)
+? z1!
+
+v!=new BBjVector()
+v1!=new BBjVector()
+v1!.addItem("one")
+v1!.addItem("two")
+v1!.addItem("three")
+v2!=new BBjVector()
+v2!.addItem("eins")
+v2!.addItem("zwei")
+v2!.addItem("drei")
+
+v!.addItem(v1!)
+v!.addItem(v2!)
+t! = BBjAPI().makeTemplatedString("TEST:C(10)")
+t!.setFieldValue("TEST","123")
+v!.addItem(t!)
+
+
+b!.put(v!)
+
+
+tm! = new java.util.TreeMap()
+tm!.put("1","one")
+tm!.put("2","two")
+b!.put(tm!)
+? tm!
+
+
+
+b!.saveBucket()
+
+
+bnew! = new ConfigBucket("TEST","TEST","TEST")
+bnew!.loadBucket()
+
+? bnew!.getBBjString()
+? bnew!.getBBjNumber()
+? bnew!.getBBjVector()
+? bnew!.getHashMap()
+? bnew!.getBBjVector()
+? bnew!.getTreeMap()
+
+
+input *
+
+
+
+
+
+
+

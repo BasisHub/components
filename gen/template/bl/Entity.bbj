@@ -1,0 +1,79 @@
+use ::components/db/DataRow.bbj::DataRow
+use ::generated/(DB_NICE)(TBL_NICE)EntityT.bbj::(DB_NICE)(TBL_NICE)EntityT
+
+rem /**
+rem * (DB_NICE)(TBL_NICE)EntityT
+rem *
+rem * Auto-generated entity class
+rem * Use this class to put your custom code
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public (DB_NICE)(TBL_NICE)Entity extends (DB_NICE)(TBL_NICE)EntityT
+
+    rem /**
+    rem * Method newInstance:
+    rem * create and return a new instance of this class
+    rem * you do not need to override this methods in most cases
+    rem * @return DataRow newRow!: the new instance
+    rem *
+    method public static DataRow newInstance()
+
+        methodret new (DB_NICE)(TBL_NICE)Entity()
+
+    methodend
+
+    rem /**
+    rem * Method toString:
+    rem * override to adjust the visual representation on screen of this record
+    rem * @return String toString!: the visual representation of the contents of the record
+    rem *
+    method public String toString()
+
+        rem override to set the visual representation of a record on screen
+        rem like for a customer entity show something like the name and the city
+        rem sample:
+        rem methodret #super!.getFieldAsString("name")
+
+        rem if you override this method don't forget to delete the next row
+
+        methodret #super!.toString()
+
+    methodend
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

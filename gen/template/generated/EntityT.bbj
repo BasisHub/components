@@ -1,0 +1,63 @@
+use ::components/db/DataRow.bbj::DataRow
+
+rem /**
+rem * (DB_NICE)(TBL_NICE)EntityT
+rem *
+rem * Auto-generated entity class
+rem * DO NOT PUT ANY CHANGES HERE !
+rem * THIS CLASS WILL BE OVERWRITTEN BY EACH CODE GENERATION !
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public (DB_NICE)(TBL_NICE)EntityT extends DataRow
+
+    <field>
+    field protected (FLD_TYPE) (FLD_NICE)!
+    </field>
+
+    <getter>
+    method protected (FLD_TYPE) get(FLD_NICE)()
+        methodret #(FLD_NICE)!
+    methodend
+    </getter>
+
+    <setter>
+    method protected void set(FLD_NICE)((FLD_TYPE) (FLD_NICE)!)
+        #(FLD_NICE)! = (FLD_NICE)!
+    methodend
+    </setter>
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

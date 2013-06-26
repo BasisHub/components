@@ -1,0 +1,78 @@
+use ::components/db/DataProvider.bbj::DataProvider
+use ::components/db/DataRow.bbj::DataRow
+
+use ::bl/(DB_NICE)(TBL_NICE)Entity.bbj::(DB_NICE)(TBL_NICE)Entity
+
+rem /**
+rem * (DB_NICE)(TBL_NICE)DataProviderT
+rem *
+rem * Auto-generated entity class
+rem * DO NOT PUT ANY CHANGES HERE !
+rem * THIS CLASS WILL BE OVERWRITTEN BY EACH CODE GENERATION !
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public (DB_NICE)(TBL_NICE)DataProviderT extends DataProvider
+
+    rem /**
+    rem * Method (DB_NICE)(TBL_NICE)DataProviderT():
+    rem * standard constructor
+    rem */
+    method public (DB_NICE)(TBL_NICE)DataProviderT()
+
+        #setupDatabaseLink()
+
+    methodend
+
+    rem /**
+    rem * Method setupDatabaseLink:
+    rem * this method does setup the database sql and the key information
+    rem */
+    method protected void setupDatabaseLink()
+
+        #setDataSource("(DB)")
+        #setSQL("SELECT * FROM (TBL)")
+        #setPrimaryTable("(TBL)")
+        <keyseg>
+        #addPrimaryKeySegment("(KEYSEG)")
+        </keyseg>
+        #setEntityClass((DB_NICE)(TBL_NICE)Entity.newInstance())
+
+    methodend
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

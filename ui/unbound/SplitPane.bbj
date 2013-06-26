@@ -1,0 +1,136 @@
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
+class public SplitPane
+
+
+    field private BBjNumber X
+    field private BBjNumber Y
+    field private BBjNumber W
+    field private BBjNumber H
+    field private BBjChildWindow CwCanvas!
+    field private BBjChildWindow CwTop!
+    field private BBjChildWindow CwBottom!
+    field private UIWidget UiwTop!
+    field private UIWidget UiwBottom!
+    
+    field private BBjStaticText Split!
+    field private BBjNumber      SplitPos
+    field private BBjNumber      dragging=0
+
+    method public SplitPane(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        #X = x
+        #Y = y
+        #W = w
+        #H = h
+        
+        #SplitPos = int((h-8)/2)
+
+        #CwCanvas! = wnd!.addChildWindow(id,x,y,w,h,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        
+        #CwTop!     = #CwCanvas!.addChildWindow(100,0,0,w,#SplitPos-4-20,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #CwBottom!  = #CwCanvas!.addChildWindow(101,0,#SplitPos+2,w,#H-#SplitPos-4,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+
+rem        #Split!     = #CwCanvas!.addChildWindow(200,0,#SplitPos-2,w,4,$$,$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #Split!     = #CwCanvas!.addStaticText(200,0,#SplitPos-2,w,4,"")
+
+         #Split!.setCursor(8)
+        #Split!.setBackColor(BBjAPI().makeColor("LTGRAY"))
+        
+        #CwCanvas!.setCallback(BBjAPI.ON_MOUSE_DOWN,#this!,"onSplitMouseDown")
+        #CwCanvas!.setCallback(BBjAPI.ON_MOUSE_UP,#this!,"onSplitMouseUp")
+        #CwCanvas!.setCallback(BBjAPI.ON_MOUSE_MOVE,#this!,"onSplitMouseMove")
+
+    methodend
+
+    method public BBjChildWindow getTop()
+    
+        methodret #CwTop!
+        
+    methodend
+
+    method public BBjChildWindow getBottom()
+    
+        methodret #CwBottom!
+        
+    methodend
+    
+    method public void setUiwTop(UIWidget uiw!)
+        
+            #UiwTop! = uiw!
+            
+    methodend
+
+    method public void setUiwBottom(UIWidget uiw!)
+        
+            #UiwBottom! = uiw!
+            
+    methodend
+    
+    method public void setSize(BBjNumber w, BBjNumber h)
+
+        BBjAPI().removeTimer("delay",err=*next)
+        
+        ratio = #SplitPos/#H
+    
+        #H = h
+        #W = w
+        #SplitPos = int(#H*ratio)
+        
+        
+        BBjAPI().createTimer("delay", .5, #this!, "delayedResize")
+            
+    methodend
+    
+    method public void delayedResize(BBjTimerEvent ev!)
+    
+        BBjAPI().removeTimer("delay",err=*next)
+        #CwCanvas!.setSize(#W,#H)
+        
+        #CwTop!.setSize(#W,#SplitPos-4)
+        #CwBottom!.setLocation(0,#SplitPos+4)
+        #CwBottom!.setSize(#W,#H-#SplitPos-4)
+    
+        if #UiwTop! <> null() then
+            #UiwTop!.setSize(#W,#SplitPos-4)
+        fi
+
+        if #UiwBottom! <> null() then
+
+            #UiwBottom!.setSize(#W,#H-#SplitPos-4)
+        fi
+    
+    #Split!.setLocation(0,#SplitPos)
+    #Split!.setSize(#W,4)
+    
+    methodend
+    
+    method public void onSplitMouseDown(BBjMouseDownEvent ev!)
+        #dragging=1
+        #CwBottom!.setEnabled(0)
+        #CwTop!.setEnabled(0)
+
+        BBjAPI().removeTimer("delay",err=*next)
+    methodend
+    
+    method public void onSplitMouseUp(BBjMouseUpEvent ev!)
+        #dragging=0
+        #CwBottom!.setEnabled(1)
+        #CwTop!.setEnabled(1)
+        
+        BBjAPI().createTimer("delay", .5, #this!, "delayedResize")
+    methodend    
+
+    method public void onSplitMouseMove(BBjMouseMoveEvent ev!)
+
+        if #dragging then
+            #SplitPos = min(ev!.getY())
+            #Split!.setLocation(0,#SplitPos)
+        fi
+        
+    methodend  
+  
+    
+
+classend
+

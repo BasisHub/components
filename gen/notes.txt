@@ -1,0 +1,25 @@
+
+variables in the template
+(DB)
+(TBL)
+(DB_NICE)
+(TBL_NICE)
+(SQL)
+
+(KEYSEG)
+<keyseg></keyseg>
+
+(FLD_TYPE) (FLD_NICE)
+<field></field>
+<getter></getter>
+<setter></setter>
+
+
+Wishlist:
+
+Generator:
+- create properties file for translations
+- make sizes of INPUTE according to field lengths
+- recognize views and make everything readonly (like OPENINV in ChileCompany)
+
+

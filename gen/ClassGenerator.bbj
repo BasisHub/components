@@ -1,0 +1,557 @@
+
+rem /** 
+rem * ClassGenerator
+rem * 
+rem * <class description>
+rem * 
+rem * @author <author>
+rem * @version <version>
+rem */
+
+use ::DialogWizard/BBDialog.bbj::BBDialog
+use ::DialogWizard/DialogUtils.bbj::DialogUtils
+use ::DialogWizard/DialogWizardRun.bbj::DialogWizardRun
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::bbwindowutils.bbj::BBWindowUtils
+use ::FileChooser/FileChooser.bbj::FileChooser
+use java.sql.ResultSet
+use java.sql.Connection
+use java.sql.DatabaseMetaData
+
+use ::ClassGeneratorWorker.bbj::ProgressCallback
+
+
+
+class public ClassGenerator extends BBDialog implements ProgressCallback
+
+    rem static member (fields) are only created once for the class
+    field private static BBjAPI        API! = BBjAPI()
+    field private static BBjNumber     TRUE = #API!.TRUE
+    field private static BBjNumber     FALSE = #API!.FALSE
+    field private static BBjSysGui     SysGui! = #API!.openSysGui("X0")
+    field private static BBjThinClient ThinClient! = #API!.getThinClient()
+    field private static BBjString     ClientLocale$ = #ThinClient!.getClientLocale()
+    field private static BBjString     PgmDirectory$ = pgm(-2)(1,max(pos("\"=pgm(-2),-1),pos("/"=pgm(-2),-1)))
+    field private static BBTranslator  Translator! = BBTranslator.getInstance("ClassGenerator",#ClientLocale$,"en",#PgmDirectory$)
+    field private static BBjNamespace  GroupNS! = #API!.getGroupNamespace()
+
+rem /** DLGWIZ_RES ClassGenerator.arc 101 **/
+rem /** DLGWIZ_FLD_BEGIN **/
+    field public BBjVector TABLES!
+    field public BBjString DB$
+    field public BBjString TARGETDIR$
+    field public BBjString USER$
+    field public BBjString PWD$
+    field public BBjString SCHEMA$
+    field public BBjString PLDIR$
+    field public BBjNumber CBPREPENDDB
+    field public BBjNumber BBjProgressBar
+rem /** DLGWIZ_FLD_END **/
+
+rem /** DLGWIZ_FLC_BEGIN **/
+    field protected BBjTopLevelWindow C_Form!
+    field protected BBjListBox C_LBTABLES!
+    field protected BBjStaticText C_STDB!
+    field protected BBjButton C_BTNREFRESH!
+    field protected BBjListEdit C_LEDB!
+    field protected BBjStaticText C_STTABLES!
+    field protected BBjStaticText C_STDIR!
+    field protected BBjEditBox C_EDTARGETDIR!
+    field protected BBjButton C_BTNGENERATE!
+    field protected BBjStaticText C_STCRED!
+    field protected BBjEditBox C_EDUSER!
+    field protected BBjEditBox C_EDPWD!
+    field protected BBjStaticText C_STSCHEMA!
+    field protected BBjEditBox C_EDSCHEMA!
+    field protected BBjToolButton C_TBFIND!
+    field protected BBjToolButton C_TBFINDTPLDIR!
+    field protected BBjStaticText C_STTPLDIR!
+    field protected BBjEditBox C_EDTPLDIR!
+    field protected BBjCheckBox C_CBPREPENDDB!
+    field protected BBjProgressBar C_BBjProgressBar!
+    field protected BBjStaticText C_STMSG!
+rem /** DLGWIZ_FLC_END **/
+
+    field public BBjTopLevelWindow Wnd!
+
+    field private BBjVector TableList!
+
+    rem /**
+    rem * Constructor ClassGenerator
+    rem */
+    method public ClassGenerator()
+        #super!("ClassGenerator.arc",101)
+        if stbl("+USER_LOCALE",err=*endif)<>"" then
+            #ClientLocale$ = stbl("+USER_LOCALE")
+            #Translator! = BBTranslator.getInstance("ClassGenerator",#ClientLocale$,"en",#PgmDirectory$)
+        endif
+        #Wnd!=#super!.getWndTop()
+        DialogUtils.buildDialogProperties(#Translator!,#super!.getCtrlVect())
+        if #Wnd!<>null() then
+            #initToolBar()
+            #setCallbacks()
+        endif
+    methodend
+
+    rem /**
+    rem * Method initToolBar:
+    rem * Setup toolbar
+    rem */
+    method private void initToolBar()
+rem /** DLGWIZ_BAR_BEGIN **/
+rem /** DLGWIZ_BAR_END **/
+    methodend
+
+    rem /**
+    rem * Method setCallbacks:
+    rem * Set control callbacks
+    rem */
+    method private void setCallbacks()
+rem /** DLGWIZ_CBS_BEGIN **/
+        #super!.getControlByName("BTNGENERATE").setCallback(#API!.ON_BUTTON_PUSH,#this!,"BTNGENERATE__ON_BUTTON_PUSH")
+        #super!.getControlByName("BTNREFRESH").setCallback(#API!.ON_BUTTON_PUSH,#this!,"BTNREFRESH__ON_BUTTON_PUSH")
+        #super!.getControlByName("Form").setCallback(#API!.ON_CLOSE,#this!,"Form__ON_CLOSE")
+        #super!.getControlByName("LBTABLES").setCallback(#API!.ON_DRAG_SOURCE_DROP,#this!,"LBTABLES__ON_DRAG_SOURCE_DROP")
+        #super!.getControlByName("LBTABLES").setCallback(#API!.ON_LIST_CLICK,#this!,"LBTABLES__ON_LIST_CLICK")
+        #super!.getControlByName("LEDB").setCallback(#API!.ON_LIST_CHANGE,#this!,"LEDB__ON_LIST_CHANGE")
+        #super!.getControlByName("TBFINDTPLDIR").setCallback(#API!.ON_TOOL_BUTTON_PUSH,#this!,"TBFINDTPLDIR__ON_TOOL_BUTTON_PUSH")
+        #super!.getControlByName("TBFIND").setCallback(#API!.ON_TOOL_BUTTON_PUSH,#this!,"TBFIND__ON_TOOL_BUTTON_PUSH")
+rem /** DLGWIZ_CBS_END **/
+    methodend
+
+    rem /**
+    rem * Method doDataExchange:
+    rem * Set controls with program variables
+    rem * @param BBjNumber pInitFlag: Controls are initialized, if true
+    rem */
+    method private void doDataExchange(BBjNumber pInitFlag)
+rem /** DLGWIZ_DDX_BEGIN **/
+        #TABLES!=#doDDX("LBTABLES",#TABLES!,pInitFlag,0)
+        #DB$=#doDDX("LEDB",#DB$,pInitFlag,0)
+        #TARGETDIR$=#doDDX("EDTARGETDIR",#TARGETDIR$,pInitFlag,0)
+        #USER$=#doDDX("EDUSER",#USER$,pInitFlag,0)
+        #PWD$=#doDDX("EDPWD",#PWD$,pInitFlag,0)
+        #SCHEMA$=#doDDX("EDSCHEMA",#SCHEMA$,pInitFlag,0)
+        #PLDIR$=#doDDX("EDTPLDIR",#PLDIR$,pInitFlag,0)
+        #CBPREPENDDB=#doDDX("CBPREPENDDB",#CBPREPENDDB,pInitFlag,0)
+        #BBjProgressBar=#doDDX("BBjProgressBar",#BBjProgressBar,pInitFlag,0)
+rem /** DLGWIZ_DDX_END **/
+    methodend
+
+    rem /**
+    rem * Method doModal:
+    rem * Initialize and display dialog (contains PROCESS_EVENTS)
+    rem * @see doDataExchange(BBjNumber pInitFlag)
+    rem * @see onInitDialog()
+    rem * @see onExitDialog()
+    rem * @return BBjNumber Answer: 0=Passed required fields check, 1=Dialog canceled/closed
+    rem */
+    method public BBjNumber doModal()
+
+        #API!.setCustomEventCallback("ReturnAnswer","do_return")
+        #API!.setCustomEventCallback("CancelAnswer","do_cancel")
+
+        #doDataExchange(#TRUE)
+        #super!.setAllValidated(#TRUE)
+
+        #onInitDialog()
+        #Wnd!.setVisible(#TRUE)
+
+        do_process_events:
+        process_events,err=*same
+
+        do_return:
+            #doDataExchange(#FALSE)
+
+            if #super!.getAllValidated()=0 then
+                #super!.setAllValidated(#TRUE)
+                goto do_process_events
+            endif
+
+        do_cancel:
+            #onExitDialog()
+            #Wnd!.destroy()
+
+        methodret #super!.getAnswer()
+    methodend
+
+    rem /**
+    rem * Method onInitDialog:
+    rem * Your custom initialization
+    rem */
+    method public void onInitDialog()
+rem /** DLGWIZ_INI_BEGIN **/
+        #C_Form! = cast(BBjTopLevelWindow,#super!.getControlByName("Form"))
+        #C_LBTABLES! = cast(BBjListBox,#super!.getControlByName("LBTABLES"))
+        #C_STDB! = cast(BBjStaticText,#super!.getControlByName("STDB"))
+        #C_BTNREFRESH! = cast(BBjButton,#super!.getControlByName("BTNREFRESH"))
+        #C_LEDB! = cast(BBjListEdit,#super!.getControlByName("LEDB"))
+        #C_STTABLES! = cast(BBjStaticText,#super!.getControlByName("STTABLES"))
+        #C_STDIR! = cast(BBjStaticText,#super!.getControlByName("STDIR"))
+        #C_EDTARGETDIR! = cast(BBjEditBox,#super!.getControlByName("EDTARGETDIR"))
+        #C_BTNGENERATE! = cast(BBjButton,#super!.getControlByName("BTNGENERATE"))
+        #C_STCRED! = cast(BBjStaticText,#super!.getControlByName("STCRED"))
+        #C_EDUSER! = cast(BBjEditBox,#super!.getControlByName("EDUSER"))
+        #C_EDPWD! = cast(BBjEditBox,#super!.getControlByName("EDPWD"))
+        #C_STSCHEMA! = cast(BBjStaticText,#super!.getControlByName("STSCHEMA"))
+        #C_EDSCHEMA! = cast(BBjEditBox,#super!.getControlByName("EDSCHEMA"))
+        #C_TBFIND! = cast(BBjToolButton,#super!.getControlByName("TBFIND"))
+        #C_TBFINDTPLDIR! = cast(BBjToolButton,#super!.getControlByName("TBFINDTPLDIR"))
+        #C_STTPLDIR! = cast(BBjStaticText,#super!.getControlByName("STTPLDIR"))
+        #C_EDTPLDIR! = cast(BBjEditBox,#super!.getControlByName("EDTPLDIR"))
+        #C_CBPREPENDDB! = cast(BBjCheckBox,#super!.getControlByName("CBPREPENDDB"))
+        #C_BBjProgressBar! = cast(BBjProgressBar,#super!.getControlByName("BBjProgressBar"))
+        #C_STMSG! = cast(BBjStaticText,#super!.getControlByName("STMSG"))
+rem /** DLGWIZ_INI_END **/
+    rem uncomment the next line to center window
+        BBWindowUtils.centerWindow(#Wnd!)
+
+        a$=sqllist(0)
+
+        #C_LEDB!.removeAllItems()
+
+        while a$>""
+            #C_LEDB!.addItem(a$(1,pos($0a$=a$)-1))
+            a$=a$(pos($0a$=a$)+1)
+        wend
+
+
+        #C_EDTPLDIR!.setText(dir("")+"template/")
+        
+
+        #C_LEDB!.selectIndex(0)      
+        db$=BBjAPI().getThinClient().getUserProperty("components.classgenerator.db",err=*next)
+        if db$>"" then
+            #C_LEDB!.setText(db$)
+            #C_EDUSER!.setText(BBjAPI().getThinClient().getUserProperty("components.classgenerator.user",err=*next))
+            #C_EDPWD!.setText(BBjAPI().getThinClient().getUserProperty("components.classgenerator.pwd",err=*next))
+            #C_EDSCHEMA!.setText(BBjAPI().getThinClient().getUserProperty("components.classgenerator.schema",err=*next))
+            #C_EDTARGETDIR!.setText(BBjAPI().getThinClient().getUserProperty("components.classgenerator.targetdir",err=*next))
+            #BTNREFRESH__ON_BUTTON_PUSH(null())
+            #C_EDTPLDIR!.setText(BBjAPI().getThinClient().getUserProperty("components.classgenerator.tpldir",err=*next))
+            #C_CBPREPENDDB!.setSelected("1"=BBjAPI().getThinClient().getUserProperty("components.classgenerator.prependdbname",err=*next))
+            #C_BTNREFRESH!.setEnabled(1)
+        endif
+    
+        #C_TBFIND!.setImage(#SysGui!.getImageManager().loadImageFromBytes(#getFindIcon()))
+        #C_TBFINDTPLDIR!.setImage(#SysGui!.getImageManager().loadImageFromBytes(#getFindIcon()))
+
+    methodend
+
+    rem /**
+    rem * Method onExitDialog:
+    rem * Your custom exit code
+    rem */
+    method public void onExitDialog()
+        #Translator!.getTranslationBundle().save()
+    methodend
+
+    rem /**
+    rem * Method postCancelAnswer:
+    rem * Set dialog answer to "canceled"
+    rem */
+    method public void postCancelAnswer()
+        #super!.setAnswer(0)
+        #API!.postCustomEvent("CancelAnswer",null())
+    methodend
+
+    rem /**
+    rem * Method postReturnAnswer:
+    rem * Set dialog answer to "normal return"
+    rem */
+    method public void postReturnAnswer()
+        #super!.setAnswer(1)
+        #API!.postCustomEvent("ReturnAnswer",null())
+    methodend
+
+    rem /**
+    rem * Method BTNREFRESH__ON_BUTTON_PUSH:
+    rem * Event handler for the ON_BUTTON_PUSH event for BTNREFRESH
+    rem * @param BBjButtonPushEvent Button Push
+    rem */
+    method public void BTNREFRESH__ON_BUTTON_PUSH(BBjButtonPushEvent pEvent!)
+        declare ResultSet JDBCResultSet!
+        declare Connection Connection!
+        declare DatabaseMetaData md!
+        declare BBjVector v!
+        declare BBjString catFilter!
+        declare BBjString schemaFilter!
+        declare BBjString tableFilter!
+        declare BBjVector tableTypes!
+
+        #Wnd!.setCursor(#Wnd!.CURSOR_WAIT)
+
+        #C_LBTABLES!.deselectAll()
+        #C_LBTABLES!.removeAllItems()
+        #TableList! = new BBjVector()
+
+        db$ = #C_LEDB!.getText()
+        user$ = #C_EDUSER!.getText()
+        pwd$ = #C_EDPWD!.getText()
+        schema$ = #C_EDSCHEMA!.getText()
+
+        Connection! = ::ClassGeneratorWorker.bbj::ClassGeneratorWorker.connect(db$,user$,pwd$)
+
+        if Connection!<>null()
+            md! = Connection!.getMetaData()
+
+            catFilter!=null()
+            if schema$="" then
+                schemaFilter!=null()
+            else
+                schemaFilter!=cvs(schema$,4)
+            endif
+            tableFilter!="%"
+            tableTypes! = BBjAPI().makeVector()
+            tableTypes!.addItem("TABLE")
+            tableTypes!.addItem("VIEW")
+            tableTypes!.addItem("SYNONYM")
+
+            JDBCResultSet! = md!.getTables(catFilter!,schemaFilter!,tableFilter!,tableTypes!)
+
+            dn$ = md!.getDriverName()
+            v! = new BBjVector()
+
+            while JDBCResultSet!.next() 
+                s!=JDBCResultSet!.getString("TABLE_SCHEM")
+                t$=JDBCResultSet!.getString("TABLE_NAME")
+
+                if pos("BASIS "=dn$)=0 and s! <> null() and s! <> "" then
+                    t$=str(s!)+"."+t$
+                endif
+
+                #C_LBTABLES!.addItem(t$)
+                #TableList!.addItem(t$)
+
+                v!.addItem(i)
+                i=i+1
+            wend
+
+            Connection!.close()
+        endif
+
+        if v!<>null() and v!.size() then
+            #C_LBTABLES!.setSelectedIndices(v!)
+            #C_BTNGENERATE!.setEnabled(1)
+        else
+            #C_BTNGENERATE!.setEnabled(0)
+        endif
+
+        #Wnd!.setCursor(#Wnd!.CURSOR_NORMAL)
+    methodend
+
+    rem /**
+    rem * Method Form__ON_CLOSE:
+    rem * Event handler for the ON_CLOSE event for Form
+    rem * @param BBjCloseEvent Close
+    rem */
+    method public void Form__ON_CLOSE(BBjCloseEvent pEvent!)
+        #postCancelAnswer()
+    methodend
+
+    rem /**
+    rem * Method LEDB__ON_LIST_CHANGE:
+    rem * Event handler for the ON_LIST_CHANGE event for LEDB
+    rem * @param BBjListChangeEvent List Change
+    rem */
+    method public void LEDB__ON_LIST_CHANGE(BBjListChangeEvent pEvent!)
+        #C_LBTABLES!.deselectAll()
+        #C_LBTABLES!.removeAllItems()
+        #C_BTNREFRESH!.setEnabled(1)
+        #C_BTNGENERATE!.setEnabled(0)
+    methodend
+
+    rem /**
+    rem * Method LBTABLES__ON_DRAG_SOURCE_DROP:
+    rem * Event handler for the ON_DRAG_SOURCE_DROP event for LBTABLES
+    rem * @param BBjDragSourceDropEvent Drag Source Drop
+    rem */
+    method public void LBTABLES__ON_DRAG_SOURCE_DROP(BBjDragSourceDropEvent pEvent!)
+        #C_BTNGENERATE!.setEnabled(#C_LBTABLES!.getSelectedIndices().size())
+    methodend
+
+    rem /**
+    rem * Method LBTABLES__ON_LIST_CLICK:
+    rem * Event handler for the ON_LIST_CLICK event for LBTABLES
+    rem * @param BBjListClickEvent List Click
+    rem */
+    method public void LBTABLES__ON_LIST_CLICK(BBjListClickEvent pEvent!)
+        #C_BTNGENERATE!.setEnabled(#C_LBTABLES!.getSelectedIndices().size())
+    methodend
+
+
+    rem /**
+    rem * Method BTNGENERATE__ON_BUTTON_PUSH:
+    rem * Event handler for the ON_BUTTON_PUSH event for BTNGENERATE
+    rem * @param BBjButtonPushEvent Button Push
+    rem */
+    method public void BTNGENERATE__ON_BUTTON_PUSH(BBjButtonPushEvent pEvent!)
+
+
+        #C_BBjProgressBar!.setVisible(1)
+        #C_Form!.setEnabled(0)
+
+        declare BBjThinClient tc!
+
+        db$=#C_LEDB!.getText()
+        s! = #C_LBTABLES!.getSelectedIndices()
+
+        v! = new BBjVector()
+
+        if s!.size() then
+            for i=0 to s!.size()-1
+                t=s!.getItem(i)
+                t$=#TableList!.getItem(t)
+                v!.addItem(t$)
+            next
+        endif
+
+        targetdir$ = #C_EDTARGETDIR!.getText()
+        if targetdir$<>"" and pos(targetdir$(len(targetdir$))="/\")=0 targetdir$=targetdir$+"/"
+
+        tpldir$ = #C_EDTPLDIR!.getText()
+        if tpldir$<>"" and pos(tpldir$(len(tpldir$))="/\")=0 tpldir$=tpldir$+"/"
+
+
+        user$ = #C_EDUSER!.getText()
+        pwd$ = #C_EDPWD!.getText()
+        schema$ = #C_EDSCHEMA!.getText()
+
+        prepend$ = iff(#C_CBPREPENDDB!.isSelected(),"1","0")
+        
+        tc!=BBjAPI().getThinClient()
+        tc!.setUserProperty("components.classgenerator.db",db$)  
+        tc!.setUserProperty("components.classgenerator.user",user$)  
+        tc!.setUserProperty("components.classgenerator.pwd",pwd$)  
+        tc!.setUserProperty("components.classgenerator.schema",schema$)  
+        tc!.setUserProperty("components.classgenerator.targetdir",targetdir$) 
+        tc!.setUserProperty("components.classgenerator.tpldir",tpldir$) 
+        tc!.setUserProperty("components.classgenerator.prependdbname",prepend$) 
+
+        mkdir targetdir$,err=*next
+        
+        ch=unt
+        open (ch)targetdir$
+        close (ch)
+
+        
+        gen! = new ::ClassGeneratorWorker.bbj::ClassGeneratorWorker(db$,user$,pwd$,v!,targetdir$, tpldir$, prepend$="1")
+        gen!.setProgressCb(#this!)
+        gen!.generate()
+
+        a=msgbox("Finished",0,"Process finished")
+        
+        #this!.postReturnAnswer()
+    methodend
+
+    rem /**
+    rem * Method TBFIND__ON_TOOL_BUTTON_PUSH:
+    rem * Event handler for the ON_TOOL_BUTTON_PUSH event for TBFIND
+    rem * @param BBjToolButtonPushEvent Tool Button Push
+    rem */
+    method public void TBFIND__ON_TOOL_BUTTON_PUSH(BBjToolButtonPushEvent pEvent!)
+        nsVar$="TargetDirFind_"+hta(info(3,0))
+        startDir$=#C_EDTARGETDIR!.getText()
+        if startDir$="" then
+            startDir$=dsk("")+dir("")
+        endif
+        startX=-1
+        startY=-1
+        BBjAPI().getGroupNamespace().setCallbackForVariable(nsVar$,#this!,"getTargetDirFindResult")
+        useClient=#getFALSE()
+        dirOnly=#getTRUE()
+        new FileChooser(startDir$,startX,startY,nsVar$,useClient,dirOnly)
+    methodend
+
+    rem /**
+    rem * Method getTargetDirFindResult:
+    rem * Get result of target directory find from namespace
+    rem * @param BBjNamespaceEvent Namespace event object
+    rem */
+    method public void getTargetDirFindResult(BBjNamespaceEvent pEvent!)
+        nsVar$="TargetDirFind_"+hta(info(3,0))
+        BBjAPI().getGroupNamespace().removeCallbackForVariable(nsVar$)
+        user_action$=BBjAPI().getGroupNamespace().getValue(nsVar$+"_user_action")
+        if user_action$<>"::CANCEL::" then
+            fpaths!=cast(BBjVector,#getGroupNS().getValue(nsVar$))
+            if fpaths!.size()>0
+                fpath$=cast(BBjString,fpaths!.getItem(0))
+                #C_EDTARGETDIR!.setText(fpath$)
+            endif
+        endif
+    methodend
+
+    rem /**
+    rem * Method getTplDirFindResult:
+    rem * Get result of target directory find from namespace
+    rem * @param BBjNamespaceEvent Namespace event object
+    rem */
+    method public void getTplDirFindResult(BBjNamespaceEvent pEvent!)
+        nsVar$="TplDirFind_"+hta(info(3,0))
+        BBjAPI().getGroupNamespace().removeCallbackForVariable(nsVar$)
+        user_action$=BBjAPI().getGroupNamespace().getValue(nsVar$+"_user_action")
+        if user_action$<>"::CANCEL::" then
+            fpaths!=cast(BBjVector,#getGroupNS().getValue(nsVar$))
+            if fpaths!.size()>0
+                fpath$=cast(BBjString,fpaths!.getItem(0))
+                #C_EDTPLDIR!.setText(fpath$)
+            endif
+        endif
+    methodend
+
+    method protected BBjString getFindIcon()
+        methodret $89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF610000019B49444154$
+:               + $78DAAD8FBF4B425114C785906A942CC5A1D9740843227350EC69F508C4F4BD873C032921B506A1C5$
+:               + $274238D5E8A4829635D8E0E8620D827F414DD9CFC5A9BF42BEDD7B5348F48950070E5F38DFEFFDDC$
+:               + $73349AFFAC5C2E874AA582743A8D69E623653418B06EB7C36AB10C82332AF3F1655B5DC569220131$
+:               + $1482D7EB89FAB8AD2FAABFE7238F388E5B3ECF66711C8B61736303F373733404ABD98CAB7299E938$
+:               + $9FF43203785CAE839BEB6BB4DB6DE4F3791C1EC52088220BF9FD7EA69F1F1F43BEC964A2F3E80FC0$
+:               + $EDAE3E349BB8271D222B1A8C46088208835E8FBB5A8D290554C927D4DF0F06B1665BA3802A03ECF1$
+:               + $7CF7E9F111B7B737D8D9DDC5827E910004CC6AB528140A4CDFDFDE502A15996F5EB180E7790AE832$
+:               + $801C0EA3F3FC8C46A3012593811C892044007475A97F8A9ACF00C9781C67A914F6087D89ACDB3706$
+:               + $FDBAEDF34DF259E1A5D341BD5E47327942EE1486CC6932CCBCBCB8C08AC53A11A096F91B409665B4$
+:               + $5A2D4892049D4E0787C301A7D339049898A166AFD743B15844201080A2286301AA1935BA9DE3FD76$
+:               + $2F7F4075D206DF55E56ADBFD23D8070000000049454E44AE426082$
+    methodend
+
+    rem /**
+    rem * Method TBFINDTPLDIR__ON_TOOL_BUTTON_PUSH:
+    rem * Event handler for the ON_TOOL_BUTTON_PUSH event for TBFINDTPLDIR
+    rem * @param BBjToolButtonPushEvent Tool Button Push
+    rem */
+    method public void TBFINDTPLDIR__ON_TOOL_BUTTON_PUSH(BBjToolButtonPushEvent pEvent!)
+        nsVar$="TplDirFind_"+hta(info(3,0))
+        startDir$=#C_EDTPLDIR!.getText()
+        if startDir$="" then
+            startDir$=dsk("")+dir("")
+        endif
+        startX=-1
+        startY=-1
+        BBjAPI().getGroupNamespace().setCallbackForVariable(nsVar$,#this!,"getTplDirFindResult")
+        useClient=#getFALSE()
+        dirOnly=#getTRUE()
+        new FileChooser(startDir$,startX,startY,nsVar$,useClient,dirOnly)
+    methodend
+
+    method public void updateProgress(BBjString msg$, BBjNumber perc)
+
+        #C_STMSG!.setText(msg$)
+        #C_BBjProgressBar!.setValue(perc)
+
+    methodend
+
+classend
+
+
+declare ClassGenerator myDialog!
+myDialog! = new ClassGenerator()
+myDialog!.doModal() 
+release
+
+
+
+
+
+
+
+
