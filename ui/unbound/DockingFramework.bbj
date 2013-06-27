@@ -291,9 +291,6 @@ interface public FrameElement
 
     method public BBjString getTitle()
 
-    methodend
-
-
 interfaceend
 
 
