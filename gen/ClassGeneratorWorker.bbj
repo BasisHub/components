@@ -170,7 +170,7 @@ class public ClassGeneratorWorker
         if #Connection!<>null() then
             md! = #Connection!.getMetaData()
 
-            JDBCResultSet! = md!.getPrimaryKeys(db$,s$,t$)
+            JDBCResultSet! = md!.getPrimaryKeys(#DB$,s$,t$)
 
             while JDBCResultSet!.next() 
                 v!.addItem(JDBCResultSet!.getString("COLUMN_NAME"))
