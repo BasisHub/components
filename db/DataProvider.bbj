@@ -298,7 +298,9 @@ class public DataProvider
                 case java.sql.Types.NCHAR
                 row!.setFieldValue(col_name$,cast(String,null()))
                 break
-
+                case java.sql.Types.NVARCHAR 
+                    row!.setFieldValue(col_name$,cast(String,null()))
+                break
                 case java.sql.Types.NUMERIC
                 case java.sql.Types.DECIMAL
                 row!.setFieldValue(col_name$,cast(java.math.BigDecimal,null()))
@@ -420,6 +422,11 @@ class public DataProvider
                                 s!=#JDBCResultSet!.getString(col_name$)
                                 row!.setFieldValue(col_name$,cast(String,s!))
                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+                                break
+                                case java.sql.Types.NVARCHAR 
+                                    s!=#JDBCResultSet!.getString(col_name$)
+                                    row!.setFieldValue(col_name$,cast(String,s!))
+                                    row!.setFieldAttribute(col_name$,"LABEL",col_label$)
                                 break
 
                                 case java.sql.Types.NUMERIC
