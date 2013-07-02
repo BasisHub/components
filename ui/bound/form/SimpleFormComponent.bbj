@@ -884,9 +884,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             fi
 
             #EditedFields! = cast(java.util.HashMap,#onBeforeSave(#EditedFields!))
-            print "RecNo:",#getBC().getEditingRecNo()
-            print "Fields:",#EditedFields!
-            input *
+REM             print "RecNo:",#getBC().getEditingRecNo()
+REM             print "Fields:",#EditedFields!
             
             #getBC().saveRecord(#getBC().getEditingRecNo(),#EditedFields!)
             #getBC().clearValidationErrors()
