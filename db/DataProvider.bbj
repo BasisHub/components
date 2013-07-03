@@ -246,9 +246,13 @@ class public DataProvider
 
             if pos("1=2" =sql$) = 0 then 
 
-            
-
-                sql$="SELECT COUNT(*) AS COUNT FROM ("+sql$+") AS X"
+                rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
+                rem sollte ein order by im Satement sein muss dieses entfernt werden
+                count$ = sql$
+                if pos("ORDER BY"= sql$) > 0 then
+                    count$ = sql$(1,pos("ORDER BY"= sql$)-1)
+                endif     
+                sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
 
                 stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
                 #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
@@ -529,7 +533,14 @@ class public DataProvider
             
             rem now determine size for later use - it's probably needed anyway
             
-            sql$="SELECT COUNT(*) AS COUNT FROM ("+sql$+") AS X"
+            rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
+            rem sollte ein order by im Satement sein muss dieses entfernt werden
+            count$ = sql$
+            if pos("ORDER BY"= sql$) > 0 then
+                count$ = sql$(1,pos("ORDER BY"= sql$)-1)
+            endif     
+            sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
+
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
 
