@@ -766,6 +766,25 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         fi
 
+        rem if there's no primary key segment that has been enabled, just enable the entire form and trust in god
+        REM TODO maybe put in more logic to determine if only auto increment keys et al are missing 
+        if f=0 then
+            
+            if #ControlList!.size() then
+                ks! = #ControlList!.keySet()
+                it! = ks!.iterator()
+    
+                while it!.hasNext()
+                    ctrl_name$=it!.next()
+                    ControlMap! = #ControlList!.get(ctrl_name$)
+                    ctrl!       = ControlMap!.get("ControlInstance")
+                    ctrl!.setEnabled(1)                
+                wend
+    
+            fi
+
+        
+        fi
 
 
     methodend
@@ -884,9 +903,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             fi
 
             #EditedFields! = cast(java.util.HashMap,#onBeforeSave(#EditedFields!))
-            print "RecNo:",#getBC().getEditingRecNo()
-            print "Fields:",#EditedFields!
-            input *
+REM             print "RecNo:",#getBC().getEditingRecNo()
+REM             print "Fields:",#EditedFields!
             
             #getBC().saveRecord(#getBC().getEditingRecNo(),#EditedFields!)
             #getBC().clearValidationErrors()
