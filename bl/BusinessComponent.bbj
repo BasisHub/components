@@ -111,7 +111,7 @@ class public BusinessComponent
     rem * Method setSortOrder:
     rem * set the sort order to one column
     rem * @param BBjString col$: the column name
-    rem * @param BBjNumber size: 0=descending, 1=ascending
+    rem * @param BBjNumber sortAscending: 0=descending, 1=ascending
     rem */
     method public void setSortOrder(BBjString col$,BBjNumber sortAscending)
 
