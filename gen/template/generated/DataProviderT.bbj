@@ -37,6 +37,8 @@ class public (DB_NICE)(TBL_NICE)DataProviderT extends DataProvider
         <keyseg>
         #addPrimaryKeySegment("(KEYSEG)")
         </keyseg>
+        rem template because of ms sql server problem
+        rem #addPrimaryKeySegment("intID")
         #setEntityClass((DB_NICE)(TBL_NICE)Entity.newInstance())
 
     methodend
