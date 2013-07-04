@@ -58,13 +58,7 @@ class public UIComponent
     rem /**
     rem * Constructor UIComponent - disabled
     rem */
-    method public UIComponent()
-
-        sg! = BBjAPI().openSysGui("X0")
-        id=BBjAPI().getSysGui().getAvailableContext()
-        #UIComponent(CAST(BBjChildWindow,null()))
-        #UIComponent(CAST(BBjWindow,null()), 701, 10, 10, 800, 600)
-
+    method private UIComponent()
 
     methodend
 
