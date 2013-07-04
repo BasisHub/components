@@ -18,7 +18,7 @@ class public (DB_NICE)(TBL_NICE)Form extends SimpleFormComponent
     rem *
     method public (DB_NICE)(TBL_NICE)Form ()
 
-        #super!(wnd!,BBjAPI().getSysGui().getAvailableContext(),20,20,640,480)
+        #super!(null(),701,10,10,800,500)
         #super!.setChildWindow("arc/(DB_NICE)(TBL_NICE)Form.arc",100)
         #setupLinkedForms()
 
