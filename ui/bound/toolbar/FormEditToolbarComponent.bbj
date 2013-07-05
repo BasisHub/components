@@ -26,6 +26,12 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
     field private BBjMenuItem MenuRestore!
     field private BBjMenuItem MenuRestoreAll!
     
+    field private BBjNumber ShowButtonNew=1
+    field private BBjNumber ShowButtonSave=1
+    field private BBjNumber ShowButtonDel=1
+    field private BBjNumber ShowButtonRestore=1
+    field private BBjNumber ShowButtonRestoreAll=1
+    
 
 
     method public FormEditToolbarComponent (BBjChildWindow cw!)
@@ -117,6 +123,41 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
         #super!.setBC(bc!)
 
     methodend
+    
+    method public void setShowButtonNew(BBjNumber fShow)
+    
+        #ShowButtonNew = fShow
+        #BtnNew!.setVisible(fShow)
+    
+    methodend    
+    
+    method public void setShowButtonSave(BBjNumber fShow)
+    
+        #ShowButtonSave = fShow
+        #BtnSave!.setVisible(fShow)
+    
+    methodend
+    
+    method public void setShowButtonDel(BBjNumber fShow)
+    
+        #ShowButtonDel = fShow
+        #BtnDel!.setVisible(fShow)
+    
+    methodend        
+    
+    method public void setShowButtonUndo(BBjNumber fShow)
+    
+        #ShowButtonRestore = fShow
+        #BtnRestore!.setVisible(fShow)
+    
+    methodend
+             
+    method public void setShowButtonUndoAll(BBjNumber fShow)
+    
+        #ShowButtonRestoreAll = fShow
+        #BtnRestoreAll!.setVisible(fShow)
+    
+    methodend                      
 
     method public void onBtnNew(BBjEvent ev!)
 

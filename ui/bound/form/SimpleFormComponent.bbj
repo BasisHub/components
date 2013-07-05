@@ -11,7 +11,7 @@ use ::components/ui/bound/toolbar/FormEditToolbarComponent.bbj::FormEditToolbarC
 use ::components/ui/bound/controls/ForeignKeyPicker.bbj::ForeignKeyPicker
 
 use ::translations/bbtranslator.bbj::BBTranslator
-use ::components/i18n/i18n.bbj::i18n
+
 
 
 
@@ -25,8 +25,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     field protected java.util.HashMap ControlList!
 
-    field private NavigationToolbarComponent NavigationToolbarComponent!
-    field private FormEditToolbarComponent FormEditToolbarComponent!
+    field protected NavigationToolbarComponent NavigationToolbar!
+    field protected FormEditToolbarComponent FormEditToolbar!
     
     field protected DataRow   Rec!
 
@@ -308,14 +308,14 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             #getLaf().prepareWindow(#ToolbarWnd!)
             #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
             
-            #FormEditToolbarComponent! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,200,25)
+            #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,200,25)
             if #this!.getBC()<>null() then 
-                #FormEditToolbarComponent!.setBC(#this!.getBC())
+                #FormEditToolbar!.setBC(#this!.getBC())
             fi
             
-            #NavigationToolbarComponent! = new NavigationToolbarComponent(#ToolbarWnd!,11,200,2,250,25)
+            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,200,2,250,25)
             if #this!.getBC()<>null() then
-                #NavigationToolbarComponent!.setBC(#this!.getBC())
+                #NavigationToolbar!.setBC(#this!.getBC())
             fi
             
     methodend
@@ -346,10 +346,10 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         if fShow then
             editMenu! = #super!.getMenuBar().addMenu(-2,"&Edit")
-            #FormEditToolbarComponent!.setupMenu(editMenu!)
+            #FormEditToolbar!.setupMenu(editMenu!)
             
             navMenu! = #super!.getMenuBar().addMenu(-3,"&Record")
-            #NavigationToolbarComponent!.setupMenu(navMenu!)
+            #NavigationToolbar!.setupMenu(navMenu!)
         fi
         
     methodend
@@ -377,12 +377,12 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         #super!.setBC(bc!)
 
-        if #NavigationToolbarComponent! <> null() then
-            #NavigationToolbarComponent!.setBC(#this!.getBC())
+        if #NavigationToolbar! <> null() then
+            #NavigationToolbar!.setBC(#this!.getBC())
         fi
 
-        if #FormEditToolbarComponent! <> null() then
-            #FormEditToolbarComponent!.setBC(#this!.getBC())
+        if #FormEditToolbar! <> null() then
+            #FormEditToolbar!.setBC(#this!.getBC())
         fi
 
         Rec!  = #getBC().getColumnAttributes()

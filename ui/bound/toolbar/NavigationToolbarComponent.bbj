@@ -24,6 +24,13 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
     field private BBjMenuItem MenuPrev!
     field private BBjMenuItem MenuNext!
     field private BBjMenuItem MenuLast!
+    
+    field private BBjNumber ShowButtonSearch=1
+    field private BBjNumber ShowButtonFirst=1
+    field private BBjNumber ShowButtonPrev=1
+    field private BBjNumber ShowButtonNext=1
+    field private BBjNumber ShowButtonLast=1
+
 
     method public NavigationToolbarComponent (BBjChildWindow cw!)
 
@@ -104,6 +111,44 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
         #super!.setBC(bc!)
 
     methodend
+
+    method public void setShowButtonSearch(BBjNumber fShow)
+    
+        #ShowButtonSearch = fShow
+        #BtnSearch!.setVisible(fShow)
+    
+    methodend
+
+    method public void setShowButtonFirst(BBjNumber fShow)
+    
+        #ShowButtonFirst = fShow
+        #BtnFirst!.setVisible(fShow)
+    
+    methodend
+    
+    method public void setShowButtonPrev(BBjNumber fShow)
+    
+        #ShowButtonPrev = fShow
+        #BtnPrev!.setVisible(fShow)
+    
+    methodend
+
+    method public void setShowButtonNext(BBjNumber fShow)
+    
+        #ShowButtonNext = fShow
+        #BtnNext!.setVisible(fShow)
+    
+    methodend
+    
+    method public void setShowButtonLast(BBjNumber fShow)
+    
+        #ShowButtonLast = fShow
+        #BtnLast!.setVisible(fShow)
+    
+    methodend
+        
+        
+
 
     method public void onBtnFirst(BBjEvent ev!)
 
