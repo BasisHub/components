@@ -376,7 +376,7 @@ class public NavigationGridComponent extends UIComponent implements UIWidget
 
     methodend
 
-    method private void initialize()
+    method protected void initialize()
 
 REM         panel! = #getWnd().addChildWindow(100,0,0,#getWnd().getWidth(),#getH(),"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
 REM         #getLaf().prepareWindow(panel!)

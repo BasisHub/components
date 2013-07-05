@@ -306,6 +306,7 @@ rem /** DLGWIZ_INI_END **/
             tableTypes!.addItem("TABLE")
             rem tableTypes!.addItem("VIEW")
             rem tableTypes!.addItem("SYNONYM")
+            rem TODO: consider what to do with database views 
 
             JDBCResultSet! = md!.getTables(catFilter!,schemaFilter!,tableFilter!,tableTypes!)
 
