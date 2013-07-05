@@ -597,7 +597,7 @@ class public BusinessComponent
         v! = new BBjVector()
         v!.addItem(selection$)
         #ControllerFilter!.put(var$,v!)
-        
+
         #prepareResultSet(0,0)
         if #getResultSet().size()>0 then
             v! = new BBjVector()
@@ -618,6 +618,21 @@ class public BusinessComponent
 
     methodend
 
+    rem /**
+    rem * Method resetdrive:
+    rem * reset all controller filter (set by drive)
+    rem */
+    method public void resetdrive()
+
+        ks! = #super!.getControllerFilter().keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            var$=it!.next()
+            #super!.getControllerFilter().remove(var$)
+        wend
+        
+
+    methodend
 
     method public java.util.HashMap getControllerFilter()
 

@@ -77,8 +77,27 @@ class public DataProviderBusinessComponent extends BusinessComponent
     methodend
 
     rem /**
-    rem * Method resetdrive:
+    rem * Method drive:
     rem * called by the controller when a change of the selection occured (from outside)
+    rem * @param BBjString var$: the variable that changed
+    rem * @param BBjString selection$: the new selection (one item only)
+    rem */
+    method public void drive(BBjString var$, BBjString selection$)
+
+        v! = new BBjVector()
+        v!.addItem(selection$)
+        #super!.getControllerFilter().put(var$,v!)
+
+        #getDataProvider().putControllerFilter(var$,v!)
+
+        #refresh(1)
+   
+
+    methodend    
+
+    rem /**
+    rem * Method resetdrive:
+    rem * reset one particular controller filter (set by drive)
     rem * @param BBjString var$: the variable that changed
     rem */
     method public void resetdrive(BBjString var$)
@@ -87,6 +106,25 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
         #getDataProvider().clearControllerFilter(var$)
 
+        #refresh(1)
+
+    methodend
+
+    rem /**
+    rem * Method resetdrive:
+    rem * reset all controller filter (set by drive)
+    rem */
+    method public void resetdrive()
+
+        kf! = #super!.getControllerFilter().clone()
+        ks! = kf!.keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            var$=it!.next()
+            #super!.getControllerFilter().remove(var$)
+        wend
+        
+        #getDataProvider().clearControllerFilter(var$)
         #refresh(1)
 
     methodend
