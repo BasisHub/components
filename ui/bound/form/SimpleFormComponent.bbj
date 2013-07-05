@@ -11,7 +11,7 @@ use ::components/ui/bound/toolbar/FormEditToolbarComponent.bbj::FormEditToolbarC
 use ::components/ui/bound/controls/ForeignKeyPicker.bbj::ForeignKeyPicker
 
 use ::translations/bbtranslator.bbj::BBTranslator
-use ::components/i18n/i18n.bbj::i18n
+
 
 
 
@@ -25,8 +25,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     field protected java.util.HashMap ControlList!
 
-    field private NavigationToolbarComponent NavigationToolbarComponent!
-    field private FormEditToolbarComponent FormEditToolbarComponent!
+    field protected NavigationToolbarComponent NavigationToolbar!
+    field protected FormEditToolbarComponent FormEditToolbar!
     
     field protected DataRow   Rec!
 
@@ -36,9 +36,10 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     field private BBjVector WarningIcons! = new BBjVector()
 
-    field private static BBTranslator  Translator! = i18n.getTranslator()
     
     field private java.util.HashMap RestoreControllerFilter!
+    
+    field private BBjNumber ReadOnly
 
 
     method public SimpleFormComponent (BBjChildWindow cw!)
@@ -170,7 +171,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
                 else
 
-                    if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
+                    if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and ctrl!.getControlType() <> 17 then
                         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onCtrlInputKeypress")
                     fi
 
@@ -269,13 +270,20 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     method public void onCtrlLostFocus(BBjLostFocusEvent ev!)
 
         ctrl_name$=ev!.getControl().getName()
+        
+        
 
         if #EditedFields! <> null() and #ControlList!.get(ctrl_name$)<>null() then
             v$=ev!.getText()
-
+            
+            if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and v$="" then
+                methodret
+                rem don't validate primary key fields as long as they're empty
+            fi
+            
             if #EditedRec! = null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
                 #EditedFields!.put(ctrl_name$,v$)
-                print ctrl_name$,"-> ",v$
+
                 validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
                 #this!.markValidationErrors()
             else
@@ -302,14 +310,14 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             #getLaf().prepareWindow(#ToolbarWnd!)
             #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
             
-            #FormEditToolbarComponent! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,200,25)
+            #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,200,25)
             if #this!.getBC()<>null() then 
-                #FormEditToolbarComponent!.setBC(#this!.getBC())
+                #FormEditToolbar!.setBC(#this!.getBC())
             fi
             
-            #NavigationToolbarComponent! = new NavigationToolbarComponent(#ToolbarWnd!,11,200,2,250,25)
+            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,200,2,250,25)
             if #this!.getBC()<>null() then
-                #NavigationToolbarComponent!.setBC(#this!.getBC())
+                #NavigationToolbar!.setBC(#this!.getBC())
             fi
             
     methodend
@@ -340,10 +348,10 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         if fShow then
             editMenu! = #super!.getMenuBar().addMenu(-2,"&Edit")
-            #FormEditToolbarComponent!.setupMenu(editMenu!)
+            #FormEditToolbar!.setupMenu(editMenu!)
             
             navMenu! = #super!.getMenuBar().addMenu(-3,"&Record")
-            #NavigationToolbarComponent!.setupMenu(navMenu!)
+            #NavigationToolbar!.setupMenu(navMenu!)
         fi
         
     methodend
@@ -366,17 +374,24 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         #super!.setVisible(v)
 
     methodend
+    
+    method public void setReadOnly(BBjNumber ro)
+    
+        #ReadOnly = ro
+        #enableControls(0,0)
+    
+    methodend
 
     method public void setBC(BusinessComponent bc!)
 
         #super!.setBC(bc!)
 
-        if #NavigationToolbarComponent! <> null() then
-            #NavigationToolbarComponent!.setBC(#this!.getBC())
+        if #NavigationToolbar! <> null() then
+            #NavigationToolbar!.setBC(#this!.getBC())
         fi
 
-        if #FormEditToolbarComponent! <> null() then
-            #FormEditToolbarComponent!.setBC(#this!.getBC())
+        if #FormEditToolbar! <> null() then
+            #FormEditToolbar!.setBC(#this!.getBC())
         fi
 
         Rec!  = #getBC().getColumnAttributes()
@@ -415,14 +430,11 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     method public BBjNumber canSelectionChange(BBjNumber force)
 
 
-        if #EditedRec! = null() or #EditedFields! = null() then
+        if  #EditedRec! = null() or #EditedFields! = null() then
 
             methodret 1
 
         fi
-
-        
-
 
         if force=0 then
             opt=35
@@ -430,7 +442,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             opt=36
         fi
 
-        a=msgbox(#Translator!.getTranslation("SAVE_CHANGES"),opt,#getBC().getTitle())
+        a=msgbox(#super!.getTranslator().getTranslation("SAVE_CHANGES"),opt,#getBC().getTitle())
 
         switch a
 
@@ -468,6 +480,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         
         if #getBC().getSelection() = null() or #getBC().getSelection().size() <> 1 then
 
+            #Rec!=null()
             if #IsFormLocked = 0 then
 
                 #getBC().clearValidationErrors()
@@ -752,7 +765,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                 ControlMap! = #ControlList!.get(ctrl_name$)
                 ctrl!       = ControlMap!.get("ControlInstance")
 
-                if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
+                if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and ctrl!.getControlType() <> 17 then
                     ctrl!.setEnabled(1)
                     if f=0 then
                         ctrl!.focus()
@@ -786,6 +799,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         
         fi
 
+        BBjAPI().getSysGui().flushEvents()
 
     methodend
 
@@ -914,6 +928,7 @@ REM             print "Fields:",#EditedFields!
 
         #EditedFields! = null()
         #EditedRec! = null()
+
         rem perform onSelectionChange to drive all linked foreign key pickers over the UI
         rem TODO: avoid flickering of the old value in the form
 
@@ -1172,6 +1187,8 @@ REM             print "Fields:",#EditedFields!
                     ctrl_name$=it!.next()
                     ControlMap! = #ControlList!.get(ctrl_name$)
                     ctrl!       = ControlMap!.get("ControlInstance")
+
+                    ctrl!.setEditable(!#ReadOnly)
 
                     if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
                         ctrl!.setEnabled(!fEditing)

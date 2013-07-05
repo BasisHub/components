@@ -2,7 +2,7 @@
 
 VERSION "4.0"
 
-WINDOW 101 "Generate Classes" 100 100 424 522
+WINDOW 101 "Generate Classes" 100 100 424 584
 BEGIN
     EVENTMASK 3287287500
     INVISIBLE
@@ -58,7 +58,7 @@ BEGIN
         NAME "ED_TARGETDIR"
     END
 
-    BUTTON 300, "Generate Classes", 143, 440, 139, 27
+    BUTTON 300, "Generate Classes", 142, 501, 139, 27
     BEGIN
         NAME "BTN_GENERATE"
     END
@@ -138,17 +138,23 @@ BEGIN
         NOT OPAQUE
     END
 
-    PROGRESSBAR 110, 17, 487, 391, 21
+    PROGRESSBAR 110, 16, 548, 391, 21
     BEGIN
         CUSTOMTEXT ""
         INVISIBLE
         NAME "BBj Progress Bar"
     END
 
-    STATICTEXT 111, "", 17, 491, 391, 20
+    STATICTEXT 111, "", 16, 552, 391, 20
     BEGIN
         JUSTIFICATION 16384
         NAME "ST_MSG"
+        NOT OPAQUE
+    END
+
+    CHECKBOX 112, "Overwrite all files.", 117, 458, 232, 25
+    BEGIN
+        NAME "CB_OVERWRITE"
         NOT OPAQUE
     END
 

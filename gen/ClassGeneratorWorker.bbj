@@ -39,6 +39,8 @@ class public ClassGeneratorWorker
     field private Connection Connection!
     field public ProgressCallback ProgressCb!
 
+    field public BBjNumber Overwrite=0
+
     method public ClassGeneratorWorker(BBjString db$, BBjString user$, BBjString pwd$, BBjVector tables!, BBjString targetdir$, BBjString tpldir$, BBjNumber prepend)
 
         #DB$ = db$
@@ -337,10 +339,12 @@ class public ClassGeneratorWorker
 
         f$=targetdir$+db_nice$+tbl_nice$+ftpl$
 
-        open (ch,err=startGen)f$
-        rem do not generate as the file exists
-        close (ch)
-        methodret
+        if !#Overwrite then
+            open (ch,err=startGen)f$
+            rem do not generate as the file exists
+            close (ch)
+            methodret
+        fi
 
         startGen:
         
@@ -425,8 +429,12 @@ class public ClassGeneratorWorker
                         w=min(max(30,col_size*13),400)
                     break
                 swend
+                
+                if rsmd!.isReadOnly(i) or rsmd!.isAutoIncrement(i) then
+                        ctrl$="STATICTEXT"
+                fi
 
-                if ctrl$="INPUTE" or ctrl$="INPUTN" or ctrl$="INPUTD" OR ctrl$="EDIT" then
+                if ctrl$="INPUTE" or ctrl$="INPUTN" or ctrl$="INPUTD" OR ctrl$="EDIT"  then
 
                     PRINT (ch)"    STATICTEXT "+str(cid)+", """+col_label$+":"", 10, "+str(8+row*30)+", 130, 20"
                     PRINT (ch)"        BEGIN"
@@ -452,6 +460,7 @@ class public ClassGeneratorWorker
                     if ctrl$="INPUTE" then
                         PRINT (ch)"            PADCHARACTER 32"
                     fi
+
                                     
                 PRINT (ch)"        END"
                 print (ch)""
@@ -655,12 +664,13 @@ class public ClassGeneratorWorker
             tpl$=tpl$(pos("\"=tpl$)+1)
         wend
         
-        if pos("T.bbj"=tpl$)=0 then
-             ch1=unt
-             open (ch1,err=*next)targetdir$+db$+t$+tpl$; close (ch1); goto skip
-        else
-             
-        endif
+
+        if !#Overwrite then
+            if pos("T.bbj"=tpl$)=0 then
+                 ch1=unt
+                 open (ch1,err=*next)targetdir$+db$+t$+tpl$; close (ch1); goto skip
+            endif
+        fi
 
             f$=targetdir$+db_nice$+tbl_nice$+tpl$
             open (ch,mode="O_CREATE,O_TRUNC")f$

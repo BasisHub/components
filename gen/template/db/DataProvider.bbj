@@ -78,6 +78,49 @@ class public (DB_NICE)(TBL_NICE)DataProvider extends (DB_NICE)(TBL_NICE)DataProv
         methodret #super!.getDistinctValues(fieldName$)
 
     methodend
+    
+    
+    method public void deleteRecords(BBjVector indexList!)
+
+        #super!.deleteRecords(indexList!)
+
+    methodend
+    
+    method public void updateRecord(DataRow rec!, DataRow orig_rec!)
+    
+        #super!.updateRecord(rec!, orig_rec!)
+        
+    methodend
+    
+    method public void insertRecord(DataRow rec!)
+    
+        #super!.insertRecord(rec!)
+        
+    methodend
+        
+    rem /**
+    rem * Method openDatabase:
+    rem * open the connection to the database
+    rem */
+    method protected void openDatabase()
+
+        #super!.openDatabase()
+
+        rem if you want to do something else here
+        rem then you'll need to do something like
+        rem #super!.setConnection( someJavaSqlConnection! ) 
+
+    methodend
+
+    rem /**
+    rem * Method closeDatabase:
+    rem * close the connection to the database
+    rem */
+    method protected void closeDatabase()
+
+        #super!.closeDatabase()
+
+    methodend
 
 classend
 

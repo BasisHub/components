@@ -8,10 +8,6 @@ bc! = new (DB_NICE)(TBL_NICE)BusinessComponent()
 
 EditForm! = new (DB_NICE)(TBL_NICE)Form()
 EditForm!.setBC(bc!)
-EditForm!.setShowToolBar(1)
-EditForm!.setShowMenuBar(1)
-EditForm!.setShowOkCancelButtons(0)
-
 EditForm!.doModal()
 
 release

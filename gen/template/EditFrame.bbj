@@ -1,12 +1,12 @@
-use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
 use ::components/ui/unbound/SplitPane.bbj::SplitPane
 
 use ::ui/(DB_NICE)(TBL_NICE)Form.bbj::(DB_NICE)(TBL_NICE)Form
+use ::ui/(DB_NICE)(TBL_NICE)Grid.bbj::(DB_NICE)(TBL_NICE)Grid
 use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
 
 
 declare (DB_NICE)(TBL_NICE)Form        EditEditForm!
-declare NavigationGridComponent NavGrid!
+declare (DB_NICE)(TBL_NICE)Grid        NavGrid!
 declare SplitPane SplitPane!
 
 sg! = BBjAPI().openSysGui("X0")
@@ -18,7 +18,7 @@ wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
 
 SplitPane! = new SplitPane(wnd!,100,10,10,1000,700)
 
-NavGrid! = new NavigationGridComponent(SplitPane!.getTop())
+NavGrid! = new (DB_NICE)(TBL_NICE)Grid(SplitPane!.getTop())
 SplitPane!.setUiwTop(NavGrid!)
 NavGrid!.setBC(bc!)
 NavGrid!.setShowToolbar(1)

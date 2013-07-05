@@ -104,8 +104,15 @@ class public (DB_NICE)(TBL_NICE)Form extends SimpleFormComponent
             #setShowToolBar(1)
             #setShowMenuBar(1)
             #setShowStatusBar(1)
-            
+            #setShowOkCancelButtons(0)
+           
         fi
+
+        rem sample: this is how you hide the search button in navigation toolbar
+        rem #getNavigationToolbar().setShowButtonSearch(0)
+        
+        rem and this is how you would hide the delete button
+        rem #getFormEditToolbar().setShowButtonDel(0)
         
     methodend    
 

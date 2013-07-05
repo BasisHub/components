@@ -24,6 +24,13 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
     field private BBjMenuItem MenuPrev!
     field private BBjMenuItem MenuNext!
     field private BBjMenuItem MenuLast!
+    
+    field private BBjNumber ShowButtonSearch=1
+    field private BBjNumber ShowButtonFirst=1
+    field private BBjNumber ShowButtonPrev=1
+    field private BBjNumber ShowButtonNext=1
+    field private BBjNumber ShowButtonLast=1
+
 
     method public NavigationToolbarComponent (BBjChildWindow cw!)
 
@@ -52,30 +59,35 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
         #BtnSearch! = #getWnd().addToolButton(99,offs,0,22,22,"")
         #BtnSearch!.setImage(imgMan!.loadImageFromBytes(#getIconSearch()))
         #BtnSearch!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnSearch")
+        #BtnSearch!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_SEARCH"))
         #BtnSearch!.setOpaque(0)
         offs=offs+stepping+5
         
         #BtnFirst! = #getWnd().addToolButton(100,offs,0,22,22,"")
         #BtnFirst!.setImage(imgMan!.loadImageFromBytes(#getIconFirst()))
         #BtnFirst!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnFirst")
+        #BtnFirst!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_FIRST"))
         #BtnFirst!.setOpaque(0)
         offs=offs+stepping
 
         #BtnPrev! = #getWnd().addToolButton(101,offs,0,22,22,"")
         #BtnPrev!.setImage(imgMan!.loadImageFromBytes(#getIconPrev()))
         #BtnPrev!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnPrev")
+        #BtnPrev!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_PREV"))
         #BtnPrev!.setOpaque(0)
         offs=offs+stepping
 
         #BtnNext! = #getWnd().addToolButton(102,offs,0,22,22,"")
         #BtnNext!.setImage(imgMan!.loadImageFromBytes(#getIconNext()))
         #BtnNext!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnNext")
+        #BtnNext!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_NEXT"))
         #BtnNext!.setOpaque(0)
         offs=offs+stepping
 
         #BtnLast! = #getWnd().addToolButton(103,offs,0,22,22,"")
         #BtnLast!.setImage(imgMan!.loadImageFromBytes(#getIconLast()))
         #BtnLast!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnLast")
+        #BtnLast!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_LAST"))
         #BtnLast!.setOpaque(0)
         offs=offs+stepping
 
@@ -99,6 +111,44 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
         #super!.setBC(bc!)
 
     methodend
+
+    method public void setShowButtonSearch(BBjNumber fShow)
+    
+        #ShowButtonSearch = fShow
+        #BtnSearch!.setVisible(fShow)
+    
+    methodend
+
+    method public void setShowButtonFirst(BBjNumber fShow)
+    
+        #ShowButtonFirst = fShow
+        #BtnFirst!.setVisible(fShow)
+    
+    methodend
+    
+    method public void setShowButtonPrev(BBjNumber fShow)
+    
+        #ShowButtonPrev = fShow
+        #BtnPrev!.setVisible(fShow)
+    
+    methodend
+
+    method public void setShowButtonNext(BBjNumber fShow)
+    
+        #ShowButtonNext = fShow
+        #BtnNext!.setVisible(fShow)
+    
+    methodend
+    
+    method public void setShowButtonLast(BBjNumber fShow)
+    
+        #ShowButtonLast = fShow
+        #BtnLast!.setVisible(fShow)
+    
+    methodend
+        
+        
+
 
     method public void onBtnFirst(BBjEvent ev!)
 
@@ -231,29 +281,29 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
     method public void setupMenu(BBjMenu editMenu!)
         
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuSearch! = editMenu!.addMenuItem(-1,"&Search")
+        #MenuSearch! = editMenu!.addMenuItem(-1,#super!.getTranslator().getTranslation("MENUITEM_SEARCH"))
         #MenuSearch!.setImage(imgMan!.loadImageFromBytes(#getIconSearch()))
         #MenuSearch!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnSearch")
 
         editMenu!.addSeparator()
 
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuFirst! = editMenu!.addMenuItem(-1,"&First")
+        #MenuFirst! = editMenu!.addMenuItem(-1,#super!.getTranslator().getTranslation("MENUITEM_FIRST"))
         #MenuFirst!.setImage(imgMan!.loadImageFromBytes(#getIconFirst()))
         #MenuFirst!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnFirst")
 
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuPrev! = editMenu!.addMenuItem(-1,"&Prev")
+        #MenuPrev! = editMenu!.addMenuItem(-1,#super!.getTranslator().getTranslation("MENUITEM_PREV"))
         #MenuPrev!.setImage(imgMan!.loadImageFromBytes(#getIconPrev()))
         #MenuPrev!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnPrev")
         
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuNext! = editMenu!.addMenuItem(-1,"&Next")
+        #MenuNext! = editMenu!.addMenuItem(-1,#super!.getTranslator().getTranslation("MENUITEM_NEXT"))
         #MenuNext!.setImage(imgMan!.loadImageFromBytes(#getIconNext()))
         #MenuNext!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnNext")
         
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuLast! = editMenu!.addMenuItem(-1,"&Last")
+        #MenuLast! = editMenu!.addMenuItem(-1,#super!.getTranslator().getTranslation("MENUITEM_LAST"))
         #MenuLast!.setImage(imgMan!.loadImageFromBytes(#getIconLast()))
         #MenuLast!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnLast")
         

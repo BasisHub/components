@@ -46,6 +46,7 @@ rem /** DLGWIZ_FLD_BEGIN **/
     field public BBjString PLDIR$
     field public BBjNumber CBPREPENDDB
     field public BBjNumber BBjProgressBar
+    field public BBjNumber CBOVERWRITE
 rem /** DLGWIZ_FLD_END **/
 
 rem /** DLGWIZ_FLC_BEGIN **/
@@ -70,6 +71,7 @@ rem /** DLGWIZ_FLC_BEGIN **/
     field protected BBjCheckBox C_CBPREPENDDB!
     field protected BBjProgressBar C_BBjProgressBar!
     field protected BBjStaticText C_STMSG!
+    field protected BBjCheckBox C_CBOVERWRITE!
 rem /** DLGWIZ_FLC_END **/
 
     field public BBjTopLevelWindow Wnd!
@@ -135,6 +137,7 @@ rem /** DLGWIZ_DDX_BEGIN **/
         #PLDIR$=#doDDX("EDTPLDIR",#PLDIR$,pInitFlag,0)
         #CBPREPENDDB=#doDDX("CBPREPENDDB",#CBPREPENDDB,pInitFlag,0)
         #BBjProgressBar=#doDDX("BBjProgressBar",#BBjProgressBar,pInitFlag,0)
+        #CBOVERWRITE=#doDDX("CBOVERWRITE",#CBOVERWRITE,pInitFlag,0)
 rem /** DLGWIZ_DDX_END **/
     methodend
 
@@ -202,6 +205,7 @@ rem /** DLGWIZ_INI_BEGIN **/
         #C_CBPREPENDDB! = cast(BBjCheckBox,#super!.getControlByName("CBPREPENDDB"))
         #C_BBjProgressBar! = cast(BBjProgressBar,#super!.getControlByName("BBjProgressBar"))
         #C_STMSG! = cast(BBjStaticText,#super!.getControlByName("STMSG"))
+        #C_CBOVERWRITE! = cast(BBjCheckBox,#super!.getControlByName("CBOVERWRITE"))
 rem /** DLGWIZ_INI_END **/
     rem uncomment the next line to center window
         BBWindowUtils.centerWindow(#Wnd!)
@@ -304,8 +308,9 @@ rem /** DLGWIZ_INI_END **/
             tableFilter!="%"
             tableTypes! = BBjAPI().makeVector()
             tableTypes!.addItem("TABLE")
-            tableTypes!.addItem("VIEW")
-            tableTypes!.addItem("SYNONYM")
+            rem tableTypes!.addItem("VIEW")
+            rem tableTypes!.addItem("SYNONYM")
+            rem TODO: consider what to do with database views 
 
             JDBCResultSet! = md!.getTables(catFilter!,schemaFilter!,tableFilter!,tableTypes!)
 
@@ -437,6 +442,9 @@ rem /** DLGWIZ_INI_END **/
         
         gen! = new ::ClassGeneratorWorker.bbj::ClassGeneratorWorker(db$,user$,pwd$,v!,targetdir$, tpldir$, prepend$="1")
         gen!.setProgressCb(#this!)
+        if #C_CBOVERWRITE!.isSelected() then
+            gen!.setOverwrite(1)
+        fi
         gen!.generate()
 
         a=msgbox("Finished",0,"Process finished")
@@ -547,6 +555,7 @@ declare ClassGenerator myDialog!
 myDialog! = new ClassGenerator()
 myDialog!.doModal() 
 release
+
 
 
 

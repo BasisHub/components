@@ -1,0 +1,93 @@
+use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
+
+rem /**
+rem * (DB_NICE)(TBL_NICE)Grid
+rem *
+rem * Auto-generated form class
+rem * Use this class to put your custom code
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public (DB_NICE)(TBL_NICE)Grid extends NavigationGridComponent
+
+
+    rem /**
+    rem * (DB_NICE)(TBL_NICE)Form
+    rem * standard constructor to generate a standalone window or a child window
+    rem *
+    method public (DB_NICE)(TBL_NICE)Grid()
+
+        #super!(null(),100,100,100,640,480)
+
+    methodend
+
+    rem /**
+    rem * (DB_NICE)(TBL_NICE)Form
+    rem * standard constructor to generate a standalone window or a child window
+    rem * @param BBjWindow wnd!: null() creates a new BBjTopLevelWindow, else the parent window to create the component on
+    rem * @param BBjNumber id: the control ID for the component
+    rem * @param BBjNumber x: postition x
+    rem * @param BBjNumber y: postition y
+    rem * @param BBjNumber w: width
+    rem * @param BBjNumber h:height
+    rem *
+    method public (DB_NICE)(TBL_NICE)Grid (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        #super!(wnd!,id,x,y,w,h)
+
+    methodend
+
+    rem /**
+    rem * (DB_NICE)(TBL_NICE)Form
+    rem * constructor to generate the component inside an existing child window
+    rem * @param BBjWindow wnd!: the child window to use for this component
+    rem *
+    method public (DB_NICE)(TBL_NICE)Grid (BBjChildWindow wnd!)
+
+        #super!(wnd!)
+
+    methodend
+    
+    
+    method protected void initialize()
+
+        #super!.initialize()
+        rem do additional initialization here
+        
+    methodend    
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

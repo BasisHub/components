@@ -26,7 +26,12 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
     field private BBjMenuItem MenuRestore!
     field private BBjMenuItem MenuRestoreAll!
     
-    field private static BBTranslator  Translator! = i18n.getTranslator()
+    field private BBjNumber ShowButtonNew=1
+    field private BBjNumber ShowButtonSave=1
+    field private BBjNumber ShowButtonDel=1
+    field private BBjNumber ShowButtonRestore=1
+    field private BBjNumber ShowButtonRestoreAll=1
+    
 
 
     method public FormEditToolbarComponent (BBjChildWindow cw!)
@@ -57,30 +62,35 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
         #BtnNew! = #getWnd().addToolButton(100,offs,0,22,22,"")
         #BtnNew!.setImage(imgMan!.loadImageFromBytes(#getIconNew()))
         #BtnNew!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnNew")
+        #BtnNew!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_NEW"))
         #BtnNew!.setOpaque(0)
         offs=offs+stepping
 
         #BtnSave! = #getWnd().addToolButton(101,offs,0,22,22,"")
         #BtnSave!.setImage(imgMan!.loadImageFromBytes(#getIconSave()))
         #BtnSave!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnSave")
+        #BtnSave!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_SAVE"))
         #BtnSave!.setOpaque(0)
         offs=offs+stepping
 
         #BtnDel! = #getWnd().addToolButton(102,offs,0,22,22,"")
         #BtnDel!.setImage(imgMan!.loadImageFromBytes(#getIconDel()))
         #BtnDel!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnDel")
+        #BtnDel!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_DELETE"))
         #BtnDel!.setOpaque(0)
         offs=offs+stepping+5
 
         #BtnRestore! = #getWnd().addToolButton(103,offs,0,22,22,"")
         #BtnRestore!.setImage(imgMan!.loadImageFromBytes(#getIconRestore()))
         #BtnRestore!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnRestore")
+        #BtnRestore!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_UNDO"))
         #BtnRestore!.setOpaque(0)
         offs=offs+stepping
 
         #BtnRestoreAll! = #getWnd().addToolButton(104,offs,0,22,22,"")
         #BtnRestoreAll!.setImage(imgMan!.loadImageFromBytes(#getIconRestoreAll()))
         #BtnRestoreAll!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnRestoreAll")
+        #BtnRestoreAll!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_UNDOALL"))
         #BtnRestoreAll!.setOpaque(0)
         offs=offs+stepping+5
 
@@ -113,6 +123,41 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
         #super!.setBC(bc!)
 
     methodend
+    
+    method public void setShowButtonNew(BBjNumber fShow)
+    
+        #ShowButtonNew = fShow
+        #BtnNew!.setVisible(fShow)
+    
+    methodend    
+    
+    method public void setShowButtonSave(BBjNumber fShow)
+    
+        #ShowButtonSave = fShow
+        #BtnSave!.setVisible(fShow)
+    
+    methodend
+    
+    method public void setShowButtonDel(BBjNumber fShow)
+    
+        #ShowButtonDel = fShow
+        #BtnDel!.setVisible(fShow)
+    
+    methodend        
+    
+    method public void setShowButtonUndo(BBjNumber fShow)
+    
+        #ShowButtonRestore = fShow
+        #BtnRestore!.setVisible(fShow)
+    
+    methodend
+             
+    method public void setShowButtonUndoAll(BBjNumber fShow)
+    
+        #ShowButtonRestoreAll = fShow
+        #BtnRestoreAll!.setVisible(fShow)
+    
+    methodend                      
 
     method public void onBtnNew(BBjEvent ev!)
 
@@ -128,8 +173,8 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
 
     method public void onBtnDel(BBjEvent ev!)
 
-        msg$=iff(#getBC().getSelection().size()>1,#Translator!.getTranslation("DELETE_RECORDS_Q"),#Translator!.getTranslation("DELETE_RECORD_Q"))
-        a=msgbox(msg$,BBjAPI().getConstants().MB_ICONQUESTION+BBjAPI().getConstants().MB_YESNO,#Translator!.getTranslation("CONFIRM"))
+        msg$=iff(#getBC().getSelection().size()>1,#super!.getTranslator().getTranslation("DELETE_RECORDS_Q"),#super!.getTranslator().getTranslation("DELETE_RECORD_Q"))
+        a=msgbox(msg$,BBjAPI().getConstants().MB_ICONQUESTION+BBjAPI().getConstants().MB_YESNO,#super!.getTranslator().getTranslation("CONFIRM"))
 
         if a=BBjAPI().getConstants().MB_SELECT_YES then
             #getBC().deleteSelectedRecords()
@@ -293,27 +338,27 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
     method public void setupMenu(BBjMenu editMenu!)
         
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuNew! = editMenu!.addMenuItem(-1,"&New")
+        #MenuNew! = editMenu!.addMenuItem(-1,#super!.getTranslator().getTranslation("MENUITEM_NEW"))
         #MenuNew!.setImage(imgMan!.loadImageFromBytes(#getIconNew()))
         #MenuNew!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnNew")
         
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuSave! = editMenu!.addMenuItem(-2,"&Save")
+        #MenuSave! = editMenu!.addMenuItem(-2,#super!.getTranslator().getTranslation("MENUITEM_SAVE"))
         #MenuSave!.setImage(imgMan!.loadImageFromBytes(#getIconSave()))
         #MenuSave!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnSave")
 
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuDel! = editMenu!.addMenuItem(-3,"&Delete")
+        #MenuDel! = editMenu!.addMenuItem(-3,#super!.getTranslator().getTranslation("MENUITEM_DELETE"))
         #MenuDel!.setImage(imgMan!.loadImageFromBytes(#getIconDel()))
         #MenuDel!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnDel")
 
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuRestore! = editMenu!.addMenuItem(-4,"&Undo")
+        #MenuRestore! = editMenu!.addMenuItem(-4,#super!.getTranslator().getTranslation("MENUITEM_UNDO"))
         #MenuRestore!.setImage(imgMan!.loadImageFromBytes(#getIconRestore()))
         #MenuRestore!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnRestore")
 
         imgMan! = BBjAPI().getSysGui().getImageManager()
-        #MenuRestoreAll! = editMenu!.addMenuItem(-5,"&Undo All")
+        #MenuRestoreAll! = editMenu!.addMenuItem(-5,#super!.getTranslator().getTranslation("MENUITEM_UNDOALL"))
         #MenuRestoreAll!.setImage(imgMan!.loadImageFromBytes(#getIconRestoreAll()))
         #MenuRestoreAll!.setCallback(BBjAPI.ON_MENU_ITEM_SELECT,#this!,"onBtnRestoreAll")
 

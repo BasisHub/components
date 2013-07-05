@@ -7,9 +7,6 @@ use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
 use ::components/ui/unbound/GoogleMapsAreaChooserDialog.bbj::GoogleMapsAreaChooserDialog
 
-use ::translations/bbtranslator.bbj::BBTranslator
-use ::components/i18n/i18n.bbj::i18n
-
 
 class public NavigationGridComponentSelChangeEvent
 
@@ -57,7 +54,6 @@ class public DistinctFilterPopup
     field public BBjNumber Aborted=0
     field private BBjStandardGrid C_DistinctGrid!
 
-    field private static BBTranslator  Translator! = i18n.getTranslator()
 
 
     method private DistinctFilterPopup()
@@ -76,8 +72,8 @@ class public DistinctFilterPopup
         #DistinctOrig! = distinct!
 
         #frame! = BBjAPI().getSysGui().addWindow(BBjAPI().getSysGui().getAvailableContext(),x,y,w,h,"",$01080000$ )
-        #C_BtnCancel! = #frame!.addButton(2,w-80,h-25,75,20,#Translator!.getTranslation("CANCEL"))
-        #C_BtnOk! = #frame!.addButton(1,w-160,h-25,75,20,#Translator!.getTranslation("OK"))
+        #C_BtnCancel! = #frame!.addButton(2,w-80,h-25,75,20,#super!.getTranslator().getTranslation("CANCEL"))
+        #C_BtnOk! = #frame!.addButton(1,w-160,h-25,75,20,#super!.getTranslator().getTranslation("OK"))
 
 
         #C_BtnOk!.setCallback(#C_BtnOk!.ON_BUTTON_PUSH,#this!,"onOK")
@@ -352,7 +348,6 @@ class public NavigationGridComponent extends UIComponent implements UIWidget
     field private BBjVector ColumnConfig!
     field private BBjString ColumnConfigTpl$ = "NAME:C(1*),DESC:C(1*),VISIBLE:N(1),WIDTH:N(5),CONTROL:C(1*),MASK:C(1*)"
 
-    field private static BBTranslator  Translator! = i18n.getTranslator()
 
     method public NavigationGridComponent ()
 
@@ -376,7 +371,7 @@ class public NavigationGridComponent extends UIComponent implements UIWidget
 
     methodend
 
-    method private void initialize()
+    method protected void initialize()
 
 REM         panel! = #getWnd().addChildWindow(100,0,0,#getWnd().getWidth(),#getH(),"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
 REM         #getLaf().prepareWindow(panel!)
@@ -980,7 +975,7 @@ REM         #getLaf().prepareWindow(panel!)
             rem -------------------------sort in bc----------------------
 
             if pos("RELATED" = sortRule$) or pos("UI_ONLY" = sortRule$)  then
-                a=msgbox(#Translator!.getTranslation("CANNOT_SORT_BY")+" "+col$,0,#Translator!.getTranslation("SORT"))
+                a=msgbox(#super!.getTranslator().getTranslation("CANNOT_SORT_BY")+" "+col$,0,#super!.getTranslator().getTranslation("SORT"))
 
                 methodret
 
@@ -1231,7 +1226,7 @@ REM         #getLaf().prepareWindow(panel!)
 
 REM         if s>rows then
             #ScrollBar!.setVisible(1)
-            #ScrollBar!.setScrollRange(1,s-rows)
+            #ScrollBar!.setScrollRange(1,max(1,s-rows+1))
             #ScrollBar!.setScrollProp(rows)
             #ScrollBar!.setScrollPosition(1)
 
@@ -1277,7 +1272,7 @@ REM         fi
             #ColumnConfig! = cast(BBjVector,c!.getBBjVector(err=*next))
 
             if #ColumnConfig!.size()=0 then
-                a=msgbox(#Translator!.getTranslation("CANNOT_LOAD_PRESET")+" "+#PresetConfig$,BBjAPI().getConstants().MB_ICONEXCLAMATION,#Translator!.getTranslation("ERROR"))
+                a=msgbox(#super!.getTranslator().getTranslation("CANNOT_LOAD_PRESET")+" "+#PresetConfig$,BBjAPI().getConstants().MB_ICONEXCLAMATION,#super!.getTranslator().getTranslation("ERROR"))
             fi
 
         fi
@@ -1604,7 +1599,7 @@ REM         fi
         endRow=startRow+#VisibleRows-1
         row=0
 
-
+        #Grid!.setNumRows(#VisibleRows-1)
 
         loop:
 
@@ -2014,7 +2009,7 @@ REM         fi
                 #TbFilter! = #ToolBar!.addToolButton(100,offs,1,22,22,"")
                 imgFilter! = myImageManager!.loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001A04944415478DA63601870D0DADAFA9F149C909808C237E29393BDC106545656FE7FF3E6CDFF1F3F7E80F1C78F1FC1FC274F9EFCBF72E5CAFF6BD7AEFDBF75EBD6FF070F1EFC07A985590C3204CCC8CACAFABF74E952B0A2BB77EFFEDFBD7BF7FF850B17FEAFADADFDAFA3A3F3DFD4D4F4BF8F8FCFFFB4B4B4FF20B51806C4C4C4FC270543BDF0303E29C90F6CC0AA55AB9881122F4A4A4AFEBF7EFD1AEC92D3A74FFF5FB361EFFFFAEEF5FF77EF3DF6BFA8A8E87F7878F88B84A4A423898989F618013969D22451A0822F656565FF3F7FFEFC7FCDDAF5FF4B6AA6FC2F6F5DF71F64707070F097F9F3E74BE08D8D3973E6E8040404FC696C6CFC7FF3D6C3FF53E7EFFE9F9C51F2DFCBCBEBCFE2C58BF5898A52A02D41400DFF67CF9EFB3F23ABE0BF9B9BDBFF79F3E68590942E56AE5C59595151F1DFCFCFEFFFC68D1B6BC84A5C717171B3D5D5D537919D3A8181365D5555750BD906D8D8D82C949797DF4BB6015A5A5A31E2E2E2670C5D5DA5CC9D3DB54CDDDDB54D3C3CD48D5D7CE58C5D5CF8893244455B678D998B67AE89AB47A4A9B387A9B193A73248B3B1B1312BB23A002745083F1F756D9E0000000049454E44AE426082$)
                 #TbFilter!.setImage(imgFilter!)
-                #TbFilter!.setToolTipText(#Translator!.getTranslation("FILTER"))
+                #TbFilter!.setToolTipText(#super!.getTranslator().getTranslation("FILTER"))
                 #TbFilter!.setNoEdge(0)
                 #TbFilter!.setTabTraversable(0)
                 #TbFilter!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"toggleFilter")
@@ -2027,7 +2022,7 @@ REM         fi
                     #TbFilterGeo! = #ToolBar!.addToolButton(101,offs,1,22,22,"")
                     imgFilterGeo! = myImageManager!.loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000003654944415478DA85D1FD4F53571CC7F1FB07B887ECC9B841D0B84DA7537E182EB1992ECA80213036602BAB755A8A127442158654099101B24207A354A0885A851BB54207130641D8B207AD012C8109650DE1618C429C30963204D6ECBDDB76EED79DE493DC9C73EEEB7CBFE708C2FF8C2FCB0E3CD954119F2DE6CB86BDF17E7BE7FEDB70B55EB560BD7460D852F57EA7591F7DA3F64C6456BB49B9A6B55AB1D35212DEA04F0D58CC8815F83CF579BA4C7BB8707233E69CAD8B96E2306B8B49B14B104515FDFDA5B458E338736A3BB5C6700C275FE368A4C0A1DD82B4790B19B902D99501F4DB55AC4C19981F2AA2C9104AB936080988C1F1504DCFD207F4DE3B067461FFEE53AE176DA75127C358B08E981302FAF30AEE0DFF40F794966E9782AF4677A02812BC4034B685381FD0735F856BC4C49FB3668A8EACE7EA67DB906B0534A743A9AF33E3FC7988F9DF1F30333740F3E81B28FDC05EEEB8E3FD80B78A418D544527513B040AF39E2232CB0B8471F6623677879A7DC0E0CC051F90A2F3014A7A166ED3BD94EE475C6A1E4C5EE4E3A4D5E834EB3115BE4C6A8EC0414300977B5EE7B7B951BE99DCE703FE6D41C9E47217B625242493494F1A538E12CA8A7792245F4552ECE3E4A5ACC57AEE4D3AFB22E89D4AC131ADC6E93AC417E501FE163C9E366619E0B6843CC406CB563E8C798CC2DC606A2AB7A03DFE1C69AA206E5E496665C400EE7A7EFA753FE72A363C025A7C7DC35DECCBE0F44072A68677E4E1BEBBD01EDFC41D9B9CE95F8ED176EDB074FA009DE3098F80447ABFCD63D66164DE590573D7C0D34FEEA98F50EDDFCD61552067CB43D024AFE5C79B1938ECA769B7D7D038EAC6502E9300FD5BCCCF5C964E6F92528FFB7E254E7B3129094F937B22584A90AF0A8B3E94BEAF35B8C6AAF8DE96C48DB142F2CB12FD2D2C4E77303ED4C0C0AD22E905CE4B900563D926D489ABC8510722E66FC3569780BD359DE9F16ADA2D47F0CC99114D117E4014CB989898907EF4B0F8C70833635D28E336F089661FA559BB880F1648DB23509AFE22576A150CF715E0769422D6442154E5CBA3DB1A75B71AAE8B7F89A288375E4CB9379157376F4416F2CADFCAB0C00E65D4D6D4BA9277CD99492FAD545744507074A31F90C633529E95B2BACE989DDCD65C3DE8C562DF962D6B0E467604AE7922445A5B2725484AA09417AA7572D5255D74ABA5E63DD73FB96A7C1A2CF9D89A0000000049454E44AE426082$)
                     #TbFilterGeo!.setImage(imgFilterGeo!)
-                    #TbFilterGeo!.setToolTipText(#Translator!.getTranslation("GEO_SEARCH"))
+                    #TbFilterGeo!.setToolTipText(#super!.getTranslator().getTranslation("GEO_SEARCH"))
                     #TbFilterGeo!.setNoEdge(0)
                     #TbFilterGeo!.setTabTraversable(0)
                     #TbFilterGeo!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"toggleFilterGeo")
@@ -2150,7 +2145,7 @@ REM         fi
 
             offs=offs+110
 
-            #BtnCancelProgress! = #ToolBar!.addButton(200,offs,1,40,22,#Translator!.getTranslation("CANCEL"))
+            #BtnCancelProgress! = #ToolBar!.addButton(200,offs,1,40,22,#super!.getTranslator().getTranslation("CANCEL"))
             #BtnCancelProgress!.setVisible(0)
 
 
@@ -2295,7 +2290,7 @@ REM         fi
         methodret
 
         errtrap:
-        a=msgbox(errmes(-1),BBjAPI().getConstants().MB_ICONEXCLAMATION,#Translator!.getTranslation("CANNOT_LOAD"))
+        a=msgbox(errmes(-1),BBjAPI().getConstants().MB_ICONEXCLAMATION,#super!.getTranslator().getTranslation("CANNOT_LOAD"))
 
 
     methodend
@@ -2347,7 +2342,7 @@ REM         fi
         methodret
 
         errtrap1:
-        a=msgbox(errmes(-1),BBjAPI().getConstants().MB_ICONEXCLAMATION,#Translator!.getTranslation("CANNOT_SAVE"))
+        a=msgbox(errmes(-1),BBjAPI().getConstants().MB_ICONEXCLAMATION,#super!.getTranslator().getTranslation("CANNOT_SAVE"))
 
     methodend
 
