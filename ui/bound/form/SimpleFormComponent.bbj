@@ -269,13 +269,20 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     method public void onCtrlLostFocus(BBjLostFocusEvent ev!)
 
         ctrl_name$=ev!.getControl().getName()
+        
+        
 
         if #EditedFields! <> null() and #ControlList!.get(ctrl_name$)<>null() then
             v$=ev!.getText()
-
+            
+            if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and v$="" then
+                methodret
+                rem don't validate primary key fields as long as they're empty
+            fi
+            
             if #EditedRec! = null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
                 #EditedFields!.put(ctrl_name$,v$)
-                print ctrl_name$,"-> ",v$
+
                 validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
                 #this!.markValidationErrors()
             else
@@ -420,10 +427,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             methodret 1
 
         fi
-
-        ? #EditedFields!
-        ? #EditedRec!
-escape
 
         if force=0 then
             opt=35
@@ -788,6 +791,7 @@ escape
         
         fi
 
+        BBjAPI().getSysGui().flushEvents()
 
     methodend
 
