@@ -304,8 +304,8 @@ rem /** DLGWIZ_INI_END **/
             tableFilter!="%"
             tableTypes! = BBjAPI().makeVector()
             tableTypes!.addItem("TABLE")
-            tableTypes!.addItem("VIEW")
-            tableTypes!.addItem("SYNONYM")
+            rem tableTypes!.addItem("VIEW")
+            rem tableTypes!.addItem("SYNONYM")
 
             JDBCResultSet! = md!.getTables(catFilter!,schemaFilter!,tableFilter!,tableTypes!)
 
