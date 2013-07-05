@@ -38,6 +38,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     
     field private java.util.HashMap RestoreControllerFilter!
+    
+    field private BBjNumber ReadOnly
 
 
     method public SimpleFormComponent (BBjChildWindow cw!)
@@ -371,6 +373,13 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         #super!.setVisible(v)
 
+    methodend
+    
+    method public void setReadOnly(BBjNumber ro)
+    
+        #ReadOnly = ro
+        #enableControls(0,0)
+    
     methodend
 
     method public void setBC(BusinessComponent bc!)
@@ -1178,6 +1187,8 @@ REM             print "Fields:",#EditedFields!
                     ctrl_name$=it!.next()
                     ControlMap! = #ControlList!.get(ctrl_name$)
                     ctrl!       = ControlMap!.get("ControlInstance")
+
+                    ctrl!.setEditable(!#ReadOnly)
 
                     if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
                         ctrl!.setEnabled(!fEditing)
