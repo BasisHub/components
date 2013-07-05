@@ -415,14 +415,15 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     method public BBjNumber canSelectionChange(BBjNumber force)
 
 
-        if #EditedRec! = null() or #EditedFields! = null() then
+        if  #EditedRec! = null() or #EditedFields! = null() then
 
             methodret 1
 
         fi
 
-        
-
+        ? #EditedFields!
+        ? #EditedRec!
+escape
 
         if force=0 then
             opt=35
@@ -468,6 +469,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         
         if #getBC().getSelection() = null() or #getBC().getSelection().size() <> 1 then
 
+            #Rec!=null()
             if #IsFormLocked = 0 then
 
                 #getBC().clearValidationErrors()
@@ -914,6 +916,7 @@ REM             print "Fields:",#EditedFields!
 
         #EditedFields! = null()
         #EditedRec! = null()
+
         rem perform onSelectionChange to drive all linked foreign key pickers over the UI
         rem TODO: avoid flickering of the old value in the form
 
