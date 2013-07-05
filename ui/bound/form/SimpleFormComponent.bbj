@@ -36,7 +36,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     field private BBjVector WarningIcons! = new BBjVector()
 
-    field private static BBTranslator  Translator! = i18n.getTranslator()
     
     field private java.util.HashMap RestoreControllerFilter!
 
@@ -434,7 +433,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             opt=36
         fi
 
-        a=msgbox(#Translator!.getTranslation("SAVE_CHANGES"),opt,#getBC().getTitle())
+        a=msgbox(#super!.getTranslator().getTranslation("SAVE_CHANGES"),opt,#getBC().getTitle())
 
         switch a
 
