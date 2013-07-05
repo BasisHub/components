@@ -39,6 +39,8 @@ class public ClassGeneratorWorker
     field private Connection Connection!
     field public ProgressCallback ProgressCb!
 
+    field public BBjNumber Overwrite=0
+
     method public ClassGeneratorWorker(BBjString db$, BBjString user$, BBjString pwd$, BBjVector tables!, BBjString targetdir$, BBjString tpldir$, BBjNumber prepend)
 
         #DB$ = db$
@@ -337,10 +339,12 @@ class public ClassGeneratorWorker
 
         f$=targetdir$+db_nice$+tbl_nice$+ftpl$
 
-        open (ch,err=startGen)f$
-        rem do not generate as the file exists
-        close (ch)
-        methodret
+        if !#Overwrite then
+            open (ch,err=startGen)f$
+            rem do not generate as the file exists
+            close (ch)
+            methodret
+        fi
 
         startGen:
         
@@ -655,12 +659,13 @@ class public ClassGeneratorWorker
             tpl$=tpl$(pos("\"=tpl$)+1)
         wend
         
-        if pos("T.bbj"=tpl$)=0 then
-             ch1=unt
-             open (ch1,err=*next)targetdir$+db$+t$+tpl$; close (ch1); goto skip
-        else
-             
-        endif
+
+        if !#Overwrite then
+            if pos("T.bbj"=tpl$)=0 then
+                 ch1=unt
+                 open (ch1,err=*next)targetdir$+db$+t$+tpl$; close (ch1); goto skip
+            endif
+        fi
 
             f$=targetdir$+db_nice$+tbl_nice$+tpl$
             open (ch,mode="O_CREATE,O_TRUNC")f$
