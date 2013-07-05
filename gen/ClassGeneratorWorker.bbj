@@ -429,8 +429,12 @@ class public ClassGeneratorWorker
                         w=min(max(30,col_size*13),400)
                     break
                 swend
+                
+                if rsmd!.isReadOnly(i) or rsmd!.isAutoIncrement(i) then
+                        ctrl$="STATICTEXT"
+                fi
 
-                if ctrl$="INPUTE" or ctrl$="INPUTN" or ctrl$="INPUTD" OR ctrl$="EDIT" then
+                if ctrl$="INPUTE" or ctrl$="INPUTN" or ctrl$="INPUTD" OR ctrl$="EDIT"  then
 
                     PRINT (ch)"    STATICTEXT "+str(cid)+", """+col_label$+":"", 10, "+str(8+row*30)+", 130, 20"
                     PRINT (ch)"        BEGIN"
@@ -456,6 +460,7 @@ class public ClassGeneratorWorker
                     if ctrl$="INPUTE" then
                         PRINT (ch)"            PADCHARACTER 32"
                     fi
+
                                     
                 PRINT (ch)"        END"
                 print (ch)""
