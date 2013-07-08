@@ -744,7 +744,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             while it!.hasNext()
                 ctrl_name$=it!.next()
                 fixvalues! =f!.get(ctrl_name$)
-                if fixvalues!.size()=1 then
+                if fixvalues! <> null() and fixvalues!.size()=1 then
                     fixvalue$=fixvalues!.getItem(0)
                     ControlMap! = #ControlList!.get(ctrl_name$)
                     ctrl! = ControlMap!.get("ControlInstance")
@@ -765,7 +765,10 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                 ControlMap! = #ControlList!.get(ctrl_name$)
                 ctrl!       = ControlMap!.get("ControlInstance")
 
-                if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and ctrl!.getControlType() <> 17 then
+                if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 
+:                   and ctrl!.getControlType() <> 17 
+:                   and #ForeignKeyPickerList!.get(ctrl_name$) = null() then
+
                     ctrl!.setEnabled(1)
                     if f=0 then
                         ctrl!.focus()
