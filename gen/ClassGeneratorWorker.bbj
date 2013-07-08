@@ -58,54 +58,18 @@ class public ClassGeneratorWorker
     methodend
 
 
-    method private BBjString cnv7bit(BBjString in$)
-    
-        while pos("{"=in$)
-            in$(pos("{"=in$),1)="ä"
-        wend
-        while pos("|"=in$)
-            in$(pos("|"=in$),1)="ö"
-        wend
-        while pos("}"=in$)
-            in$(pos("}"=in$),1)="ü"
-        wend
-        while pos("["=in$)
-            in$(pos("["=in$),1)="Ä"
-        wend
-        while pos("\"=in$)
-            in$(pos("\"=in$),1)="Ö"
-        wend
-        while pos("]"=in$)
-            in$(pos("]"=in$),1)="Ü"
-        wend
-        while pos("~"=in$)
-            in$(pos("~"=in$),1)="ß"
-        wend
 
-
-        methodret in$
-
-    methodend
 
     method private  BBjString getBBjDDProperty(BBjString db$, BBjString tabl$, BBjString col$,BBjString prop$)
             
-            if db$="nov" then
-                db$=db$+"db"
-            fi
-            rem "TODO handle connection pools correctly
-
-
             database! = #Admin!.getDatabase(db$,err=noDB)
-
-            tab! = database!.getTable(tabl$)
-
-            col! = tab!.getColumn(col$)
-            
-            r$= col!.getString(prop$,err=*next)
-
-            if db$="novdb" then
-                r$=#cnv7bit(r$)
-            fi
+            rem TODO: connection pools?
+    
+                tab! = database!.getTable(tabl$)
+    
+                col! = tab!.getColumn(col$)
+                
+                r$= col!.getString(prop$,err=*next)
 
             noDB:
 
@@ -595,7 +559,6 @@ class public ClassGeneratorWorker
                         y1$=y0$(pos(":"=y0$)+1)
                         y1$=y1$(1,len(y1$)-1)
                         y2$= #getBBjDDProperty(#DB$, t$, col_name$,y1$)
-                        
                         x$=#replace(x$,y0$,y2$)
                     wend
 
