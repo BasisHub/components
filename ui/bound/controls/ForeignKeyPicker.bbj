@@ -44,7 +44,8 @@ class public ForeignKeyPicker extends UIComponent
             bc!.prepareResultSet(0,s)
 
             ctrl1! = #BoundCtrl!
-
+            ctrl1!.removeAllItems()
+            
             ctrl1!.addItem("")
             #IndexToKeyMap!.addItem("")
 
