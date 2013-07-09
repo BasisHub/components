@@ -6,6 +6,8 @@ use ::components/ui/bound/grid/NavigationGridComponentConfigDialog.bbj::Navigati
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
 use ::components/ui/unbound/GoogleMapsAreaChooserDialog.bbj::GoogleMapsAreaChooserDialog
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::components/i18n/i18n.bbj::i18n
 
 
 class public NavigationGridComponentSelChangeEvent
@@ -54,7 +56,7 @@ class public DistinctFilterPopup
     field public BBjNumber Aborted=0
     field private BBjStandardGrid C_DistinctGrid!
 
-
+    field protected static BBTranslator  Translator! = i18n.getTranslator()
 
     method private DistinctFilterPopup()
 
@@ -72,8 +74,8 @@ class public DistinctFilterPopup
         #DistinctOrig! = distinct!
 
         #frame! = BBjAPI().getSysGui().addWindow(BBjAPI().getSysGui().getAvailableContext(),x,y,w,h,"",$01080000$ )
-        #C_BtnCancel! = #frame!.addButton(2,w-80,h-25,75,20,#super!.getTranslator().getTranslation("CANCEL"))
-        #C_BtnOk! = #frame!.addButton(1,w-160,h-25,75,20,#super!.getTranslator().getTranslation("OK"))
+        #C_BtnCancel! = #frame!.addButton(2,w-80,h-25,75,20,#Translator!.getTranslation("CANCEL"))
+        #C_BtnOk! = #frame!.addButton(1,w-160,h-25,75,20,#Translator!.getTranslation("OK"))
 
 
         #C_BtnOk!.setCallback(#C_BtnOk!.ON_BUTTON_PUSH,#this!,"onOK")
