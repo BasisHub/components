@@ -744,7 +744,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             while it!.hasNext()
                 ctrl_name$=it!.next()
                 fixvalues! =f!.get(ctrl_name$)
-                if fixvalues!.size()=1 then
+                if fixvalues! <> null() and fixvalues!.size()=1 then
                     fixvalue$=fixvalues!.getItem(0)
                     ControlMap! = #ControlList!.get(ctrl_name$)
                     ctrl! = ControlMap!.get("ControlInstance")
@@ -760,22 +760,31 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             ks! = #ControlList!.keySet()
             it! = ks!.iterator()
 
+            minctrl=65000
+            
             while it!.hasNext()
                 ctrl_name$=it!.next()
                 ControlMap! = #ControlList!.get(ctrl_name$)
                 ctrl!       = ControlMap!.get("ControlInstance")
 
-                if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and ctrl!.getControlType() <> 17 then
+                if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 
+:                   and ctrl!.getControlType() <> 17 
+:                   and #ForeignKeyPickerList!.get(ctrl_name$) = null() then
+
                     ctrl!.setEnabled(1)
-                    if f=0 then
-                        ctrl!.focus()
-                        f=1
-                    fi
+                        if ctrl!.getID() < minctrl then
+                            minctrl = ctrl!.getID()
+                            fctrl! = ctrl!
+                        fi
                 else
                     ctrl!.setEnabled(0)                
                 fi
 
             wend
+            
+            if minctrl<65000 then
+                fctrl!.focus()
+            fi
 
         fi
 
@@ -1131,14 +1140,14 @@ REM             print "Fields:",#EditedFields!
                     for i=0 to pk!.size()-1
                         ctrl_name$=pk!.getItem(i)
                         ControlMap! = #ControlList!.get(ctrl_name$)
-                        ctrl! = ControlMap!.get("ControlInstance")
-                        c$=ctrl!.getText()
-                        if c$>"" then
-                            
-                            v!=new BBjVector()
-                            filter!.put(ctrl_name$,v!)
-                            v!.addItem(c$)
-
+                        if ControlMap! <> null() then
+                            ctrl! = ControlMap!.get("ControlInstance")
+                            c$=ctrl!.getText()
+                            if c$>"" then
+                                v!=new BBjVector()
+                                filter!.put(ctrl_name$,v!)
+                                v!.addItem(c$)
+                            fi
                         fi
                     next
                     
@@ -1179,6 +1188,7 @@ REM             print "Fields:",#EditedFields!
             min_pkfield     = 65000
             min_datafield   = 65000
 
+
            if #ControlList!.size() then
                 ks! = #ControlList!.keySet()
                 it! = ks!.iterator()
@@ -1186,16 +1196,18 @@ REM             print "Fields:",#EditedFields!
                 while it!.hasNext()
                     ctrl_name$=it!.next()
                     ControlMap! = #ControlList!.get(ctrl_name$)
-                    ctrl!       = ControlMap!.get("ControlInstance")
-
-                    ctrl!.setEditable(!#ReadOnly)
-
-                    if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
-                        ctrl!.setEnabled(!fEditing)
-                        min_pkfield = min(min_pkfield, ctrl!.getID())
-                    else
-                        ctrl!.setEnabled(fEditing)
-                        min_datafield = min(min_datafield, ctrl!.getID())
+                    if ControlMap! <> null() then
+                        ctrl!       = ControlMap!.get("ControlInstance")
+    
+                        ctrl!.setEditable(!#ReadOnly)
+    
+                        if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
+                            ctrl!.setEnabled(!fEditing)
+                            min_pkfield = min(min_pkfield, ctrl!.getID())
+                        else
+                            ctrl!.setEnabled(fEditing)
+                            min_datafield = min(min_datafield, ctrl!.getID())
+                        fi
                     fi
                 wend
                     
