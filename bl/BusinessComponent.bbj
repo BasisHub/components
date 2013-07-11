@@ -1203,7 +1203,7 @@ class public BusinessComponent
     rem ---------------------------json version of methods
     
     
-    method public BBjString getColumnAttributesAsJson()
+    method public json getColumnAttributesAsJson()
     
         declare DataRow attr!
         declare json json!
@@ -1244,17 +1244,17 @@ class public BusinessComponent
         json!.set("tablename",#DataProvider!.getPrimaryTable())
         json!.set("title",#getTitle())
         
-        methodret json!.getJsonString()
+        methodret json!
         
     methodend
     
-    method public BBjString getResultSetAsJson()
+    method public json getResultSetAsJson()
     
         methodret #getResultSetAsJson(0,#DataProvider!.size())
     
     methodend
     
-    method public BBjString getResultSetAsJson(BBjNumber first, BBjNumber last)
+    method public json getResultSetAsJson(BBjNumber first, BBjNumber last)
     
         declare json jr!
         declare json jason!
@@ -1285,7 +1285,7 @@ class public BusinessComponent
         next
         json!.set("recordset",jv!)
         
-        methodret json!.getJsonString()
+        methodret json!
     
     methodend
 
