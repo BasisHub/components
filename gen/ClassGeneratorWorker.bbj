@@ -535,7 +535,7 @@ class public ClassGeneratorWorker
 
         endif
 
-        if pos("<field>"=x$) then
+        while pos("<field>"=x$) 
 
             x1$=x$(1,pos("<field>"=x$)-1)
             x2$=x$(pos("</field>"=x$)+8)
@@ -569,7 +569,7 @@ class public ClassGeneratorWorker
 
             x$=x1$+x2$
 
-        endif
+        wend
 
         if pos("<getter>"=x$) then
 
