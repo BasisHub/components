@@ -166,7 +166,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
                 if pos(".label"=ctrl_name$)>0 then
 
-                    lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL")
+                    lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL",err=*endif)
                     ctrl!.setText(lbl$+":")
 
                 else
@@ -1199,7 +1199,7 @@ REM             print "Fields:",#EditedFields!
                     if ControlMap! <> null() then
                         ctrl!       = ControlMap!.get("ControlInstance")
     
-                        ctrl!.setEditable(!#ReadOnly)
+                        ctrl!.setEditable(!#ReadOnly,err=*next)
     
                         if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
                             ctrl!.setEnabled(!fEditing)
