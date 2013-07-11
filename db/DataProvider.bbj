@@ -49,6 +49,12 @@ class public DataProvider
         #PrimaryTable$ = primaryTable$
 
     methodend
+    
+    method public BBjString getPrimaryTable()
+    
+        methodret #PrimaryTable$
+    
+    methodend
 
     method public void setEntityClass(DataRow dr!)
 
