@@ -189,6 +189,10 @@ class public UIComponent
 
         #BC! = bc!
         bc!.registerUI(#this!)
+        
+        if #IsStandalone then
+            #ParentWnd!.setText(#getBC().getTitle())
+        fi
 
     methodend
 
