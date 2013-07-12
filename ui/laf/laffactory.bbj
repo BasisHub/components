@@ -316,10 +316,17 @@ class public laffactory
 
     method public static laf getLaf()
     
-        laf$ = stbl("LAF",err=*next)
+    
+        if info(3,6)="5" then
+            laf$ = ""
+        else
+            laf$ = stbl("LAF",err=*next)
+        fi
         
         methodret #getLaf(laf$)
-    
+            
+            
+        
     methodend
 
     method public static laf getLaf(BBjString name!)

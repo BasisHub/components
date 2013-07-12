@@ -50,15 +50,19 @@ class public ForeignKeyPicker extends UIComponent
             #IndexToKeyMap!.addItem("")
 
             while x<s
+            
 
-                r! = cast(DataRow,bc!.getResultSet().getItem(x))
-                fkval$     = r!.getFieldAsString(fk$)
+                r! = bc!.getResultSet().getItem(x)
                 fkdisp$ = r!.toString()
+                
+                
+                fkval$     = r!.getFieldAsString(fk$)
+                fkval!     = r!.getField(fk$)
                 ctrl1!.addItem(cvs(FkDisp$,3))
 
                 x=x+1
-                #KeyMap!.put(fkval$,x)
-                #IndexToKeyMap!.addItem(fkval$)
+                #KeyMap!.put(fkval!,x)
+                #IndexToKeyMap!.addItem(fkval!)
             wend
 
 
@@ -127,9 +131,9 @@ class public ForeignKeyPicker extends UIComponent
             if #getBC().size()=1 then
                 declare DataRow r!
                 r! = cast(DataRow,#getBC().getResultSet().getItem(0))
-                fk$     = r!.getFieldAsString(#Fk$)
+                fk!     = r!.getField(#Fk$)
                 fkdisp$ = cvs(r!.toString(),3)
-                i!= #KeyMap!.get(fk$)
+                i!= #KeyMap!.get(fk!)
 
                 if i!=null() then
                     ctrl!.selectIndex(-1)
@@ -222,19 +226,19 @@ class public ForeignKeyPicker extends UIComponent
 
     methodend
 
-    method public BBjString getSelectedForeignKeyValue()
+    method public Object getSelectedForeignKeyValue()
 
         if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             ctrl! = #BoundCtrl!
 
             i=ctrl!.getSelectedIndex()
-            fk$=#IndexToKeyMap!.get(i)
+            fk!=#IndexToKeyMap!.get(i)
         else
-            fk$=#BoundCtrl!.getText()
+            fk!=#BoundCtrl!.getText()
         fi
 
 
-        methodret fk$
+        methodret fk!
 
 
     methodend

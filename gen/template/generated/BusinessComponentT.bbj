@@ -28,7 +28,7 @@ class public (DB_NICE)(TBL_NICE)BusinessComponentT extends DataProviderBusinessC
         #super!.setDataProvider(new (DB_NICE)(TBL_NICE)DataProvider())
         #super!.setResultSet(#getDataProvider().getResultSet())
 
-        #super!.setLocale(BBjAPI().getThinClient().getClientLocale())
+        #super!.setLocale(BBjAPI().getThinClient(err=*next).getClientLocale())
 
         if #super!.getLocale() = ""
             #super!.setLocale(stbl("!LOCALE"))

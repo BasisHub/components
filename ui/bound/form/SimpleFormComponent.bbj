@@ -30,11 +30,11 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     
     field protected DataRow   Rec!
 
-    field private DataRow   EditedRec!
-    field private java.util.HashMap EditedFields!
-    field private java.util.HashMap ForeignKeyPickerList! = new java.util.HashMap()
+    field protected DataRow   EditedRec!
+    field protected java.util.HashMap EditedFields!
+    field protected java.util.HashMap ForeignKeyPickerList! = new java.util.HashMap()
 
-    field private BBjVector WarningIcons! = new BBjVector()
+    field protected BBjVector WarningIcons! = new BBjVector()
 
     
     field private java.util.HashMap RestoreControllerFilter!
@@ -166,7 +166,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
                 if pos(".label"=ctrl_name$)>0 then
 
-                    lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL")
+                    lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL",err=*endif)
                     ctrl!.setText(lbl$+":")
 
                 else
@@ -827,7 +827,18 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         while it!.hasNext()
             ctrl_name$=it!.next()
 
-            if #EditedFields!.get(ctrl_name$)=null() and #ForeignKeyPickerList!.get(ctrl_name$)=null() then
+
+            rem take foreign key value from the linked business component
+            picker! = #ForeignKeyPickerList!.get(ctrl_name$)
+
+            if picker!<> null() then
+                #EditedFields!.put(ctrl_name$,picker!.getSelectedForeignKeyValue())
+
+                continue
+            fi
+            
+
+            if #EditedFields!.get(ctrl_name$)=null() then
                 ControlMap! = #ControlList!.get(ctrl_name$)
                 ctrl! = ControlMap!.get("ControlInstance")
 
@@ -876,12 +887,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
             fi
 
-            rem take foreign key value from the linked business component
-            picker! = #ForeignKeyPickerList!.get(ctrl_name$)
 
-            if picker!<> null() then
-                #EditedFields!.put(ctrl_name$,picker!.getSelectedForeignKeyValue())
-            fi
 
         wend
 
@@ -890,6 +896,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
             #getBC().clearValidationErrors()
             val = #getBC().validateRecord(#getBC().getEditingRecNo(),#EditedFields!)
+           
             val = max(val,#getBC().getFieldValidationErrorLevel())
 
             if val>0 then
@@ -925,10 +932,13 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
             fi
 
+                            
             #EditedFields! = cast(java.util.HashMap,#onBeforeSave(#EditedFields!))
+            
+            
 REM             print "RecNo:",#getBC().getEditingRecNo()
 REM             print "Fields:",#EditedFields!
-            
+
             #getBC().saveRecord(#getBC().getEditingRecNo(),#EditedFields!)
             #getBC().clearValidationErrors()
             #getBC().clearFieldValidationErrors()
@@ -1199,7 +1209,7 @@ REM             print "Fields:",#EditedFields!
                     if ControlMap! <> null() then
                         ctrl!       = ControlMap!.get("ControlInstance")
     
-                        ctrl!.setEditable(!#ReadOnly)
+                        ctrl!.setEditable(!#ReadOnly,err=*next)
     
                         if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
                             ctrl!.setEnabled(!fEditing)

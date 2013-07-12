@@ -6,6 +6,7 @@ use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/UIController.bbj::UIController
 use ::components/ui/bound/form/GoogleMapsComponent.bbj::GoogleMapsComponent
 
+use ::util/string/json.bbj::json
 rem /**
 rem * BusinessComponent
 rem *
@@ -1195,6 +1196,97 @@ class public BusinessComponent
     method public BBjVector getPrimaryKeySegments()
 
  
+    methodend
+    
+    
+    
+    rem ---------------------------json version of methods
+    
+    
+    method public json getColumnAttributesAsJson()
+    
+        declare DataRow attr!
+        declare json json!
+        declare json jf! 
+        attr! = #getColumnAttributes()
+        pkey! = #getPrimaryKeySegments()
+
+        json! = new json()
+
+        v! = attr!.getFieldNames()
+        jv! = new BBjVector()
+        if v!.size() then
+            
+            for i=0 to v!.size()-1
+                jf! = new json()
+                f$=v!.getItem(i)
+                jf!.set("name",f$)
+                
+                if #getPrimaryKeySegments().indexOf(f$)>-1
+                    jf!.set("index","1")
+                fi
+                
+                col_attr! = attr!.getFieldAttributes(f$)
+
+                ks! = col_attr!.keySet()
+                it! = ks!.iterator()
+                while it!.hasNext()
+                        k$=it!.next()
+                        jf!.set(K$,col_attr!.get(K$))
+                wend
+
+                jv!.addItem(jf!)
+            next
+            
+        fi
+        
+        json!.set("fields",jv!)
+        json!.set("tablename",#DataProvider!.getPrimaryTable())
+        json!.set("title",#getTitle())
+        
+        methodret json!
+        
+    methodend
+    
+    method public json getResultSetAsJson()
+    
+        methodret #getResultSetAsJson(0,#DataProvider!.size())
+    
+    methodend
+    
+    method public json getResultSetAsJson(BBjNumber first, BBjNumber last)
+    
+        declare json jr!
+        declare json jason!
+    
+        first = max(0,first)
+        last = min(last,#size())
+        
+        #prepareResultSet(first,last)
+        
+        jv! = new BBjVector()
+        json! = new json()
+        
+        for i=first to last-1
+            jr! = new json()
+            row! = #getResultSet().getItem(i)
+            
+            vf! = row!.getFieldNames()
+                    if vf!.size() then
+                        
+                        for j=vf!.size()-1 to 0 step -1
+                            f$=vf!.getItem(j)
+                            jr!.set(f$,row!.getFieldAsString(f$))
+                        next
+
+                    fi            
+            
+            jv!.addItem(jr!)
+        next
+        json!.set("recordset",jv!)
+        
+        methodret json!
+    
     methodend
 
 classend
