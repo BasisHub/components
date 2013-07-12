@@ -90,7 +90,9 @@ class public ForeignKeyPicker extends UIComponent
             #TbClear!.setOpaque(0)
 
 
-            #StDisp! = #super!.getWnd().addStaticText(101,2*h+5,5,200,h,"")
+            #StDisp! = #super!.getWnd().addStaticText(101,2*h+5,0,180,h,"")
+            #StDisp!.setOpaque(0)
+            #getLaf().setStyle(#StDisp!,"Badge")
 
 
             c! = #BoundCtrl!
@@ -159,7 +161,7 @@ class public ForeignKeyPicker extends UIComponent
                 fk$     = r!.getFieldAsString(#Fk$)
                 fkdisp$ = cvs(r!.toString(),3)
                 #BoundCtrl!.setText(fk$)
-                #StDisp!.setText(fkdisp$)
+                #StDisp!.setText(cvs(fkdisp$,3))
                 #TbClear!.setEnabled(1)
             else
                 #BoundCtrl!.setText("")
@@ -218,7 +220,7 @@ class public ForeignKeyPicker extends UIComponent
 
         if newText$>"" then
             #BoundCtrl!.setText(newText$)
-            #StDisp!.setText(newfkdisp$)
+            #StDisp!.setText(cvs(newfkdisp$,3))
             v!=new BBjVector()
             v!.addItem(newText$)
             #super!.getBC().drive(#Fk$,v!)
