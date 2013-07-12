@@ -1119,6 +1119,21 @@ class public DataRow
 
     methodend
 
+    method public Object getField(BBjString name$)
+
+        declare DataField field!
+        field! = CAST(DataField,#FieldList!.get(name$))
+
+
+        if field! = null() then
+            throw "Field "+name$+" does not exist",47
+        fi
+
+
+        methodret field!.getObject()
+
+    methodend
+
     method public BBjString getFieldAsString(BBjString name$)
 
         declare DataField field!
@@ -1131,7 +1146,6 @@ class public DataRow
 
 
         methodret field!.getValueAsString()
-
 
     methodend
 

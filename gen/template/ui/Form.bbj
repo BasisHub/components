@@ -115,6 +115,13 @@ class public (DB_NICE)(TBL_NICE)Form extends SimpleFormComponent
         rem #getFormEditToolbar().setShowButtonDel(0)
         
     methodend    
+    
+
+    method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
+
+        methodret editedFields!
+
+    methodend    
 
 classend
 

@@ -321,8 +321,8 @@ class public DataProviderBusinessComponent extends BusinessComponent
             while it!.hasNext()
 
                 f$=it!.next()
-                v$=fields!.get(f$)
-                row!.setFieldValue(f$,v$)
+                v!=fields!.get(f$)
+                row!.setFieldValue(f$,v!)
             wend
 
             ? row!.toString()
@@ -389,8 +389,8 @@ class public DataProviderBusinessComponent extends BusinessComponent
             while it!.hasNext()
 
                 f$=it!.next()
-                v$=fields!.get(f$)
-                row!.setFieldValue(f$,v$)
+                v!=fields!.get(f$)
+                row!.setFieldValue(f$,v!)
             wend
 
             ? row!.toString()
