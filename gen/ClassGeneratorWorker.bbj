@@ -136,7 +136,12 @@ class public ClassGeneratorWorker
         if #Connection!<>null() then
             md! = #Connection!.getMetaData()
 
-            JDBCResultSet! = md!.getPrimaryKeys(#DB$,s$,t$)
+            rem old call which did not work with MS SQL Server
+            rem maybe the new one with null() for the first two parameters now fails on other DBs 
+            rem so leaving this in as a reminder....
+            rem JDBCResultSet! = md!.getPrimaryKeys(#DB$,s$,t$)
+            
+            JDBCResultSet! = md!.getPrimaryKeys(null(),null(),t$)
 
             while JDBCResultSet!.next() 
                 v!.addItem(JDBCResultSet!.getString("COLUMN_NAME"))
