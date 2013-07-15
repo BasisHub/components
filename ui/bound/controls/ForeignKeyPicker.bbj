@@ -162,6 +162,7 @@ class public ForeignKeyPicker extends UIComponent
                 fkdisp$ = cvs(r!.toString(),3)
                 #BoundCtrl!.setText(fk$)
                 #StDisp!.setText(cvs(fkdisp$,3))
+                #StDisp!.setOpaque(0)
                 #TbClear!.setEnabled(1)
             else
                 #BoundCtrl!.setText("")
