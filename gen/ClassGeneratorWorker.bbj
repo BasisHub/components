@@ -421,7 +421,8 @@ class public ClassGeneratorWorker
                 PRINT (ch)"        BEGIN"
 
                     if ctrl$="INPUTE" then
-                        PRINT (ch)"            MASK """+fill(col_size,"X")+""""
+                        PRINT (ch)"            MASK """+fill(min(100,col_size),"X")+""""
+                        rem TODO: choose a better control for very large fields, like a CEdit
                     fi
                 
                 PRINT (ch)"            NAME """+col_name$+""""
