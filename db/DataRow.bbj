@@ -827,7 +827,7 @@ class public DataField
     method public DataField clone()
 
         if #Type$ = "N" then
-            f! = new DataField(#Name$,#Type$,#NumValue)
+            f! = new DataField(#Name$,#Type$,#DoubleValue!)
         else
             f! = new DataField(#Name$,#Type$,#StringValue!)
         fi
