@@ -51,7 +51,10 @@ class public ForeignKeyPicker extends UIComponent
 
             while x<s
             
-
+REM                 declare auto DataRow r!
+REM                 r! = cast(DataRow,bc!.getResultSet().getItem(x))
+REM                 fkdisp$ = r!.toString()
+               
                 r! = bc!.getResultSet().getItem(x)
                 fkdisp$ = r!.toString()
                 

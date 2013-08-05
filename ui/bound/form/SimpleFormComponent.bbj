@@ -478,7 +478,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         #EditedRec! = null()
 
         
-        if #getBC().getSelection() = null() or #getBC().getSelection().size() <> 1 then
+        if #getBC().getSelection() = null() or #getBC().getSelection().size() <> 1 or #getBC().size()=0 then
 
             #Rec!=null()
             if #IsFormLocked = 0 then
