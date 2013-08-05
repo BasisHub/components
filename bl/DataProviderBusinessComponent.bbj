@@ -91,6 +91,13 @@ class public DataProviderBusinessComponent extends BusinessComponent
         #getDataProvider().putControllerFilter(var$,v!)
 
         #refresh(1)
+
+       #prepareResultSet(0,0)
+       if #getResultSet().size()>0 then
+            v! = new BBjVector()
+            v!.addItem(0)
+            #setSelection(v!)
+        fi        
    
 
     methodend    

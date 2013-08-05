@@ -219,7 +219,7 @@ class public DataField
                 #BigDecimalValue! = null()
             else
 
-                if value! = "" then value!="0"
+                if value! = "" or value! = null() then value!="0"
                 #BigDecimalValue! = new java.math.BigDecimal(value!)
             fi
 
@@ -305,7 +305,7 @@ class public DataField
         fi
 
         if #Type$="Y" then
-            #BigDecimalValue! = value
+            #BigDecimalValue! = new java.math.BigDecimal(value)
         fi
 
 
