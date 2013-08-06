@@ -1,3 +1,4 @@
+rem package components.gen
 
 rem /** 
 rem * ClassGenerator
@@ -19,7 +20,6 @@ use java.sql.Connection
 use java.sql.DatabaseMetaData
 
 use ::ClassGeneratorWorker.bbj::ProgressCallback
-
 
 
 class public ClassGenerator extends BBDialog implements ProgressCallback
@@ -150,7 +150,6 @@ rem /** DLGWIZ_DDX_END **/
     rem * @return BBjNumber Answer: 0=Passed required fields check, 1=Dialog canceled/closed
     rem */
     method public BBjNumber doModal()
-
         #API!.setCustomEventCallback("ReturnAnswer","do_return")
         #API!.setCustomEventCallback("CancelAnswer","do_cancel")
 
@@ -219,11 +218,9 @@ rem /** DLGWIZ_INI_END **/
             a$=a$(pos($0a$=a$)+1)
         wend
 
-
         #C_EDTPLDIR!.setText(dir("")+"template/")
-        
 
-        #C_LEDB!.selectIndex(0)      
+        #C_LEDB!.selectIndex(0)
         db$=BBjAPI().getThinClient().getUserProperty("components.classgenerator.db",err=*next)
         if db$>"" then
             #C_LEDB!.setText(db$)
@@ -236,7 +233,7 @@ rem /** DLGWIZ_INI_END **/
             #C_CBPREPENDDB!.setSelected("1"=BBjAPI().getThinClient().getUserProperty("components.classgenerator.prependdbname",err=*next))
             #C_BTNREFRESH!.setEnabled(1)
         endif
-    
+
         #C_TBFIND!.setImage(#SysGui!.getImageManager().loadImageFromBytes(#getFindIcon()))
         #C_TBFINDTPLDIR!.setImage(#SysGui!.getImageManager().loadImageFromBytes(#getFindIcon()))
 
@@ -384,15 +381,12 @@ rem /** DLGWIZ_INI_END **/
         #C_BTNGENERATE!.setEnabled(#C_LBTABLES!.getSelectedIndices().size())
     methodend
 
-
     rem /**
     rem * Method BTNGENERATE__ON_BUTTON_PUSH:
     rem * Event handler for the ON_BUTTON_PUSH event for BTNGENERATE
     rem * @param BBjButtonPushEvent Button Push
     rem */
     method public void BTNGENERATE__ON_BUTTON_PUSH(BBjButtonPushEvent pEvent!)
-
-
         #C_BBjProgressBar!.setVisible(1)
         #C_Form!.setEnabled(0)
 
@@ -423,7 +417,7 @@ rem /** DLGWIZ_INI_END **/
         schema$ = #C_EDSCHEMA!.getText()
 
         prepend$ = iff(#C_CBPREPENDDB!.isSelected(),"1","0")
-        
+
         tc!=BBjAPI().getThinClient()
         tc!.setUserProperty("components.classgenerator.db",db$)  
         tc!.setUserProperty("components.classgenerator.user",user$)  
@@ -434,12 +428,12 @@ rem /** DLGWIZ_INI_END **/
         tc!.setUserProperty("components.classgenerator.prependdbname",prepend$) 
 
         mkdir targetdir$,err=*next
-        
+
         ch=unt
         open (ch)targetdir$
         close (ch)
 
-        
+
         gen! = new ::ClassGeneratorWorker.bbj::ClassGeneratorWorker(db$,user$,pwd$,v!,targetdir$, tpldir$, prepend$="1")
         gen!.setProgressCb(#this!)
         if #C_CBOVERWRITE!.isSelected() then
@@ -448,7 +442,7 @@ rem /** DLGWIZ_INI_END **/
         gen!.generate()
 
         a=msgbox("Finished",0,"Process finished")
-        
+
         #this!.postReturnAnswer()
     methodend
 
@@ -541,6 +535,12 @@ rem /** DLGWIZ_INI_END **/
         new FileChooser(startDir$,startX,startY,nsVar$,useClient,dirOnly)
     methodend
 
+    rem /**
+    rem * Method updateProgress:
+    rem * Updates the progress bar
+    rem * @param BBjString msg$: message to display
+    rem * @param BBjNumber perc: percent to display
+    rem */
     method public void updateProgress(BBjString msg$, BBjNumber perc)
 
         #C_STMSG!.setText(msg$)
@@ -555,12 +555,3 @@ declare ClassGenerator myDialog!
 myDialog! = new ClassGenerator()
 myDialog!.doModal() 
 release
-
-
-
-
-
-
-
-
-

@@ -1,11 +1,14 @@
+rem package components.bl
+
 rem /**
-rem * SQLBusinessComponent
+rem * DataProviderBusinessComponent
 rem *
 rem * Implementation of a core SQL-based Business Component
 rem *
 rem * @author Stephan Wald
 rem * @version 1.0
 rem */
+
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
@@ -13,8 +16,6 @@ use ::components/db/DataRow.bbj::DataField
 use ::components/db/DataProvider.bbj::DataProvider
 
 class public DataProviderBusinessComponent extends BusinessComponent
-
-    
 
     rem /**
     rem * Method getDistinctValues:
@@ -66,7 +67,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
     rem */
     method public void drive(BBjString var$, BBjVector selection!)
 
-    rem print "drive ",var$,selection!
+        rem print "drive ",var$,selection!
 
         #super!.getControllerFilter().put(var$,selection!)
 
@@ -75,6 +76,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
         #refresh(1)
 
     methodend
+
 
     rem /**
     rem * Method drive:
@@ -91,9 +93,16 @@ class public DataProviderBusinessComponent extends BusinessComponent
         #getDataProvider().putControllerFilter(var$,v!)
 
         #refresh(1)
-   
 
-    methodend    
+        #prepareResultSet(0,0)
+        if #getResultSet().size()>0 then
+            v! = new BBjVector()
+            v!.addItem(0)
+            #setSelection(v!)
+        fi        
+   
+    methodend
+
 
     rem /**
     rem * Method resetdrive:
@@ -110,6 +119,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method resetdrive:
     rem * reset all controller filter (set by drive)
@@ -123,7 +133,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
             var$=it!.next()
             #super!.getControllerFilter().remove(var$)
         wend
-        
+
         #getDataProvider().clearControllerFilter(var$)
         #refresh(1)
 
@@ -146,7 +156,6 @@ class public DataProviderBusinessComponent extends BusinessComponent
     methodend
 
 
-
     rem /**
     rem * Method setSortOrder:
     rem * set the sort order to one column
@@ -165,40 +174,39 @@ class public DataProviderBusinessComponent extends BusinessComponent
     methodend
 
 
-
+    rem /**
+    rem * Method prepareResultSet:
+    rem * Execute the SQL query and prepare the result set
+    rem * @param BBjNumber first: start reading at the "first" row from the record set
+    rem * @param BBjNumber last: read to the "last" row from the record set
+    rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
-    
+
         if last>=#getResultSet().size() then
             doIt=1
         else
-
             for i=first to last
-
                 if #getResultSet().getItem(i)=null() then
                     doIt=1
                     break
                 fi
-
             next
-
         fi
 
         if doIt then
             v! = #getDataProvider().prepareResultSet(first, last*3)
 
             if v!.size() then
-
                 for i=0 to v!.size()-1
                     rec = v!.getItem(i)
                     rec!=#getResultSet().getItem(rec)
                     #getResultSet().setItem(rec,#processRecord(rec!))
                 next
-
             fi
-
         fi
 
     methodend
+
 
     rem /**
     rem * Method getColumnAttributes:
@@ -239,10 +247,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
 
 
-
-
     rem editing methods
-
 
 
     rem /**
@@ -252,15 +257,14 @@ class public DataProviderBusinessComponent extends BusinessComponent
     rem */
     method public BBjNumber canDeleteSelectedRecord()
 
-
         methodret 0
 
         rem TODO
 
         methodret #getDataProvider().getPrimaryKeySegments().size() AND #PrimaryTable$>""
 
-
     methodend
+
 
     rem /**
     rem * Method deleteSelectedRecords:
@@ -276,7 +280,6 @@ class public DataProviderBusinessComponent extends BusinessComponent
     methodend
 
 
-
     rem /**
     rem * Method saveRecord
     rem * saves a record within the result set
@@ -285,18 +288,15 @@ class public DataProviderBusinessComponent extends BusinessComponent
     rem */
     method public void saveRecord(BBjNumber recno, java.util.HashMap fields!)
 
-
         if recno=-2 then
-
             row! = #getDataProvider().getNewEntity()
             ks! = fields!.keySet()
             it!=ks!.iterator()
 
             while it!.hasNext()
-
                 f$=it!.next()
-                v$=fields!.get(f$)
-                row!.setFieldValue(f$,v$)
+                v!=fields!.get(f$)
+                row!.setFieldValue(f$,v!)
             wend
 
             row! = #onBeforeInsert(row!)
@@ -304,11 +304,9 @@ class public DataProviderBusinessComponent extends BusinessComponent
             #getDataProvider().insertRecord(row!)
             #refresh(0)
             #setEditedRecord(-1)
-
         fi
 
         if recno>-1 then
-
             orig_row! = #getResultSet().getItem(recno)
             rem TODO:  re-read the record from the database, compare to this version
             rem and abort operation if one of the edited fields has changed in the meantime
@@ -319,7 +317,6 @@ class public DataProviderBusinessComponent extends BusinessComponent
             it!=ks!.iterator()
 
             while it!.hasNext()
-
                 f$=it!.next()
                 v!=fields!.get(f$)
                 row!.setFieldValue(f$,v!)
@@ -337,11 +334,9 @@ class public DataProviderBusinessComponent extends BusinessComponent
             fi
 
             #setEditedRecord(-1)
-
         fi
 
     methodend
-
 
 
     rem /**
@@ -358,25 +353,20 @@ class public DataProviderBusinessComponent extends BusinessComponent
         fi
 
         if recno=-2 then
-
             row! = #getDataProvider().getNewEntity()
             ks! = fields!.keySet()
             it!=ks!.iterator()
 
             while it!.hasNext()
-
                 f$=it!.next()
                 v$=fields!.get(f$)
                 row!.setFieldValue(f$,v$)
             wend
 
-
             methodret  #validateRecord(row!,null())
-
         fi
 
         if recno>-1 then
-
             orig_row! = #getResultSet().getItem(recno)
             rem TODO:  re-read the record from the database, compare to this version
             rem and abort operation if one of the edited fields has changed in the meantime
@@ -387,7 +377,6 @@ class public DataProviderBusinessComponent extends BusinessComponent
             it!=ks!.iterator()
 
             while it!.hasNext()
-
                 f$=it!.next()
                 v!=fields!.get(f$)
                 row!.setFieldValue(f$,v!)
@@ -395,10 +384,10 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
             ? row!.toString()
 
-
             methodret #validateRecord(row!,orig_row!)
 
         fi
+
     methodend
 
 
@@ -422,7 +411,6 @@ class public DataProviderBusinessComponent extends BusinessComponent
     rem * @param BBjNumber recno: the record number being edited
     rem */
     method public void setEditedRecord(BBjNumber recno)
-
 
         if #super!.getEditingRecNo() <> recno then
             #super!.setEditedRecord(recno)
@@ -454,18 +442,15 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
     methodend
 
+    rem /**
+    rem * Method getPrimaryKeySegments:
+    rem * return the primary key segments
+    rem * @return BBjVector primaryKeySegments!: a BBjVector with the primary key segments
+    rem */
     method public BBjVector getPrimaryKeySegments()
 
         methodret #getDataProvider().getPrimaryKeySegments()
 
     methodend
 
-
 classend
-
-
-
-
-
-
-

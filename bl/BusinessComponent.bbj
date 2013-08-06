@@ -1,12 +1,5 @@
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
-use ::components/db/DataProvider.bbj::DataProvider
-use ::components/bl/ValidationError.bbj::ValidationError
-use ::components/ui/bound/UIComponent.bbj::UIComponent
-use ::components/ui/bound/UIController.bbj::UIController
-use ::components/ui/bound/form/GoogleMapsComponent.bbj::GoogleMapsComponent
+rem package components.bl
 
-use ::util/string/json.bbj::json
 rem /**
 rem * BusinessComponent
 rem *
@@ -16,16 +9,26 @@ rem * @author Stephan Wald
 rem * @version 1.0
 rem */
 
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+use ::components/db/DataProvider.bbj::DataProvider
+use ::components/bl/ValidationError.bbj::ValidationError
+use ::components/ui/bound/UIComponent.bbj::UIComponent
+use ::components/ui/bound/UIController.bbj::UIController
+use ::components/ui/bound/form/GoogleMapsComponent.bbj::GoogleMapsComponent
+
+use ::util/string/json.bbj::json
+
 class public BusinessComponent
 
-    field protected BBjVector           ResultSet! = new BBjVector()
-    field protected BBjVector           Selection! = new BBjVector()
+    field protected BBjVector           ResultSet!                     = new BBjVector()
+    field protected BBjVector           Selection!                     = new BBjVector()
     field protected DataRow             ColumnAttributes!
-    field public    BBjVector           UIList! = new BBjVector()
-    field protected BBjNumber           QueryComplete =0
-    field protected BBjNumber           BlockSize = 20
-    field public    BBjNumber           AllowFilter = 0
-    field public    BBjNumber           AllowSort = 0
+    field public    BBjVector           UIList!                        = new BBjVector()
+    field protected BBjNumber           QueryComplete                  = 0
+    field protected BBjNumber           BlockSize                      = 20
+    field public    BBjNumber           AllowFilter                    = 0
+    field public    BBjNumber           AllowSort                      = 0
     field protected BBjString           SortField$
     field protected BBjNumber           SortAscending
 
@@ -34,23 +37,23 @@ class public BusinessComponent
 
     field protected java.util.HashMap   QueryFilter!
 
-    field protected java.util.HashMap   Controller!                 = new java.util.HashMap()
-    field protected java.util.HashMap   ControllerVars!             = new java.util.HashMap()
-    field protected java.util.HashMap   FullResultsetController!    = new java.util.HashMap()
-    field protected java.util.HashMap   FullResultsetControllerVars!= new java.util.HashMap()
+    field protected java.util.HashMap   Controller!                    = new java.util.HashMap()
+    field protected java.util.HashMap   ControllerVars!                = new java.util.HashMap()
+    field protected java.util.HashMap   FullResultsetController!       = new java.util.HashMap()
+    field protected java.util.HashMap   FullResultsetControllerVars!   = new java.util.HashMap()
 
-    field protected java.util.HashMap   ControllerFilter!           = new java.util.HashMap()
-    field protected java.util.HashMap   ControllerFilterUnlock!     = new java.util.HashMap()
+    field protected java.util.HashMap   ControllerFilter!              = new java.util.HashMap()
+    field protected java.util.HashMap   ControllerFilterUnlock!        = new java.util.HashMap()
 
-    field private   java.util.HashMap   ForeignKeyPointerBcList!    = new java.util.HashMap()
-    field private   java.util.HashMap   ForeignKeyPointerKeyFieldList!  = new java.util.HashMap()
-    field private   UIController        ForeignKeyPointerController! = new UIController()
+    field private   java.util.HashMap   ForeignKeyPointerBcList!       = new java.util.HashMap()
+    field private   java.util.HashMap   ForeignKeyPointerKeyFieldList! = new java.util.HashMap()
+    field private   UIController        ForeignKeyPointerController!   = new UIController()
 
-    field private   BBjNumber           EditingRecNo=-1
-    field private   BBjVector           ValidationErrors!           = new BBjVector()
-    field private   java.util.HashMap   FieldValidationErrors!      = new java.util.HashMap()
+    field private   BBjNumber           EditingRecNo                   = -1
+    field private   BBjVector           ValidationErrors!              = new BBjVector()
+    field private   java.util.HashMap   FieldValidationErrors!         = new java.util.HashMap()
 
-    field protected DataProvider DataProvider!
+    field protected DataProvider        DataProvider!
 
     rem *********************set / get methods ****************************
 
@@ -71,11 +74,19 @@ class public BusinessComponent
     methodend
 
 
+    rem /**
+    rem * Method unregisterUI:
+    rem * unregister a UI component
+    rem * note: a business component can deal with multiple UI components that are working
+    rem * on the same resultset of data
+    rem * @param UIComponent uic!: add a UI component to this business component
+    rem */
     method public void unregisterUI(UIComponent uic!)
 
         #UIList!.removeItem(#UIList!.indexOf(uic!,err=*next),err=*next)
 
     methodend
+
 
     rem /**
     rem * Method getResultSet:
@@ -88,6 +99,7 @@ class public BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method setBlockSize:
     rem * set the size of blocks of data pulled from the data source and processed
@@ -95,12 +107,19 @@ class public BusinessComponent
     rem */
     method public void setBlockSize(BBjNumber size)
 
-        if size>=0 then
+        if size >= 0 then
             #BlockSize=int(size)
         fi
 
     methodend
 
+
+    rem /**
+    rem * Method prepareResultSet:
+    rem * Execute the SQL query and prepare the result set
+    rem * @param BBjNumber first: start reading at the "first" row from the record set
+    rem * @param BBjNumber last: read to the "last" row from the record set
+    rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
 
         #DataProvider!.prepareResultSet(first, last)
@@ -122,6 +141,7 @@ class public BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method setQueryFilter:
     rem * filters the result set
@@ -134,6 +154,7 @@ class public BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method getQueryFilter:
     rem * filters the result set
@@ -141,11 +162,11 @@ class public BusinessComponent
     rem */
     method public java.util.HashMap getQueryFilter()
 
-        methodret #QueryFilter! 
+        methodret #QueryFilter!
 
     methodend
-    
-    
+
+
     rem /**
     rem * Method checkRecordExists:
     rem * checks if there's a record matching the filter!
@@ -158,21 +179,20 @@ class public BusinessComponent
         if #QueryFilter! <> null() then
             tmp! = #QueryFilter!.clone()
         fi
-        
+
         #QueryFilter! = filter!
         #DataProvider!.setQueryFilter(filter!)
         rem #DataProvider!.prepareResultSet(first, last)
         s = #size()
-        
-        
+
         #QueryFilter! = tmp!
         #DataProvider!.setQueryFilter(tmp!)
-        
+
         methodret s
         rem #refresh(0)
 
     methodend
-    
+
 
     rem /**
     rem * Method refresh:
@@ -221,7 +241,6 @@ class public BusinessComponent
             #prepareResultSet(0,s!)
 
             if #ResultSet!.size() then
-
                 for i= 0 to #ResultSet!.size()-1
                     rec! = #ResultSet!.getItem(i)
                     f$=rec!.getFieldAsString(k$)
@@ -232,25 +251,19 @@ class public BusinessComponent
                     fi
                     rem TODO: deal correctly with null() and numeric fields
                 next
-
             fi
 
             if clist!.size() then
-
                 for i=0 to clist!.size()-1
-
                     c! = clist!.getItem(i)
                     v$ = vlist!.getItem(i)
                     c!.drive(v$,v!)
-
                 next
-
             fi
-
         wend
 
-
     methodend
+
 
     rem /**
     rem * Method checkUserCancel:
@@ -263,7 +276,6 @@ class public BusinessComponent
         cancel=0
 
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
 
@@ -271,14 +283,13 @@ class public BusinessComponent
                     cancel=1
                     break
                 fi
-
             next
-
         fi
 
         methodret cancel
 
     methodend
+
 
     rem /**
     rem * Method setProgress:
@@ -291,12 +302,10 @@ class public BusinessComponent
         cancel=0
 
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.setProgress(progress)
             next
-
         fi
 
     methodend
@@ -329,12 +338,18 @@ class public BusinessComponent
 
     methodend
 
+
+    rem /**
+    rem * Method deselectAll:
+    rem * select a deselect all selected rows
+    rem */
     method public void deselectAll()
 
         #Selection!.clear()
         #onSelectionChange()
 
     methodend
+
 
     rem /**
     rem * Method unSelectRow:
@@ -346,18 +361,17 @@ class public BusinessComponent
         i=0
 
         while i<#Selection!.size()
-
             if #Selection!.getItem(i)=row then
                 #Selection!.removeItem(i)
             else
                 i=i+1
             fi
-
         wend
 
         #onSelectionChange()
 
     methodend
+
 
     rem /**
     rem * Method canSelectionChange:
@@ -370,6 +384,7 @@ class public BusinessComponent
         methodret #this!.canSelectionChange(force, null())
 
     methodend
+
 
     rem /**
     rem * Method canSelectionChange:
@@ -393,15 +408,11 @@ class public BusinessComponent
                 if !force and !canChange then
                     break
                 fi
-
             next
-
         fi
 
         if !force and !canChange then
-
             methodret 0
-
         fi
 
         ks!=#Controller!.keySet()
@@ -415,42 +426,31 @@ class public BusinessComponent
             v!=new BBjVector()
 
             if #Selection!.size() then
-
                 for i= 0 to #Selection!.size()-1
                     k = #Selection!.getItem(i)
                     rec! = #ResultSet!.getItem(k)
                     f$=rec!.getFieldAsString(k$)
                     v!.addItem(f$)
                 next
-
             fi
 
             if clist!.size() then
-
                 for i=0 to clist!.size()-1
-
                     c! = clist!.getItem(i)
                     v$ = vlist!.getItem(i)
                     canChange = canChange AND c!.canDrive(v$,v!,force)
 
                     if !force and !canChange then
-
                         methodret 0
-
                     fi
-
                 next
-
             fi
-
         wend
-
-
 
         methodret canChange
 
-
     methodend
+
 
     rem /**
     rem * Method onSelectionChange:
@@ -459,12 +459,10 @@ class public BusinessComponent
     method public void onSelectionChange()
 
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.onSelectionChange()
             next
-
         fi
 
         ks!=#Controller!.keySet()
@@ -478,8 +476,7 @@ class public BusinessComponent
             v!=new BBjVector()
 
             if #Selection!.size() then
-
-                for i= 0 to #Selection!.size()-1
+                for i=0 to #Selection!.size()-1
                     k = #Selection!.getItem(i)
                     rec! = #ResultSet!.getItem(k)
                     f$=rec!.getFieldAsString(k$)
@@ -489,23 +486,16 @@ class public BusinessComponent
                         v!.addItem(f$)
                     fi
                     rem TODO: deal correctly with null() and numeric fields
-                   
                 next
-
             fi
 
             if clist!.size() then
-
                 for i=0 to clist!.size()-1
-
                     c! = clist!.getItem(i)
                     v$ = vlist!.getItem(i)
                     c!.drive(v$,v!)
-
                 next
-
             fi
-
         wend
 
     methodend
@@ -526,7 +516,6 @@ class public BusinessComponent
     methodend
 
 
-
     rem /**
     rem * Method registerController:
     rem * register a UIController that wants to get notified on changes of the selection
@@ -537,9 +526,7 @@ class public BusinessComponent
     rem */
     method public void registerController(UIController uc!, BBjString var$, BBjString fieldname$, BBjNumber fDriveWithFullResult)
 
-
         if fDriveWithFullResult then
-
             v! = #FullResultsetController!.get(fieldname$)
             v1!= #FullResultsetControllerVars!.get(fieldname$)
 
@@ -553,9 +540,7 @@ class public BusinessComponent
 
             v!.addItem(uc!)
             v1!.addItem(var$)
-
         else
-
             v! = #Controller!.get(fieldname$)
             v1!= #ControllerVars!.get(fieldname$)
 
@@ -569,7 +554,6 @@ class public BusinessComponent
 
             v!.addItem(uc!)
             v1!.addItem(var$)
-
         fi
 
     methodend
@@ -586,6 +570,7 @@ class public BusinessComponent
         #ControllerFilter!.put(var$,selection!)
 
     methodend
+
 
     rem /**
     rem * Method drive:
@@ -604,9 +589,10 @@ class public BusinessComponent
             v! = new BBjVector()
             v!.addItem(0)
             #setSelection(v!)
-        fi        
+        fi
 
     methodend
+
 
     rem /**
     rem * Method resetdrive:
@@ -618,6 +604,7 @@ class public BusinessComponent
         #ControllerFilter!.remove(var$)
 
     methodend
+
 
     rem /**
     rem * Method resetdrive:
@@ -631,21 +618,25 @@ class public BusinessComponent
             var$=it!.next()
             #super!.getControllerFilter().remove(var$)
         wend
-        
 
     methodend
 
+
+    rem /**
+    rem * Method getControllerFilter:
+    rem * @return java.lang.HashMap ControllerFilter!: a HashMap with the filters for the controler
+    rem */
     method public java.util.HashMap getControllerFilter()
 
         methodret #ControllerFilter!
 
     methodend
 
+
     rem /**
     rem * Method canDrive:
     rem * called by the controller before a change of the selection occurs (from outside)
     rem * check if unsaved data needs saving
-
     rem * @param BBjString var$: the variable that changed
     rem * @param BBjVector selection!: the new selection
     rem * @param BBjNumber force: notify the other components of a mandatory selection change with no option to veto
@@ -657,12 +648,12 @@ class public BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method setControllerFilterUnlock:
     rem * called to (temporarily) unlock the business component from the UIController driver
     rem * @param BBjString field$: the field to be unlocked
     rem * @param BBjNumber f_unlock: 1=unlock, 0=lock
-
     rem */
     method public void setControllerFilterUnlock(BBjString field$, BBjNumber f_unlock)
 
@@ -687,36 +678,70 @@ class public BusinessComponent
     methodend
 
 
+    rem /**
+    rem * Method clearValidationErrors:
+    rem * Clear all validation errors
+    rem */
     method public void clearValidationErrors()
 
         #ValidationErrors!.clear()
 
     methodend
 
+
+    rem /**
+    rem * Method clearValidationError:
+    rem * Clear a validation error for a field
+    rem * @param BBjString fieldName$: clear validation error for a field with the name fieldName$ 
+    rem */
     method public void clearValidationError(BBjString fieldName$)
 
         #FieldValidationErrors!.remove(fieldName$)
 
     methodend
 
+
+    rem /**
+    rem * Method clearFieldValidationErrors:
+    rem * Clear all field validation errors
+    rem */
     method public void clearFieldValidationErrors()
 
         #FieldValidationErrors!.clear()
 
     methodend
 
+
+    rem /**
+    rem * Method addValidationError:
+    rem * Add validation errors
+    rem * @param ValidationError v_err!: the ValidationError to be added to the BusinessComponent
+    rem */
     method public void addValidationError(ValidationError v_err!)
 
         #ValidationErrors!.addItem(v_err!)
 
     methodend
 
+
+    rem /**
+    rem * Method addValidationError:
+    rem * Add validation error for a field
+    rem * @param BBjString fieldName$: add the validation error to the field with the name fieldName$
+    rem * @param ValidationError v_err!: the ValidationError for the field
+    rem */
     method public void addValidationError(BBjString fieldName$,ValidationError v_err!)
 
         #FieldValidationErrors!.put(fieldName$,v_err!)
 
     methodend
 
+
+    rem /**
+    rem * Method getValidationErrors:
+    rem * Get all validation errors
+    rem * @return BBjVector errors!: BBjVector with ValidationErrors
+    rem */
     method public BBjVector getValidationErrors()
 
         v! = #ValidationErrors!.clone()
@@ -730,9 +755,14 @@ class public BusinessComponent
 
         methodret v!
 
-
     methodend
 
+
+    rem /**
+    rem * Method getFieldValidationErrorLevel:
+    rem * Get the highest validation error level
+    rem * @return BBjNumber level: the highest validation error level
+    rem */
     method public BBjNumber getFieldValidationErrorLevel()
 
         declare auto ValidationError v_err!
@@ -741,24 +771,28 @@ class public BusinessComponent
 
         while it!.hasNext()
             v_err! = #FieldValidationErrors!.get(it!.next())
-            level=max(level,v_err!.getLevel())
+            level = max(level,v_err!.getLevel())
         wend
 
         methodret level
 
     methodend
 
+
+    rem /**
+    rem * Method getValidationErrorMessage:
+    rem * Get the validation error message
+    rem * @return BBjString ErrorMessage$: the validation error message
+    rem */
     method public BBjString getValidationErrorMessage()
 
         declare auto ValidationError v_err!
 
         if #ValidationErrors!.size() then
-
             for i=0 to #ValidationErrors!.size() -1
                 v_err! = #ValidationErrors!.getItem(i)
                 msg$ = msg$+v_err!.getMessage()+" "+v_err!.getFieldList().toString()+$0a$
             next
-
         fi
 
         ks! = #FieldValidationErrors!.keySet()
@@ -768,7 +802,6 @@ class public BusinessComponent
             v_err! = #FieldValidationErrors!.get(it!.next())
             msg$ = msg$+v_err!.getMessage()+" "+v_err!.getFieldList().toString()+$0a$
         wend
-
 
         methodret msg$
 
@@ -800,7 +833,6 @@ class public BusinessComponent
     rem */
     method public DataRow getColumnAttributes()
 
-
         if #ColumnAttributes! = null() then
             r!=#getResultSet()
 
@@ -815,19 +847,17 @@ class public BusinessComponent
             #ColumnAttributes! = new DataRow()
 
             if fields!.size()>0 then
-
                 for i=0 to fields!.size()-1
                     f$=fields!.getItem(i)
                     #ColumnAttributes!.setFieldValue(f$,"")
                 next
-
             fi
-
         fi
 
         methodret #ColumnAttributes!
 
     methodend
+
 
     rem /**
     rem * Method processRecord:
@@ -850,8 +880,8 @@ class public BusinessComponent
     rem */
     method public BBjNumber size()
 
-
     methodend
+
 
     rem /**
     rem * Method getDistinctValues:
@@ -861,7 +891,6 @@ class public BusinessComponent
     rem * @return java.util.TreeMap distinct!: the distinct values
     rem */
     method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
-
 
     methodend
 
@@ -880,14 +909,15 @@ class public BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method deleteSelectedRecords:
     rem * override to delete the currently selected records
     rem */
     method public void deleteSelectedRecords()
 
-
     methodend
+
 
     rem /**
     rem * Method setEditedRecord
@@ -896,19 +926,17 @@ class public BusinessComponent
     rem */
     method public void setEditedRecord(BBjNumber recno)
 
-
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.setEditing(recno>-1 OR recno = -2)
             next
-
         fi
 
         #EditingRecNo = recno
 
     methodend
+
 
     rem /**
     rem * Method broadcastSaveRecord
@@ -919,12 +947,10 @@ class public BusinessComponent
         fail=0
 
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 fail=fail+ui!.saveRecord()
             next
-
         fi
 
         if fail=0 then
@@ -943,12 +969,10 @@ class public BusinessComponent
         #this!.deselectAll()
 
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.newRecord()
             next
-
         fi
 
         #setEditedRecord(-2)
@@ -964,15 +988,14 @@ class public BusinessComponent
     method public void broadcastPartialUpdate(BBjNumber recno)
 
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.onPartialUpdate(recno)
             next
-
         fi
 
     methodend
+
 
     rem /**
     rem * Method broadcastSoftlockStatusChange
@@ -983,12 +1006,10 @@ class public BusinessComponent
     method public void broadcastSoftlockStatusChange(BBjNumber recno, BBjNumber isLocked)
 
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.onSoftlockStatusChange(recno, isLocked)
             next
-
         fi
 
     methodend
@@ -1002,8 +1023,6 @@ class public BusinessComponent
     rem */
     method public void saveRecord(BBjNumber recno, java.util.HashMap fields!)
 
-
-
     methodend
 
 
@@ -1014,12 +1033,10 @@ class public BusinessComponent
     method public void restoreEditedField()
 
         if #UIList!.size() then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.restoreEditedField()
             next
-
         fi
 
     methodend
@@ -1028,14 +1045,13 @@ class public BusinessComponent
     rem /**
     rem * Method getEditingRecNo
     rem * retrieve the record number within the result set currently being edited
-    rem * @return BBjNumber recno: -1 = no editing operation pending, >=0: the record number in the resultset
+    rem * @return BBjNumber recno: -2 = new record, -1 = no editing operation pending, >=0: the record number in the resultset
     method public BBjNumber getEditingRecNo()
-
 
         methodret #EditingRecNo
 
-
     methodend
+
 
     rem /**
     rem * Method isLocked
@@ -1044,11 +1060,10 @@ class public BusinessComponent
     rem */
     method public BBjNumber isLocked(BBjNumber recno)
 
-
         methodret 0
 
-
     methodend
+
 
     rem /**
     rem * Method broadcastEdit:
@@ -1063,6 +1078,7 @@ class public BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method broadcastEdit:
     rem * called by UI to notify the BC about an ongoing edit
@@ -1074,23 +1090,34 @@ class public BusinessComponent
     method public void broadcastEdit(BBjNumber recno, BBjString fieldName$, BBjString newContent$)
 
         if #UIList!.size() and recno >-1 then
-
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.onBroadcastEdit(recno, fieldName$, newContent$)
             next
-
         fi
 
     methodend
 
 
+    rem /**
+    rem * Method beforeUpdateRecord:
+    rem * override this method before updating a record
+    rem * @param java.util.HashMap fields!: the fields to be updated
+    rem * @return java.util.HashMap fields!: the fields to be updated
+    rem */
     method public java.util.HashMap beforeUpdateRecord(java.util.HashMap fields!)
 
         methodret fields!
 
     methodend
 
+
+    rem /**
+    rem * Method beforeInsertRecord:
+    rem * override this method before inserting a record
+    rem * @param java.util.HashMap fields!: the fields to be inserted
+    rem * @return java.util.HashMap fields!: the fields to be inserted
+    rem */
     method public java.util.HashMap beforeInsertRecord(java.util.HashMap fields!)
 
         methodret fields!
@@ -1098,10 +1125,17 @@ class public BusinessComponent
     methodend
 
 
+    rem /**
+    rem * Method setForeignKeyPointer:
+    rem * Set another BusinessComponent for a field which is a foreign key
+    rem * @param BBjString fieldname$: the field name that is a foreign key
+    rem * @param BusinessComponent bc!: the BusinessComponent for the foreign key
+    rem * @param BBjString fkfield$: the foreign field name
+    rem */
     method public void setForeignKeyPointer(BBjString fieldname$, BusinessComponent bc!, BBjString fkfield$)
 
-        #ForeignKeyPointerBcList!           .put(fieldname$,bc!)
-        #ForeignKeyPointerKeyFieldList!     .put(fieldname$,fkfield$)
+        #ForeignKeyPointerBcList!.put(fieldname$,bc!)
+        #ForeignKeyPointerKeyFieldList!.put(fieldname$,fkfield$)
 
         guid$ = java.util.UUID.randomUUID().toString()
         #ForeignKeyPointerController!.registerDriver(#this!,guid$,fieldname$)
@@ -1109,12 +1143,24 @@ class public BusinessComponent
 
     methodend
 
+
+    rem /**
+    rem * Method getForeignKeyBC:
+    rem * Get the BusinessComponent for a foreign key field
+    rem * @param BBjString fieldname$: the foreign key field name
+    rem */
     method public BusinessComponent getForeignKeyBC(BBjString fieldname$)
 
         methodret cast(BusinessComponent,#ForeignKeyPointerBcList!.get(fieldname$))
 
     methodend
 
+
+    rem /**
+    rem * Method getForeignKeyFkField:
+    rem * Get the field name of the corresponding primary key
+    rem * @param BBjString fieldname$: the foreign key field name
+    rem */
     method public BBjString getForeignKeyFkField(BBjString fieldname$)
 
         methodret cast(BBjString,#ForeignKeyPointerKeyFieldList!.get(fieldname$))
@@ -1137,6 +1183,7 @@ class public BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method onBeforeUpdate:
     rem * called immediately before a row will be inserted
@@ -1149,6 +1196,7 @@ class public BusinessComponent
         methodret row!
 
     methodend
+
 
     rem /**
     rem * Method validateField:
@@ -1165,6 +1213,7 @@ class public BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method validateRecord:
     rem * override this method for validating a record before it's written
@@ -1177,7 +1226,6 @@ class public BusinessComponent
         methodret 0
 
     methodend
-
 
     rem /**
     rem * Method validateRecord
@@ -1193,18 +1241,26 @@ class public BusinessComponent
     methodend
 
 
+    rem /**
+    rem * Method getPrimaryKeySegments:
+    rem * override this method for validating a record before it's written
+    rem * @return BBjVector primaryKeySegments!: a BBjVector with the primary key segments
+    rem */
     method public BBjVector getPrimaryKeySegments()
 
- 
     methodend
-    
-    
-    
+
+
     rem ---------------------------json version of methods
-    
-    
+
+    rem /**
+    rem * Method getColumnAttributesAsJson:
+    rem * return all column-specific attributes in json format
+    rem * override to enrich data by formatting rules
+    rem * @return json attributes!: a json row holding the column-specific attributes
+    rem */
     method public json getColumnAttributesAsJson()
-    
+
         declare DataRow attr!
         declare json json!
         declare json jf! 
@@ -1216,86 +1272,87 @@ class public BusinessComponent
         v! = attr!.getFieldNames()
         jv! = new BBjVector()
         if v!.size() then
-            
             for i=0 to v!.size()-1
                 jf! = new json()
                 f$=v!.getItem(i)
                 jf!.set("name",f$)
-                
-                if #getPrimaryKeySegments().indexOf(f$)>-1
+
+                if #getPrimaryKeySegments().indexOf(f$) >- 1 then
                     jf!.set("index","1")
                 fi
-                
+
                 col_attr! = attr!.getFieldAttributes(f$)
 
                 ks! = col_attr!.keySet()
                 it! = ks!.iterator()
                 while it!.hasNext()
-                        k$=it!.next()
-                        jf!.set(K$,col_attr!.get(K$))
+                    k$=it!.next()
+                    jf!.set(K$,col_attr!.get(K$))
                 wend
 
                 jv!.addItem(jf!)
             next
-            
         fi
-        
+
         json!.set("fields",jv!)
         json!.set("tablename",#DataProvider!.getPrimaryTable())
         json!.set("title",#getTitle())
-        
+
         methodret json!
-        
+
     methodend
-    
+
+
+    rem /**
+    rem * Method getResultSetAsJson:
+    rem * return the result set in json notation
+    rem * @return json result!: the current result set in json notation
+    rem */
     method public json getResultSetAsJson()
-    
+
         methodret #getResultSetAsJson(0,#DataProvider!.size())
-    
+
     methodend
-    
+
+
+    rem /**
+    rem * Method getResultSetAsJson:
+    rem * return the result set in json notation
+    rem * @param BBjNumber first: position of the first record to return
+    rem * @param BBjNumber last: position of the last record to return
+    rem * @return json result!: the current result set in json notation
+    rem */
     method public json getResultSetAsJson(BBjNumber first, BBjNumber last)
-    
+
         declare json jr!
         declare json jason!
-    
+
         first = max(0,first)
         last = min(last,#size())
-        
+
         #prepareResultSet(first,last)
-        
+
         jv! = new BBjVector()
         json! = new json()
-        
+
         for i=first to last-1
             jr! = new json()
             row! = #getResultSet().getItem(i)
-            
-            vf! = row!.getFieldNames()
-                    if vf!.size() then
-                        
-                        for j=vf!.size()-1 to 0 step -1
-                            f$=vf!.getItem(j)
-                            jr!.set(f$,row!.getFieldAsString(f$))
-                        next
 
-                    fi            
-            
+            vf! = row!.getFieldNames()
+            if vf!.size() then
+                for j=vf!.size()-1 to 0 step -1
+                    f$=vf!.getItem(j)
+                    jr!.set(f$,row!.getFieldAsString(f$))
+                next
+            fi
+
             jv!.addItem(jr!)
         next
         json!.set("recordset",jv!)
-        
+
         methodret json!
-    
+
     methodend
 
 classend
-
-
-
-
-
-
-
-
-

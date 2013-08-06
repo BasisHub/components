@@ -1,7 +1,15 @@
+rem package components.ui.bound.grid
 
 use ::translations/bbtranslator.bbj::BBTranslator
 use ::components/i18n/i18n.bbj::i18n
 
+
+rem /**
+rem * NavigationGridComponentConfigDialog
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
 class public NavigationGridComponentConfigDialog
 
     field private BBjTopLevelWindow Wnd!
@@ -25,11 +33,22 @@ class public NavigationGridComponentConfigDialog
     field private static BBTranslator  Translator! = i18n.getTranslator()
 
 
+    rem /**
+    rem * Constructor NavigationGridComponentConfigDialog
+    rem * Default constructor
+    rem * @param BBjWindow wnd!: child window that the component shall occupy
+    rem */
     method public NavigationGridComponentConfigDialog()
-
 
     methodend
 
+
+    rem /**
+    rem * Constructor NavigationGridComponentConfigDialog
+    rem * Creates the component and set the position to x,y
+    rem * @param BBjNumber x: x-coordinate
+    rem * @param BBjNumber y: y-coordinate
+    rem */
     method public NavigationGridComponentConfigDialog(BBjNumber x, BBjNumber y)
 
         #this!()
@@ -39,30 +58,40 @@ class public NavigationGridComponentConfigDialog
 
     methodend
 
+
     method private BBjVector cloneVector(BBjVector in!)
 
         out! = new BBjVector()
 
         if in!.size() then
-
             for i=0 to in!.size()-1
                 out!.addItem(in!.getItem(i))
             next
-
         fi
 
         methodret out!
 
-
     methodend
 
+
+    rem /**
+    rem * Method setGridColumns:
+    rem * set the content of the grid
+    rem * @param BBjVector vec!: grid content as BBjVector
+    rem */
     method public void setGridColumns(BBjVector v!)
 
         #GridColumnsOrig! = v!
-        #GridColumns! = cast (BBjVector,#cloneVector(v!))
+        #GridColumns! = cast(BBjVector,#cloneVector(v!))
 
     methodend
 
+
+    rem /**
+    rem * Method setGridColumns:
+    rem * get the grid content as BBjVector
+    rem * @return BBjVector: the grid content as BBjVector
+    rem */
     method public BBjVector getGridColumns()
 
         methodret #GridColumns!
@@ -70,10 +99,10 @@ class public NavigationGridComponentConfigDialog
     methodend
 
 
-    method private void resize()
-
-    methodend
-
+    rem /**
+    rem * Method resetGrid:
+    rem * reset the content of the grid
+    rem */
     method private void resetGrid()
 
         #Grid!.setNumRows(#GridColumns!.size())
@@ -88,8 +117,12 @@ class public NavigationGridComponentConfigDialog
     methodend
 
 
+    rem /**
+    rem * Method doModal:
+    rem * show a modal dialog window holding the component
+    rem * @return BBjNumber ret: 1=user hit "OK", 0=user hit "Cancel" or closed / aborted the window
+    rem */
     method public BBjNumber doModal()
-
 
         if #GridColumns! = null() then
             throw "Grid Column List not set",250
@@ -133,7 +166,6 @@ class public NavigationGridComponentConfigDialog
         if #GridColumns!.size()=0 then
             a=msgbox(#Translator!.getTranslation("NO_COLUMNS"),BBjAPI().getConstants().MB_ICONEXCLAMATION,#Translator!.getTranslation("GRID_SETUP"))
         else
-
             #resetGrid()
         fi
 
@@ -171,6 +203,7 @@ class public NavigationGridComponentConfigDialog
 
     methodend
 
+
     method public void onResize(BBjResizeEvent ev!)
 
         w=ev!.getWidth()
@@ -187,15 +220,14 @@ class public NavigationGridComponentConfigDialog
         #BtnOK!.setLocation(w-125,h-65)
         #BtnCancel!.setLocation(w-125,h-35)
 
-
     methodend
+
 
     method public void onGridClick(BBjGridMouseDownEvent ev!)
 
         row = ev!.getRow()
 
         if ev!.getColumn() = 0 and row >= 0 then
-
             state=#Grid!.getCellState(row,0)
 
             if state then
@@ -212,8 +244,8 @@ class public NavigationGridComponentConfigDialog
             #GridColumns!.insertItem(row,z!)
         fi
 
-
     methodend
+
 
     method public void onGridDragDrop(BBjDropTargetDropEvent ev!)
 
@@ -223,8 +255,14 @@ class public NavigationGridComponentConfigDialog
 
     methodend
 
-    method private void moveRow(BBjNumber source, BBjNumber target)
 
+    rem /**
+    rem * Method moveRow:
+    rem * move a row from source pos to target pos
+    rem * @param BBjNumber source: the row that shall be moved
+    rem * @param BBjNumber target: the target row position
+    rem */
+    method private void moveRow(BBjNumber source, BBjNumber target)
 
         if source<0 or target<0 then methodret
 
@@ -245,6 +283,7 @@ class public NavigationGridComponentConfigDialog
 
     methodend
 
+
     method public void onBtnTop(BBjButtonPushEvent ev!)
 
         source=#Grid!.getSelectedRow()
@@ -253,8 +292,8 @@ class public NavigationGridComponentConfigDialog
             #moveRow(source,0)
         fi
 
-
     methodend
+
 
     method public void onBtnUp(BBjButtonPushEvent ev!)
 
@@ -264,8 +303,8 @@ class public NavigationGridComponentConfigDialog
             #moveRow(source,source-1)
         fi
 
-
     methodend
+
 
     method public void onBtnDown(BBjButtonPushEvent ev!)
 
@@ -274,12 +313,14 @@ class public NavigationGridComponentConfigDialog
 
     methodend
 
+
     method public void onBtnLast(BBjButtonPushEvent ev!)
 
         source=#Grid!.getSelectedRow()
         #moveRow(source,#GridColumns!.size())
 
     methodend
+
 
     method public void onBtnRestore(BBjButtonPushEvent ev!)
 
@@ -289,6 +330,7 @@ class public NavigationGridComponentConfigDialog
     methodend
 
 classend
+
 
 
 declare NavigationGridComponentConfigDialog dlg!
@@ -310,15 +352,4 @@ dlg!.setGridColumns(v!)
 if dlg!.doModal() then
     a=msgbox(str(dlg!.getGridColumns()))
 fi
-
-
-
-
-
-
-
-
-
-
-
 

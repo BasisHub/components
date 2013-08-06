@@ -1,3 +1,5 @@
+rem package components.ui.bound.grid
+
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/db/DataRow.bbj::DataRow
@@ -9,12 +11,35 @@ use ::components/ui/unbound/GoogleMapsAreaChooserDialog.bbj::GoogleMapsAreaChoos
 use ::translations/bbtranslator.bbj::BBTranslator
 use ::components/i18n/i18n.bbj::i18n
 
+use java.lang.Byte
+use java.lang.Short
+use java.lang.Double
+use java.util.Date
+use java.text.SimpleDateFormat
+use java.io.FileInputStream
+use java.io.FileOutputStream
+use java.io.File
+
+use org.apache.poi.hssf.usermodel.HSSFWorkbook
+use org.apache.poi.hssf.usermodel.HSSFCell
+use org.apache.poi.hssf.usermodel.HSSFSheet
+use org.apache.poi.hssf.usermodel.HSSFRow
+use org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator
+use org.apache.poi.hssf.usermodel.HSSFCellStyle
+use org.apache.poi.hssf.usermodel.HSSFFont
+use org.apache.poi.hssf.usermodel.HSSFDataFormat
+use org.apache.poi.hssf.usermodel.HSSFPalette
+use org.apache.poi.ss.usermodel.DateUtil
+use org.apache.poi.hssf.util.HSSFColor
+use org.apache.poi.hssf.record.Record
+
 
 class public NavigationGridComponentSelChangeEvent
 
     field public BBjVector SelectedRecords!
 
 classend
+
 
 class public NavigationGridComponentCellClickEvent
 
@@ -23,6 +48,7 @@ class public NavigationGridComponentCellClickEvent
     field public BBjNumber SelectedRow
 
 classend
+
 
 class public NavigationGridComponentContextMenuEvent
 
@@ -33,6 +59,7 @@ class public NavigationGridComponentContextMenuEvent
 
 classend
 
+
 class public NavigationGridComponentContextMenuItem
 
     field public BBjString  ID$
@@ -42,7 +69,9 @@ class public NavigationGridComponentContextMenuItem
     field public Object     TargetObject!
     field public BBjString  TargetMethod$
     field public BBjImage   Image!
+
 classend
+
 
 class public DistinctFilterPopup
 
@@ -58,14 +87,12 @@ class public DistinctFilterPopup
 
     field protected static BBTranslator  Translator! = i18n.getTranslator()
 
-    method private DistinctFilterPopup()
 
+    method private DistinctFilterPopup()
 
     methodend
 
     method public DistinctFilterPopup(BBjWindow parent!, BBjNumber x, BBjNumber y, java.util.TreeMap distinct!)
-
-
 
         w=250
         h=400
@@ -138,14 +165,13 @@ class public DistinctFilterPopup
 
     methodend
 
+
     method public void onGridMouseUp(BBjGridMouseUpEvent ev!)
 
         row=ev!.getRow()
 
         if row=-1 then
-
             methodret
-
         fi
 
         state=#C_DistinctGrid!.getCellState(row,1)
@@ -157,9 +183,7 @@ class public DistinctFilterPopup
         fi
 
 
-
         if row=0 then
-
             if state=0 then
                 no=1
                 yes=0
@@ -178,7 +202,6 @@ class public DistinctFilterPopup
                 #Distinct!.put(K$,state)
                 r=r+1
             wend
-
         else
             #C_DistinctGrid!.setCellState(row,1,state)
             ks! = #Distinct!.keySet()
@@ -200,7 +223,6 @@ class public DistinctFilterPopup
 
                 r=r+1
             wend
-
         fi
 
         #updateAllSelector(yes,no)
@@ -208,6 +230,7 @@ class public DistinctFilterPopup
         #C_DistinctGrid!.deselectAllCells()
 
     methodend
+
 
     method private void updateAllSelector(BBjNumber yes, BBjNumber no)
 
@@ -217,13 +240,11 @@ class public DistinctFilterPopup
             #C_DistinctGrid!.setCellImage(0,1,null())
         fi
 
-
         if yes=0 then
             #C_DistinctGrid!.setCellStyle(0,1,BBjGrid.GRID_STYLE_UNCHECKED)
             #C_DistinctGrid!.setCellState(0,1,0)
             #C_DistinctGrid!.setCellImage(0,1,null())
         fi
-
 
         if yes and no then
             rem #C_DistinctGrid!.setCellStyle(0,1,BBjGrid.GRID_STYLE_TEXT)
@@ -234,8 +255,8 @@ class public DistinctFilterPopup
             #C_DistinctGrid!.setCellImage(0,1,img!)
         fi
 
-
     methodend
+
 
     method public void onOK(BBjButtonPushEvent ev!)
 
@@ -243,20 +264,19 @@ class public DistinctFilterPopup
 
     methodend
 
+
     method public void onCancel(BBjButtonPushEvent ev!)
 
         BBjAPI().postPriorityCustomEvent("Cancel","")
 
     methodend
 
-    method public java.util.TreeMap getDistinct()
 
+    method public java.util.TreeMap getDistinct()
 
         methodret #Distinct!
 
-
     methodend
-
 
 classend
 
@@ -366,12 +386,14 @@ class public NavigationGridComponent extends UIComponent implements UIWidget
 
     methodend
 
+
     method public NavigationGridComponent (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
         #super!(wnd!,id,x,y,w,h)
         #initialize()
 
     methodend
+
 
     method protected void initialize()
 
@@ -434,6 +456,7 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void onKeypress(BBjKeypressEvent ev!)
 
         kc=ev!.getKeyCode()
@@ -442,7 +465,6 @@ REM         #getLaf().prepareWindow(panel!)
             rem down
 
             if #getBC().canSelectionChange(0) then
-
                 if #getBC().getSelection().size()>0 then
                     recno = #getBC().getSelection().getItem(0)
                 else
@@ -455,17 +477,13 @@ REM         #getLaf().prepareWindow(panel!)
                     v!.addItem(recno)
                     #getBC().setSelection(v!)
                 fi
-
             fi
-
         fi
-
 
         if kc=301 then
             rem up
 
             if #getBC().canSelectionChange(0) then
-
                 if #getBC().getSelection().size()>0 then
                     recno = #getBC().getSelection().getItem(0)
                 fi
@@ -476,14 +494,12 @@ REM         #getLaf().prepareWindow(panel!)
                 v!.addItem(recno)
                 #getBC().setSelection(v!)
             fi
-
         fi
 
         if kc=306 then
             rem pgdn
 
             if #getBC().canSelectionChange(0) then
-
                 if #getBC().getSelection().size()>0 then
                     recno = #getBC().getSelection().getItem(0)
                 fi
@@ -494,7 +510,6 @@ REM         #getLaf().prepareWindow(panel!)
                 v!.addItem(recno)
                 #getBC().setSelection(v!)
             fi
-
         fi
 
 
@@ -502,7 +517,6 @@ REM         #getLaf().prepareWindow(panel!)
             rem pgup
 
             if #getBC().canSelectionChange(0) then
-
                 if #getBC().getSelection().size()>0 then
                     recno = #getBC().getSelection().getItem(0)
                 fi
@@ -513,7 +527,6 @@ REM         #getLaf().prepareWindow(panel!)
                 v!.addItem(recno)
                 #getBC().setSelection(v!)
             fi
-
         fi
 
         if kc=307 then
@@ -525,7 +538,6 @@ REM         #getLaf().prepareWindow(panel!)
                 v!.addItem(recno)
                 #getBC().setSelection(v!)
             fi
-
         fi
 
         if kc=308 then
@@ -537,10 +549,10 @@ REM         #getLaf().prepareWindow(panel!)
                 v!.addItem(recno)
                 #getBC().setSelection(v!)
             fi
-
         fi
 
     methodend
+
 
     method private void initVariables()
 
@@ -550,13 +562,9 @@ REM         #getLaf().prepareWindow(panel!)
         #FilterStrings! = new java.util.HashMap()
         #FilterByDistinct! = new java.util.HashMap()
 
-
         #QueryFilter! = new java.util.HashMap()
 
-
-
         #Grid!.unsort()
-
 
     methodend
 
@@ -570,6 +578,7 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void setCellClickCallback(BBjString col$, Object target!, BBjString methodName$)
 
         #MouseLClickTargetObjectList!.put(col$,target!)
@@ -577,12 +586,12 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void setCellDoubleClickCallback(BBjString col$, BBjString methodName$)
 
         if #super!.getIsStandalone() then
             throw "Can't register Event on label in standalone-mode",250
         fi
-
 
         evid$=str(#this!)
         evid$=evid$(1,pos(" "=evid$)-1)+"CellDoubleClickCallback"
@@ -594,6 +603,7 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void setCellDoubleClickCallback(BBjString col$, Object target!, BBjString methodName$)
 
         #MouseDoubleClickTargetObjectList!.put(col$,target!)
@@ -601,11 +611,13 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void setCellContextMenu(BBjString col$, BBjString caption$, BBjString menuID$, Object target!, BBjString methodName$)
 
         #setCellContextMenu(col$, caption$, menuID$, target!, methodName$, null())
 
     methodend
+
 
     method public void setCellContextMenu(BBjString col$, BBjString caption$, BBjString menuID$, Object target!, BBjString methodName$, BBjImage image!)
 
@@ -625,11 +637,13 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void setRowContextMenu(BBjString caption$, BBjString menuID$, Object target!, BBjString methodName$, BBjImage image!)
 
         #setRowContextMenu(-1, caption$, menuID$, target!, methodName$,image!)
 
     methodend
+
 
     method public void setRowContextMenu(BBjString caption$, BBjString menuID$, Object target!, BBjString methodName$)
 
@@ -637,11 +651,13 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void setRowContextMenu(BBjNumber row, BBjString caption$, BBjString menuID$, Object target!, BBjString methodName$)
 
         #setRowContextMenu(row, caption$, menuID$, target!, methodName$, null())
 
     methodend
+
 
     method public void setRowContextMenu(BBjNumber row, BBjString caption$, BBjString menuID$, Object target!, BBjString methodName$, BBjImage image!)
 
@@ -658,22 +674,15 @@ REM         #getLaf().prepareWindow(panel!)
 
         #RowContextMenuList!.put(#ContextMenuItemID,menu!)
 
-
         #ContextMenuItemID=#ContextMenuItemID+1
 
-
-
     methodend
-
-
 
 
     method public void onScroll(BBjControlScrollEvent ev!)
 
         if ev!.isAdjusting() then
-
             methodret
-
         fi
 
         p=ev!.getPosition()
@@ -683,9 +692,6 @@ REM         #getLaf().prepareWindow(panel!)
     methodend
 
 
-
-
-
     method public void userQueryInterrupt(BBjButtonPushEvent ev!)
 
         #userInterrupt = 1
@@ -693,20 +699,18 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
-    method public BBjNumber interruptQueryCallback()
 
+    method public BBjNumber interruptQueryCallback()
 
         methodret #userInterrupt
 
-
     methodend
+
 
     method public void setProgress(BBjNumber percentage)
 
         if #ProgressBar!<>null() then
-
             if percentage>0 then
-
                 percentage=min(100,int(percentage/2))
 
 
@@ -716,12 +720,9 @@ REM         #getLaf().prepareWindow(panel!)
             else
                 #ProgressBar!.setVisible(0)
             fi
-
         fi
 
-
     methodend
-
 
 
     method public void setGridRowHeight(BBjNumber h)
@@ -732,15 +733,15 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
-    method public void gridLeftColumnChange(BBjGridLeftColumnChangeEvent ev!)
 
+    method public void gridLeftColumnChange(BBjGridLeftColumnChangeEvent ev!)
 
         if #FilterGrid! <> null() then
             #this!.scrollFilterGrid()
         fi
 
-
     methodend
+
 
     method public void gridColumnSize(BBjGridColumnSizeEvent ev!)
 
@@ -756,8 +757,8 @@ REM         #getLaf().prepareWindow(panel!)
             #FilterGrid!.setColumnWidth(c,s)
         fi
 
-
     methodend
+
 
     method private void updateSelection()
 
@@ -771,7 +772,6 @@ REM         #getLaf().prepareWindow(panel!)
                 j=0
 
                 while j<#GridContents!.size()
-
                     if #GridContents!.getItem(j) = row! then
                         v!.addItem(j)
                         break
@@ -783,20 +783,15 @@ REM         #getLaf().prepareWindow(panel!)
                 i=i+1
             wend
 
-
-
             #getBC().setSelection(v!)
-
         else
             v! = #Grid!.getSelectedRows()
             #SelectedRows!.clear()
 
             if v!.size() > 0 then
-
                 for i=0 to v!.size()-1
                     #SelectedRows!.addItem(v!.getItem(i)+#FirstRecordInGrid)
                 next
-
             fi
 
             #getBC().setSelection(#SelectedRows!)
@@ -811,15 +806,11 @@ REM         #getLaf().prepareWindow(panel!)
     methodend
 
 
-
-
-
     method public void onGridSelectRow(BBjGridSelectRowEvent ev!)
 
         if !#getBC().canSelectionChange(0) then
             #onSelectionChange()
         fi
-
 
         if #MultipleSelection then
             #Grid!.deselectAllCells()
@@ -829,17 +820,16 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void onGridKeypress(BBjGridKeypressEvent ev!)
 
         if ev!.getKeyCode()=10 then
-
             col=ev!.getColumn()
             row=ev!.getRow()
 
             if col>-1 and row>-1 then
                 #doGridNotifySelect(col, row)
             fi
-
         fi
 
         rem 307=Pos1, 308=End
@@ -849,7 +839,6 @@ REM         #getLaf().prepareWindow(panel!)
 
     method public void onGridDoubleClick(BBjGridDoubleClickEvent ev!)
 
-
         col=ev!.getColumn()
         row=ev!.getRow()
 
@@ -858,6 +847,7 @@ REM         #getLaf().prepareWindow(panel!)
         fi
 
     methodend
+
 
     method public void doGridNotifySelect(BBjNumber col, BBjNumber row)
 
@@ -881,22 +871,18 @@ REM         #getLaf().prepareWindow(panel!)
             if target! <> null() then
                 #super!.invokeCallback(target!,methodName!, ev!)
             else
-
                 BBjAPI().postPriorityCustomEvent(methodName!,ev!)
             fi
 
             methodret
-
         fi
 
         if #MultipleSelection=0  then
-
             #updateSelection()
 
             if #super!.getIsStandalone() then
                 BBjAPI().postPriorityCustomEvent("ReturnAnswer",null())
             fi
-
         fi
 
     methodend
@@ -904,36 +890,27 @@ REM         #getLaf().prepareWindow(panel!)
 
     method public void toggleSort(BBjString col$)
 
-
-
         sortRule$=#GridAttributes!.getFieldAttribute(col$,"SORT")
 
         if sortRule$="NONE" then
-
             methodret
-
         fi
 
         if col$=#SortOrder$ then
-
             if #SortOrderForward then
                 #SortOrderForward = 0
             else
                 #SortOrderForward = 1
             fi
-
         fi
 
         rem remove col header icon if any
 
         if #SortOrder$ > "" then
-
             for i=0 to #ColumnNames!.size()
-
                 if #ColumnNames!.get(i) = #SortOrder$ then
                     break
                 fi
-
             next
 
             #Grid!.setColumnHeaderCellImage(i,null())
@@ -945,11 +922,9 @@ REM         #getLaf().prepareWindow(panel!)
         rem set i to col number that it's about
 
         for i=0 to #ColumnNames!.size()
-
             if #ColumnNames!.get(i) = #SortOrder$ then
                 break
             fi
-
         next
 
 
@@ -971,16 +946,13 @@ REM         #getLaf().prepareWindow(panel!)
             fi
 
             #Grid!.setColumnVisible(i)
-
         else
-
             rem -------------------------sort in bc----------------------
 
             if pos("RELATED" = sortRule$) or pos("UI_ONLY" = sortRule$)  then
                 a=msgbox(#super!.getTranslator().getTranslation("CANNOT_SORT_BY")+" "+col$,0,#super!.getTranslator().getTranslation("SORT"))
 
                 methodret
-
             fi
 
             if #super!.getBC().getAllowSort() then
@@ -994,7 +966,6 @@ REM         #getLaf().prepareWindow(panel!)
 
                 #Grid!.setColumnHeaderCellImage(i,img!)
             fi
-
         fi
 
     methodend
@@ -1005,9 +976,7 @@ REM         #getLaf().prepareWindow(panel!)
         col=ev!.getColumn()
 
         if col=-1 then
-
             methodret
-
         fi
 
         row=ev!.getRow()
@@ -1018,19 +987,16 @@ REM         #getLaf().prepareWindow(panel!)
         fi
 
         if col=-1 and #this!.getMultipleSelection() then
-
             row! = #FilteredGridContents!.getItem(row)
 
             found=0
             i=0
 
             while i<#SelectedRows!.size()
-
                 if row!.equals(#SelectedRows!.getItem(i)) then
                     #SelectedRows!.removeItem(i)
                     found=1
                     break
-
                 fi
 
                 i=i+1
@@ -1047,7 +1013,6 @@ REM         #getLaf().prepareWindow(panel!)
         fi
 
 
-
         if col>-1 and 0 then
             rem TODO - send event
 
@@ -1057,21 +1022,18 @@ REM         #getLaf().prepareWindow(panel!)
                 methodName! = #MouseLClickTargetMethodList!.get(col$)
 
                 if target! <>null() and methodName! <> null() then
-
                     declare NavigationGridComponentCellClickEvent ev!
                     ev! = new NavigationGridComponentCellClickEvent()
                     ev!.setValue(#Grid!.getCellText(row,col))
                     ev!.setSelectedRecord(#FilteredGridContents!.getItem(row))
                     ev!.setSelectedRow(row)
                     #super!.invokeCallback(target!,methodName!, ev!)
-
                 fi
-
             fi
-
         fi
 
     methodend
+
 
     method public void gridRClick(BBjGridRightMouseDownEvent ev!)
 
@@ -1084,9 +1046,7 @@ REM         #getLaf().prepareWindow(panel!)
         row = ev!.getRow()
 
         if row=-1 or col=-1 then
-
             methodret
-
         fi
 
         #Grid!.removePopupMenu()
@@ -1096,7 +1056,6 @@ REM         #getLaf().prepareWindow(panel!)
 
         col$="<NIL>"
         col$=#ColumnNames!.getItem(col,err=*next)
-
 
 
         #TmpPopupMenuEvent! = new NavigationGridComponentContextMenuEvent()
@@ -1111,7 +1070,6 @@ REM         #getLaf().prepareWindow(panel!)
         foundone=0
 
         while it!.hasNext()
-
             id=it!.next()
             item! = #CellContextMenuList!.get(id)
 
@@ -1123,9 +1081,7 @@ REM         #getLaf().prepareWindow(panel!)
                 if item!.getImage() <>null() then
                     menuItem!.setImage(item!.getImage())
                 fi
-
             fi
-
         wend
 
         if foundone=0 then
@@ -1140,12 +1096,10 @@ REM         #getLaf().prepareWindow(panel!)
         it! = ks!.iterator()
 
         while it!.hasNext()
-
             id=it!.next()
             item! = #RowContextMenuList!.get(id)
 
             if item!.getRow() = row or item!.getRow() = -1 then
-
                 if sep=0 and foundone=1 then
                     sep=1
                     menu!.addSeparator()
@@ -1158,12 +1112,11 @@ REM         #getLaf().prepareWindow(panel!)
                 if item!.getImage() <>null() then
                     menuItem!.setImage(item!.getImage())
                 fi
-
             fi
-
         wend
 
     methodend
+
 
     method public void onContextMenuItemSelect(BBjPopupSelectEvent ev!)
 
@@ -1176,7 +1129,6 @@ REM         #getLaf().prepareWindow(panel!)
             item! = #RowContextMenuList!.get(id)
             #TmpPopupMenuEvent!.setMenuID(item!.getID())
             #super!.invokeCallback(item!.getTargetObject(),item!.getTargetMethod(), #TmpPopupMenuEvent!)
-
         fi
 
         if id>1000 then
@@ -1188,10 +1140,11 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+
     method public void setSize(BBjNumber width, BBjNumber height)
 
         #super!.setSize(width,height)
-        
+
         #setGridPosition()
         #InfoText!.setLocation(#Grid!.getWidth()-#InfoText!.getWidth()-4,#super!.getH()-30)
 
@@ -1215,7 +1168,7 @@ REM         #getLaf().prepareWindow(panel!)
             #FilterByDistinct!.clear()
             #ColumnConfig!.clear()
         fi
-        
+
         if #InitGrid then
             #VisibleRows=int( #Grid!.getHeight()/#this!.getGridRowHeight() -2)
             #Grid!.setNumRows(#VisibleRows)
@@ -1240,26 +1193,19 @@ REM         fi
 
 
         if #GridContents!.size() = 0 then
-
             #getBC().deselectAll()
             #Grid!.setNumRows(0)
 
             methodret
-
         fi
 
         #GridAttributes! = cast(DataRow,#getBC().getColumnAttributes())
 
-
-
         #pullRowsToGrid(0)
-
-
 
         #onSelectionChange()
 
     methodend
-
 
 
     method private void pullRowsToGrid(BBjNumber startRow)
@@ -1276,13 +1222,11 @@ REM         fi
             if #ColumnConfig!.size()=0 then
                 a=msgbox(#super!.getTranslator().getTranslation("CANNOT_LOAD_PRESET")+" "+#PresetConfig$,BBjAPI().getConstants().MB_ICONEXCLAMATION,#super!.getTranslator().getTranslation("ERROR"))
             fi
-
         fi
 
         rem no column config loaded from preset, so we're creating a default one
 
         if #ColumnConfig!.size()=0 then
-
             if #GridAttributes! = null() then
                 #GridAttributes! = cast(DataRow,#getBC().getColumnAttributes())
             fi
@@ -1293,11 +1237,9 @@ REM         fi
                 throw "no columns",250
 
                 methodret
-
             fi
 
             for i=0 to fields!.size()-1
-
                 f$=fields!.getItem(i)
 
                 if f$="{ROW_HEADER}" then
@@ -1340,37 +1282,28 @@ REM         fi
                 columnConfig!.setFieldValue("MASK",m$)
 
                 #ColumnConfig!.addItem(columnConfig!)
-
             next i
-
         fi
 
         if #ColumnConfig!.size() = 0 then
             #Grid!.setNumColumns(0)
 
             methodret
-
         else
-
             declare auto BBjTemplatedString columnConfig!
 
-
             for i=0 to #ColumnConfig!.size()-1
-
                 columnConfig! = #ColumnConfig!.getItem(i)
 
                 if columnConfig!.getFieldAsNumber("VISIBLE")=1 then
                     fieldcount=fieldcount+1
                 fi
-
             next
-
         fi
 
         rem   ----end column config -------------
 
         HeaderString$=#GridAttributes!.getFieldAsString("{ROW_HEADER}",err=*next)
-
 
 
         if #InitGrid then
@@ -1411,11 +1344,9 @@ REM         fi
                 if ALIGN$="RIGHT" then
                     #Grid!.setRowHeaderAlignment(#Grid!.GRID_ALIGN_RIGHT)
                 else
-
                     if ALIGN$="CENTER" then
                         #Grid!.setRowHeaderAlignment(#Grid!.GRID_ALIGN_CENTER)
                     fi
-
                 fi
 
 
@@ -1432,7 +1363,6 @@ REM         fi
                     col!= BBjAPI().makeColor(asc(fgcol$(1,1)),asc(fgcol$(2,1)),asc(fgcol$(3,1)))
                     #Grid!.setRowHeaderForeColor(col!)
                 fi
-
             fi
 
 
@@ -1442,7 +1372,6 @@ REM         fi
             i=0
 
             for col=0 to #ColumnConfig!.size()-1
-
                 columnConfig! = #ColumnConfig!.getItem(col)
 
                 if columnConfig!.getFieldAsNumber("VISIBLE")=0 then
@@ -1457,14 +1386,12 @@ REM         fi
                 #Grid!.setColumnAlignment(i,#Grid!.GRID_ALIGN_LEFT)
                 #Grid!.setColumnWidth(i,columnConfig!.getFieldAsNumber("WIDTH"))
 
-
                 ctrl$=columnConfig!.getFieldAsString("CONTROL")
                 style=0
 
                 if ctrl$="INPUTE" then
                     style=BBjGrid.GRID_STYLE_INPUTE
                 fi
-
 
                 if ctrl$="INPUTD" then
                     style=BBjGrid.GRID_STYLE_INPUTD
@@ -1491,8 +1418,6 @@ REM         fi
                 it! = ks!.iterator()
 
                 while it!.hasNext()
-
-
                     k$=it!.next()
 
                     if k$="BGCOLOR" then
@@ -1502,7 +1427,6 @@ REM         fi
                             col!= BBjAPI().makeColor(asc(bgcol$(1,1)),asc(bgcol$(2,1)),asc(bgcol$(3,1)))
                             #Grid!.setColumnBackColor(i,col!)
                         fi
-
                     fi
 
                     if k$="FGCOLOR" then
@@ -1512,7 +1436,6 @@ REM         fi
                             col!= BBjAPI().makeColor(asc(fgcol$(1,1)),asc(fgcol$(2,1)),asc(fgcol$(3,1)))
                             #Grid!.setColumnForeColor(i,col!)
                         fi
-
                     fi
 
                     if k$="FONTSTYLE" then
@@ -1531,7 +1454,6 @@ REM         fi
                             newfont! = BBjAPI().getSysGui().makeFont(font!.getName(), font!.getSize(), style)
                             #Grid!.setColumnFont(i,newfont!)
                         fi
-
                     fi
 
 
@@ -1540,7 +1462,6 @@ REM         fi
                         #Grid!.setToolTipText(i,m$)
                     fi
 
-
                     if k$="ALIGN" then
                         align$=attrs!.get(k$)
 
@@ -1548,21 +1469,16 @@ REM         fi
                             align=BBjGrid.GRID_ALIGN_LEFT
                         fi
 
-
                         if align$="RIGHT" then
                             align=BBjGrid.GRID_ALIGN_RIGHT
                         fi
-
 
                         if align$="CENTER" then
                             align=BBjGrid.GRID_ALIGN_CENTER
                         fi
 
                         #Grid!.setColumnAlignment(i,align)
-
-
                     fi
-
                 wend
 
                 i=i+1
@@ -1576,18 +1492,13 @@ REM         fi
             ? "#super!.getBC().getAllowFilter()=",#super!.getBC().getAllowFilter()
 
             if #super!.getBC().getAllowFilter() and #TbFilter! <> null() then
-                
                 #TbFilter!.setEnabled(1)
 
                 if #TbFilterGeo!<>null() then
-                    rem                    #TbFilterGeo!.setEnabled(1)
+                    rem #TbFilterGeo!.setEnabled(1)
                 fi
-
             fi
-
         fi
-
-
 
 
         v!=new BBjVector()
@@ -1612,7 +1523,6 @@ REM         fi
         j=0
 
         for col=0 to #ColumnConfig!.size()-1
-
             columnConfig! = #ColumnConfig!.getItem(col)
 
             if columnConfig!.getFieldAsNumber("VISIBLE")=0 then
@@ -1631,8 +1541,6 @@ REM         fi
             related$=""
 
             while it!.hasNext()
-
-
                 k$=it!.next()
 
                 if k$="BGCOLOR" then
@@ -1642,7 +1550,6 @@ REM         fi
                         col!= BBjAPI().makeColor(asc(bgcol$(1,1)),asc(bgcol$(2,1)),asc(bgcol$(3,1)))
                         #Grid!.setCellBackColor(row,j,col!)
                     fi
-
                 fi
 
                 if k$="FGCOLOR" then
@@ -1652,7 +1559,6 @@ REM         fi
                         col!= BBjAPI().makeColor(asc(fgcol$(1,1)),asc(fgcol$(2,1)),asc(fgcol$(3,1)))
                         #Grid!.setCellForeColor(row,j,col!)
                     fi
-
                 fi
 
                 if k$="FONTSTYLE" then
@@ -1670,16 +1576,13 @@ REM         fi
                         if pos("UNDERLINE"=style$)>0    then let style=style+16
                         newfont! = BBjAPI().getSysGui().makeFont(font!.getName(), font!.getSize(), style)
                         #Grid!.setCellFont(row,j,newfont!)
-
                     fi
-
                 fi
 
                 img! = null()
 
                 if k$="IMAGEFILE" then
                     img! = BBjAPI().getSysGui().getImageManager().loadImageFromFile(attrs!.get(k$),err=*next)
-
                 fi
 
                 if k$="IMAGEBYTES" then
@@ -1697,42 +1600,31 @@ REM         fi
 
                     if ctrl$="INPUTE" then
                         style=BBjGrid.GRID_STYLE_INPUTE
-
                     fi
-
 
                     if ctrl$="INPUTD" then
                         style=BBjGrid.GRID_STYLE_INPUTD
-
                     fi
-
 
                     if ctrl$="INPUTN" then
                         style=BBjGrid.GRID_STYLE_INPUTN
-
                     fi
-
 
                     if ctrl$="HTML" then
                         style=BBjGrid.GRID_STYLE_TEXT
-
                     fi
 
                     if style then
                         #Grid!.setCellStyle(row,j,style)
                         celltype$=ctrl$
                     fi
-
                 fi
-
-
 
                 if k$="MASK" then
                     m$=attrs!.get(k$)
                     #Grid!.setCellMask(row,j,m$)
                     cellmask$=m$
                 fi
-
 
                 if k$="TOOLTIP" then
                     m$=attrs!.get(k$)
@@ -1743,7 +1635,6 @@ REM         fi
                     related$=attrs!.get(k$)
                 fi
 
-
                 if k$="ALIGN" then
                     align$=attrs!.get(k$)
 
@@ -1751,11 +1642,9 @@ REM         fi
                         align=BBjGrid.GRID_ALIGN_LEFT
                     fi
 
-
                     if align$="RIGHT" then
                         align=BBjGrid.GRID_ALIGN_RIGHT
                     fi
-
 
                     if align$="CENTER" then
                         align=BBjGrid.GRID_ALIGN_CENTER
@@ -1763,9 +1652,6 @@ REM         fi
 
                     #Grid!.setCellAlignment(row,j,align)
                 fi
-
-
-
             wend
 
             f1$=str(rec!.getFieldAsString(f$))
@@ -1777,20 +1663,16 @@ REM         fi
                     f1$=""
                 fi
 
-
                 if cellmask$="" then
                     f1$=date(f)
                 else
                     f1$=date(f:cellmask$)
                 fi
 
-
                 if related$="" then
                     related$=date(f:"%Yl%Mz%Dz")
                 fi
-
             fi
-
 
 
             v!.addItem(f1$)
@@ -1809,10 +1691,7 @@ REM         fi
         fi
 
 
-
         if HeaderString$>"" then
-
-
             bgcol$=rec!.getFieldAttribute("{ROW_HEADER}","BGCOLOR")
 
             if bgcol$>"" then
@@ -1839,16 +1718,13 @@ REM         fi
             fi
 
             #Grid!.setRowHeaderCellText(row,Header$)
-
         fi
 
         if #MultipleSelection then
-
             found=0
             j=0
 
             while j< #SelectedRows!.size()
-
                 if rec!.equals(#SelectedRows!.getItem(j)) then
                     found=1
                     break
@@ -1862,7 +1738,6 @@ REM         fi
             else
                 #Grid!.setRowHeaderCellStyle(rec_count,#Grid!.GRID_STYLE_UNCHECKED)
             fi
-
         fi
 
         rem --------------------------------------------------
@@ -1914,6 +1789,7 @@ REM         fi
 
     methodend
 
+
     method public void onSelectionChange()
 
         v!=#getBC().getSelection()
@@ -1926,7 +1802,6 @@ REM         fi
             if p<#FirstRecordInGrid or p>=#LastRecordInGrid then
                 #pullRowsToGrid(p)
             else
-
                 v!=#getBC().getSelection()
                 v_view! = new BBjVector()
                 i=0
@@ -1944,23 +1819,19 @@ REM         fi
                 if v_view!.size() then
                     #Grid!.setSelectedRows(v_view!)
                 fi
-
-
             fi
-
         else
             #Grid!.deselectAllCells()
         fi
 
     methodend
 
-    method private void setGridPosition()
 
+    method private void setGridPosition()
 
         if #ToolBar! <> null() then
             h=25
         fi
-
 
         if #FilterGrid! <> null() then
             h=h+27
@@ -1973,10 +1844,9 @@ REM         fi
 
         #ScrollBar!.setLocation(#super!.getW()-15,h)
         #ScrollBar!.setSize(15,#Grid!.getHeight())
-        
-        
-        if #FilterGrid! <> null() then
 
+
+        if #FilterGrid! <> null() then
             if #Grid!.getHasRowHeader() then
                 rhw = #Grid!.getRowHeaderWidth()
             fi
@@ -1984,11 +1854,10 @@ REM         fi
             #FilterGrid!.setSize(#super!.getW()-rhw, #FilterGrid!.getHeight())
         fi
 
-
     methodend
 
-    method public void setShowToolbar(BBjNumber f_show)
 
+    method public void setShowToolbar(BBjNumber f_show)
 
         if #ToolBar! <> null() and f_show =0 then
             #ToolBar!.destroy()
@@ -2064,7 +1933,6 @@ REM         fi
 
                     offs=offs+10
                 fi
-
             fi
 
 
@@ -2108,7 +1976,6 @@ REM         fi
                     offs=offs+22
 
                     if #AdminMode then
-
                         #TbAdminToggle! = #ToolBar!.addToolButton(304,offs,1,22,22,"")
                         imgTbAdminToggle! = myImageManager!.loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000002734944415478DA8DD06B4853611C067041CB8A89C2464DF741246D5A636A2769795DB3A51EDDCEDC3C73D39DB3915A1D2FE968595EC09D6A5636A8FC302F9394C04994462A4423E8829F4605620515D597C8E8464551D1E54907490385FDE1F9F4BEFCDEE7FF4644FC374AA5324A53AA1D6158DB6796B5FD32579A7E32DA928093560A22C29992A2D2C16A5B0D8C5516E80C34C8320D0A77A94166486F8505E829EDFCA5FE5E04AE4FC1EBEEC6E8691E636DF5C8DC98F83D2C80268BDE3EBA3185570FEEE1C58C1FF77D7DB8D6D5087982F04F58406B25F924E01BC063FF04E6C68771A7B70B578ED4225712F73B2CC0A5CDF14FF2CD98F1B870F34C27A69D4D38BFBF02A64DA20F61018E1C694F9F4D83AB9D1C2E1FAEC548A319AE830DA018DB0FBAB90D1477E8795611C5D3341DB92C604D15112D8A140CD694C363D5A09135E3F5BBF7E04E79C1F50C81E9704351664462DA96E32BB6D049D60DD76D4D42AB7A1BB8A367B19BE1B0599ED1BE789647D11524B30744FECEF9D0DFA76901CBB2A3160BF3CD7DF204AA9504086174F0C5146207BA5D2EE8F5868F56ABD5D37EAE1F6A3D8D10C06EB70FB8162E7539795C181BC7ECDC430C1D3B8016568206533CEA74EBC1140B4117C4429325805AB62614E079FE8DCFE70357DF803EEF08A6FDB731F1EC2B9A2D09B83B590EE00B3EBD74C2D32EC245B7048569D1A100499270381CA0CAF590C933D1D33B84E2BD1D68AA8A5F021444F212A094AE0E05C46231542A553069B27450D51C4C4DADC1FACB01F9C9AB560614D979200A2878669F82338A975D2137292A04902F02FF12132782205688ED663BF61936C0562A824915079D2206C5E96B83F5B313231781B285A4FE05E73F5BB725F891C10000000049454E44AE426082$)
                         #TbAdminToggle!.setImage(imgTbAdminToggle!)
@@ -2119,12 +1986,8 @@ REM         fi
                         offs=offs+22
                     fi
 
-
-
                     offs=offs+10
                 fi
-
-
             fi
 
 
@@ -2141,7 +2004,6 @@ REM         fi
             fi
 
 
-
             #ProgressBar! = #ToolBar!.addProgressBar(199,offs,1,100,22,0,100)
             #ProgressBar!.setVisible(0)
 
@@ -2149,12 +2011,10 @@ REM         fi
 
             #BtnCancelProgress! = #ToolBar!.addButton(200,offs,1,40,22,#super!.getTranslator().getTranslation("CANCEL"))
             #BtnCancelProgress!.setVisible(0)
-
-
         fi
 
-
     methodend
+
 
     method public void setShowTbFilter(BBjNumber f_show)
 
@@ -2165,8 +2025,8 @@ REM         fi
             #setShowToolbar(1)
         fi
 
-
     methodend
+
 
     method public void setShowTbConfig(BBjNumber f_show)
 
@@ -2177,8 +2037,8 @@ REM         fi
             #setShowToolbar(1)
         fi
 
-
     methodend
+
 
     method public void setShowTbExcel(BBjNumber f_show)
 
@@ -2193,7 +2053,6 @@ REM         fi
             #setShowToolbar(1)
         fi
 
-
     methodend
 
 
@@ -2206,6 +2065,7 @@ REM         fi
         fi
 
     methodend
+
 
     method private void fillLedConfigSave()
 
@@ -2224,7 +2084,6 @@ REM         fi
         sav=-1
 
         if #ConfigSaveConfigBuckets!.size() then
-
             for i=0 to #ConfigSaveConfigBuckets!.size()-1
                 c!=#ConfigSaveConfigBuckets!.getItem(i)
                 c$=c!.getName()
@@ -2233,9 +2092,7 @@ REM         fi
                 if sav$=c$ then
                     sav=i
                 fi
-
             next
-
         fi
 
         #LedConfigSave!.selectIndex(sav+1)
@@ -2254,14 +2111,12 @@ REM         fi
             #enableConfigSaveButtons()
 
             methodret
-
         fi
 
         #enableConfigSaveButtons()
 
 
         if #ConfigSaveConfigBuckets!.size() and sav$>"" then
-
             for i=0 to #ConfigSaveConfigBuckets!.size()-1
                 c!=#ConfigSaveConfigBuckets!.getItem(i)
                 c$=c!.getName()
@@ -2270,15 +2125,11 @@ REM         fi
                     config! = c!
                     break
                 fi
-
             next
-
         fi
 
 
-
         if config! <> null() then
-
             seterr errtrap
             config!.loadBucket()
 
@@ -2286,7 +2137,6 @@ REM         fi
             #InitGrid=1
             #pullRowsToGrid(0)
             #enableConfigSaveButtons()
-
         fi
 
         methodret
@@ -2294,20 +2144,18 @@ REM         fi
         errtrap:
         a=msgbox(errmes(-1),BBjAPI().getConstants().MB_ICONEXCLAMATION,#super!.getTranslator().getTranslation("CANNOT_LOAD"))
 
-
     methodend
+
 
     method private void enableConfigSaveButtons()
 
         if #LedConfigSave!<>null() and #TbConfigSave!<>null() and #TbConfigDel! <> null() then
-
             fenable1 = #LedConfigSave!.getText() > ""
 
             fenable3 = 0
             sav$=#LedConfigSave!.getText()
 
             if #ConfigSaveConfigBuckets!.size() then
-
                 for i=0 to #ConfigSaveConfigBuckets!.size()-1
                     c!=#ConfigSaveConfigBuckets!.getItem(i)
                     c$=c!.getName()
@@ -2316,9 +2164,7 @@ REM         fi
                         fenable3 = 1
                         break
                     fi
-
                 next
-
             fi
 
             #TbConfigSave!.setEnabled(fenable1)
@@ -2326,6 +2172,7 @@ REM         fi
         fi
 
     methodend
+
 
     method public void onTbConfigSaveBtnPush(BBjToolButtonPushEvent ev!)
 
@@ -2348,6 +2195,7 @@ REM         fi
 
     methodend
 
+
     method public void onTbConfigDelBtnPush(BBjToolButtonPushEvent ev!)
 
         user$=#ConfigBucketUser$
@@ -2362,9 +2210,8 @@ REM         fi
 
     methodend
 
+
     method public void onTbAdminTogglePush(BBjToolButtonPushEvent ev!)
-
-
 
         #fAdminToggle=ev!.isSelected()
 
@@ -2376,8 +2223,8 @@ REM         fi
 
         #fillLedConfigSave()
 
-
     methodend
+
 
     method private void fillLedFilterSave()
 
@@ -2389,7 +2236,6 @@ REM         fi
         sav=-1
 
         if #FilterSaveConfigBuckets!.size() then
-
             for i=0 to #FilterSaveConfigBuckets!.size()-1
                 c!=#FilterSaveConfigBuckets!.getItem(i)
                 c$=c!.getName()
@@ -2398,14 +2244,13 @@ REM         fi
                 if sav$=c$ then
                     sav=i
                 fi
-
             next
-
         fi
 
         #LedFilterSave!.selectIndex(sav+1)
 
     methodend
+
 
     method public void onLedFilterSaveEditModify(BBjEditModifyEvent ev!)
 
@@ -2415,7 +2260,6 @@ REM         fi
 
 
         if #FilterSaveConfigBuckets!.size() and sav$>"" then
-
             for i=0 to #FilterSaveConfigBuckets!.size()-1
                 c!=#FilterSaveConfigBuckets!.getItem(i)
                 c$=c!.getName()
@@ -2424,18 +2268,13 @@ REM         fi
                     config! = c!
                     break
                 fi
-
             next
-
         else
-
             #FilterStrings!.clear()
             #FilterByDistinct!.clear()
-
         fi
 
         if config! <> null() then
-
             config!.loadBucket()
             #FilterStrings!     = cast(java.util.HashMap, config!.getHashMap())
             #FilterByDistinct!  = cast(java.util.HashMap, config!.getHashMap())
@@ -2444,7 +2283,6 @@ REM         fi
         img! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001A04944415478DA63601870D0DADAFA9F149C909808C237E29393BDC106545656FE7FF3E6CDFF1F3F7E80F1C78F1FC1FC274F9EFCBF72E5CAFF6BD7AEFDBF75EBD6FF070F1EFC07A985590C3204CCC8CACAFABF74E952B0A2BB77EFFEDFBD7BF7FF850B17FEAFADADFDAFA3A3F3DFD4D4F4BF8F8FCFFFB4B4B4FF20B51806C4C4C4FC270543BDF0303E29C90F6CC0AA55AB9881122F4A4A4AFEBF7EFD1AEC92D3A74FFF5FB361EFFFFAEEF5FF77EF3DF6BFA8A8E87F7878F88B84A4A423898989F618013969D22451A0822F656565FF3F7FFEFC7FCDDAF5FF4B6AA6FC2F6F5DF71F64707070F097F9F3E74BE08D8D3973E6E8040404FC696C6CFC7FF3D6C3FF53E7EFFE9F9C51F2DFCBCBEBCFE2C58BF5898A52A02D41400DFF67CF9EFB3F23ABE0BF9B9BDBFF79F3E68590942E56AE5C59595151F1DFCFCFEFFFC68D1B6BC84A5C717171B3D5D5D537919D3A8181365D5555750BD906D8D8D82C949797DF4BB6015A5A5A31E2E2E2670C5D5DA5CC9D3DB54CDDDDB54D3C3CD48D5D7CE58C5D5CF8893244455B678D998B67AE89AB47A4A9B387A9B193A73248B3B1B1312BB23A002745083F1F756D9E0000000049454E44AE426082$)
 
         if config! <> null() or sav$="" then
-
             if #FilterGrid! = null() then
                 #toggleFilter(null())
             fi
@@ -2465,31 +2303,23 @@ REM         fi
                 tmp! = #FilterByDistinct!.get(f1$)
 
                 if tmp!=null() then
-
                     #FilterGrid!.setCellImage(0,i,null())
                 else
-
                     #FilterGrid!.setCellImage(0,i,img!)
-
                 fi
-
-
             next
 
             #FilterGrid!.setCellText(0,0,v!)
 
             #applyFilter()
-
-
-
         fi
 
     methodend
 
+
     method private void enableFilterSaveButtons()
 
         if #LedFilterSave!<>null() and #TbFilterSave!<>null() and #TbFilterDel! <> null() then
-
             fenable1 = #LedFilterSave!.getText() > ""
             fenable2 = #FilterStrings!.size() + #FilterByDistinct!.size()
 
@@ -2497,7 +2327,6 @@ REM         fi
             sav$=#LedFilterSave!.getText()
 
             if #FilterSaveConfigBuckets!.size() then
-
                 for i=0 to #FilterSaveConfigBuckets!.size()-1
                     c!=#FilterSaveConfigBuckets!.getItem(i)
                     c$=c!.getName()
@@ -2506,9 +2335,7 @@ REM         fi
                         fenable3 = 1
                         break
                     fi
-
                 next
-
             fi
 
             #TbFilterSave!.setEnabled(fenable1 AND fenable2)
@@ -2516,6 +2343,7 @@ REM         fi
         fi
 
     methodend
+
 
     method public void onTbFilterSaveBtnPush(BBjToolButtonPushEvent ev!)
 
@@ -2530,6 +2358,7 @@ REM         fi
 
     methodend
 
+
     method public void onTbFilterDelBtnPush(BBjToolButtonPushEvent ev!)
 
         ConfigBucket.deleteConfigBucket(#ConfigBucketRealm$+"_Filter",#ConfigBucketUser$,#LedFilterSave!.getText())
@@ -2542,7 +2371,6 @@ REM         fi
     method public void toggleFilter(BBjToolButtonPushEvent ev!)
 
         if #FilterGrid! = null() then
-
             if #Grid!.getHasRowHeader() then
                 rhw = #Grid!.getRowHeaderWidth()
             fi
@@ -2573,15 +2401,12 @@ REM         fi
             #TbFilter!.setSelected(0)
         fi
 
-
     methodend
+
 
     method public void toggleFilterGeo(BBjToolButtonPushEvent ev!)
 
-
         if #TbFilterGeo!.isSelected() then
-
-
             dlg! = new GoogleMapsAreaChooserDialog()
 
             if dlg!.doModal() then
@@ -2590,17 +2415,14 @@ REM         fi
             else
                 #TbFilterGeo!.setSelected(0)
             fi
-
         else
             #getBC().setGeoFilter(null(), 0)
         fi
 
-
     methodend
 
+
     method public void onFilterQuery(BBjGridCellQueryEvent ev!)
-
-
 
         c = ev!.getColumn()
         f$=#FilterGrid!.getCellRelated(0,c)
@@ -2610,7 +2432,6 @@ REM         fi
         fi
 
         if distinct! = null() then
-
             distinct_tmp! = #FilterByDistinct!.get(f$)
 
             distinct! = #super!.getBC().getDistinctValues(f$)
@@ -2629,16 +2450,12 @@ REM         fi
                         if tmp!<>null() then
                             distinct!.put(k$,0)
                         fi
-
                     fi
-
                 wend
-
             fi
 
 
             #FilterByDistinct!.put(f$,distinct!)
-
         fi
 
         #FilterGrid!.accept(1)
@@ -2694,7 +2511,6 @@ REM         fi
                     no=1
                     break
                 fi
-
             wend
 
 
@@ -2702,17 +2518,13 @@ REM         fi
                 #FilterByDistinct!.remove(f$)
 
                 #FilterGrid!.setCellImage(0,c,null())
-
             else
-
                 img! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001A04944415478DA63601870D0DADAFA9F149C909808C237E29393BDC106545656FE7FF3E6CDFF1F3F7E80F1C78F1FC1FC274F9EFCBF72E5CAFF6BD7AEFDBF75EBD6FF070F1EFC07A985590C3204CCC8CACAFABF74E952B0A2BB77EFFEDFBD7BF7FF850B17FEAFADADFDAFA3A3F3DFD4D4F4BF8F8FCFFFB4B4B4FF20B51806C4C4C4FC270543BDF0303E29C90F6CC0AA55AB9881122F4A4A4AFEBF7EFD1AEC92D3A74FFF5FB361EFFFFAEEF5FF77EF3DF6BFA8A8E87F7878F88B84A4A423898989F618013969D22451A0822F656565FF3F7FFEFC7FCDDAF5FF4B6AA6FC2F6F5DF71F64707070F097F9F3E74BE08D8D3973E6E8040404FC696C6CFC7FF3D6C3FF53E7EFFE9F9C51F2DFCBCBEBCFE2C58BF5898A52A02D41400DFF67CF9EFB3F23ABE0BF9B9BDBFF79F3E68590942E56AE5C59595151F1DFCFCFEFFFC68D1B6BC84A5C717171B3D5D5D537919D3A8181365D5555750BD906D8D8D82C949797DF4BB6015A5A5A31E2E2E2670C5D5DA5CC9D3DB54CDDDDB54D3C3CD48D5D7CE58C5D5CF8893244455B678D998B67AE89AB47A4A9B387A9B193A73248B3B1B1312BB23A002745083F1F756D9E0000000049454E44AE426082$)
 
                 #FilterGrid!.setCellImage(0,c,img!)
-
             fi
 
             #applyFilter()
-
         fi
 
         #FilterGrid!.endEdit(1)
@@ -2730,7 +2542,6 @@ REM         fi
         rem workaround for Bug 24936 - BBjGridEditStopEvent fired twice upon end edit of a cell
         BBjAPI().getSysGui().flushEvents()
 
-
         same=1
 
         declare java.util.HashMap newFilterStrings!
@@ -2741,22 +2552,17 @@ REM         fi
             f1$=#FilterGrid!.getCellRelated(0,i)
 
             if f$>"" then
-
                 newFilterStrings!.put(f1$,f$)
-
             fi
-
 
             if f$ <> str(#FilterStrings!.get(f1$)) then
                 same=0
             fi
-
         next
 
         if same=0 then
             #FilterStrings! = newFilterStrings!
             #applyFilter()
-
         fi
 
         #scrollFilterGrid()
@@ -2767,7 +2573,6 @@ REM         fi
 
 
     method private void applyFilter()
-
 
         #QueryFilter! = new java.util.HashMap()
 
@@ -2789,13 +2594,10 @@ REM         fi
 
                 v!.addItem(fs$)
             fi
-
         wend
-
 
         ks! = #FilterByDistinct!.keySet()
         it!=ks!.iterator()
-
 
         while it!.hasNext()
             f$=it!.next()
@@ -2803,7 +2605,6 @@ REM         fi
 
             if f$>"" then
                 fs!=#FilterByDistinct!.get(f$)
-
 
                 v!=#QueryFilter!.get(f$)
 
@@ -2822,21 +2623,16 @@ REM         fi
                     if v then
                         v!.addItem(k$)
                     fi
-
                 wend
-
             fi
-
         wend
-
 
         #super!.getBC().setQueryFilter(#QueryFilter!)
 
-
     methodend
 
-    method private void adjustFilterGrid()
 
+    method private void adjustFilterGrid()
 
         if #FilterGrid! <> null() then
             fieldcount=#Grid!.getNumColumns()
@@ -2847,13 +2643,11 @@ REM         fi
             i=0
 
             for col=0 to #ColumnConfig!.size()-1
-
                 columnConfig! = #ColumnConfig!.getItem(col)
 
                 if columnConfig!.getFieldAsNumber("VISIBLE")=0 then
                     continue
                 fi
-
 
                 #FilterGrid!.setColumnAlignment(i,#Grid!.GRID_ALIGN_LEFT)
                 #FilterGrid!.setColumnWidth(i,columnConfig!.getFieldAsNumber("WIDTH"))
@@ -2861,7 +2655,6 @@ REM         fi
                 if #AllowFilterByDistinct then
                     #FilterGrid!.setCellHasQuery(0,i,1)
                 fi
-
 
                 x$=columnConfig!.getFieldAsString("NAME")
                 reldata!.addItem(x$)
@@ -2879,13 +2672,11 @@ REM         fi
 
     method private void scrollFilterGrid()
 
-
         if #FilterGrid! <>null() then
             a= #Grid!.getLeftColumn()
             #Grid!.setLeftColumn(a)
             #FilterGrid!.setLeftColumn(a)
         fi
-
 
     methodend
 
@@ -2901,41 +2692,16 @@ REM         fi
             #InitGrid=1
             #ColumnConfig! = dlg!.getGridColumns()
             #pullRowsToGrid(0)
-
         fi
-
 
     methodend
 
+
     method public void doExcel(BBjToolButtonPushEvent ev!)
-
-        use java.lang.Byte
-        use java.lang.Short
-        use java.lang.Double
-        use java.util.Date
-        use java.text.SimpleDateFormat
-        use java.io.FileInputStream
-        use java.io.FileOutputStream
-        use java.io.File
-
-        use org.apache.poi.hssf.usermodel.HSSFWorkbook
-        use org.apache.poi.hssf.usermodel.HSSFCell
-        use org.apache.poi.hssf.usermodel.HSSFSheet
-        use org.apache.poi.hssf.usermodel.HSSFRow
-        use org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator
-        use org.apache.poi.hssf.usermodel.HSSFCellStyle
-        use org.apache.poi.hssf.usermodel.HSSFFont
-        use org.apache.poi.hssf.usermodel.HSSFDataFormat
-        use org.apache.poi.hssf.usermodel.HSSFPalette
-        use org.apache.poi.ss.usermodel.DateUtil
-        use org.apache.poi.hssf.util.HSSFColor
-        use org.apache.poi.hssf.record.Record
 
         filename$=filesave("Excel Files","\",#FilenameExcel$,"Excel Files"+$0a$+".xls",MODE="CLIENT")
 
         if filename$<>"::CANCEL::" then
-
-
             wb! = new HSSFWorkbook()
 
             rem create a exel sheet
@@ -2956,7 +2722,6 @@ REM         fi
             header = #Grid!.getHasColumnHeader()
 
             if header = 1  then
-
                 sheet!.createFreezePane(0,1)
                 font!=wb!.createFont()
                 style!= wb!.createCellStyle()
@@ -2967,7 +2732,6 @@ REM         fi
                 row! = sheet!.createRow(0)
 
                 for c=0 to #Grid!.getNumColumns()
-
                     columntext$ = #Grid!.getColumnHeaderCellText(c)
 
                     rem TextColor
@@ -3013,9 +2777,7 @@ REM         fi
                     style!= wb!.createCellStyle()
                     style!.setAlignment(short!.valueOf(str(2)))
                     cell!.setCellStyle(style!)
-
                 next c
-
             else
                 header = 0
             fi
@@ -3026,7 +2788,6 @@ REM         fi
                 row! = sheet!.createRow(r)
 
                 for c=0 to #Grid!.getNumColumns() - 1
-
                     rem BBj Cell Text auslesen
                     text$ = #Grid!.getCellText(r - header,c)
                     width = #Grid!.getColumnWidth(c)
@@ -3074,7 +2835,6 @@ REM         fi
                     rem Cell Format Excel erstellen
 
                     if cvs(text$,3) <> "" then
-
                         sheet!.setColumnWidth(c, width*30)
                         font!=wb!.createFont()
 
@@ -3124,11 +2884,9 @@ REM         fi
                     fi
 
 
-
                     rem Zelle schreiben
 
                     if inputstyle = 512  AND cvs(text$,3) <> "" and 1=2 then
-
                         rem InputD Maske auslesen und text richtig parsen
                         rem Aktuelle nur Standard Maske von InputD (mmttjjjj)
                         rem Fehler abgefangen wenn Text mit "/" gespeichert wird
@@ -3164,7 +2922,6 @@ REM         fi
                             if ex = 0 or ex = 1 and text$(1,1) = "0" and text$(2,1) <> "." then
                                 ok = 0
                             fi
-
                         fi
 
                         if ok then
@@ -3177,18 +2934,15 @@ REM         fi
                                 cell!.setCellType(0)
                                 cell!.setCellValue(double!.valueOf(zahl))
                             endif
-
                         else
                             cell!.setCellType(1)
                             cell!.setCellValue(text$)
                         endif
-
                     fi
 
                     cell!.setCellStyle(style!)
                     text$=""
                 next c
-
             next r
 
             rem path setting must be absolute
@@ -3202,15 +2956,12 @@ REM         fi
             fileOut!.close()
 
 
-
             ctemp! = File@.createTempFile("bbj",".xls")
             ctempname$=ctemp!.getAbsolutePath()
 
             BBjAPI().getThinClient().getClientFileSystem().getClientFile(filename$).copyToClient(tempname$)
             erase tempname$
-
         fi
-
 
     methodend
 
@@ -3243,6 +2994,7 @@ REM         fi
 
     methodend
 
+
     rem /**
     rem * Method onBroadcastEdit:
     rem * called by BC to notify the UI about an ongoing edit from a different side
@@ -3253,29 +3005,14 @@ REM         fi
     method public void onBroadcastEdit(BBjNumber recNo, BBjString fieldName$, BBjString newContent$)
 
         if #ColumnNames!.size() then
-
             for i=0 to #ColumnNames!.size()-1
-
                 if #ColumnNames!.get(i) = fieldName$ then
                     #Grid!.setCellText(recNo,i,newContent$)
                 fi
-
             next
-
         fi
-
 
     methodend
 
 classend
-
-
-
-
-
-
-
-
-
-
 

@@ -1,3 +1,5 @@
+rem package components.ui.bound
+
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
 rem /**
@@ -19,11 +21,11 @@ class public UIController
     field private java.util.HashMap TargetFieldNames!
     field private java.util.HashMap TargetAutoSelectFirstRecord!
 
+
     rem /**
     rem * Constructor UIController
     rem */
     method public UIController()
-
 
         #Targets!                       = new java.util.HashMap()
         #TargetFieldNames!              = new java.util.HashMap()
@@ -32,7 +34,6 @@ class public UIController
         #FullResultsetDrivers!          = new java.util.HashMap()
         #FullResultsetDriverFieldNames! = new java.util.HashMap()
         #TargetAutoSelectFirstRecord!   = new java.util.HashMap()
-
 
     methodend
 
@@ -63,9 +64,7 @@ class public UIController
     rem */
     method public void registerDriver (BusinessComponent bc!, BBjString var$, BBjString fieldname$, BBjNumber fDriveWithFullResult)
 
-
         if fDriveWithFullResult then
-
             v!  = #FullResultsetDrivers!.get(var$)
             v1! = #FullResultsetDriverFieldNames!.get(var$)
 
@@ -81,7 +80,6 @@ class public UIController
             v1!.addItem(fieldname$)
 
             bc!.registerController(#this!, var$, fieldname$,1)
-
         else
             v!  = #Drivers!.get(var$)
             v1! = #DriverFieldNames!.get(var$)
@@ -114,8 +112,9 @@ class public UIController
     method public void registerTarget (BusinessComponent bc!, BBjString var$, BBjString fieldname$)
 
         #registerTarget (bc!, var$, fieldname$,0)
-       
+
     methodend
+
 
     rem /**
     rem * Method registerTarget:
@@ -128,18 +127,15 @@ class public UIController
     rem */
     method public void registerTarget (BusinessComponent bc!, BBjString var$, BBjString fieldname$, BBjNumber positionOnFirstRecord)
 
-
         v!  = #Targets!.get(var$)
         v1! = #TargetFieldNames!.get(var$)
 
         if v!=null() then
-
             v! = new BBjVector()
             #Targets!.put(var$,v!)
 
             v1! = new BBjVector()
             #TargetFieldNames!.put(var$,v1!)
-
         fi
 
         v!.addItem(bc!)
@@ -161,7 +157,6 @@ class public UIController
             fi
         fi
 
-
     methodend
 
 
@@ -173,7 +168,6 @@ class public UIController
     rem * @param BBjString fieldname$: the field name driven by the contents of the variable
     rem */
     method public void unregisterTarget (BBjString var$, BBjString fieldname$)
-
 
         v!  = #Targets!.get(var$)
         v1! = #TargetFieldNames!.get(var$)
@@ -188,12 +182,10 @@ class public UIController
                     bc!.resetdrive(fieldname$)
                     bc!.refresh(0)
                 fi
-            next
+            next i
         fi
 
         #TargetAutoSelectFirstRecord!.remove(fieldname$,err=*next)
-
-        
 
     methodend
 
@@ -208,26 +200,19 @@ class public UIController
     rem */
     method public BBjNumber canDrive (BBjString var$, BBjVector selection!, BBjNumber force)
 
-
         canDrive=1
 
         bclist! = #Targets!.get(var$)
         vlist!  = #TargetFieldNames!.get(var$)
 
         if bclist! <> null() then
-
             if bclist!.size() then
-
                 for i=0 to bclist!.size()-1
-
                     bc! = bclist!.getItem(i)
                     v$  = vlist!.getItem(i)
                     canDrive = canDrive and bc!.canDrive(v$,selection!, force)
-
-                next
-
+                next i
             fi
-
         fi
 
         methodret canDrive
@@ -243,16 +228,12 @@ class public UIController
     rem */
     method public void drive (BBjString var$, BBjVector selection!)
 
-
         bclist! = #Targets!.get(var$)
         vlist!  = #TargetFieldNames!.get(var$)
 
         if bclist! <> null() then
-
             if bclist!.size() then
-
                 for i=0 to bclist!.size()-1
-
                     bc! = bclist!.getItem(i)
                     v$  = vlist!.getItem(i)
                     bc!.drive(v$,selection!)
@@ -266,23 +247,10 @@ class public UIController
                             bc!.setSelection(v!)
                         fi
                     fi
-                next
-
+                next i
             fi
-
         fi
-
 
     methodend
 
 classend
-
-
-
-
-
-
-
-
-
-
