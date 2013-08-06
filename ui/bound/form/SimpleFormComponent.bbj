@@ -104,7 +104,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     rem /**
     rem * Method getAllControlsRecursive:
     rem * Get all controls recursively
-    rem * @param BBjWindow pWindow!: the window whit the controls
+    rem * @param BBjWindow pWindow!: the window with the controls
     rem * @return BBjVector: vector of all control information
     rem */
     method public static BBjVector getAllControlsRecursive(BBjWindow pWindow!)
@@ -852,112 +852,115 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         #clearValidationErrorSignage()
 
-        startover:
-        ks! = #EditedFields!.keySet()
-        it! = ks!.iterator()
+        if #EditedFields! <> null() then
+            startover:
+            ks! = #EditedFields!.keySet()
+            it! = ks!.iterator()
 
-        while it!.hasNext()
-            ctrl_name$=it!.next()
+            while it!.hasNext()
+                ctrl_name$=it!.next()
+    
+    
+                rem take foreign key value from the linked business component
+                picker! = #ForeignKeyPickerList!.get(ctrl_name$)
+    
+                if picker!<> null() then
+                    #EditedFields!.put(ctrl_name$,picker!.getSelectedForeignKeyValue())
+    
+                    continue
+                fi
 
-            rem take foreign key value from the linked business component
-            picker! = #ForeignKeyPickerList!.get(ctrl_name$)
+                if #EditedFields!.get(ctrl_name$)=null() then
+                    ControlMap! = #ControlList!.get(ctrl_name$)
+                    ctrl! = ControlMap!.get("ControlInstance")
 
-            if picker!<> null() then
-                #EditedFields!.put(ctrl_name$,picker!.getSelectedForeignKeyValue())
+                    switch ctrl!.getControlType()
+                        case BBjControl.INPUTD_TYPE
+                            v = ctrl!.getValue()
 
-                continue
-            fi
+                            if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
+                                #EditedFields!.put(ctrl_name$,str(v))
+                                validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
+                            else
+                                #EditedFields!.remove(ctrl_name$)
+                                exitto startover; rem to avoid concurrent edit exception
+                            fi
+                        break
 
-            if #EditedFields!.get(ctrl_name$)=null() then
-                ControlMap! = #ControlList!.get(ctrl_name$)
-                ctrl! = ControlMap!.get("ControlInstance")
+                        case BBjControl.CHECKBOX_TYPE
+                            v = ctrl!.isSelected()
 
-                switch ctrl!.getControlType()
-                    case BBjControl.INPUTD_TYPE
-                        v = ctrl!.getValue()
+                            if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
+                                #EditedFields!.put(ctrl_name$,str(v))
+                                validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
+                            else
+                                #EditedFields!.remove(ctrl_name$)
+                                exitto startover; rem to avoid concurrent edit exception
+                            fi
+                        break
 
-                        if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
-                            #EditedFields!.put(ctrl_name$,str(v))
-                            validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
-                        else
-                            #EditedFields!.remove(ctrl_name$)
-                            exitto startover; rem to avoid concurrent edit exception
-                        fi
-                    break
+                        case default
+                            default_set2:
+                            v$=ctrl!.getText()
 
-                    case BBjControl.CHECKBOX_TYPE
-                        v = ctrl!.isSelected()
+                            if #EditedRec!=null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
+                                #EditedFields!.put(ctrl_name$,v$)
+                                validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
+                            else
+                                #EditedFields!.remove(ctrl_name$)
+                                exitto startover; rem to avoid concurrent edit exception
+                            fi
+                        break
+                    swend
+                fi
+            wend
+    
+            if #EditedFields!.size() then
+                #getBC().clearValidationErrors()
+                val = #getBC().validateRecord(#getBC().getEditingRecNo(),#EditedFields!)
+                val = max(val,#getBC().getFieldValidationErrorLevel())
 
-                        if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
-                            #EditedFields!.put(ctrl_name$,str(v))
-                            validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
-                        else
-                            #EditedFields!.remove(ctrl_name$)
-                            exitto startover; rem to avoid concurrent edit exception
-                        fi
-                    break
+                if val>0 then
+                    #markValidationErrors()
 
-                    case default
-                        default_set2:
-                        v$=ctrl!.getText()
+                    if val=ValidationError.ERROR() then
+                        a=msgbox(#getBC().getValidationErrorMessage(),16,"validation failed")
 
-                        if #EditedRec!=null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
-                            #EditedFields!.put(ctrl_name$,v$)
-                            validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
-                        else
-                            #EditedFields!.remove(ctrl_name$)
-                            exitto startover; rem to avoid concurrent edit exception
-                        fi
-                    break
-                swend
-            fi
-        wend
-
-        if #EditedFields!.size() then
-            #getBC().clearValidationErrors()
-            val = #getBC().validateRecord(#getBC().getEditingRecNo(),#EditedFields!)
-            val = max(val,#getBC().getFieldValidationErrorLevel())
-
-            if val>0 then
-                #markValidationErrors()
-
-                if val=ValidationError.ERROR() then
-                    a=msgbox(#getBC().getValidationErrorMessage(),16,"validation failed")
-
-                    methodret 1
-
-                    rem aborting save and going back
-                else
-                    if val=ValidationError.NOTICE() then
-                        icon=64
-                    fi
-
-                    if val=ValidationError.WARN() then
-                        icon=48
-                    fi
-
-                    a=msgbox(#getBC().getValidationErrorMessage(),icon+1,"validation failed")
-
-                    if a=2 then
                         methodret 1
 
-                        rem "cancel - abort saving operation
+                        rem aborting save and going back
+                    else
+                        if val=ValidationError.NOTICE() then
+                            icon=64
+                        fi
+
+                        if val=ValidationError.WARN() then
+                            icon=48
+                        fi
+
+                        a=msgbox(#getBC().getValidationErrorMessage(),icon+1,"validation failed")
+
+                        if a=2 then
+                            methodret 1
+    
+                            rem "cancel - abort saving operation
+                        fi
                     fi
                 fi
+
+
+                #EditedFields! = cast(java.util.HashMap,#onBeforeSave(#EditedFields!))
+
+REM                 print "RecNo:",#getBC().getEditingRecNo()
+REM                 print "Fields:",#EditedFields!
+
+                #getBC().saveRecord(#getBC().getEditingRecNo(),#EditedFields!)
+                #getBC().clearValidationErrors()
+                #getBC().clearFieldValidationErrors()
+                #clearValidationErrorSignage()
             fi
-
-
-            #EditedFields! = cast(java.util.HashMap,#onBeforeSave(#EditedFields!))
-
-REM             print "RecNo:",#getBC().getEditingRecNo()
-REM             print "Fields:",#EditedFields!
-
-            #getBC().saveRecord(#getBC().getEditingRecNo(),#EditedFields!)
-            #getBC().clearValidationErrors()
-            #getBC().clearFieldValidationErrors()
-            #clearValidationErrorSignage()
-        fi
-
+        fi ; rem "if EditedFields <> null()
+        
         #EditedFields! = null()
         #EditedRec! = null()
 

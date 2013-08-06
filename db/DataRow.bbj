@@ -320,10 +320,7 @@ class public DataField
             if value! = null() then
                 #BigDecimalValue! = null()
             else
-                if value! = "" then value!="0"
-
                 if value! = "" or value! = null() then value!="0"
-
                 #BigDecimalValue! = new java.math.BigDecimal(value!)
             fi
         fi
