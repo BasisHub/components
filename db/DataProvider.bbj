@@ -411,7 +411,6 @@ class public DataProvider
 
             row!.setSQLType(col_name$,col_type)
 
-            row!.setSQLType(col_name$,col_type)
         wend
 
         #closeDatabase()
