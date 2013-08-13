@@ -1,14 +1,17 @@
+rem package components.db
+
 rem /**
 rem * DataProvider
-rem *
 rem *
 rem * @author Stephan Wald
 rem * @version 1.0
 rem */
+
 use ::components/db/DataRow.bbj::DataRow
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::admin/admin.bbj::Admin
 use ::admin/admin.bbj::UserCredentials
+
 
 class public DataProvider
 
@@ -30,60 +33,103 @@ class public DataProvider
     field protected java.sql.ResultSet  JDBCResultSet!
     field protected BBjString           ConnMode$
     field public    DataRow             EntityClass!                = new DataRow()
-    
 
-    method public void  addPrimaryKeySegment(BBjString fieldName$)
+
+    rem /**
+    rem * Method addPrimaryKeySegment:
+    rem * add a primary key segment
+    rem * @param BBjString fieldName$: the name of the primary key segment
+    rem */
+    method public void addPrimaryKeySegment(BBjString fieldName$)
 
         #PrimaryKeySegments!.addItem(fieldName$)
 
     methodend
 
+
+    rem /**
+    rem * Method getPrimaryKeySegments:
+    rem * get a BBjVector with the primary key segments
+    rem * @return BBjVector keySegments!: the vetor containing the primary key segments
+    rem */
     method public BBjVector getPrimaryKeySegments()
 
         methodret #PrimaryKeySegments!
 
     methodend
 
+
+    rem /**
+    rem * Method setPrimaryTable:
+    rem * set the name of the primary table
+    rem * @param BBjString primaryTable$: the name of the primary table
+    rem */
     method public void setPrimaryTable(BBjString primaryTable$)
 
         #PrimaryTable$ = primaryTable$
 
     methodend
-    
+
+
+    rem /**
+    rem * Method getPrimaryTable:
+    rem * get the name of the primary table
+    rem * @return BBjString primaryTable$: the name of the primary table
+    rem */
     method public BBjString getPrimaryTable()
-    
+
         methodret #PrimaryTable$
-    
+
     methodend
 
+
+    rem /**
+    rem * Method setEntityClass:
+    rem * set the entity class
+    rem * @param DataRow entity!: the entity for the data provider
+    rem */
     method public void setEntityClass(DataRow dr!)
 
         #EntityClass! = dr!
 
     methodend
 
-    method public DataRow getNewEntity()
 
+    rem /**
+    rem * Method getNewEntity:
+    rem * get a new entity based on the current result set
+    rem * @return DataRow entity!: the new entity based on the current result set
+    rem */
+    method public DataRow getNewEntity()
 
         methodret #getAttributesRecord()
 
-
     methodend
 
+
+    rem /**
+    rem * Method buildSQLStatement:
+    rem * build and return the sql query (filter and order by clausel are ignored)
+    rem * @return BBjString sqlQuery$: the sql query
+    rem */
     method protected BBjString buildSQLStatement()
 
         methodret #buildSQLStatement(0)
 
     methodend
 
+
+    rem /**
+    rem * Method buildSQLStatement:
+    rem * build and return the sql query
+    rem * @param BBjNumber fIgnoreFilterAndOrder: 1 = ignore filter and order by
+    rem * @return BBjString sqlQuery$: the sql query
+    rem */
     method protected BBjString buildSQLStatement(BBjNumber fIgnoreFilterAndOrder)
 
         sql$=#getSQL()
 
-
-        if  #QueryFilter! <>null() and fIgnoreFilterAndOrder=0 then
-
-
+        if  #QueryFilter!<>null() and fIgnoreFilterAndOrder=0 then
             ks!=#QueryFilter!.keySet()
             it! = ks!.iterator()
 
@@ -94,7 +140,6 @@ class public DataProvider
 
                 if f!.size() > 0 then
                     for i=0 to f!.size()-1
-
                         f1$=f!.getItem(i)
 
                         if pos("%"=f1$)>0 then
@@ -112,7 +157,6 @@ class public DataProvider
                         rem search case insensitive?
                         rem introduce option (set per column, or like Google?)
                         rem or leave it to the database setup?
-
                     next
                 fi
 
@@ -123,26 +167,17 @@ class public DataProvider
 
                     wh$=wh$+"("+w1$+")"
                 fi
-
             wend
-
-
         fi
-
-        
 
         rem if #QueryFilter...
 
 
         if #ControllerFilter!.size()  then
-
-            
-
             ks! = #ControllerFilter!.keySet()
             it! = ks!.iterator()
 
             while it!.hasNext()
-
                 var$=it!.next()
 
                 if #ControllerFilterUnlock!.get(var$)<> null() then
@@ -150,7 +185,7 @@ class public DataProvider
                 fi
 
                 sel! = #ControllerFilter!.get(var$)
-                
+
                 if sel! = null() then
                     print "sel! = null() for var$=",var$
                     wh$="1=2"
@@ -166,22 +201,20 @@ class public DataProvider
                 w1$=""
 
                 for i=0 to sel!.size()-1
-
                     f1!=sel!.getItem(i)
-                    
+
                     if f1! = null() then
                         cond$="''"
                         rem TODO: is that correct for null() ?
                     else 
                         cond$="'"+str(f1!)+"'"
                     fi
-                    
+
                     if w1$>"" then
                         w1$=w1$+" OR "
                     fi
 
                     w1$=w1$ + var$+" = "+cond$
-
                 next
 
                 if wh$>"" then
@@ -189,9 +222,7 @@ class public DataProvider
                 fi
 
                 wh$=wh$+"("+w1$+")"
-
             wend
-
         fi
 
         rem if #ControllerFilter
@@ -202,14 +233,12 @@ class public DataProvider
             if w>0 then
                 sql$=sql$(1,w+5)+" "+wh$+" AND ("+sql$(w+6)+")"
             else
-
                 if pos("ORDER BY"=cvs(sql$,4))=0 then
                     sql$=sql$ + " WHERE "+wh$
                 else
                     sql$=sql$(1,pos("ORDER BY"=cvs(sql$,4))-1)+" WHERE "+wh$+" "+sql$(pos("ORDER BY"=cvs(sql$,4)))
                 fi
             fi
-
         fi
 
 
@@ -225,7 +254,6 @@ class public DataProvider
             if w>0 then
                 sql$=sql$(1,w-1)
             fi
-
         fi
 
         sql$=sql$+orderby$
@@ -235,29 +263,38 @@ class public DataProvider
 
     methodend
 
-    method public BBjVector getResultSet()
 
+    rem /**
+    rem * Method getResultSet:
+    rem * get the result set (a BBjVector with DataRow's).
+    rem * Call #prepareResultSet() first to execute the sql query.
+    rem * @return BBjVector resultSet: a BBjVector with DataRow elements
+    rem */
+    method public BBjVector getResultSet()
 
         methodret #ResultSet!
 
-
     methodend
 
-    method public BBjNumber size()
 
+    rem /**
+    rem * Method size:
+    rem * returns the size of the result set
+    rem * @return BBjNumber size: the size of the result set. Returns -1 on empty result set.
+    rem */
+    method public BBjNumber size()
 
         if #Size = -1 then
             #openDatabase()
             sql$=#buildSQLStatement()
 
             if pos("1=2" =sql$) = 0 then 
-
                 rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
                 rem sollte ein order by im Satement sein muss dieses entfernt werden
                 count$ = sql$
                 if pos("ORDER BY"= sql$) > 0 then
                     count$ = sql$(1,pos("ORDER BY"= sql$)-1)
-                endif     
+                endif
                 sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
 
                 stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
@@ -283,12 +320,16 @@ class public DataProvider
 
     methodend
 
-    method public DataRow getAttributesRecord()
 
+    rem /**
+    rem * Method getAttributesRecord:
+    rem * returns an empty DataRow with the sql attributes
+    rem * @return DataRow row!: an empty DataRow with the sql attributes
+    rem */
+    method public DataRow getAttributesRecord()
 
         #openDatabase()
 
-        v! = new BBjVector()
         md! = #Connection!.getMetaData()
 
         declare auto DataRow row!
@@ -351,7 +392,6 @@ class public DataProvider
                 row!.setFieldValue(col_name$,cast(java.lang.Boolean,null()))
                 break
 
-
                 case java.sql.Types.BINARY
                 case java.sql.Types.VARBINARY
                 case java.sql.Types.BLOB
@@ -371,18 +411,22 @@ class public DataProvider
 
             row!.setSQLType(col_name$,col_type)
 
-            row!.setSQLType(col_name$,col_type)
         wend
 
         #closeDatabase()
 
         methodret row!
 
-
     methodend
 
 
-
+    rem /**
+    rem * Method prepareResultSet:
+    rem * Execute the SQL query and prepare the result set
+    rem * @param BBjNumber first: start reading at the "first" row from the record set
+    rem * @param BBjNumber last: read to the "last" row from the record set
+    rem * return BBjVector vec!: a BBjVector with the row numbers
+    rem */
     method public BBjVector prepareResultSet(BBjNumber first, BBjNumber last)
 
         v! = new BBjVector()
@@ -396,23 +440,18 @@ class public DataProvider
         sql$=#buildSQLStatement()
 
         if pos("1=2"=sql$)=0 then
-
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
 
             print sql$
 
             if #JDBCResultSet!.absolute(first) then
-
                 while #ResultSet!.size() < first-1
                     #ResultSet!.addItem(null())
                 wend
 
                 while 1
-
-
                     if #ResultSet!.size()=first+x-1 or #ResultSet!.getItem(first+x-1)=null() then
-
                         declare auto DataRow row!
                         row! = #EntityClass!.newInstance()
 
@@ -507,7 +546,6 @@ class public DataProvider
                             swend
 
                             row!.setSQLType(col_name$,col_type)
-
                         next
 
 
@@ -518,33 +556,28 @@ class public DataProvider
                         fi
 
                         v!.addItem(first+x-1)
-
                     fi
 
                     x=x+1
 
                     if #JDBCResultSet!.next() then
-
                         if first+x<=last then
                             continue
                         fi
-
                     fi
 
                     break
-
                 wend
-
             fi
-            
+
             rem now determine size for later use - it's probably needed anyway
-            
+
             rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
             rem sollte ein order by im Satement sein muss dieses entfernt werden
             count$ = sql$
             if pos("ORDER BY"= sql$) > 0 then
                 count$ = sql$(1,pos("ORDER BY"= sql$)-1)
-            endif     
+            endif
             sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
 
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
@@ -555,13 +588,10 @@ class public DataProvider
             else
                 #Size=0
             fi
-            
         else
-
             print "empty result set where was 1=2"
             v! = new BBjVector()
             #Size = 0
-
         fi
         print
 
@@ -571,6 +601,7 @@ class public DataProvider
 
     methodend
 
+
     rem /**
     rem * Method getConnMode:
     rem * get the connection mode for the database and cache it for future use
@@ -578,7 +609,6 @@ class public DataProvider
     method protected BBjString getConnMode()
 
         if #ConnMode$="" then
-        
             connect_user! = null()
             connect_pwd! = null()
 
@@ -601,20 +631,20 @@ class public DataProvider
                 admin!.setPassword(auth_passwd$)
             endif
             rem admin!.removeUserCredentialsCookie()
-            
+
             userCredentials! = BBjAPI().getGroupNamespace().getValue("userCredentialsFromCookie",err=*next)
             if  userCredentials! = null() then 
                 userCredentials! = admin!.getUserCredentials()
                 BBjAPI().getGroupNamespace().setValue("userCredentialsFromCookie",userCredentials! )
             fi
-                if (userCredentials! <> null())
-                    connect_user! = userCredentials!.getUser()
-                    connect_pwd! = userCredentials!.getPassword()
-                else
-                    goto connectAuthError 
-                endif
 
-            
+            if (userCredentials! <> null())
+                connect_user! = userCredentials!.getUser()
+                connect_pwd! = userCredentials!.getPassword()
+            else
+                goto connectAuthError 
+            endif
+
             connMode$=""
             if connect_user! <> null() and connect_user! <> "" then
                 connMode$ = connMode$ + "user=" + connect_user!
@@ -622,14 +652,14 @@ class public DataProvider
             if connect_pwd! <> null() and connect_pwd! <> "" then
                 connMode$ = connMode$ + fill(sgn(len(connMode$)),",") + "password=" + connect_pwd!
             endif
-            
-            #ConnMode$ = connMode$
 
+            #ConnMode$ = connMode$
         endif
 
         methodret #ConnMode$
-    
+
     methodend
+
 
     rem /**
     rem * Method openDatabase:
@@ -638,7 +668,6 @@ class public DataProvider
     method protected void openDatabase()
 
         if #Connection! = null() then
-
             connMode$=#getConnMode()
 
             count = 0
@@ -653,6 +682,7 @@ class public DataProvider
 
         methodret
 
+
         connectError:
             throw "Could not connect to data source " + #DataSource$,12
             methodret
@@ -662,6 +692,7 @@ class public DataProvider
             methodret
 
     methodend
+
 
     rem /**
     rem * Method closeDatabase:
@@ -683,7 +714,7 @@ class public DataProvider
     rem * @param BBjString col$: the column name
     rem * @param BBjNumber size: 0=descending, 1=ascending
     rem */
-    method public void setSortOrder(BBjString col$,BBjNumber sortAscending)
+    method public void setSortOrder(BBjString col$, BBjNumber sortAscending)
 
         #SortField$=col$
         #SortAscending = sortAscending
@@ -712,7 +743,6 @@ class public DataProvider
     rem */
     method public void setControllerFilterUnlock(BBjString field$, BBjNumber f_unlock)
 
-
         if f_unlock then
             #ControllerFilterUnlock!.put(field$,1)
         else
@@ -723,26 +753,25 @@ class public DataProvider
 
     methodend
 
+
     rem /**
-    rem * Method setControllerFilterUnlock:
-    rem * called to (temporarily) unlock the business component from the UIController driver
+    rem * Method putControllerFilter:
+    rem * put a filter to the controller
     rem * @param BBjString var$: the variable on which is to be filtered
     rem * @param BBjVector selection!: vector holding list of filter values
-
     rem */
-    method public void putControllerFilter(BBjString var$,BBjVector selection!)
+    method public void putControllerFilter(BBjString var$, BBjVector selection!)
 
         #ControllerFilter!.put(var$,selection!)
         #Size=-1
 
     methodend
 
-    rem /**
-    rem * Method clearControllerFilterUnlock:
-    rem * called to (temporarily) unlock the business component from the UIController driver
-    rem * @param BBjString var$: the variable on which is to be filtered
-    rem * @param BBjVector selection!: vector holding list of filter values
 
+    rem /**
+    rem * Method clearControllerFilter:
+    rem * remove a filter from the controller
+    rem * @param BBjString var$: the name of the field on which the filter was set
     rem */
     method public void clearControllerFilter(BBjString var$)
 
@@ -750,6 +779,7 @@ class public DataProvider
         #Size=-1
 
     methodend
+
 
     rem /**
     rem * Method getDistinctValues:
@@ -760,12 +790,9 @@ class public DataProvider
     rem */
     method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
 
-
         #openDatabase()
 
-
         sql$="SELECT DISTINCT "+fieldName$+" AS D FROM ("+#buildSQLStatement(1)+") AS X"
-
 
         stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
         #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
@@ -784,9 +811,7 @@ class public DataProvider
 
         methodret tm!
 
-
     methodend
-
 
 
     rem /**
@@ -805,36 +830,27 @@ class public DataProvider
         fi
 
 
-
         if 0 then
             rem TODO: wenn controller filter gesetzt dann die Feldwerte fest auch setzen
 
             cf! = #getControllerFilter()
 
             if cf!<>null() then
-
                 ks! = cf!.keySet()
                 it! = ks!.iterator()
 
                 while it!.hasNext()
-
                     k$=it!.next()
                     v!=cf!.get(k$)
 
                     if v!.size() then
-
                         fields!.put(k$,v!.getItem(0))
 
                         rem flaw: when multiple selection it's always taking the first record
-
                     fi
-
                 wend
-
             fi
-
         fi
-
 
 
         hm! = rec!.getObjects()
@@ -843,11 +859,9 @@ class public DataProvider
         it! = ks!.iterator()
 
         while it!.hasNext()
-
             k$=it!.next()
             s$=s$+","+k$
             v$=v$+",? "
-
         wend
 
         s$=s$(2)
@@ -879,38 +893,31 @@ class public DataProvider
                 stmt!.setDouble(i,obj!)
             fi
 
-
             if type$="I" then
                 stmt!.setInt(i,obj!)
             fi
-
 
             if type$="B" then
                 stmt!.setBoolean(i,obj!)
             fi
 
-
             if type$="D" then
                 stmt!.setDate(i,obj!)
             fi
-
 
             if type$="X" then
                 stmt!.setTimestamp(i,obj!)
             fi
 
-
             if type$="Y" then
                 stmt!.setBigDecimal(i,obj!)
             fi
-
 
             if type$="T" then
                 stmt!.setTime(i,obj!)
             fi
 
             i=i+1
-
         wend
 
         rem TODO: catch error
@@ -928,8 +935,9 @@ class public DataProvider
 
     methodend
 
+
     rem /**
-    rem * Method insertRecord
+    rem * Method updateRecord
     rem * saves a record within the result set
     rem * @param DataRow rec!: the row
     rem * @param DataRow orig_rec!: the original row
@@ -937,7 +945,6 @@ class public DataProvider
     method public void updateRecord(DataRow rec!, DataRow orig_rec!)
 
         for i=0 to #PrimaryKeySegments!.size()-1
-
             if i>0 then
                 wh$=wh$+" AND "
             fi
@@ -950,8 +957,7 @@ class public DataProvider
             wh$=wh$+" = '"
             wh$=wh$+v$
             wh$=wh$+"' ) "
-
-        next
+        next i
 
         hm! = rec!.getObjects()
 
@@ -959,10 +965,8 @@ class public DataProvider
         it! = ks!.iterator()
 
         while it!.hasNext()
-
             k$=it!.next()
             s$=s$+", "+k$+" = ? "
-
         wend
 
         s$=s$(2)
@@ -984,7 +988,6 @@ class public DataProvider
             obj! = hm!.get(k$)
             type$=rec!.getFieldType(k$)
 
-
             if type$="C" then
                 stmt!.setString(i,obj!)
             fi
@@ -993,41 +996,33 @@ class public DataProvider
                 stmt!.setDouble(i,obj!)
             fi
 
-
             if type$="I" then
                 stmt!.setInt(i,obj!)
             fi
-
 
             if type$="B" then
                 stmt!.setBoolean(i,obj!)
             fi
 
-
             if type$="D" then
                 stmt!.setDate(i,obj!)
             fi
-
 
             if type$="X" then
                 stmt!.setTimestamp(i,obj!)
             fi
 
-
             if type$="Y" then
                 stmt!.setBigDecimal(i,obj!)
             fi
-
 
             if type$="T" then
                 stmt!.setTime(i,obj!)
             fi
 
             i=i+1
-
         wend
 
-    
 
         rem TODO: catch error
         ret=stmt!.executeUpdate(err=*next)
@@ -1037,22 +1032,22 @@ class public DataProvider
             ex! = BBjAPI().getLastJavaException()
 
             if ex! <> null() then
-                
                 a=msgbox(ex!.toString(),0,"Error")
             fi
-
         fi
 
         stmt!.close()
         #closeDatabase()
 
-
-
-
     methodend
 
-    method public void deleteRecords(BBjVector indexList!)
 
+    rem /**
+    rem * Method deleteRecords
+    rem * deletes a record
+    rem * @param BBjVector indexList!: a vector with primary key values
+    rem */
+    method public void deleteRecords(BBjVector indexList!)
 
         if #PrimaryKeySegments!.size()=0 then
             throw "primary key segments in SQLBusinessComponent not defined!",13
@@ -1063,7 +1058,6 @@ class public DataProvider
         fi
 
         if indexList!.size()>0 then
-
             for i=0 to indexList!.size()-1
                 row=indexList!.getItem(i)
                 row! = #getResultSet().getItem(row)
@@ -1075,7 +1069,6 @@ class public DataProvider
                 wh$=wh$+"("
 
                 for j=0 to #PrimaryKeySegments!.size()-1
-
                     if j>0 then
                         wh$=wh$+" AND "
                     fi
@@ -1085,12 +1078,9 @@ class public DataProvider
 
                     rem wh$=wh$+"TRIM("+f$+")= '"+v$+"'"
                     wh$=wh$+" "+f$+"= '"+v$+"'"
-
-
                 next j
 
                 wh$=wh$+")"
-
             next i
 
 
@@ -1109,26 +1099,8 @@ class public DataProvider
 
             #closeDatabase()
             #Size=-1
-
         fi
 
     methodend
 
 classend
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

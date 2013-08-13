@@ -1,3 +1,14 @@
+rem package components.bl
+
+rem /**
+rem * ValidationError
+rem *
+rem * Implementation of a ValidationError class
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+
 class public ValidationError
 
     field public BBjNumber Level
@@ -5,6 +16,13 @@ class public ValidationError
     field public String Message!
 
 
+    rem /**
+    rem * Constructor
+    rem * Create a new ValidationError object.
+    rem * @param BBjNumber level: the error level
+    rem * @param String fieldname!: the name of the validated field
+    rem * @param String message!: the error message
+    rem */
     method public ValidationError(BBjNumber level, String fieldname!, String message!)
 
         #Level = level
@@ -14,6 +32,13 @@ class public ValidationError
     methodend
 
 
+    rem /**
+    rem * Constructor
+    rem * Create a new ValidationError object.
+    rem * @param BBjNumber level: the error level
+    rem * @param BBjVector fieldnames!: a BBjVector with the validated field names
+    rem * @param String message!: the error message
+    rem */
     method public ValidationError(BBjNumber level, BBjVector fieldnames!, String message!)
 
         #Level = level
@@ -22,18 +47,36 @@ class public ValidationError
 
     methodend
 
+
+    rem /**
+    rem * Method ERROR:
+    rem * returns the level for errors. Level could be NOTICE, WARN and ERROR.
+    rem * @return BBjNumber error: the level for errors
+    rem */
     method public static BBjNumber ERROR()
 
         methodret 9
 
     methodend
 
+
+    rem /**
+    rem * Method WARN:
+    rem * returns the level for warnings. Level could be NOTICE, WARN and ERROR.
+    rem * @return BBjNumber warn: the level for warnings
+    rem */
     method public static BBjNumber WARN()
 
         methodret 4
 
     methodend
 
+
+    rem /**
+    rem * Method NOTICE:
+    rem * returns the level for notices. Level could be NOTICE, WARN and ERROR.
+    rem * @return BBjNumber notice: the level for notices
+    rem */
     method public static BBjNumber NOTICE()
 
         methodret 1
@@ -41,14 +84,3 @@ class public ValidationError
     methodend
 
 classend
-
-
-
-
-
-
-
-
-
-
-

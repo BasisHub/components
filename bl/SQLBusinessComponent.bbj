@@ -1,3 +1,12 @@
+rem package components.bl
+
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+use ::components/bl/SoftLockController.bbj::SoftLockController
+use ::components/bl/SoftLockController.bbj::SoftLockRemoteEditEvent
+
+
 rem /**
 rem * SQLBusinessComponent
 rem *
@@ -6,11 +15,6 @@ rem *
 rem * @author Stephan Wald
 rem * @version 1.0
 rem */
-use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
-use ::components/bl/SoftLockController.bbj::SoftLockController
-use ::components/bl/SoftLockController.bbj::SoftLockRemoteEditEvent
 
 class public SQLBusinessComponent extends BusinessComponent
 
@@ -25,13 +29,23 @@ class public SQLBusinessComponent extends BusinessComponent
 
 
 
-
-    method public void  addPrimaryKeySegment(BBjString fieldName$)
+    rem /**
+    rem * Method addPrimaryKeySegment:
+    rem * add the field name(s) building the primary key
+    rem * @param BBjNamespaceEvent ev!: the event that causes this method call
+    rem */
+    method public void addPrimaryKeySegment(BBjString fieldName$)
 
         #PrimaryKeySegments!.addItem(fieldName$)
 
     methodend
 
+
+    rem /**
+    rem * Method setPrimaryTable:
+    rem * set the name of the primary table
+    rem * @param BBjString primaryTable$: the name of the primary table
+    rem */
     method public void setPrimaryTable(BBjString primaryTable$)
 
         #PrimaryTable$ = primaryTable$
@@ -42,18 +56,35 @@ class public SQLBusinessComponent extends BusinessComponent
     methodend
 
 
+    rem /**
+    rem * Method onRemoteSoftLockStart:
+    rem * callback method, handles the lock event
+    rem * @param BBjCustomEvent ev!: the lock event fired from the SoftLockController
+    rem */
     method public void onRemoteSoftLockStart(BBjCustomEvent ev!)
 
         #broadcastSoftlockStatusChange(str(ev!.getObject()), 1)
 
     methodend
 
+
+    rem /**
+    rem * Method onRemoteSoftLockStop:
+    rem * callback method, handles the unlock event
+    rem * @param BBjCustomEvent ev!: the unlock event fired from the SoftLockController
+    rem */
     method public void onRemoteSoftLockStop(BBjCustomEvent ev!)
 
         #broadcastSoftlockStatusChange(str(ev!.getObject()), 0)
 
     methodend
 
+
+    rem /**
+    rem * Method onRemoteEdit:
+    rem * callback method, handles the remote edit event
+    rem * @param BBjCustomEvent ev!: the remote edit event fired from the SoftLockController
+    rem */
     method public void onRemoteEdit(BBjCustomEvent ev!)
 
         if #PrimaryKeySegments!.size()=0 then
@@ -75,27 +106,20 @@ class public SQLBusinessComponent extends BusinessComponent
             k$=""
 
             for i=0 to #PrimaryKeySegments!.size()-1
-
                 seg$    = #PrimaryKeySegments!.getItem(i)
                 v$      = rec!.getFieldAsString(seg$)
                 k$=k$+v$
-
             next
 
             if k$=t!.getKeyValue() then
                 rem "it is the same"
 
                 methodret
-
             fi
-
         fi
 
-
         if #getResultSet().size() then
-
             for recno=0 to #getResultSet().size()-1
-
                 if recno = edrec then
                     continue
                 fi
@@ -104,15 +128,12 @@ class public SQLBusinessComponent extends BusinessComponent
                 k$=""
 
                 for i=0 to #PrimaryKeySegments!.size()-1
-
                     seg$    = #PrimaryKeySegments!.getItem(i)
                     v$      = rec!.getFieldAsString(seg$)
-                    k$=k$+v$
-
+                    k$      = k$+v$
                 next
 
                 if k$=t!.getKeyValue() then
-
                     ks! = t!.getEditedList().keySet()
                     it! = ks!.iterator()
 
@@ -124,14 +145,11 @@ class public SQLBusinessComponent extends BusinessComponent
 
                     break
                 fi
-
             next
-
         fi
 
-
-
     methodend
+
 
     rem /**
     rem * Method broadcastSoftlockStatusChange
@@ -141,23 +159,18 @@ class public SQLBusinessComponent extends BusinessComponent
     rem */
     method public void broadcastSoftlockStatusChange(BBjString keyValue$, BBjNumber isLocked)
 
-
         if #getResultSet().size() then
-
             for recno=0 to #getResultSet().size()-1
                 rec! = #getResultSet().getItem(recno)
                 k$=""
 
                 for i=0 to #PrimaryKeySegments!.size()-1
-
                     seg$    = #PrimaryKeySegments!.getItem(i)
                     v$      = rec!.getFieldAsString(seg$)
-                    k$=k$+v$
-
+                    k$      = k$+v$
                 next
 
                 if k$=keyValue$ then
-
                     if isLocked=0 then
                         #updateResultsetForSingleRecord(recno)
                     fi
@@ -165,9 +178,7 @@ class public SQLBusinessComponent extends BusinessComponent
                     #super!.broadcastSoftlockStatusChange(recno, isLocked)
                     break
                 fi
-
             next
-
         fi
 
     methodend
@@ -183,7 +194,6 @@ class public SQLBusinessComponent extends BusinessComponent
         sql$=#SQL$
 
         if #super!.getQueryFilter() <>null() then
-
             ks!=#super!.getQueryFilter().keySet()
             it! = ks!.iterator()
 
@@ -210,7 +220,6 @@ class public SQLBusinessComponent extends BusinessComponent
                     w1$=w1$ + "UCASE("+k$+")" + eq$ + "'"+cvs(f1$,4)+"'"
                     rem search case insensitive
                     rem introduce option (set per column, or like Google?)
-
                 next
 
                 if wh$>"" then
@@ -218,20 +227,15 @@ class public SQLBusinessComponent extends BusinessComponent
                 fi
 
                 wh$=wh$+"("+w1$+")"
-
-
             wend
-
         fi
 
 
         if #getControllerFilter().size() and #super!.getControllerFilterUnlock()=0 then
-
             ks! = #getControllerFilter().keySet()
             it! = ks!.iterator()
 
             while it!.hasNext()
-
                 var$=it!.next()
                 sel! = #getControllerFilter().get(var$)
 
@@ -248,7 +252,6 @@ class public SQLBusinessComponent extends BusinessComponent
                 w1$=""
 
                 for i=0 to sel!.size()-1
-
                     f1$=sel!.getItem(i)
 
                     if w1$>"" then
@@ -256,7 +259,6 @@ class public SQLBusinessComponent extends BusinessComponent
                     fi
 
                     w1$=w1$ + var$+" = '"+f1$+"'"
-
                 next
 
                 if wh$>"" then
@@ -264,11 +266,8 @@ class public SQLBusinessComponent extends BusinessComponent
                 fi
 
                 wh$=wh$+"("+w1$+")"
-
             wend
-
         fi
-
 
         if wh$>"" then
             w=pos("WHERE"=cvs(sql$,4))
@@ -278,10 +277,7 @@ class public SQLBusinessComponent extends BusinessComponent
             else
                 sql$=sql$ + " WHERE "+wh$
             fi
-
         fi
-
-
 
         sortCol$= #super!.getSortField()
 
@@ -295,7 +291,7 @@ class public SQLBusinessComponent extends BusinessComponent
             w=pos("ORDER"=cvs(sql$,4))
 
             if w>0
-            sql$=sql$(1,w-1)
+                sql$=sql$(1,w-1)
         fi
 
         sql$=sql$+orderby$
@@ -319,13 +315,11 @@ class public SQLBusinessComponent extends BusinessComponent
         sqlopen (ch)#DataSource$
 
         if #super!.getQueryFilter() <> null() then
-
             x! = #super!.getQueryFilter().get(fieldName$)
 
             if x!<>null() then
                 #super!.getQueryFilter().remove(fieldName$)
             fi
-
         fi
 
         sqlprep (ch)"SELECT DISTINCT "+fieldName$+" AS D FROM ("+#getSQLStatement()+")"
@@ -365,7 +359,6 @@ class public SQLBusinessComponent extends BusinessComponent
 
         tpl$=sqltmpl(#SQLChan)
 
-
         while 1
             t! = new DataRow(tpl$,sqlfetch(#SQLChan,end=*break))
             t! = #processRecord(t!)
@@ -373,13 +366,13 @@ class public SQLBusinessComponent extends BusinessComponent
             if t! <> null() then
                 #super!.getResultSet().addItem(t!)
             fi
-
         wend
 
         #closeDatabase()
         #super!.setQueryComplete(1)
 
     methodend
+
 
     rem /**
     rem * Method queryDataFull:
@@ -398,7 +391,6 @@ class public SQLBusinessComponent extends BusinessComponent
         sqlexec (#SQLChan)
         tpl$=sqltmpl(#SQLChan)
 
-
         i=1
 
         while i< #super!.getBlockSize()
@@ -413,8 +405,6 @@ class public SQLBusinessComponent extends BusinessComponent
                 #super!.setProgress(int(i/#super!.getBlockSize()*100))
                 i=i+1
             fi
-
-
         wend
 
         if finished then
@@ -425,6 +415,7 @@ class public SQLBusinessComponent extends BusinessComponent
         #super!.setProgress(0)
 
     methodend
+
 
     rem /**
     rem * Method size:
@@ -443,10 +434,10 @@ class public SQLBusinessComponent extends BusinessComponent
             ret=s.rows_affected
         fi
 
-
         methodret ret
 
     methodend
+
 
     rem /**
     rem * Method moreData:
@@ -458,6 +449,7 @@ class public SQLBusinessComponent extends BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method moreData:
     rem * compute the next block of the resultset
@@ -465,21 +457,16 @@ class public SQLBusinessComponent extends BusinessComponent
     rem */
     method public void moreData(BBjNumber count)
 
-
         if #this!.getQueryComplete() or #SQLChan = 0 then
-
             methodret
-
         fi
 
         oldsize = #super!.getResultSet().size()
-
 
         BBjAPI().setCustomEventCallback("INTERRUPT","NOOP")
 
         i=1
         loop:
-
 
         finished=1
         t! = new DataRow(sqltmpl(#SQLChan),sqlfetch(#SQLChan,end=end_loop))
@@ -490,8 +477,6 @@ class public SQLBusinessComponent extends BusinessComponent
             #super!.getResultSet().addItem(t!)
         fi
 
-
-
         if mod(i,20)=0 then
             BBjAPI().postCustomEvent("INTERRUPT","")
             process_events,err=*next
@@ -500,14 +485,8 @@ class public SQLBusinessComponent extends BusinessComponent
                 goto end_loop
             fi
 
-
             #super!.setProgress(max(1,int(i/count*100)))
-
-
         fi
-
-
-
 
         if i<count then
             i=i+1
@@ -517,7 +496,6 @@ class public SQLBusinessComponent extends BusinessComponent
         rem workaround; process_events kills stack
 
         end_loop:
-
 
         if finished then
             #super!.setQueryComplete(1)
@@ -570,14 +548,13 @@ class public SQLBusinessComponent extends BusinessComponent
     methodend
 
 
-
     rem /**
     rem * Method openDatabase:
     rem * open the connection to the database
     rem */
     method protected void openDatabase()
 
-        if #SQLChan =0 then
+        if #SQLChan = 0 then
             #SQLChan = sqlunt
             sqlopen (#SQLChan) #DataSource$
         fi
@@ -591,14 +568,12 @@ class public SQLBusinessComponent extends BusinessComponent
     method protected void closeDatabase()
 
         sqlclose (#SQLChan)
-        #SQLChan=0
+        #SQLChan = 0
 
     methodend
 
 
-
     rem editing methods
-
 
 
     rem /**
@@ -608,11 +583,10 @@ class public SQLBusinessComponent extends BusinessComponent
     rem */
     method public BBjNumber canDeleteSelectedRecord()
 
-
         methodret #PrimaryKeySegments!.size() AND #PrimaryTable$>""
 
-
     methodend
+
 
     rem /**
     rem * Method deleteSelectedRecords:
@@ -630,7 +604,6 @@ class public SQLBusinessComponent extends BusinessComponent
         fi
 
         if #getSelection().size()>0 then
-
             for i=0 to #getSelection().size()-1
                 row=#getSelection().getItem(i)
                 row! = #getResultSet().getItem(row)
@@ -642,7 +615,6 @@ class public SQLBusinessComponent extends BusinessComponent
                 wh$=wh$+"("
 
                 for j=0 to #PrimaryKeySegments!.size()-1
-
                     if j>0 then
                         wh$=wh$+" AND "
                     fi
@@ -651,12 +623,9 @@ class public SQLBusinessComponent extends BusinessComponent
                     v$=row!.getFieldAsString(f$)
 
                     wh$=wh$+f$+"= '"+v$+"'"
-
-
                 next j
 
                 wh$=wh$+")"
-
             next i
 
 
@@ -669,11 +638,9 @@ class public SQLBusinessComponent extends BusinessComponent
             sqlclose (ch)
             #setEditedRecord(-1)
             #refresh(0)
-
         fi
 
     methodend
-
 
 
     rem /**
@@ -699,24 +666,18 @@ class public SQLBusinessComponent extends BusinessComponent
             cf! = #getControllerFilter()
 
             if cf!<>null() then
-
                 ks! = cf!.keySet()
                 it! = ks!.iterator()
 
                 while it!.hasNext()
-
                     k$=it!.next()
                     v!=cf!.get(k$)
 
                     if v!.size() then
-
                         fields!.put(k$,v!.getItem(0))
                         rem flaw: when multiple selection it's always taking the first record
-
                     fi
-
                 wend
-
             fi
 
             fields! = #beforeInsertRecord(fields!)
@@ -725,7 +686,6 @@ class public SQLBusinessComponent extends BusinessComponent
             it!=ks!.iterator()
 
             while it!.hasNext()
-
                 f$=it!.next()
                 v$=fields!.get(f$)
 
@@ -737,12 +697,9 @@ class public SQLBusinessComponent extends BusinessComponent
                 fields$=fields$+f$
 
                 values$=values$+"'"+v$+"'"
-
-
             wend
 
             sql$="INSERT INTO "+#PrimaryTable$+" ( "+fields$+" ) VALUES ( "+values$+" ) "
-
 
             ch=sqlunt
             sqlopen (ch) #DataSource$
@@ -752,7 +709,6 @@ class public SQLBusinessComponent extends BusinessComponent
 
             #refresh()
             #setEditedRecord(-1)
-
         else
             rem update
 
@@ -761,7 +717,6 @@ class public SQLBusinessComponent extends BusinessComponent
             fields! = #beforeUpdateRecord(fields!)
 
             for i=0 to #PrimaryKeySegments!.size()-1
-
                 if i>0 then
                     wh$=wh$+" AND "
                 fi
@@ -774,20 +729,17 @@ class public SQLBusinessComponent extends BusinessComponent
                 wh$=wh$+" = '"
                 wh$=wh$+v$
                 wh$=wh$+"' ) "
-
             next
 
             ks! = fields!.keySet()
             it!=ks!.iterator()
 
             while it!.hasNext()
-
                 f$=it!.next()
                 v$=fields!.get(f$)
 
                 rem set the field values in the records to prepare for a reread, in case the primary key was also changed
                 rem rec!.setFieldValue(f$,v$,err=*next)
-
 
                 if set$>"" then
                     set$=set$+", "
@@ -801,8 +753,6 @@ class public SQLBusinessComponent extends BusinessComponent
                 else
                     set$=set$+"'"+v$+"'"
                 fi
-
-
             wend
 
             sql$="UPDATE "+#PrimaryTable$+" SET "+set$+" WHERE "+wh$
@@ -815,9 +765,7 @@ class public SQLBusinessComponent extends BusinessComponent
 
             #updateResultsetForSingleRecord(recno)
             #setEditedRecord(-1)
-
         fi
-
 
     methodend
 
@@ -840,7 +788,6 @@ class public SQLBusinessComponent extends BusinessComponent
         rec! = #getResultSet().getItem(recno)
 
         for i=0 to #PrimaryKeySegments!.size()-1
-
             if i>0 then
                 wh$=wh$+" AND "
             fi
@@ -853,9 +800,7 @@ class public SQLBusinessComponent extends BusinessComponent
             wh$=wh$+" = '"
             wh$=wh$+v$
             wh$=wh$+"' ) "
-
         next
-
 
 
         ch=sqlunt
@@ -903,17 +848,13 @@ class public SQLBusinessComponent extends BusinessComponent
             if recno < 0 then
                 #SoftLockController!.removeLock(err=*next)
             else
-
                 rec! = #getResultSet().getItem(recno)
 
                 for i=0 to #PrimaryKeySegments!.size()-1
-
                     seg$    = #PrimaryKeySegments!.getItem(i)
                     v$      = rec!.getFieldAsString(seg$)
                     k$=k$+v$
-
                 next
-
 
                 canLock=#SoftLockController!.setLock(k$,err=*next)
 
@@ -922,9 +863,7 @@ class public SQLBusinessComponent extends BusinessComponent
                     #setEditedRecord(-1)
                     #refresh(0)
                 fi
-
             fi
-
         fi
 
     methodend
@@ -940,17 +879,14 @@ class public SQLBusinessComponent extends BusinessComponent
         rec! = #getResultSet().getItem(recno)
 
         for i=0 to #PrimaryKeySegments!.size()-1
-
             seg$    = #PrimaryKeySegments!.getItem(i)
             v$      = rec!.getFieldAsString(seg$)
-            k$=k$+v$
-
+            k$      = k$+v$
         next
 
         locked= #SoftLockController!.isLocked(k$)
 
         methodret locked
-
 
     methodend
 
@@ -965,6 +901,7 @@ class public SQLBusinessComponent extends BusinessComponent
 
     methodend
 
+
     rem /**
     rem * Method broadcastEdit:
     rem * called by UI to notify the BC about an ongoing edit
@@ -977,14 +914,6 @@ class public SQLBusinessComponent extends BusinessComponent
         #super!.broadcastEdit(fieldName$, newContent$)
         #SoftLockController!.broadcastEdit(fieldName$,newContent$)
 
-
     methodend
 
 classend
-
-
-
-
-
-
-

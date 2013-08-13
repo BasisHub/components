@@ -4,7 +4,6 @@ interface public laf
     method public static void setStyle(BBjControl ctrl!, BBjString style!)
     method public static void prepareWindow(BBjWindow ctrl!)
     method public static void activate()
-    
 
 interfaceend
 
@@ -16,18 +15,17 @@ class public defaultLaf implements laf
 
     method public static void setStyle(BBjControl ctrl!, BBjString style!)
     methodend
-    
+
     method public static void prepareWindow(BBjWindow ctrl!)
     methodend
 
     method public static void activate()
     methodend
-    
+
 classend
 
 
 class public BizLaf implements laf
-
 
     method private static BBjString getCanonicalStyle(BBjString style!)
 
@@ -38,223 +36,230 @@ class public BizLaf implements laf
         fi
 
     methodend
-    
+
+
     method private static void setBizLafStyle(java.lang.Object component!, BBjString style!)
 
-            CAST(javax.swing.JComponent@, component!).putClientProperty("Cezanne.Tag", #getCanonicalStyle(style!))
-            
+        CAST(javax.swing.JComponent@, component!).putClientProperty("Cezanne.Tag", #getCanonicalStyle(style!))
+
     methodend
-    
+
+
     method private static void setOpaque(BBjControl component!, BBjNumber opaque)
 
-            #getJComponent(component!).setOpaque(opaque)
+        #getJComponent(component!).setOpaque(opaque)
 
     methodend
+
 
     method private static void setFont(BBjControl component!, BBjString name$, BBjNumber style, BBjNumber size)
 
-            component!.setFont(BBjAPI().getSysGui().makeFont(name$, ROUND(size / 13 * 10, 0), style))
+        component!.setFont(BBjAPI().getSysGui().makeFont(name$, ROUND(size / 13 * 10, 0), style))
 
     methodend
+
 
     method private static void setForeground(BBjControl component!, BBjColor color!)
 
-            component!.setForeColor(color!)
+        component!.setForeColor(color!)
 
     methodend
+
 
     method private static void setBackground(BBjControl component!, BBjColor color!)
 
-            component!.setBackColor(color!)
+        component!.setBackColor(color!)
 
     methodend
+
 
     method private static javax.swing.JComponent@ getJComponent(java.lang.Object component!)
 
         methodret CAST(javax.swing.JComponent@, component!)
-        
+
     methodend
+
 
     method private static javax.swing.JComponent@ getParent(java.lang.Object component!)
+
         methodret #getJComponent(#getJComponent(component!).getParent())
+
     methodend
+
 
     method private static javax.swing.JComponent@ getChild(java.lang.Object component!, BBjNumber childIndex)
+
         methodret #getJComponent(#getJComponent(component!).getComponent(childIndex))
+
     methodend
+
 
     method public static void setStyle(BBjWindow ctrl!, BBjString style!)
-    
-           if ctrl! = null() then throw "control is null()",255
 
+       if ctrl! = null() then throw "control is null()",255
 
-           #getJComponent(ctrl!).setOpaque(0)
-    
-            #setBizLafStyle(ctrl!, style!)
-            if style! = null() then
-            else
-                if style! = "Notepad" then
-                    #getJComponent(ctrl!).setOpaque(0)
-                fi
-                if style! = "ShadowedPanel" then
-                    #getJComponent(ctrl!).setOpaque(0)
-                fi
-                if style! = "Showcase" then
-                    #getJComponent(ctrl!).setOpaque(0)
-                fi
-            fi    
-    
+       #getJComponent(ctrl!).setOpaque(0)
+
+        #setBizLafStyle(ctrl!, style!)
+        if style! = null() then
+        else
+            if style! = "Notepad" then
+                #getJComponent(ctrl!).setOpaque(0)
+            fi
+            if style! = "ShadowedPanel" then
+                #getJComponent(ctrl!).setOpaque(0)
+            fi
+            if style! = "Showcase" then
+                #getJComponent(ctrl!).setOpaque(0)
+            fi
+        fi
+
     methodend
+
 
     method public static void setStyle(BBjControl component!, BBjString style!)
-    
+
         if component! = null() then throw "control is null()",255
-        
-    
+
         if style! <> null() then #setBizLafStyle( component!,  style!)
-        
+
         switch component!.getControlType()
+            case BBjSysGui.BUTTON_TYPE
+                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
+                #getJComponent(component!).setOpaque(0)
+            break
 
-                    case BBjSysGui.BUTTON_TYPE
-                        #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
-                        #getJComponent(component!).setOpaque(0)
-                    break
+            case BBjSysGui.TOOLBUTTON_TYPE
+                #setFont(component!, "Segoe UI Semibold", BBjSysGui.PLAIN, 12)
+                #getJComponent(component!).setOpaque(0)
+            break
 
-                    case BBjSysGui.TOOLBUTTON_TYPE
-                        #setFont(component!, "Segoe UI Semibold", BBjSysGui.PLAIN, 12)
-                        #getJComponent(component!).setOpaque(0)
-                    break                    
+            case BBjSysGui.LISTBUTTON_TYPE
+                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
+                #getJComponent(component!).setOpaque(0)
+            break 
 
-                    case BBjSysGui.LISTBUTTON_TYPE
+            case BBjSysGui.CHECKBOX_TYPE
+                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
+                #getJComponent(component!).setOpaque(0)
+            break
+
+            case BBjSysGui.RADIOBUTTON_TYPE
+                #getJComponent(component!).setOpaque(0)
+                if style! = null() then
+                    #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
+                else
+                    if style! = "StripLeading" then
+                        #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 11)
+                    fi
+                    if style! = "StripCenter" then
+                        #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 11)
+                    fi
+                    if style! = "StripTrailing" then
+                        #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 11)
+                    fi
+                fi
+            break
+
+            case BBjSysGui.CEDIT_TYPE
+               #setStyle(#getChild(#getChild(component!, 0), 0), style!)
+                if style! = null() then
+                    #setFont(component!, "Segoe UI", BBjSysGui.BOLD, 13)
+                else
+                    if style! = "Notepad" then
+                        #setFont(component!, "Segoe UI Semibold", BBjSysGui.PLAIN, 13)
+                        component!.setOpaque(0)
+                    fi
+                fi
+            break
+
+            case BBjSysGui.PROGRESS_TYPE
+                #getJComponent(component!).setOpaque(0)
+                #setStyle(component!, style!)
+            break
+
+            case BBjSysGui.STATIC_TEXT_TYPE
+                #setOpaque(component!, 0)
+                if style! = null() or style! = "" then
+                    #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
+                else
+                    if style! = "HeaderPrimary" then
+                        #setFont(component!, "Segoe UI Semibold", BBjSysGui.PLAIN, 18)
+                        #setForeground(component!, new BBjColor(255, 255, 255))
+                    fi
+                    if style! = "HeaderSecondaryProxy" then
+                        #setFont(component!, "Segoe UI Semibold", BBjSysGui.PLAIN, 18)
+                        #setForeground(component!, new BBjColor(191, 201, 215))
+                    fi
+                    if style! = "FormKey" then
+                        #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 12)
+                        #setForeground(component!, new BBjColor(79, 94, 115))
+                        cast(BBjStaticText,component!).setAlignment(component!.ALIGN_RIGHT)
+                    fi
+                    if style! = "Badge" then
                         #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
-                        #getJComponent(component!).setOpaque(0)
-                    break 
-                                       
-                    case BBjSysGui.CHECKBOX_TYPE
+                        #setForeground(component!, new BBjColor(255, 255, 255))
+                    fi
+                    if style! = "Shadowed" then
+                        #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 12)
+                        #setForeground(component!, new BBjColor(255, 255, 255))
+                    fi
+                fi
+            break
+
+            case BBjSysGui.EDIT_TYPE
+            case BBjSysGui.INPUTE_TYPE
+            case BBjSysGui.INPUTN_TYPE
+            case BBjSysGui.INPUTD_TYPE
+                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
+                #setOpaque(component!, 0)
+
+            break
+
+            case BBjSysGui.TABCTRL_TYPE
+                c! = #getParent(component!)
+                c!.setOpaque(0)
+                if style! = null() then
+                    #setFont(component!, "Segoe UI", BBjSysGui.BOLD, 13)
+                else
+                    if style! = "RibbonLike" then
                         #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
-                        #getJComponent(component!).setOpaque(0)
-                    break           
-                             
-                
-                    case BBjSysGui.RADIOBUTTON_TYPE
-                        #getJComponent(component!).setOpaque(0)
-                        if style! = null() then
-                            #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
-                        else
-                            if style! = "StripLeading" then
-                                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 11)
-                            fi
-                            if style! = "StripCenter" then
-                                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 11)
-                            fi
-                            if style! = "StripTrailing" then
-                                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 11)
-                            fi
-                        fi  
-                    break        
-                    
-                    case BBjSysGui.CEDIT_TYPE
-                       #setStyle(#getChild(#getChild(component!, 0), 0), style!)
-                        if style! = null() then
-                            #setFont(component!, "Segoe UI", BBjSysGui.BOLD, 13)
-                        else
-                            if style! = "Notepad" then
-                                #setFont(component!, "Segoe UI Semibold", BBjSysGui.PLAIN, 13)
-                                component!.setOpaque(0)
-                            fi
-                        fi            
-                    break  
-                    
-                    case BBjSysGui.PROGRESS_TYPE
-                        #getJComponent(component!).setOpaque(0)
-                        #setStyle(component!, style!)                    
-                    break    
-                    
-                    case BBjSysGui.STATIC_TEXT_TYPE
-                        
-                        #setOpaque(component!, 0)
-                        if style! = null() or style! = "" then
-                            #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
-                        else
-                            if style! = "HeaderPrimary" then
-                                #setFont(component!, "Segoe UI Semibold", BBjSysGui.PLAIN, 18)
-                                #setForeground(component!, new BBjColor(255, 255, 255))
-                            fi
-                            if style! = "HeaderSecondaryProxy" then
-                                #setFont(component!, "Segoe UI Semibold", BBjSysGui.PLAIN, 18)
-                                #setForeground(component!, new BBjColor(191, 201, 215))
-                            fi
-                            if style! = "FormKey" then
-                                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 12)
-                                #setForeground(component!, new BBjColor(79, 94, 115))
-                                cast(BBjStaticText,component!).setAlignment(component!.ALIGN_RIGHT)
-                            fi
-                            if style! = "Badge" then
-                                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
-                                #setForeground(component!, new BBjColor(255, 255, 255))
-                            fi
-                            if style! = "Shadowed" then
-                                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 12)
-                                #setForeground(component!, new BBjColor(255, 255, 255))
-                            fi
-                        fi                   
-                    break    
-                    
-                    case BBjSysGui.EDIT_TYPE
-                    case BBjSysGui.INPUTE_TYPE
-                    case BBjSysGui.INPUTN_TYPE
-                    case BBjSysGui.INPUTD_TYPE                    
-                        #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
-                        #setOpaque(component!, 0)
-                  
-                    break                      
-                                     
-                    
-                    case BBjSysGui.TABCTRL_TYPE
-                        c! = #getParent(component!)
-                        c!.setOpaque(0)
-                        if style! = null() then
-                            #setFont(component!, "Segoe UI", BBjSysGui.BOLD, 13)
-                        else
-                            if style! = "RibbonLike" then
-                                #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 13)
-                            fi
-                            if style! = "ToolBarLike" then
-                                #setFont(component!, "Segoe UI", BBjSysGui.BOLD, 13)
-                            fi
-                        fi
-                        c! = #getParent(component!)
-                        c!.setOpaque(0)
-                        
-                        n=cast(BBjTabCtrl,component!).getNumTabs()
-                        if n>0 then
-                            for i=0 to n-1
-                                #getParent(cast(BBjTabCtrl,component!).getControlAt(i)).setOpaque(0)
-                            next
-                        fi
-                        
-                    break      
-                    
-                    case default
-                         rem #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 11)
-                                                
-                         rem #setOpaque(component!, 1)
-                         
-                    break
-             
+                    fi
+                    if style! = "ToolBarLike" then
+                        #setFont(component!, "Segoe UI", BBjSysGui.BOLD, 13)
+                    fi
+                fi
+                c! = #getParent(component!)
+                c!.setOpaque(0)
+
+                n=cast(BBjTabCtrl,component!).getNumTabs()
+                if n>0 then
+                    for i=0 to n-1
+                        #getParent(cast(BBjTabCtrl,component!).getControlAt(i)).setOpaque(0)
+                    next
+                fi
+
+            break
+
+            case default
+                 rem #setFont(component!, "Segoe UI", BBjSysGui.PLAIN, 11)
+
+                 rem #setOpaque(component!, 1)
+
+            break
         swend
-        
+
     methodend
 
+
     method public static void prepareWindow(BBjWindow ctrl!)
-    
+
         if ctrl!.getControlType() = 1 then
             rem toplevel window
             #setBackground(ctrl!, new BBjColor(101, 113, 128))
         fi
-        
+
         if ctrl!.getControlType() = 2 then
-            
             rem childwindow
             rem get and manipulate IDockedChildrenPanel
             c! = #getJComponent(ctrl!)
@@ -274,77 +279,68 @@ class public BizLaf implements laf
         fi
 
         methodret
-        
+
         v! = ctrl!.getAllControls()
         if v!.size() then
-        
             for i=0 to v!.size()-1
                 component! = v!.getItem(i)
-                
+
                 switch component!.getControlType() 
                     case 1
                     case 2 
                         #prepareWindow(component!)
-                        
                     break
-                    
+
                     case default
                         #setStyle(component!,null())
-                        
                     break
-                    
                swend
-                
-            next
-        
+            next i
         fi
-        
-    
+
     methodend
 
 
-    
     method public static void activate()
+
         javax.swing.UIManager@.setLookAndFeel("de.centigrade.bizlaf.BizLookAndFeel")
+
     methodend
-    
+
 classend
+
 
 class public laffactory
 
     field private static laf Laf! 
 
     method public static laf getLaf()
-    
-    
+
         if info(3,6)="5" then
             laf$ = ""
         else
             laf$ = stbl("LAF",err=*next)
         fi
-        
+
         methodret #getLaf(laf$)
-            
-            
-        
+
     methodend
 
+
     method public static laf getLaf(BBjString name!)
-    
+
         if #Laf! = null() then
-            
             if name! = "BizLaf" then
                 #Laf! = new BizLaf()
             else
                 #Laf! = new defaultLaf()
             fi
-         
+
             #Laf!.activate()
-            
         fi
-        
+
         methodret #Laf!  
-    
+
     methodend 
 
 classend
@@ -371,5 +367,3 @@ wnd!.setCallback(BBjAPI.ON_CLOSE,"byebye")
 
 process_events
 byebye:bye
-
-

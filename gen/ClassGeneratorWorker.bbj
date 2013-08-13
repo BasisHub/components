@@ -1,3 +1,5 @@
+rem package components.gen
+
 use ::translations/bbtranslator.bbj::BBTranslator
 use java.sql.Connection
 use java.sql.ResultSet
@@ -23,7 +25,12 @@ interface public ProgressCallback
 interfaceend
 
 
-
+rem /**
+rem * ClassGeneratorWorker
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
 class public ClassGeneratorWorker
 
     field private  BBjAdminBase  Admin! = BBjAdminFactory.getBBjAdmin(InetAddress.getByName("localhost"),2002,0,50000,"admin","admin123")
@@ -41,6 +48,18 @@ class public ClassGeneratorWorker
 
     field public BBjNumber Overwrite=0
 
+
+    rem /**
+    rem * Constructor ClassGeneratorWorker
+    rem *
+    rem * @param BBjString db$: database name
+    rem * @param BBjString user$: databse user
+    rem * @param BBjString pwd$: password for the database user
+    rem * @param BBjVector tables!: selected table names
+    rem * @param BBjString targetdir$: target directory (the directory where the generated classes should be saved)
+    rem * @param BBjString tpldir$: the path of the templates
+    rem * @param BBjNumber prepend: prepends nice formatted DB names
+    rem */
     method public ClassGeneratorWorker(BBjString db$, BBjString user$, BBjString pwd$, BBjVector tables!, BBjString targetdir$, BBjString tpldir$, BBjNumber prepend)
 
         #DB$ = db$
@@ -54,46 +73,56 @@ class public ClassGeneratorWorker
         mkdir #TargetDir$+"i18n/",err=*next
         #Translator! = BBTranslator.getInstance(#nice(#DB$),"en","en",#TargetDir$+"i18n/")
 
+    methodend
+
+
+    rem /**
+    rem * Method getBBjDDProperty:
+    rem * get data dictionary property for a column in a database table
+    rem * @param BBjString db$: database name
+    rem * @param BBjString table$: table name
+    rem * @param BBjString col$: the column name
+    rem * @param BBjString prop$: the property name
+    rem * @return BBjString value: the value of column property
+    rem */
+    method private BBjString getBBjDDProperty(BBjString db$, BBjString table$, BBjString col$,BBjString prop$)
+
+        database! = #Admin!.getDatabase(db$,err=noDB)
+        rem TODO: connection pools?
+
+        tab! = database!.getTable(table$)
+
+        col! = tab!.getColumn(col$)
+
+        r$ = col!.getString(prop$,err=*next)
+
+        noDB:
+        methodret r$
 
     methodend
 
 
+    rem /**
+    rem * Method generateProperties:
+    rem * generate the label's (fieldname label's) for the GUI (.arc) files.
+    rem * The labels are stored in a java properties file
+    rem * The properties files can be manually extended and/or translated in different languages.
+    rem * @param BBjString schema$: schema name
+    rem * @param BBjString table$: table name
+    rem */
+    method public void generateProperties(BBjString s$, BBjString t$)
 
-
-    method private  BBjString getBBjDDProperty(BBjString db$, BBjString tabl$, BBjString col$,BBjString prop$)
-            
-            database! = #Admin!.getDatabase(db$,err=noDB)
-            rem TODO: connection pools?
-    
-                tab! = database!.getTable(tabl$)
-    
-                col! = tab!.getColumn(col$)
-                
-                r$= col!.getString(prop$,err=*next)
-
-            noDB:
-
-            methodret r$     
-
-    methodend
-
-    method public  void generateProperties( BBjString s$, BBjString t$)
         declare ResultSet JDBCResultSet!
         declare BBjVector v!
         declare DatabaseMetaData md!
-
-
 
         if pos("."=t$)>0 then
             schema$=t$(1,pos("."=t$)-1)
             t$=t$(pos("."=t$)+1)
         endif
 
-        
-
         v! = new BBjVector()
 
-        
         if #Connection!<>null() then
             md! = #Connection!.getMetaData()
 
@@ -103,23 +132,28 @@ class public ClassGeneratorWorker
                 col_type=JDBCResultSet!.getInt("DATA_TYPE")
                 col_name$=JDBCResultSet!.getString("COLUMN_NAME")
 
-                
                 transl$ = #getBBjDDProperty(#DB$, t$, col_name$,BBjAdminColumn.DESCRIPTION)
                 if  transl$ = "" then
                     transl$ = col_name$
                 fi
                 #Translator!.getTranslation(t$+"."+col_name$+".label",transl$,BBjAPI().TRUE,0,1)
-
             wend
 
             #Translator!.getTranslation(t$+".label",t$,BBjAPI().TRUE,0,1)
-
-
         endif
+
     methodend
 
 
-    method public  BBjVector getKeySegments( BBjString s$, BBjString t$)
+    rem /**
+    rem * Method getKeySegments:
+    rem * get a BBjVector with the primary key segments (primary key definition)
+    rem * @param BBjString schema$: schema name
+    rem * @param BBjString table$: table name
+    rem * @return BBjVector vec!: a BBjVector with the primary key segments
+    rem */
+    method public BBjVector getKeySegments(BBjString s$, BBjString t$)
+
         declare ResultSet JDBCResultSet!
         declare BBjVector v!
 
@@ -140,20 +174,29 @@ class public ClassGeneratorWorker
             rem maybe the new one with null() for the first two parameters now fails on other DBs 
             rem so leaving this in as a reminder....
             rem JDBCResultSet! = md!.getPrimaryKeys(#DB$,s$,t$)
-            
+
             JDBCResultSet! = md!.getPrimaryKeys(null(),null(),t$)
 
             while JDBCResultSet!.next() 
                 v!.addItem(JDBCResultSet!.getString("COLUMN_NAME"))
             wend
-
         endif
 
         methodret  v!
 
     methodend
 
-    method public  BBjVector getImportedKeys( BBjString s$, BBjString t$)
+
+    rem /**
+    rem * Method getImportedKeys:
+    rem * get a BBjVector with templated strings describing the primary key columns that are referenced by the given table's foreign key columns.
+    rem * The templated string is definded as: "FKCOLUMN_NAME:C(1*),PKTABLE_NAME:C(1*),PKCOLUMN_NAME:C(1*)"
+    rem * @param BBjString schema$: schema name
+    rem * @param BBjString table$: table name
+    rem * @return BBjVector vec!: a BBjVector with the referenced primary keys
+    rem */
+    method public BBjVector getImportedKeys(BBjString s$, BBjString t$)
+
         declare ResultSet JDBCResultSet!
         declare BBjVector v!
         declare DatabaseMetaData md!
@@ -178,7 +221,6 @@ class public ClassGeneratorWorker
             JDBCResultSet! = md!.getImportedKeys(base_db$,s$,t$)
 
             while JDBCResultSet!.next() 
-
                 declare BBjTemplatedString t!
                 t! = BBjAPI().makeTemplatedString("FKCOLUMN_NAME:C(1*),PKTABLE_NAME:C(1*),PKCOLUMN_NAME:C(1*)")
 
@@ -186,16 +228,23 @@ class public ClassGeneratorWorker
                 t!.setFieldValue("PKTABLE_NAME",JDBCResultSet!.getString("PKTABLE_NAME"))
                 t!.setFieldValue("PKCOLUMN_NAME",JDBCResultSet!.getString("PKCOLUMN_NAME"))
                 v!.addItem(t!)
-
             wend
-
         endif
 
         methodret v!
 
     methodend
 
-    method public  BBjVector getFields( BBjString s$, BBjString t$)
+
+    rem /**
+    rem * Method getFields:
+    rem * get a BBjVector with templated strings describing the columns fields.
+    rem * The templated string is defined as: "DATA_TYPE:C(1*),COLUMN_NAME:C(1*)"
+    rem * @param BBjString schema$: schema name
+    rem * @param BBjString table$: table name
+    rem * @return BBjVector vec!: a BBjVector with the column fields
+    rem */
+    method public BBjVector getFields(BBjString s$, BBjString t$)
         declare ResultSet JDBCResultSet!
         declare BBjVector v!
         declare DatabaseMetaData md!
@@ -207,14 +256,12 @@ class public ClassGeneratorWorker
 
         v! = new BBjVector()
 
-
         if #Connection! <> null() then
             md! = #Connection!.getMetaData()
 
             JDBCResultSet! = md!.getColumns(null(),null(),t$,"%")
 
             while JDBCResultSet!.next() 
-
                 declare BBjTemplatedString t!
                 t! = BBjAPI().makeTemplatedString("DATA_TYPE:C(1*),COLUMN_NAME:C(1*)")
 
@@ -224,10 +271,7 @@ class public ClassGeneratorWorker
                 t!.setFieldValue("DATA_TYPE",data_type$)
                 t!.setFieldValue("COLUMN_NAME",col_name$)
                 v!.addItem(t!)
-
             wend
-
-
         endif
 
         methodret v!
@@ -235,55 +279,70 @@ class public ClassGeneratorWorker
     methodend
 
 
-    method public  BBjString replace(BBjString t$,BBjString search$, BBjString replace$)
+    rem /**
+    rem * Method static replace:
+    rem * search for t$ in search$ and replace all occurrences with replace$
+    rem * @param BBjString t$: search for t$
+    rem * @param BBjString search$: string where to search
+    rem * @param BBjString replace$: replace t$ with replace$
+    rem */
+    method public static BBjString replace(BBjString t$, BBjString search$, BBjString replace$)
 
-    
         while pos(search$=t$)
-
             t$=t$(1,pos(search$=t$)-1)+replace$+t$(pos(search$=t$)+len(search$))
-
         wend
-        
 
         methodret t$
 
     methodend
 
 
-    method public  BBjString nice(BBjString s$)
+    rem /**
+    rem * Method static nice:
+    rem * format a string for better reading.
+    rem * Removes all '-', '_', '.' signs and capilizes the string.
+    rem * F.g. the table name CUSTOMER_ADDRESSES would be formated as "CustomerAddresses"
+    rem * @param BBjString string$: the string to format
+    rem * @return BBjString: the formatted string
+    rem */
+    method public static BBjString nice(BBjString s$)
 
         if s$ = cvs(s$,4) or s$=cvs(s$,8) then
             s$=cvs(s$,8)
             s$(1,1)=cvs(s$(1,1),4)
         endif
 
-        if pos (s$(len(s$),1)= "_-.") >0
+        if pos(s$(len(s$),1)= "_-.") > 0 then
             s$=s$+"x"
         endif
-        
-        while pos("_"=s$)
 
+        while pos("_"=s$)
             s$=s$(1,pos("_"=s$)-1)+cvs(s$(pos("_"=s$)+1,1),4)+s$(pos("_"=s$)+2)
-            
         wend
 
         while pos("-"=s$)
-
             s$=s$(1,pos("-"=s$)-1)+cvs(s$(pos("-"=s$)+1,1),4)+s$(pos("-"=s$)+2)
-            
         wend
 
         while pos("."=s$)
-
             s$=s$(1,pos("."=s$)-1)+cvs(s$(pos("."=s$)+1,1),4)+s$(pos("."=s$)+2)
-            
         wend
 
         methodret s$
 
     methodend
 
-    method public  void generateArc(BBjString tpl$,  BBjString s$, BBjString t$, BBjString targetdir$)
+
+    rem /**
+    rem * Method generateArc:
+    rem * generate the GUI mask for a table as a .ARC file using a template
+    rem * @param BBjString tpl$: the templates directory
+    rem * @param BBjString schema$: the schema name
+    rem * @param BBjString table$: the table name for which the GUI should be generated
+    rem * @param BBjString targetdir$: the target dir for the .ARC file
+    rem */
+    method public void generateArc(BBjString tpl$,  BBjString s$, BBjString t$, BBjString targetdir$)
+
         declare ResultSet JDBCResultSet!
 
         declare Statement stmt!
@@ -297,14 +356,14 @@ class public ClassGeneratorWorker
         ch=unt
 
         ftpl$ = tpl$
-        
+
         while pos("/"=ftpl$)
             ftpl$=ftpl$(pos("/"=ftpl$)+1)
         wend
 
         while pos("\"=ftpl$)
             ftpl$=ftpl$(pos("\"=ftpl$)+1)
-        wend        
+        wend
 
         f$=targetdir$+db_nice$+tbl_nice$+ftpl$
 
@@ -316,7 +375,7 @@ class public ClassGeneratorWorker
         fi
 
         startGen:
-        
+
         open (ch,mode="O_CREATE,O_TRUNC")f$
 
         cid=100
@@ -324,13 +383,11 @@ class public ClassGeneratorWorker
 
         sql$="SELECT * FROM "+t$
 
-
         if #Connection! <> null() then
             stmt! = #Connection!.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
             JDBCResultSet! = cast(ResultSet,stmt!.executeQuery(sql$),err=method_end)
 
             JDBCResultSet!.next() 
-
 
             print (ch)"//#charset: windows-1252"
             print (ch)""
@@ -389,22 +446,21 @@ class public ClassGeneratorWorker
                     break
 
                     case java.sql.Types.TIMESTAMP
-                        ctrl$="EDIT"                            
+                        ctrl$="EDIT"
                         w=250
                     break
 
                     case default
-                        ctrl$="INPUTE"                            
+                        ctrl$="INPUTE"
                         w=min(max(30,col_size*13),400)
                     break
                 swend
-                
+
                 if rsmd!.isReadOnly(i) or rsmd!.isAutoIncrement(i) then
-                        ctrl$="STATICTEXT"
+                    ctrl$="STATICTEXT"
                 fi
 
                 if ctrl$="INPUTE" or ctrl$="INPUTN" or ctrl$="INPUTD" OR ctrl$="EDIT"  then
-
                     PRINT (ch)"    STATICTEXT "+str(cid)+", """+col_label$+":"", 10, "+str(8+row*30)+", 130, 20"
                     PRINT (ch)"        BEGIN"
                     rem PRINT (ch)"        JUSTIFICATION 32768"
@@ -414,31 +470,28 @@ class public ClassGeneratorWorker
                     print (ch)""
 
                     cid=cid+1
-
                 endif
 
                 PRINT (ch)"    "+ctrl$+" "+str(cid)+", """", 150, "+str(5+row*30)+", "+str(w)+", 20"
                 PRINT (ch)"        BEGIN"
 
-                    if ctrl$="INPUTE" then
-                        PRINT (ch)"            MASK """+fill(min(100,col_size),"X")+""""
-                        rem TODO: choose a better control for very large fields, like a CEdit
-                    fi
-                
+                if ctrl$="INPUTE" then
+                    PRINT (ch)"            MASK """+fill(min(100,col_size),"X")+""""
+                    rem TODO: choose a better control for very large fields, like a CEdit
+                fi
+
                 PRINT (ch)"            NAME """+col_name$+""""
 
-                    if ctrl$="INPUTE" then
-                        PRINT (ch)"            PADCHARACTER 32"
-                    fi
+                if ctrl$="INPUTE" then
+                    PRINT (ch)"            PADCHARACTER 32"
+                fi
 
-                                    
                 PRINT (ch)"        END"
                 print (ch)""
 
                 cid=cid+1
 
                 if ctrl$="CHECKBOX" then
-
                     PRINT (ch)"    "+ctrl$+" "+str(cid)+", """+col_label$+""", 150, "+str(5+row*30)+", "+str(w)+", 20"
                     PRINT (ch)"        BEGIN"
                     PRINT (ch)"            NAME """+col_name$+""""
@@ -446,13 +499,10 @@ class public ClassGeneratorWorker
                     print (ch)""
 
                     cid=cid+1
-
                 endif
 
                 row=row+1
             next i
-
-
         endif
 
         print (ch)"END"
@@ -462,16 +512,22 @@ class public ClassGeneratorWorker
         methodret
 
         method_end:
-
             if ch then close (ch)
             a=msgbox("Error generating classes for "+t$,0,"Error")
-        
 
     methodend
 
 
-    method public  void generateFile(BBjString tpl$,  BBjString s$, BBjString t$, BBjString targetdir$)
-
+    rem /**
+    rem * Method generateFile:
+    rem * generate a BBj program which uses a corresponding .ARC file to view and persists data from/to the databse.
+    rem * The BBj program is generated based on a template.
+    rem * @param BBjString tpl$: the templates directory
+    rem * @param BBjString schema$: the schema name
+    rem * @param BBjString table$: the table name for which the BBj program should be generated
+    rem * @param BBjString targetdir$: the target dir for the BBj program
+    rem */
+    method public void generateFile(BBjString tpl$,  BBjString s$, BBjString t$, BBjString targetdir$)
 
         mkdir targetdir$,err=*next
         ch=unt
@@ -491,14 +547,11 @@ class public ClassGeneratorWorker
         x$=#replace(x$,"(DB_NICENAME)",db_nicename$)
         x$=#replace(x$,"(TBL_NICE)",tbl_nice$)
 
-
         if pos("<keyseg>"=x$) then
-
             x1$=x$(1,pos("<keyseg>"=x$)-1)
             x2$=x$(pos("</keyseg>"=x$)+9)
             x3$=x$(pos("<keyseg>"=x$)+8)
             x3$=x3$(1,pos("</keyseg>"=x3$)-1)
-
 
             ks! = #getKeySegments(s$,t$)
             if ks!.size()
@@ -506,16 +559,13 @@ class public ClassGeneratorWorker
                     k$ = ks!.getItem(i)
 
                     x1$=x1$+#replace(x3$,"(KEYSEG)",k$)
-
-                next 
+                next i
             endif
 
             x$=x1$+x2$
-
         endif
 
         if pos("<importedkey>"=x$) then
-
             x1$=x$(1,pos("<importedkey>"=x$)-1)
             x2$=x$(pos("</importedkey>"=x$)+14)
             x3$=x$(pos("<importedkey>"=x$)+13)
@@ -533,16 +583,13 @@ class public ClassGeneratorWorker
                     x$=#replace(x$,"(FKCOLUMN_NAME)",t!.getFieldAsString("FKCOLUMN_NAME"))
 
                     x1$=x1$+x$
-
-                next 
+                next i
             endif
 
             x$=x1$+x2$
-
         endif
 
         while pos("<field>"=x$) 
-
             x1$=x$(1,pos("<field>"=x$)-1)
             x2$=x$(pos("</field>"=x$)+8)
             x3$=x$(pos("<field>"=x$)+7)
@@ -569,16 +616,13 @@ class public ClassGeneratorWorker
                     wend
 
                     x1$=x1$+x$
-
                 next 
             endif
 
             x$=x1$+x2$
-
         wend
 
         if pos("<getter>"=x$) then
-
             x1$=x$(1,pos("<getter>"=x$)-1)
             x2$=x$(pos("</getter>"=x$)+9)
             x3$=x$(pos("<getter>"=x$)+8)
@@ -593,16 +637,13 @@ class public ClassGeneratorWorker
                     x$=#replace(x$,"(FLD_TYPE)",t!.getFieldAsString("DATA_TYPE"))
                     x$=#replace(x$,"(FLD_NICE)",#nice(t!.getFieldAsString("COLUMN_NAME")))
                     x1$=x1$+x$
-
-                next 
+                next i
             endif
 
             x$=x1$+x2$
-
         endif
 
         if pos("<setter>"=x$) then
-
             x1$=x$(1,pos("<setter>"=x$)-1)
             x2$=x$(pos("</setter>"=x$)+9)
             x3$=x$(pos("<setter>"=x$)+8)
@@ -617,12 +658,10 @@ class public ClassGeneratorWorker
                     x$=#replace(x$,"(FLD_TYPE)",t!.getFieldAsString("DATA_TYPE"))
                     x$=#replace(x$,"(FLD_NICE)",#nice(t!.getFieldAsString("COLUMN_NAME")))
                     x1$=x1$+x$
-
-                next 
+                next i
             endif
 
             x$=x1$+x2$
-
         endif
 
         while pos("/"=tpl$)
@@ -632,7 +671,6 @@ class public ClassGeneratorWorker
         while pos("\"=tpl$)
             tpl$=tpl$(pos("\"=tpl$)+1)
         wend
-        
 
         if !#Overwrite then
             if pos("T.bbj"=tpl$)=0 then
@@ -641,10 +679,10 @@ class public ClassGeneratorWorker
             endif
         fi
 
-            f$=targetdir$+db_nice$+tbl_nice$+tpl$
-            open (ch,mode="O_CREATE,O_TRUNC")f$
-            write (ch)x$
-            close (ch)
+        f$=targetdir$+db_nice$+tbl_nice$+tpl$
+        open (ch,mode="O_CREATE,O_TRUNC")f$
+        write (ch)x$
+        close (ch)
 
         skip:
 
@@ -652,19 +690,22 @@ class public ClassGeneratorWorker
 
     methodend
 
-    method public  void generate()
+
+    rem /**
+    rem * Method generate:
+    rem * generate for each of the the selected tables the .arc, .bbj and .properties files
+    rem */
+    method public void generate()
 
         if #Tables!.size()
-
-
             #Connection! = #connect(#DB$,#User$,#Pwd$)
+
             if #Connection! = null() then
                 a=msgbox("Connect Error!",0,"Error")
                 methodret
             fi
 
             for i=0 to #Tables!.size()-1
-
                 T$=#Tables!.getItem(i)
 
                 if #this!.getProgressCb() <> null() then
@@ -672,30 +713,22 @@ class public ClassGeneratorWorker
                     #this!.getProgressCb().updateProgress(T$,perc)
                 fi
 
-                
-
                 if t$(1,1)="[" and pos("]"=t$)>0 then
-                
                     S$=t$(2,pos("]"=t$)-2)
                     t$=t$(pos("]"=t$)+1)
-                    
-                    
                 else 
-                    
                     S$=""
-                
                 endif
 
                 if pos("."=t$)>0 then
                     t$=T$(pos("."=t$)+1)
                 fi
 
-
                 #generateProperties(s$,t$)
                 #iterateTemplate(s$,t$,#TplDir$,"")
 
                 rem now recursively iterate directory structure
-                
+
 REM                 #generateFile("BusinessComponent.bbj", s$, t$, #TargetDir$+"bl/")
 REM                 #generateFile("BusinessComponentT.bbj", s$, t$, #TargetDir$+"generated/")
 REM                 #generateFile("DataProvider.bbj",s$, t$, #TargetDir$+"db/")
@@ -706,61 +739,68 @@ REM                 #generateFile("Form.bbj",s$, t$, #TargetDir$+"ui/")
 REM                 #generateFile("EditFrame.bbj",s$, t$, #TargetDir$)
 REM                 #generateArc(s$, t$, #TargetDir$+"arc/")
 
-            next
+            next i
 
             #Connection!.close()
-
-
-
         endif
 
-                if #this!.getProgressCb() <> null() then
-                    perc = int(i/#Tables!.size()-1)
-                    #this!.getProgressCb().updateProgress("Finished",100)
-                fi
+        if #this!.getProgressCb() <> null() then
+            perc = int(i/#Tables!.size()-1)
+            #this!.getProgressCb().updateProgress("Finished",100)
+        fi
 
     methodend
-    
+
+
+    rem /**
+    rem * Method iterateTemplate:
+    rem * generate for each templated file a corresponding .arc and bbj file (recursiv for each subfolder in the templates dir)
+    rem * @param BBjString s$: the schema name
+    rem * @param BBjString t$: the table name
+    rem * @param BBjString dir$: the directory with the templates
+    rem * @param BBjString targetdir$: the target dir, where the generated files should be saved
+    rem */
     method private void iterateTemplate(BBjString s$, BBjString t$, BBjString dir$, BBjString reldir$)
-        
+
         ch=unt
         open (ch)dir$
         while 1
             read record(ch,end=*break)f$
-            
+
             if f$(1,1)="." then
                 continue
             fi
-            
+
             if f$(len(f$),1)="/" then
                 rem directory
-                #this!.iterateTemplate(s$,t$,dir$+f$, reldir$+f$)
+                #this!.iterateTemplate(s$, t$, dir$+f$, reldir$+f$)
             else
                 rem file
                 if len(f$)<4 or cvs(f$(len(f$)-3,4),8)=".bbj" then
                      #generateFile(dir$+f$, s$, t$, #TargetDir$+reldir$)
                 fi
-                
+
                 rem arc file
                 if len(f$)>3 and cvs(f$(len(f$)-3,4),8)=".arc" then
                     #generateArc(dir$+f$, s$, t$, #TargetDir$+reldir$)
                 fi
             fi
-            
         wend
         close (ch)
-        
+
     methodend
+
 
     rem /**
     rem * Method connect:
-    rem * Event handler for connecting to the database via JDBC
-    rem * @param BBjString Database name
-    rem * @param BBjString User name
-    rem * @param BBjString Password
-    rem * @returns java.sql.Connection Connection object
+    rem * connect to the database and return the database connection
+    rem * @param BBjString db$: the atabase name
+    rem * @param BBjString user$: the user name
+    rem * @param BBjString pwd$: the users password
+    rem * @return java.sql.Connection: the databse connection
     rem */
     method public static Connection connect(BBjString db$, BBjString user$, BBjString pwd$)
+
         connMode$=""
         if user$<>"" then
             connMode$ = connMode$ + "user=" + user$
@@ -771,9 +811,18 @@ REM                 #generateArc(s$, t$, #TargetDir$+"arc/")
 
         methodret BBjAPI().getJDBCConnection(db$, connMode$, err=*next)
         methodret null()
+
     methodend
 
-    method public  BBjString getSQLTypeAsString(BBjNumber type)
+
+    rem /**
+    rem * Method getSQLTypeAsString:
+    rem * get SQL type of a field (column) as string
+    rem * @param BBjNumber type: the SQL type number
+    rem * @return BBjString: the SQL type as string
+    rem */
+    method public BBjString getSQLTypeAsString(BBjNumber type)
+
         switch type
             case java.sql.Types.ARRAY;rem Array
                 type$="Array"
@@ -887,7 +936,9 @@ REM                 #generateArc(s$, t$, #TargetDir$+"arc/")
                 type$="Object"
                 break
         swend
+
         methodret type$
+
     methodend
 
 classend

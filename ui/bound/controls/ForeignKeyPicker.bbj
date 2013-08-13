@@ -1,3 +1,5 @@
+rem package components.ui.bound.controls
+
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
@@ -5,6 +7,12 @@ use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
 
 
+rem /**
+rem * ForeignKeyPicker
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
 class public ForeignKeyPicker extends UIComponent
 
     field private BBjControl        BoundCtrl!
@@ -21,18 +29,29 @@ class public ForeignKeyPicker extends UIComponent
     field private java.util.HashMap KeyMap!
     field private BBjVector         IndexToKeyMap!
 
-
+    rem /**
+    rem * Constructor ForeignKeyPicker
+    rem * Default Constructor
+    rem */
     method private ForeignKeyPicker()
-
 
     methodend
 
+
+    rem /**
+    rem * Constructor ForeignKeyPicker
+    rem * Creates the component by using a given existing BBjWindow
+    rem * @param BBjWindow wnd!: child window that the component shall occupy
+    rem * @param BBjNumber id: Control ID for the BBjChildWindow, which is created on wnd!
+    rem * @param BBjControl ctrl!: the control used to display the data
+    rem * @param BusinessComponent bc!: the BusinessComponent which handles the data
+    rem * @param BBjString fk$: the field name
+    rem */
     method public ForeignKeyPicker(BBjWindow wnd!, BBjNumber id, BBjControl ctrl!, BusinessComponent bc!, BBjString fk$)
 
         #super!(wnd!,id,x,y,w,h)
 
         #BoundCtrl! = ctrl!
-
 
         if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             bc!.setControllerFilterUnlock(fk$,1)
@@ -45,17 +64,14 @@ class public ForeignKeyPicker extends UIComponent
 
             ctrl1! = #BoundCtrl!
             ctrl1!.removeAllItems()
-            
+
             ctrl1!.addItem("")
             #IndexToKeyMap!.addItem("")
 
             while x<s
-            
-
                 r! = bc!.getResultSet().getItem(x)
                 fkdisp$ = r!.toString()
-                
-                
+
                 fkval$     = r!.getFieldAsString(fk$)
                 fkval!     = r!.getField(fk$)
                 ctrl1!.addItem(cvs(FkDisp$,3))
@@ -65,11 +81,8 @@ class public ForeignKeyPicker extends UIComponent
                 #IndexToKeyMap!.addItem(fkval!)
             wend
 
-
             bc!.setControllerFilterUnlock(fk$,0)
-
         else
-
             x=ctrl!.getX()
             y=ctrl!.getY()
             w=ctrl!.getWidth()
@@ -102,30 +115,41 @@ class public ForeignKeyPicker extends UIComponent
 
         #Fk$        = fk$
 
-
         #super!.setBC(bc!)
 
     methodend
 
-    method public void refresh( BBjNumber resetFilter)
+
+    rem /**
+    rem * Method refresh:
+    rem * refresh the displayed data
+    rem * @param BBjNumber resetFilter: if set to 1, the UI Component needs to clear any filtering defined on UI side
+    rem */
+    method public void refresh (BBjNumber resetFilter)
 
         #displayData()
 
     methodend
 
 
+    rem /**
+    rem * Method onSelectionChange:
+    rem * This method is called from the business component when the selection changed
+    rem */
     method public void onSelectionChange()
 
         #displayData()
 
     methodend
 
+
+    rem /**
+    rem * Method displayData:
+    rem * display the data on the user component
+    rem */
     method public void displayData()
 
         if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE or #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
-   
-        
-
             #getBC().prepareResultSet(0,0)
 
             ctrl! = #BoundCtrl!
@@ -143,15 +167,10 @@ class public ForeignKeyPicker extends UIComponent
                     i=num(i!)
                     ctrl!.selectIndex(i)
                 fi
-
             else
                 ctrl!.selectIndex(-1)
-
             fi
-
-
         else
-
             #getBC().prepareResultSet(0,0)
 
             if #getBC().size()=1 then
@@ -169,7 +188,6 @@ class public ForeignKeyPicker extends UIComponent
                 #StDisp!.setText("")
                 #TbClear!.setEnabled(0)
             fi
-
         fi
 
     methodend
@@ -179,12 +197,11 @@ class public ForeignKeyPicker extends UIComponent
 
         #BoundCtrl!.setText("")
         #BoundCtrl!.focus()
-        #StDisp!.setText("")        
+        #StDisp!.setText("")
         #super!.getBC().drive(#Fk$,new BBjVector())
-        
-        
 
     methodend
+
 
     method public void onTbPickPush(BBjToolButtonPushEvent ev!)
 
@@ -202,7 +219,6 @@ class public ForeignKeyPicker extends UIComponent
         #super!.getBC().setControllerFilterUnlock(#Fk$,1)
 
         if ng!.doModal() then
-
             dr! = ng!.getSelectedRows()
 
             if dr!.size()=1 then
@@ -214,7 +230,6 @@ class public ForeignKeyPicker extends UIComponent
                 newText$=row!.getFieldAsString(#Fk$)
                 newfkdisp$ = row!.toString()
             fi
-
         fi
 
         #super!.getBC().setControllerFilterUnlock(#Fk$,0)
@@ -229,6 +244,12 @@ class public ForeignKeyPicker extends UIComponent
 
     methodend
 
+
+    rem /**
+    rem * Method getSelectedForeignKeyValue:
+    rem * get the value of the selected foreign key
+    rem * @return java.lang.Object value!: value of the selected foreign key
+    rem */
     method public Object getSelectedForeignKeyValue()
 
         if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
@@ -243,9 +264,14 @@ class public ForeignKeyPicker extends UIComponent
 
         methodret fk!
 
-
     methodend
 
+
+    rem /**
+    rem * Method setForeignKeyFormLink:
+    rem * set the ForeignKeyForm and create a Link on the UI for the foreign key
+    rem * @param UIComponent uic!: the UIComponent form (control) of the foreign key
+    rem */
     method public void setForeignKeyFormLink(UIComponent uic!)
 
         #ForeignKeyForm!=uic!
@@ -254,7 +280,6 @@ class public ForeignKeyPicker extends UIComponent
         if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             rem TODO implement foreign key form link, maybe by rightclick popup
         else
-
             #StDisp!.setForeColor(BBjAPI().makeColor("BLUE"))
 
             declare BBjFont font!
@@ -265,10 +290,10 @@ class public ForeignKeyPicker extends UIComponent
             tbHyperlink! = #super!.getWnd().addToolButton(200,#StDisp!.getX(),#StDisp!.getY(),#StDisp!.getWidth(),#StDisp!.getHeight(),"")
             tbHyperlink!.setOpaque(0)
             tbHyperlink!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onTbHyperlinkPush")
-
         fi
 
     methodend
+
 
     method public void onTbHyperlinkPush(BBjToolButtonPushEvent ev!)
 
@@ -283,26 +308,22 @@ class public ForeignKeyPicker extends UIComponent
 
     methodend
 
+
+    rem /**
+    rem * Method setEnabled:
+    rem * enable/disable the UI component control
+    rem * @param BBjNumber fEnable: 1 = enabled, 0 = disabled
+    rem */
     method public void setEnabled(BBjNumber fEnable)
 
-       if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
-                #BoundCtrl!.setEnabled(fEnable)
-       else
-                #BoundCtrl!.setEnabled(fEnable)
-                #TbPick!.setEnabled(fEnable)
-                #TbClear!.setEnabled(fEnable)
-       fi       
+        if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
+            #BoundCtrl!.setEnabled(fEnable)
+        else
+            #BoundCtrl!.setEnabled(fEnable)
+            #TbPick!.setEnabled(fEnable)
+            #TbClear!.setEnabled(fEnable)
+        fi
 
     methodend
 
 classend
-
-
-
-
-
-
-
-
-
-

@@ -1,3 +1,5 @@
+rem package components.ui.bound.form
+
 use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
 
@@ -13,11 +15,13 @@ use ::components/ui/bound/controls/ForeignKeyPicker.bbj::ForeignKeyPicker
 use ::translations/bbtranslator.bbj::BBTranslator
 
 
-
-
-
+rem /**
+rem * SimpleFormComponent
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
 class public SimpleFormComponent extends UIComponent implements UIWidget
-
 
     field private BBjNumber IsFormLocked
     field protected BBjChildWindow FormWnd!
@@ -27,7 +31,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     field protected NavigationToolbarComponent NavigationToolbar!
     field protected FormEditToolbarComponent FormEditToolbar!
-    
+
     field protected DataRow   Rec!
 
     field protected DataRow   EditedRec!
@@ -36,26 +40,48 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     field protected BBjVector WarningIcons! = new BBjVector()
 
-    
     field private java.util.HashMap RestoreControllerFilter!
-    
+
     field private BBjNumber ReadOnly
 
 
-    method public SimpleFormComponent (BBjChildWindow cw!)
+    rem /**
+    rem * Constructor SimpleFormComponent
+    rem * Creates the component by using a given existing BBjChildWindow
+    rem * @param BBjWindow wnd!: child window that the component shall occupy
+    rem */
+    method public SimpleFormComponent(BBjChildWindow cw!)
 
         #super!(cw!)
         #initialize()
 
     methodend
 
-    method public SimpleFormComponent (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+    rem /**
+    rem * Constructor SimpleFormComponent
+    rem * Creates the component by using a given existing BBjWindow
+    rem * @param BBjWindow wnd!: child window that the component shall occupy
+    rem * @param BBjNumber id: Control ID for the BBjChildWindow, which is created on wnd!
+    rem * @param BBjNumber x: x-coordinate
+    rem * @param BBjNumber y: y-coordinate
+    rem * @param BBjNumber w: width
+    rem * @param BBjNumber h: height
+    rem */
+    method public SimpleFormComponent(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
         #super!(wnd!,id,x,y,w,h)
         #initialize()
 
     methodend
 
+
+    rem /**
+    rem * Method setChildWindow
+    rem * load the child window from a resource file (.arc)
+    rem * @param BBjString resFile$: the name of the resource file
+    rem * @param BBjNumber childId: the child window ControlID in the resource file
+    rem */
     method public void setChildWindow(BBjString resFile$, BBjNumber childId)
 
         res = BBjAPI().getSysGui().resOpen(resFile$)
@@ -65,12 +91,12 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         #FormWnd!.setVisible(0)
         #FormWnd!.setTrack(0)
         #FormWnd!.setSize(#getW(), #getH())
-        
+
         if #this!.getShowToolBar() then
             #ToolbarWnd!.setSize(#getWnd().getWidth(), 25)
             #FormWnd!.setLocation(0,26)
             #setSize(#getW(), #getH()) 
-        fi       
+        fi
 
     methodend
 
@@ -78,11 +104,11 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     rem /**
     rem * Method getAllControlsRecursive:
     rem * Get all controls recursively
-    rem * @param BBjWindow Window object
-    rem * @param BBjNumber Flag as to whether to include the control instance
-    rem * @return BBjVector Vector of all control information
+    rem * @param BBjWindow pWindow!: the window with the controls
+    rem * @return BBjVector: vector of all control information
     rem */
     method public static BBjVector getAllControlsRecursive(BBjWindow pWindow!)
+
         declare BBjVector  allControls!
         declare BBjVector  winControls!
         declare BBjControl control!
@@ -94,7 +120,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         control!=cast(BBjControl,pWindow!)
         controlMap!=new java.util.HashMap()
 
-
         controlMap!.put("ControlInstance",pWindow!)
 
         controlMap!.put("ControlID",control!.getID())
@@ -103,6 +128,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         winControls!=pWindow!.getAllControls()
         controlCount=winControls!.size()
+
         if controlCount>0 then
             for i=0 to controlCount-1
                 control!=cast(BBjControl,winControls!.get(i))
@@ -127,20 +153,21 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         endif
 
         methodret allControls!
+
     methodend
 
 
+    rem /**
+    rem * Method prepareControlList:
+    rem * prepare the controls (determine foreign keys, create calendar button's for InputD fields, set callbacks for controls)
+    rem * @param BBjVector fieldNames!: vector with controls to prepare
+    rem */
     method protected void prepareControlList(BBjVector fieldNames!)
 
-
         if fieldNames!.size() then
-
             for i=0 to fieldNames!.size()-1
-
                 fields$ = fields$+fieldNames!.getItem(i)+$0a$
-
             next i
-
         fi
 
         li! = #getAllControlsRecursive(#FormWnd!)
@@ -148,38 +175,27 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         #ControlList! = new java.util.HashMap()
 
 
-
         if li!.size() then
-
             for i=0 to li!.size()-1
-
                 controlMap! = li!.getItem(i)
 
                 ctrl_name$= controlMap!.get("ControlName")
                 ctrl! = ControlMap!.get("ControlInstance")
-                
+
                 #getLaf().setStyle(ctrl!,"")
-                
+
                 wnd! = BBjAPI().getSysGui().getWindow(ctrl!.getContextID())
 
-
-
                 if pos(".label"=ctrl_name$)>0 then
-
                     lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL",err=*endif)
                     ctrl!.setText(lbl$+":")
-
                 else
-
                     if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and ctrl!.getControlType() <> 17 then
                         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onCtrlInputKeypress")
                     fi
-
-
                 fi
 
                 if ctrl!.getControlType() = BBjControl.INPUTD_TYPE then
-
                     h=ctrl!.getHeight()
                     TbPick! = wnd!.addToolButton(wnd!.getAvailableControlID(),ctrl!.getX()+ctrl!.getWidth(),ctrl!.getY(),h,h,"")
                     TbPick!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onTbDatePick")
@@ -187,12 +203,10 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                     img!=BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001D44944415478DA9592CF8BA96114C7FD23B397C558D8584959DD9D85A494A69464C1BD4AA424126F162232C34674576C6E6ED9988D158532C68F894C29228A895828BEE339DD5BF3C4D4CC53DFDEE73DCF399F739E731E91E8DFBACF26F15D893E2EE1E1277A6F7FBE2CE6CF01EE7E29715F34E1E12F2FB7DB8DE7D747CEC6FC983F0730FB6EF1BBF1E3CB62FE1780EF8A03D86C3694CB6508C51B12DB339BCBE5422E97E3CE2A950A1C0E070F608EF57A1D8D46E353B55A2D74BB5D0C0603040281EB8042A100854201B1584C41D96C166AB51A72B91C068301A5520993C904E170F83A402693412291402A9512C0683442A552A156AB41A3D1C0EFF763B55A211A8D5E0744221168B55A28954AB4DB6DBABF4EA783C5622155AB55ECF77B241289CF7B60B55A29DB7038442814A2FF7EBF0F8FC743573C1E8F482693978066B349597D3E1F659B4EA76463E5068341A4D3698CC7639C4EA74B007B719D4E87B232A7F97C8EF57A8DDD6E87C3E14041FF173BBB0078BD5E8C46230A7E3CCFFCE93CB2423E8F5EAF879773F9CBE592FA93C964108FC761369B79009BEB6C36A30E2F160BACCFDFCD6683ED764B628F27954AD1F8583293C9C403D801CB108BC5A8C3ACC48F12040176BB1D7ABD9EFAE3743A09F00ED76A5070D91CEE300000000049454E44AE426082$)
                     TbPick!.setImage(img!)
                     TbPick!.setOpaque(0)
-
                 fi
 
 
-                if pos(ctrl_name$=fields$) >0 then
-
+                if pos(ctrl_name$=fields$) > 0 then
                     #ControlList!.put(ctrl_name$,ControlMap!)
 
                     rem now register the necessary events
@@ -215,37 +229,28 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
                         #ForeignKeyPickerList!.put(ctrl_name$,picker!)
                     fi
-
                 fi
-
-            next
-
+            next i
         fi
 
         #FormWnd!.setVisible(1)
-
 
     methodend
 
 
     method public void onCtrlGainedFocus(BBjGainedFocusEvent ev!)
 
-
         if #getBC().getSelection().size() then
             recno=#getBC().getSelection().getItem(0)
             #getBC().setEditedRecord(recno)
         fi
 
-
         if #EditedRec! = null() and #Rec! <> null() then
-
             #EditedRec! = cast(DataRow,#Rec!.clone())
         fi
 
         if #EditedFields! = null() then
-
             #EditedFields! = new java.util.HashMap()
-
         fi
 
         #EditedFields!.put(ev!.getControl().getName(),null())
@@ -257,11 +262,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     method public void onCtrlInputKeypress(BBjInputKeypressEvent ev!)
 
-
         if ev!.getControl().getText()>"" and (ev!.getKeyCode() = 13 or ev!.getKeyCode() = 9) then
-
             #searchRecord()
-
         fi
 
     methodend
@@ -270,17 +272,15 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     method public void onCtrlLostFocus(BBjLostFocusEvent ev!)
 
         ctrl_name$=ev!.getControl().getName()
-        
-        
 
         if #EditedFields! <> null() and #ControlList!.get(ctrl_name$)<>null() then
             v$=ev!.getText()
-            
+
             if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and v$="" then
                 methodret
                 rem don't validate primary key fields as long as they're empty
             fi
-            
+
             if #EditedRec! = null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
                 #EditedFields!.put(ctrl_name$,v$)
 
@@ -290,10 +290,10 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                 #EditedFields!.remove(ctrl_name$)
                 print ctrl_name$,"-> deleted"
             fi
-
         fi
 
     methodend
+
 
     method public void onCtrlEditModify(BBjEditModifyEvent ev!)
 
@@ -302,28 +302,39 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     methodend
 
+
+    rem /**
+    rem * Method initialize:
+    rem * initialize the form. Creates hte edit and navigation toolbar.
+    rem */
     method protected void initialize()
 
             rem initialize the toolbar
-            
+
             #ToolbarWnd! = #getWnd().addChildWindow(100,0,0,#getWnd().getWidth(),0,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
             #getLaf().prepareWindow(#ToolbarWnd!)
             #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
-            
+
             #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,200,25)
             if #this!.getBC()<>null() then 
                 #FormEditToolbar!.setBC(#this!.getBC())
             fi
-            
+
             #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,200,2,250,25)
             if #this!.getBC()<>null() then
                 #NavigationToolbar!.setBC(#this!.getBC())
             fi
-            
+
     methodend
-    
+
+
+    rem /**
+    rem * Method setShowToolBar:
+    rem * set the visiblity of the tool bar
+    rem * @param BBjNumber fShow: 1 = visible, 0 = invisible
+    rem */
     method public void setShowToolBar(BBjNumber fShow)
-    
+
         #super!.setShowToolBar(fShow)
         if fShow and #FormWnd! <> null() then
             #ToolbarWnd!.setSize(#getWnd().getWidth(), 25)
@@ -332,34 +343,54 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         else
             rem TODO implement hide toolbar
         fi
-        
+
     methodend
-    
-    
+
+
+    rem /**
+    rem * Method setShowStatusBar:
+    rem * set the visiblity of the status bar
+    rem * @param BBjNumber fShow: 1 = visible, 0 = invisible
+    rem */
     method public void setShowStatusBar(BBjNumber fShow)
+
         #super!.setShowStatusBar(fShow)
         #super!.setStatusBar(#getParentWnd().addStatusBar(5))
         #super!.getStatusBar().setTextAt(0,"...")
+
     methodend
-    
-    
+
+
+    rem /**
+    rem * Method setShowMenuBar:
+    rem * set the visiblity of the menu bar
+    rem * @param BBjNumber fShow: 1 = visible, 0 = invisible
+    rem */
     method public void setShowMenuBar(BBjNumber fShow)
+
         #super!.setShowMenuBar(fShow)
 
         if fShow then
             editMenu! = #super!.getMenuBar().addMenu(-2,"&Edit")
             #FormEditToolbar!.setupMenu(editMenu!)
-            
+
             navMenu! = #super!.getMenuBar().addMenu(-3,"&Record")
             #NavigationToolbar!.setupMenu(navMenu!)
         fi
-        
+
     methodend
 
+
+    rem /**
+    rem * Method setSize:
+    rem * set the size of the form component
+    rem * @param BBjNumber width: the width
+    rem * @param BBjNumber height: the height
+    rem */
     method public void setSize(BBjNumber w, BBjNumber h)
 
         #super!.setSize(w,h)
-        
+
         if #ToolbarWnd! <> null() then
             #ToolbarWnd!.setSize(w,25)
             #FormWnd!.setSize(w, h-25)
@@ -369,19 +400,37 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     methodend
 
+
+    rem /**
+    rem * Method setVisible:
+    rem * set the visibility of the form component
+    rem * @param BBjNumber visible: 1 = visible, 0 = invisible
+    rem */
     method public void setVisible(BBjNumber v)
 
         #super!.setVisible(v)
 
     methodend
-    
+
+
+    rem /**
+    rem * Method setReadOnly:
+    rem * set the form component as read only
+    rem * @param BBjNumber ro: 1 = read only, 0 = editable
+    rem */
     method public void setReadOnly(BBjNumber ro)
-    
+
         #ReadOnly = ro
         #enableControls(0,0)
-    
+
     methodend
 
+
+    rem /**
+    rem * Method setBC:
+    rem * set the business component for the form
+    rem * @param BusinessComponent bc!: the business component
+    rem */
     method public void setBC(BusinessComponent bc!)
 
         #super!.setBC(bc!)
@@ -398,11 +447,16 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         #prepareControlList(Rec!.getFieldNames())
 
         #newRecord()
-        
+
     methodend
 
 
-    method public void refresh( BBjNumber resetFilter)
+    rem /**
+    rem * Method refresh:
+    rem * refresh the displayed data
+    rem * @param BusinessComponent bc!: the business component
+    rem */
+    method public void refresh(BBjNumber resetFilter)
 
         #displayData()
         #EditedRec! = null()
@@ -411,6 +465,10 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     methodend
 
 
+    rem /**
+    rem * Method refresh:
+    rem * This method is called from the business component when the selection changed
+    rem */
     method public void onSelectionChange()
 
         #displayData()
@@ -424,16 +482,13 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     rem * Method canSelectionChange:
     rem * This method is called from the business component when the selection changed
     rem * (needs overriding)
-    rem * @param force: if set to 1, enforce saving unsaved data as selection will undeniably change
-    rem * @return canChange: 0 = can't change, 1 = change is OK
+    rem * @param BBjNumber force: if set to 1, enforce saving unsaved data as selection will undeniably change
+    rem * @return BBjNumber: 0 = can't change, 1 = change is OK
     rem */
     method public BBjNumber canSelectionChange(BBjNumber force)
 
-
         if  #EditedRec! = null() or #EditedFields! = null() then
-
             methodret 1
-
         fi
 
         if force=0 then
@@ -445,7 +500,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         a=msgbox(#super!.getTranslator().getTranslation("SAVE_CHANGES"),opt,#getBC().getTitle())
 
         switch a
-
             case 6
             rem yes
             #getBC().broadcastSaveRecord()
@@ -463,7 +517,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             rem cancel
             canDrive=0
             break
-
         swend
 
         methodret canDrive
@@ -471,18 +524,19 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     methodend
 
 
+    rem /**
+    rem * Method displayData:
+    rem * display the data on the user component
+    rem */
     method public void displayData()
 
         #clearValidationErrorSignage()
         #EditedFields! = null()
         #EditedRec! = null()
 
-        
-        if #getBC().getSelection() = null() or #getBC().getSelection().size() <> 1 then
-
+        if #getBC().getSelection() = null() or #getBC().getSelection().size() <> 1 or #getBC().size()=0 then
             #Rec!=null()
             if #IsFormLocked = 0 then
-
                 #getBC().clearValidationErrors()
                 #getBC().clearFieldValidationErrors()
 
@@ -491,9 +545,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                 #enableControls(0,0)
                 rem #FormWnd!.setEnabled(0)
             fi
-
         else
-
             if #IsFormLocked = 1 then
                 #IsFormLocked = 0
                 #enableControls(1,0)
@@ -501,14 +553,11 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             fi
 
 
-
             rem display record
 
             recno = #getBC().getSelection().getItem(0)
             #getBC().prepareResultSet(recno,recno)
             #Rec!  = cast(DataRow,#getBC().getResultSet().getItem(recno))
-
-
 
             if #ControlList!.size() then
                 ks! = #ControlList!.keySet()
@@ -522,7 +571,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                     if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
                         ctrl!.setEnabled(0)
                     fi
-
 
                     bc!=#getBC().getForeignKeyBC(ctrl_name$)
 
@@ -541,11 +589,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                             pick!.setEnabled(0)
                         fi
                     fi
-
                 wend
-
             fi
-
 
             locked = #getBC().isLocked(recno)
             #FormWnd!.setEnabled(!locked)
@@ -556,6 +601,12 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     methodend
 
+
+    rem /**
+    rem * Method displayField:
+    rem * shows the data of a field on a form control
+    rem * @param BBjString name$: the name of the control
+    rem */
     method protected void displayField(BBjString ctrl_name$)
 
         contents$ = #Rec!.getFieldAsString(ctrl_name$)
@@ -564,42 +615,33 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         ctrl!       = ControlMap!.get("ControlInstance")
         ctrl_obj!   = ControlMap!.get("ControlObject")
 
-
         switch ctrl!.getControlType()
-
             case BBjControl.INPUTD_TYPE
-
-            if #Rec!.getFieldType(ctrl_name$)="D" then
-                ctrl!.setValue(#Rec!.getFieldAsNumber(ctrl_name$))
-            else
-                goto default_set
-            fi
-
+                if #Rec!.getFieldType(ctrl_name$)="D" then
+                    ctrl!.setValue(#Rec!.getFieldAsNumber(ctrl_name$))
+                else
+                    goto default_set
+                fi
             break
 
             case BBjControl.CHECKBOX_TYPE
-            ctrl!.setSelected(#Rec!.getFieldAsNumber(ctrl_name$))
+                ctrl!.setSelected(#Rec!.getFieldAsNumber(ctrl_name$))
             break
 
             case BBjControl.LISTBUTTON_TYPE
             case BBjControl.LISTBOX_TYPE
-            rem TODO optimize - save list serverside and save roundtrips!
-            declare auto BBjVector list!
-            list! = ctrl!.getAllItems()
+                rem TODO optimize - save list serverside and save roundtrips!
+                declare auto BBjVector list!
+                list! = ctrl!.getAllItems()
 
-            if list!.size() then
-
-                for i=0 to list!.size()-1
-
-                    if list!.getItem(i)=contents$ then
-                        ctrl!.selectIndex(i)
-                        break
-                    fi
-
-                next
-
-            fi
-
+                if list!.size() then
+                    for i=0 to list!.size()-1
+                        if list!.getItem(i)=contents$ then
+                            ctrl!.selectIndex(i)
+                            break
+                        fi
+                    next i
+                fi
             break
 
             case default
@@ -608,60 +650,57 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             break
         swend
 
-
     methodend
 
+
+    rem /**
+    rem * Method emptyForm:
+    rem * empty all controls in the form
+    rem */
     method private void emptyForm()
 
-        if #ControlList!<>null() then
-
-            if #ControlList!.size() then
-
-                ks! = #ControlList!.keySet()
-                it! = ks!.iterator()
-
-                while it!.hasNext()
-                    ctrl_name$=it!.next()
-
-                    if #getBC().getForeignKeyBC(ctrl_name$)=null() then
-                        ControlMap! = #ControlList!.get(ctrl_name$)
-                        ctrl! = ControlMap!.get("ControlInstance")
-
-                        switch ctrl!.getControlType()
-                            case BBjControl.LISTBUTTON_TYPE
-                            case BBjControl.LISTBOX_TYPE
-
-                            break
-
-                            case BBjControl.CHECKBOX_TYPE
-                            ctrl!.setSelected(0)
-                            break
-
-                            case default
-                            ctrl!.setText("")
-                            break
-                        swend
-
-                    fi
-
-                wend
-
-            fi
-
+        if #ControlList! = null() or #ControlList!.size() = 0 then
+            methodret
         fi
+
+        ks! = #ControlList!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            ctrl_name$=it!.next()
+
+            if #getBC().getForeignKeyBC(ctrl_name$)=null() then
+                ControlMap! = #ControlList!.get(ctrl_name$)
+                ctrl! = ControlMap!.get("ControlInstance")
+
+                switch ctrl!.getControlType()
+                    case BBjControl.LISTBUTTON_TYPE
+                    case BBjControl.LISTBOX_TYPE
+
+                    break
+
+                    case BBjControl.CHECKBOX_TYPE
+                    ctrl!.setSelected(0)
+                    break
+
+                    case default
+                    ctrl!.setText("")
+                    break
+                swend
+            fi
+        wend
 
     methodend
 
 
     rem /**
-    rem * Method setEditing
+    rem * Method setEditing:
     rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
     rem * @param BBjNumber isEditing: -1 = i
     rem */
     method public void setEditing(BBjNumber isEditing)
 
         if isEditing=0 then
-
             if #EditedRec! <> null() and #getBC().getSelection().size()=1 then
                 recno=#getBC().getSelection().getItem(0)
                 #getBC().getResultSet().setItem(recno,null())
@@ -690,7 +729,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             fi
             #emptyForm()
             #newRecord()
-            
         fi
 
         rem #enableControls(isEditing,0)
@@ -698,9 +736,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     methodend
 
 
-
     rem /**
-    rem * Method restoreEditedField
+    rem * Method restoreEditedField:
     rem * invoked from BusinessComponent, broadcast that the user wants to restore the field currently being edited
     rem */
     method public void restoreEditedField()
@@ -723,9 +760,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     methodend
 
 
-
     rem /**
-    rem * Method newRecord
+    rem * Method newRecord:
     rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
     rem */
     method public void newRecord()
@@ -733,7 +769,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         #FormWnd!.setEnabled(1)
         #emptyForm()
         #EditedFields! = null()
-        #EditedRec! = null()        
+        #EditedRec! = null()
         #IsFormLocked = 0
         #EditedFields! = new java.util.HashMap()
 
@@ -761,7 +797,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             it! = ks!.iterator()
 
             minctrl=65000
-            
+
             while it!.hasNext()
                 ctrl_name$=it!.next()
                 ControlMap! = #ControlList!.get(ctrl_name$)
@@ -777,174 +813,154 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                             fctrl! = ctrl!
                         fi
                 else
-                    ctrl!.setEnabled(0)                
+                    ctrl!.setEnabled(0)
                 fi
-
             wend
-            
+
             if minctrl<65000 then
                 fctrl!.focus()
             fi
-
         fi
 
         rem if there's no primary key segment that has been enabled, just enable the entire form and trust in god
         REM TODO maybe put in more logic to determine if only auto increment keys et al are missing 
         if f=0 then
-            
             if #ControlList!.size() then
                 ks! = #ControlList!.keySet()
                 it! = ks!.iterator()
-    
+
                 while it!.hasNext()
                     ctrl_name$=it!.next()
                     ControlMap! = #ControlList!.get(ctrl_name$)
                     ctrl!       = ControlMap!.get("ControlInstance")
-                    ctrl!.setEnabled(1)                
+                    ctrl!.setEnabled(1)
                 wend
-    
             fi
-
-        
         fi
 
         BBjAPI().getSysGui().flushEvents()
 
     methodend
 
+
     rem /**
-    rem * Method saveRecord
+    rem * Method saveRecord:
     rem * invoked from BusinessComponent, broadcast that the user wants to save the record
+    rem * @return BBjNumber: 0 = record saved without errors, 1 = validation errors
     rem */
     method public BBjNumber saveRecord()
 
         #clearValidationErrorSignage()
 
-        startover:
-        ks! = #EditedFields!.keySet()
-        it! = ks!.iterator()
+        if #EditedFields! <> null() then
+            startover:
+            ks! = #EditedFields!.keySet()
+            it! = ks!.iterator()
 
-        while it!.hasNext()
-            ctrl_name$=it!.next()
+            while it!.hasNext()
+                ctrl_name$=it!.next()
+    
+    
+                rem take foreign key value from the linked business component
+                picker! = #ForeignKeyPickerList!.get(ctrl_name$)
+    
+                if picker!<> null() then
+                    #EditedFields!.put(ctrl_name$,picker!.getSelectedForeignKeyValue())
+    
+                    continue
+                fi
 
+                if #EditedFields!.get(ctrl_name$)=null() then
+                    ControlMap! = #ControlList!.get(ctrl_name$)
+                    ctrl! = ControlMap!.get("ControlInstance")
 
-            rem take foreign key value from the linked business component
-            picker! = #ForeignKeyPickerList!.get(ctrl_name$)
+                    switch ctrl!.getControlType()
+                        case BBjControl.INPUTD_TYPE
+                            v = ctrl!.getValue()
 
-            if picker!<> null() then
-                #EditedFields!.put(ctrl_name$,picker!.getSelectedForeignKeyValue())
+                            if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
+                                #EditedFields!.put(ctrl_name$,str(v))
+                                validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
+                            else
+                                #EditedFields!.remove(ctrl_name$)
+                                exitto startover; rem to avoid concurrent edit exception
+                            fi
+                        break
 
-                continue
-            fi
-            
+                        case BBjControl.CHECKBOX_TYPE
+                            v = ctrl!.isSelected()
 
-            if #EditedFields!.get(ctrl_name$)=null() then
-                ControlMap! = #ControlList!.get(ctrl_name$)
-                ctrl! = ControlMap!.get("ControlInstance")
+                            if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
+                                #EditedFields!.put(ctrl_name$,str(v))
+                                validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
+                            else
+                                #EditedFields!.remove(ctrl_name$)
+                                exitto startover; rem to avoid concurrent edit exception
+                            fi
+                        break
 
-                switch ctrl!.getControlType()
+                        case default
+                            default_set2:
+                            v$=ctrl!.getText()
 
-                    case BBjControl.INPUTD_TYPE
-                    v = ctrl!.getValue()
+                            if #EditedRec!=null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
+                                #EditedFields!.put(ctrl_name$,v$)
+                                validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
+                            else
+                                #EditedFields!.remove(ctrl_name$)
+                                exitto startover; rem to avoid concurrent edit exception
+                            fi
+                        break
+                    swend
+                fi
+            wend
+    
+            if #EditedFields!.size() then
+                #getBC().clearValidationErrors()
+                val = #getBC().validateRecord(#getBC().getEditingRecNo(),#EditedFields!)
+                val = max(val,#getBC().getFieldValidationErrorLevel())
 
-                    if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
-                        #EditedFields!.put(ctrl_name$,str(v))
-                        validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
-                    else
-                        #EditedFields!.remove(ctrl_name$)
-                        exitto startover; rem to avoid concurrent edit exception
-                    fi
+                if val>0 then
+                    #markValidationErrors()
 
-                    break
-
-                    case BBjControl.CHECKBOX_TYPE
-                    v = ctrl!.isSelected()
-
-                    if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
-                        #EditedFields!.put(ctrl_name$,str(v))
-                        validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
-                    else
-                        #EditedFields!.remove(ctrl_name$)
-                        exitto startover; rem to avoid concurrent edit exception
-                    fi
-
-                    break
-
-                    case default
-                    default_set2:
-                    v$=ctrl!.getText()
-
-                    if #EditedRec!=null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
-                        #EditedFields!.put(ctrl_name$,v$)
-                        validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
-                    else
-                        #EditedFields!.remove(ctrl_name$)
-                        exitto startover; rem to avoid concurrent edit exception
-                    fi
-
-                    break
-                swend
-
-            fi
-
-
-
-        wend
-
-        if #EditedFields!.size() then
-
-
-            #getBC().clearValidationErrors()
-            val = #getBC().validateRecord(#getBC().getEditingRecNo(),#EditedFields!)
-           
-            val = max(val,#getBC().getFieldValidationErrorLevel())
-
-            if val>0 then
-                #markValidationErrors()
-
-                if val=ValidationError.ERROR() then
-                    a=msgbox(#getBC().getValidationErrorMessage(),16,"validation failed")
-
-                    methodret 1
-
-                    rem aborting save and going back
-                else
-
-                    if val=ValidationError.NOTICE() then
-                        icon=64
-                    fi
-
-
-                    if val=ValidationError.WARN() then
-                        icon=48
-                    fi
-
-                    a=msgbox(#getBC().getValidationErrorMessage(),icon+1,"validation failed")
-
-                    if a=2 then
+                    if val=ValidationError.ERROR() then
+                        a=msgbox(#getBC().getValidationErrorMessage(),16,"validation failed")
 
                         methodret 1
 
-                        rem "cancel - abort saving operation
-                    fi
+                        rem aborting save and going back
+                    else
+                        if val=ValidationError.NOTICE() then
+                            icon=64
+                        fi
 
+                        if val=ValidationError.WARN() then
+                            icon=48
+                        fi
+
+                        a=msgbox(#getBC().getValidationErrorMessage(),icon+1,"validation failed")
+
+                        if a=2 then
+                            methodret 1
+    
+                            rem "cancel - abort saving operation
+                        fi
+                    fi
                 fi
 
+
+                #EditedFields! = cast(java.util.HashMap,#onBeforeSave(#EditedFields!))
+
+REM                 print "RecNo:",#getBC().getEditingRecNo()
+REM                 print "Fields:",#EditedFields!
+
+                #getBC().saveRecord(#getBC().getEditingRecNo(),#EditedFields!)
+                #getBC().clearValidationErrors()
+                #getBC().clearFieldValidationErrors()
+                #clearValidationErrorSignage()
             fi
-
-                            
-            #EditedFields! = cast(java.util.HashMap,#onBeforeSave(#EditedFields!))
-            
-            
-REM             print "RecNo:",#getBC().getEditingRecNo()
-REM             print "Fields:",#EditedFields!
-
-            #getBC().saveRecord(#getBC().getEditingRecNo(),#EditedFields!)
-            #getBC().clearValidationErrors()
-            #getBC().clearFieldValidationErrors()
-            #clearValidationErrorSignage()
-        fi
-
+        fi ; rem "if EditedFields <> null()
+        
         #EditedFields! = null()
         #EditedRec! = null()
 
@@ -968,33 +984,47 @@ REM             print "Fields:",#EditedFields!
         #enableControls(0,0)
         BBjAPI().getSysGui().flushEvents()
         #newRecord()
-        
+
         methodret 0
 
     methodend
 
 
+    rem /**
+    rem * Method onBeforeSave:
+    rem * This method is called from the business component before saving the record
+    rem * (needs overriding)
+    rem * @return java.util.HashMap: a java.util.HashMap with the edited fields
+    rem */
     method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
+
         methodret editedFields!
+
     methodend
 
+
+    rem /**
+    rem * Method clearValidationErrorSignage:
+    rem * clear all validation error marks on the form
+    rem */
     method private void clearValidationErrorSignage()
 
         if #WarningIcons!.size() then
-
             for i=0 to #WarningIcons!.size()-1
-
                 c! = #WarningIcons!.get(i)
                 c!.destroy()
-
-            next
+            next i
 
             #WarningIcons!.clear()
-
         fi
 
     methodend
 
+
+    rem /**
+    rem * Method markValidationErrors:
+    rem * set validation error marks for the controls with validation errors
+    rem */
     method private void markValidationErrors()
 
         declare auto ValidationError v_err!
@@ -1007,14 +1037,11 @@ REM             print "Fields:",#EditedFields!
         v_list!=#getBC().getValidationErrors()
 
         if v_list!.size() then
-
             for i=0 to v_list!.size()-1
-
                 v_err!=v_list!.getItem(i)
                 f_list! = v_err!.getFieldList()
 
                 if f_list!.size() then
-
                     for f=0 to f_list!.size()-1
                         f_name$=f_list!.getItem(f)
 
@@ -1032,11 +1059,9 @@ REM             print "Fields:",#EditedFields!
                             icon! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000002D54944415478DAB553EF4B536114B63F20E843DF54483286A894380DE7744C9766CCCDA0FDF2EA74776B6D9A8ABAC9C85F586A35B5942D613A1D38E6129989111AE69CB66ECE2F12A5444116ACB68FE2372178BAEFB5042BFAD68187E73DE7DCF39C73EF796F42C2FF3083C15044D3F42CADD34575B5B5DF7535358C56AB1DD65656E6FEB3D06432255ED7EB1DB77B7A10D9D8403C1EC7FEFE3EB6B6B610080460B3D9A056AB47150A05EF6F5DB36F188D78BAB080682C8EC99939B4DCB1C3D0D6056BDF203C3301BCFFF0115EAF174AA512AC48EA71019A76AF854288BCD986BAB91B9DD3CB68724C43D9D28386112FDABD4BD0B474633914C698CB850A996CF4A858A7D389EEF6F7E3CBB738A4E65BB0F819F4AF7F45595D078811267EB33704597D3BC2CC06CC6633CACBCB859C40AD56EB0BB1DD873CB3A08602B03EFB0445EF1444B48D0339931881C63E83CE87E3989C98405959998F13D05657473FEFEE425AD70D6A9C01ED7B8B9CCA56FC327226317AFA1DA8B130AE983A100C0651525212E504AA28EA20168B21B3A20E32C76BC81F6D42D0E040FAD5064E80B0DC19E1E2249FC13EB7B9B9094971F10127A0D168A23BDBDBE02B9A20EE5F8164F0152403619C93D6730284894FE2249F7DAD11ABEC0462B1F87002954AE57B3237074DEB3D64357A20EC5B83B0378433974D9C0061E293F885FA7154B7D9E176BB2112890EBF01BB5391D562C1FC520829320BB22C01E474BD00AFEA3E9225468E897FBEF931928B68CC2F06A1D7EB515050203A5A65855CEEF1F97CB0BBFC4812EB905AE3405AE30C326D8B48BBE9C7D9AA0748B964C0F0E42C5CEC3DC8CFCFF71CBB4852A934572693C1E974E2F96A18D5D6015C54B5E2B4A00A42AA0DC68E11ACAC33B0DBED6474E4E5E5FDF95FB07B4D2A2D2D7590F1FC7E3F229108767676C0300CA6A6A6405114E9EC608B137FAF3DC1E2248B0C02D6F40281E025FB8E7B858585100A857B7C3E9FE1F1787A369FFE13A748E10FB7FBCC1083CC06B40000000049454E44AE426082$)
                         fi
 
-
                         if v_err!.getLevel() = v_err!.WARN() then
                             icon! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000002524944415478DAB5926F48536118C51F188544D08AB25199061298E9A2200A0291CCB24030D40872146139CA5552391A597D72A8F73AB52D32E775830C8CCA046350D64C0CFFA10C6FDA1C33D3894EDC660D579BAED3DD822812B3A0033F789F0FE79C878797E87F4AAB5DB7F2AE7AF5AA7F32D7B292248E8974D58660D726FD95B9E166FC728E8972D8078DB00F1AC031EB1DA16D961CC095C52A3B5EAA3035FC10135603BACC2AD4B11B8A9664AE61E3D7704C9CCB3B63C73BF371816C04837ED431D15EAE2446F2E7762681E969D3607AA4112A650E0A2E64C2C157C1D2A1114262758B9A8DA5895B3846EA0FF867D1FF2A1D6969696178F37E04E77CC22DE2E66BD86DB18BB427DEB774EAE1196F81EBFD216464A423F5400A26F883E04D720CF61951CB6C7FBCB0B944BCE3495D32F0F5336CED29087833912B3B8C3D9B56806F2298D4842FDE29343F90415F26DDF75B407531B5F4779FC7CC643D9C0312F89C7B7149B611A78F46C3C94B30DAB90CB6D757313264126E216DFBC5AC2BA2234D06B1B07A05BAEB23E0B646E2D3480C66DDC784D6B39873EF867F7A17EC6609E6035EBC6854C0C04A33BE7F9A2C12690BA9EFED9B1C8CF62A6035113E0E6F856F5C8A4AE6040A0B92C3EFD9B104382D627CE8D2C039D61ADAC2D6D09025A2CA7C3AD95CBD195E8711CF8B23C03F22589F89C2E4E5A6225F9EFA631E784A68AFDE8990DA4CA7848346C9A93C8F7A865A2FC363E3E019E6F0B382C16098853439C6E29E9A1CA4CC267DF91942983C82464EA83827A020545E245415106E5F21689502D708BAEB843B37046E114A95D4FB0D123F95B46841BEF10000000049454E44AE426082$)
                         fi
-
 
                         if v_err!.getLevel() = v_err!.ERROR() then
                             icon! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000002524944415478DA75935D489A6114C7BDE872DEB4E8D3C80B239036E80324A2A0A8208218ECCA2B0982D2F44AD07B711BDEB8722186287ABB60B1B58CAC315738C5E6FCBA1ADB606BA8EDB511B2816E5EFC77CE6B91963DF0E3BCCF39FFF37FCEFB2591D42CAFD7AB74BBDD028106E43D1E4F9FE4B6E572B9941B1B1B423A9D46A552B941329904D5F3AC6BD8EC743AF38944025F8F8E703039890F131388131C79FF291402D7595767B2BABADAE77038F2C7C7C762736C7A1AE77373F83B3F8F7F0447DE739EEBAC23BD40544DEC767B3E1C0EE3F3E121C274DACF9919FC9E9DC59F1A78CF79AEB32E128980FABE8B06369B0D8542015B2323382141616A0A670DE03CD7B7C6C6502E97C17DA281C562412E974360701027E3E3F8D1806FA3A3F8A25289F59D8101F0B25AAD5583959515F02D385B5AF05EA140A4B7578CEF7A7AF0B6BB1B7B6D6D08B6B7E3A0B353BC7E2A95229BCDC268345E1944A351389A9BB1C7A28E0E04291EC86478430621B9BC0E676B2B04418056ABAD1AF0452C16C3636A7AD9D5853D6A0ADEC22BAA3F218362B1586790F5F97CD85C5FC7333AF50519ED90B096D704E71D345D6C7B1BA9540A3A9DEE5434D0EBF5F7C844609380D78B35126E127C1AC3533DA7FD1A4DF07177576C369BCD0583C170F5312D2D2D2997979705BFDF8F001959E9243B8D6AA787C6F1114D96DADF179B4D265381F5373E67B55A7D7F7171F1947E18643219944A25F17D5F128FC7F9C99FB1AED1BF7487900F0D0D3DD06834BF161616701DCA9F0F0F0F3F641D21BD6ED044DC25648482E8270609D545ECBFC8CB2E744D978DFF01179CEE65B0A7865F0000000049454E44AE426082$)
@@ -1045,20 +1070,16 @@ REM             print "Fields:",#EditedFields!
                         ic!.setImage(icon!)
                         ic!.setToolTipText(v_err!.getMessage())
                         #WarningIcons!.addItem(ic!)
-
-
-                    next
-
+                    next f
                 fi
-
-            next
-
+            next i
         fi
 
     methodend
 
+
     rem /**
-    rem * Method onPartialUpdate
+    rem * Method onPartialUpdate:
     rem * invoked from Business Component, broadcasting the change of a record
     rem * @param BBjNumber recno: the record number within the resultset that has been updated
     rem * @param BBjNumber isLocked: 1=record was locked, 0=record was unlocked
@@ -1066,18 +1087,14 @@ REM             print "Fields:",#EditedFields!
     method public void onSoftlockStatusChange(BBjNumber recno, BBjNumber isLocked)
 
         if #getBC().getSelection().size()=1 then
-
             if recno=#getBC().getSelection().getItem(0) then
-
                 locked = #getBC().isLocked(recno)
                 #FormWnd!.setEnabled(!locked)
 
                 if locked=0 then
                     #displayData()
                 fi
-
             fi
-
         fi
 
     methodend
@@ -1093,7 +1110,6 @@ REM             print "Fields:",#EditedFields!
     method public void onBroadcastEdit(BBjNumber recNo, BBjString fieldName$, BBjString newContent$)
 
         if #EditedRec! = null() AND #getBC().getSelection().size()=1 then
-
             if recno=#getBC().getSelection().getItem(0) then
                 ControlMap! = #ControlList!.get(fieldName$)
 
@@ -1101,11 +1117,8 @@ REM             print "Fields:",#EditedFields!
                     ctrl! = ControlMap!.get("ControlInstance")
                     ctrl!.setText(newContent$)
                 fi
-
             fi
-
         fi
-
 
     methodend
 
@@ -1125,121 +1138,104 @@ REM             print "Fields:",#EditedFields!
     methodend
 
 
+    rem /**
+    rem * Method searchRecord:
+    rem * search and select a record if it is existing. Condition: the primary key controls are filled in.
+    rem */
     method public void searchRecord()
 
-        v!=#getBC().getSelection().clone()
+        pk! = #getBC().getPrimaryKeySegments()
+        if pk!.size() = 0 then
+            methodret
+        fi
 
-            f=0
+        n$ = BBjAPI().getLastEvent().getControl().getName()
+        if !pk!.contains(n$) then
+            methodret
+        fi
 
-            n$ = BBjAPI().getLastEvent().getControl().getName()
-        
-            pk! = #getBC().getPrimaryKeySegments()
-            if pk!.size() then
-                for i=0 to pk!.size()-1
-                    ctrl_name$=pk!.getItem(i)
-                    if n$=ctrl_name$ then
-                        f=1
-                        break
-                    fi
-                next
 
-                if f=1 then
+        filter! = new java.util.HashMap()
 
-                    filter! = new java.util.HashMap()
+        for i=0 to pk!.size()-1
+            ctrl_name$=pk!.getItem(i)
+            ControlMap! = #ControlList!.get(ctrl_name$)
+            if ControlMap! <> null() then
+                ctrl! = ControlMap!.get("ControlInstance")
+                c$=ctrl!.getText()
+                if c$>"" then
+                    v!=new BBjVector()
+                    filter!.put(ctrl_name$,v!)
+                    v!.addItem(c$)
+                fi
+            fi
+        next i
 
-                    for i=0 to pk!.size()-1
-                        ctrl_name$=pk!.getItem(i)
-                        ControlMap! = #ControlList!.get(ctrl_name$)
-                        if ControlMap! <> null() then
-                            ctrl! = ControlMap!.get("ControlInstance")
-                            c$=ctrl!.getText()
-                            if c$>"" then
-                                v!=new BBjVector()
-                                filter!.put(ctrl_name$,v!)
-                                v!.addItem(c$)
-                            fi
-                        fi
-                    next
-                    
-                    if #getBC().checkRecordExists(filter!) then
-                        rem record exists - pull it up instead and edit it
+        if #getBC().checkRecordExists(filter!) then
+            rem record exists - pull it up instead and edit it
 
-                        #getBC().setEditedRecord(-1)
-                        
-                        if #getBC().getQueryFilter() <> null() then
-                            #RestoreControllerFilter! = cast(java.util.HashMap, #getBC().getQueryFilter().clone())
-                        else
-                            #RestoreControllerFilter! = new java.util.HashMap()
-                        fi
-                        
-                        #getBC().setQueryFilter(filter!)
-                        #getBC().prepareResultSet(0,0)
-                        v1! = new BBjVector()
-                        v1!.add(0)
-                        #getBC().setSelection(v1!)
-                        #getBC().setEditedRecord(0) 
-                        #EditedRec! = cast(DataRow,#Rec!.clone())
-                        #EditedFields! = new java.util.HashMap()
-                        #setEditing(1)
-                    else
-                        #getBC().setEditedRecord(-2)
-                    fi
+            #getBC().setEditedRecord(-1)
 
-                    #enableControls(1,1)
-                    
-                fi; rem if f=1 then
-            fi; rem if pk!.size() then                  
+            if #getBC().getQueryFilter() <> null() then
+                #RestoreControllerFilter! = cast(java.util.HashMap, #getBC().getQueryFilter().clone())
+            else
+                #RestoreControllerFilter! = new java.util.HashMap()
+            fi
+
+            #getBC().setQueryFilter(filter!)
+            #getBC().prepareResultSet(0,0)
+            v1! = new BBjVector()
+            v1!.add(0)
+            #getBC().setSelection(v1!)
+            #getBC().setEditedRecord(0) 
+            #EditedRec! = cast(DataRow,#Rec!.clone())
+            #EditedFields! = new java.util.HashMap()
+            #setEditing(1)
+        else
+            #getBC().setEditedRecord(-2)
+        fi
+
+        #enableControls(1,1)
 
     methodend
 
 
+    rem /**
+    rem * Method enableControls:
+    rem * make all controls editable or not editable. If fSetFocus=1, set the focus of the first control on the form that is not part of the primary key.
+    rem */
     method private void enableControls(BBjNumber fEditing, BBjNumber fSetFocus)
 
-            min_pkfield     = 65000
-            min_datafield   = 65000
+        min_pkfield     = 65000
+        min_datafield   = 65000
 
+        if #ControlList!.size() then
+            ks! = #ControlList!.keySet()
+            it! = ks!.iterator()
 
-           if #ControlList!.size() then
-                ks! = #ControlList!.keySet()
-                it! = ks!.iterator()
+            while it!.hasNext()
+                ctrl_name$=it!.next()
+                ControlMap! = #ControlList!.get(ctrl_name$)
+                if ControlMap! <> null() then
+                    ctrl!       = ControlMap!.get("ControlInstance")
 
-                while it!.hasNext()
-                    ctrl_name$=it!.next()
-                    ControlMap! = #ControlList!.get(ctrl_name$)
-                    if ControlMap! <> null() then
-                        ctrl!       = ControlMap!.get("ControlInstance")
-    
-                        ctrl!.setEditable(!#ReadOnly,err=*next)
-    
-                        if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
-                            ctrl!.setEnabled(!fEditing)
-                            min_pkfield = min(min_pkfield, ctrl!.getID())
-                        else
-                            ctrl!.setEnabled(fEditing)
-                            min_datafield = min(min_datafield, ctrl!.getID())
-                        fi
+                    ctrl!.setEditable(!#ReadOnly,err=*next)
+
+                    if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 then
+                        ctrl!.setEnabled(!fEditing)
+                        min_pkfield = min(min_pkfield, ctrl!.getID())
+                    else
+                        ctrl!.setEnabled(fEditing)
+                        min_datafield = min(min_datafield, ctrl!.getID())
                     fi
-                wend
-                    
-            fi
-            
-            if fEditing AND fSetFocus then
-                #FormWnd!.getControl(min_datafield).focus()
-            fi
-            
-            
-     methodend
+                fi
+            wend
+        fi
+
+        if fEditing AND fSetFocus then
+            #FormWnd!.getControl(min_datafield).focus()
+        fi
+
+    methodend
 
 classend
-
-
-
-
-
-
-
-
-
-
-
-

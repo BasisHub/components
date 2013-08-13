@@ -1,4 +1,13 @@
-? 'HIDE',
+rem package components.bl
+
+rem /**
+rem * SoftLockRemoteEditEvent
+rem *
+rem * Event class for SoftLockController
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
 
 class public SoftLockRemoteEditEvent
 
@@ -7,6 +16,15 @@ class public SoftLockRemoteEditEvent
 
 classend
 
+
+rem /**
+rem * SoftLockController
+rem *
+rem * Class SoftLockController helps editing a record/value from two or more user at the same time
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
 class public SoftLockController
 
     field private BBjString     TableName$
@@ -17,40 +35,53 @@ class public SoftLockController
     field private BBjString     LockedKey$
 
 
-
-
+    rem /**
+    rem * Constructor SoftLockController
+    rem */
     method private SoftLockController()
-
 
     methodend
 
 
+    rem /**
+    rem * Constructor
+    rem * Create a new SoftLockController object.
+    rem * @param BBjString tableName$: the tablename that should be locked.
+    rem */
     method public SoftLockController(BBjString tableName$)
 
         #TableName$=tableName$
         #ListNs!=BBjAPI().getNamespace("SoftLockController",#TableName$,1)
 
-
     methodend
 
 
+    rem /**
+    rem * Method onListNameSpace:
+    rem * event handler method, handles a NameSpaceChange callback. This method is called only from the SoftLockController on edit start or edit stop.
+    rem * @param BBjNamespaceEvent ev!: the event that causes this method call
+    rem */
     method public void onListNameSpace(BBjNamespaceEvent ev!)
 
         record$ = ev!.getVariableName()
 
-        if record$>"" and record$<>#LockedKey$ then
-
+        if record$ > "" and record$ <> #LockedKey$ then
             if ev!.getNewValue() = "1" then
                 BBjAPI().postPriorityCustomEvent("SoftLockStart",record$)
             else
                 BBjAPI().postPriorityCustomEvent("SoftLockStop",record$)
             fi
-
         fi
-
 
     methodend
 
+
+    rem /**
+    rem * Method setLock:
+    rem * set a lock for a field
+    rem * @param BBjString keyValue$: the fieldname (key) to be locked
+    rem * @return BBjNumber locked: true if lock was set successfull
+    rem */
     method public BBjNumber setLock(BBjString keyValue$)
 
         if #LockedKey$>"" then
@@ -63,35 +94,40 @@ class public SoftLockController
 
         #Ns!=BBjAPI().getNamespace("SoftLockRemoteEditController",#TableName$,1)
 
-
         methodret 1
 
-        couldNotLock:
-        throw "could not acquire lock",0
 
+        couldNotLock:
+            throw "could not acquire lock",0
 
     methodend
 
 
+    rem /**
+    rem * Method isLocked:
+    rem * check if the given field (key) is locked
+    rem * @param BBjString keyValue$: the fieldname (key) to be checked if it is locked
+    rem * @return BBjNumber locked: true if the field (key) is locked
+    rem */
     method public BBjNumber isLocked(BBjString keyValue$)
-
 
         a!=#ListNs!.getValue(keyValue$,err=notLocked)
         #ListNs!.setLock(keyValue$,10,err=isLocked)
         #ListNs!.removeLock(keyValue$)
 
         notLocked:
-
-        methodret 0
+            methodret 0
 
         isLocked:
-
-        methodret 1
-
+            methodret 1
 
     methodend
 
 
+    rem /**
+    rem * Method removeLock:
+    rem * remove the lock if it is set
+    rem */
     method public void removeLock()
 
         if #LockedKey$="" then
@@ -107,6 +143,13 @@ class public SoftLockController
 
     methodend
 
+
+    rem /**
+    rem * Method onRemoteEdit:
+    rem * event handler method, handles a remote edit callback.
+    rem * @param BBjNamespaceEvent ev!: the fieldname (key) to be checked if it is locked
+    rem * @return BBjNumber locked: true if the field (key) is locked
+    rem */
     method public void onRemoteEdit(BBjNamespaceEvent ev!)
 
         variable$   = ev!.getVariableName()
@@ -120,6 +163,13 @@ class public SoftLockController
 
     methodend
 
+
+    rem /**
+    rem * Method broadcastEdit:
+    rem * broadcasts a message that a softlock value has changed
+    rem * @param BBjString fieldName$: the field name that has changed
+    rem * @param BBjString value$: the new (changed) value of the field
+    rem */
     method public void broadcastEdit(BBjString fieldName$, BBjString value$)
 
         if  #LockedKey$="" then
@@ -139,14 +189,27 @@ class public SoftLockController
     methodend
 
 
+    rem /**
+    rem * Method setCallbackForSoftlock:
+    rem * set the labels for handling the lock and unlock callback's
+    rem * @param BBjString labelOnLockStart$: the label that handles the "start lock" callback
+    rem * @param BBjString labelOnLockStop$: the label that handles the "stop lock" callback
+    rem */
     method public void setCallbackForSoftlock(BBjString labelOnLockStart$, BBjString labelOnLockStop$)
 
-        #setCallbackForSoftlock(null(),labelOnLockStart$,  labelOnLockStop$)
+        #setCallbackForSoftlock(null(),labelOnLockStart$, labelOnLockStop$)
 
     methodend
 
-    method public void setCallbackForSoftlock(CustomObject o!, BBjString labelOnLockStart$, BBjString labelOnLockStop$)
 
+    rem /**
+    rem * Method setCallbackForSoftlock:
+    rem * set the labels or methods for handling the lock and unlock callback's
+    rem * @param CustomObject o!: the custom object containing the label's or method's for handling the lock and unlock callbacks
+    rem * @param BBjString labelOnLockStart$: the label or method that handles the "start lock" callback
+    rem * @param BBjString labelOnLockStop$: the label or method that handles the "stop lock" callback
+    rem */
+    method public void setCallbackForSoftlock(CustomObject o!, BBjString labelOnLockStart$, BBjString labelOnLockStop$)
 
         #ListNs!.removeCallbackForVariableChange(#NotifyOnLockKey$,err=*next)
 
@@ -160,16 +223,28 @@ class public SoftLockController
 
         #ListNs!.setCallbackForNamespaceChange(#this!,"onListNameSpace")
 
+    methodend
+
+
+    rem /**
+    rem * Method setCallbackForRemoteEdit:
+    rem * set the label for handling the "on remote edit" callback
+    rem * @param BBjString labelOnRemoteEdit$: the label that handles the "on remote edit" callback
+    rem */
+    method public void setCallbackForRemoteEdit(BBjString labelOnRemoteEdit$)
+
+        #setCallbackForRemoteEdit(null(), labelOnRemoteEdit$)
 
     methodend
 
-    method public void setCallbackForRemoteEdit( BBjString labelOnRemoteEdit$ )
 
-        #setCallbackForRemoteEdit( null(),  labelOnRemoteEdit$ )
-
-    methodend
-
-    method public void setCallbackForRemoteEdit( CustomObject o!, BBjString labelOnRemoteEdit$ )
+    rem /**
+    rem * Method setCallbackForRemoteEdit:
+    rem * set the label or method for handling the "on remote edit" callback
+    rem * @param CustomObject o!: the custom object containing the label or method for handling the "on remote edit" callback
+    rem * @param BBjString labelOnRemoteEdit$: the label or method that handles the "on remote edit" callback
+    rem */
+    method public void setCallbackForRemoteEdit(CustomObject o!, BBjString labelOnRemoteEdit$)
 
         if o!=null() then
             BBjAPI().setCustomEventCallback("SoftLockRemoteEdit",labelOnRemoteEdit$)
@@ -182,23 +257,22 @@ class public SoftLockController
 
     methodend
 
+
+    rem /**
+    rem * Method clearCallbackForSoftlock:
+    rem * clear all calback handlers (for lock, unlock and on remote edit)
+    rem */
     method public void clearCallbackForSoftlock()
 
         #ListNs!.removeCallbackForVariableChange(#NotifyOnLockKey$,err=*next)
 
-        #NotifyOnLockKey$           = ""
-        #NotifyOnLockStartLabel$    = ""
-        #NotifyOnLockStopLabel$     = ""
-        #NotifyOnRemoteEdit$        = ""
-        #NotifyOnLockObject!        = null()
+        #NotifyOnLockKey$ = ""
 
         BBjAPI().clearCustomEventCallback("SoftLockStart")
         BBjAPI().clearCustomEventCallback("SoftLockStop")
         BBjAPI().clearCustomEventCallback("SoftLockRemoteEdit")
 
     methodend
-
-
 
 classend
 
@@ -226,12 +300,9 @@ if a=1 then
     fi
 
     ed!.setCallback(BBjAPI.ON_EDIT_MODIFY,"editmodify")
-
-
 else
     s1!.setCallbackForSoftlock("softlocked", "unsoftlocked")
     s1!.setCallbackForRemoteEdit("remoteedit")
-
 fi
 
 
@@ -264,11 +335,5 @@ remoteedit:
 declare auto BBjCustomEvent edev!
 edev!=BBjAPI().getLastEvent()
 evstring! = edev!.getObject()
-ed!.setText(evstring!.getFieldAsString("VALUE"))
-
-
-
-
-
-
-
+ed!.setText(evstring!.getEditedList().get("FIELD"))
+return
