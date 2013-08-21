@@ -1024,6 +1024,16 @@ class public BusinessComponent
     method public void saveRecord(BBjNumber recno, java.util.HashMap fields!)
 
     methodend
+    
+    rem /**
+    rem * Method saveRecord
+    rem * saves a record within the result set
+    rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
+    rem * @param java.util.HashMap fields!: the fields
+    rem */
+    method public void saveRecord(BBjNumber recno,  DataRow row!)
+
+    methodend    
 
 
     rem /**

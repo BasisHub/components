@@ -279,6 +279,46 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
     methodend
 
+    method public DataRow getNewEntity()
+        methodret #getDataProvider().getNewEntity()
+    methodend
+
+
+    rem /**
+    rem * Method saveRecord
+    rem * saves a record within the result set
+    rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
+    rem * @param java.util.HashMap fields!: the fields
+    rem */
+    method public void saveRecord(BBjNumber recno, DataRow row!)
+
+        if recno=-2 then
+
+            row! = #onBeforeInsert(row!)
+
+            #getDataProvider().insertRecord(row!)
+            #refresh(0)
+            #setEditedRecord(-1)
+        fi
+
+        if recno>-1 then
+            orig_row! = #getResultSet().getItem(recno)
+            rem TODO:  re-read the record from the database, compare to this version
+            rem and abort operation if one of the edited fields has changed in the meantime
+
+            row! = #onBeforeUpdate(row!, orig_row!)
+
+            #getDataProvider().updateRecord(row!, orig_row!)
+            #refresh(0)
+
+            if recno <#getResultSet().size() then
+                #getResultSet().setItem(recno,null())
+            fi
+
+            #setEditedRecord(-1)
+        fi
+
+    methodend
 
     rem /**
     rem * Method saveRecord
@@ -289,7 +329,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
     method public void saveRecord(BBjNumber recno, java.util.HashMap fields!)
 
         if recno=-2 then
-            row! = #getDataProvider().getNewEntity()
+            row! = #getNewEntity()
             ks! = fields!.keySet()
             it!=ks!.iterator()
 
@@ -311,7 +351,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
             rem TODO:  re-read the record from the database, compare to this version
             rem and abort operation if one of the edited fields has changed in the meantime
 
-            row! = #getDataProvider().getNewEntity()
+            row! = #getNewEntity()
 
             ks! = fields!.keySet()
             it!=ks!.iterator()
@@ -353,7 +393,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
         fi
 
         if recno=-2 then
-            row! = #getDataProvider().getNewEntity()
+            row! = #getNewEntity()
             ks! = fields!.keySet()
             it!=ks!.iterator()
 
