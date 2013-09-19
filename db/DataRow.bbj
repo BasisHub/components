@@ -321,7 +321,7 @@ class public DataField
                 #BigDecimalValue! = null()
             else
                 if value! = "" or value! = null() then value!="0"
-                #BigDecimalValue! = new java.math.BigDecimal(value!)
+                #BigDecimalValue! = new java.math.BigDecimal(value!,err=*next)
             fi
         fi
 
