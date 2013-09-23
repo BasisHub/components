@@ -874,6 +874,9 @@ class public DataField
             f! = new DataField(#Name$,#Type$,#StringValue!)
         fi
 
+        if #Type$ = "B" then
+            f! = new DataField(#Name$,#Type$,#BooleanValue!)
+        fi
         rem TODO types TDB
 
         ks! = #Attributes!.keySet()
