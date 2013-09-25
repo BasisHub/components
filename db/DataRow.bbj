@@ -877,6 +877,27 @@ class public DataField
         if #Type$ = "B" then
             f! = new DataField(#Name$,#Type$,#BooleanValue!)
         fi
+        
+        if #Type$ = "I" then
+            f! = new DataField(#Name$,#Type$,#IntegerValue!)
+        fi
+        
+        if #Type$ = "D" then
+            f! = new DataField(#Name$,#Type$,#DateValue!)
+        fi
+
+        if #Type$ = "X" then
+            f! = new DataField(#Name$,#Type$,#TimestampValue!)
+        fi
+          
+        if #Type$ = "Y" then
+            f! = new DataField(#Name$,#Type$,#BigDecimalValue!)
+        fi 
+        
+        if #Type$ = "T" then
+            f! = new DataField(#Name$,#Type$,#TimeValue!)
+        fi                  
+                
         rem TODO types TDB
 
         ks! = #Attributes!.keySet()
