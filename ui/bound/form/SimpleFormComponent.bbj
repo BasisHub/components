@@ -205,7 +205,11 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                     TbPick!.setOpaque(0)
                 fi
 
-
+                if ctrl!.getControlType() = BBjControl.CHECKBOX_CONTROL then
+                   lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$,"LABEL",err=*endif)
+                   ctrl!.setText(lbl$)
+                fi
+                
                 if pos(ctrl_name$=fields$) > 0 then
                     #ControlList!.put(ctrl_name$,ControlMap!)
 
