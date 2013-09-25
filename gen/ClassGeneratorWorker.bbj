@@ -218,7 +218,9 @@ class public ClassGeneratorWorker
             endif
             if base_db$="" base_db$=db$
 
-            JDBCResultSet! = md!.getImportedKeys(base_db$,s$,t$)
+            rem JDBCResultSet! = md!.getImportedKeys(base_db$,s$,t$)
+            rem Fix for Ms SQL
+            JDBCResultSet! = md!.getImportedKeys(null(),null(),t$)
 
             while JDBCResultSet!.next() 
                 declare BBjTemplatedString t!
@@ -491,15 +493,16 @@ class public ClassGeneratorWorker
 
                 cid=cid+1
 
-                if ctrl$="CHECKBOX" then
-                    PRINT (ch)"    "+ctrl$+" "+str(cid)+", """+col_label$+""", 150, "+str(5+row*30)+", "+str(w)+", 20"
-                    PRINT (ch)"        BEGIN"
-                    PRINT (ch)"            NAME """+col_name$+""""
-                    PRINT (ch)"        END"
-                    print (ch)""
-
-                    cid=cid+1
-                endif
+REM Issue #26 the control was created twice
+REM                 if ctrl$="CHECKBOX" then
+REM                     PRINT (ch)"    "+ctrl$+" "+str(cid)+", """+col_label$+""", 150, "+str(5+row*30)+", "+str(w)+", 20"
+REM                     PRINT (ch)"        BEGIN"
+REM                     PRINT (ch)"            NAME """+col_name$+""""
+REM                     PRINT (ch)"        END"
+REM                     print (ch)""
+REM 
+REM                     cid=cid+1
+REM                 endif
 
                 row=row+1
             next i
