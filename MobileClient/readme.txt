@@ -3,3 +3,5 @@ This subtree contains a POC of a mobile PhoneGap client for mobile devices. Key 
 - provide online and offline browsing and editing capabilities
 
 WARNING: this sub-project is work in progress and not meant for production use (yet)!
+
+...
