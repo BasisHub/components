@@ -435,6 +435,7 @@ REM         #getLaf().prepareWindow(panel!)
         #Grid!.setCallback(#Grid!.ON_GRID_COLUMN_SIZE,#this!,"gridColumnSize")
 
         #ScrollBar!.setCallback(BBjAPI.ON_CONTROL_SCROLL,#this!,"onScroll")
+        #getWnd().setCallback(BBjAPI.ON_MOUSE_SCROLL,#this!,"onMouseWheel") 
 
         #MouseLClickTargetObjectList! = new java.util.HashMap()
         #MouseLClickTargetMethodList! = new java.util.HashMap()
@@ -691,6 +692,33 @@ REM         #getLaf().prepareWindow(panel!)
 
     methodend
 
+    method public void onMouseWheel(BBjScrollWheelEvent ev!)
+    
+        BBjAPI().removeTimer("WHEEL",err=*next)
+       
+        p=#ScrollBar!.getScrollPosition()
+        if ev!.getScrollDirection() = 0 then
+            p=min( #ScrollBar!.getScrollMaximum(), p+ ev!.getWheelRotation())
+        else
+            p=max( 0, p - ev!.getWheelRotation())
+        fi
+
+        #ScrollBar!.setScrollPosition(p)
+        
+        BBjAPI().createTimer("WHEEL",.2,#this!,"delayedMouseWheelUpdate")
+REM         #getBC().prepareResultSet(max(0,p-2), p+#Grid!.getVisibleRowCount()+2)
+REM         #pullRowsToGrid(p)
+   
+    methodend
+    
+    method public void delayedMouseWheelUpdate(BBjTimerEvent ev!)
+    
+        BBjAPI().removeTimer("WHEEL")
+        p=#ScrollBar!.getScrollPosition()
+        #getBC().prepareResultSet(max(0,p-2), p+#Grid!.getVisibleRowCount()+2)
+        #pullRowsToGrid(p)
+    
+    methodend
 
     method public void userQueryInterrupt(BBjButtonPushEvent ev!)
 
