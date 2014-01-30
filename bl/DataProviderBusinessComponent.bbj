@@ -194,7 +194,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
         fi
 
         if doIt then
-            v! = #getDataProvider().prepareResultSet(first, last*3)
+            v! = #getDataProvider().prepareResultSet(first, last + min(10,int((first-last) /4)))
 
             if v!.size() then
                 for i=0 to v!.size()-1
