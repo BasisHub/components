@@ -119,6 +119,15 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
         methodret row!
 
     methodend
+    
+    rem /**
+    rem * Method onAfterInsert:
+    rem * called immediately after a row was inserted
+    rem * @param DataRow row!: the row just inserted
+    rem */
+    method protected void onAfterInsert(DataRow row!)
+
+    methodend    
 
     rem /**
     rem * Method onBeforeUpdate:
@@ -139,6 +148,27 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
 
     methodend
 
+    rem * Method onAfterUpdate:
+    rem * called immediately after a row was be updated
+    rem * @param DataRow row!: the row to be updated - new contents
+    rem * @param DataRow orig_row!: the original row from the resultset
+    rem */
+    method protected void onAfterUpdate(DataRow row!, DataRow orig_row!)
+
+    methodend
+
+    rem /**
+    rem * Method onBeforeDelete:
+    rem * called immediately before one or more rows will be deleted
+    rem * @param BBjVector sel!: the selected rows to be deleted
+    rem * @return BBjVector sel!: the rows to be deleted
+    rem */    
+    method public BBjVector onBeforeDelete(BBjVector sel!)
+    
+        methodret sel!
+        
+    methodend 
+    
     rem /**
     rem * Method validateRecord:
     rem * override this method for validating a record before it's written

@@ -327,6 +327,20 @@ class public BusinessComponent
 
 
     rem /**
+    rem * Method setSelection:
+    rem * apply a new selection
+    rem * @param: BBjNumber row:the index  of the row to be selected
+    rem */
+    method public void setSelection(BBjNumber row)
+    
+         
+        #Selection! = new BBjVector()
+        #Selection!.addItem(row)
+        #onSelectionChange()
+
+    methodend
+
+    rem /**
     rem * Method selectRow:
     rem * select a row
     rem * @param: BBjNumber row: row to be selected
@@ -1195,11 +1209,19 @@ class public BusinessComponent
 
     methodend
 
+    rem /**
+    rem * Method onAfterInsert:
+    rem * called immediately after a row was inserted
+    rem * @param DataRow row!: the row just inserted
+    rem */
+    method protected void onAfterInsert(DataRow row!)
+
+    methodend
 
     rem /**
     rem * Method onBeforeUpdate:
-    rem * called immediately before a row will be inserted
-    rem * @param DataRow row!: the row to be inserted
+    rem * called immediately before a row will be updated
+    rem * @param DataRow row!: the row to be updated
     rem * @param DataRow orig_row!: the original row from the resultset
     rem * @return DataRow row!: the row after preparation; null() to abort
     rem */
@@ -1209,6 +1231,25 @@ class public BusinessComponent
 
     methodend
 
+    rem /**
+    rem * Method onAfterUpdate:
+    rem * called immediately after a row was be updated
+    rem * @param DataRow row!: the row to be updated - new contents
+    rem * @param DataRow orig_row!: the original row from the resultset
+    rem */
+    method protected void onAfterUpdate(DataRow row!, DataRow orig_row!)
+
+    methodend
+
+    rem /**
+    rem * Method onBeforeDelete:
+    rem * called immediately before one or more rows will be deleted
+    rem * @param BBjVector sel!: the selected rows to be deleted
+    rem * @return BBjVector sel!: the rows to be deleted
+    rem */    
+    method public BBjVector onBeforeDelete(BBjVector sel!)
+        methodret sel!
+    methodend    
 
     rem /**
     rem * Method validateField:
@@ -1224,6 +1265,9 @@ class public BusinessComponent
         methodret 0
 
     methodend
+
+
+
 
 
     rem /**

@@ -273,10 +273,16 @@ class public DataProviderBusinessComponent extends BusinessComponent
     rem */
     method public void deleteSelectedRecords()
 
-        #getDataProvider().deleteRecords(#getSelection())
-        #setEditedRecord(-1)
-        #refresh(0)
-
+        declare BBjVector sel!
+        sel! = #getSelection()
+        sel! = #onBeforeDelete(sel!)
+        
+        if sel!.size() then 
+            #getDataProvider().deleteRecords(sel!)
+            #setEditedRecord(-1)
+            #refresh(0)
+        fi
+        
     methodend
 
     method public DataRow getNewEntity()
@@ -297,6 +303,9 @@ class public DataProviderBusinessComponent extends BusinessComponent
             row! = #onBeforeInsert(row!)
 
             #getDataProvider().insertRecord(row!)
+            
+            #onAfterInsert(row!)
+            
             #refresh(0)
             #setEditedRecord(-1)
         fi
@@ -309,6 +318,9 @@ class public DataProviderBusinessComponent extends BusinessComponent
             row! = #onBeforeUpdate(row!, orig_row!)
 
             #getDataProvider().updateRecord(row!, orig_row!)
+            
+            #onAfterUpdate(row!, orig_row!)
+            
             #refresh(0)
 
             if recno <#getResultSet().size() then
@@ -342,6 +354,9 @@ class public DataProviderBusinessComponent extends BusinessComponent
             row! = #onBeforeInsert(row!)
 
             #getDataProvider().insertRecord(row!)
+            
+            #onAfterInsert(row!)
+            
             #refresh(0)
             #setEditedRecord(-1)
         fi
@@ -367,6 +382,9 @@ class public DataProviderBusinessComponent extends BusinessComponent
             row! = #onBeforeUpdate(row!, orig_row!)
 
             #getDataProvider().updateRecord(row!, orig_row!)
+            
+            #onAfterUpdate(row!, orig_row!)
+            
             #refresh(0)
 
             if recno <#getResultSet().size() then
