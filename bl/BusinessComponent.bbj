@@ -1114,6 +1114,7 @@ class public BusinessComponent
     rem * override this method before updating a record
     rem * @param java.util.HashMap fields!: the fields to be updated
     rem * @return java.util.HashMap fields!: the fields to be updated
+    rem * @deprecated deprecated - never called from DataProviderBusinessComponent
     rem */
     method public java.util.HashMap beforeUpdateRecord(java.util.HashMap fields!)
 
@@ -1127,6 +1128,7 @@ class public BusinessComponent
     rem * override this method before inserting a record
     rem * @param java.util.HashMap fields!: the fields to be inserted
     rem * @return java.util.HashMap fields!: the fields to be inserted
+    rem * @deprecated deprecated - never called from DataProviderBusinessComponent
     rem */
     method public java.util.HashMap beforeInsertRecord(java.util.HashMap fields!)
 
