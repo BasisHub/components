@@ -13,7 +13,7 @@ sg! = BBjAPI().openSysGui("X0")
 
 bc! = new (DB_NICE)(TBL_NICE)BusinessComponent()
 
-wnd! = sg!.addWindow(0,0,1024,768,bc!.getTitle(),$00080013$ )
+wnd! = sg!.addWindow(0,0,1024,768,bc!.getTitle(),$00080093$ )
 wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
 
 SplitPane! = new SplitPane(wnd!,100,10,10,1000,700)
