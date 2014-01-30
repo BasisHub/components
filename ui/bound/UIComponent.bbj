@@ -784,5 +784,25 @@ class public UIComponent
         methodret form!
 
     methodend
+    
+    rem /**
+    rem * Method getForeignKeyFormLink:
+    rem * get the UIComponent for a foreign key field
+    rem * @param BBjString fieldName$: the foreign key field name
+    rem * @return UIComponent className$: the UIComponent of the foreign key field
+    rem */
+    method public static BBjNumber getToolbarHeight()
+
+        h=25
+
+        bui! = bbjapi().getBuiManager()
+        touch = bui!.isTouchSupported(err=*next)
+
+        if touch then
+            h=50
+        fi
+
+        methodret h
+    methodend 
 
 classend

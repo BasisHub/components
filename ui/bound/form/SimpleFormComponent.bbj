@@ -58,6 +58,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     methodend
 
 
+
     rem /**
     rem * Constructor SimpleFormComponent
     rem * Creates the component by using a given existing BBjWindow
@@ -100,6 +101,15 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
     methodend
 
+
+
+    method public FormEditToolbarComponent getFormEditToolbar()
+        methodret #FormEditToolbar!
+    methodend
+    
+    method public NavigationToolbarComponent getNavigationToolbar()
+        methodret #NavigationToolbar!
+    methodend    
 
     rem /**
     rem * Method getAllControlsRecursive:
@@ -318,13 +328,15 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
             #ToolbarWnd! = #getWnd().addChildWindow(100,0,0,#getWnd().getWidth(),0,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
             #getLaf().prepareWindow(#ToolbarWnd!)
             #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
-
-            #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,200,25)
+            
+            
+            
+            #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,9*UIComponent.getToolbarHeight(),UIComponent.getToolbarHeight())
             if #this!.getBC()<>null() then 
                 #FormEditToolbar!.setBC(#this!.getBC())
             fi
 
-            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,200,2,250,25)
+            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
             if #this!.getBC()<>null() then
                 #NavigationToolbar!.setBC(#this!.getBC())
             fi
@@ -341,8 +353,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         #super!.setShowToolBar(fShow)
         if fShow and #FormWnd! <> null() then
-            #ToolbarWnd!.setSize(#getWnd().getWidth(), 25)
-            #FormWnd!.setLocation(0,26)
+            #ToolbarWnd!.setSize(#getWnd().getWidth(), UIComponent.getToolbarHeight())
+            #FormWnd!.setLocation(0,UIComponent.getToolbarHeight()+1)
             #setSize(#getW(), #getH())
         else
             rem TODO implement hide toolbar
@@ -396,8 +408,8 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         #super!.setSize(w,h)
 
         if #ToolbarWnd! <> null() then
-            #ToolbarWnd!.setSize(w,25)
-            #FormWnd!.setSize(w, h-25)
+            #ToolbarWnd!.setSize(w,UIComponent.getToolbarHeight())
+            #FormWnd!.setSize(w, h-UIComponent.getToolbarHeight())
         else
             #FormWnd!.setSize(w, h)
         fi
