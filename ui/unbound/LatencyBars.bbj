@@ -1,6 +1,7 @@
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
 
 
-class public LatencyBars
+class public LatencyBars implements UIWidget
 
 
     field private BBjVector BarImgs!
