@@ -795,11 +795,15 @@ class public UIComponent
 
         h=25
 
-        bui! = bbjapi().getBuiManager()
-        touch = bui!.isTouchSupported(err=*next)
+        r$=rev
 
-        if touch then
-            h=50
+        if num(r$(4))>13.10 then
+            bui! = bbjapi().getBuiManager()
+            touch = bui!.isTouchSupported(err=*next)
+    
+            if touch then
+                h=50
+            fi
         fi
 
         methodret h
