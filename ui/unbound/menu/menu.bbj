@@ -1,0 +1,136 @@
+class public MenuItem
+
+    field public  BBjString Caption!
+    field private BBjString IconFileName!
+    field private MenuItem Parent!
+    field private BBjVector Children! = new BBjVector()
+    field private BBjString RunProgram!
+    field private BBjString Wd!
+    field private BBjString Cfg!
+    field private BBjString Args!
+
+    method private MenuItem()
+    methodend
+
+
+    method public MenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!, BBjString runprog!, BBjString wd!, BBjString cfg!, BBjString args!)
+
+        #this!(parentItem!, caption!, iconFilename!)
+        #RunProgram! = runprog!
+        #Wd! = wd!
+        #Cfg! = cfg!
+        #Args! = args!
+
+    methodend
+
+    method public MenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!)
+
+        #Caption! = caption!
+        #IconFileName! = iconFilename!
+        
+        #Parent! = parentItem!
+        if #Parent! <> null() then
+            #Parent!.addChild(#this!)
+        fi
+
+    methodend
+
+    method public void setRunProgram(BBjString runprog!)
+
+        #RunProgram! = runprog!
+
+    methodend
+
+    method public void doScall()
+       
+        if #RunProgram! <>null() then
+            s$="bbj "
+            if #Wd! >"" then
+                s$=s$+"-WD"+#Wd!+" "
+            fi
+            if #Cfg! >"" then
+                s$=s$+"-c"+#Cfg!+" "
+            fi
+            s$=s$+#RunProgram!+" "
+            if #Args!>"" then
+                s$=s$+" - "+#Args!
+            fi
+            s$=s$+"&"
+            a=scall(s$)
+        else
+            ? 'RB',
+        fi
+        
+
+    methodend
+
+
+    method public void addChild(MenuItem item!)
+        #Children!.addItem(item!)
+    methodend
+
+    method public BBjVector getChildren()
+        methodret #Children!
+    methodend
+
+    method public BBjString getIconFileName()
+
+        methodret str(IconFileName!)
+
+    methodend
+
+    method public BBjImage getImage()
+
+        if #IconFileName! <> null() and #IconFileName! <> "" then
+            img! = BBjAPI().getSysGui().getImageManager().loadImageFromFile(#IconFileName!,err=*next)
+        fi
+        methodret img!
+
+    methodend
+
+classend
+
+rem ##################################################################################################
+rem class Menu
+rem ##################################################################################################
+
+class public Menu 
+
+    
+    field private MenuItem RootItem! = new MenuItem(null(),"root","")
+
+    method public MenuItem addMenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!)
+
+        if parentItem! = null() then
+            parentItem! = #RootItem!
+        fi
+        item! = new MenuItem(parentItem!, caption!, iconFilename!)
+        methodret item!
+
+    methodend
+
+    method public MenuItem addMenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!,BBjString runprog!, BBjString wd!, BBjString cfg!, BBjString args!)
+
+
+        if parentItem! = null() then
+            parentItem! = #RootItem!
+        fi
+        item! = new MenuItem(parentItem!, caption!, iconFilename!, runprog!, wd!, cfg!, args!)
+
+        
+
+        methodret item!
+
+    methodend
+
+    method public BBjVector getChildren(MenuItem item!)
+
+        if item! = null() then
+            methodret #RootItem!.getChildren()
+        else
+            methodret item!.getChildren()
+        fi
+
+    methodend
+
+classend
