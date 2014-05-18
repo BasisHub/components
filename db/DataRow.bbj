@@ -375,7 +375,7 @@ class public DataField
             fi
 
             if value>0 then
-                #DateValue! = new java.sql.Date(num(date(value:"%Yl")), num(date(value:"%Mz")), num(date(value:"%Dz")) )
+                #DateValue! = java.sql.Date.valueOf(date(value:"%Yl-%Mz-%Dz")) 
             fi
         fi
 
@@ -389,7 +389,7 @@ class public DataField
             fi
 
             if value>0 then
-                #TimestampValue! = new java.sql.Date(num(date(value:"%Yl")), num(date(value:"%Mz")), num(date(value:"%Dz")) )
+                #TimestampValue! = java.sql.Date.valueOf(date(value:"%Yl-%Mz-%Dz"))
             fi
         fi
 
@@ -745,7 +745,7 @@ class public DataField
     method public BBjNumber getValueAsNumber()
 
         if #Type$="C" then
-            ret=num(#StringValue!)
+            if #StringValue!<>null() then  ret=num(#StringValue!) else ret = 0
         fi
 
         if #Type$="N" then
@@ -877,28 +877,28 @@ class public DataField
         if #Type$ = "B" then
             f! = new DataField(#Name$,#Type$,#BooleanValue!)
         fi
-        
-        if #Type$ = "I" then
+
+                if #Type$ = "I" then
             f! = new DataField(#Name$,#Type$,#IntegerValue!)
         fi
-        
-        if #Type$ = "D" then
+
+                if #Type$ = "D" then
             f! = new DataField(#Name$,#Type$,#DateValue!)
         fi
 
         if #Type$ = "X" then
             f! = new DataField(#Name$,#Type$,#TimestampValue!)
         fi
-          
-        if #Type$ = "Y" then
+
+                  if #Type$ = "Y" then
             f! = new DataField(#Name$,#Type$,#BigDecimalValue!)
         fi 
-        
-        if #Type$ = "T" then
+
+                if #Type$ = "T" then
             f! = new DataField(#Name$,#Type$,#TimeValue!)
         fi                  
-                
-        rem TODO types TDB
+
+                        rem TODO types TDB
 
         ks! = #Attributes!.keySet()
         it! = ks!.iterator()
