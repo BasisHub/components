@@ -222,7 +222,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                 
                 if pos(ctrl_name$=fields$) > 0 then
                     #ControlList!.put(ctrl_name$,ControlMap!)
-
                     rem now register the necessary events
                     ctrl!.setCallback(BBjAPI.ON_GAINED_FOCUS,#this!,"onCtrlGainedFocus",err=*next)
                     ctrl!.setCallback(BBjAPI.ON_LOST_FOCUS,#this!,"onCtrlLostFocus",err=*next)
@@ -407,7 +406,7 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
 
         #super!.setSize(w,h)
 
-        if #ToolbarWnd! <> null() then
+        if #ToolbarWnd! <> null() AND #this!.getShowToolBar() then
             #ToolbarWnd!.setSize(w,UIComponent.getToolbarHeight())
             #FormWnd!.setSize(w, h-UIComponent.getToolbarHeight())
         else
@@ -1253,5 +1252,12 @@ REM                 print "Fields:",#EditedFields!
         fi
 
     methodend
+
+    method protected BBjControl getControl(BBjString name$)
+    
+        methodret #FormWnd!.getControl(name$)
+    
+    methodend
+    
 
 classend
