@@ -8,6 +8,7 @@ use ::components/ui/bound/grid/NavigationGridComponentConfigDialog.bbj::Navigati
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
 use ::components/ui/unbound/GoogleMapsAreaChooserDialog.bbj::GoogleMapsAreaChooserDialog
+use ::components/util/Util.bbj::Util
 use ::translations/bbtranslator.bbj::BBTranslator
 use ::components/i18n/i18n.bbj::i18n
 
@@ -829,7 +830,7 @@ REM         #pullRowsToGrid(p)
         declare NavigationGridComponentSelChangeEvent ev!
         ev! = new NavigationGridComponentSelChangeEvent()
         ev!.setSelectedRecords(#this!.getSelectedRows())
-        #super!.invokeCallback(#SelChangeTargetObject!, #SelChangeTargetMethod$, ev!)
+        Util.invoke(#SelChangeTargetObject!, #SelChangeTargetMethod$, ev!)
 
     methodend
 
@@ -897,7 +898,7 @@ REM         #pullRowsToGrid(p)
             ev!.setSelectedRow(row)
 
             if target! <> null() then
-                #super!.invokeCallback(target!,methodName!, ev!)
+                Util.invoke(target!,methodName!, ev!)
             else
                 BBjAPI().postPriorityCustomEvent(methodName!,ev!)
             fi
@@ -1055,7 +1056,7 @@ REM         #pullRowsToGrid(p)
                     ev!.setValue(#Grid!.getCellText(row,col))
                     ev!.setSelectedRecord(#FilteredGridContents!.getItem(row))
                     ev!.setSelectedRow(row)
-                    #super!.invokeCallback(target!,methodName!, ev!)
+                    Util.invoke(target!,methodName!, ev!)
                 fi
             fi
         fi
@@ -1156,14 +1157,14 @@ REM         #pullRowsToGrid(p)
             id=id-2000
             item! = #RowContextMenuList!.get(id)
             #TmpPopupMenuEvent!.setMenuID(item!.getID())
-            #super!.invokeCallback(item!.getTargetObject(),item!.getTargetMethod(), #TmpPopupMenuEvent!)
+            Util.invoke(item!.getTargetObject(),item!.getTargetMethod(), #TmpPopupMenuEvent!)
         fi
 
         if id>1000 then
             id=id-1000
             item! = #CellContextMenuList!.get(id)
             #TmpPopupMenuEvent!.setMenuID(item!.getID())
-            #super!.invokeCallback(item!.getTargetObject(),item!.getTargetMethod(), #TmpPopupMenuEvent!)
+            Util.invoke(item!.getTargetObject(),item!.getTargetMethod(), #TmpPopupMenuEvent!)
         fi
 
     methodend
