@@ -6,11 +6,10 @@ use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
 
 use ::components/i18n/i18n.bbj::i18n
-
+use ::util/string/json.bbj::json
 
 class public GoogleMapsComponent extends UIComponent implements UIWidget
 
-    field public static BBjString ApiKey$ ="ABQIAAAAap0HEV-ixXMRUaYIBuBfmRT77L4N76s2HcFsGSkrxDTwKN97jRQmWLW6hTKLmlPz92AuJhUvgis35Q"
 
     field private WebBrowserComponent BrowserWidget!
     field private BBjProgressBar      ProgressBar!
@@ -197,7 +196,7 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget
 
     method public void onSelectionChange()
 
-        if #TbShowAllOrSelected! <> null() and #TbShowAllOrSelected!.isSelected() then
+        if #TbShowAllOrSelected! = null() or #TbShowAllOrSelected!.isSelected() then
             #displayData()
         fi
 
@@ -306,7 +305,8 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget
 
             #ProgressBar!.setMinimum(0)
 
-            if #TbShowAllOrSelected!.isSelected() then
+            
+            if #TbShowAllOrSelected!=null() or #TbShowAllOrSelected!.isSelected() then
 
                 if #getBC().getSelection().size() then
                     #ProgressBar!.setMaximum(#getBC().getSelection().size()-1)
@@ -543,48 +543,49 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget
 
             methodret LatLong!
 
+
         fi
 
-        url$="http://maps.google.com/maps/geo?key="+#ApiKey$+"&output=csv&q="
-
-        if #ApiKey$="" then
-            throw "set Google API Key with .setApiKey first",18
+        ApiKey$=stbl("GOOGLE_MAPS_API_KEY",err=*next)
+        if ApiKey$="" then
+            throw "set Google API Key as STBL(""GOOGLE_MAPS_API_KEY"") first",18
             rem url$="http://maps.google.com/maps/geo?sensor=false&output=csv&q="
         fi
 
 
+        url$="https://maps.googleapis.com/maps/api/geocode/json?address="+adr$+"&sensor=true_or_false&key="+ApiKey$
 
 
-        url$="http://maps.google.com/maps/geo?key="+#ApiKey$+"&output=csv&q="
-
-        url$=url$+adr$
-
-        wait 1
+        wait .01
 
         url! = new java.net.URL(url$)
         yc! = url!.openConnection()
-        ir! = new java.io.InputStreamReader(yc!.getInputStream())
+        ir! = new java.io.InputStreamReader(yc!.getInputStream(),err=skip)
         in! = new java.io.BufferedReader(ir!)
 
-        inputLine! = in!.readLine()
+        while 1
+          inputLine! = in!.readLine()
+          if inputLine! = null() then break
+          result$=result$+str(inputLine!)
+        wend
         in!.close()
 
-
-        temp![] = inputLine!.split(",")
-
-        if num(temp![0]) = 200 then
-            lat$ = temp![2]
-            lng$ = temp![3]
-        else
-            a=msgbox(#super!.getTranslator().getTranslation("GOOGLE_RETURNED_ERROR")+" "+temp![0])
-
-            if geocache then
-                close (geocache)
-            fi
-
-            throw "Google returned Error "+temp![0],num(temp![0])
-        fi
-
+        
+        
+        if pos("""status"" : ""OK"""=result$)=0 then goto skip
+        
+        
+        lat$=result$(pos("""lat"" : "=result$)+7)
+        lat$=cvs(lat$(1,pos(","=lat$)-1),144)
+        
+        
+        lng$=result$(pos("""lng"" : "=result$)+7)
+        lng$=cvs(lng$(1,pos("}"=lng$)-1),144)
+                
+        
+        REM FIXME: use clean json parsing!
+        
+        
         LatLong!.setFieldValue("LAT",lat$)
         LatLong!.setFieldValue("LONG",lng$)
 
@@ -597,6 +598,9 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget
         fi
 
         methodret LatLong!
+
+skip:
+    methodret null()
 
     methodend
 
@@ -646,8 +650,10 @@ classend
 
 prefix "../../../ "+pfx
 
+rem set valid google maps api key to run this demo
+dummy$=stbl("GOOGLE_MAPS_API_KEY","xxxxxx")
 
-GoogleMapsComponent.setApiKey("ABQIAAAAap0HEV-ixXMRUaYIBuBfmRT77L4N76s2HcFsGSkrxDTwKN97jRQmWLW6hTKLmlPz92AuJhUvgis35Q")
+
 a1!= GoogleMapsComponent.getLatLong("Feldstr. 25","66127","Saarbrücken","","Deutschland")
 a2!= GoogleMapsComponent.getLatLong("5901 Jefferson Street NE","87109-3432","Albuquerque","NM","USA")
 a3!= GoogleMapsComponent.getLatLong("Treppenstraße 53","66787","Wadgassen","","Deutschland")
