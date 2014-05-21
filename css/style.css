@@ -1,0 +1,431 @@
+/* @override 
+	http://localhost:8888/buires/4745E5E9B16BCF8C456AAB4518B4951F.css
+
+	http://localhost:8888/buires/16DC6C8722A8023191B6669CF1B2AB7A.css */
+
+/* 
+==========================================================
+Global and BASIS overrides
+==========================================================
+*/
+.BBjControl {
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -o-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+
+    /* iPhone-specific stuff */
+    -webkit-tap-highlight-color: rgba(0,0,0,0.0) !important;
+}
+
+body {
+    margin: 8px auto;
+    padding: 0;
+	display: block;
+    overflow: hidden;	
+    color: #f0f0f0;
+	background: url('/files/Demos/BUI-MusicInventory/default.png') no-repeat center top #2b2b2b;
+	font: small-caps bolder 16px "Lucida Grande", Lucida, Verdana, sans-serif;
+	text-align: center !important;
+	text-shadow: 0 1px 1px #444;
+	
+	/* iPhone-specific stuff */
+	-webkit-tap-highlight-color: rgba(255,255,255,0.2) !important;
+}
+
+a, a:visited {
+	border: 1px solid #333;
+	text-decoration: none !important;
+    color: #606060;
+    padding: 2px 20px 6px 20px;
+/*    background: #606060 !important;*/
+    -webkit-border-radius: 5px;
+    -moz-border-radius:    5px;
+    border-radius:         5px;
+	-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+	-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+	text-shadow: 0 1px 0 #fff;
+	background: #e0e0e0;
+	background: -moz-linear-gradient(top,  #ffffff 1%, #ffffff 2%, #ededed 44%, #e0e0e0 45%, #bfbfbf 97%, #8c8c8c 97%, #7f7f7f 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#ffffff), color-stop(2%,#ffffff), color-stop(44%,#ededed), color-stop(45%,#e0e0e0), color-stop(97%,#bfbfbf), color-stop(97%,#8c8c8c), color-stop(100%,#7f7f7f));
+	background: -webkit-linear-gradient(top,  #ffffff 1%,#ffffff 2%,#ededed 44%,#e0e0e0 45%,#bfbfbf 97%,#8c8c8c 97%,#7f7f7f 100%);
+	background: -o-linear-gradient(top,  #ffffff 1%,#ffffff 2%,#ededed 44%,#e0e0e0 45%,#bfbfbf 97%,#8c8c8c 97%,#7f7f7f 100%);
+	background: -ms-linear-gradient(top,  #ffffff 1%,#ffffff 2%,#ededed 44%,#e0e0e0 45%,#bfbfbf 97%,#8c8c8c 97%,#7f7f7f 100%);
+	background: linear-gradient(top,  #ffffff 1%,#ffffff 2%,#ededed 44%,#e0e0e0 45%,#bfbfbf 97%,#8c8c8c 97%,#7f7f7f 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#7f7f7f',GradientType=0 );
+	
+}
+
+a:hover, a:visited:hover {
+	border-color: #3c5899;
+    color: #3c5899;
+	background: #e7efff;
+	background: -moz-linear-gradient(top,  #ffffff 1%, #fcfcff 2%, #e7efff 44%, #d3e1ff 45%, #a6c2fa 97%, #6d89c1 97%, #5672aa 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#ffffff), color-stop(2%,#fcfcff), color-stop(44%,#e7efff), color-stop(45%,#d3e1ff), color-stop(97%,#a6c2fa), color-stop(97%,#6d89c1), color-stop(100%,#5672aa));
+	background: -webkit-linear-gradient(top,  #ffffff 1%,#fcfcff 2%,#e7efff 44%,#d3e1ff 45%,#a6c2fa 97%,#6d89c1 97%,#5672aa 100%);
+	background: -o-linear-gradient(top,  #ffffff 1%,#fcfcff 2%,#e7efff 44%,#d3e1ff 45%,#a6c2fa 97%,#6d89c1 97%,#5672aa 100%);
+	background: -ms-linear-gradient(top,  #ffffff 1%,#fcfcff 2%,#e7efff 44%,#d3e1ff 45%,#a6c2fa 97%,#6d89c1 97%,#5672aa 100%);
+	background: linear-gradient(top,  #ffffff 1%,#fcfcff 2%,#e7efff 44%,#d3e1ff 45%,#a6c2fa 97%,#6d89c1 97%,#5672aa 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#5672aa',GradientType=0 );
+	
+}
+
+/*  Remove the blue border around the BUI application */
+.gwt-TabLayoutPanel, .gwt-TabLayoutPanelContentContainer, .gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {   
+    border-width: 0 !important;
+}
+
+/* Remove the window tab scrollbuttons that sometimes appear*/
+.gwt-PushButton.scrollLeft, .gwt-PushButton.scrollRight {
+	visibility: hidden;
+}
+
+/* ======================================================== 
+	BBj Control Customization
+   ======================================================== */
+
+.BBjStaticText, .BBjButton, .BBjListBox {
+	-webkit-user-select: none !important;
+	-khtml-user-select: none !important;
+	-moz-user-select: none !important;
+	-ms-user-select: none !important;
+	-o-user-select: none !important;
+	user-select: none !important; 
+}
+
+/* MSGBOX Customization */
+.dialogMiddleCenter {
+	background: #404040 !important;
+	color: #fff;
+	text-shadow: 0 1px 2px black;
+}
+.Caption {
+	color: #303030;
+	text-shadow: 0 1px 0 #ffffff;
+}
+.basis-msgbox-button {
+	outline: none;
+}
+/* Turn off all outines in Chrome */
+.BBjControl {
+	outline: none;
+}
+
+/* Customized window backdrop */
+.windowBG {
+    background-color: transparent !important;
+    border-width: 0 !important;
+}
+
+
+/* ======================================================== 
+	BBjListBox
+   ======================================================== */
+.BBjListBox {
+	white-space: normal !important;
+	border: 1px solid #555 !important;
+	border-top-width: 0px !important;
+	background: #fff;
+}
+
+.categoryHeader {
+	border-bottom: 1px solid #2e4a6b;
+	height: 25px;
+	color: #fcfdfe;
+	font: bolder 18px Tahoma, Geneva, sans-serif;
+	text-shadow: 0 1px 3px rgba(0,0,0,0.75);
+	background: #7d94b0;
+	background: -moz-linear-gradient(top,  #e6e6e6 0%, #b5c0ce 2%, #96a6bb 33%, #889bb3 50%, #7f94b0 50%, #6d83a1 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e6e6e6), color-stop(2%,#b5c0ce), color-stop(33%,#96a6bb), color-stop(50%,#889bb3), color-stop(50%,#7f94b0), color-stop(100%,#6d83a1));
+	background: -webkit-linear-gradient(top,  #e6e6e6 0%,#b5c0ce 2%,#96a6bb 33%,#889bb3 50%,#7f94b0 50%,#6d83a1 100%);
+	background: -o-linear-gradient(top,  #e6e6e6 0%,#b5c0ce 2%,#96a6bb 33%,#889bb3 50%,#7f94b0 50%,#6d83a1 100%);
+	background: -ms-linear-gradient(top,  #e6e6e6 0%,#b5c0ce 2%,#96a6bb 33%,#889bb3 50%,#7f94b0 50%,#6d83a1 100%);
+	background: linear-gradient(top,  #e6e6e6 0%,#b5c0ce 2%,#96a6bb 33%,#889bb3 50%,#7f94b0 50%,#6d83a1 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e6e6e6', endColorstr='#6d83a1',GradientType=0 );
+}
+
+.itemBG {
+	color: #444;
+	height: 45px !important;
+	border-top: 1px solid #fff;
+	border-bottom: 1px solid #888;
+	font: 10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	text-align: left;
+	background: url('/files/Demos/BUI-MusicInventory/listItemBG.png') no-repeat left top;
+}
+
+.discImage {
+	background: url('/files/Demos/BUI-MusicInventory/iconCD.png') no-repeat 4px center;
+	width: 55px !important;
+/*	border: 1px solid #333;*/
+}
+
+.recordImage {
+	background: url('/files/Demos/BUI-MusicInventory/iconRecord.png') no-repeat 4px center;
+	width: 55px !important;
+/*	border: 1px solid #333;*/
+}
+
+/* This provides high resolution images for retina-display iPhones, iPads, etc. */
+@media only screen and (-moz-min-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
+  .discImage {
+	background: url('/files/Demos/BUI-MusicInventory/iconCD@2x.png') no-repeat 4px center;
+	background-size: 43px 43px;
+	width: 55px !important;
+  }
+  .recordImage {
+  	background: url('/files/Demos/BUI-MusicInventory/iconRecord@2x.png') no-repeat 4px center;
+  	background-size: 43px 43px;
+  	width: 55px !important;
+  }
+}
+
+.disclosureImage {
+	background: url('/files/Demos/BUI-MusicInventory/disclosure@2x.png') no-repeat left center;
+	background-size: 10px 13px;
+	width: 18px !important;
+/*	border: 1px solid #333;*/
+}
+
+.infoArtist {
+/*	border: 1px solid #333;*/
+	font: bold 16px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	line-height: 15px;
+	color: #1d4558;
+	text-shadow: 0 1px 0 #ffffff;
+}
+.infoTitle {
+/*	border: 1px solid #333;*/
+	color: #202428;
+	font-size: 12px;
+	line-height: 15px;
+	text-shadow: 0 1px 0 #ffffff;
+	overflow: hidden !important;
+	white-space: nowrap;
+}
+.infoMisc {
+/*	border: 1px solid #333;*/
+	font-size: 8px;
+	line-height: 12px;
+	color: #606468;
+	font-variant: small-caps;
+	text-shadow: 0 1px 0 #f2f2f2;
+}
+
+.infoMiscValue {
+	font-size: 10px;
+}
+
+/* This modifies the font color of a listbox item when you click on it */
+/*.itemBG:active .infoArtist {
+	color: #111;
+}
+.itemBG:active .infoTitle, .itemBG:active .infoMisc {
+	color: #222;
+}*/
+
+/* ======================================================== 
+	Top Gradient Bar
+   ======================================================== */
+.topGradientBar {
+	background: transparent;
+	text-align: center !important;
+	text-shadow: 0 2px 0 #888, 0 4px 4px #000 !important;
+	color: #f1f2f4 !important;
+	font: bolder 22px Tahoma, Geneva, sans-serif !important;
+	border-bottom: 1px solid #000;
+	padding-top:  5px;
+}
+
+
+/* ======================================================== 
+	Exit Button
+   ======================================================== */
+.exitButton {
+    font: bolder 17px Tahoma, Geneva, sans-serif !important;
+    color:  #bbb !important;
+	background: rgba(255,255,255,.15) !important;
+    -webkit-border-radius: 50px;
+    -moz-border-radius:    50px;
+    border-radius:         50px;
+    border: 1px solid rgba(255,255,255,.2) !important;
+}
+
+.exitButton:hover {   
+	background: #bbbec5;
+	background: -moz-linear-gradient(top,  #f2f5fd 0%, #f2f5fd 3%, #9da0a8 100%) !important;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f2f5fd), color-stop(3%,#f2f5fd), color-stop(100%,#9da0a8)) !important;
+	background: -webkit-linear-gradient(top,  #f2f5fd 0%,#f2f5fd 3%,#9da0a8 100%) !important;
+	background: -o-linear-gradient(top,  #f2f5fd 0%,#f2f5fd 3%,#9da0a8 100%) !important;
+	background: -ms-linear-gradient(top,  #f2f5fd 0%,#f2f5fd 3%,#9da0a8 100%) !important;
+	background: linear-gradient(top,  #f2f5fd 0%,#f2f5fd 3%,#9da0a8 100%) !important;
+	color: #1d4558 !important;
+	text-shadow: 0 1px 0 white;
+	border: 1px solid #5c6674 !important;
+}
+.exitButton:active {
+    color: #842b34 !important;
+}
+
+/* ======================================================== 
+	Detail View
+   ======================================================== */
+.backButton {
+	background: rgba(255,255,255,.1) !important;
+	border-width: 0;
+	border-bottom: 1px solid #666 !important;
+	border-left: 1px solid #585858 !important;
+	border-right: 1px solid #585858 !important;
+	font: bold 12px Tahoma, Geneva, sans-serif !important;
+	text-shadow: 0 -1px 0px #444;
+	-webkit-border-radius: 5px;
+	-moz-border-radius:    5px;
+	border-radius:         5px;
+	-moz-box-shadow: inset 0 1px 4px #000;
+	-webkit-box-shadow: inset 0 1px 4px #000;
+	box-shadow: inset 0 1px 4px #222;
+}
+.backButton:hover{
+	background: rgba(255,255,255,.2) !important;
+}
+.backButton:active {
+	background: rgba(255,255,255,.3) !important;
+	color: #fff;
+}
+
+
+.albumArt {
+}
+
+.detailAlbumArt {
+	text-align: center;
+}
+
+.detailAlbumArt img {
+	text-align: left;
+	border: 5px solid #f0f0f0;
+	-webkit-border-radius: 2px;
+	-moz-border-radius:    2px;
+	border-radius:         2px;
+	-webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+	-moz-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+	width: 100px;
+	height: 100px;
+	margin: 2px;
+}
+
+.detailAlbumArtInfo {
+	padding: 0px 0px 0px 10px;
+	font: bold 14px/22px "Lucida Grande", Lucida, Verdana, sans-serif;
+	width: 220px;
+}
+.detailAlbumArtInfoArtist {
+	font-size: 17px;
+	color: #000;
+}
+
+.detailAlbumArtInfoTitle {
+	color: #444;
+}
+
+/* The ListBox for the album details */
+.albumDetails, .albumDetails .GALD-WOM {
+	background: transparent !important;
+	border-width: 0 !important;
+	text-align: left;
+}
+
+.detailTable td {
+/*	border: 1px solid #333;*/
+	text-shadow: 0 1px 0 #fff;
+	font-size: 14px;
+}
+
+.detailSpacer {
+	height: 8px;
+}
+
+.detailTitle {
+	background: transparent;
+	color: #5e697d;
+	text-shadow: 0 1px 1px #eee !important;
+	font: bold 18px Tahoma, Geneva, sans-serif !important;
+	height:  30px;
+}
+
+.detailLabel {
+	background: #f5f5f5;
+	color: #516691;
+	text-align: right;
+	border-bottom: 1px solid #cacaca;
+	border-top: 1px solid #fff;
+	border-left: 2px solid #a6acb1;
+	height: 30px;
+	padding: 0px 5px 0px 5px;
+	font: bold 12px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+	width: 50px !important;
+}
+
+.detailValue {
+	background: #f5f5f5;
+	color: #111;
+	border-bottom: 1px solid #cacaca;
+	border-top: 1px solid #fff;
+	border-right: 2px solid #a6acb1;
+	padding: 0px 5px 2px 0px;
+	font: bold 13px "Lucida Grande", Lucida, Verdana, sans-serif !important;
+}
+
+.topLeft {
+	-webkit-border-top-left-radius: 10px;
+	-moz-border-radius-topleft: 10px;
+	border-top-left-radius: 10px;
+	border-top: 2px solid #a6acb1;
+}
+.topRight {
+	-webkit-border-top-right-radius: 10px;
+	-moz-border-radius-topright: 10px;
+	border-top-right-radius: 10px;
+	border-top: 2px solid #a6acb1;
+}
+.bottomLeft {
+	-webkit-border-bottom-left-radius: 10px;
+	-moz-border-radius-bottomleft: 10px;
+	border-bottom-left-radius: 10px;
+	border-bottom: 2px solid #a6acb1;
+}
+.bottomRight {
+	-webkit-border-bottom-right-radius: 10px;
+	-moz-border-radius-bottomright: 10px;
+	border-bottom-right-radius: 10px;
+	border-bottom: 2px solid #a6acb1;
+}
+
+
+/* Show/Hide a control by sliding it off/on the screen */
+.animated {
+	-webkit-transition: all .3s ease-in-out !important; 
+	-moz-transition:    all .3s ease-in-out !important; 
+	-ms-transition:     all .3s ease-in-out !important; 
+	-o-transition:      all .3s ease-in-out !important; 
+}
+.invisible { 
+    left: -485px !important;
+}
+.visible { 
+    left: 0px !important;
+}
+.fadeOut {
+	opacity: 0;
+}
+.slideUpFromBottom {
+	transform: translate(0px,-65px);
+	-ms-transform: translate(0px,-65px);
+	-webkit-transform: translate(0px,-65px);
+	-o-transform: translate(0px,-65px);
+	-moz-transform: translate(0px,-65px);
+}

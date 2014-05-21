@@ -1,0 +1,451 @@
+.BBjButton:not(.bbj-disabled):hover,
+.BBjButton:not(.bbj-disabled):active {
+  text-shadow: none;
+  box-shadow: none;
+  color: inherit;
+  background: inherit;
+  border-color: inherit;
+  margin-top: 0;
+}
+body {
+  background: #fcfcfc;
+}
+@font-face {
+  font-family: SourceSansPro-ExtraLight;
+  src: url('/files/fonts/SourceSansPro-ExtraLight.ttf');
+}
+@font-face {
+  font-family: SourceSansPro-Light;
+  src: url('/files/fonts/SourceSansPro-Light.ttf');
+}
+@font-face {
+  font-family: SourceSansPro-Regular;
+  src: url('/files/fonts/SourceSansPro-Regular.ttf');
+}
+@font-face {
+  font-family: SourceSansPro-Semibold;
+  src: url('/files/fonts/SourceSansPro-Semibold.ttf');
+}
+@font-face {
+  font-family: SourceSansPro-Bold;
+  src: url('/files/fonts/SourceSansPro-Bold.ttf');
+}
+@font-face {
+  font-family: AdventPro-Thin;
+  src: url('/files/fonts/AdventPro-Thin.ttf');
+}
+@font-face {
+  font-family: AdventPro-ExtraLight;
+  src: url('/files/fonts/AdventPro-ExtraLight.ttf');
+}
+@font-face {
+  font-family: AdventPro-Light;
+  src: url('/files/fonts/AdventPro-Light.ttf');
+}
+@font-face {
+  font-family: AdventPro-Regular;
+  src: url('/files/fonts/AdventPro-Regular.ttf');
+}
+@font-face {
+  font-family: AdventPro-Medium;
+  src: url('/files/fonts/AdventPro-Medium.ttf');
+}
+@font-face {
+  font-family: AdventPro-Semibold;
+  src: url('/files/fonts/AdventPro-SemiBold.ttf');
+}
+@font-face {
+  font-family: AdventPro-Bold;
+  src: url('/files/fonts/AdventPro-Bold.ttf');
+}
+@font-face {
+  font-family: FontinSans;
+  src: url('/files/fonts/Philosopher-Bold.ttf');
+}
+/*  Reload Message 
+ *
+ */
+.terminatedMessage {
+  text-align: center;
+  margin-top: 10px;
+}
+.terminatedMessage a,
+.terminatedMessage a:visited {
+  text-decoration: none !important;
+  font: normal 20px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  padding: 5px 10px 7px 10px;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
+  border-radius: 6px;
+  -webkit-transition: all 0.2s ease-out !important;
+  -moz-transition: all 0.2s ease-out !important;
+  -ms-transition: all 0.2s ease-out !important;
+  -o-transition: all 0.2s ease-out !important;
+  background: #607f9f;
+  color: #d1d9e0;
+  /* iPhone-specific stuff */
+
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+}
+.terminatedMessage a:hover,
+.terminatedMessage a:visited:hover {
+  color: #ffcc66;
+  background: #56738f;
+}
+.terminatedMessage a:active,
+.terminatedMessage a:visited:active {
+  color: #ffb31a;
+  background: #4d6680;
+}
+.BBjTabCtrl-contentContainer {
+  border-width: 0;
+}
+.windowBG {
+  border: 1px solid #c9cccf;
+}
+.BBjTopLevelWindow,
+.BBjWindowManager-contentContainer {
+  border-width: 0 !important;
+  border-radius: 0 !important;
+}
+/* Customized window backdrop for iOS */
+.mobileDevice.windowBG {
+  border-width: 0 !important;
+}
+.BBjControl {
+  font: normal 15px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #222;
+  outline: none !important;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Prevent the iOS devices from selecting/copying anything */
+
+  -webkit-touch-callout: none;
+  /* iPhone-specific stuff */
+
+  -webkit-tap-highlight-color: transparent !important;
+}
+.topGradientBar {
+  font: normal 18px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  background: rgba(255, 255, 255, 0.85);
+  text-align: center !important;
+  padding-top: 7px;
+  border-bottom: 1px solid #c9cccf;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.075);
+  letter-spacing: 4px;
+  word-spacing: 3px;
+  text-shadow: none;
+  border-top-width: 0;
+  background: rgba(66, 102, 138, 0.85);
+  color: #fafafa;
+  border-width: 0;
+  box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 0 !important;
+  -webkit-transition: all 0.4s ease-out !important;
+  -moz-transition: all 0.4s ease-out !important;
+  -ms-transition: all 0.4s ease-out !important;
+  -o-transition: all 0.4s ease-out !important;
+}
+.exitButton {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  border-radius: 30px;
+  -webkit-transition: all 0.2s ease-out !important;
+  -moz-transition: all 0.2s ease-out !important;
+  -ms-transition: all 0.2s ease-out !important;
+  -o-transition: all 0.2s ease-out !important;
+  box-shadow: none !important;
+}
+.exitButton:hover {
+  border-color: #ffcc66 !important;
+}
+.BBjButton.exitButton:active,
+.exitButton.BBjControl.BBjButton:not(.bbj-disabled).gwt-PushButton-down-hovering {
+  border-color: #ffb31a !important;
+}
+.backButton {
+  background: transparent !important;
+  border-width: 0 !important;
+  text-align: left !important;
+  box-shadow: none !important;
+  color: #d1d9e0;
+}
+.backButton:before {
+  content: ' <';
+  font: normal 36px "AdventPro-Medium", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  line-height: 26px !important;
+}
+.BBjButton.backButton:hover {
+  color: #ffcc66;
+}
+.BBjButton.backButton:active,
+.backButton.BBjControl.BBjButton:not(.bbj-disabled).gwt-PushButton-down-hovering {
+  color: #ffb31a;
+}
+/* List Box */
+.BBjListBox,
+.BBjListBox:hover {
+  white-space: normal !important;
+  border-width: 0 !important;
+  border-radius: 0px;
+  background: #eff0f0 !important;
+}
+.BBjListBox-item {
+  padding: 0px 10px 0px 10px !important;
+  border-width: 0px !important;
+}
+.BBjListBox-item:hover,
+.BBjListBox-item:not(bbj-disabled):hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-width: 0px !important;
+}
+.BBjListBox-item.bbj-selected {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-width: 0px !important;
+}
+.categoryHeader {
+  font: normal 16px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  letter-spacing: 2px !important;
+  word-spacing: 1px !important;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15), 0 1px 0px rgba(255, 255, 255, 0.6);
+  font-family: "Trebuchet MS" !important;
+  line-height: 22px !important;
+  color: #bf4040;
+  background: #dde0e3;
+  height: 21px;
+  text-align: center !important;
+  margin-top: 15px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border: 1px solid #c9cccf !important;
+}
+.categoryHeader:after {
+  white-space: pre !important;
+  content: ' \266A';
+}
+/* HTML Styles */
+.titleBarSpacer {
+  height: 40px !important;
+}
+td.itemBG {
+  background: #ffffff;
+  border-bottom: 1px solid #c9cccf !important;
+  border-left: 1px solid #c9cccf !important;
+  border-right: 1px solid #c9cccf !important;
+  cursor: hand !important;
+  height: 55px !important;
+}
+td.itemBG:hover {
+  background: #f7f9fc;
+}
+.BBjListBox-item:not(.bbj-disabled):active td {
+  text-shadow: none;
+}
+td {
+  font: normal 14px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #222;
+}
+td .infoTitle {
+  font: normal 16px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #0d6cf2;
+}
+td.disclosureImage:after {
+  content: '>';
+  font: normal 30px "AdventPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  line-height: 28px !important;
+  color: #e3e5e8;
+  padding-right: 5px;
+}
+td:hover .disclosureImage:after {
+  color: #abb1ba;
+}
+td .infoSubTitle {
+  font: normal 14px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+td .infoMisc {
+  font: normal 11px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  padding-bottom: 2px;
+}
+td .infoMiscValue {
+  font: normal 12px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #202020;
+}
+.icon {
+  width: 55px !important;
+  background-size: 40px 40px;
+  opacity: .75;
+}
+
+/* Detail BBjListBox - let background image show through */
+.albumDetails,
+.albumDetails:hover {
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+/* Detail Listing */
+.backdrop img {
+  position: absolute;
+  height: 110%;
+  width: auto;
+  top: -5%;
+  left: -5%;
+}
+.landscape .backdrop img {
+  width: 110%;
+  height: auto;
+}
+.detailTable {
+  padding-top: 45px;
+}
+.detailAlbumArt {
+  text-align: center;
+  width: 100px;
+  height: 100px;
+  border-width: 0;
+  padding-top: 5px;
+  padding-left: 15px;
+}
+.detailAlbumArt img {
+  text-align: left;
+  width: 104px;
+  height: 104px;
+}
+.detailTitle {
+  font: normal 26px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #0d6cf2;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  /*
+    border: 1px solid hsla(215, 0%, 0%, .1);
+    background: hsla(215, 0%, 100%, .2);
+    padding-left: 4px;
+    margin-right:-30px;
+    .borderRadius;
+    */
+
+}
+.detailAlbumArtInfo {
+  padding-left: 10px;
+}
+.detailAlbumArtInfoArtist {
+  font: normal 25px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+.detailAlbumArtInfoTitle {
+  font: normal 25px "SourceSansPro-ExtraLight", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+.detailLabel {
+  font: normal 14px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  padding-left: 15px;
+  width: 22%;
+}
+.detailValue {
+  font: normal 16px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+  padding: 2px 0 2px 0;
+}
+.detailCopyright {
+  font: normal 12px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  -webkit-border-radius: 15px;
+  -moz-border-radius: 15px;
+  -ms-border-radius: 15px;
+  -o-border-radius: 15px;
+  border-radius: 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 3px 1px 3px 1px;
+}
+.detailSpacer {
+  height: 12px;
+}
+/* Show/Hide a control by sliding it off/on the screen */
+.animated {
+  -webkit-transition: all 0.4s ease-out !important;
+  -moz-transition: all 0.4s ease-out !important;
+  -ms-transition: all 0.4s ease-out !important;
+  -o-transition: all 0.4s ease-out !important;
+}
+.animatedFast {
+  -webkit-transition: all 0.2s ease-out !important;
+  -moz-transition: all 0.2s ease-out !important;
+  -ms-transition: all 0.2s ease-out !important;
+  -o-transition: all 0.2s ease-out !important;
+}
+.invisible {
+  left: -485px !important;
+}
+.visible {
+  left: 0 !important;
+}
+.fadeOut {
+  opacity: 0;
+}
+/* Browser-specific stuff */
+.BBjListBox {
+  scrollbar-track-color: #eff0f0 !important;
+  scrollbar-arrow-color: #eff0f0 !important;
+  scrollbar-face-color: #eff0f0 !important;
+  scrollbar-shadow-color: #eff0f0 !important;
+}
+.BBjListBox::-webkit-scrollbar {
+  width: 0 !important;
+}
+
+
+.BBjGroupBox {
+-webkit-box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
+-moz-box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
+box-shadow: 0 0 0pxrgba(0, 0, 0, 0.25);
+border: 0px;
+-webkit-border-radius: 0px;
+-moz-border-radius: 0px;
+-ms-border-radius: 0px;
+-o-border-radius: 0px;
+border-radius: 10px;
+-webkit-border-bottom-right-radius: 3.1px;
+-webkit-border-bottom-left-radius: 3.1px;
+-moz-border-radius-bottomright: 3.1px;
+-moz-border-radius-bottomleft: 3.1px;
+border-bottom-right-radius: 3.1px;
+border-bottom-left-radius: 3.1px;
+border-color: #8c8c8c;
+background: none !important;
+}
+
+.BBjEditBox, .bbj-password, .BBjInputE, .BBjInputN, .BBjInputD, .BBjCEdit, .BBjCEdit.bbj-bordered, .BBjListBox, .BBjListEdit, .BBjTree, .BBjHtmlView, .BBjUserAuthentication-user, .BBjUserAuthentication-password, .BBjFileChooser-fileGridPanel, .BBjFileChooser-fileName {
+/* -webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.25); */
+-moz-box-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+/* box-shadow: 0 0 2px rgba(0, 0, 0, 0.25); */
+/* border: 1px solid #8c8c8c; */
+/* -webkit-border-radius: 2px; */
+-moz-border-radius: 2px;
+-ms-border-radius: 2px;
+-o-border-radius: 2px;
+/* border-radius: 2px; */
+/* background-color: #fcfcfd; */
+/* color: #262626; */
+opacity: 1.0;
+cursor: default;
+box-shadow: 0 0 0px rgba(0, 0, 0, 0);
+border: 0px;
+font: normal 15px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+
+.BBjInputE.bbj-disabled {
+opacity: 1.0;
+cursor: default;
+box-shadow: 0 0 0px rgba(0, 0, 0, 0);
+border: 0px;
+}
+
+.BBjGroupBox legend {
+color: #2466a8;
+font: normal 22px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}

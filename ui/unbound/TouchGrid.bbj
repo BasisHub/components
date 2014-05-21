@@ -1,0 +1,188 @@
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/db/DataRow.bbj::DataRow
+use ::components/util/Util.bbj::Util
+
+class public TouchGrid implements UIWidget
+
+
+    field private BBjChildWindow    CwCanvas!
+    field private BBjListBox        LbList!
+    field private BBjVector         DataSet!
+    field private BBjString         RowTemplate$
+    
+    field private Object            SelChangeObject!
+    field private BBjString         SelChangeMethod$
+    
+    field private static BBjNumber ON_SELCHANGE=100
+    
+    method private TouchGrid()
+
+
+    methodend
+
+    method public BBjNumber ON_SELCHANGE()
+        methodret #ON_SELCHANGE
+    methodend 
+
+    method public TouchGrid(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        #CwCanvas! = wnd!.addChildWindow(id,x,y,w,h,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #LbList! = #CwCanvas!.addListBox(200,0,0,w,h,"")
+        #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
+    methodend
+
+    method public void setSize(BBjNumber w, BBjNumber h)
+
+        #CwCanvas!.setSize(w,h)
+        #LbList!.setSize(w,h)
+        
+    methodend
+
+    method public void setLocation(BBjNumber x, BBjNumber y)
+
+        #CwCanvas!.setLocation(x,y)
+        
+    methodend
+
+    method public voic clear()
+        #DataSet! = new BBjVector()
+    methodend
+    
+    method public void addItem(DataRow row!)
+          if #DataSet! = null() then
+            #DataSet! = new BBjVector()
+          fi
+          #DataSet!.addItem(row!)
+          #updateUI()
+    methodend
+    
+    method public void setItems(BBjVector v!)
+        
+        #DataSet! = v!
+        #updateUI()
+        
+    methodend
+    
+    method public void updateUI()
+    
+        #LbList!.removeAllItems()
+        
+        v! = new BBjVector()
+        it! = #DataSet!.iterator()
+        while it!.hasNext()
+            
+            r! = it!.next()
+            v!.addItem(r!.replaceFields(#RowTemplate$))
+
+        wend
+        
+        #LbList!.insertItems(0,v!)
+    
+    methodend
+    
+    method public void setRowTemplate(BBjString html$)
+        #RowTemplate$ = html$
+    methodend
+    
+    method public void setCallback(BBjNumber event, Object o!, BBjString method$)
+    
+        #SelChangeObject! = o!
+        #SelChangeMethod$ = method$
+    
+    methodend
+    
+    method public void onListSelChange(BBjListClickEvent ev!)
+    
+        sel = ev!.getSelectedIndex()
+        rem a=msgbox(str(sel),0,"Touch!")
+        if sel>-1 and #SelChangeObject!<>null() and #SelChangeMethod$<>"" then
+            Util.invoke(#SelChangeObject!, #SelChangeMethod$, sel)
+        fi
+        #LbList!.deselectAll()
+        #LbList!.focus()
+        if sel>-1 then
+            #LbList!.selectIndex(sel)
+        fi
+    methodend
+
+classend
+
+BBjAPI().getConfig().setOptionSetting("FAST_TOUCH_CLICK", 1)
+
+wnd! = BBjAPI().openSysGui("X0").addWindow(10,10,800,700,"TEST")
+wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
+
+c! = new TouchGrid(wnd!,100,10,10,300,600)
+c!.setRowTemplate("
+:<html>
+:    <table border=0 cellpadding=0 cellspacing=0 width=""100%"" height=""100%"">
+:        <tr>
+:            <td class=""itemBG"">
+:                <table border=0 cellpadding=0 cellspacing=0 width=""100%"" height=""100%"">
+:                  <tr>
+:                    <td rowspan=3 class=""icon"" align='center'><img src='$F{ICONURL}' width='32' height='32'></td>
+:                    <td colspan=3 class=""infoTitle"">$F{FIRSTNAME} $F{NAME}</td>
+:                    <td rowspan=3 class=""disclosureImage""></td>
+:                  </tr>
+:                  <!--
+:                  <tr>
+:                    <td colspan=3 class=""infoSubTitle"">%%title%%</td>
+:                  </tr>
+:                  <tr>
+:                    <td class=""infoMisc"">CD:    <span class=""infoMiscValue"">%%cdnumber%%</span></td>        
+:                    <td class=""infoMisc"">Rec:   <span class=""infoMiscValue"">%%recordingtype%%</span></td>   
+:                    <td class=""infoMisc"">Label: <span class=""infoMiscValue"">%%label%%</span></td>   
+:                  </tr>
+:                  -->
+:                </table>
+:            </td>
+:        </tr>
+:    </table>
+:</html>
+:")
+
+r! = new DataRow()
+r!.setFieldValue("NAME","Mouse")
+r!.setFieldValue("FIRSTNAME","Mickey")
+r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/shwz/disney/48/mickey-mouse-icon.png")
+c!.addItem(r!)
+
+r! = new DataRow()
+r!.setFieldValue("NAME","Duck")
+r!.setFieldValue("FIRSTNAME","Donald")
+r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Donald-Duck-2-icon.png")
+c!.addItem(r!)
+
+r! = new DataRow()
+r!.setFieldValue("NAME","Pluto")
+r!.setFieldValue("FIRSTNAME","")
+r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Pluto-2-icon.png")
+c!.addItem(r!)
+
+l! = new listener()
+c!.setCallback(c!.ON_SELCHANGE(),l!,"onClick")
+
+? 'HIDE'
+wnd!.focus()
+
+process_events
+byebye:bye
+
+
+class public listener
+
+    method public void onClick(Object o!)
+        a=msgbox(o!.toString())
+    methodend
+
+classend 
+
+
+
+
+
+
+
+
+
+
