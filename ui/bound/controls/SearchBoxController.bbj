@@ -1,0 +1,108 @@
+rem package components.ui.bound.controls
+
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+use com.basis.lucene.BBjSearchGizmo
+use com.basis.lucene.BBjSearchGizmoDoc
+
+dir$="D:\\ORSTM01.index\\"
+
+
+
+class public SearchBoxController 
+
+    field private BBjControl        BoundCtrl!
+    field private BusinessComponent BC!
+    field private BBjString         Fieldname$
+    
+    field private BBjVector         Fields!
+    field private BBjSearchGizmo    SearchEngine!
+    rem /**
+    rem * Constructor SearchBox
+    rem * Default Constructor
+    rem */
+    method private SearchBoxController()
+        
+    methodend
+
+    rem this is lucene based for multiple fields
+    method public SearchBoxController(BBjInputE ctrl!, BusinessComponent bc!, BBjString IDField$,BBjVector fields!,  BBjString indexDir$)
+    
+        #Fieldname$ = IDField$
+        #Fields! = fields!
+        #SearchEngine! = new BBjSearchGizmo(indexDir$)
+
+        #BoundCtrl! = ctrl!
+        ctrl!.setPassEnter(0)
+        #setBC(bc!)
+        ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onInputKeypress")
+        #setQueryFilter("nooop")
+    
+    methodend
+
+
+    rem this is standard SQL based for one field
+    method public SearchBoxController(BBjInputE ctrl!, BusinessComponent bc!, BBjString fieldname$)
+        
+        #Fieldname$ = fieldname$
+
+        #BoundCtrl! = ctrl!
+        ctrl!.setPassEnter(0)
+        #setBC(bc!)
+        ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onInputKeypress")
+        #setQueryFilter("nooop")
+
+    methodend
+    
+    method public void onInputKeypress( BBjInputKeypressEvent ev!)
+        
+        if ev!.getKeyCode()<>13 then methodret
+        
+        t$=ev!.getControl().getText()
+        if len(t$)<2 then methodret
+        #setQueryFilter(t$)
+    
+    methodend
+
+
+    method private void setQueryFilter(BBjString search$)
+        QueryFilter! = new java.util.HashMap()
+
+        if #SearchEngine! <> null() then
+            s! = cvs(search$,35)
+            search$="*"+s!.replace(" ","* *")+"*"
+            
+            fields! =  java.lang.reflect.Array.newInstance(Class.forName("java.lang.String"),#Fields!.size())
+            for i=0 to #Fields!.size()-1
+                java.lang.reflect.Array.set(fields!,i,#Fields!.getItem(i))
+            next 
+            
+            result! = #SearchEngine!.doSearch(search$,fields!)
+            
+            v!=new BBjVector()
+            
+            it! = result!.iterator()
+            while it!.hasNext()
+            
+                v!.addItem(it!.next())
+            
+            wend
+            
+            if v!.size() = 0 then
+                v!.addItem("blabla_noop")
+                rem TODO load the MRU list instead
+            fi
+            
+            QueryFilter!.put(#Fieldname$,v!)
+            
+        else
+            v!=new BBjVector()
+            v!.addItem("%"+search$+"%")
+            QueryFilter!.put(#Fieldname$,v!)
+        fi
+        
+        #BC!.setQueryFilter(QueryFilter!)         
+    methodend
+
+classend
