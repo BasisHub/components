@@ -1,0 +1,56 @@
+class public Util
+
+    rem /**
+    rem * Method invoke:
+    rem * invoke a method in a given class and pass an object with data
+    rem * @param Object obj!: the object that holds the method that will be called
+    rem * @param BBjString nethodName$: the name of the method
+    rem * @param Object payload!: the object that is passed to the method
+    rem */
+    method public static void invoke(Object obj!, BBjString methodName$, Object payload!)
+
+        if obj!<>null() and methodName$>"" and payload! <> null() then
+
+            x$="obj!."+methodname$+"(payload!)"
+            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
+            ch=unt
+            open (ch)temp$
+            write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+            close (ch)
+            call temp$
+            erase temp$
+        fi
+
+    methodend
+    
+    rem /**
+    rem * Method static newInstance:
+    rem * create a new instance for a given class name
+    rem * @param BBjString class$: the name of the class
+    rem * @return Object: the new instance of the given class name
+    rem */
+    method public static Object newInstance(BBjString class$)
+
+        x$="x! = new "+class$+"()"
+        temp$ = str(java.io.File.createTempFile("blabla", ".call"))
+        ch=unt
+        open (ch)temp$
+        write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+        close (ch)
+        call temp$
+        erase temp$
+
+        methodret x!
+
+        REM searching for something like 
+        REM 
+        REM class! =  CustomObject.forName("::oeval.bbj::foo")
+        REM y! = class!.newInstance()
+        REM 
+        REM OR
+        REM 
+        REM y! = CustomObject.newInstance("::oeval.bbj::foo")
+
+    methodend    
+
+classend
