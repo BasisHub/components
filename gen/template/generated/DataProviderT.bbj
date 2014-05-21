@@ -32,6 +32,7 @@ class public (DB_NICE)(TBL_NICE)DataProviderT extends DataProvider
     method protected void setupDatabaseLink()
 
         #setDataSource("(DB)")
+        #setDataSource(STBL("DATABASE",err=*next))
         #setSQL("SELECT * FROM (TBL)")
         #setPrimaryTable("(TBL)")
         <keyseg>
