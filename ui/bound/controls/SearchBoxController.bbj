@@ -80,7 +80,8 @@ class public SearchBoxController
 
         if #SearchEngine! <> null() then
             s! = cvs(search$,35)
-            search$="*"+s!.replace(" ","* *")+"*"
+            search$="+*"+s!.replace(" ","* +*")+"*"
+            rem search$=s!.replace(" ","* ")+"*"
             
             fields! =  java.lang.reflect.Array.newInstance(Class.forName("java.lang.String"),#Fields!.size())
             for i=0 to #Fields!.size()-1
@@ -110,14 +111,14 @@ class public SearchBoxController
             v!.addItem("%"+search$+"%")
             QueryFilter!.put(#Fieldname$,v!)
         fi
-        
+       
         #BC!.setQueryFilter(QueryFilter!)
         
     if INFO(3,6)="5" and b! <> null() then
         b!.setVisible(0)
     fi
     
-        
+         
     methodend
 
 classend
