@@ -32,7 +32,7 @@ class public TouchGridComponent extends UIComponent implements UIWidget
         #TouchGrid! = new TouchGrid(cw!,100,0,0,cw!.getWidth(),cw!.getHeight())
         #TouchGrid!.setCallback(#TouchGrid!.ON_SELCHANGE(),#this!,"onGridSelChange")
         
-        #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,"bupkis"))
+        #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,"Geen resultaten..."))
         #ResultInfo!.addStyle("TouchGridResultinfo")
 
     methodend
@@ -62,6 +62,9 @@ class public TouchGridComponent extends UIComponent implements UIWidget
         #TouchGrid!.setRowTemplate(html$)
     methodend
 
+    method public void loadRowTemplate(BBjString file$)
+        #TouchGrid!.loadRowTemplate(file$)
+    methodend
 
     method public void refresh( BBjNumber resetFilter)
 

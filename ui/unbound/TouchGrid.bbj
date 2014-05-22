@@ -84,6 +84,21 @@ class public TouchGrid implements UIWidget
         #RowTemplate$ = html$
     methodend
     
+    method public void loadRowTemplate(BBjString file$)
+    
+        ch=unt
+        open (ch)file$
+        while 1
+            read record (ch,siz=1000,end=*break)l$
+            t$=t$+l$
+        wend
+        close (ch)
+
+        #RowTemplate$ = t$
+        
+    
+    methodend
+    
     method public void setCallback(BBjNumber event, Object o!, BBjString method$)
     
         #SelChangeObject! = o!
