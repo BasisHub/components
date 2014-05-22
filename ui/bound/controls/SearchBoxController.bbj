@@ -37,7 +37,7 @@ class public SearchBoxController
         ctrl!.setPassEnter(0)
         #setBC(bc!)
         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onInputKeypress")
-        #setQueryFilter("nooop")
+        #prepareQueryFilter("nooop")
     
     methodend
 
@@ -51,7 +51,7 @@ class public SearchBoxController
         ctrl!.setPassEnter(0)
         #setBC(bc!)
         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onInputKeypress")
-        #setQueryFilter("nooop")
+        #prepareQueryFilter("nooop")
 
     methodend
     
@@ -61,12 +61,21 @@ class public SearchBoxController
         
         t$=ev!.getControl().getText()
         if len(t$)<2 then methodret
-        #setQueryFilter(t$)
+        #this!.prepareQueryFilter(t$)
     
     methodend
 
 
-    method private void setQueryFilter(BBjString search$)
+    method private void prepareQueryFilter(BBjString search$)
+    
+    
+    if INFO(3,6)="5" then
+        bui! = bbjapi().getBuiManager()
+        b! = bui!.getBusyIndicator(err=*next)
+        rem b!.setText("Busy...")
+        b!.setVisible(1)
+    fi
+
         QueryFilter! = new java.util.HashMap()
 
         if #SearchEngine! <> null() then
@@ -102,7 +111,13 @@ class public SearchBoxController
             QueryFilter!.put(#Fieldname$,v!)
         fi
         
-        #BC!.setQueryFilter(QueryFilter!)         
+        #BC!.setQueryFilter(QueryFilter!)
+        
+    if INFO(3,6)="5" and b! <> null() then
+        b!.setVisible(0)
+    fi
+    
+        
     methodend
 
 classend
