@@ -328,6 +328,11 @@ class public DataProvider
     rem */
     method public DataRow getAttributesRecord()
 
+        declare auto BBjVector fieldnames!
+        v! = #prepareResultSet(0,0)
+        rec! = #getResultSet().getItem(0)
+        fieldnames! = rec!.getFieldNames()
+        
         #openDatabase()
 
         md! = #Connection!.getMetaData()
@@ -340,6 +345,10 @@ class public DataProvider
         while JDBCResultSet!.next()
             col_type=JDBCResultSet!.getInt("DATA_TYPE")
             col_name$=JDBCResultSet!.getString("COLUMN_NAME")
+
+            if (! fieldnames!.contains(col_name$)) then 
+                continue
+            fi
 
             switch col_type
                 case java.sql.Types.VARCHAR
