@@ -124,7 +124,7 @@ class public ForeignKeyPicker extends UIComponent
             fi
 
             c! = #BoundCtrl!
-            c!.setEditable(0)
+            c!.setEditable(0,err=*next)
             rem TODO: allow direct entry of key values
         fi
 
