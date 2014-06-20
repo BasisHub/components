@@ -101,7 +101,28 @@ class public ClassGeneratorWorker
 
     methodend
 
+    rem /**
+    rem * Method getBBjDDProperty:
+    rem * get data dictionary property for a column in a database table
+    rem * @param BBjString db$: database name
+    rem * @param BBjString table$: table name
+    rem * @param BBjString prop$: the property name
+    rem * @return BBjString value: the value of column property
+    rem */
+    method private BBjString getBBjDDProperty(BBjString db$, BBjString table$, BBjString prop$)
 
+        database! = #Admin!.getDatabase(db$,err=noDB1)
+        rem TODO: connection pools?
+
+        tab! = database!.getTable(table$)
+
+        r$ = tab!.getString(prop$,err=*next)
+
+        noDB1:
+        methodret r$
+
+    methodend
+    
     rem /**
     rem * Method generateProperties:
     rem * generate the label's (fieldname label's) for the GUI (.arc) files.
@@ -416,6 +437,12 @@ class public ClassGeneratorWorker
             for i=1 to rsmd!.getColumnCount()
                 col_name$ = rsmd!.getColumnName(i)
 
+                tmp$ = #getBBjDDProperty(#DB$, t$, col_name$,"OBSOLETE",err=*next)
+                
+                if tmp$="true" then
+                    continue
+                fi
+                
                 col_label$ = #getBBjDDProperty(#DB$, t$, col_name$,BBjAdminColumn.DESCRIPTION)
                 if  col_label$ = "" then
                     col_label$ = rsmd!.getColumnLabel(i)
@@ -556,6 +583,18 @@ REM                 endif
         x$=#replace(x$,"(DB_NICENAME)",db_nicename$)
         x$=#replace(x$,"(TBL_NICE)",tbl_nice$)
 
+        while pos("(TBLPROP:"=x$)
+            y0$=x$(pos("(TBLPROP:"=x$))
+            y0$=y0$(1,pos(")"=y0$))
+            y1$=y0$(pos(":"=y0$)+1)
+            y1$=y1$(1,len(y1$)-1)
+            
+            y2$= #getBBjDDProperty(#DB$, t$, y1$)
+            x$=#replace(x$,y0$,y2$)
+
+        wend
+                    
+
         if pos("<keyseg>"=x$) then
             x1$=x$(1,pos("<keyseg>"=x$)-1)
             x2$=x$(pos("</keyseg>"=x$)+9)
@@ -620,8 +659,10 @@ REM                 endif
                         y0$=y0$(1,pos(")"=y0$))
                         y1$=y0$(pos(":"=y0$)+1)
                         y1$=y1$(1,len(y1$)-1)
+                        
                         y2$= #getBBjDDProperty(#DB$, t$, col_name$,y1$)
                         x$=#replace(x$,y0$,y2$)
+
                     wend
                     if (i=flds!.size()-1) and len(x$)=len(col_name$)+1 and x$(len(x$),1)="," then
                         x$=x$(1,len(x$)-1)
