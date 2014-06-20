@@ -270,6 +270,12 @@ class public ClassGeneratorWorker
                 data_type$=#getSQLTypeAsString(JDBCResultSet!.getInt("DATA_TYPE"))
                 col_name$=JDBCResultSet!.getString("COLUMN_NAME")
 
+                tmp$="false"
+                tmp$ = #getBBjDDProperty(#DB$, t$, col_name$,"OBSOLETE",err=*next)
+                if tmp$="true" then
+                    continue
+                fi
+                
                 t!.setFieldValue("DATA_TYPE",data_type$)
                 t!.setFieldValue("COLUMN_NAME",col_name$)
                 v!.addItem(t!)
@@ -617,7 +623,9 @@ REM                 endif
                         y2$= #getBBjDDProperty(#DB$, t$, col_name$,y1$)
                         x$=#replace(x$,y0$,y2$)
                     wend
-
+                    if (i=flds!.size()-1) and len(x$)=len(col_name$)+1 and x$(len(x$),1)="," then
+                        x$=x$(1,len(x$)-1)
+                    fi
                     x1$=x1$+x$
                 next 
             endif
