@@ -506,7 +506,7 @@ class public ClassGeneratorWorker
                     PRINT (ch)"        BEGIN"
                     rem PRINT (ch)"        JUSTIFICATION 32768"
                     rem right justify
-                    PRINT (ch)"            NAME """+t$+"."+col_name$+".label"""
+                    PRINT (ch)"            NAME """+col_name$+".label"""
                     PRINT (ch)"        END"
                     print (ch)""
 
@@ -521,7 +521,7 @@ class public ClassGeneratorWorker
                     rem TODO: choose a better control for very large fields, like a CEdit
                 fi
 
-                PRINT (ch)"            NAME """+t$+"."+col_name$+""""
+                PRINT (ch)"            NAME """+col_name$+""""
 
                 if ctrl$="INPUTE" then
                     PRINT (ch)"            PADCHARACTER 32"
