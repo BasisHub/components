@@ -383,7 +383,7 @@ class public ClassGeneratorWorker
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
         
-        classname$= #getBBjDDProperty(#DB$, t$, "CLASSNAME")
+        classname$= cvs(#getBBjDDProperty(#DB$, t$, "CLASSNAME"),128)
         if classname$>"" then
             tbl_nice$=classname$
         fi
@@ -506,7 +506,7 @@ class public ClassGeneratorWorker
                     PRINT (ch)"        BEGIN"
                     rem PRINT (ch)"        JUSTIFICATION 32768"
                     rem right justify
-                    PRINT (ch)"            NAME """+col_name$+".label"""
+                    PRINT (ch)"            NAME """+t$+"."+col_name$+".label"""
                     PRINT (ch)"        END"
                     print (ch)""
 
@@ -521,7 +521,7 @@ class public ClassGeneratorWorker
                     rem TODO: choose a better control for very large fields, like a CEdit
                 fi
 
-                PRINT (ch)"            NAME """+col_name$+""""
+                PRINT (ch)"            NAME """+t$+"."+col_name$+""""
 
                 if ctrl$="INPUTE" then
                     PRINT (ch)"            PADCHARACTER 32"
@@ -585,7 +585,7 @@ REM                 endif
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
         
-        classname$= #getBBjDDProperty(#DB$, t$, "CLASSNAME")
+        classname$= cvs(#getBBjDDProperty(#DB$, t$, "CLASSNAME"),128)
         if classname$>"" then
             tbl_nice$=classname$
         fi
@@ -636,7 +636,13 @@ REM                 endif
                     t! = ks!.getItem(i)
 
                     x$=x3$
-                    x$=#replace(x$,"(PKTABLE_NAME_NICE)",#nice(t!.getFieldAsString("PKTABLE_NAME")))
+                    
+                    PKTABLE_NAME_NICE$=#nice(t!.getFieldAsString("PKTABLE_NAME"))
+                    pk_classname$= cvs(#getBBjDDProperty(#DB$,t!.getFieldAsString("PKTABLE_NAME"), "CLASSNAME"),128)
+                    if pk_classname$>"" then
+                        PKTABLE_NAME_NICE$=pk_classname$
+                    fi                    
+                    x$=#replace(x$,"(PKTABLE_NAME_NICE)",PKTABLE_NAME_NICE$)
                     x$=#replace(x$,"(PKTABLE_NAME)",t!.getFieldAsString("PKTABLE_NAME"))
                     x$=#replace(x$,"(PKCOLUMN_NAME)",t!.getFieldAsString("PKCOLUMN_NAME"))
                     x$=#replace(x$,"(FKCOLUMN_NAME)",t!.getFieldAsString("FKCOLUMN_NAME"))
