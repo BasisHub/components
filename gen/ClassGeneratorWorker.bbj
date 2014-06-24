@@ -382,6 +382,12 @@ class public ClassGeneratorWorker
         db_nice$=iff(#Prepend,#nice(#DB$),"")
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
+        
+        classname$= #getBBjDDProperty(#DB$, t$, "CLASSNAME")
+        if classname$>"" then
+            tbl_nice$=classname$
+        fi
+                
         ch=unt
 
         ftpl$ = tpl$
@@ -566,8 +572,8 @@ REM                 endif
     method public void generateFile(BBjString tpl$,  BBjString s$, BBjString t$, BBjString targetdir$)
 
         mkdir targetdir$,err=*next
-        ch=unt
 
+        ch=unt
         open (ch)tpl$
         read record (ch,siz=512000)X$
         close (ch)
@@ -578,6 +584,11 @@ REM                 endif
         db_nice$=iff(#Prepend,#nice(#DB$),"")
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
+        
+        classname$= #getBBjDDProperty(#DB$, t$, "CLASSNAME")
+        if classname$>"" then
+            tbl_nice$=classname$
+        fi
 
         x$=#replace(x$,"(DB_NICE)",db_nice$)
         x$=#replace(x$,"(DB_NICENAME)",db_nicename$)
@@ -724,14 +735,15 @@ REM                 endif
             tpl$=tpl$(pos("\"=tpl$)+1)
         wend
 
+        f$=targetdir$+db_nice$+tbl_nice$+tpl$
+        
         if !#Overwrite then
             if pos("T.bbj"=tpl$)=0 then
                  ch1=unt
-                 open (ch1,err=*next)targetdir$+db$+t$+tpl$; close (ch1); goto skip
+                 open (ch1,err=*next)f$; close (ch1); goto skip
             endif
         fi
 
-        f$=targetdir$+db_nice$+tbl_nice$+tpl$
         open (ch,mode="O_CREATE,O_TRUNC")f$
         write (ch)x$
         close (ch)
