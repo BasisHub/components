@@ -1,0 +1,60 @@
+if INFO(3,6)<>"5" then 
+    ::components/util/Util.bbj::Util.runAsBui(pgm(-1))
+fi
+
+
+
+use ::ui/(DB_NICE)(TBL_NICE)TouchScreenCombo.bbj::(DB_NICE)(TBL_NICE)TouchScreenCombo
+use ::DialogWizard/DialogWizardRun.bbj::DialogWizardRun
+
+listpagesize$ = stbl("!LIST_PAGE_SIZE","20")
+BBjAPI().getConfig().setOptionSetting("FAST_TOUCH_CLICK", 1)
+
+sg! = BBjAPI().openSysGui("X0")
+
+screenSize! = BBjAPI().getSysGui().getSystemMetrics().getScreenSize()
+wnd! = sg!.addWindow(0,0,screenSize!.width,screenSize!.height,"",$01081010$ )
+
+ 
+wnd!.setCallback(BBjAPI.ON_SCREEN_RESIZE,"resize")
+wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
+
+cw!     = wnd!.addChildWindow(100,0,40,300,300,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+ctc!    = new (DB_NICE)(TBL_NICE)TouchScreenCombo(cw!)
+
+h = wnd!.getHeight()
+w = wnd!.getWidth()
+
+ctc!.setSize(w,h-60)
+
+myTopBar! = wnd!.addStaticText(110, 0, 0, w, 40, "")
+myTopBar!.setName("topGradientBar")
+
+myStatusBar! = wnd!.addStaticText(112, 0, h-20, w, 20, "") 
+myStatusBar!.setName("topGradientBar")
+
+wnd!.addImage(111,0,0,2500,40,"components/css/banner.png")
+
+REM Exit Button
+myExit! = wnd!.addButton(200, w-24-8, 8, 30, 30, "")
+myExit!.setName("exitButton")
+myExit!.setCallback(BBjAPI.ON_BUTTON_PUSH, "byebye")
+
+
+wnd!.setVisible(1)
+
+process_events
+
+byebye:
+    bye
+
+resize:
+    ev! = BBjAPI().getLastEvent()
+    w = ev!.getWidth()
+    h = ev!.getHeight()
+    myTopBar!.setSize(w,40)
+    myStatusBar!.setSize(w,20)
+    myStatusBar!.setLocation(0, h-20)
+    myExit!.setLocation(w-24-8,8)
+    ctc!.setSize(w,h-80)
+return
