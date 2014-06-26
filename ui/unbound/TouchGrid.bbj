@@ -113,8 +113,8 @@ class public TouchGrid implements UIWidget
         if sel>-1 and #SelChangeObject!<>null() and #SelChangeMethod$<>"" then
             Util.invoke(#SelChangeObject!, #SelChangeMethod$, sel)
         fi
-        #LbList!.deselectAll()
-        #LbList!.focus()
+         #LbList!.deselectAll()
+REM        #LbList!.focus()
         if sel>-1 then
             #LbList!.selectIndex(sel)
         fi
