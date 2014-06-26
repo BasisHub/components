@@ -511,4 +511,8 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
     methodend
 
+    method public BBjString getPrimaryTable()
+        methodret #getDataProvider().getPrimaryTable()
+    methodend
+
 classend

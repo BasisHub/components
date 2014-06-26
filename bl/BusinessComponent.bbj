@@ -1410,5 +1410,9 @@ class public BusinessComponent
         methodret json!
 
     methodend
+    
+    method public BBjString getPrimaryTable()
+        methodret ""
+    methodend
 
 classend
