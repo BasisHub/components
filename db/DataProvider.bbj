@@ -329,9 +329,12 @@ class public DataProvider
     method public DataRow getAttributesRecord()
 
         declare auto BBjVector fieldnames!
+        
         v! = #prepareResultSet(0,0)
-        rec! = #getResultSet().getItem(0)
-        fieldnames! = rec!.getFieldNames()
+        if #getResultSet().size() then
+            rec! = #getResultSet().getItem(0)
+            fieldnames! = rec!.getFieldNames()
+        fi
         
         #openDatabase()
 
@@ -346,7 +349,7 @@ class public DataProvider
             col_type=JDBCResultSet!.getInt("DATA_TYPE")
             col_name$=JDBCResultSet!.getString("COLUMN_NAME")
 
-            if (! fieldnames!.contains(col_name$)) then 
+            if (fieldnames! <> null() AND ! fieldnames!.contains(col_name$)) then 
                 continue
             fi
 
