@@ -797,18 +797,6 @@ REM                 endif
                 #generateProperties(s$,t$)
                 #iterateTemplate(s$,t$,#TplDir$,"")
 
-                rem now recursively iterate directory structure
-
-REM                 #generateFile("BusinessComponent.bbj", s$, t$, #TargetDir$+"bl/")
-REM                 #generateFile("BusinessComponentT.bbj", s$, t$, #TargetDir$+"generated/")
-REM                 #generateFile("DataProvider.bbj",s$, t$, #TargetDir$+"db/")
-REM                 #generateFile("DataProviderT.bbj",s$, t$, #TargetDir$+"generated/")
-REM                 #generateFile("Entity.bbj",s$, t$, #TargetDir$+"bl/")
-REM                 #generateFile("EntityT.bbj",s$, t$, #TargetDir$+"generated/")
-REM                 #generateFile("Form.bbj",s$, t$, #TargetDir$+"ui/")
-REM                 #generateFile("EditFrame.bbj",s$, t$, #TargetDir$)
-REM                 #generateArc(s$, t$, #TargetDir$+"arc/")
-
             next i
 
             #Connection!.close()
@@ -846,7 +834,7 @@ REM                 #generateArc(s$, t$, #TargetDir$+"arc/")
                 #this!.iterateTemplate(s$, t$, dir$+f$, reldir$+f$)
             else
                 rem file
-                if len(f$)<4 or cvs(f$(len(f$)-3,4),8)=".bbj" then
+                if len(f$)<4 or cvs(f$(len(f$)-3,4),8)=".bbj" or  cvs(f$(len(f$)-4,5),8)=".html" then
                      #generateFile(dir$+f$, s$, t$, #TargetDir$+reldir$)
                 fi
 
