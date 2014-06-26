@@ -234,11 +234,18 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                     if bc!<>null() then
                         fk$=#getBC().getForeignKeyFkField(ctrl_name$)
                         picker! = new ForeignKeyPicker(wnd!,wnd!.getAvailableControlID(),ctrl!,bc!,fk$)
-                        uiform! = #getForeignKeyFormLink(ctrl_name$)
 
-                        if uiform! <> null() then
-                            picker!.setForeignKeyFormLink(uiform!)
-                        fi
+                            uiclass$ = #getForeignKeyFormClass(ctrl_name$)
+                            
+                            if uiclass$>"" then
+                                picker!.setForeignKeyFormClass(uiclass$)
+                            else
+                                uiform! = #getForeignKeyFormLink(ctrl_name$)
+        
+                                if uiform! <> null() then
+                                    picker!.setForeignKeyFormLink(uiform!)
+                                fi
+                            fi
 
                         #ForeignKeyPickerList!.put(ctrl_name$,picker!)
                     fi

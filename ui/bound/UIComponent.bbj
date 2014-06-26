@@ -697,6 +697,23 @@ class public UIComponent
         #ForeignKeyFormClassList!.put(fieldName$,className$)
 
     methodend
+    
+    rem /**
+    rem * Method getForeignKeyFormClass:
+    rem * get the UIComponent for a foreign key field
+    rem * @param BBjString fieldName$: the foreign key field name
+    rem * @return BBjString className$: the UIComponent of the foreign key field
+    rem */    
+    method public BBjString getForeignKeyFormClass(BBjString fieldName$)
+
+        cl! = #ForeignKeyFormClassList!.get(fieldName$)
+        if cl! <> null() then
+            methodret str(cl!)
+        else
+            methodret ""
+        fi
+
+    methodend
 
 
     rem /**
@@ -724,6 +741,7 @@ class public UIComponent
             class! = #ForeignKeyFormClassList!.get(fieldName$)
             if class! <> null() then
                 form! = Util.newInstance(str(class!))
+                print "instantiating "+str(class!)
             fi
         fi
 
