@@ -27,17 +27,34 @@ class public SearchBoxController
     methodend
 
     rem this is lucene based for multiple fields
-    method public SearchBoxController(BBjInputE ctrl!, BusinessComponent bc!, BBjString IDField$,BBjVector fields!,  BBjString indexDir$)
+    method public SearchBoxController(BBjInputE ctrl!, BusinessComponent bc!, BBjVector fields!,  BBjString indexDir$)
+
+        prim! = bc!.getPrimaryKeySegments()
+        
+        if prim!.size() then
+          for pk=0 to prim!.size()-1
+              if i then
+                  pk$=pk$+$0a$
+              fi
+              pk$=prim!.getItem(pk)
+          next
+        fi
     
-        #Fieldname$ = IDField$
+        #Fieldname$ = pk$
         #Fields! = fields!
+       
         #SearchEngine! = new BBjSearchGizmo(indexDir$)
 
         #BoundCtrl! = ctrl!
         ctrl!.setPassEnter(0)
+        ctrl!.setVisible(1) 
+        ctrl!.setEnabled(1)
+        ctrl!.setEditable(1)
+        ctrl!.setAlignment(ctrl!.ALIGN_LEFT )
         #setBC(bc!)
         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onInputKeypress")
         #prepareQueryFilter("nooop")
+        
     
     methodend
 
@@ -62,6 +79,8 @@ class public SearchBoxController
         t$=ev!.getControl().getText()
         if len(t$)<2 then methodret
         #this!.prepareQueryFilter(t$)
+    
+        ev!.getControl().focus()
     
     methodend
 
