@@ -2,6 +2,7 @@
 use ::components/ui/unbound/menu/menu.bbj::Menu
 use ::components/ui/unbound/menu/menu.bbj::MenuItem
 use ::components/ui/laf/laffactory.bbj::laffactory
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
 laf! = laffactory.getLaf()
 
 rem ##################################################################################################
@@ -134,6 +135,11 @@ REM             wend
             node! = itemList!.getItem(j)
             id = id + 1 ; rem (parentNodeId+1)*40 + j
             tree!.addNode(id,parentNodeId,node!.getCaption())
+            
+            if node!.getImage()<>null() then
+                tree!.setNodeIcon(id,node!.getImage())
+            fi
+
             #MenuItems!.put(str(tree!)+"::"+str(id),node!)
            
             id = #addChildNodes(tree!,id,node!.getChildren())
