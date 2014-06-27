@@ -16,6 +16,7 @@ use ::admin/admin.bbj::UserCredentials
 class public DataProvider
 
     field private   BBjVector           ResultSet!                 = new BBjVector()
+    field private   BBjNumber           RecordCountInResultSet
     field protected BBjString           SQL$
     field protected BBjString           DataSource$
     field private   BBjVector           PrimaryKeySegments!        = new BBjVector()
@@ -457,6 +458,22 @@ class public DataProvider
 
             print "(prepare "+str(first)+"-"+str(last)+")"+sql$
             
+            if #RecordCountInResultSet > 500 then
+                print "clean up resultset"
+                for i=0 to #ResultSet!.size()
+                    if i>=first and i<=last then
+                        continue
+                    fi
+                    if #ResultSet!.getItem(i) <> null() 
+                        #ResultSet!.setItem(i,null())
+                        #RecordCountInResultSet=#RecordCountInResultSet-1
+                    fi
+                    if #RecordCountInResultSet < 500 then 
+                        break
+                    fi
+                next
+            
+            fi
 
             if #JDBCResultSet!.absolute(first) then
                 while #ResultSet!.size() < first-1
@@ -567,6 +584,7 @@ class public DataProvider
                         else
                             #ResultSet!.setItem(first+x-1,row!)
                         fi
+                        #RecordCountInResultSet = #RecordCountInResultSet+1 
 
                         v!.addItem(first+x-1)
                     fi
