@@ -300,7 +300,7 @@ class public DataProvider
                 stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
                 #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
 
-                print sql$
+                print "(determine size)",sql$
 
                 if #JDBCResultSet!.next() then
                     size = #JDBCResultSet!.getInt("COUNT")
@@ -455,7 +455,8 @@ class public DataProvider
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
 
-            print sql$
+            print "(prepare "+str(first)+"-"+str(last)+")"+sql$
+            
 
             if #JDBCResultSet!.absolute(first) then
                 while #ResultSet!.size() < first-1
