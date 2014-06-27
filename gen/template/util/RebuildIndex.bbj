@@ -19,10 +19,10 @@ if prim!.size() then
         rec! = rs!.getItem(i)
         pk$=""
         for pk=0 to prim!.size()-1
-            if i then
-                pk$=pk$+$0a$
+            if pk then
+                 pk$=pk$+"++++"
             fi
-            pk$=rec!.getFieldAsString(prim!.getItem(pk))
+            pk$=pk$+rec!.getFieldAsString(prim!.getItem(pk))
         next
 
         d! = new BBjSearchGizmoDoc(pk$)
