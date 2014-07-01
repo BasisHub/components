@@ -15,7 +15,7 @@ class public (DB_NICE)(TBL_NICE)Form extends SimpleFormComponent
     rem /**
     rem * (DB_NICE)(TBL_NICE)Form
     rem * standard constructor to generate a standalone window or a child window
-    rem *
+    rem */
     method public (DB_NICE)(TBL_NICE)Form ()
 
         #super!(null(),701,10,10,800,500)
@@ -33,7 +33,7 @@ class public (DB_NICE)(TBL_NICE)Form extends SimpleFormComponent
     rem * @param BBjNumber y: postition y
     rem * @param BBjNumber w: width
     rem * @param BBjNumber h:height
-    rem *
+    rem */
     method public (DB_NICE)(TBL_NICE)Form (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
         #super!(wnd!,id,x,y,w,h)
@@ -46,7 +46,7 @@ class public (DB_NICE)(TBL_NICE)Form extends SimpleFormComponent
     rem * (DB_NICE)(TBL_NICE)Form
     rem * constructor to generate the component inside an existing child window
     rem * @param BBjWindow wnd!: the child window to use for this component
-    rem *
+    rem */
     method public (DB_NICE)(TBL_NICE)Form (BBjChildWindow wnd!)
 
         #super!(wnd!)
@@ -60,7 +60,7 @@ class public (DB_NICE)(TBL_NICE)Form extends SimpleFormComponent
     rem * setupLinkedForms
     rem * override this method with your custom code to avoid auto-generation of linked forms
     rem * that have been set up in the parent class as a result of foreign key relations in the database
-    rem *
+    rem */
     method private void setupLinkedForms()
 
         v! = BBjAPI().getRuntime().getBBjStack()
