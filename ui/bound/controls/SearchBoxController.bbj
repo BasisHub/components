@@ -44,7 +44,15 @@ class public SearchBoxController
         ctrl!.setAlignment(ctrl!.ALIGN_LEFT )
         #setBC(bc!)
         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onInputKeypress")
-        #prepareQueryFilter("nooop")
+        REM TODO add more granular rules for when to display all items and when
+        REM TODO make this as well programmeable
+        REM SEE also below
+        REM for now: if we have less that 50 records show all items
+        if (bc!.size() > 50) then        
+            #prepareQueryFilter("noop")
+        else
+            #prepareQueryFilter("")
+        fi
         
     
     methodend
@@ -59,7 +67,15 @@ class public SearchBoxController
         ctrl!.setPassEnter(0)
         #setBC(bc!)
         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onInputKeypress")
-        #prepareQueryFilter("nooop")
+        REM TODO add more granular rules for when to display all items and when
+        REM TODO make this as well programmeable
+        REM SEE also above
+        REM for now: if we have less that 50 records show all items        
+        if (bc!.size() > 50) then
+            #prepareQueryFilter("noop")
+        else
+            #prepareQueryFilter("")            
+        fi
 
     methodend
     
@@ -141,7 +157,7 @@ class public SearchBoxController
                 it1! = #PkFieldnames!.iterator()
                 while it1!.hasNext()
                     v! = hm!.get(it1!.next())
-                    v!.addItem("blabla_noop")
+                    v!.addItem("0")
                 wend                     
                 rem TODO load the MRU list instead
             fi
@@ -156,10 +172,12 @@ class public SearchBoxController
         
         if count=0 then
             v!=new BBjVector()
-            v!.addItem("%"+search$+"%")
+            v!.addItem("0")
             QueryFilter!.put(#PkFieldnames!.getItem(0),v!)
         fi
-       
+REM TODO: add option if all items should be loaded w/o search or none
+
+        
         #BC!.setQueryFilter(QueryFilter!)
         
     if INFO(3,6)="5" and b! <> null() then
