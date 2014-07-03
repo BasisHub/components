@@ -182,7 +182,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
     rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
 
-        if last>=#getResultSet().size() then
+        if max(first,last)>=#getResultSet().size() then
             doIt=1
         else
             for i=first to last
