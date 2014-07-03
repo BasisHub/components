@@ -79,9 +79,10 @@ class public Util
         argsVect!=new BBjVector()
         
         BBUtils.registerBUIApp(source$,name$,config$,path$,System.getProperty("user.name"),argsVect!,1)
+        BBUtils.setShowClientConfirmationDialog(name$,0)
         BBUtils.setBUISplash(name$, "components/css/LoadImage.png", 1)
         BBUtils.applyCss(name$, "components/css/style.css", 1)
-
+        
         ch=unt
         open (ch)"components/ui/fonts/"
         while 1
