@@ -1,0 +1,212 @@
+if INFO(3,6)<>"5" then 
+    ::components/util/Util.bbj::Util.runAsBui(pgm(-1))
+fi
+
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
+class public WindowStackHelper
+
+    method public void onClose(BBjCloseEvent ev!)
+        WindowStack.closeWindow() 
+    methodend
+
+    method public void onBackButton(BBjButtonPushEvent ev!)
+        WindowStack.closeWindow() 
+    methodend
+        
+    method public void onResize( BBjResizeEvent ev!)
+        WindowStack.resize(ev!.getWidth(),ev!.getHeight())
+    methodend
+
+    method public void onScreenResize( BBjScreenResizeEvent ev!)
+        WindowStack.resize(ev!.getWidth(),ev!.getHeight())
+    methodend
+    
+classend
+
+class public WindowStack
+
+    field private static BBjVector WindowList! = new BBjVector()
+    field private static BBjVector WidgetList! = new BBjVector()
+
+    rem this is for BUI only, when embedded in another child window
+    field private static BBjWindow ContainerWnd!
+    
+    method public static void setContainerWnd(BBjChildWindow cw!)
+        #ContainerWnd! = cw!
+    methodend
+    
+    method public static BBjChildWindow openWindow(BBjString name$)
+        
+        sg! = BBjAPI().getSysGui(err=*next); goto got_sysgui
+            sg! = BBjAPI().openSysGui("X0")
+        got_sysgui:
+
+        wh! = new WindowStackHelper()
+        if INFO(3,6)<>"5" then
+            rem GUI
+            wnd! = sg!.addWindow(sg!.getAvailableContext(), 10*#WindowList!.size(),10*#WindowList!.size(),1024,768,name$,$00080093$ )
+            wnd!.setCallback(BBjAPI.ON_CLOSE,wh!,"onClose")
+            wnd!.setCallback(BBjAPI.ON_RESIZE,wh!,"onResize")
+        else
+            if #ContainerWnd! = null() then
+                screenSize! = BBjAPI().getSysGui().getSystemMetrics().getScreenSize()
+                ContainerWnd! = sg!.addWindow(0,0,screenSize!.width,screenSize!.height,"",$01081010$ )
+                ContainerWnd!.maximize()
+                ContainerWnd!.setCallback(BBjAPI.ON_SCREEN_RESIZE , wh! ,"onScreenResize")
+                ContainerWnd!.setVisible(1)
+                #ContainerWnd! = CAST(BBjWindow,ContainerWnd!)
+            fi
+
+            if #WindowList!.size() then
+                wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+                wnd!.setVisible(0)
+            fi
+            
+            wnd!     = #ContainerWnd!.addChildWindow(#ContainerWnd!.getAvailableControlID(),0,0,#ContainerWnd!.getWidth(),#ContainerWnd!.getHeight(),"",$00000800$,sg!.getAvailableContext())
+            wnd!.setVisible(1)
+        fi
+        #WindowList!.addItem(wnd!)
+        #WidgetList!.addItem(null())
+
+        yoffs=0
+        if INFO(3,6)="5" and #WindowList!.size()>1 then
+            yoffs=40
+        fi
+        cw!     = wnd!.addChildWindow(100,0,yoffs,wnd!.getWidth(),wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
+        if yoffs then
+            backButton!=wnd!.addButton(101,10,10,150,25,"Back")
+            backButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onBackButton")
+        fi
+        
+        wnd!.setVisible(1)
+        methodret cw!
+        
+    methodend
+    
+
+    
+    method public static void closeWindow()
+    
+        if #WindowList!.size() then
+            wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+            #WindowList!.removeItem(#WindowList!.size()-1)
+            #WidgetList!.removeItem(#WidgetList!.size()-1)
+            wnd!.destroy()
+        fi
+    
+        if #WindowList!.size()=0 then
+            BBjAPI().postPriorityCustomEvent("WindowStackEmpty","")
+        else
+            wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+            wnd!.setVisible(1)
+        
+            if INFO(3,6)="5" and #ContainerWnd! <>null() then
+                #resize(#ContainerWnd!.getWidth(), #ContainerWnd!.getHeight())
+            fi
+        fi
+    
+    methodend 
+    
+    method public static void resize (BBjNumber w, BBjNumber h)
+        if #WindowList!.size() then
+
+            yoffs=0
+            if INFO(3,6)="5" and #WindowList!.size()>1 then
+                yoffs=40
+            fi        
+            wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+            wnd!.setSize(w,h)
+            uiw! = #WidgetList!.getItem(#WidgetList!.size()-1)
+            if uiw! <> null() then
+                uiw!.setSize(w,h-yoffs)
+            fi
+        fi        
+    methodend
+    
+    method public static void setWidget(UIWidget uiw!)
+        #WidgetList!.setItem(#WidgetList!.size()-1,uiw!)
+        
+            if INFO(3,6)="5" and #ContainerWnd! <>null() then
+                #resize(#ContainerWnd!.getWidth(), #ContainerWnd!.getHeight())
+            fi
+                    
+            if INFO(3,6)="5" then
+                wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+                #resize(wnd!.getWidth(),wnd!.getHeight())
+            fi
+    methodend
+   
+
+classend
+
+class public testWidget implements UIWidget
+
+    field private BBjChildWindow Cw!
+
+    method private testWidget()
+    methodend
+    
+    method public testWidget(BBjChildWindow cw!)
+        #Cw! = cw!
+        cw!.addStaticText(101,10,50,400,25,"")
+        #render()
+    methodend
+    
+    method public void onClose(BBjButtonPushEvent ev!)
+        WindowStack.closeWindow()
+    methodend
+    
+    method private void render()
+        #Cw!.getControl(101).setText(str(#Cw!.getWidth())+","+str(#Cw!.getHeight()))
+    methodend
+    
+    method public void setSize(BBjNumber w, BBjNumber h)
+        #Cw!.setSize(w,h)
+        #render()
+    methodend
+
+classend
+
+if 1=2 then
+
+  sg! = BBjAPI().openSysGui("X0")
+  wnd! = sg!.addWindow(sg!.getAvailableContext(), 10,10,1024,768,"Hallo Welt",$00080093$ )
+  cw_frame! = wnd!.addChildWindow(100,10,10,800,600,"",$00000800$,sg!.getAvailableContext())
+  wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
+  wnd!.setVisible(1)
+  WindowStack.setContainerWnd(cw_frame!)
+
+fi
+
+cw! = WindowStack.openWindow("Eins")
+t!  = new testWidget(cw!)
+WindowStack.setWidget(t!)
+
+btn! = cw!.addButton(100,10,10,200,25,"open Zwei")
+btn!.setCallback(BBjAPI.ON_BUTTON_PUSH,"openZwei")
+
+BBjAPI().setCustomEventCallback("WindowStackEmpty","byebye")
+
+
+process_events
+
+
+
+openZwei:
+    cw2! = WindowStack.openWindow("Zwei")
+    t1!  = new testWidget(cw2!)
+    WindowStack.setWidget(t1!)    
+    btn2! = cw2!.addButton(100,10,10,200,25,"open ZweiA")
+    btn2!.setCallback(BBjAPI.ON_BUTTON_PUSH,"openZweiA")
+    return
+
+openZweiA:
+    cw2a! = WindowStack.openWindow("ZweiA")
+    return
+
+
+byebye:
+    release
+ 
+
