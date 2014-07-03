@@ -2,44 +2,45 @@ if INFO(3,6)<>"5" then
     ::components/util/Util.bbj::Util.runAsBui(pgm(-1))
 fi
 
-
-
+use ::components/ui/unbound/WindowStack.bbj::WindowStack
 use ::ui/(DB_NICE)(TBL_NICE)TouchScreenCombo.bbj::(DB_NICE)(TBL_NICE)TouchScreenCombo
-use ::DialogWizard/DialogWizardRun.bbj::DialogWizardRun
+use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
 
-listpagesize$ = stbl("!LIST_PAGE_SIZE","20")
+
+rem * this sample shows a touch version of a search grid + form
+rem * embedded in a child window
+rem * note that WindowStack by default can be used
+rem * to achieve a full screen display of the screen
+
+
+listpagesize$ = stbl("!LIST_PAGE_SIZE","10")
 BBjAPI().getConfig().setOptionSetting("FAST_TOUCH_CLICK", 1)
 
-sg! = BBjAPI().openSysGui("X0")
-
+sg!         = BBjAPI().openSysGui("X0")
 screenSize! = BBjAPI().getSysGui().getSystemMetrics().getScreenSize()
-wnd! = sg!.addWindow(0,0,screenSize!.width,screenSize!.height,"",$01081010$ )
 
- 
+wnd!        = sg!.addWindow(0,0,screenSize!.width,screenSize!.height,"",$01081010$ )
 wnd!.setCallback(BBjAPI.ON_SCREEN_RESIZE,"resize")
 wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
 
-cw!     = wnd!.addChildWindow(100,0,40,300,300,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
-ctc!    = new (DB_NICE)(TBL_NICE)TouchScreenCombo(cw!)
+frame!      = wnd!.addChildWindow(100,0,40,screenSize!.width,screenSize!.height-80,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
 
-h = wnd!.getHeight()
-w = wnd!.getWidth()
+WindowStack.setContainerWnd(frame!)
+bc!         = new (DB_NICE)(TBL_NICE)BusinessComponent()
+cw!         = WindowStack.openWindow(bc!.getTitle())
+ctc!        = new (DB_NICE)(TBL_NICE)TouchScreenCombo(cw!, bc!)
+WindowStack.setWidget(ctc!)
 
-ctc!.setSize(w,h-60)
-
-myTopBar! = wnd!.addStaticText(110, 0, 0, w, 40, "")
+myTopBar!   = wnd!.addStaticText(110, 0, 0, w, 40, "")
 myTopBar!.setName("topGradientBar")
+wnd!.addImage(111,0,0,2500,40,"components/css/banner.png")
 
 myStatusBar! = wnd!.addStaticText(112, 0, h-20, w, 20, "") 
 myStatusBar!.setName("topGradientBar")
 
-wnd!.addImage(111,0,0,2500,40,"components/css/banner.png")
-
-REM Exit Button
-myExit! = wnd!.addButton(200, w-24-8, 8, 30, 30, "")
+myExit!     = wnd!.addButton(200, screenSize!.width-24-8, 8, 30, 30, "")
 myExit!.setName("exitButton")
 myExit!.setCallback(BBjAPI.ON_BUTTON_PUSH, "byebye")
-
 
 wnd!.setVisible(1)
 
@@ -56,5 +57,7 @@ resize:
     myStatusBar!.setSize(w,20)
     myStatusBar!.setLocation(0, h-20)
     myExit!.setLocation(w-24-8,8)
-    ctc!.setSize(w,h-80)
+    frame!.setSize(w,h-80)
+    WindowStack.resize(w,h-80)
 return
+

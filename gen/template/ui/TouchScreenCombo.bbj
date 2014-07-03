@@ -8,7 +8,7 @@ use ::ui/(DB_NICE)(TBL_NICE)Form.bbj::(DB_NICE)(TBL_NICE)Form
 use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
 
 
-class public (DB_NICE)(TBL_NICE)TouchScreenCombo
+class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements UIWidget
 
     field private BBjChildWindow Wnd!
     field private (DB_NICE)(TBL_NICE)BusinessComponent Bc!
@@ -19,10 +19,10 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo
     method private (DB_NICE)(TBL_NICE)TouchScreenCombo()
     methodend
     
-    method public (DB_NICE)(TBL_NICE)TouchScreenCombo(BBjChildWindow wnd!)
+    method public (DB_NICE)(TBL_NICE)TouchScreenCombo(BBjChildWindow wnd!, (DB_NICE)(TBL_NICE)BusinessComponent bc! )
     
 
-      #Bc! = new (DB_NICE)(TBL_NICE)BusinessComponent()
+      #Bc! = bc!
       #Wnd! = wnd!
       
       #Split! = new ResponsiveSplitPane(wnd!)
