@@ -1,12 +1,21 @@
+.BBjButton {
+  -webkit-border-radius: 15;
+  -moz-border-radius: 15;
+  border-radius: 15px;
+  font: normal 15px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #ffffff;
+  font-size: 14px !important;
+  background: #802A50;
+  padding: 5px 10px 5px 10px;
+  text-decoration: none;
+  }
+
 .BBjButton:not(.bbj-disabled):hover,
-.BBjButton:not(.bbj-disabled):active {
-  text-shadow: none;
-  box-shadow: none;
-  color: inherit;
-  background: inherit;
-  border-color: inherit;
-  margin-top: 0;
+.BBjButton:not(.bbj-disabled):active{
+  background: #802A50;
+  text-decoration: none;
 }
+
 body {
   background: #fcfcfc;
 }
