@@ -43,7 +43,7 @@ class public WindowStack
         got_sysgui:
 
         wh! = new WindowStackHelper()
-        if INFO(3,6)<>"5" then
+        if INFO(3,6)<>"5" and #ContainerWnd! = null() then
             rem GUI
             wnd! = sg!.addWindow(sg!.getAvailableContext(), 10*#WindowList!.size(),10*#WindowList!.size(),1024,768,name$,$00080093$ )
             wnd!.setCallback(BBjAPI.ON_CLOSE,wh!,"onClose")
@@ -112,7 +112,7 @@ class public WindowStack
         if #WindowList!.size() then
 
             yoffs=0
-            if INFO(3,6)="5" and #WindowList!.size()>1 then
+            if ( INFO(3,6)="5" and #WindowList!.size()>1 ) or #ContainerWnd! <> null() then
                 yoffs=40
             fi        
             wnd! = #WindowList!.getItem(#WindowList!.size()-1)
