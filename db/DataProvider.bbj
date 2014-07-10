@@ -130,15 +130,102 @@ class public DataProvider
 
         sql$=#getSQL()
 
-        if  #QueryFilter!<>null() and fIgnoreFilterAndOrder=0 then
-            ks!=#QueryFilter!.keySet()
+        filter! = new java.util.HashMap()
+
+        print "#ControllerFilter!=",#ControllerFilter!
+        print "#QueryFilter!=",#QueryFilter!
+
+        if fIgnoreFilterAndOrder then
+            if #ControllerFilter! = null() then
+                filter! = new java.util.HashMap()
+            else
+                filter! = #ControllerFilter!.clone()
+            fi
+        else
+                filter! = new java.util.HashMap()
+
+                declare BBjVector allKeys!
+                allKeys! = new BBjVector()
+                
+                if #ControllerFilter! <>null() then
+                    ks! = #ControllerFilter!.keySet()
+                    it! = ks!.iterator()
+                    while it!.hasNext()
+                        allKeys!.addItem(it!.next())
+                    wend  
+                fi  
+
+                if #QueryFilter!<>null() then
+                    ks! = #QueryFilter!.keySet()
+                    it! = ks!.iterator()
+                    while it!.hasNext()
+                        k$=it!.next()
+                        if allKeys!.contains(k$)=0 then
+                            allKeys!.addItem(k$)
+                        fi
+                    wend    
+                fi
+                
+                it! = allKeys!.iterator()
+                while it!.hasNext()
+                    k$=it!.next()
+
+                    if #ControllerFilterUnlock!.get(k$)<> null() or #ControllerFilter!=null() then
+                        cf! = new BBjVector()
+                    else
+                        cf! = #ControllerFilter!.get(k$)
+                        if cf! = null() then
+                            cf! = new BBjVector()
+                        fi
+                    fi                    
+                    
+                    if #QueryFilter! = null() then
+                        qf! = new BBjVector()
+                    else
+                        qf! = #QueryFilter!.get(k$)
+                        if qf! = null() then
+                            qf! = new BBjVector()
+                        fi                        
+                    fi
+
+                    if qf!.size()>cf!.size() then
+                        left! = qf!
+                        right! = cf!
+                    else
+                        left! = cf!
+                        right! = qf!
+                    fi
+                    
+                    ? "left!=",left!
+                    ? "right!=",right!
+                    
+
+                    f! = new BBjVector()
+                    it1! = left!.iterator()
+                    while it1!.hasNext()
+                        k1$=it1!.next()
+                        if right!.contains(k1$) =0 then
+                            f!.addItem(k1$)
+                        fi
+                    wend
+
+                    filter!.put(k$,f!)
+                wend 
+       
+        fi
+        ? "filter!=",filter!
+
+        wh$=""
+        
+        if  filter!<>null() and filter!.size() then
+            
+            ks!=filter!.keySet()
             it! = ks!.iterator()
 
             while it!.hasNext()
                 k$=it!.next()
-                f! = #QueryFilter!.get(k$)
+                f! = filter!.get(k$)
                 w1$=""
-
                 if f!.size() > 0 then
                     for i=0 to f!.size()-1
                         f1$=f!.getItem(i)
@@ -153,82 +240,29 @@ class public DataProvider
                             w1$=w1$+" OR "
                         fi
 
-                        rem w1$=w1$ + k$ + eq$ + "'"+f1$+"'"
+                        rem wh$=wh$ + k$ + eq$ + "'"+f1$+"'"
                         w1$=w1$ + k$+ eq$ + "'"+f1$+"'"
                         rem search case insensitive?
                         rem introduce option (set per column, or like Google?)
                         rem or leave it to the database setup?
                     next
-                fi
-
-                if w1$>"" then
-                    if wh$>"" then
-                        wh$=wh$+" AND "
-                    fi
-
-                    wh$=wh$+"("+w1$+")"
-                fi
-            wend
-        fi
-
-        rem if #QueryFilter...
-
-
-        if #ControllerFilter!.size()  then
-            ks! = #ControllerFilter!.keySet()
-            it! = ks!.iterator()
-
-            while it!.hasNext()
-                var$=it!.next()
-
-                if #ControllerFilterUnlock!.get(var$)<> null() then
-                    continue
-                fi
-
-                sel! = #ControllerFilter!.get(var$)
-
-                if sel! = null() then
-                    print "sel! = null() for var$=",var$
-                    wh$="1=2"
-                    break
-                fi
-
-                if sel!.size()=0 then
-                    print "sel!.size()=0 for var$=",var$
-                    wh$="1=2"
-                    break
-                fi
-
-                w1$=""
-
-                for i=0 to sel!.size()-1
-                    f1!=sel!.getItem(i)
-
-                    if f1! = null() then
-                        cond$="''"
-                        rem TODO: is that correct for null() ?
-                    else 
-                        cond$="'"+str(f1!)+"'"
-                    fi
-
+                    
                     if w1$>"" then
-                        w1$=w1$+" OR "
-                    fi
-
-                    w1$=w1$ + var$+" = "+cond$
-                next
-
-                if wh$>"" then
-                    wh$=wh$+" AND "
+                        if wh$>"" then
+                            wh$=wh$+" AND "
+                        fi
+                        wh$=wh$+"("+w1$+")"
+                    fi                    
+                    
                 fi
 
-                wh$=wh$+"("+w1$+")"
+
             wend
         fi
 
-        rem if #ControllerFilter
-
+        
         if wh$>"" then
+            
             w=pos("WHERE"=cvs(sql$,4))
 
             if w>0 then
@@ -259,6 +293,9 @@ class public DataProvider
 
         sql$=sql$+orderby$
 
+REM         open (999,mode="O_CREATE,O_APPEND")"sql.txt"
+REM         print (999)sql$
+REM         close (999)
 
         methodret sql$
 
@@ -301,7 +338,7 @@ class public DataProvider
                 stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
                 #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
 
-                print "(determine size)",sql$
+                print "(determine size)"
 
                 if #JDBCResultSet!.next() then
                     size = #JDBCResultSet!.getInt("COUNT")
@@ -455,8 +492,8 @@ class public DataProvider
         if pos("1=2"=sql$)=0 then
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
-
-            print "(prepare "+str(first)+"-"+str(last)+")"+sql$
+            
+            rem print "(prepare "+str(first)+"-"+str(last)+")"+sql$
             
             if #RecordCountInResultSet > 500 then
                 print "clean up resultset"
@@ -827,7 +864,7 @@ class public DataProvider
 
         stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
         #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
-        print sql$
+        rem print sql$
 
         tm! = new java.util.TreeMap()
 
@@ -899,7 +936,7 @@ class public DataProvider
         v$=v$(2)
 
         sql$="INSERT INTO "+#PrimaryTable$+" ("+s$+") VALUES ("+v$+")"
-        print sql$
+        rem print sql$
 
 
         #openDatabase()
@@ -1004,7 +1041,7 @@ class public DataProvider
 
 
         sql$="UPDATE "+#PrimaryTable$+" SET "+s$+" WHERE "+wh$
-        print sql$
+        rem print sql$
 
         #openDatabase()
         declare java.sql.PreparedStatement stmt!
@@ -1116,7 +1153,7 @@ class public DataProvider
 
 
             sql$="DELETE FROM "+#PrimaryTable$+" WHERE "+wh$
-            print sql$
+            rem print sql$
 
             #openDatabase()
             stmt! = #Connection!.createStatement()
