@@ -154,7 +154,9 @@ REM               #CwRight!.setBackColor(BBjAPI().makeColor("YELLOW"))
             
     methodend
     
+    method public void destroy()
     
+    methodend
     
 
 classend
