@@ -69,14 +69,20 @@ class public WindowStack
         #WindowList!.addItem(wnd!)
         #WidgetList!.addItem(null())
 
-        yoffs=0
-        if INFO(3,6)="5" and #WindowList!.size()>1 then
+        yoffs=0 
+        if 1 or INFO(3,6)="5" and #WindowList!.size()>1 then
             yoffs=40
         fi
         cw!     = wnd!.addChildWindow(100,0,yoffs,wnd!.getWidth(),wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
         if yoffs then
-            backButton!=wnd!.addButton(101,10,10,150,25,"Back")
+
+            backButton!=wnd!.addButton(101,10,10,125,30,"Back")
+            backButton!.addStyle("backButton")
             backButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onBackButton")
+            
+            st! = wnd!.addStaticText(102,150,10,2000,30,name$)
+            st!.addStyle("GroupTitle")
+            
         fi
         
         wnd!.setVisible(1)
@@ -90,8 +96,10 @@ class public WindowStack
     
         if #WindowList!.size() then
             wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+            uiw! = #WidgetList!.getItem(#WindowList!.size()-1)
             #WindowList!.removeItem(#WindowList!.size()-1)
             #WidgetList!.removeItem(#WidgetList!.size()-1)
+            uiw!.destroy()
             wnd!.destroy()
         fi
     
