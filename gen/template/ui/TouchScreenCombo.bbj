@@ -90,4 +90,18 @@ class public SearchBoxAndGrid implements UIWidget
             
     methodend
 
+	method public void destroy()
+
+      if #NavGrid!<> null() then
+        #NavGrid!.destroy()
+      fi
+      if #EditForm! <> null() then
+        #EditForm!.destroy()
+      fi
+      if #Split!<> null() then
+        #Split!.destroy()
+      fi
+	  
+	methodend
+	
 classend
