@@ -497,19 +497,20 @@ REM         close (999)
             
             if #RecordCountInResultSet > 500 then
                 print "clean up resultset"
-                for i=0 to #ResultSet!.size()
-                    if i>=first and i<=last then
-                        continue
-                    fi
-                    if #ResultSet!.getItem(i) <> null() 
-                        #ResultSet!.setItem(i,null())
-                        #RecordCountInResultSet=#RecordCountInResultSet-1
-                    fi
-                    if #RecordCountInResultSet < 500 then 
-                        break
-                    fi
-                next
-            
+                if #ResultSet!.size() then
+                    for i=0 to #ResultSet!.size()
+                        if i>=first and i<=last then
+                            continue
+                        fi
+                        if #ResultSet!.getItem(i) <> null() 
+                            #ResultSet!.setItem(i,null())
+                            #RecordCountInResultSet=#RecordCountInResultSet-1
+                        fi
+                        if #RecordCountInResultSet < 500 then 
+                            break
+                        fi
+                    next
+                 fi
             fi
 
             if #JDBCResultSet!.absolute(first) then
