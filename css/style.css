@@ -441,7 +441,7 @@ box-shadow: 0 0 0px rgba(0, 0, 0, 0);
 border: 0px;
 }
 
-.BBjGroupBox legend {
+.GroupTitle, .BBjGroupBox legend {
 color: #802A50;
 font: normal 22px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
