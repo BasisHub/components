@@ -1,0 +1,345 @@
+rem package BBLayout
+
+use java.util.Map
+use java.util.List
+use java.util.ArrayList
+use java.util.WeakHashMap
+
+use java.awt.Dimension
+
+use java.lang.Double
+use java.lang.reflect.Array
+
+use net.miginfocom.layout.AC
+use net.miginfocom.layout.CC
+use net.miginfocom.layout.LC
+use net.miginfocom.layout.Grid
+use net.miginfocom.layout.LayoutUtil
+use net.miginfocom.layout.ComponentWrapper
+use net.miginfocom.layout.ConstraintParser
+use net.miginfocom.layout.ContainerWrapper
+
+use com.basisx.bbj.layout.BBComponent
+use com.basisx.bbj.layout.BBContainer
+use com.basisx.bbj.layout.BBComponentWrapper
+use com.basisx.bbj.layout.BBContainerWrapper
+
+rem /**
+rem * Manages components with MigLayout added via add(component, CC)
+rem * 
+rem * @author Adapted from JavaFX to BBj by Ralph Lance
+rem */
+class public BBMigPane
+
+    field private BBContainer container!
+    field private BBContainerWrapper containerWrapper!
+    field private boolean iDebug! = BBjAPI().FALSE
+    field private Grid migGrid!
+    field private boolean valid! = BBjAPI().FALSE
+    field private LC layoutConstraints! = null()
+    field private AC columnConstraints! = null()
+    field private AC rowConstraints! = null()
+
+	rem ======================================================
+	rem CONSTRUCTOR
+	
+    rem /**
+    rem * Constructor
+    rem */
+    method private BBMigPane()
+    methodend
+
+	rem /**
+	rem * Constructor
+	rem */
+	method public BBMigPane( BBjWindow window! )
+	    #container! = new BBContainer(window!)
+		#construct()
+	methodend
+
+	rem /**
+    rem * Constructor
+	rem * use the class layout constraints
+	rem */
+	method public BBMigPane( BBjWindow window!, LC layoutConstraints! )
+        #container! = new BBContainer(window!)
+		#setLayoutConstraints( layoutConstraints! )
+		#construct()
+	methodend
+	
+	rem /**
+    rem * Constructor
+	rem * use the class layout constraints
+	rem */
+	method public BBMigPane( BBjWindow window!, LC layoutConstraints!, AC colConstraints! )
+        #container! = new BBContainer(window!)
+		#setLayoutConstraints( layoutConstraints! )
+		#setColumnConstraints( colConstraints! )
+		#construct()
+	methodend
+	
+	rem /**
+    rem * Constructor
+	rem * use the class layout constraints
+	rem */
+	method public BBMigPane( BBjWindow window!, LC layoutConstraints!, AC colConstraints!, AC rowConstraints! )
+        #container! = new BBContainer(window!)
+		#setLayoutConstraints( layoutConstraints! )
+		#setColumnConstraints( colConstraints! )
+		#setRowConstraints( rowConstraints! )
+		#construct()
+	methodend
+	
+	rem /**
+    rem * Constructor
+	rem * use the string layout constraints
+	rem */
+	method public BBMigPane( BBjWindow window!, String layoutConstraints! )
+        #container! = new BBContainer(window!)
+		#setLayoutConstraints( ConstraintParser.parseLayoutConstraint( ConstraintParser.prepare( layoutConstraints! ) ) )
+		#construct()
+	methodend
+
+	rem /**
+    rem * Constructor
+	rem * use the string layout constraints
+	rem */
+	method public BBMigPane( BBjWindow window!, String layoutConstraints!, String colConstraints! )
+        #container! = new BBContainer(window!)
+		#setLayoutConstraints( ConstraintParser.parseLayoutConstraint( ConstraintParser.prepare( layoutConstraints! ) ) )
+		#setColumnConstraints( ConstraintParser.parseColumnConstraints( ConstraintParser.prepare( colConstraints! ) ) )
+		#construct()
+	methodend
+
+	rem /**
+    rem * Constructor
+	rem * use the string layout constraints
+	rem */
+	method public BBMigPane( BBjWindow window!, String layoutConstraints!, String colConstraints!, String rowConstraints! )
+        #container! = new BBContainer(window!)
+		#setLayoutConstraints( ConstraintParser.parseLayoutConstraint( ConstraintParser.prepare( layoutConstraints! ) ) )
+		#setColumnConstraints( ConstraintParser.parseColumnConstraints( ConstraintParser.prepare( colConstraints! ) ) )
+		#setRowConstraints( ConstraintParser.parseRowConstraints( ConstraintParser.prepare( rowConstraints! ) ) )
+		#construct()
+	methodend
+
+    rem /**
+	rem * Method construct
+	rem * 
+	rem */
+	method private void construct()
+	    declare Dimension d!
+	    
+		rem defaults
+		if #getLayoutConstraints() = null() #setLayoutConstraints( new LC() )
+		if #getRowConstraints() = null() #setRowConstraints( new AC() )
+		if #getColumnConstraints() = null() #setColumnConstraints( new AC() )
+		
+		rem default sizes for the container itself
+		d! = new Dimension( int(#container!.getControl().getWidth()), int(#container!.getControl().getHeight()) )
+        cast(BBComponent, #container!).setMinimumSize( new Dimension( int(d!.width / 4), int(d!.height / 4) ) )
+        cast(BBComponent, #container!).setPreferredSize( d! )
+        cast(BBComponent, #container!).setMaximumSize( new Dimension( int(d!.width * 100), int(d!.height * 100) ) )
+		
+		rem the container wrapper
+		#containerWrapper! = new BBContainerWrapper( #container!, #this! )
+	
+		rem create the initial grid so it won't be null
+		#createMigLayoutGrid()
+	methodend
+	
+	
+	rem ======================================================
+	rem CONSTRAINTS
+	
+    rem /**
+    rem * Method getLayoutConstraints
+    rem * 
+    rem */
+	method public LC getLayoutConstraints()
+	    methodret #layoutConstraints!
+	methodend
+	
+    rem /**
+    rem * Method setLayoutConstraints
+    rem * 
+    rem */
+	method public void setLayoutConstraints(LC constraints!)
+		#layoutConstraints! = constraints!
+	methodend
+	
+    rem /**
+    rem * Method getColumnConstraints
+    rem * 
+    rem */
+	method public AC getColumnConstraints()
+	    methodret #columnConstraints!
+	methodend
+	
+    rem /**
+    rem * Method setColumnConstraints
+    rem * 
+    rem */
+	method public void setColumnConstraints(AC constraints!)
+	    #columnConstraints! = constraints!
+	methodend
+	
+    rem /**
+    rem * Method getRowConstraints
+    rem * 
+    rem */
+	method public AC getRowConstraints()
+	    methodret #rowConstraints!
+	methodend
+	
+    rem /**
+    rem * Method setRowConstraints
+    rem * 
+    rem */
+	method public void setRowConstraints(AC constraints!)
+	    #rowConstraints! = constraints!
+	methodend
+	
+	rem ======================================================
+	rem CONTROLS (COMPONENTS)
+
+	rem /**
+	rem * @param control BBj control object
+	rem * @param cc Column constraints object
+	rem */
+	method public void add(BBjControl control!, CC cc!)
+	    declare BBComponent component!
+	    declare Dimension d!
+	    
+	    component! = new BBComponent(control!)
+	    
+        d! = new Dimension( int(control!.getWidth()), int(control!.getHeight()) )
+	    component!.setMinimumSize( new Dimension( int(d!.width / 2), int(d!.height / 2) ) )
+        component!.setPreferredSize( d! )
+        component!.setMaximumSize( new Dimension( int(d!.width * 50), int(d!.height * 50) ) )
+	    
+	    #containerWrapper!.add(component!, cc!)
+	methodend
+
+	rem /**
+	rem * 
+	rem * @param control BBj control object
+	rem */
+	method public void add(BBjControl control!)
+		#add(control!, new CC())
+	methodend
+	
+	rem /**
+	rem * 
+	rem * @param control BBj control object
+	rem * @param cc Column constraints string
+	rem */
+	method public void add(BBjControl control!, String cc!)
+	    declare CC lCC!
+	    
+		lCC! = ConstraintParser.parseComponentConstraint( ConstraintParser.prepare( cc! ) )
+		#add(control!, lCC!)
+	methodend
+
+
+	rem ======================================================
+	rem LAYOUT
+	
+	rem /**
+	rem * This is where the actual layout happens
+	rem */
+	method public void layoutChildren()
+		rem validate if the grid should be recreated
+		#validateMigLayoutGrid()
+
+		rem this will use BBComponentWrapper.setBounds to actually place the components
+        lBounds! = Array.newInstance(Integer.TYPE,4)
+        Array.set( lBounds!, 0, new Integer(0));rem new Integer(#container!.getControl().getX()) )
+        Array.set( lBounds!, 1, new Integer(0));rem new Integer(#container!.getControl().getY()) )
+        Array.set( lBounds!, 2, new Integer(#container!.getControl().getWidth()) )
+        Array.set( lBounds!, 3, new Integer(#container!.getControl().getHeight()) )
+		#migGrid!.layout( lBounds!, #getLayoutConstraints().getAlignX(), #getLayoutConstraints().getAlignY(), #iDebug!, BBjAPI().TRUE )
+	methodend
+	
+	rem /**
+	rem * 
+	rem */
+	method private void createMigLayoutGrid()
+        #migGrid! = new Grid( #containerWrapper!, #getLayoutConstraints(), #getRowConstraints(), #getColumnConstraints(), #containerWrapper!.getComponentWrapperToCCMap(), null() )
+        #setLayoutSizes()
+        #valid! = BBjAPI().TRUE
+     methodend
+ 	
+    rem /**
+    rem * @see Swing MigLayout: maximumLayoutSize(); minimumLayoutSize(); preferredLayoutSize();
+    rem */
+ 	method private void setLayoutSizes()
+ 	    declare Dimension d!
+ 	    
+        d! = new Dimension( LayoutUtil.getSizeSafe(#migGrid!.getWidth(), LayoutUtil.MIN), LayoutUtil.getSizeSafe(#migGrid!.getHeight(), LayoutUtil.MIN) )
+        cast(BBComponent, #container!).setMinimumSize( d! )
+        d! = new Dimension( LayoutUtil.getSizeSafe(#migGrid!.getWidth(), LayoutUtil.MAX), LayoutUtil.getSizeSafe(#migGrid!.getHeight(), LayoutUtil.MAX) )
+        cast(BBComponent, #container!).setMaximumSize( d! )
+        d! = new Dimension( LayoutUtil.getSizeSafe(#migGrid!.getWidth(), LayoutUtil.PREF), LayoutUtil.getSizeSafe(#migGrid!.getHeight(), LayoutUtil.PREF) )
+        cast(BBComponent, #container!).setPreferredSize( d! )
+        rem resize container itself with preferred sizes
+        #container!.getControl().setSize(d!.width, d!.height)
+    methodend
+
+	rem /**
+	rem * the grid is valid if all component hashcodes are unchanged
+	rem */
+	method private void validateMigLayoutGrid()
+		rem only needed if the grid is valid
+		if (#isMiglayoutGridValid())
+			componentWrapperList! = #containerWrapper!.getComponentWrapperList()
+			if componentWrapperList! <> null() and componentWrapperList!.size() > 0 then
+			    for i = 0 to componentWrapperList!.size()-1
+			        componentWrapper! = componentWrapperList!.get(i)
+			        component! = componentWrapper!.getComponent()
+			        rem if this component is managed by MigLayout
+			        if (#containerWrapper!.getComponentToComponentWrapperMap().containsKey(component!))
+			            rem get its previous hashcode
+			            if (#containerWrapper!.getComponentToHashcodeMap().get(component!) <> null())
+			                lPreviousHashcode = num(#containerWrapper!.getComponentToHashcodeMap().get(component!))
+			            else
+			                lPreviousHashcode = 0
+			            endif
+    					rem calculate its current hashcode
+    					lCurrentHashcode = componentWrapper!.getLayoutHashCode()
+    					rem if it is not the same
+    					if (lPreviousHashcode = 0 or lPreviousHashcode <> lCurrentHashcode)
+    					    rem invalidate the grid
+    					    #invalidateMigLayoutGrid()
+    					    rem remember the new hashcode
+    					    #containerWrapper!.getComponentToHashcodeMap().put(component!, lCurrentHashcode)
+    					endif
+    				endif
+    			next i
+    		endif
+		endif
+		rem if invalid, create
+		if !(#isMiglayoutGridValid())
+			#createMigLayoutGrid()
+		endif
+	methodend
+	
+	rem /**
+	rem * mark the grid as invalid
+	rem */
+	method private void invalidateMigLayoutGrid()
+		#valid! = BBjAPI().FALSE
+	methodend
+	
+    rem /**
+    rem * @returns true if the grid is valid.
+    rem */
+    method private boolean isMiglayoutGridValid()
+        methodret #valid!
+    methodend
+    
+        
+	rem ======================================================
+	rem DEBUG - TODO
+    
+classend
