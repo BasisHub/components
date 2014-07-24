@@ -199,7 +199,7 @@ class public jabberwalky
         #Window!.setCallback(#Window!.ON_CLOSE, #this!, "closeWindow")
         #Window!.setCallback(#Window!.ON_RESIZE, #this!, "windowResize")
         #Window!.setCallback(#Window!.ON_SCREEN_RESIZE, #this!, "screenResize")
-        #Window!.setCallback(#Window!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
+        if info(3,6)<>"5" then #Window!.setCallback(#Window!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
         #Window!.setVisible(#TRUE)
         #Window!.focus()        
         process_events
@@ -242,13 +242,13 @@ class public jabberwalky
         event$ = p_event!.getEventString()
         isShiftDown = and(event.flags$,$01$)=$01$
         isCtrlDown = and(event.flags$,$02$)=$02$
+        isCmdDown = and(event.flags$,$08$)=$08$
         isAltDown = and(event.flags$,$10$)=$10$
-        rem isCmdDown = and(event.flags$,$??$)=$??$
         rem getWheelRotation(): amount of the scroll wheel's movement
         zoom_step = p_event!.getWheelRotation(); rem usually 1, can be 2 if scrolled very fast
         rem getScrollDirection(): 0=Mouse scrolled down (zoom out), 16=Mouse scrolled up (zoom in)
         zoom_in = p_event!.getScrollDirection()
-        if isCtrlDown then
+        if isCtrlDown or isCmdDown then
             rem current_context:i(2),available_context:u(2),active_context_count:u(2),scale_x:b,
             rem scale_y:b,units:c(1),screen_width:u(2),screen_height:u(2),screen_hres:u(2),
             rem screen_vres:u(2),display_type:u(1),devname:c(1*=0),devtype:c(1*=0),devmode:c(1*=0)
