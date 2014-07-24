@@ -265,7 +265,7 @@ class public BBMigPane
 	rem * 
 	rem */
 	method private void createMigLayoutGrid()
-	        #migGrid! = new Grid( #containerWrapper!, #getLayoutConstraints(), #getRowConstraints(), #getColumnConstraints(), #containerWrapper!.getComponentWrapperToCCMap(), null() )
+	    #migGrid! = new Grid( #containerWrapper!, #getLayoutConstraints(), #getRowConstraints(), #getColumnConstraints(), #containerWrapper!.getComponentWrapperToCCMap(), null() )
         #setLayoutSizes()
         #valid! = BBjAPI().TRUE
      methodend
