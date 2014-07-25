@@ -128,8 +128,6 @@ class public BBMigPane
 	rem * 
 	rem */
 	method private void construct()
-	    declare Dimension d!
-
 		rem defaults
 		if #getLayoutConstraints() = null() #setLayoutConstraints( new LC() )
 		if #getRowConstraints() = null() #setRowConstraints( new AC() )
@@ -137,6 +135,9 @@ class public BBMigPane
 		
 		rem default sizes for the container itself
 		d! = new Dimension( int(#container!.getControl().getWidth()), int(#container!.getControl().getHeight()) )
+        cast(BBComponent, #container!).setOrigMinimumSize( new Dimension( int(d!.width / 4), int(d!.height / 4) ) )
+        cast(BBComponent, #container!).setOrigPreferredSize( d! )
+        cast(BBComponent, #container!).setOrigMaximumSize( new Dimension( int(d!.width * 100), int(d!.height * 100) ) )
         cast(BBComponent, #container!).setMinimumSize( new Dimension( int(d!.width / 4), int(d!.height / 4) ) )
         cast(BBComponent, #container!).setPreferredSize( d! )
         cast(BBComponent, #container!).setMaximumSize( new Dimension( int(d!.width * 100), int(d!.height * 100) ) )
@@ -203,6 +204,14 @@ class public BBMigPane
 	rem ======================================================
 	rem CONTROLS (COMPONENTS)
 
+    rem /**
+    rem * 
+    rem * @returns container BBContainer object
+    rem */
+    method public BBContainer getContainer()
+        methodret #container!
+    methodend
+
 	rem /**
 	rem * @param control BBj control object
 	rem * @param cc Column constraints object
@@ -214,7 +223,10 @@ class public BBMigPane
 	    component! = new BBComponent(control!)
 	    
         d! = new Dimension( int(control!.getWidth()), int(control!.getHeight()) )
-	    component!.setMinimumSize( new Dimension( int(d!.width / 2), int(d!.height / 2) ) )
+	    component!.setOrigMinimumSize( new Dimension( int(d!.width / 2), int(d!.height / 2) ) )
+        component!.setOrigPreferredSize( d! )
+        component!.setOrigMaximumSize( new Dimension( int(d!.width * 50), int(d!.height * 50) ) )
+        component!.setMinimumSize(  new Dimension( int(d!.width / 2), int(d!.height / 2) )  )
         component!.setPreferredSize( d! )
         component!.setMaximumSize( new Dimension( int(d!.width * 50), int(d!.height * 50) ) )
 	    
@@ -338,6 +350,33 @@ class public BBMigPane
         methodret #valid!
     methodend
     
+    rem /**
+    rem * scale layout
+    rem */
+    method public void scaleLayout(BBjNumber scale)
+        componentWrapperList! = #containerWrapper!.getComponentWrapperList()
+        if componentWrapperList! <> null() and componentWrapperList!.size() > 0 then
+            for i = 0 to componentWrapperList!.size()-1
+                componentWrapper! = componentWrapperList!.get(i)
+                component! = componentWrapper!.getComponent()
+                if (#containerWrapper!.getComponentToComponentWrapperMap().containsKey(component!))
+                    d! = component!.getOrigMinimumSize()
+                    component!.setMinimumSize( new Dimension( int((d!.width*scale) / 2), int((d!.height*scale) / 2) ) )
+                    d! = component!.getOrigPreferredSize()
+                    component!.setPreferredSize( new Dimension( int(d!.width*scale), int(d!.height*scale) ) )
+                    d! = component!.getOrigMaximumSize()
+                    component!.setMaximumSize( new Dimension( int((d!.width*scale) * 50), int((d!.height*scale) * 50) ) )
+                    #containerWrapper!.getComponentToHashcodeMap().put(component!, componentWrapper!.getLayoutHashCode())
+                    #invalidateMigLayoutGrid()
+                endif
+            next i
+        endif
+        rem if invalid, create
+        if !(#isMiglayoutGridValid())
+            #createMigLayoutGrid()
+        endif
+    methodend
+
         
 	rem ======================================================
 	rem DEBUG - TODO

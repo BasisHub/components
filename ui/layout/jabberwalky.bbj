@@ -2,17 +2,24 @@
 use ::BBMigPane.bbj::BBMigPane
 use net.miginfocom.layout.PlatformDefaults
 
+use java.util.HashMap
+use java.util.Iterator
+
+new jabberwalky()
+release
+
 class public jabberwalky
     field private BBjAPI    API! = BBjAPI()
     field private BBjNumber TRUE = BBjAPI().TRUE
     field private BBjNumber FALSE = BBjAPI().FALSE
-    field private BBjNumber sysgui_ch
-    field private BBjSysGui SysGui!
+    field private BBjSysGui SysGui! = #API!.openSysGui("X0")
 
     field private BBjTopLevelWindow Window!
     field private BBMigPane Layout!
     field private BBjChildWindow cWindow!
     field private BBMigPane cLayout!
+
+    field private BBjStaticText lFirstName!
     
     field public BBjNumber ActiveResize
     field public BBjNumber ResizeEventWidth
@@ -20,10 +27,6 @@ class public jabberwalky
 
     method public jabberwalky()
 
-        #sysgui_ch = unt
-        open(#sysgui_ch)"X0"
-        #SysGui! = #API!.getSysGui()
-        
         rem test platforms (NOTE: setting this sticks til reset or JVM re-started)
         rem PlatformDefaults.setPlatform(PlatformDefaults.WINDOWS_XP)
         rem PlatformDefaults.setPlatform(PlatformDefaults.MAC_OSX)
@@ -43,155 +46,8 @@ class public jabberwalky
                 print "Unknown",
         swend
         print " (real os=",System.getProperty("os.name"),")"
-
-        WinFlags$=$00000000$
-        WinFlags$=IOR(WinFlags$,$00000001$); rem Allows the window to be resized.
-        WinFlags$=IOR(WinFlags$,$00000002$); rem Includes a close box with the window.
-        rem WinFlags$=IOR(WinFlags$,$00000004$); rem Causes a horizontal scroll bar to appear if the window contents are not scaled, or the window is resized so that the entire contents are not displayed.
-        rem WinFlags$=IOR(WinFlags$,$00000008$); rem Causes a vertical scroll bar to appear if the window contents are not scaled, or the window is resized so that the entire contents are not displayed.
-        WinFlags$=IOR(WinFlags$,$00000010$); rem Allows the window to be initially invisible.
-        rem WinFlags$=IOR(WinFlags$,$00000020$); rem Allows the window to be initially disabled.
-        WinFlags$=IOR(WinFlags$,$00000080$); rem Allows the window to be maximized or minimized.
-        rem WinFlags$=IOR(WinFlags$,$00000100$); rem Sets the window to be initially minimized.
-        rem WinFlags$=IOR(WinFlags$,$00000800$); rem Include menu bar. Creates a menu bar.
-        rem WinFlags$=IOR(WinFlags$,$00001000$); rem Sets the window to be initially maximized.
-        rem WinFlags$=IOR(WinFlags$,$00002000$); rem Prevents the separator line between the menu and client area of a window from being drawn.
-        WinFlags$=IOR(WinFlags$,$00010000$); rem Activates keyboard navigation in the window. If this flag is specified, key pressed ("t") events for arrow keys and the tab key will not be reported.
-        rem WinFlags$=IOR(WinFlags$,$00020000$); rem Always positions the window on top of other windows.
-        rem WinFlags$=IOR(WinFlags$,$00040000$); rem Creates a border around the dialog.
-        rem WinFlags$=IOR(WinFlags$,$00080000$); rem Sets the window to behave as a dialog.
-        rem WinFlags$=IOR(WinFlags$,$00100000$); rem Automatically arranges all controls and child windows placed in the window to fit.
-        WinFlags$=IOR(WinFlags$,$00400000$); rem Allows use of a custom color palette. This provides a more accurate display of colors in bitmapped images.
-        WinFlags$=IOR(WinFlags$,$00800000$); rem Sets the <Enter> key to behave as a <Tab> key.
-        rem WinFlags$=IOR(WinFlags$,$01000000$); rem Creates the window without a title bar.
-        WinFlags$=IOR(WinFlags$,$04000000$); rem Sets the window to automatically manage SYSCOLOR events.
-        rem WinFlags$=IOR(WinFlags$,$20000000$); rem Causes Visual PRO/5 to report the mouse's right button down event.
-        rem WinFlags$=IOR(WinFlags$,$40000000$); rem Sets the window to be group-modal within an MDI group.
-        #Window! = #SysGui!.addWindow(500,500,500,500,"BBMigPane Layout Test",WinFlags$)
-        #Window!.setName("window")
-        
-        declare BBjFont font!
-        font_size=12
-        font! = #SysGui!.makeFont("Dialog",font_size,#SysGui!.PLAIN)
-        #Window!.setFont(font!)
-        font_height=iff(font!.getStyle()=#SysGui!.BOLD,int(font_size*1.1),font_size)
-        
-        #Layout! = new BBMigPane(#Window!, "insets dialog,fillx", "[align label]rel[grow,fill]unrel[align label]rel[grow,fill]", "")
-
-        declare BBjVector tx!
-        declare BBjVector tm!
-        
-        tx! = #API!.makeVector()
-        tidFirstName = 0; tx!.add(tidFirstName, "First Name")
-        tidSurname = 1; tx!.add(tidSurname, "Surname")
-        tidAddress = 2; tx!.add(tidAddress, "Address")
-        tidOk = 3; tx!.add(tidOk, "OK")
-        tidCancel = 4; tx!.add(tidCancel, "Cancel")
-        tidHelp = 5; tx!.add(tidHelp, "Help")
-        tidHelp2 = 6; tx!.add(tidHelp2, "Second Help")
-        tm! = #SysGui!.getMeasures(tx!)
-
-        declare BBjColor bcolor!
-        bcolor! = #API!.makeColor(#SysGui!.LTGRAY)
-
-        lwpad=0,lhpad=12,iwpad=12,ihpad=12; rem label width/height padding, input control width/height padding
-        
-        declare BBjStaticText lFirstName!
-        lFirstName! =  #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidFirstName))+lwpad,font_height+lhpad,str(tx!.get(tidFirstName)))
-        lFirstName!.setName("lFirstName")
-        lFirstName!.setFont(font!)
-        lFirstName!.setBackColor(bcolor!)
-        #Layout!.add( lFirstName!, "" )
-        
-        declare BBjInputE iFirstName!
-        iFirstName! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
-        iFirstName!.setName("iFirstName")
-        iFirstName!.setFont(font!)
-        #Layout!.add( iFirstName!, "" )
-        
-        declare BBjStaticText lSurname!
-        lSurname! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidSurName))+lwpad,font_height+lhpad,str(tx!.get(tidSurName)))
-        lSurname!.setName("lSurname")
-        lSurname!.setFont(font!)
-        lSurname!.setBackColor(bcolor!)
-        #Layout!.add( lSurname!, "" )
-        
-        declare BBjInputE iSurname!
-        iSurname! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
-        iSurname!.setName("iSurname")
-        iSurname!.setFont(font!)
-        #Layout!.add( iSurname!, "wrap" )
-        
-        declare BBjStaticText lAddress!
-        lAddress! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidAddress))+lwpad,font_height+lhpad,str(tx!.get(tidAddress)))
-        lAddress!.setName("lAddress")
-        lAddress!.setFont(font!)
-        lAddress!.setBackColor(bcolor!)
-        #Layout!.add( lAddress!, "" )
-
-        declare BBjInputE iAddress!
-        iAddress! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,200,font_height+ihpad,"")
-        iAddress!.setName("iAddress")
-        iAddress!.setFont(font!)
-        #Layout!.add( iAddress!, "spanx, wrap unrel:push" )
-
-        rem child window (pane) for the buttons to test button tags
-        cWinFlags$=$00000000$
-        rem cWinFlags$=IOR(cWinFlags$,$00000004$); rem Includes a horizontal scroll bar with the child window. The scroll bar is only visible if this flag is set, 
-        rem            the 'TRACK'(0) mnemonic is used to prevent image scaling, and either the child window or the virtual drawing surface is resized.
-        rem cWinFlags$=IOR(cWinFlags$,$00000008$); rem Includes a vertical scroll bar with the child window. The scroll bar is only visible if this flag is set, 
-        rem            the 'TRACK'(0) mnemonic is used to prevent image scaling, and either the child window or the virtual drawing surface is resized.
-        rem cWinFlags$=IOR(cWinFlags$,$00000010$); rem Sets the child window to be initially invisible.
-        rem cWinFlags$=IOR(cWinFlags$,$00000020$); rem Sets the child window to be initially disabled.
-        cWinFlags$=IOR(cWinFlags$,$00000800$); rem Creates a child window without a border.
-        cWinFlags$=IOR(cWinFlags$,$00010000$); rem Activates keyboard navigation in the child window. 
-        rem            If this flag is specified, key pressed ("t") events for arrow keys and the tab key will not be reported.
-        rem cWinFlags$=IOR(cWinFlags$,$00100000$); rem Automatically arranges all controls to fit within the child window.
-        rem cWinFlags$=IOR(cWinFlags$,$00200000$); rem Attaches the child window to one side of the parent frame, by default to the top frame. 
-        rem            It will always occupy the full extent of the parent window's edge (even if the parent is resized later), 
-        rem            but the other dimension is determined by the width or height specified when the child was created. 
-        rem            By default, docked child windows are attached to the top of their parent. This can be changed with the 'DOCK' mnemonic.
-        rem cWinFlags$=IOR(cWinFlags$,$00800000$); rem Sets the <Enter> key to behave as a <Tab> key.
-        rem cWinFlags$=IOR(cWinFlags$,$01000000$); rem Draws a recessed client edge around the child window.
-        rem cWinFlags$=IOR(cWinFlags$,$02000000$); rem Draws a raised edge around the child window.
-        #cWindow! = #Window!.addChildWindow(#Window!.getAvailableControlID(),0,70,#Window!.getWidth(),25,"",cWinFlags$,#SysGui!.getAvailableContext())
-        #cWindow!.setName("cWindow")
-        #cWindow!.setFont(font!)
-        #cWindow!.setBackColor(bcolor!)
-        
-        #cLayout! = new BBMigPane(#cWindow!, "nogrid,fill", "[grow,fill]", "")
-        
-        bwpad=16,bhpad=16; rem button width/height padding
-        
-        declare BBjMenuButton bOk!
-        bOk! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidOk))+bwpad,font_height+bhpad,str(tx!.get(tidOk)))
-        bOk!.setName("bOk")
-        bOk!.setFont(font!)
-        #cLayout!.add( bOk!, "sg,tag ok" )
-
-        declare BBjMenuButton bCancel!
-        bCancel! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidCancel))+bwpad,font_height+bhpad,str(tx!.get(tidCancel)))
-        bCancel!.setName("bCancel")
-        bCancel!.setFont(font!)
-        #cLayout!.add( bCancel!, "sg,tag cancel" )
-
-        declare BBjMenuButton bHelp!
-        bHelp! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidHelp))+bwpad,font_height+bhpad,str(tx!.get(tidHelp)))
-        bHelp!.setName("bHelp")
-        bHelp!.setFont(font!)
-        #cLayout!.add( bHelp!, "sg,tag help" )
-
-        declare BBjMenuButton bHelp2!
-        bHelp2! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidHelp2))+bwpad,font_height+bhpad,str(tx!.get(tidHelp2)))
-        bHelp2!.setName("bHelp2")
-        bHelp2!.setFont(font!)
-        #cLayout!.add( bHelp2!, "sg,tag help2" )
-
-        #cLayout!.layoutChildren()
-                
-        #Layout!.add( #cWindow!, "south")
-        #Layout!.layoutChildren()
        
+        #constructForm()
         #show()
     methodend
 
@@ -199,14 +55,16 @@ class public jabberwalky
         #Window!.setCallback(#Window!.ON_CLOSE, #this!, "closeWindow")
         #Window!.setCallback(#Window!.ON_RESIZE, #this!, "windowResize")
         #Window!.setCallback(#Window!.ON_SCREEN_RESIZE, #this!, "screenResize")
-        if info(3,6)<>"5" then #Window!.setCallback(#Window!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
+        if info(3,6)<>"5" then
+            #Window!.setCallback(#Window!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
+            #cWindow!.setCallback(#cWindow!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
+        endif
         #Window!.setVisible(#TRUE)
         #Window!.focus()        
         process_events
     methodend
 
     method public void closeWindow(BBjCloseEvent ev!)
-        if #sysgui_ch then close(#sysgui_ch)
         release
     methodend
     
@@ -236,37 +94,218 @@ class public jabberwalky
     methodend
 
     method public void mouseScroll(BBjScrollWheelEvent p_event!)
-        rem context:i(2),code:u(1),id:u(2),flags:u(1),x:u(2),y:u(2)
-        rem dim event$:#SysGui!.stringForEventTemplate
-        dim event$:tmpl(#sysgui_ch)
-        event$ = p_event!.getEventString()
-        isShiftDown = and(event.flags$,$01$)=$01$
-        isCtrlDown = and(event.flags$,$02$)=$02$
-        isCmdDown = and(event.flags$,$08$)=$08$
-        isAltDown = and(event.flags$,$10$)=$10$
-        rem getWheelRotation(): amount of the scroll wheel's movement
-        zoom_step = p_event!.getWheelRotation(); rem usually 1, can be 2 if scrolled very fast
-        rem getScrollDirection(): 0=Mouse scrolled down (zoom out), 16=Mouse scrolled up (zoom in)
-        zoom_in = p_event!.getScrollDirection()
-        if isCtrlDown or isCmdDown then
-            rem current_context:i(2),available_context:u(2),active_context_count:u(2),scale_x:b,
-            rem scale_y:b,units:c(1),screen_width:u(2),screen_height:u(2),screen_hres:u(2),
-            rem screen_vres:u(2),display_type:u(1),devname:c(1*=0),devtype:c(1*=0),devmode:c(1*=0)
-            dim sysgui_fin$:tmpl(#sysgui_ch,ind=0)
-            sysgui_fin$ = fin(#sysgui_ch,ind=0)
-            if zoom_in then
-                zoom_factor = sysgui_fin.scale_x + (zoom_step / 10)
+        if p_event!.isControlDown() or p_event!.isCmdDown() then
+            scale = num(cast(HashMap, #Window!.getUserData()).get("scale"))
+            if p_event!.getScrollDirection() then
+                scale = scale + (p_event!.getWheelRotation() / 10)
             else
-                zoom_factor = sysgui_fin.scale_x - (zoom_step / 10)
+                scale = scale - (p_event!.getWheelRotation() / 10)
             endif
-            if zoom_factor > 0.25 then
-                print(#sysgui_ch)'SCALE'(zoom_factor,zoom_factor)
+            if scale >= 0.5 and scale <= 3.0 then
+                #Layout!.scaleLayout(scale)
+                #cLayout!.scaleLayout(scale)
+                #scaleFonts(#Window!,scale)
                 #resizeTimerEvent(null())
+                cast(HashMap, #Window!.getUserData()).put("scale", scale)
             endif
         endif
     methodend
+
+    method public void scaleFonts(BBjWindow window!, BBjNumber scale)
+        declare BBjFont f!
+        declare BBjVector v!
+        declare Iterator iter!
+        declare BBjControl c!
+        
+        rem first the window itself
+        sz = 0
+        sz = num(cast(HashMap, window!.getUserData(),err=*next).get("prefFontSize",err=*next))
+        if sz > 0 then
+            sz = int(sz * scale)
+            f! = window!.getFont()
+            window!.setFont( #SysGui!.makeFont(f!.getName(), sz, f!.getStyle()) )
+        endif
+        rem then its controls
+        v! = window!.getAllControls()
+        iter! = v!.iterator()
+        while iter!.hasNext()
+            c! = cast(BBjControl, iter!.next())
+            if c!.getControlType() = #SysGui!.CHILD_TYPE then
+                #this!.scaleFonts(cast(BBjWindow, c!), scale)
+                continue
+            endif
+            sz = 0
+            sz = num(cast(HashMap, c!.getUserData(),err=*continue).get("prefFontSize",err=*continue))
+            if sz > 0 then
+                sz = int(sz * scale)
+                f! = c!.getFont()
+                c!.setFont( #SysGui!.makeFont(f!.getName(), sz, f!.getStyle()) )
+            endif
+        wend
+    methodend
+
+    method public void constructForm()
+        WinFlags$=$00000000$
+        WinFlags$=IOR(WinFlags$,$00000001$); rem Allows the window to be resized.
+        WinFlags$=IOR(WinFlags$,$00000002$); rem Includes a close box with the window.
+        rem WinFlags$=IOR(WinFlags$,$00000004$); rem Causes a horizontal scroll bar to appear if the window contents are not scaled, or the window is resized so that the entire contents are not displayed.
+        rem WinFlags$=IOR(WinFlags$,$00000008$); rem Causes a vertical scroll bar to appear if the window contents are not scaled, or the window is resized so that the entire contents are not displayed.
+        WinFlags$=IOR(WinFlags$,$00000010$); rem Allows the window to be initially invisible.
+        rem WinFlags$=IOR(WinFlags$,$00000020$); rem Allows the window to be initially disabled.
+        WinFlags$=IOR(WinFlags$,$00000080$); rem Allows the window to be maximized or minimized.
+        rem WinFlags$=IOR(WinFlags$,$00000100$); rem Sets the window to be initially minimized.
+        rem WinFlags$=IOR(WinFlags$,$00000800$); rem Include menu bar. Creates a menu bar.
+        rem WinFlags$=IOR(WinFlags$,$00001000$); rem Sets the window to be initially maximized.
+        rem WinFlags$=IOR(WinFlags$,$00002000$); rem Prevents the separator line between the menu and client area of a window from being drawn.
+        WinFlags$=IOR(WinFlags$,$00010000$); rem Activates keyboard navigation in the window. If this flag is specified, key pressed ("t") events for arrow keys and the tab key will not be reported.
+        rem WinFlags$=IOR(WinFlags$,$00020000$); rem Always positions the window on top of other windows.
+        rem WinFlags$=IOR(WinFlags$,$00040000$); rem Creates a border around the dialog.
+        rem WinFlags$=IOR(WinFlags$,$00080000$); rem Sets the window to behave as a dialog.
+        rem WinFlags$=IOR(WinFlags$,$00100000$); rem Automatically arranges all controls and child windows placed in the window to fit.
+        WinFlags$=IOR(WinFlags$,$00400000$); rem Allows use of a custom color palette. This provides a more accurate display of colors in bitmapped images.
+        WinFlags$=IOR(WinFlags$,$00800000$); rem Sets the <Enter> key to behave as a <Tab> key.
+        rem WinFlags$=IOR(WinFlags$,$01000000$); rem Creates the window without a title bar.
+        WinFlags$=IOR(WinFlags$,$04000000$); rem Sets the window to automatically manage SYSCOLOR events.
+        rem WinFlags$=IOR(WinFlags$,$20000000$); rem Causes Visual PRO/5 to report the mouse's right button down event.
+        rem WinFlags$=IOR(WinFlags$,$40000000$); rem Sets the window to be group-modal within an MDI group.
+        #Window! = #SysGui!.addWindow(500,500,500,500,"BBMigPane Layout Test",WinFlags$)
+        #Window!.setName("window")
+        #Window!.setUserData(new HashMap())
+        cast(HashMap, #Window!.getUserData()).put("scale",1.0)
+                
+        declare BBjFont font!
+        font_size=12
+        font! = #SysGui!.makeFont("Dialog",font_size,#SysGui!.PLAIN)
+        font_height=iff(font!.getStyle()=#SysGui!.BOLD,int(font_size*1.1),font_size)
+        
+        #Window!.setFont(font!); cast(HashMap, #Window!.getUserData()).put("prefFontSize",font!.getSize())
+        
+        #Layout! = new BBMigPane(#Window!, "insets dialog,fillx", "[align label]rel[grow,fill]unrel[align label]rel[grow,fill]", "")
+
+        declare BBjVector tx!
+        declare BBjVector tm!
+        
+        tx! = #API!.makeVector()
+        tidFirstName = 0; tx!.add(tidFirstName, "First Name")
+        tidSurname = 1; tx!.add(tidSurname, "Surname")
+        tidAddress = 2; tx!.add(tidAddress, "Address")
+        tidOk = 3; tx!.add(tidOk, "OK")
+        tidCancel = 4; tx!.add(tidCancel, "Cancel")
+        tidHelp = 5; tx!.add(tidHelp, "Help")
+        tidHelp2 = 6; tx!.add(tidHelp2, "Second Help")
+        tm! = #SysGui!.getMeasures(tx!)
+
+        declare BBjColor bcolor!
+        bcolor! = #API!.makeColor(#SysGui!.LTGRAY)
+
+        lwpad=0,lhpad=12,iwpad=12,ihpad=12; rem label width/height padding, input control width/height padding
+        
+        rem declare BBjStaticText lFirstName!
+        #lFirstName! =  #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidFirstName))+lwpad,font_height+lhpad,str(tx!.get(tidFirstName)))
+        #lFirstName!.setName("lFirstName")
+        #lFirstName!.setUserData(new HashMap())
+        #lFirstName!.setFont(font!); cast(HashMap, #lFirstName!.getUserData()).put("prefFontSize",font!.getSize())
+        #lFirstName!.setBackColor(bcolor!)
+        #Layout!.add( #lFirstName!, "" )
+        
+        declare BBjInputE iFirstName!
+        iFirstName! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
+        iFirstName!.setName("iFirstName")
+        iFirstName!.setUserData(new HashMap())
+        iFirstName!.setFont(font!); cast(HashMap, iFirstName!.getUserData()).put("prefFontSize",font!.getSize())
+        #Layout!.add( iFirstName!, "" )
+        
+        declare BBjStaticText lSurname!
+        lSurname! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidSurName))+lwpad,font_height+lhpad,str(tx!.get(tidSurName)))
+        lSurname!.setName("lSurname")
+        lSurname!.setUserData(new HashMap())
+        lSurname!.setFont(font!); cast(HashMap, lSurname!.getUserData()).put("prefFontSize",font!.getSize())
+        lSurname!.setBackColor(bcolor!)
+        #Layout!.add( lSurname!, "" )
+        
+        declare BBjInputE iSurname!
+        iSurname! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
+        iSurname!.setName("iSurname")
+        iSurname!.setUserData(new HashMap())
+        iSurname!.setFont(font!); cast(HashMap, iSurname!.getUserData()).put("prefFontSize",font!.getSize())
+        #Layout!.add( iSurname!, "wrap" )
+        
+        declare BBjStaticText lAddress!
+        lAddress! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidAddress))+lwpad,font_height+lhpad,str(tx!.get(tidAddress)))
+        lAddress!.setName("lAddress")
+        lAddress!.setUserData(new HashMap())
+        lAddress!.setFont(font!); cast(HashMap, lAddress!.getUserData()).put("prefFontSize",font!.getSize())
+        lAddress!.setBackColor(bcolor!)
+        #Layout!.add( lAddress!, "" )
+
+        declare BBjInputE iAddress!
+        iAddress! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,200,font_height+ihpad,"")
+        iAddress!.setName("iAddress")
+        iAddress!.setUserData(new HashMap())
+        iAddress!.setFont(font!); cast(HashMap, iAddress!.getUserData()).put("prefFontSize",font!.getSize())
+        #Layout!.add( iAddress!, "spanx, wrap unrel:push" )
+
+        rem child window (pane) for the buttons to test button tags
+        cWinFlags$=$00000000$
+        rem cWinFlags$=IOR(cWinFlags$,$00000004$); rem Includes a horizontal scroll bar with the child window. The scroll bar is only visible if this flag is set, 
+        rem            the 'TRACK'(0) mnemonic is used to prevent image scaling, and either the child window or the virtual drawing surface is resized.
+        rem cWinFlags$=IOR(cWinFlags$,$00000008$); rem Includes a vertical scroll bar with the child window. The scroll bar is only visible if this flag is set, 
+        rem            the 'TRACK'(0) mnemonic is used to prevent image scaling, and either the child window or the virtual drawing surface is resized.
+        rem cWinFlags$=IOR(cWinFlags$,$00000010$); rem Sets the child window to be initially invisible.
+        rem cWinFlags$=IOR(cWinFlags$,$00000020$); rem Sets the child window to be initially disabled.
+        cWinFlags$=IOR(cWinFlags$,$00000800$); rem Creates a child window without a border.
+        cWinFlags$=IOR(cWinFlags$,$00010000$); rem Activates keyboard navigation in the child window. 
+        rem            If this flag is specified, key pressed ("t") events for arrow keys and the tab key will not be reported.
+        rem cWinFlags$=IOR(cWinFlags$,$00100000$); rem Automatically arranges all controls to fit within the child window.
+        rem cWinFlags$=IOR(cWinFlags$,$00200000$); rem Attaches the child window to one side of the parent frame, by default to the top frame. 
+        rem            It will always occupy the full extent of the parent window's edge (even if the parent is resized later), 
+        rem            but the other dimension is determined by the width or height specified when the child was created. 
+        rem            By default, docked child windows are attached to the top of their parent. This can be changed with the 'DOCK' mnemonic.
+        rem cWinFlags$=IOR(cWinFlags$,$00800000$); rem Sets the <Enter> key to behave as a <Tab> key.
+        rem cWinFlags$=IOR(cWinFlags$,$01000000$); rem Draws a recessed client edge around the child window.
+        rem cWinFlags$=IOR(cWinFlags$,$02000000$); rem Draws a raised edge around the child window.
+        #cWindow! = #Window!.addChildWindow(#Window!.getAvailableControlID(),0,70,#Window!.getWidth(),25,"",cWinFlags$,#SysGui!.getAvailableContext())
+        #cWindow!.setName("cWindow")
+        #cWindow!.setUserData(new HashMap())
+        #cWindow!.setFont(font!); cast(HashMap, #cWindow!.getUserData()).put("prefFontSize",font!.getSize())
+        #cWindow!.setBackColor(bcolor!)
+        
+        #cLayout! = new BBMigPane(#cWindow!, "nogrid,fill", "[grow,fill]", "")
+        
+        bwpad=16,bhpad=16; rem button width/height padding
+        
+        declare BBjMenuButton bOk!
+        bOk! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidOk))+bwpad,font_height+bhpad,str(tx!.get(tidOk)))
+        bOk!.setName("bOk")
+        bOk!.setUserData(new HashMap())
+        bOk!.setFont(font!); cast(HashMap, bOk!.getUserData()).put("prefFontSize",font!.getSize())
+        #cLayout!.add( bOk!, "sg,tag ok" )
+
+        declare BBjMenuButton bCancel!
+        bCancel! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidCancel))+bwpad,font_height+bhpad,str(tx!.get(tidCancel)))
+        bCancel!.setName("bCancel")
+        bCancel!.setUserData(new HashMap())
+        bCancel!.setFont(font!); cast(HashMap, bCancel!.getUserData()).put("prefFontSize",font!.getSize())
+        #cLayout!.add( bCancel!, "sg,tag cancel" )
+
+        declare BBjMenuButton bHelp!
+        bHelp! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidHelp))+bwpad,font_height+bhpad,str(tx!.get(tidHelp)))
+        bHelp!.setName("bHelp")
+        bHelp!.setUserData(new HashMap())
+        bHelp!.setFont(font!); cast(HashMap, bHelp!.getUserData()).put("prefFontSize",font!.getSize())
+        #cLayout!.add( bHelp!, "sg,tag help" )
+
+        declare BBjMenuButton bHelp2!
+        bHelp2! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidHelp2))+bwpad,font_height+bhpad,str(tx!.get(tidHelp2)))
+        bHelp2!.setName("bHelp2")
+        bHelp2!.setUserData(new HashMap())
+        bHelp2!.setFont(font!); cast(HashMap, bHelp2!.getUserData()).put("prefFontSize",font!.getSize())
+        #cLayout!.add( bHelp2!, "sg,tag help2" )
+
+        #cLayout!.layoutChildren()
+                
+        #Layout!.add( #cWindow!, "south")
+        #Layout!.layoutChildren()
+    methodend
     
 classend
-
-
-new jabberwalky()
