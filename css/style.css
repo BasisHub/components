@@ -171,23 +171,23 @@ body {
   width: 30px;	
 }
 
-.backButton {
+.BackButton {
   background: transparent !important;
   border-width: 0 !important;
   text-align: left !important;
   box-shadow: none !important;
   color: #d1d9e0;
 }
-.backButton:before {
+.BackButton:before {
   content: ' <';
   font: normal 36px "AdventPro-Medium", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
   line-height: 26px !important;
 }
-.BBjButton.backButton:hover {
+.BBjButton.BackButton:hover {
   color: #ffcc66;
 }
-.BBjButton.backButton:active,
-.backButton.BBjControl.BBjButton:not(.bbj-disabled).gwt-PushButton-down-hovering {
+.BBjButton.BackButton:active,
+.BackButton.BBjControl.BBjButton:not(.bbj-disabled).gwt-PushButton-down-hovering {
   color: #ffb31a;
 }
 /* List Box */
