@@ -77,7 +77,7 @@ class public WindowStack
         if yoffs then
 
             backButton!=wnd!.addButton(101,10,10,125,30,"Back")
-            backButton!.addStyle("backButton")
+            backButton!.addStyle("BackButton")
             backButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onBackButton")
             
             st! = wnd!.addStaticText(102,150,10,2000,30,name$)
