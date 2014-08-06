@@ -201,7 +201,7 @@ class public UIComponent
 
 
     rem /**
-    rem * Method setBC:
+    rem * Method destroy:
     rem * destroy the UI component
     rem */
     method public void destroy()
