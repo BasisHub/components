@@ -19,6 +19,8 @@ class public DataProvider
     field private   BBjNumber           RecordCountInResultSet
     field protected BBjString           SQL$
     field protected BBjString           DataSource$
+    field protected BBjString           Schema$
+    field protected BBjString           SchemaPfx$    
     field private   BBjVector           PrimaryKeySegments!        = new BBjVector()
     field private   BBjString           PrimaryTable$
 
@@ -936,14 +938,13 @@ REM         close (999)
         s$=s$(2)
         v$=v$(2)
 
-        sql$="INSERT INTO "+#PrimaryTable$+" ("+s$+") VALUES ("+v$+")"
+        sql$="INSERT INTO "+#SchemaPfx$+#PrimaryTable$+" ("+s$+") VALUES ("+v$+")"
         rem print sql$
 
 
         #openDatabase()
         declare java.sql.PreparedStatement stmt!
         stmt! = #Connection!.prepareStatement(sql$)
-
         ks! = hm!.keySet()
         it! = ks!.iterator()
         i=1
@@ -1041,11 +1042,12 @@ REM         close (999)
         s$=s$(2)
 
 
-        sql$="UPDATE "+#PrimaryTable$+" SET "+s$+" WHERE "+wh$
+        sql$="UPDATE "+#SchemaPfx$+#PrimaryTable$+" SET "+s$+" WHERE "+wh$
         rem print sql$
 
         #openDatabase()
         declare java.sql.PreparedStatement stmt!
+
         stmt! = #Connection!.prepareStatement(sql$)
 
         ks! = hm!.keySet()
@@ -1091,7 +1093,6 @@ REM         close (999)
 
             i=i+1
         wend
-
 
         rem TODO: catch error
         ret=stmt!.executeUpdate(err=*next)
