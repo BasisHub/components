@@ -41,8 +41,10 @@ class public (DB_NICE)(TBL_NICE)DataProvider extends (DB_NICE)(TBL_NICE)DataProv
         rem generated super class does the following:
 
         rem #setDataSource("(DB)")
+        rem #setSchema("(SCHEMA)")
+        rem #setSchemaPfx("(SCHEMAPFX)")        
         rem #setSQL("SELECT * FROM (TBL)")
-		rem #setSQL("SELECT <field>(FLD),</field> FROM (TBL)")
+		rem #setSQL("SELECT <field>(FLD),</field> FROM (SCHEMAPFX)(TBL)")
 		
         rem #setPrimaryTable("(TBL)")
         <keyseg>

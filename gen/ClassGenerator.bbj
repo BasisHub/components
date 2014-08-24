@@ -434,7 +434,7 @@ rem /** DLGWIZ_INI_END **/
         close (ch)
 
 
-        gen! = new ::ClassGeneratorWorker.bbj::ClassGeneratorWorker(db$,user$,pwd$,v!,targetdir$, tpldir$, prepend$="1")
+        gen! = new ::ClassGeneratorWorker.bbj::ClassGeneratorWorker(db$,schema$,user$,pwd$,v!,targetdir$, tpldir$, prepend$="1")
         gen!.setProgressCb(#this!)
         if #C_CBOVERWRITE!.isSelected() then
             gen!.setOverwrite(1)

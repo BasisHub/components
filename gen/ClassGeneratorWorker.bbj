@@ -36,6 +36,8 @@ class public ClassGeneratorWorker
     field private  BBjAdminBase  Admin! = BBjAdminFactory.getBBjAdmin(InetAddress.getByName("localhost"),2002,0,50000,"admin","admin123")
 
     field private BBjString DB$
+    field private BBjString Schema$
+
     field private BBjString User$
     field private BBjString Pwd$
     field private BBjVector Tables!
@@ -60,7 +62,7 @@ class public ClassGeneratorWorker
     rem * @param BBjString tpldir$: the path of the templates
     rem * @param BBjNumber prepend: prepends nice formatted DB names
     rem */
-    method public ClassGeneratorWorker(BBjString db$, BBjString user$, BBjString pwd$, BBjVector tables!, BBjString targetdir$, BBjString tpldir$, BBjNumber prepend)
+    method public ClassGeneratorWorker(BBjString db$, BBjString schema$, BBjString user$, BBjString pwd$, BBjVector tables!, BBjString targetdir$, BBjString tpldir$, BBjNumber prepend)
 
         #DB$ = db$
         #User$ = user$
@@ -68,6 +70,7 @@ class public ClassGeneratorWorker
         #Tables! = tables!
         #TargetDir$ = targetdir$
         #TplDir$ = tpldir$
+        #Schema$=schema$
         #Prepend = prepend
 
         mkdir #TargetDir$+"i18n/",err=*next
@@ -79,15 +82,14 @@ class public ClassGeneratorWorker
     rem /**
     rem * Method getBBjDDProperty:
     rem * get data dictionary property for a column in a database table
-    rem * @param BBjString db$: database name
     rem * @param BBjString table$: table name
     rem * @param BBjString col$: the column name
     rem * @param BBjString prop$: the property name
     rem * @return BBjString value: the value of column property
     rem */
-    method private BBjString getBBjDDProperty(BBjString db$, BBjString table$, BBjString col$,BBjString prop$)
+    method private BBjString getBBjDDProperty(BBjString table$, BBjString col$,BBjString prop$)
 
-        database! = #Admin!.getDatabase(db$,err=noDB)
+        database! = #Admin!.getDatabase(#DB$ ,err=noDB)
         rem TODO: connection pools?
 
         tab! = database!.getTable(table$)
@@ -104,14 +106,13 @@ class public ClassGeneratorWorker
     rem /**
     rem * Method getBBjDDProperty:
     rem * get data dictionary property for a column in a database table
-    rem * @param BBjString db$: database name
     rem * @param BBjString table$: table name
     rem * @param BBjString prop$: the property name
     rem * @return BBjString value: the value of column property
     rem */
-    method private BBjString getBBjDDProperty(BBjString db$, BBjString table$, BBjString prop$)
+    method private BBjString getBBjDDProperty( BBjString table$, BBjString prop$)
 
-        database! = #Admin!.getDatabase(db$,err=noDB1)
+        database! = #Admin!.getDatabase(#DB$ ,err=noDB1)
         rem TODO: connection pools?
 
         tab! = database!.getTable(table$)
@@ -128,10 +129,9 @@ class public ClassGeneratorWorker
     rem * generate the label's (fieldname label's) for the GUI (.arc) files.
     rem * The labels are stored in a java properties file
     rem * The properties files can be manually extended and/or translated in different languages.
-    rem * @param BBjString schema$: schema name
     rem * @param BBjString table$: table name
     rem */
-    method public void generateProperties(BBjString s$, BBjString t$)
+    method public void generateProperties(BBjString t$)
 
         declare ResultSet JDBCResultSet!
         declare BBjVector v!
@@ -147,13 +147,13 @@ class public ClassGeneratorWorker
         if #Connection!<>null() then
             md! = #Connection!.getMetaData()
 
-            JDBCResultSet! = md!.getColumns(null(),null(),t$,"%")
+            JDBCResultSet! = md!.getColumns(null(),#Schema$,t$,"%")
 
             while JDBCResultSet!.next() 
                 col_type=JDBCResultSet!.getInt("DATA_TYPE")
                 col_name$=JDBCResultSet!.getString("COLUMN_NAME")
 
-                transl$ = #getBBjDDProperty(#DB$, t$, col_name$,BBjAdminColumn.DESCRIPTION)
+                transl$ = #getBBjDDProperty(t$, col_name$,BBjAdminColumn.DESCRIPTION)
                 if  transl$ = "" then
                     transl$ = col_name$
                 fi
@@ -169,11 +169,10 @@ class public ClassGeneratorWorker
     rem /**
     rem * Method getKeySegments:
     rem * get a BBjVector with the primary key segments (primary key definition)
-    rem * @param BBjString schema$: schema name
     rem * @param BBjString table$: table name
     rem * @return BBjVector vec!: a BBjVector with the primary key segments
     rem */
-    method public BBjVector getKeySegments(BBjString s$, BBjString t$)
+    method public BBjVector getKeySegments(BBjString t$)
 
         declare ResultSet JDBCResultSet!
         declare BBjVector v!
@@ -196,7 +195,11 @@ class public ClassGeneratorWorker
             rem so leaving this in as a reminder....
             rem JDBCResultSet! = md!.getPrimaryKeys(#DB$,s$,t$)
 
-            JDBCResultSet! = md!.getPrimaryKeys(null(),null(),t$)
+            rem TODO: check if this now works in MS SQL Server
+            JDBCResultSet! = md!.getPrimaryKeys(null(),#Schema$,t$)
+            
+            
+            rem JDBCResultSet! = md!.getIndexInfo(null(),#Schema$,t$,1,1)
 
             while JDBCResultSet!.next() 
                 v!.addItem(JDBCResultSet!.getString("COLUMN_NAME"))
@@ -212,11 +215,10 @@ class public ClassGeneratorWorker
     rem * Method getImportedKeys:
     rem * get a BBjVector with templated strings describing the primary key columns that are referenced by the given table's foreign key columns.
     rem * The templated string is definded as: "FKCOLUMN_NAME:C(1*),PKTABLE_NAME:C(1*),PKCOLUMN_NAME:C(1*)"
-    rem * @param BBjString schema$: schema name
     rem * @param BBjString table$: table name
     rem * @return BBjVector vec!: a BBjVector with the referenced primary keys
     rem */
-    method public BBjVector getImportedKeys(BBjString s$, BBjString t$)
+    method public BBjVector getImportedKeys(BBjString t$)
 
         declare ResultSet JDBCResultSet!
         declare BBjVector v!
@@ -241,7 +243,9 @@ class public ClassGeneratorWorker
 
             rem JDBCResultSet! = md!.getImportedKeys(base_db$,s$,t$)
             rem Fix for Ms SQL
-            JDBCResultSet! = md!.getImportedKeys(null(),null(),t$)
+            
+            rem TODO check MS SQL Server again
+            JDBCResultSet! = md!.getImportedKeys(null(),#Schema$,t$)
 
             while JDBCResultSet!.next() 
                 declare BBjTemplatedString t!
@@ -263,11 +267,10 @@ class public ClassGeneratorWorker
     rem * Method getFields:
     rem * get a BBjVector with templated strings describing the columns fields.
     rem * The templated string is defined as: "DATA_TYPE:C(1*),COLUMN_NAME:C(1*)"
-    rem * @param BBjString schema$: schema name
     rem * @param BBjString table$: table name
     rem * @return BBjVector vec!: a BBjVector with the column fields
     rem */
-    method public BBjVector getFields(BBjString s$, BBjString t$)
+    method public BBjVector getFields( BBjString t$)
         declare ResultSet JDBCResultSet!
         declare BBjVector v!
         declare DatabaseMetaData md!
@@ -292,7 +295,7 @@ class public ClassGeneratorWorker
                 col_name$=JDBCResultSet!.getString("COLUMN_NAME")
 
                 tmp$="false"
-                tmp$ = #getBBjDDProperty(#DB$, t$, col_name$,"OBSOLETE",err=*next)
+                tmp$ = #getBBjDDProperty(t$, col_name$,"OBSOLETE",err=*next)
                 if tmp$="true" then
                     continue
                 fi
@@ -370,7 +373,7 @@ class public ClassGeneratorWorker
     rem * @param BBjString table$: the table name for which the GUI should be generated
     rem * @param BBjString targetdir$: the target dir for the .ARC file
     rem */
-    method public void generateArc(BBjString tpl$,  BBjString s$, BBjString t$, BBjString targetdir$)
+    method public void generateArc(BBjString tpl$,  BBjString t$, BBjString targetdir$)
 
         declare ResultSet JDBCResultSet!
 
@@ -383,7 +386,7 @@ class public ClassGeneratorWorker
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
         
-        classname$= cvs(#getBBjDDProperty(#DB$, t$, "CLASSNAME"),128)
+        classname$= cvs(#getBBjDDProperty( t$, "CLASSNAME"),128)
         if classname$>"" then
             tbl_nice$=classname$
         fi
@@ -416,7 +419,11 @@ class public ClassGeneratorWorker
         cid=100
         row=1
 
-        sql$="SELECT * FROM "+t$
+        if #Schema$>"" then
+            s$=#Schema$+"."
+        fi
+        
+        sql$="SELECT * FROM "+s$+t$
 
         if #Connection! <> null() then
             stmt! = #Connection!.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
@@ -443,13 +450,13 @@ class public ClassGeneratorWorker
             for i=1 to rsmd!.getColumnCount()
                 col_name$ = rsmd!.getColumnName(i)
 
-                tmp$ = #getBBjDDProperty(#DB$, t$, col_name$,"OBSOLETE",err=*next)
+                tmp$ = #getBBjDDProperty(t$, col_name$,"OBSOLETE",err=*next)
                 
                 if tmp$="true" then
                     continue
                 fi
                 
-                col_label$ = #getBBjDDProperty(#DB$, t$, col_name$,BBjAdminColumn.DESCRIPTION)
+                col_label$ = #getBBjDDProperty( t$, col_name$,BBjAdminColumn.DESCRIPTION)
                 if  col_label$ = "" then
                     col_label$ = rsmd!.getColumnLabel(i)
                 fi
@@ -496,12 +503,12 @@ class public ClassGeneratorWorker
                         w=min(max(30,col_size*13),400)
                     break
                 swend
+REM 
+REM                 if rsmd!.isReadOnly(i) or rsmd!.isAutoIncrement(i) then
+REM                     ctrl$="STATICTEXT"
+REM                 fi
 
-                if rsmd!.isReadOnly(i) or rsmd!.isAutoIncrement(i) then
-                    ctrl$="STATICTEXT"
-                fi
-
-                if ctrl$="INPUTE" or ctrl$="INPUTN" or ctrl$="INPUTD" OR ctrl$="EDIT"  then
+                if ctrl$="INPUTE" or ctrl$="INPUTN" or ctrl$="INPUTD" OR ctrl$="EDIT" or ctrl$="STATICTEXT" then
                     PRINT (ch)"    STATICTEXT "+str(cid)+", """+col_label$+":"", 10, "+str(8+row*30)+", 130, 20"
                     PRINT (ch)"        BEGIN"
                     rem PRINT (ch)"        JUSTIFICATION 32768"
@@ -565,11 +572,10 @@ REM                 endif
     rem * generate a BBj program which uses a corresponding .ARC file to view and persists data from/to the databse.
     rem * The BBj program is generated based on a template.
     rem * @param BBjString tpl$: the templates directory
-    rem * @param BBjString schema$: the schema name
     rem * @param BBjString table$: the table name for which the BBj program should be generated
     rem * @param BBjString targetdir$: the target dir for the BBj program
     rem */
-    method public void generateFile(BBjString tpl$,  BBjString s$, BBjString t$, BBjString targetdir$)
+    method public void generateFile(BBjString tpl$,  BBjString t$, BBjString targetdir$)
 
         mkdir targetdir$,err=*next
 
@@ -579,13 +585,23 @@ REM                 endif
         close (ch)
 
         x$=#replace(x$,"(DB)",#DB$)
+        x$=#replace(x$,"(SCHEMA)",#Schema$)
+        
+        if #Schema$>"" then
+            s$=#Schema$+"."
+        else
+            s$=""
+        fi
+        
+        x$=#replace(x$,"(SCHEMAPFX)",s$) 
+
         x$=#replace(x$,"(TBL)",t$)
 
         db_nice$=iff(#Prepend,#nice(#DB$),"")
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
         
-        classname$= cvs(#getBBjDDProperty(#DB$, t$, "CLASSNAME"),128)
+        classname$= cvs(#getBBjDDProperty( t$, "CLASSNAME"),128)
         if classname$>"" then
             tbl_nice$=classname$
         fi
@@ -600,7 +616,7 @@ REM                 endif
             y1$=y0$(pos(":"=y0$)+1)
             y1$=y1$(1,len(y1$)-1)
             
-            y2$= #getBBjDDProperty(#DB$, t$, y1$)
+            y2$= #getBBjDDProperty( t$, y1$)
             x$=#replace(x$,y0$,y2$)
 
         wend
@@ -612,7 +628,7 @@ REM                 endif
             x3$=x$(pos("<keyseg>"=x$)+8)
             x3$=x3$(1,pos("</keyseg>"=x3$)-1)
 
-            ks! = #getKeySegments(s$,t$)
+            ks! = #getKeySegments(t$)
             if ks!.size()
                 for i=0 to ks!.size()-1
                     k$ = ks!.getItem(i)
@@ -630,7 +646,7 @@ REM                 endif
             x3$=x$(pos("<importedkey>"=x$)+13)
             x3$=x3$(1,pos("</importedkey>"=x3$)-1)
 
-            ks! = #getImportedKeys(s$,t$)
+            ks! = #getImportedKeys(t$)
             if ks!.size()
                 for i=0 to ks!.size()-1
                     t! = ks!.getItem(i)
@@ -638,7 +654,7 @@ REM                 endif
                     x$=x3$
                     
                     PKTABLE_NAME_NICE$=#nice(t!.getFieldAsString("PKTABLE_NAME"))
-                    pk_classname$= cvs(#getBBjDDProperty(#DB$,t!.getFieldAsString("PKTABLE_NAME"), "CLASSNAME"),128)
+                    pk_classname$= cvs(#getBBjDDProperty(t!.getFieldAsString("PKTABLE_NAME"), "CLASSNAME"),128)
                     if pk_classname$>"" then
                         PKTABLE_NAME_NICE$=pk_classname$
                     fi                    
@@ -660,7 +676,7 @@ REM                 endif
             x3$=x$(pos("<field>"=x$)+7)
             x3$=x3$(1,pos("</field>"=x3$)-1)
 
-            flds! = #getFields(s$,t$)
+            flds! = #getFields(t$)
             if flds!.size()
                 for i=0 to flds!.size()-1
                     t! = flds!.getItem(i)
@@ -677,7 +693,7 @@ REM                 endif
                         y1$=y0$(pos(":"=y0$)+1)
                         y1$=y1$(1,len(y1$)-1)
                         
-                        y2$= #getBBjDDProperty(#DB$, t$, col_name$,y1$)
+                        y2$= #getBBjDDProperty(t$, col_name$,y1$)
                         x$=#replace(x$,y0$,y2$)
 
                     wend
@@ -697,7 +713,7 @@ REM                 endif
             x3$=x$(pos("<getter>"=x$)+8)
             x3$=x3$(1,pos("</getter>"=x3$)-1)
 
-            flds! = #getFields(s$,t$)
+            flds! = #getFields(t$)
             if flds!.size()
                 for i=0 to flds!.size()-1
                     t! = flds!.getItem(i)
@@ -718,7 +734,7 @@ REM                 endif
             x3$=x$(pos("<setter>"=x$)+8)
             x3$=x3$(1,pos("</setter>"=x3$)-1)
 
-            flds! = #getFields(s$,t$)
+            flds! = #getFields(t$)
             if flds!.size()
                 for i=0 to flds!.size()-1
                     t! = flds!.getItem(i)
@@ -794,8 +810,8 @@ REM                 endif
                     t$=T$(pos("."=t$)+1)
                 fi
 
-                #generateProperties(s$,t$)
-                #iterateTemplate(s$,t$,#TplDir$,"")
+                #generateProperties(t$)
+                #iterateTemplate(t$,#TplDir$,"")
 
             next i
 
@@ -813,12 +829,11 @@ REM                 endif
     rem /**
     rem * Method iterateTemplate:
     rem * generate for each templated file a corresponding .arc and bbj file (recursiv for each subfolder in the templates dir)
-    rem * @param BBjString s$: the schema name
     rem * @param BBjString t$: the table name
     rem * @param BBjString dir$: the directory with the templates
     rem * @param BBjString targetdir$: the target dir, where the generated files should be saved
     rem */
-    method private void iterateTemplate(BBjString s$, BBjString t$, BBjString dir$, BBjString reldir$)
+    method private void iterateTemplate(BBjString t$, BBjString dir$, BBjString reldir$)
 
         ch=unt
         open (ch)dir$
@@ -831,16 +846,16 @@ REM                 endif
 
             if f$(len(f$),1)="/" then
                 rem directory
-                #this!.iterateTemplate(s$, t$, dir$+f$, reldir$+f$)
+                #this!.iterateTemplate(t$, dir$+f$, reldir$+f$)
             else
                 rem file
                 if len(f$)<4 or cvs(f$(len(f$)-3,4),8)=".bbj" or  cvs(f$(len(f$)-4,5),8)=".html" then
-                     #generateFile(dir$+f$, s$, t$, #TargetDir$+reldir$)
+                     #generateFile(dir$+f$, t$, #TargetDir$+reldir$)
                 fi
 
                 rem arc file
                 if len(f$)>3 and cvs(f$(len(f$)-3,4),8)=".arc" then
-                    #generateArc(dir$+f$, s$, t$, #TargetDir$+reldir$)
+                    #generateArc(dir$+f$,  t$, #TargetDir$+reldir$)
                 fi
             fi
         wend

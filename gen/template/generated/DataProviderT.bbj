@@ -32,8 +32,13 @@ class public (DB_NICE)(TBL_NICE)DataProviderT extends DataProvider
     method protected void setupDatabaseLink()
 
         #setDataSource("(DB)")
+        #setSchema("(SCHEMA)")
+        #setSchemaPfx("(SCHEMAPFX)")        
+        
         #setDataSource(STBL("DATABASE",err=*next))
-        #setSQL("SELECT <field>(FLD),</field> FROM (TBL)")
+        #setSchema(STBL("SCHEMA",err=*next)); #setSchemaPfx(STBL("SCHEMA")+".")
+
+        #setSQL("SELECT <field>(FLD),</field> FROM (SCHEMAPFX)(TBL)")
         #setPrimaryTable("(TBL)")
         <keyseg>
         #addPrimaryKeySegment("(KEYSEG)")
