@@ -234,11 +234,18 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
                     if bc!<>null() then
                         fk$=#getBC().getForeignKeyFkField(ctrl_name$)
                         picker! = new ForeignKeyPicker(wnd!,wnd!.getAvailableControlID(),ctrl!,bc!,fk$)
-                        uiform! = #getForeignKeyFormLink(ctrl_name$)
 
-                        if uiform! <> null() then
-                            picker!.setForeignKeyFormLink(uiform!)
-                        fi
+                            uiclass$ = #getForeignKeyFormClass(ctrl_name$)
+                            
+                            if uiclass$>"" then
+                                picker!.setForeignKeyFormClass(uiclass$)
+                            else
+                                uiform! = #getForeignKeyFormLink(ctrl_name$)
+        
+                                if uiform! <> null() then
+                                    picker!.setForeignKeyFormLink(uiform!)
+                                fi
+                            fi
 
                         #ForeignKeyPickerList!.put(ctrl_name$,picker!)
                     fi
@@ -1256,6 +1263,30 @@ REM                 print "Fields:",#EditedFields!
     method protected BBjControl getControl(BBjString name$)
     
         methodret #FormWnd!.getControl(name$)
+    
+    methodend
+    
+    method public void destroy()
+
+        if #NavigationToolbar! <> null() then
+            #NavigationToolbar!.destroy()
+        fi
+      
+        if #FormEditToolbar!<>null() then
+            #FormEditToolbar!.destroy()
+        fi
+      
+        
+        ks! = #ForeignKeyPickerList!.keySet()
+        it! = ks!.iterator() 
+        while it!.hasNext()
+            uic! = #ForeignKeyPickerList!.get(it!.next())
+            uic!.destroy()
+        wend
+        #ForeignKeyPickerList!.clear()
+            
+        
+        #super!.destroy()
     
     methodend
     

@@ -33,7 +33,7 @@ class public (DB_NICE)(TBL_NICE)DataProviderT extends DataProvider
 
         #setDataSource("(DB)")
         #setDataSource(STBL("DATABASE",err=*next))
-        #setSQL("SELECT * FROM (TBL)")
+        #setSQL("SELECT <field>(FLD),</field> FROM (TBL)")
         #setPrimaryTable("(TBL)")
         <keyseg>
         #addPrimaryKeySegment("(KEYSEG)")

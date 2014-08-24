@@ -5,7 +5,7 @@ use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
-
+use ::components/util/Util.bbj::Util
 
 rem /**
 rem * ForeignKeyPicker
@@ -19,6 +19,7 @@ class public ForeignKeyPicker extends UIComponent
     field private BBjString         Fk$
 
     field private UIComponent       ForeignKeyForm!
+    field private BBjString         FkFormClass$
 
     rem fields for picker toolbutton
     field private BBjToolButton     TbPick!
@@ -124,7 +125,7 @@ class public ForeignKeyPicker extends UIComponent
             fi
 
             c! = #BoundCtrl!
-            c!.setEditable(0)
+            c!.setEditable(0,err=*next)
             rem TODO: allow direct entry of key values
         fi
 
@@ -281,6 +282,17 @@ class public ForeignKeyPicker extends UIComponent
 
     methodend
 
+    rem /**
+    rem * Method setForeignKeyFormLink:
+    rem * set the ForeignKeyForm and create a Link on the UI for the foreign key
+    rem * @param UIComponent uic!: the UIComponent form (control) of the foreign key
+    rem */
+    method public void setForeignKeyFormClass(BBjString FkFormClass$)
+
+        #FkFormClass$=FkFormClass$
+        #createForeignKeyLink(); rem assume this is going to work upon lazy load and create the link!
+        
+    methodend
 
     rem /**
     rem * Method setForeignKeyFormLink:
@@ -292,6 +304,12 @@ class public ForeignKeyPicker extends UIComponent
         #ForeignKeyForm!=uic!
         #ForeignKeyForm!.setBC(#super!.getBC())
 
+        #createForeignKeyLink()
+
+    methodend
+    
+    method private void createForeignKeyLink()
+    
         if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             rem TODO implement foreign key form link, maybe by rightclick popup
         else
@@ -306,8 +324,8 @@ class public ForeignKeyPicker extends UIComponent
             tbHyperlink!.setOpaque(0)
             tbHyperlink!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onTbHyperlinkPush")
         fi
-
-    methodend
+        
+    methodend    
 
 
     method public void onTbHyperlinkPush(BBjToolButtonPushEvent ev!)
@@ -319,6 +337,13 @@ class public ForeignKeyPicker extends UIComponent
         fi
 
         #super!.getBC().setSelection(Selection!)
+        
+        if #ForeignKeyForm! = null() then
+          #ForeignKeyForm!=CAST(UIComponent,Util.newInstance(#FkFormClass$))
+          #ForeignKeyForm!.setBC(#super!.getBC())
+                  
+        fi
+        
         #ForeignKeyForm!.doModal()
 
     methodend

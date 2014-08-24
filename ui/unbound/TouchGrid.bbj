@@ -31,6 +31,14 @@ class public TouchGrid implements UIWidget
         #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
     methodend
 
+
+    method public TouchGrid(BBjChildWindow wnd!)
+
+        #CwCanvas! = wnd!
+        #LbList! = #CwCanvas!.addListBox(200,0,0,w,h,"")
+        #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
+    methodend
+
     method public void setSize(BBjNumber w, BBjNumber h)
 
         #CwCanvas!.setSize(w,h)
@@ -113,8 +121,8 @@ class public TouchGrid implements UIWidget
         if sel>-1 and #SelChangeObject!<>null() and #SelChangeMethod$<>"" then
             Util.invoke(#SelChangeObject!, #SelChangeMethod$, sel)
         fi
-        #LbList!.deselectAll()
-        #LbList!.focus()
+         #LbList!.deselectAll()
+REM        #LbList!.focus()
         if sel>-1 then
             #LbList!.selectIndex(sel)
         fi

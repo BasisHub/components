@@ -4,12 +4,20 @@ use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
 use ::components/ui/unbound/TouchGrid.bbj::TouchGrid
+use ::components/util/Util.bbj::Util
 
 
 class public TouchGridComponent extends UIComponent implements UIWidget
 
     field private TouchGrid TouchGrid!
     field private BBjStaticText ResultInfo!
+
+    field private Object            SelChangeObject!
+    field private BBjString         SelChangeMethod$
+    
+    field private static BBjNumber ON_SELCHANGE=100
+    
+
 
     method public TouchGridComponent (BBjChildWindow cw!)
 
@@ -25,14 +33,24 @@ class public TouchGridComponent extends UIComponent implements UIWidget
 
     methodend
 
-
+    method public BBjNumber ON_SELCHANGE()
+        methodret #ON_SELCHANGE
+    methodend 
+    
+    method public void setCallback(BBjNumber event, Object o!, BBjString method$)
+    
+        #SelChangeObject! = o!
+        #SelChangeMethod$ = method$
+    
+    methodend    
+    
     method private void initialize()
     
         cw! = #super!.getWnd()
         #TouchGrid! = new TouchGrid(cw!,100,0,0,cw!.getWidth(),cw!.getHeight())
         #TouchGrid!.setCallback(#TouchGrid!.ON_SELCHANGE(),#this!,"onGridSelChange")
         
-        #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,"Geen resultaten..."))
+        #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,#getTranslator().getTranslation("NO_RESULT")))
         #ResultInfo!.addStyle("TouchGridResultinfo")
 
     methodend
@@ -82,16 +100,17 @@ class public TouchGridComponent extends UIComponent implements UIWidget
     methodend
 
 
-
     method public void onSelectionChange()
-
-        
 
     methodend
     
     method public void onGridSelChange(BBjNumber sel)
     
         #getBC().setSelection(sel)
+
+        if sel>-1 and #SelChangeObject!<>null() and #SelChangeMethod$<>"" then
+            Util.invoke(#SelChangeObject!, #SelChangeMethod$, sel)
+        fi
     
     methodend
 

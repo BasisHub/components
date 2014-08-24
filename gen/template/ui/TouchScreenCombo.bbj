@@ -1,0 +1,107 @@
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/ui/bound/grid/TouchGridComponent.bbj::TouchGridComponent
+use ::components/ui/bound/controls/SearchBoxController.bbj::SearchBoxController
+use ::components/ui/unbound/ResponsiveSplitPane.bbj::ResponsiveSplitPane
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
+use ::ui/(DB_NICE)(TBL_NICE)Form.bbj::(DB_NICE)(TBL_NICE)Form
+use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
+
+
+class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements UIWidget
+
+    field private BBjChildWindow Wnd!
+    field private (DB_NICE)(TBL_NICE)BusinessComponent Bc!
+    field private TouchGridComponent NavGrid!
+    field private (DB_NICE)(TBL_NICE)Form EditForm!
+    field private ResponsiveSplitPane Split!
+    
+    method private (DB_NICE)(TBL_NICE)TouchScreenCombo()
+    methodend
+    
+    method public (DB_NICE)(TBL_NICE)TouchScreenCombo(BBjChildWindow wnd!, (DB_NICE)(TBL_NICE)BusinessComponent bc! )
+    
+
+      #Bc! = bc!
+      #Wnd! = wnd!
+      
+      #Split! = new ResponsiveSplitPane(wnd!)
+      
+      #NavGrid! = new TouchGridComponent(#Split!.getLeft(),200,0,50,280,300)
+      #NavGrid!.loadRowTemplate("html/(DB_NICE)(TBL_NICE)TouchGridRow.html")
+      #NavGrid!.setBC(#Bc!)
+      
+      #NavGrid!.setCallback(#NavGrid!.ON_SELCHANGE(),#this!,"onGridSelChange")
+      
+      #EditForm! = new (DB_NICE)(TBL_NICE)Form(#Split!.getRight())
+      #EditForm!.setBC(#Bc!)
+      #EditForm!.setShowToolBar(0)   
+       
+
+        
+      searchbox! = #Split!.getLeft().addInputE(300,10,10,280,30,"")
+      searchbox!.addStyle("searchbox")
+
+      fields!=new BBjVector()
+<field>	  
+      fields!.addItem("(FLD)")</field>
+       
+      sbc! = new SearchBoxController(searchbox!,#Bc!,fields!,::components/util/Util.bbj::Util.getLuceneBaseDir("(DB_NICE)(TBL_NICE)"))
+      
+      #Bc!.refresh()         
+
+      left! = new SearchBoxAndGrid(#NavGrid!,searchbox!)
+      
+      #Split!.setUiwLeft(left!)
+      #Split!.setUiwRight(#EditForm!) 
+      #Split!.setSize(#Wnd!.getWidth(),#Wnd!.getHeight())
+      
+    methodend
+    
+    method public void onGridSelChange(BBjNumber sel)
+    
+        #Split!.activateRight()
+    
+    methodend
+    
+    method public void setSize(BBjNumber w, BBjNumber h)
+        #Wnd!.setSize(w,h)
+        #Split!.setSize(w,h)
+    methodend
+
+classend
+
+class public SearchBoxAndGrid implements UIWidget
+
+    field private TouchGridComponent    NavGrid!
+    field private BBjInputE             SearchBox!
+    
+    method private SearchBoxAndGrid()
+    methodend
+    
+    method public SearchBoxAndGrid(TouchGridComponent NavGrid!, BBjInputE SearchBox!)
+        #NavGrid! = NavGrid!
+        #SearchBox! = SearchBox!
+    methodend
+    
+    method public void setSize(BBjNumber w, BBjNumber h)
+    
+        #NavGrid!.setSize(w,h-50)
+            
+    methodend
+
+	method public void destroy()
+
+      if #NavGrid!<> null() then
+        #NavGrid!.destroy()
+      fi
+      if #EditForm! <> null() then
+        #EditForm!.destroy()
+      fi
+      if #Split!<> null() then
+        #Split!.destroy()
+      fi
+	  
+	methodend
+	
+classend

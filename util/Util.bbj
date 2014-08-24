@@ -1,3 +1,5 @@
+use ::BBUtils.bbj::BBUtils
+
 class public Util
 
     rem /**
@@ -52,5 +54,68 @@ class public Util
         REM y! = CustomObject.newInstance("::oeval.bbj::foo")
 
     methodend    
+
+    method public static void runAsBui(BBjString p$)
+
+        fullPath! = p$
+        fullPath! = fullPath!.replace("\","/");rem /xxx/yyy/zzz.bbj
+        path$ = fullPath!.substring(0,pos("/"=fullPath!,-1));rem /xxx/yyy/
+        source$ = fullPath!.substring(pos("/"=fullPath!,-1));rem zzz.bbj
+        if pos("."=source$) then
+            name$ = source$(1,pos("."=source$,-1)-1)
+        else
+            name$ = source$
+        endif
+
+        clo! = BBjAPI().getConfig().getCurrentCommandLineObject()
+        config$ = clo!.getConfigFile()
+        if pos($22$=config$)=1 then
+            config$=config$(2)
+        endif
+        if pos($22$=config$,-1)=len(config$) then
+            config$=config$(1,len(config$)-1)
+        endif
+
+        argsVect!=new BBjVector()
+        
+        BBUtils.registerBUIApp(source$,name$,config$,path$,System.getProperty("user.name"),argsVect!,1)
+        BBUtils.setShowClientConfirmationDialog(name$,0)
+        BBUtils.setBUISplash(name$, "components/css/LoadImage.png", 1)
+        BBUtils.applyCss(name$, "components/css/style.css", 1)
+        
+        ch=unt
+        open (ch)"components/ui/fonts/"
+        while 1
+            read record (1,end=*break)d$
+            if D$(1,1)="." then continue
+            BBUtils.copyFileToWebServer("components/ui/fonts/"+d$,"fonts")
+        wend
+        close (ch)
+
+        
+        open (ch)"components/css/"
+        while 1
+            read record (1,end=*break)d$
+            if D$(1,1)="." then continue
+            BBUtils.copyFileToWebServer("components/css/"+d$,"res")
+        wend
+        close (ch)
+            
+        protocol$=BBUtils.getWebServerProtocol()
+        host$=BBUtils.getWebServerHost()
+        port$=BBUtils.getWebServerPort()
+        url$ = protocol$ + "://" + host$ + ":" + port$ + "/apps/" + name$
+        BBjAPI().getThinClient().browse(url$)            
+        release
+
+     methodend
+
+     
+    method public static BBjString getLuceneBaseDir(BBjString file$)
+    
+        methodret dsk("")+"\\componentsindex\\"+file$+"\\"
+    
+    methodend     
+
 
 classend

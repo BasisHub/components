@@ -1,3 +1,5 @@
+use ::components/util/Util.bbj::Util
+
 class public MenuItem
 
     field public  BBjString Caption!
@@ -8,6 +10,10 @@ class public MenuItem
     field private BBjString Wd!
     field private BBjString Cfg!
     field private BBjString Args!
+
+    field private Object    NotifyObj!
+    field private BBjString NotifyMethod$
+    field private Object    NotifyPayload!
 
     method private MenuItem()
     methodend
@@ -23,11 +29,22 @@ class public MenuItem
 
     methodend
 
-    method public MenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!)
+    method public MenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!, Object NotifyObj!, BBjString NotifyMethod$, Object NotifyPayload!)
+    
+        #this!(parentItem!, caption!, iconFilename!)
+        
+        #NotifyObj!         = NotifyObj! 
+        #NotifyMethod$      = NotifyMethod$
+        #NotifyPayload!     = NotifyPayload!
+        
+    methodend
 
+    method public MenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!)
+    
+        
         #Caption! = caption!
         #IconFileName! = iconFilename!
-        
+
         #Parent! = parentItem!
         if #Parent! <> null() then
             #Parent!.addChild(#this!)
@@ -58,9 +75,10 @@ class public MenuItem
             s$=s$+"&"
             a=scall(s$)
         else
-            ? 'RB',
+            if #NotifyObj! <> null() and #NotifyMethod$ <> "" and #NotifyPayload! <> null() then
+                Util.invoke(#NotifyObj!,#NotifyMethod$,#NotifyPayload!)
+            fi
         fi
-        
 
     methodend
 
@@ -117,11 +135,22 @@ class public Menu
         fi
         item! = new MenuItem(parentItem!, caption!, iconFilename!, runprog!, wd!, cfg!, args!)
 
-        
+        methodret item!
+
+    methodend
+
+    method public MenuItem addMenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!, Object NotifyObj!, BBjString NotifyMethod$, Object NotifyPayload!)
+
+
+        if parentItem! = null() then
+            parentItem! = #RootItem!
+        fi
+        item! = new MenuItem(parentItem!, caption!, iconFilename!,  NotifyObj!,  NotifyMethod$,  NotifyPayload!)
 
         methodret item!
 
     methodend
+
 
     method public BBjVector getChildren(MenuItem item!)
 

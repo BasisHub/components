@@ -1,0 +1,250 @@
+chdir "../../../"
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/ui/unbound/TestWidget.bbj::TestWidget
+
+
+
+class public ResponsiveFormFrame implements UIWidget
+
+    field private BBjNumber X
+    field private BBjNumber Y
+    field private BBjNumber W
+    field private BBjNumber H
+    field private BBjNumber MaxH
+    field private BBjNumber InnerWidth
+    field private BBjChildWindow CwCanvas!
+    field private BBjVector WidgetList!=new BBjVector()
+    
+    field private BBjNumber MaxWidgetHeight
+    field private BBjNumber TotalWidgetHeight
+    
+    field private BBjNumber Cols=1
+    field private BBjNumber CurCols
+
+    field private BBjNumber Spacing=5
+
+    method private ResponsiveFormFrame()
+    methodend
+    
+    method public ResponsiveFormFrame(BBjWindow wnd!, BBjNumber id,BBjNumber x, BBjNumber y,BBjNumber w, BBjNumber h)
+        #X=x
+        #Y=Y        
+        #W=w
+        if h<1 then
+            h=9999999
+        fi
+        #MaxH=h
+        #H=h   
+        #CwCanvas! = wnd!.addChildWindow(id,#X,#Y,#W,#H,"",$0000080C$,BBjAPI().getSysGui().getAvailableContext())
+        #CwCanvas!.setBackColor(BBjAPI().makeColor("YELLOW"))
+    methodend
+    
+    method public void setLocation(BBjNumber x, BBjNumber y)
+        #X=x
+        #Y=Y
+        #CwCanvas!.setLocation(x,y)
+    methodend
+    
+    method public void setSize(BBjNumber w, BBjNumber h)
+    
+        if h<1 then
+            h=999999
+        fi
+        
+        if #W<>w then
+            update=1
+
+            rem notify nested form frames:
+            it! = #WidgetList!.iterator()
+            while it!.hasNext()
+                widget! = it!.next()
+                dummy$=str(widget!)
+                if pos("ResponsiveFormFrame"=dummy$)>0 then
+                    o=widget!.getHeight()
+                    widget!.setSize(max(#InnerWidth-30,w-30),widget!.getHeight())
+                    n=widget!.getHeight()
+                    if o<>n then
+                        #CurCols=-1
+                    fi
+                fi
+            wend
+
+        fi
+        #W=w
+        #MaxH=h
+        
+        if update then
+            #updateUI()
+        fi
+        
+        #resizeCanvas()
+        
+    methodend
+    
+    
+    method public void setNumCols(BBjNumber cols)
+        #Cols = cols
+        #updateUI()
+    methodend
+    
+    method private void resizeCanvas()
+    
+        if #MaxH<=#H or #InnerWidth > #W then
+            #CwCanvas!.setTrack(1)
+            #CwCanvas!.setSize(max(#InnerWidth-30,#W-30),#H)
+            #CwCanvas!.setTrack(0)
+            #CwCanvas!.setSize(#W,min(#H,#MaxH))
+        else
+            #CwCanvas!.setTrack(1)
+            #CwCanvas!.setSize(#W,#H)
+        fi
+          
+    methodend
+    
+    method public BBjNumber getX()
+        methodret #X
+    methodend
+    
+    method public BBjNumber getY()
+        methodret #Y
+    methodend
+    
+    method public BBjNumber getWidth()
+        methodret #W
+    methodend
+    
+    method public BBjNumber getHeight()
+        methodret #H
+    methodend
+    
+    method public BBjChildWindow getWnd()
+        methodret #CwCanvas!
+    methodend    
+
+    method public void addWidget(UIWidget uiw!)
+        #WidgetList!.addItem(uiw!)
+        #MaxWidgetHeight    = max(#MaxWidgetHeight,uiw!.getHeight()+#Spacing)
+        #TotalWidgetHeight  = #TotalWidgetHeight + uiw!.getHeight()+#Spacing
+
+        rem enforce a redraw
+        #CurCols=-1
+        
+        #updateUI()
+    methodend
+
+    method private void updateUI()
+        
+        cols = #Cols
+        maxLocalWidth = 0
+        
+        REM first discover the optimal distribution and column count
+        while 1
+            avg = int((#TotalWidgetHeight / cols) *1.1)
+            
+            cols! = new BBjVector()
+            col! = new BBjVector()
+            cols!.addItem(col!)
+            it! = #WidgetList!.iterator()
+            colHeight=0
+            totalWidth=0
+            maxColHeight=0
+            while it!.hasNext()
+                uiw! = it!.next()
+                ?stbl("ESCAPE",err=*next); ? uiw!.getHeight()
+                if abs(avg-colHeight) < abs(avg-(colHeight+uiw!.getHeight()+#Spacing)) and cols!.size()<cols and col!.size()>0 then
+                    col! = new BBjVector()
+                    cols!.addItem(col!)
+                    totalWidth=totalWidth+maxLocalWidth
+                    maxLocalWidth=0
+                    colHeight=0
+                fi
+                
+                col!.addItem(uiw!)
+                maxLocalWidth = max(maxLocalWidth,uiw!.getWidth()+#Spacing)
+                colHeight=colHeight+uiw!.getHeight()+#Spacing
+                maxColHeight=max(maxColHeight,colHeight)
+            wend
+            totalWidth=totalWidth+maxLocalWidth
+            
+            if totalWidth > #W and cols>1 then
+                cols=cols-1
+                continue
+            fi 
+            
+            #H = maxColHeight
+            #InnerWidth = totalWidth
+            #resizeCanvas()
+
+            break
+        wend
+ 
+        if cols <> #CurCols then
+            REM now render that stuff, but only if something changed
+            #CurCols=cols
+            it! = cols!.iterator()
+            x=0
+            while it!.hasNext()
+                col! = it!.next()
+                it1! = col!.iterator()
+                y=0
+                maxW = 0
+                while it1!.hasNext()
+                    uiw! = it1!.next()
+                    uiw!.setLocation(x,y)
+                    
+                    y=y+uiw!.getHeight()+#Spacing
+                    maxW = max(maxW,uiw!.getWidth()+#Spacing)
+                    
+                wend
+                x=x+maxW
+            wend
+        fi
+        
+
+        
+    methodend
+
+classend
+
+
+setesc byebye
+
+sg!=BBjAPI().openSysGui("X0")
+wnd! = sg!.addWindow(0,0,1024,768,"TEST")
+wnd!.setCallback(BBjAPI.ON_CLOSE,"byebye")
+wnd!.setCallback(BBjAPI.ON_RESIZE,"resize")
+
+
+
+f1! = new ResponsiveFormFrame(wnd!,100,0,0,1024,768)
+
+w!=new TestWidget(f1!.getWnd(),100)
+f1!.addWidget(w!)
+
+w!=new TestWidget(f1!.getWnd(),102)
+f1!.addWidget(w!)
+
+
+f2! = new ResponsiveFormFrame(f1!.getWnd(),101,0,301,1024,0)
+ 
+f2!.setNumCols(3)
+for i=1 to 10
+    w!=new TestWidget(f2!.getWnd(),100+i)
+    f2!.addWidget(w!)
+next
+f1!.addWidget(f2!)
+
+w!=new TestWidget(f1!.getWnd(),104)
+f1!.addWidget(w!)
+
+
+process_events
+
+resize:
+    ev!=BBjAPI().getLastEvent()
+    w=ev!.getWidth()
+    h=ev!.getHeight()
+    f1!.setSize(w,h)
+return
+
+byebye:bye

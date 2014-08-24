@@ -75,7 +75,7 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
             <field>rem attr!.setFieldAttribute("(FLD)","TABORDER","(COLPROP:TABORDER)")
             </field>           
 
-            <field>attr!.setFieldAttribute("(FLD)","SQL_TYPE ","(COLPROP:SQL_TYPE)")
+            <field>attr!.setFieldAttribute("(FLD)","SQL_TYPE","(COLPROP:SQL_TYPE)")
             attr!.setFieldAttribute("(FLD)","PRECISION","(COLPROP:PRECISION)")
             attr!.setFieldAttribute("(FLD)","SCALE","(COLPROP:SCALE)")
             </field>   

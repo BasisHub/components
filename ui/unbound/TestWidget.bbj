@@ -1,0 +1,82 @@
+chdir "../../../"
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
+class public TestWidget implements UIWidget
+
+    field private BBjNumber X
+    field private BBjNumber Y
+    field private BBjNumber W=250+RND(50)
+    field private BBjNumber H=50+RND(50)
+    field private BBjChildWindow CwCanvas!
+    field private static BBjNumber Number
+    
+    method private TestWidget()
+    methodend
+    
+    method public TestWidget(BBjWindow wnd!, BBjNumber id)
+    
+        #CwCanvas! = wnd!.addChildWindow(id,#X,#Y,#W,#H,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #CwCanvas!.setBackColor(BBjAPI().makeColor("RED"))
+    
+        st! = #CwCanvas!.addStaticText(100,5,5,#W-10,#H-10,"#"+str(#Number)+" ("+str(#W)+"x"+str(#H)+")")
+        #Number=#Number+1
+    
+    methodend
+    
+    method public void setLocation(BBjNumber x, BBjNumber y)
+        #X=x
+        #Y=Y
+        #CwCanvas!.setLocation(x,y)
+    methodend
+    
+    method public void setSize(BBjNumber w, BBjNumber h)
+        #W=w
+        #H=h
+        #CwCanvas!.setSize(w,h)
+        #CwCanvas!.getControl(100).setSize(w-10,h-10)
+        
+    methodend
+    
+    method public BBjNumber getX()
+        methodret #X
+    methodend
+    
+    method public BBjNumber getY()
+        methodret #Y
+    methodend
+    
+    method public BBjNumber getWidth()
+        methodret #W
+    methodend
+    
+    method public BBjNumber getHeight()
+        methodret #H
+    methodend
+    
+    method public void setVisible(BBjNumber visible)
+    methodend
+    
+    method public BBjNumber isVisible()
+    methodend
+        
+    method public void destroy()
+    methodend
+    
+    method public BBjChildWindow getWnd()
+        methodret #CwCanvas!
+    methodend
+
+classend
+
+sg!=BBjAPI().openSysGui("X0")
+wnd! = sg!.addWindow(0,0,1024,768,"TEST")
+wnd!.setCallback(BBjAPI.ON_CLOSE,"byebye")
+
+w! = new TestWidget(wnd!,100)
+
+process_events
+
+byebye:bye
+
+
+

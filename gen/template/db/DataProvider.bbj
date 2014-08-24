@@ -42,6 +42,8 @@ class public (DB_NICE)(TBL_NICE)DataProvider extends (DB_NICE)(TBL_NICE)DataProv
 
         rem #setDataSource("(DB)")
         rem #setSQL("SELECT * FROM (TBL)")
+		rem #setSQL("SELECT <field>(FLD),</field> FROM (TBL)")
+		
         rem #setPrimaryTable("(TBL)")
         <keyseg>
         rem #addPrimaryKeySegment("(KEYSEG)")

@@ -15,6 +15,11 @@ interface public UIWidget
     method public void setVisible(BBjNumber visible)
 
     method public BBjNumber isVisible()
+    
+    method public void destroy()
+    
+    method public BBjChildWindow getWnd()
+    
 
 interfaceend
 

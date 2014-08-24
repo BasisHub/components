@@ -1,0 +1,49 @@
+use com.basis.lucene.BBjSearchGizmo
+use com.basis.lucene.BBjSearchGizmoDoc
+use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
+
+chdir ".."
+dir$=::components/util/Util.bbj::Util.getLuceneBaseDir("(DB_NICE)(TBL_NICE)")
+
+bc! = new (DB_NICE)(TBL_NICE)BusinessComponent()
+s=bc!.size()
+bc!.prepareResultSet(0,1)
+
+searchengine! = new BBjSearchGizmo(dir$)
+rs! = bc!.getResultSet()
+prim! = bc!.getPrimaryKeySegments()
+step_ = 10
+
+if prim!.size() then
+
+
+    for x=0 to s step step_
+    low = x
+    high = min(x+step_-1,s-1)
+    bc!.prepareResultSet(low,high)
+    rs! = bc!.getResultSet()
+    
+        rem TODO page for large files!
+        for i=low to high
+            rec! = rs!.getItem(i)
+            pk$=""
+            for pk=0 to prim!.size()-1
+                if pk then
+                     pk$=pk$+"++++"
+                fi
+                pk$=pk$+rec!.getFieldAsString(prim!.getItem(pk))
+            next
+    
+            d! = new BBjSearchGizmoDoc(pk$)
+    <field>		
+            d!.addField("(FLD)",rec!.getFieldAsString("(FLD)"),1.0)</field>
+            searchengine!.addDocument(d!)
+            print "Adding ",pk$
+            count=count+1
+        next i 
+    next x
+else
+    a=msgbox("no primary key defined!",0,"Can't create index!")
+fi
+
+release

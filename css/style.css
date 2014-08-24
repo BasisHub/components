@@ -1,431 +1,503 @@
-/* @override 
-	http://localhost:8888/buires/4745E5E9B16BCF8C456AAB4518B4951F.css
+.BBjButton {
+  -webkit-border-radius: 15;
+  -moz-border-radius: 15;
+  border-radius: 15px;
+  font: normal 15px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #ffffff;
+  font-size: 14px !important;
+  background: #802A50;
+  padding: 5px 10px 5px 10px;
+  text-decoration: none;
+  }
 
-	http://localhost:8888/buires/16DC6C8722A8023191B6669CF1B2AB7A.css */
-
-/* 
-==========================================================
-Global and BASIS overrides
-==========================================================
-*/
-.BBjControl {
-    -webkit-user-select: text;
-    -khtml-user-select: text;
-    -moz-user-select: text;
-    -o-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-
-    /* iPhone-specific stuff */
-    -webkit-tap-highlight-color: rgba(0,0,0,0.0) !important;
+.BBjButton:not(.bbj-disabled):hover,
+.BBjButton:not(.bbj-disabled):active{
+  background: #802A50;
+  text-decoration: none;
 }
 
 body {
-    margin: 8px auto;
-    padding: 0;
-	display: block;
-    overflow: hidden;	
-    color: #f0f0f0;
-	background: url('/files/Demos/BUI-MusicInventory/default.png') no-repeat center top #2b2b2b;
-	font: small-caps bolder 16px "Lucida Grande", Lucida, Verdana, sans-serif;
-	text-align: center !important;
-	text-shadow: 0 1px 1px #444;
-	
-	/* iPhone-specific stuff */
-	-webkit-tap-highlight-color: rgba(255,255,255,0.2) !important;
+  background: #fcfcfc;
 }
+@font-face {
+  font-family: SourceSansPro-ExtraLight;
+  src: url('/files/fonts/SourceSansPro-ExtraLight.ttf');
+}
+@font-face {
+  font-family: SourceSansPro-Light;
+  src: url('/files/fonts/SourceSansPro-Light.ttf');
+}
+@font-face {
+  font-family: SourceSansPro-Regular;
+  src: url('/files/fonts/SourceSansPro-Regular.ttf');
+}
+@font-face {
+  font-family: SourceSansPro-Semibold;
+  src: url('/files/fonts/SourceSansPro-Semibold.ttf');
+}
+@font-face {
+  font-family: SourceSansPro-Bold;
+  src: url('/files/fonts/SourceSansPro-Bold.ttf');
+}
+@font-face {
+  font-family: AdventPro-Thin;
+  src: url('/files/fonts/AdventPro-Thin.ttf');
+}
+@font-face {
+  font-family: AdventPro-ExtraLight;
+  src: url('/files/fonts/AdventPro-ExtraLight.ttf');
+}
+@font-face {
+  font-family: AdventPro-Light;
+  src: url('/files/fonts/AdventPro-Light.ttf');
+}
+@font-face {
+  font-family: AdventPro-Regular;
+  src: url('/files/fonts/AdventPro-Regular.ttf');
+}
+@font-face {
+  font-family: AdventPro-Medium;
+  src: url('/files/fonts/AdventPro-Medium.ttf');
+}
+@font-face {
+  font-family: AdventPro-Semibold;
+  src: url('/files/fonts/AdventPro-SemiBold.ttf');
+}
+@font-face {
+  font-family: AdventPro-Bold;
+  src: url('/files/fonts/AdventPro-Bold.ttf');
+}
+@font-face {
+  font-family: FontinSans;
+  src: url('/files/fonts/Philosopher-Bold.ttf');
+}
+/*  Reload Message 
+ *
+ */
+.terminatedMessage {
+  text-align: center;
+  margin-top: 10px;
+}
+.terminatedMessage a,
+.terminatedMessage a:visited {
+  text-decoration: none !important;
+  font: normal 20px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  padding: 5px 10px 7px 10px;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
+  border-radius: 6px;
+  -webkit-transition: all 0.2s ease-out !important;
+  -moz-transition: all 0.2s ease-out !important;
+  -ms-transition: all 0.2s ease-out !important;
+  -o-transition: all 0.2s ease-out !important;
+  background: #607f9f;
+  color: #d1d9e0;
+  /* iPhone-specific stuff */
 
-a, a:visited {
-	border: 1px solid #333;
-	text-decoration: none !important;
-    color: #606060;
-    padding: 2px 20px 6px 20px;
-/*    background: #606060 !important;*/
-    -webkit-border-radius: 5px;
-    -moz-border-radius:    5px;
-    border-radius:         5px;
-	-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-	-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-	text-shadow: 0 1px 0 #fff;
-	background: #e0e0e0;
-	background: -moz-linear-gradient(top,  #ffffff 1%, #ffffff 2%, #ededed 44%, #e0e0e0 45%, #bfbfbf 97%, #8c8c8c 97%, #7f7f7f 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#ffffff), color-stop(2%,#ffffff), color-stop(44%,#ededed), color-stop(45%,#e0e0e0), color-stop(97%,#bfbfbf), color-stop(97%,#8c8c8c), color-stop(100%,#7f7f7f));
-	background: -webkit-linear-gradient(top,  #ffffff 1%,#ffffff 2%,#ededed 44%,#e0e0e0 45%,#bfbfbf 97%,#8c8c8c 97%,#7f7f7f 100%);
-	background: -o-linear-gradient(top,  #ffffff 1%,#ffffff 2%,#ededed 44%,#e0e0e0 45%,#bfbfbf 97%,#8c8c8c 97%,#7f7f7f 100%);
-	background: -ms-linear-gradient(top,  #ffffff 1%,#ffffff 2%,#ededed 44%,#e0e0e0 45%,#bfbfbf 97%,#8c8c8c 97%,#7f7f7f 100%);
-	background: linear-gradient(top,  #ffffff 1%,#ffffff 2%,#ededed 44%,#e0e0e0 45%,#bfbfbf 97%,#8c8c8c 97%,#7f7f7f 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#7f7f7f',GradientType=0 );
-	
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
 }
-
-a:hover, a:visited:hover {
-	border-color: #3c5899;
-    color: #3c5899;
-	background: #e7efff;
-	background: -moz-linear-gradient(top,  #ffffff 1%, #fcfcff 2%, #e7efff 44%, #d3e1ff 45%, #a6c2fa 97%, #6d89c1 97%, #5672aa 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#ffffff), color-stop(2%,#fcfcff), color-stop(44%,#e7efff), color-stop(45%,#d3e1ff), color-stop(97%,#a6c2fa), color-stop(97%,#6d89c1), color-stop(100%,#5672aa));
-	background: -webkit-linear-gradient(top,  #ffffff 1%,#fcfcff 2%,#e7efff 44%,#d3e1ff 45%,#a6c2fa 97%,#6d89c1 97%,#5672aa 100%);
-	background: -o-linear-gradient(top,  #ffffff 1%,#fcfcff 2%,#e7efff 44%,#d3e1ff 45%,#a6c2fa 97%,#6d89c1 97%,#5672aa 100%);
-	background: -ms-linear-gradient(top,  #ffffff 1%,#fcfcff 2%,#e7efff 44%,#d3e1ff 45%,#a6c2fa 97%,#6d89c1 97%,#5672aa 100%);
-	background: linear-gradient(top,  #ffffff 1%,#fcfcff 2%,#e7efff 44%,#d3e1ff 45%,#a6c2fa 97%,#6d89c1 97%,#5672aa 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#5672aa',GradientType=0 );
-	
+.terminatedMessage a:hover,
+.terminatedMessage a:visited:hover {
+  color: #ffcc66;
+  background: #56738f;
 }
-
-/*  Remove the blue border around the BUI application */
-.gwt-TabLayoutPanel, .gwt-TabLayoutPanelContentContainer, .gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {   
-    border-width: 0 !important;
+.terminatedMessage a:active,
+.terminatedMessage a:visited:active {
+  color: #ffb31a;
+  background: #4d6680;
 }
-
-/* Remove the window tab scrollbuttons that sometimes appear*/
-.gwt-PushButton.scrollLeft, .gwt-PushButton.scrollRight {
-	visibility: hidden;
+.BBjTabCtrl-contentContainer {
+  border-width: 0;
 }
-
-/* ======================================================== 
-	BBj Control Customization
-   ======================================================== */
-
-.BBjStaticText, .BBjButton, .BBjListBox {
-	-webkit-user-select: none !important;
-	-khtml-user-select: none !important;
-	-moz-user-select: none !important;
-	-ms-user-select: none !important;
-	-o-user-select: none !important;
-	user-select: none !important; 
-}
-
-/* MSGBOX Customization */
-.dialogMiddleCenter {
-	background: #404040 !important;
-	color: #fff;
-	text-shadow: 0 1px 2px black;
-}
-.Caption {
-	color: #303030;
-	text-shadow: 0 1px 0 #ffffff;
-}
-.basis-msgbox-button {
-	outline: none;
-}
-/* Turn off all outines in Chrome */
-.BBjControl {
-	outline: none;
-}
-
-/* Customized window backdrop */
 .windowBG {
-    background-color: transparent !important;
-    border-width: 0 !important;
+  border: 1px solid #c9cccf;
 }
-
-
-/* ======================================================== 
-	BBjListBox
-   ======================================================== */
-.BBjListBox {
-	white-space: normal !important;
-	border: 1px solid #555 !important;
-	border-top-width: 0px !important;
-	background: #fff;
+.BBjTopLevelWindow,
+.BBjWindowManager-contentContainer {
+  border-width: 0 !important;
+  border-radius: 0 !important;
 }
-
-.categoryHeader {
-	border-bottom: 1px solid #2e4a6b;
-	height: 25px;
-	color: #fcfdfe;
-	font: bolder 18px Tahoma, Geneva, sans-serif;
-	text-shadow: 0 1px 3px rgba(0,0,0,0.75);
-	background: #7d94b0;
-	background: -moz-linear-gradient(top,  #e6e6e6 0%, #b5c0ce 2%, #96a6bb 33%, #889bb3 50%, #7f94b0 50%, #6d83a1 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e6e6e6), color-stop(2%,#b5c0ce), color-stop(33%,#96a6bb), color-stop(50%,#889bb3), color-stop(50%,#7f94b0), color-stop(100%,#6d83a1));
-	background: -webkit-linear-gradient(top,  #e6e6e6 0%,#b5c0ce 2%,#96a6bb 33%,#889bb3 50%,#7f94b0 50%,#6d83a1 100%);
-	background: -o-linear-gradient(top,  #e6e6e6 0%,#b5c0ce 2%,#96a6bb 33%,#889bb3 50%,#7f94b0 50%,#6d83a1 100%);
-	background: -ms-linear-gradient(top,  #e6e6e6 0%,#b5c0ce 2%,#96a6bb 33%,#889bb3 50%,#7f94b0 50%,#6d83a1 100%);
-	background: linear-gradient(top,  #e6e6e6 0%,#b5c0ce 2%,#96a6bb 33%,#889bb3 50%,#7f94b0 50%,#6d83a1 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e6e6e6', endColorstr='#6d83a1',GradientType=0 );
+/* Customized window backdrop for iOS */
+.mobileDevice.windowBG {
+  border-width: 0 !important;
 }
-
-.itemBG {
-	color: #444;
-	height: 45px !important;
-	border-top: 1px solid #fff;
-	border-bottom: 1px solid #888;
-	font: 10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
-	text-align: left;
-	background: url('/files/Demos/BUI-MusicInventory/listItemBG.png') no-repeat left top;
-}
-
-.discImage {
-	background: url('/files/Demos/BUI-MusicInventory/iconCD.png') no-repeat 4px center;
-	width: 55px !important;
-/*	border: 1px solid #333;*/
-}
-
-.recordImage {
-	background: url('/files/Demos/BUI-MusicInventory/iconRecord.png') no-repeat 4px center;
-	width: 55px !important;
-/*	border: 1px solid #333;*/
-}
-
-/* This provides high resolution images for retina-display iPhones, iPads, etc. */
-@media only screen and (-moz-min-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
-  .discImage {
-	background: url('/files/Demos/BUI-MusicInventory/iconCD@2x.png') no-repeat 4px center;
-	background-size: 43px 43px;
-	width: 55px !important;
-  }
-  .recordImage {
-  	background: url('/files/Demos/BUI-MusicInventory/iconRecord@2x.png') no-repeat 4px center;
-  	background-size: 43px 43px;
-  	width: 55px !important;
-  }
-}
-
-.disclosureImage {
-	background: url('/files/Demos/BUI-MusicInventory/disclosure@2x.png') no-repeat left center;
-	background-size: 10px 13px;
-	width: 18px !important;
-/*	border: 1px solid #333;*/
-}
-
-.infoArtist {
-/*	border: 1px solid #333;*/
-	font: bold 16px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
-	line-height: 15px;
-	color: #1d4558;
-	text-shadow: 0 1px 0 #ffffff;
-}
-.infoTitle {
-/*	border: 1px solid #333;*/
-	color: #202428;
-	font-size: 12px;
-	line-height: 15px;
-	text-shadow: 0 1px 0 #ffffff;
-	overflow: hidden !important;
-	white-space: nowrap;
-}
-.infoMisc {
-/*	border: 1px solid #333;*/
-	font-size: 8px;
-	line-height: 12px;
-	color: #606468;
-	font-variant: small-caps;
-	text-shadow: 0 1px 0 #f2f2f2;
-}
-
-.infoMiscValue {
-	font-size: 10px;
-}
-
-/* This modifies the font color of a listbox item when you click on it */
-/*.itemBG:active .infoArtist {
-	color: #111;
-}
-.itemBG:active .infoTitle, .itemBG:active .infoMisc {
-	color: #222;
-}*/
-
-/* ======================================================== 
-	Top Gradient Bar
-   ======================================================== */
+//.BBjControl {
+//  font: normal 15px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+//  color: #222;
+//  outline: none !important;
+//  -webkit-user-select: none;
+//  -khtml-user-select: none;
+//  -moz-user-select: none;
+//  -ms-user-select: none;
+//  user-select: none;
+//  /* Prevent the iOS devices from selecting/copying anything */
+//
+//  -webkit-touch-callout: none;
+//  /* iPhone-specific stuff */
+//
+//  -webkit-tap-highlight-color: transparent !important;
+//}
 .topGradientBar {
-	background: transparent;
-	text-align: center !important;
-	text-shadow: 0 2px 0 #888, 0 4px 4px #000 !important;
-	color: #f1f2f4 !important;
-	font: bolder 22px Tahoma, Geneva, sans-serif !important;
-	border-bottom: 1px solid #000;
-	padding-top:  5px;
+  font: normal 18px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  background: rgba(255, 255, 255, 0.85);
+  text-align: center !important;
+  padding-top: 7px;
+  border-bottom: 1px solid #c9cccf;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.075);
+  letter-spacing: 4px;
+  word-spacing: 3px;
+  text-shadow: none;
+  border-top-width: 0;
+  background: rgba(188, 188, 188, 0.85);
+  color: #fafafa;
+  border-width: 0;
+  box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 0 !important;
+//  -webkit-transition: all 0.4s ease-out !important;
+//  -moz-transition: all 0.4s ease-out !important;
+//  -ms-transition: all 0.4s ease-out !important;
+//  -o-transition: all 0.4s ease-out !important;
 }
-
-
-/* ======================================================== 
-	Exit Button
-   ======================================================== */
 .exitButton {
-    font: bolder 17px Tahoma, Geneva, sans-serif !important;
-    color:  #bbb !important;
-	background: rgba(255,255,255,.15) !important;
-    -webkit-border-radius: 50px;
-    -moz-border-radius:    50px;
-    border-radius:         50px;
-    border: 1px solid rgba(255,255,255,.2) !important;
+  background: url("/files/res/off.png") no-repeat scroll 0 0 transparent;
+  background-size: 100% 100%;
+  color: #000000;
+  cursor: pointer;
+  font-weight: bold;
+  height: 30px;
+  width: 30px;	
 }
 
-.exitButton:hover {   
-	background: #bbbec5;
-	background: -moz-linear-gradient(top,  #f2f5fd 0%, #f2f5fd 3%, #9da0a8 100%) !important;
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f2f5fd), color-stop(3%,#f2f5fd), color-stop(100%,#9da0a8)) !important;
-	background: -webkit-linear-gradient(top,  #f2f5fd 0%,#f2f5fd 3%,#9da0a8 100%) !important;
-	background: -o-linear-gradient(top,  #f2f5fd 0%,#f2f5fd 3%,#9da0a8 100%) !important;
-	background: -ms-linear-gradient(top,  #f2f5fd 0%,#f2f5fd 3%,#9da0a8 100%) !important;
-	background: linear-gradient(top,  #f2f5fd 0%,#f2f5fd 3%,#9da0a8 100%) !important;
-	color: #1d4558 !important;
-	text-shadow: 0 1px 0 white;
-	border: 1px solid #5c6674 !important;
+.BackButton {
+  background: transparent !important;
+  border-width: 0 !important;
+  text-align: left !important;
+  box-shadow: none !important;
+  color: #d1d9e0;
 }
-.exitButton:active {
-    color: #842b34 !important;
+.BackButton:before {
+  content: ' <';
+  font: normal 36px "AdventPro-Medium", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  line-height: 26px !important;
+}
+.BBjButton.BackButton:hover {
+  color: #ffcc66;
+}
+.BBjButton.BackButton:active,
+.BackButton.BBjControl.BBjButton:not(.bbj-disabled).gwt-PushButton-down-hovering {
+  color: #ffb31a;
+}
+/* List Box */
+.BBjListBox,
+.BBjListBox:hover {
+  white-space: normal !important;
+  border-width: 0 !important;
+  border-radius: 0px;
+  background: #eff0f0 !important;
+}
+.BBjListBox-item {
+  padding: 0px 10px 0px 10px !important;
+  border-width: 0px !important;
+}
+.BBjListBox-item:hover,
+.BBjListBox-item:not(bbj-disabled):hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-width: 0px !important;
+}
+.BBjListBox-item.bbj-selected {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-width: 0px !important;
+}
+.categoryHeader {
+  font: normal 16px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  letter-spacing: 2px !important;
+  word-spacing: 1px !important;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15), 0 1px 0px rgba(255, 255, 255, 0.6);
+  font-family: "Trebuchet MS" !important;
+  line-height: 22px !important;
+  color: #bf4040;
+  background: #dde0e3;
+  height: 21px;
+  text-align: center !important;
+  margin-top: 15px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border: 1px solid #c9cccf !important;
+}
+.categoryHeader:after {
+  white-space: pre !important;
+  content: ' \266A';
+}
+/* HTML Styles */
+.titleBarSpacer {
+  height: 40px !important;
+}
+td.itemBG {
+  background: #ffffff;
+  border-bottom: 1px solid #c9cccf !important;
+  border-left: 1px solid #c9cccf !important;
+  border-right: 1px solid #c9cccf !important;
+  cursor: hand !important;
+  height: 55px !important;
+}
+td.itemBG:hover {
+  background: #f7f9fc;
+}
+.BBjListBox-item:not(.bbj-disabled):active td {
+  text-shadow: none;
+}
+td {
+  font: normal 14px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #222;
+}
+td .infoTitle {
+  font: normal 16px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #802A50;
+}
+td.disclosureImage:after {
+  content: '>;
+  font: normal 30px "AdventPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  line-height: 28px !important;
+  color: #e3e5e8;
+  padding-right: 5px;
+}
+td:hover .disclosureImage:after {
+  color: #abb1ba;
+}
+td .infoSubTitle {
+  font: normal 14px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+td .infoMisc {
+  font: normal 11px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  padding-bottom: 2px;
+}
+td .infoMiscValue {
+  font: normal 12px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #202020;
+}
+.icon {
+  width: 55px !important;
+  background-size: 40px 40px;
+  opacity: .75;
 }
 
-/* ======================================================== 
-	Detail View
-   ======================================================== */
-.backButton {
-	background: rgba(255,255,255,.1) !important;
-	border-width: 0;
-	border-bottom: 1px solid #666 !important;
-	border-left: 1px solid #585858 !important;
-	border-right: 1px solid #585858 !important;
-	font: bold 12px Tahoma, Geneva, sans-serif !important;
-	text-shadow: 0 -1px 0px #444;
-	-webkit-border-radius: 5px;
-	-moz-border-radius:    5px;
-	border-radius:         5px;
-	-moz-box-shadow: inset 0 1px 4px #000;
-	-webkit-box-shadow: inset 0 1px 4px #000;
-	box-shadow: inset 0 1px 4px #222;
+/* Detail Listing */
+.backdrop img {
+  position: absolute;
+  height: 110%;
+  width: auto;
+  top: -5%;
+  left: -5%;
 }
-.backButton:hover{
-	background: rgba(255,255,255,.2) !important;
+.landscape .backdrop img {
+  width: 110%;
+  height: auto;
 }
-.backButton:active {
-	background: rgba(255,255,255,.3) !important;
-	color: #fff;
+.detailTable {
+  padding-top: 45px;
 }
-
-
-.albumArt {
-}
-
 .detailAlbumArt {
-	text-align: center;
+  text-align: center;
+  width: 100px;
+  height: 100px;
+  border-width: 0;
+  padding-top: 5px;
+  padding-left: 15px;
 }
-
 .detailAlbumArt img {
-	text-align: left;
-	border: 5px solid #f0f0f0;
-	-webkit-border-radius: 2px;
-	-moz-border-radius:    2px;
-	border-radius:         2px;
-	-webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
-	-moz-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
-	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
-	width: 100px;
-	height: 100px;
-	margin: 2px;
+  text-align: left;
+  width: 104px;
+  height: 104px;
 }
+.detailTitle {
+  font: normal 26px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #802A50;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  /*
+    border: 1px solid hsla(215, 0%, 0%, .1);
+    background: hsla(215, 0%, 100%, .2);
+    padding-left: 4px;
+    margin-right:-30px;
+    .borderRadius;
+    */
 
+}
 .detailAlbumArtInfo {
-	padding: 0px 0px 0px 10px;
-	font: bold 14px/22px "Lucida Grande", Lucida, Verdana, sans-serif;
-	width: 220px;
+  padding-left: 10px;
 }
 .detailAlbumArtInfoArtist {
-	font-size: 17px;
-	color: #000;
+  font: normal 25px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
-
 .detailAlbumArtInfoTitle {
-	color: #444;
+  font: normal 25px "SourceSansPro-ExtraLight", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
-
-/* The ListBox for the album details */
-.albumDetails, .albumDetails .GALD-WOM {
-	background: transparent !important;
-	border-width: 0 !important;
-	text-align: left;
-}
-
-.detailTable td {
-/*	border: 1px solid #333;*/
-	text-shadow: 0 1px 0 #fff;
-	font-size: 14px;
-}
-
-.detailSpacer {
-	height: 8px;
-}
-
-.detailTitle {
-	background: transparent;
-	color: #5e697d;
-	text-shadow: 0 1px 1px #eee !important;
-	font: bold 18px Tahoma, Geneva, sans-serif !important;
-	height:  30px;
-}
-
 .detailLabel {
-	background: #f5f5f5;
-	color: #516691;
-	text-align: right;
-	border-bottom: 1px solid #cacaca;
-	border-top: 1px solid #fff;
-	border-left: 2px solid #a6acb1;
-	height: 30px;
-	padding: 0px 5px 0px 5px;
-	font: bold 12px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
-	width: 50px !important;
+  font: normal 14px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  padding-left: 15px;
+  width: 22%;
 }
-
 .detailValue {
-	background: #f5f5f5;
-	color: #111;
-	border-bottom: 1px solid #cacaca;
-	border-top: 1px solid #fff;
-	border-right: 2px solid #a6acb1;
-	padding: 0px 5px 2px 0px;
-	font: bold 13px "Lucida Grande", Lucida, Verdana, sans-serif !important;
+  font: normal 16px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+  padding: 2px 0 2px 0;
 }
-
-.topLeft {
-	-webkit-border-top-left-radius: 10px;
-	-moz-border-radius-topleft: 10px;
-	border-top-left-radius: 10px;
-	border-top: 2px solid #a6acb1;
+.detailCopyright {
+  font: normal 12px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  -webkit-border-radius: 15px;
+  -moz-border-radius: 15px;
+  -ms-border-radius: 15px;
+  -o-border-radius: 15px;
+  border-radius: 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 3px 1px 3px 1px;
 }
-.topRight {
-	-webkit-border-top-right-radius: 10px;
-	-moz-border-radius-topright: 10px;
-	border-top-right-radius: 10px;
-	border-top: 2px solid #a6acb1;
+.detailSpacer {
+  height: 12px;
 }
-.bottomLeft {
-	-webkit-border-bottom-left-radius: 10px;
-	-moz-border-radius-bottomleft: 10px;
-	border-bottom-left-radius: 10px;
-	border-bottom: 2px solid #a6acb1;
-}
-.bottomRight {
-	-webkit-border-bottom-right-radius: 10px;
-	-moz-border-radius-bottomright: 10px;
-	border-bottom-right-radius: 10px;
-	border-bottom: 2px solid #a6acb1;
-}
-
-
 /* Show/Hide a control by sliding it off/on the screen */
 .animated {
-	-webkit-transition: all .3s ease-in-out !important; 
-	-moz-transition:    all .3s ease-in-out !important; 
-	-ms-transition:     all .3s ease-in-out !important; 
-	-o-transition:      all .3s ease-in-out !important; 
+  -webkit-transition: all 0.4s ease-out !important;
+  -moz-transition: all 0.4s ease-out !important;
+  -ms-transition: all 0.4s ease-out !important;
+  -o-transition: all 0.4s ease-out !important;
 }
-.invisible { 
-    left: -485px !important;
+.animatedFast {
+  -webkit-transition: all 0.2s ease-out !important;
+  -moz-transition: all 0.2s ease-out !important;
+  -ms-transition: all 0.2s ease-out !important;
+  -o-transition: all 0.2s ease-out !important;
 }
-.visible { 
-    left: 0px !important;
+.invisible {
+  left: -485px !important;
+}
+.visible {
+  left: 0 !important;
 }
 .fadeOut {
-	opacity: 0;
+  opacity: 0;
 }
-.slideUpFromBottom {
-	transform: translate(0px,-65px);
-	-ms-transform: translate(0px,-65px);
-	-webkit-transform: translate(0px,-65px);
-	-o-transform: translate(0px,-65px);
-	-moz-transform: translate(0px,-65px);
+/* Browser-specific stuff */
+.BBjListBox {
+  scrollbar-track-color: #eff0f0 !important;
+  scrollbar-arrow-color: #eff0f0 !important;
+  scrollbar-face-color: #eff0f0 !important;
+  scrollbar-shadow-color: #eff0f0 !important;
 }
+.BBjListBox::-webkit-scrollbar {
+  width: 0 !important;
+}
+
+.BBjGroupBox {
+-webkit-box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
+-moz-box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
+box-shadow: 0 0 0pxrgba(0, 0, 0, 0.25);
+border: 0px;
+-webkit-border-radius: 0px;
+-moz-border-radius: 0px;
+-ms-border-radius: 0px;
+-o-border-radius: 0px;
+border-radius: 10px;
+-webkit-border-bottom-right-radius: 3.1px;
+-webkit-border-bottom-left-radius: 3.1px;
+-moz-border-radius-bottomright: 3.1px;
+-moz-border-radius-bottomleft: 3.1px;
+border-bottom-right-radius: 3.1px;
+border-bottom-left-radius: 3.1px;
+border-color: #8c8c8c;
+background: none !important;
+}
+
+.BBjEditBox, .bbj-password, .BBjInputE, .BBjInputN, .BBjInputD, .BBjCEdit, .BBjCEdit.bbj-bordered, .BBjListBox, .BBjListEdit, .BBjTree, .BBjHtmlView, .BBjUserAuthentication-user, .BBjUserAuthentication-password, .BBjFileChooser-fileGridPanel, .BBjFileChooser-fileName {
+/* -webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.25); */
+-moz-box-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+/* box-shadow: 0 0 2px rgba(0, 0, 0, 0.25); */
+/* border: 1px solid #8c8c8c; */
+/* -webkit-border-radius: 2px; */
+-moz-border-radius: 2px;
+-ms-border-radius: 2px;
+-o-border-radius: 2px;
+/* border-radius: 2px; */
+/* background-color: #fcfcfd; */
+/* color: #262626; */
+opacity: 1.0;
+cursor: default;
+box-shadow: 0 0 0px rgba(0, 0, 0, 0);
+border: 0px;
+font: normal 15px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+
+.BBjInputE.bbj-disabled, .BBjListButton-buttonText{
+opacity: 1.0 !important;
+cursor: default;
+box-shadow: 0 0 0px rgba(0, 0, 0, 0);
+border: 0px;
+}
+
+.GroupTitle, .BBjGroupBox legend {
+color: #802A50;
+font: normal 22px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+
+.picker {
+	display:none;
+}
+
+
+.BBjInputE.searchbox {
+
+background: url(data:image/png;base64,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) no-repeat 10px 6px #fcfcfc !important;
+	
+//	background: #f8f8f8 url(/files/images/search_dark.png) no-repeat !important;
+
+    border: 1px solid #d1d1d1;
+    color: #bebebe;
+    padding: 6px 15px 6px 35px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) inset;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) inset;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) inset;
+    -webkit-transition: all 0.7s ease 0s;
+    -moz-transition: all 0.7s ease 0s;
+    -o-transition: all 0.7s ease 0s;
+    transition: all 0.7s ease 0s;
+	font: normal 15px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+    }
+
+
+.TouchGridResultinfo {
+  font: normal 16px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  background: rgba(215, 215, 215, 0.85);
+  text-align: center !important;
+  padding-top: 7px;
+  border-bottom: 1px solid #c9cccf;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.075);
+  letter-spacing: 4px;
+  word-spacing: 3px;
+  text-shadow: none;
+  border-top-width: 0;
+  background: rgba(209, 209, 209, 0.85);
+  color: #fafafa;
+  border-width: 0;
+  box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 10px !important;
+//  -webkit-transition: all 0.4s ease-out !important;
+//  -moz-transition: all 0.4s ease-out !important;
+//  -ms-transition: all 0.4s ease-out !important;
+//  -o-transition: all 0.4s ease-out !important;
+	
+}
+
+
+
+)
