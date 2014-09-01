@@ -19,10 +19,10 @@ use net.miginfocom.layout.ComponentWrapper
 use net.miginfocom.layout.ConstraintParser
 use net.miginfocom.layout.ContainerWrapper
 
-use com.basisx.bbj.layout.BBComponent
-use com.basisx.bbj.layout.BBContainer
-use com.basisx.bbj.layout.BBComponentWrapper
-use com.basisx.bbj.layout.BBContainerWrapper
+use com.basis.bbj.layout.BBComponent
+use com.basis.bbj.layout.BBContainer
+use com.basis.bbj.layout.BBComponentWrapper
+use com.basis.bbj.layout.BBContainerWrapper
 
 rem /**
 rem * Manages components with MigLayout added via add(component, CC)

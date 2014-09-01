@@ -102,10 +102,12 @@ class public jabberwalky
                 scale = scale - (p_event!.getWheelRotation() / 10)
             endif
             if scale >= 0.5 and scale <= 3.0 then
+                #SysGui!.setRepaintEnabled(0)
                 #Layout!.scaleLayout(scale)
                 #cLayout!.scaleLayout(scale)
                 #scaleFonts(#Window!,scale)
                 #resizeTimerEvent(null())
+                #SysGui!.setRepaintEnabled(1)
                 cast(HashMap, #Window!.getUserData()).put("scale", scale)
             endif
         endif
