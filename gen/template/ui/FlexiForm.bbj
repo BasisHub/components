@@ -1,0 +1,159 @@
+use ::components/ui/bound/form/FlexiFormComponent.bbj::FlexiFormComponent
+
+rem /**
+rem * (DB_NICE)(TBL_NICE)FlexiForm
+rem *
+rem * Auto-generated form class
+rem * Use this class to put your custom code
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public (DB_NICE)(TBL_NICE)FlexiForm extends FlexiFormComponent
+
+
+    rem /**
+    rem * (DB_NICE)(TBL_NICE)Form
+    rem * standard constructor to generate a standalone window or a child window
+    rem */
+    method public (DB_NICE)(TBL_NICE)FlexiForm ()
+
+        #super!(null(),701,10,10,800,500)
+        #super!.loadLayout("arc/(DB_NICE)(TBL_NICE)Form.xml")
+        #setupLinkedForms()
+
+    methodend
+
+    rem /**
+    rem * (DB_NICE)(TBL_NICE)Form
+    rem * standard constructor to generate a standalone window or a child window
+    rem * @param BBjWindow wnd!: null() creates a new BBjTopLevelWindow, else the parent window to create the component on
+    rem * @param BBjNumber id: the control ID for the component
+    rem * @param BBjNumber x: postition x
+    rem * @param BBjNumber y: postition y
+    rem * @param BBjNumber w: width
+    rem * @param BBjNumber h:height
+    rem */
+    method public (DB_NICE)(TBL_NICE)Form (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        #super!(wnd!,id,x,y,w,h)
+        #super!.loadLayout("arc/(DB_NICE)(TBL_NICE)Form.xml")
+        #setupLinkedForms()
+
+    methodend
+
+    rem /**
+    rem * (DB_NICE)(TBL_NICE)Form
+    rem * constructor to generate the component inside an existing child window
+    rem * @param BBjWindow wnd!: the child window to use for this component
+    rem */
+    method public (DB_NICE)(TBL_NICE)Form (BBjChildWindow wnd!)
+
+        #super!(wnd!)
+        #super!.loadLayout("arc/(DB_NICE)(TBL_NICE)Form.xml")
+        #setupLinkedForms()
+
+    methodend
+
+
+    rem /**
+    rem * setupLinkedForms
+    rem * override this method with your custom code to avoid auto-generation of linked forms
+    rem * that have been set up in the parent class as a result of foreign key relations in the database
+    rem */
+    method private void setupLinkedForms()
+
+        v! = BBjAPI().getRuntime().getBBjStack()
+
+        for i=1 to v!.size()-1
+            s! = v!.getItem(i)
+
+            if pos("(DB_NICE)(TBL_NICE)Form"=str(s!.getClassName()))>0 and str(s!.getMethodName())="setupLinkedForms" then
+                rem "circle reference"
+
+                methodret
+
+            fi
+
+        next
+
+        <importedkey>
+        #super!.registerForeignKeyFormClass("(FKCOLUMN_NAME)","::ui/(DB_NICE)(PKTABLE_NAME_NICE)Form.bbj::(DB_NICE)(PKTABLE_NAME_NICE)Form")
+
+        </importedkey>
+
+        rem TODO: add foreign key releations that may not have been defined in the database
+        rem to define a form to be activated by the hyperlink
+        rem (don't forget to set up the foreign key in (DB_NICE)(TBL_NICE)BusinessComponent::setupImportedKeys())
+        rem sample:
+        rem fk_form! = new ::ui/xyzForm.bbj::xyzForm(null(),102,10,400,400,350)
+        rem #super!.registerForeignKeyFormLink("COLUMNNAME",fk_form!)
+        rem or
+        rem #super!.registerForeignKeyFormClass("COLUMNNAME","::classfile.bbj::classname")
+
+    methodend
+    
+    
+    method protected void initialize()
+
+        #super!.initialize()
+        rem do additional initialization here
+    
+        if #super!.getIsStandalone() then
+
+            #setShowToolBar(1)
+            #setShowMenuBar(1)
+            #setShowStatusBar(1)
+            #setShowOkCancelButtons(0)
+           
+        fi
+
+        rem sample: this is how you hide the search button in navigation toolbar
+        rem #getNavigationToolbar().setShowButtonSearch(0)
+        
+        rem and this is how you would hide the delete button
+        rem #getFormEditToolbar().setShowButtonDel(0)
+        
+    methodend    
+    
+
+    method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
+
+        methodret editedFields!
+
+    methodend    
+
+classend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -64,9 +64,9 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements UIWidget
     
     methodend
     
-    method public void setSize(BBjNumber w, BBjNumber h)
-        #Wnd!.setSize(w,h)
-        #Split!.setSize(w,h)
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
+        #Wnd!.setSize(w!,h!)
+        #Split!.setSize(w!,h!)
     methodend
 
 classend
@@ -84,9 +84,9 @@ class public SearchBoxAndGrid implements UIWidget
         #SearchBox! = SearchBox!
     methodend
     
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
     
-        #NavGrid!.setSize(w,h-50)
+        #NavGrid!.setSize(w!,h!-50)
             
     methodend
 

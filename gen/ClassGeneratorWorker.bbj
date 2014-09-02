@@ -364,6 +364,179 @@ class public ClassGeneratorWorker
 
     methodend
 
+    rem /**
+    rem * Method generateXmlForm:
+    rem * generate the GUI mask for a table as a .ARC file using a template
+    rem * @param BBjString tpl$: the templates directory
+    rem * @param BBjString schema$: the schema name
+    rem * @param BBjString table$: the table name for which the GUI should be generated
+    rem * @param BBjString targetdir$: the target dir for the .ARC file
+    rem */
+    method public void generateXmlForm(BBjString tpl$,  BBjString t$, BBjString targetdir$)
+
+        declare ResultSet JDBCResultSet!
+
+        declare Statement stmt!
+        declare ResultSetMetaData rsmd!
+
+        mkdir targetdir$,err=*next
+
+        db_nice$=iff(#Prepend,#nice(#DB$),"")
+        db_nicename$=#nice(#DB$)
+        tbl_nice$=#nice(t$)
+        
+        classname$= cvs(#getBBjDDProperty( t$, "CLASSNAME"),128)
+        if classname$>"" then
+            tbl_nice$=classname$
+        fi
+                
+        ch=unt
+
+        ftpl$ = tpl$
+
+        while pos("/"=ftpl$)
+            ftpl$=ftpl$(pos("/"=ftpl$)+1)
+        wend
+
+        while pos("\"=ftpl$)
+            ftpl$=ftpl$(pos("\"=ftpl$)+1)
+        wend
+
+        f$=targetdir$+db_nice$+tbl_nice$+ftpl$
+
+        if !#Overwrite then
+            open (ch,err=startGen)f$
+            rem do not generate as the file exists
+            close (ch)
+            methodret
+        fi
+
+        startGen:
+        open (ch,mode="O_CREATE,O_TRUNC")f$
+
+        cid=100
+        row=1
+
+        if #Schema$>"" then
+            s$=#Schema$+"."
+        fi
+        
+        sql$="SELECT * FROM "+s$+t$
+
+        if #Connection! <> null() then
+            stmt! = #Connection!.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
+            JDBCResultSet! = cast(ResultSet,stmt!.executeQuery(sql$),err=method_end)
+
+            JDBCResultSet!.next() 
+
+            print (ch)"<form>"
+            print (ch)"<group>"
+            print (ch)"<pane>"
+
+            rsmd!=JDBCResultSet!.getMetaData()
+
+            for i=1 to rsmd!.getColumnCount()
+                col_name$ = rsmd!.getColumnName(i)
+
+                tmp$ = #getBBjDDProperty(t$, col_name$,"OBSOLETE",err=*next)
+                
+                if tmp$="true" then
+                    continue
+                fi
+                
+                col_label$ = #getBBjDDProperty( t$, col_name$,BBjAdminColumn.DESCRIPTION)
+                if  col_label$ = "" then
+                    col_label$ = rsmd!.getColumnLabel(i)
+                fi
+
+                col_type = rsmd!.getColumnType(i)
+                col_size = rsmd!.getColumnDisplaySize(i)
+                switch col_type
+                    case java.sql.Types.BLOB
+                    case java.sql.Types.LONGVARBINARY
+                        rem TODO these types tend to be blobs
+                        rem skip here and see later what to do
+                        continue
+
+                    case java.sql.Types.DECIMAL
+                    case java.sql.Types.DOUBLE
+                    case java.sql.Types.FLOAT
+                    case java.sql.Types.INTEGER
+                    case java.sql.Types.SMALLINT
+                    case java.sql.Types.TINYINT
+                    case java.sql.Types.NUMERIC
+                    case java.sql.Types.REAL
+                        ctrl$="InputNWidget"
+                        
+                    break
+
+                    case java.sql.Types.DATE
+                        ctrl$="InputDWidget"
+                        w=100
+                    break
+
+                    case java.sql.Types.BOOLEAN
+                    case java.sql.Types.BIT
+                        ctrl$="CheckboxWidget"
+                        
+                    break
+
+                    case java.sql.Types.TIMESTAMP
+                        ctrl$="InputEWidget"
+                        
+                    break
+
+                    case default
+                        ctrl$="InputEWidget"
+                        
+                    break
+                swend
+REM 
+REM                 if rsmd!.isReadOnly(i) or rsmd!.isAutoIncrement(i) then
+REM                     ctrl$="STATICTEXT"
+REM                 fi
+
+                if ctrl$="InputEWidget" or ctrl$="InputNWidget" or ctrl$="InputDWidget" then
+                    PRINT (ch)"<element>"
+                    PRINT (ch)"    <type>components/ui/bound/controls/LabelWidget</type> "
+                    PRINT (ch)"    <text>"+col_label$+":</text> "
+                    PRINT (ch)"    <name>"+col_name$+".label</name> "
+                    PRINT (ch)"    <layoutconstraints></layoutconstraints> "
+                    PRINT (ch)"</element>      "
+                endif
+
+                if ctrl$="InputEWidget" or ctrl$="InputNWidget" or ctrl$="InputDWidget" then
+                    PRINT (ch)"<element>"
+                    PRINT (ch)"    <type>components/ui/bound/controls/"+ctrl$+"</type> "
+                    PRINT (ch)"    <name>"+col_name$+"</name> "
+                    PRINT (ch)"    <length>"+str(col_size)+"</length>" 
+                    PRINT (ch)"    <bindClass>"+tbl_nice$+"BusinessComponent</bindClass>"
+                    PRINT (ch)"    <bindField>"+col_name$+"</bindField>"
+                    PRINT (ch)"    <layoutconstraints>wrap</layoutconstraints> "
+                    PRINT (ch)"</element>"
+                endif
+REM                 if ctrl$="INPUTE" then
+REM                     PRINT (ch)"            MASK """+fill(min(100,col_size),"X")+""""
+REM                     TODO: choose a better control for very large fields, like a CEdit
+REM                 fi
+REM                 if ctrl$="INPUTE" then
+REM                     PRINT (ch)"            PADCHARACTER 32"
+REM                 fi
+            next i
+        endif
+        print (ch)"</pane>"
+        print (ch)"</group>"
+        print (ch)"</form>"
+        close (ch)
+
+        methodret
+
+        method_end:
+            if ch then close (ch)
+            a=msgbox("Error "+str(err)+" in line "+str(tcb(5))+" generating classes for "+t$+" ("+errmes(-1)+")",0,"Error")
+
+    methodend
+
 
     rem /**
     rem * Method generateArc:
@@ -406,13 +579,13 @@ class public ClassGeneratorWorker
         f$=targetdir$+db_nice$+tbl_nice$+ftpl$
 
         if !#Overwrite then
-            open (ch,err=startGen)f$
+            open (ch,err=startGenArc)f$
             rem do not generate as the file exists
             close (ch)
             methodret
         fi
 
-        startGen:
+        startGenArc:
 
         open (ch,mode="O_CREATE,O_TRUNC")f$
 
@@ -427,7 +600,7 @@ class public ClassGeneratorWorker
 
         if #Connection! <> null() then
             stmt! = #Connection!.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
-            JDBCResultSet! = cast(ResultSet,stmt!.executeQuery(sql$),err=method_end)
+            JDBCResultSet! = cast(ResultSet,stmt!.executeQuery(sql$),err=method_end_arc)
 
             JDBCResultSet!.next() 
 
@@ -560,7 +733,7 @@ REM                 endif
 
         methodret
 
-        method_end:
+        method_end_arc:
             if ch then close (ch)
             a=msgbox("Error "+str(err)+" in line "+str(tcb(5))+" generating classes for "+t$+" ("+errmes(-1)+")",0,"Error")
 
@@ -857,6 +1030,12 @@ REM                 endif
                 if len(f$)>3 and cvs(f$(len(f$)-3,4),8)=".arc" then
                     #generateArc(dir$+f$,  t$, #TargetDir$+reldir$)
                 fi
+
+                rem xml file
+                if len(f$)>3 and cvs(f$(len(f$)-3,4),8)=".xml" then
+                    #generateXmlForm(dir$+f$,  t$, #TargetDir$+reldir$)
+                fi
+                
             fi
         wend
         close (ch)
