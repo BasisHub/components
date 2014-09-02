@@ -1,7 +1,7 @@
 use ::ui/(DB_NICE)(TBL_NICE)Form.bbj::(DB_NICE)(TBL_NICE)Form
 use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
 
-declare (DB_NICE)(TBL_NICE)Form        EditEditForm!
+declare (DB_NICE)(TBL_NICE)Form        EditForm!
 declare (DB_NICE)(TBL_NICE)BusinessComponent bc!
 
 bc! = new (DB_NICE)(TBL_NICE)BusinessComponent()
