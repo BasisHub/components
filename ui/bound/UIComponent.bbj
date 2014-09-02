@@ -18,7 +18,7 @@ rem * UIComponent
 rem *
 rem * Base class for UI Components that connect to a business component
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public UIComponent

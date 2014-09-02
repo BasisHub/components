@@ -11,7 +11,7 @@ rem *
 rem * Auto-generated business logic class
 rem * override to implement custom behavior that belongs to application logic
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)BusinessComponentT

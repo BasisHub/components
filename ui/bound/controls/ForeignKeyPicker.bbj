@@ -10,7 +10,7 @@ use ::components/util/Util.bbj::Util
 rem /**
 rem * ForeignKeyPicker
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public ForeignKeyPicker extends UIComponent

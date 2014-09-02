@@ -3,7 +3,7 @@ rem * WebBrowserComponent
 rem *
 rem * Component to integrate either with Swing embedded browser or HTML View in BUI
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 use ::components/ui/unbound/UIWidget.bbj::UIWidget

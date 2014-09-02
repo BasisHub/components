@@ -7,7 +7,7 @@ rem *
 rem * Auto-generated entity class
 rem * Use this class to put your custom code
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public (DB_NICE)(TBL_NICE)Entity extends (DB_NICE)(TBL_NICE)EntityT

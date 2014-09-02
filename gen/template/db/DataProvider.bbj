@@ -12,7 +12,7 @@ rem * put all custom additions and method overrides in this class
 rem * to allow for iterative re-generation of (DB_NICE)(TBL_NICE)DataProviderT
 rem * override to implement custom behavior that belongs to application logic
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public (DB_NICE)(TBL_NICE)DataProvider extends (DB_NICE)(TBL_NICE)DataProviderT

@@ -18,7 +18,7 @@ use ::translations/bbtranslator.bbj::BBTranslator
 rem /**
 rem * SimpleFormComponent
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public SimpleFormComponent extends UIComponent implements UIWidget

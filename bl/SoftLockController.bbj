@@ -5,7 +5,7 @@ rem * SoftLockRemoteEditEvent
 rem *
 rem * Event class for SoftLockController
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 
@@ -22,7 +22,7 @@ rem * SoftLockController
 rem *
 rem * Class SoftLockController helps editing a record/value from two or more user at the same time
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public SoftLockController

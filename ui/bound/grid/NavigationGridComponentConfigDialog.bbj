@@ -7,7 +7,7 @@ use ::components/i18n/i18n.bbj::i18n
 rem /**
 rem * NavigationGridComponentConfigDialog
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public NavigationGridComponentConfigDialog

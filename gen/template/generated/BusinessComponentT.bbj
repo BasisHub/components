@@ -12,7 +12,7 @@ rem * Auto-generated entity class
 rem * DO NOT PUT ANY CHANGES HERE !
 rem * THIS CLASS WILL BE OVERWRITTEN BY EACH CODE GENERATION !
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public (DB_NICE)(TBL_NICE)BusinessComponentT extends DataProviderBusinessComponent

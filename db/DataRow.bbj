@@ -3,7 +3,7 @@ rem package components.db
 rem /**
 rem * DataField
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 
@@ -921,7 +921,7 @@ rem /**
 rem * DataRow
 rem *
 rem * A DataRow represents a single row from a record set.
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public DataRow

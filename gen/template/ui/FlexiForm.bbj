@@ -6,7 +6,7 @@ rem *
 rem * Auto-generated form class
 rem * Use this class to put your custom code
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public (DB_NICE)(TBL_NICE)FlexiForm extends FlexiFormComponent

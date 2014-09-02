@@ -8,7 +8,7 @@ rem *
 rem * Controller class to link BusinessComponents that drive each other
 rem * by variables, e.g. master-detail views
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public UIController

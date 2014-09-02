@@ -5,7 +5,7 @@ rem * BusinessComponent
 rem *
 rem * Base class for Business Components that connect to a UI component
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 

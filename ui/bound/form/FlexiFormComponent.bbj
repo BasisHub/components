@@ -29,7 +29,7 @@ use ::translations/bbtranslator.bbj::BBTranslator
 rem /**
 rem * FlexiFormComponent
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public FlexiFormComponent extends UIComponent implements UIWidget

@@ -7,7 +7,7 @@ rem * FrameSet
 rem *
 rem *
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public FrameSet
@@ -300,7 +300,7 @@ rem * FrameCell
 rem *
 rem *
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public FrameCell implements FrameElement
@@ -428,7 +428,7 @@ rem * FrameList
 rem *
 rem *
 rem *
-rem * @author Stephan Wald
+rem * 
 rem * @version 1.0
 rem */
 class public FrameList implements FrameElement
