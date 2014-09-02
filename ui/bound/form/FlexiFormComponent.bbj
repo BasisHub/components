@@ -1,0 +1,699 @@
+rem package components.ui.bound.form
+use javax.xml.parsers.DocumentBuilder
+use javax.xml.parsers.DocumentBuilderFactory
+use java.io.StringReader
+use org.xml.sax.InputSource
+use org.w3c.dom.Document
+use org.w3c.dom.Element
+use org.w3c.dom.Node
+use org.w3c.dom.NodeList
+use java.util.HashMap
+
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/bl/ValidationError.bbj::ValidationError
+
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/ui/bound/UIComponent.bbj::UIComponent
+use ::components/ui/bound/toolbar/NavigationToolbarComponent.bbj::NavigationToolbarComponent
+use ::components/ui/bound/toolbar/FormEditToolbarComponent.bbj::FormEditToolbarComponent
+use ::components/ui/bound/controls/ForeignKeyPicker.bbj::ForeignKeyPicker
+use ::components/ui/unbound/ResponsiveFormFrame.bbj::ResponsiveFormFrame
+use ::components/ui/layout/BBMigPane.bbj::BBMigPane
+
+use ::translations/bbtranslator.bbj::BBTranslator
+
+
+rem /**
+rem * FlexiFormComponent
+rem *
+rem * @author Stephan Wald
+rem * @version 1.0
+rem */
+class public FlexiFormComponent extends UIComponent implements UIWidget
+
+    field private   BBjNumber IsFormLocked
+    field protected BBjChildWindow FormWnd!
+    field protected ResponsiveFormFrame FormFrame!
+    field protected BBjChildWindow ToolbarWnd!
+
+    field protected java.util.HashMap ControlsByBcClass! = new java.util.HashMap()
+
+    field protected NavigationToolbarComponent NavigationToolbar!
+    field protected FormEditToolbarComponent FormEditToolbar!
+
+    field protected DataRow   Rec!
+
+    field protected DataRow   EditedRec!
+    field protected java.util.HashMap EditedFields!
+    field protected java.util.HashMap ForeignKeyPickerList! = new java.util.HashMap()
+
+    field protected BBjVector WarningIcons! = new BBjVector()
+
+    field private java.util.HashMap RestoreControllerFilter!
+
+    field private BBjNumber ReadOnly
+
+
+    rem /**
+    rem * Constructor FlexiFormComponent
+    rem * Creates the component by using a given existing BBjChildWindow
+    rem * @param BBjWindow wnd!: child window that the component shall occupy
+    rem */
+    method public FlexiFormComponent(BBjChildWindow cw!)
+
+        #super!(cw!)
+        #initialize()
+
+    methodend
+
+
+
+    rem /**
+    rem * Constructor FlexiFormComponent
+    rem * Creates the component by using a given existing BBjWindow
+    rem * @param BBjWindow wnd!: child window that the component shall occupy
+    rem * @param BBjNumber id: Control ID for the BBjChildWindow, which is created on wnd!
+    rem * @param BBjNumber x: x-coordinate
+    rem * @param BBjNumber y: y-coordinate
+    rem * @param BBjNumber w: width
+    rem * @param BBjNumber h: height
+    rem */
+    method public FlexiFormComponent(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+
+        #super!(wnd!,id,x,y,w,h)
+        #initialize()
+
+    methodend
+
+
+    rem /**
+    rem * Method setChildWindow
+    rem * load the child window from a resource file (.arc)
+    rem * @param BBjString resFile$: the name of the resource file
+    rem * @param BBjNumber childId: the child window ControlID in the resource file
+    rem */
+    method public void loadLayout(BBjString resFile$)
+
+        ch=unt
+        open (ch)resFile$
+        read record (ch,siz=1000000)xml$
+        close (ch)
+        is! = new InputSource(new StringReader(xml$))
+
+        #ControlsByBcClass! = new java.util.HashMap()
+    
+        dbf! = DocumentBuilderFactory.newInstance()
+        db! = dbf!.newDocumentBuilder()
+        doc! = db!.parse(is!)
+        doc!.getDocumentElement().normalize()
+        
+        sg!=BBjAPI().getSysGui()
+
+        #FormWnd! = #getWnd().addChildWindow( #getWnd().getAvailableControlID(),0,0,100,100,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        
+        #FormFrame! = new ResponsiveFormFrame(#FormWnd!,100,0,0,#FormWnd!.getWidth(),#FormWnd!.getHeight())
+
+
+        rem iterate groups
+        nodeLst! = doc!.getElementsByTagName("group")
+        
+        for group = 0  to  nodeLst!.getLength()-1
+        
+                fstNode! = nodeLst!.item(group)
+            
+                if fstNode!.getNodeType() = Node.ELEMENT_NODE then
+                    PRINT "+Group ",group+1
+                 
+                    ? fstNode!.getNodeName()
+                    fstElmnt! = CAST(Element,fstNode!)
+        
+                    maxCols$= #getNodeValue(fstNode!,"maxcols")
+        
+                    f2! = new ResponsiveFormFrame(#FormFrame!.getWnd(),#FormFrame!.getWnd().getAvailableControlID(),0,301,1024,0)
+                    f2!.setNumCols(num(maxCols$,err=*next))
+                 
+                    rem determine panes
+                    paneElmntLst! = fstElmnt!.getElementsByTagName("pane")
+                 
+                    for pane = 0  to  paneElmntLst!.getLength()-1
+                  
+                        paneNode! = paneElmntLst!.item(pane)
+                    
+                        if paneNode!.getNodeType() = Node.ELEMENT_NODE then
+                           
+                        
+                            layc$= #getNodeValue(paneNode!,"layoutconstraints")
+                            colc$= #getNodeValue(paneNode!,"colconstraints")
+                            rowc$= #getNodeValue(paneNode!,"rowconstraints")
+                            name$= #getNodeValue(paneNode!,"name")
+                        
+                             PRINT "++Pane: ",pane+1,name$
+                            
+                            rem create pane
+                            cwCanvas! = f2!.getWnd().addChildWindow(f2!.getWnd().getAvailableControlID(),0,0,100,100,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+                            Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
+        
+                            declare BBjFont font!
+                            font_size=10
+                    
+                            cwCanvas!.setUserData(new HashMap())
+                            cast(HashMap, cwCanvas!.getUserData()).put("scale",1.0)
+                            
+                            font! = BBjAPI().getSysGui().makeFont("Dialog",font_size,BBjAPI().getSysGui().PLAIN)
+                            font_height=iff(font!.getStyle()=BBjAPI().getSysGui().BOLD,int(font_size*1.1),font_size)
+                            
+                            cwCanvas!.setFont(font!)
+                            cast(HashMap, cwCanvas!.getUserData()).put("prefFontSize",font!.getSize())
+                            
+                    
+                    
+                            lwpad=20,lhpad=12,iwpad=12,ihpad=12; rem label width/height padding, input control width/height padding
+                            
+                            rem determine elements (aka ontrols or widgets)
+                            elElmntLst! = paneNode!.getElementsByTagName("element")
+                            
+                            if elElmntLst!.getLength() then
+                                for element = 0  to  elElmntLst!.getLength()-1
+                              
+                                    elNode! = elElmntLst!.item(element)
+                                
+                                    if elNode!.getNodeType() = Node.ELEMENT_NODE then
+                                        
+                                    
+                                        name$= #getNodeValue(elNode!,"name")
+                                        type$= #getNodeValue(elNode!,"type")
+                                        text$= #getNodeValue(elNode!,"text")
+                                        bindClass$= #getNodeValue(elNode!,"bindClass")
+                                        bindField$= #getNodeValue(elNode!,"bindField")
+                                        length=0
+                                        length= num(#getNodeValue(elNode!,"length"),err=*next)
+                                        
+                                        layc$= #getNodeValue(elNode!,"layoutconstraints")
+                                        typet$=type$
+                                        while pos("/"=typet$)
+                                            typet$=typet$(pos("/"=typet$)+1)
+                                        wend
+                                                                      
+                                        x$="el! = new ::"+type$+".bbj::"+typet$+"(cwCanvas!)"
+                                        rem execute x$
+                                        rem workaround execute
+                                            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
+                                            ch=unt
+                                            open (ch)temp$
+                                            write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+                                            close (ch)
+                                            call temp$
+                                            erase temp$                                
+                                        
+                                        el!.setSize(100,font_height+ihpad)
+                                        el!.setText(text$)
+                                        el!.setName(name$)
+                                        el!.setUserData(new HashMap())
+                                        el!.setFont(font!)
+                                        if length>0 then
+                                        el!.setLength(length)
+                                        fi
+                                        el!.setBindField(bindField$)
+                                        el!.setBindClass(bindClass$)
+                                        cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
+        
+                                        Layout!.add( el!, layc$ )
+                                        PRINT "+++Element: ",element+1,name$        
+                                        
+                                        if bindClass$>"" then
+                                            v! = #ControlsByBcClass!.get(bindClass$)
+                                            if v! = null() then
+                                                v!=new BBjVector()
+                                                #ControlsByBcClass!.put(bindClass$,v!)
+                                            fi
+                                            v!.addItem(el!)
+                                        fi
+        
+                                    fi
+                                
+                              next; rem element
+                              
+                          fi
+        
+                        Layout!.layoutChildren()
+                        f2!.addWidget(Layout!)
+        
+                            
+                            
+                        fi
+                  next; rem pane
+        
+                  rem add pane to form
+                  #FormFrame!.addWidget(f2!)
+                  
+        
+            fi
+            
+        next; rem group
+
+        rem #getLaf().prepareWindow(#FormWnd!)
+        rem #getLaf().setStyle(#FormWnd!,"ShadowedPanel")
+        #FormWnd!.setVisible(0)
+        #FormWnd!.setTrack(0)
+        #FormWnd!.setSize(#getW(), #getH())
+        #FormFrame!.setSize(#getW(), #getH())
+
+        if #this!.getShowToolBar() then
+            #ToolbarWnd!.setSize(#getWnd().getWidth(), 25)
+            #FormWnd!.setLocation(0,26)
+            #setSize(#getW(), #getH()) 
+        fi
+
+        #FormWnd!.setVisible(1)
+
+    methodend
+
+
+
+    method public FormEditToolbarComponent getFormEditToolbar()
+        methodret #FormEditToolbar!
+    methodend
+    
+    method public NavigationToolbarComponent getNavigationToolbar()
+        methodret #NavigationToolbar!
+    methodend    
+
+    rem /**
+    rem * Method getAllControlsRecursive:
+    rem * Get all controls recursively
+    rem * @param BBjWindow pWindow!: the window with the controls
+    rem * @return BBjVector: vector of all control information
+    rem */
+
+
+    rem /**
+    rem * Method initialize:
+    rem * initialize the form. Creates hte edit and navigation toolbar.
+    rem */
+    method protected void initialize()
+
+            rem initialize the toolbar
+
+            #ToolbarWnd! = #getWnd().addChildWindow(100,0,0,#getWnd().getWidth(),0,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+            #getLaf().prepareWindow(#ToolbarWnd!)
+            #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
+            
+            
+            
+            #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,9*UIComponent.getToolbarHeight(),UIComponent.getToolbarHeight())
+            if #this!.getBC()<>null() then 
+                #FormEditToolbar!.setBC(#this!.getBC())
+            fi
+
+            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
+            if #this!.getBC()<>null() then
+                #NavigationToolbar!.setBC(#this!.getBC())
+            fi
+
+    methodend
+
+
+    rem /**
+    rem * Method setShowToolBar:
+    rem * set the visiblity of the tool bar
+    rem * @param BBjNumber fShow: 1 = visible, 0 = invisible
+    rem */
+    method public void setShowToolBar(BBjNumber fShow)
+
+        #super!.setShowToolBar(fShow)
+        if fShow and #FormWnd! <> null() then
+            #ToolbarWnd!.setSize(#getWnd().getWidth(), UIComponent.getToolbarHeight())
+            #FormWnd!.setLocation(0,UIComponent.getToolbarHeight()+1)
+            #setSize(#getW(), #getH())
+        else
+            rem TODO implement hide toolbar
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method setShowStatusBar:
+    rem * set the visiblity of the status bar
+    rem * @param BBjNumber fShow: 1 = visible, 0 = invisible
+    rem */
+    method public void setShowStatusBar(BBjNumber fShow)
+
+        #super!.setShowStatusBar(fShow)
+        #super!.setStatusBar(#getParentWnd().addStatusBar(5))
+        #super!.getStatusBar().setTextAt(0,"...")
+
+    methodend
+
+
+    rem /**
+    rem * Method setShowMenuBar:
+    rem * set the visiblity of the menu bar
+    rem * @param BBjNumber fShow: 1 = visible, 0 = invisible
+    rem */
+    method public void setShowMenuBar(BBjNumber fShow)
+
+        #super!.setShowMenuBar(fShow)
+
+        if fShow then
+            editMenu! = #super!.getMenuBar().addMenu(-2,"&Edit")
+            #FormEditToolbar!.setupMenu(editMenu!)
+
+            navMenu! = #super!.getMenuBar().addMenu(-3,"&Record")
+            #NavigationToolbar!.setupMenu(navMenu!)
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method setSize:
+    rem * set the size of the form component
+    rem * @param BBjNumber width: the width
+    rem * @param BBjNumber height: the height
+    rem */
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
+
+        w=w!
+        h=h!
+        #super!.setSize(w,h)
+
+        if #ToolbarWnd! <> null() AND #this!.getShowToolBar() then
+            #ToolbarWnd!.setSize(w,UIComponent.getToolbarHeight())
+            #FormWnd!.setSize(w, h-UIComponent.getToolbarHeight())
+            #FormFrame!.setSize(w, h-UIComponent.getToolbarHeight())
+        else
+            #FormWnd!.setSize(w, h)
+            #FormFrame!.setSize(w, h)
+        fi
+
+    methodend
+
+
+    rem /**
+    rem * Method setVisible:
+    rem * set the visibility of the form component
+    rem * @param BBjNumber visible: 1 = visible, 0 = invisible
+    rem */
+    method public void setVisible(BBjNumber v)
+
+        #super!.setVisible(v)
+
+    methodend
+
+
+    rem /**
+    rem * Method setReadOnly:
+    rem * set the form component as read only
+    rem * @param BBjNumber ro: 1 = read only, 0 = editable
+    rem */
+    method public void setReadOnly(BBjNumber ro)
+
+        #ReadOnly = ro
+        #enableControls(0,0)
+
+    methodend
+
+
+    rem /**
+    rem * Method setBC:
+    rem * set the main business component for the form
+    rem * @param BusinessComponent bc!: the business component
+    rem */
+    method public void setBC(BusinessComponent bc!)
+
+        #super!.setBC(bc!)
+
+        if #NavigationToolbar! <> null() then
+            #NavigationToolbar!.setBC(#this!.getBC())
+        fi
+
+        if #FormEditToolbar! <> null() then
+            #FormEditToolbar!.setBC(#this!.getBC())
+        fi
+
+
+        rem determine class name
+        cl$ = str(bc!)
+        while pos("::"=cl$)
+            cl$=cl$(pos("::"=cl$)+2)
+        wend
+        
+        #bindBC(cl$,bc!)
+
+    methodend
+
+    method private void bindBC(BBjString bindClass$,BusinessComponent bc!)
+
+            v! = #ControlsByBcClass!.get(bindClass$)
+            if v! <> null()  then
+                it! = v!.iterator()
+                while it!.hasNext()
+                  el! = it!.next()
+                  el!.setBC(bc!)
+                wend
+            fi
+            
+            fkmap! = bc!.getForeignKeyPointerBcList()
+            ks! = fkmap!.keySet()
+            it! = ks!.iterator()
+            while it!.hasNext()
+                bc1! = fkmap!.get(it!.next())
+                cl$ = str(bc1!)
+                while pos("::"=cl$)
+                    cl$=cl$(pos("::"=cl$)+2)
+                wend
+                #bindBC(cl$,bc1!)
+            wend
+            
+            
+    
+    methodend 
+
+
+    rem /**
+    rem * Method canSelectionChange:
+    rem * This method is called from the business component when the selection changed
+    rem * (needs overriding)
+    rem * @param BBjNumber force: if set to 1, enforce saving unsaved data as selection will undeniably change
+    rem * @return BBjNumber: 0 = can't change, 1 = change is OK
+    rem */
+    method public BBjNumber canSelectionChange(BBjNumber force)
+
+        if  #EditedRec! = null() or #EditedFields! = null() then
+            methodret 1
+        fi
+
+        if force=0 then
+            opt=35
+        else
+            opt=36
+        fi
+
+        a=msgbox(#super!.getTranslator().getTranslation("SAVE_CHANGES"),opt,#getBC().getTitle())
+
+        switch a
+            case 6
+            rem yes
+            #getBC().broadcastSaveRecord()
+            canDrive=1
+            #EditedRec! = null()
+            break
+
+            case 7
+            rem no
+            canDrive=1
+            #EditedRec! = null()
+            break
+
+            case 2
+            rem cancel
+            canDrive=0
+            break
+        swend
+
+        methodret canDrive
+
+    methodend
+
+
+    rem /**
+    rem * Method displayData:
+    rem * display the data on the user component
+    rem */
+    method public void displayData()
+
+
+    methodend
+
+
+    rem /**
+    rem * Method displayField:
+    rem * shows the data of a field on a form control
+    rem * @param BBjString name$: the name of the control
+    rem */
+    method protected void displayField(BBjString ctrl_name$)
+
+        contents$ = #Rec!.getFieldAsString(ctrl_name$)
+
+        ControlMap! = #ControlList!.get(ctrl_name$)
+        ctrl!       = ControlMap!.get("ControlInstance")
+        ctrl_obj!   = ControlMap!.get("ControlObject")
+
+        switch ctrl!.getControlType()
+            case BBjControl.INPUTD_TYPE
+                if #Rec!.getFieldType(ctrl_name$)="D" then
+                    ctrl!.setValue(#Rec!.getFieldAsNumber(ctrl_name$))
+                else
+                    goto default_set
+                fi
+            break
+
+            case BBjControl.CHECKBOX_TYPE
+                ctrl!.setSelected(#Rec!.getFieldAsNumber(ctrl_name$))
+            break
+
+            case BBjControl.LISTBUTTON_TYPE
+            case BBjControl.LISTBOX_TYPE
+                rem TODO optimize - save list serverside and save roundtrips!
+                declare auto BBjVector list!
+                list! = ctrl!.getAllItems()
+
+                if list!.size() then
+                    for i=0 to list!.size()-1
+                        if list!.getItem(i)=contents$ then
+                            ctrl!.selectIndex(i)
+                            break
+                        fi
+                    next i
+                fi
+            break
+
+            case default
+            default_set:
+            ctrl!.setText(cvs(contents$,2))
+            break
+        swend
+
+    methodend
+
+
+    rem /**
+    rem * Method emptyForm:
+    rem * empty all controls in the form
+    rem */
+    method private void emptyForm()
+
+        if #ControlList! = null() or #ControlList!.size() = 0 then
+            methodret
+        fi
+
+        ks! = #ControlList!.keySet()
+        it! = ks!.iterator()
+
+        while it!.hasNext()
+            ctrl_name$=it!.next()
+
+            if #getBC().getForeignKeyBC(ctrl_name$)=null() then
+                ControlMap! = #ControlList!.get(ctrl_name$)
+                ctrl! = ControlMap!.get("ControlInstance")
+
+                switch ctrl!.getControlType()
+                    case BBjControl.LISTBUTTON_TYPE
+                    case BBjControl.LISTBOX_TYPE
+
+                    break
+
+                    case BBjControl.CHECKBOX_TYPE
+                    ctrl!.setSelected(0)
+                    break
+
+                    case default
+                    ctrl!.setText("")
+                    break
+                swend
+            fi
+        wend
+
+    methodend
+
+
+    rem /**
+    rem * Method setEditing:
+    rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
+    rem * @param BBjNumber isEditing: -1 = i
+    rem */
+    method public void setEditing(BBjNumber isEditing)
+
+        if isEditing=0 then
+            if #EditedRec! <> null() and #getBC().getSelection().size()=1 then
+                recno=#getBC().getSelection().getItem(0)
+                #getBC().getResultSet().setItem(recno,null())
+                #getBC().prepareResultSet(recno,recno)
+                #getBC().refresh(0)
+            fi
+
+            #this!.displayData()
+            #getWnd().focus()
+
+            rem workaround for BUI to drag focus away from input field
+            rem https://bugzilla.basis.com/show_bug.cgi?id=25084
+
+            if info(3,6)="5" then
+                tmp! = #getWnd().addEditBox(#getWnd().getAvailableControlID(),10,10,10,10,"")
+                tmp!.focus()
+                tmp!.destroy()
+            fi
+
+            #EditedRec! = null()
+            #EditedFields! = null()
+
+            if #RestoreControllerFilter! <> null() then
+               #getBC().setQueryFilter(#RestoreControllerFilter!)
+               #RestoreControllerFilter! = null()
+            fi
+            #emptyForm()
+            #newRecord()
+        fi
+
+        rem #enableControls(isEditing,0)
+
+    methodend
+
+
+
+    rem /**
+    rem * Method onBeforeSave:
+    rem * This method is called from the business component before saving the record
+    rem * (needs overriding)
+    rem * @return java.util.HashMap: a java.util.HashMap with the edited fields
+    rem */
+    method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
+
+        methodret editedFields!
+
+    methodend
+
+
+    method private static BBjString getNodeValue(Node node!, BBjString tagName$)
+    
+                 paneElmnt! = CAST(Element,node!)
+
+                 layElmntLst! = paneElmnt!.getElementsByTagName(tagName$)
+                 layElmnt! = CAST(Element,layElmntLst!.item(0))
+                 lay$=""
+                 if layElmnt! <> null() then
+                    lay! = layElmnt!.getChildNodes()
+                    if lay!.item(0)<> null() then
+                        lay$=lay!.item(0).getNodeValue()
+                    fi
+                 fi
+                 
+                 methodret lay$
+                 
+     methodend
+
+classend

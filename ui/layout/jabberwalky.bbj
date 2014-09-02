@@ -111,6 +111,11 @@ class public jabberwalky
                 cast(HashMap, #Window!.getUserData()).put("scale", scale)
             endif
         endif
+        
+                ? #Window!.getHeight()
+        ? #Window!.getWidth()
+
+        
     methodend
 
     method public void scaleFonts(BBjWindow window!, BBjNumber scale)
@@ -230,7 +235,7 @@ class public jabberwalky
         iSurname!.setName("iSurname")
         iSurname!.setUserData(new HashMap())
         iSurname!.setFont(font!); cast(HashMap, iSurname!.getUserData()).put("prefFontSize",font!.getSize())
-        #Layout!.add( iSurname!, "wrap" )
+        #Layout!.add( iSurname!, "" )
         
         declare BBjStaticText lAddress!
         lAddress! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidAddress))+lwpad,font_height+lhpad,str(tx!.get(tidAddress)))
@@ -246,6 +251,8 @@ class public jabberwalky
         iAddress!.setUserData(new HashMap())
         iAddress!.setFont(font!); cast(HashMap, iAddress!.getUserData()).put("prefFontSize",font!.getSize())
         #Layout!.add( iAddress!, "spanx, wrap unrel:push" )
+        
+
 
         rem child window (pane) for the buttons to test button tags
         cWinFlags$=$00000000$
@@ -266,7 +273,7 @@ class public jabberwalky
         rem cWinFlags$=IOR(cWinFlags$,$00800000$); rem Sets the <Enter> key to behave as a <Tab> key.
         rem cWinFlags$=IOR(cWinFlags$,$01000000$); rem Draws a recessed client edge around the child window.
         rem cWinFlags$=IOR(cWinFlags$,$02000000$); rem Draws a raised edge around the child window.
-        #cWindow! = #Window!.addChildWindow(#Window!.getAvailableControlID(),0,70,#Window!.getWidth(),25,"",cWinFlags$,#SysGui!.getAvailableContext())
+        #cWindow! = #Window!.addChildWindow(#Window!.getAvailableControlID(),0,10,#Window!.getWidth(),25,"",cWinFlags$,#SysGui!.getAvailableContext())
         #cWindow!.setName("cWindow")
         #cWindow!.setUserData(new HashMap())
         #cWindow!.setFont(font!); cast(HashMap, #cWindow!.getUserData()).put("prefFontSize",font!.getSize())
@@ -305,9 +312,17 @@ class public jabberwalky
         #cLayout!.add( bHelp2!, "sg,tag help2" )
 
         #cLayout!.layoutChildren()
-                
+
+        ?#cWindow!.getHeight()
+        
+
         #Layout!.add( #cWindow!, "south")
         #Layout!.layoutChildren()
+        
+        ? #Window!.getHeight()
+        ? #Window!.getWidth()
+
+        
     methodend
     
 classend

@@ -24,15 +24,20 @@ use com.basis.bbj.layout.BBContainer
 use com.basis.bbj.layout.BBComponentWrapper
 use com.basis.bbj.layout.BBContainerWrapper
 
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
+
 rem /**
 rem * Manages components with MigLayout added via add(component, CC)
 rem * 
 rem * @author Adapted from JavaFX to BBj by Ralph Lance
 rem */
-class public BBMigPane
+class public BBMigPane implements UIWidget
+
 
     field private BBContainer container!
     field private BBContainerWrapper containerWrapper!
+    field private BBjWindow canvas!
     field private boolean iDebug! = BBjAPI().FALSE
     field private Grid migGrid!
     field private boolean valid! = BBjAPI().FALSE
@@ -54,6 +59,7 @@ class public BBMigPane
 	rem */
 	method public BBMigPane( BBjWindow window! )
 	    #container! = new BBContainer(window!)
+	    #canvas!=window!
 		#construct()
 	methodend
 
@@ -63,6 +69,7 @@ class public BBMigPane
 	rem */
 	method public BBMigPane( BBjWindow window!, LC layoutConstraints! )
         #container! = new BBContainer(window!)
+        #canvas!=window!
 		#setLayoutConstraints( layoutConstraints! )
 		#construct()
 	methodend
@@ -73,6 +80,7 @@ class public BBMigPane
 	rem */
 	method public BBMigPane( BBjWindow window!, LC layoutConstraints!, AC colConstraints! )
         #container! = new BBContainer(window!)
+        #canvas!=window!
 		#setLayoutConstraints( layoutConstraints! )
 		#setColumnConstraints( colConstraints! )
 		#construct()
@@ -84,6 +92,7 @@ class public BBMigPane
 	rem */
 	method public BBMigPane( BBjWindow window!, LC layoutConstraints!, AC colConstraints!, AC rowConstraints! )
         #container! = new BBContainer(window!)
+        #canvas!=window!
 		#setLayoutConstraints( layoutConstraints! )
 		#setColumnConstraints( colConstraints! )
 		#setRowConstraints( rowConstraints! )
@@ -96,6 +105,7 @@ class public BBMigPane
 	rem */
 	method public BBMigPane( BBjWindow window!, String layoutConstraints! )
         #container! = new BBContainer(window!)
+        #canvas!=window!
 		#setLayoutConstraints( ConstraintParser.parseLayoutConstraint( ConstraintParser.prepare( layoutConstraints! ) ) )
 		#construct()
 	methodend
@@ -106,6 +116,7 @@ class public BBMigPane
 	rem */
 	method public BBMigPane( BBjWindow window!, String layoutConstraints!, String colConstraints! )
         #container! = new BBContainer(window!)
+        #canvas!=window!
 		#setLayoutConstraints( ConstraintParser.parseLayoutConstraint( ConstraintParser.prepare( layoutConstraints! ) ) )
 		#setColumnConstraints( ConstraintParser.parseColumnConstraints( ConstraintParser.prepare( colConstraints! ) ) )
 		#construct()
@@ -117,6 +128,7 @@ class public BBMigPane
 	rem */
 	method public BBMigPane( BBjWindow window!, String layoutConstraints!, String colConstraints!, String rowConstraints! )
         #container! = new BBContainer(window!)
+        #canvas!=window!
 		#setLayoutConstraints( ConstraintParser.parseLayoutConstraint( ConstraintParser.prepare( layoutConstraints! ) ) )
 		#setColumnConstraints( ConstraintParser.parseColumnConstraints( ConstraintParser.prepare( colConstraints! ) ) )
 		#setRowConstraints( ConstraintParser.parseRowConstraints( ConstraintParser.prepare( rowConstraints! ) ) )
@@ -380,5 +392,49 @@ class public BBMigPane
         
 	rem ======================================================
 	rem DEBUG - TODO
+	
+	
+	
+rem methods of interface UIWidget
+    
+    method public void setLocation(BBjNumber x, BBjNumber y)
+    
+        #canvas!.setLocation(x,y)
+        
+    methodend
+
+    method public void setSize(BBjNumber w, BBjNumber h)
+        #canvas!.setSize(w,h)
+    methodend
+
+    method public BBjNumber getX()
+        methodret #canvas!.getX()
+    methodend
+
+    method public BBjNumber getY()
+        methodret #canvas!.getY()
+    methodend
+
+    method public BBjNumber getWidth()
+        methodret #canvas!.getWidth()
+    methodend
+
+    method public BBjNumber getHeight()
+        methodret #canvas!.getHeight()
+    methodend
+
+    method public void setVisible(BBjNumber visible)
+        #canvas!.setVisible(visible)
+    methodend
+
+    method public BBjNumber isVisible()
+        methodret #canvas!.isVisible(visible)
+    methodend
+    
+    method public void destroy()
+    methodend
+    
+    method public BBjChildWindow getWnd()	
+    methodend
     
 classend

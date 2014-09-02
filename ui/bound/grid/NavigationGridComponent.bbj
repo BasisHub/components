@@ -1170,9 +1170,9 @@ REM         #pullRowsToGrid(p)
     methodend
 
 
-    method public void setSize(BBjNumber width, BBjNumber height)
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
 
-        #super!.setSize(width,height)
+        #super!.setSize(w!,h!)
 
         #setGridPosition()
         #InfoText!.setLocation(#Grid!.getWidth()-#InfoText!.getWidth()-4,#super!.getH()-30)

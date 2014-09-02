@@ -85,13 +85,13 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget
 
     methodend
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
 
-        #super!.setSize(w,h)
+        #super!.setSize(w!,h!)
 
-        #BrowserWidget!.setSize(w-20,h-50)
-        #ProgressBar!.setLocation(int(w/4*3),10)
-        #ProgressBar!.setSize(int(w/4),20)
+        #BrowserWidget!.setSize(w!-20,h!-50)
+        #ProgressBar!.setLocation(int(w!/4*3),10)
+        #ProgressBar!.setSize(int(w!/4),20)
 
     methodend
 

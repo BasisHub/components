@@ -55,11 +55,11 @@ class public TouchGridComponent extends UIComponent implements UIWidget
 
     methodend
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
 
-        #super!.setSize(w,h)
-        #TouchGrid!.setSize(w,h)
-        #ResultInfo!.setSize(w-20,40)
+        #super!.setSize(w!,h!)
+        #TouchGrid!.setSize(w!,h!)
+        #ResultInfo!.setSize(w!-20,40)
 
     methodend
 

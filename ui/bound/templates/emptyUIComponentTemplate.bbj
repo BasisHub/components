@@ -52,9 +52,9 @@ class public emptyUIComponent extends UIComponent
 
     methodend
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
 
-        #super!.setSize(w,h)
+        #super!.setSize(w!,h!)
 
     methodend
 

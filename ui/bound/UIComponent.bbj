@@ -314,11 +314,11 @@ class public UIComponent
     rem * @param BBjNumber width: new width
     rem * @param BBjNumber height: new height
     rem */
-    method public void setSize(BBjNumber width, BBjNumber height)
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
 
-        #Wnd!.setSize(width,height)
-        #W=width
-        #H=height
+        #Wnd!.setSize(w!,h!)
+        #W=w!
+        #H=h!
 
     methodend
 

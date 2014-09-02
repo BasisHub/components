@@ -1,0 +1,116 @@
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/ui/bound/UIComponent.bbj::UIComponent
+use ::components/ui/layout/BBMigPane.bbj::BBMigPane
+use ::components/db/DataRow.bbj::DataRow
+use ::components/db/DataRow.bbj::DataField
+
+use net.miginfocom.layout.PlatformDefaults
+
+class public ControlWidget extends UIComponent  implements BBjControl 
+ 
+    
+    field protected BBjControl    Ctrl!
+    field protected BBjString     BindField$
+    field protected BBjString     BindClass$
+    field protected BBjNumber     Length
+    
+    field protected static BBjNumber charw = BBjAPI().getSysGui().getMeasure("W") +2
+
+    method protected ControlWidget(BBjChildWindow cwCanvas!)
+        #super!(cwCanvas!)
+    methodend
+    
+    method public void setBindField(BBjString field$)
+        #BindField$=field$
+    methodend
+
+    method public void setBindClass(BBjString class$)
+        #BindClass$=class$
+    methodend
+    
+    method public void setLength(BBjNumber length)
+        #Length=length
+        #setSize(30+length*#charw,#getHeight())
+    methodend 
+    
+    method public void getLength(BBjNumber length)
+        methodret #getLength()
+    methodend 
+    
+    method public void setText(BBjString text$)
+        #getCtrl().setText(text$)
+    methodend
+    
+    method public void setName(BBjString text$)
+        #getCtrl().setName(text$)
+    methodend    
+ 
+     method public void setUserData(Object ud!)
+        #getCtrl().setUserData(ud!)
+    methodend  
+    
+     method public Object getUserData()
+        methodret #getCtrl().getUserData()
+    methodend      
+
+     method public void setFont(BBjFont font!)
+        #getCtrl().setFont(font!)
+    methodend  
+    
+     method public void setBackColor(BBjColor col!)
+        #getCtrl().setBackColor(col!)
+    methodend      
+           
+    method public BBjNumber getWidth()
+        methodret #getWnd().getWidth()
+    methodend
+
+    method public BBjNumber getHeight()
+        methodret #getWnd().getHeight()
+    methodend
+
+    method public Boolean isVisible()
+        methodret #getWnd().isVisible()
+    methodend
+
+    method public String getName()
+        methodret #getCtrl().getName()
+    methodend
+    
+    method public void setLocation(com.basis.util.common.BBjNumber x!, com.basis.util.common.BBjNumber y!)
+        #getWnd().setLocation(x!,y!)
+        
+    methodend
+
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
+        #getWnd().setSize(w!,h!) 
+        #getCtrl().setSize(w!-30,h!) 
+    methodend
+
+
+    rem /**
+    rem * Method onSelectionChange:
+    rem * This method is called from the business component when the selection changed
+    rem */
+    method public void onSelectionChange()
+
+        #displayData()
+
+    methodend
+    
+    rem override for widgets like Date or so
+   method public void displayData()
+            
+            if #getBC().getSelection().size()=1 then
+                sel=#getBC().getSelection().getItem(i)
+                r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                text$     = r!.getFieldAsString(#BindField$)
+                
+                #Ctrl!.setText(text$)
+            else
+                #Ctrl!.setText("<mult>")
+            fi
+
+    methodend    
+
+classend

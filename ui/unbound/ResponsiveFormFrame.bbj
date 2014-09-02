@@ -45,13 +45,13 @@ class public ResponsiveFormFrame implements UIWidget
         #CwCanvas!.setLocation(x,y)
     methodend
     
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
     
         if h<1 then
             h=999999
         fi
         
-        if #W<>w then
+        if #W<>num(w!) then
             update=1
 
             rem notify nested form frames:
@@ -61,7 +61,7 @@ class public ResponsiveFormFrame implements UIWidget
                 dummy$=str(widget!)
                 if pos("ResponsiveFormFrame"=dummy$)>0 then
                     o=widget!.getHeight()
-                    widget!.setSize(max(#InnerWidth-30,w-30),widget!.getHeight())
+                    widget!.setSize(max(#InnerWidth-30,w!-30),widget!.getHeight())
                     n=widget!.getHeight()
                     if o<>n then
                         #CurCols=-1
@@ -70,8 +70,8 @@ class public ResponsiveFormFrame implements UIWidget
             wend
 
         fi
-        #W=w
-        #MaxH=h
+        #W=w!
+        #MaxH=h!
         
         if update then
             #updateUI()
@@ -83,7 +83,7 @@ class public ResponsiveFormFrame implements UIWidget
     
     
     method public void setNumCols(BBjNumber cols)
-        #Cols = cols
+        #Cols = max(1,cols)
         #updateUI()
     methodend
     
@@ -226,7 +226,6 @@ f1!.addWidget(w!)
 
 
 f2! = new ResponsiveFormFrame(f1!.getWnd(),101,0,301,1024,0)
- 
 f2!.setNumCols(3)
 for i=1 to 10
     w!=new TestWidget(f2!.getWnd(),100+i)
