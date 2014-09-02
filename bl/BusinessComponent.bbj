@@ -1165,7 +1165,7 @@ class public BusinessComponent
 
         guid$ = java.util.UUID.randomUUID().toString()
         #ForeignKeyPointerController!.registerDriver(#this!,guid$,fieldname$)
-        #ForeignKeyPointerController!.registerTarget(bc!,guid$,fkfield$)
+        #ForeignKeyPointerController!.registerTarget(bc!,guid$,fkfield$,1)
 
     methodend
 
@@ -1414,5 +1414,11 @@ class public BusinessComponent
     method public BBjString getPrimaryTable()
         methodret ""
     methodend
+
+    method public java.util.HashMap getForeignKeyPointerBcList()
+        map! = #ForeignKeyPointerBcList!.clone()
+        methodret   map!
+    methodend
+
 
 classend
