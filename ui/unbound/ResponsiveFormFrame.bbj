@@ -36,7 +36,7 @@ class public ResponsiveFormFrame implements UIWidget
         #MaxH=h
         #H=h   
         #CwCanvas! = wnd!.addChildWindow(id,#X,#Y,#W,#H,"",$0000080C$,BBjAPI().getSysGui().getAvailableContext())
-        #CwCanvas!.setBackColor(BBjAPI().makeColor("YELLOW"))
+        
     methodend
     
     method public void setLocation(BBjNumber x, BBjNumber y)
