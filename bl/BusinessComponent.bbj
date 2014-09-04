@@ -122,7 +122,9 @@ class public BusinessComponent
     rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
 
-        #DataProvider!.prepareResultSet(first, last)
+        if #DataProvider!<>null() then
+            #DataProvider!.prepareResultSet(first, last)
+        fi
 
     methodend
 
@@ -1303,6 +1305,8 @@ class public BusinessComponent
     rem * @return BBjVector primaryKeySegments!: a BBjVector with the primary key segments
     rem */
     method public BBjVector getPrimaryKeySegments()
+
+        methodret new BBjVector()
 
     methodend
 
