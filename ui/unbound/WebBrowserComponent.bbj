@@ -87,20 +87,20 @@ class public WebBrowserComponent implements UIWidget
 
     methodend
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
-        #Wnd!.setSize(w,h)
+        #Wnd!.setSize(w!,h!)
 
-        #W = w
-        #H = h
+        #W = w!
+        #H = h!
 
         if  #HtmlView!<>null() then
             rem BUI
-            #HtmlView!.setSize(w,h)
+            #HtmlView!.setSize(w!,h!)
         else
 
             if #Wrapper! <> null() then
-                #Wrapper!.setSize(w,h)
+                #Wrapper!.setSize(w!,h!)
             endif
 
         endif

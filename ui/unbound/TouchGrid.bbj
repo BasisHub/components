@@ -39,10 +39,10 @@ class public TouchGrid implements UIWidget
         #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
     methodend
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
-        #CwCanvas!.setSize(w,h)
-        #LbList!.setSize(w,h)
+        #CwCanvas!.setSize(w!,h!)
+        #LbList!.setSize(w!,h!)
         
     methodend
 

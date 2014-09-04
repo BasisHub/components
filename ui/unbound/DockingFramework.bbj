@@ -251,12 +251,12 @@ class public FrameSet
     methodend
 
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
         BBjAPI().removeTimer("DELAYEDRESIZE",err=*next)
 
-        #NewWidth = w
-        #NewHeight = h
+        #NewWidth = w!
+        #NewHeight = h!
 
         BBjAPI().createTimer("DELAYEDRESIZE",1,#this!,"delayedResize")
 
@@ -369,17 +369,17 @@ class public FrameCell implements FrameElement
     methodend
 
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
-        #Wnd!.setSize(w-20,h-20)
+        #Wnd!.setSize(w!-20,h!-20)
 
         if #UIWidget! <> null() then
-            #UIWidget!.setSize(w-20,h-20)
+            #UIWidget!.setSize(w!-20,h!-20)
         fi
 
 
-        #W=w
-        #H=h
+        #W=w!
+        #H=h!
 
         #Wnd!.getControl(10,err=*next).setText(#Title$+" X="+str(#X)+" Y="+str(#Y)+" W="+str(#W)+" H="+str(#H))
 
@@ -503,10 +503,10 @@ class public FrameList implements FrameElement
 
     methodend
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
-        #H = h
-        #W = w
+        #H = h!
+        #W = w!
 
     methodend
 

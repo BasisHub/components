@@ -235,7 +235,7 @@ class public jabberwalky
         iSurname!.setName("iSurname")
         iSurname!.setUserData(new HashMap())
         iSurname!.setFont(font!); cast(HashMap, iSurname!.getUserData()).put("prefFontSize",font!.getSize())
-        #Layout!.add( iSurname!, "" )
+        #Layout!.add( iSurname!, "wrap" )
         
         declare BBjStaticText lAddress!
         lAddress! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidAddress))+lwpad,font_height+lhpad,str(tx!.get(tidAddress)))

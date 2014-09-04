@@ -149,9 +149,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                             colc$= #getNodeValue(paneNode!,"colconstraints")
                             rowc$= #getNodeValue(paneNode!,"rowconstraints")
                             name$= #getNodeValue(paneNode!,"name")
-                        
-                             PRINT "++Pane: ",pane+1,name$
-                            
+
                             rem create pane
                             cwCanvas! = f2!.getWnd().addChildWindow(f2!.getWnd().getAvailableControlID(),0,0,100,100,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
@@ -191,7 +189,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                                         length=0
                                         length= num(#getNodeValue(elNode!,"length"),err=*next)
                                         
-                                        layc$= #getNodeValue(elNode!,"layoutconstraints")
+                                        layc$= #getNodeValue(elNode!,"cellconstraints")
                                         typet$=type$
                                         while pos("/"=typet$)
                                             typet$=typet$(pos("/"=typet$)+1)
@@ -219,7 +217,6 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                                         el!.setBindField(bindField$)
                                         el!.setBindClass(bindClass$)
                                         cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
-        
                                         Layout!.add( el!, layc$ )
                                         PRINT "+++Element: ",element+1,name$        
                                         
@@ -238,18 +235,17 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                               
                           fi
         
+                          
                         Layout!.layoutChildren()
                         f2!.addWidget(Layout!)
-        
+                        
                             
                             
                         fi
                   next; rem pane
         
-                  rem add pane to form
+                  rem add group to form
                   #FormFrame!.addWidget(f2!)
-                  
-        
             fi
             
         next; rem group
@@ -375,7 +371,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
     rem * @param BBjNumber width: the width
     rem * @param BBjNumber height: the height
     rem */
-    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
         w=w!
         h=h!
@@ -628,38 +624,42 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
     rem */
     method public void setEditing(BBjNumber isEditing)
 
-        if isEditing=0 then
-            if #EditedRec! <> null() and #getBC().getSelection().size()=1 then
-                recno=#getBC().getSelection().getItem(0)
-                #getBC().getResultSet().setItem(recno,null())
-                #getBC().prepareResultSet(recno,recno)
-                #getBC().refresh(0)
-            fi
-
-            #this!.displayData()
-            #getWnd().focus()
-
-            rem workaround for BUI to drag focus away from input field
-            rem https://bugzilla.basis.com/show_bug.cgi?id=25084
-
-            if info(3,6)="5" then
-                tmp! = #getWnd().addEditBox(#getWnd().getAvailableControlID(),10,10,10,10,"")
-                tmp!.focus()
-                tmp!.destroy()
-            fi
-
-            #EditedRec! = null()
-            #EditedFields! = null()
-
-            if #RestoreControllerFilter! <> null() then
-               #getBC().setQueryFilter(#RestoreControllerFilter!)
-               #RestoreControllerFilter! = null()
-            fi
-            #emptyForm()
-            #newRecord()
-        fi
+REM         if isEditing=0 then
+REM             if #EditedRec! <> null() and #getBC().getSelection().size()=1 then
+REM                 recno=#getBC().getSelection().getItem(0)
+REM                 #getBC().getResultSet().setItem(recno,null())
+REM                 #getBC().prepareResultSet(recno,recno)
+REM                 #getBC().refresh(0)
+REM             fi
+REM 
+REM             #this!.displayData()
+REM             #getWnd().focus()
+REM 
+REM             rem workaround for BUI to drag focus away from input field
+REM             rem https://bugzilla.basis.com/show_bug.cgi?id=25084
+REM 
+REM             if info(3,6)="5" then
+REM                 tmp! = #getWnd().addEditBox(#getWnd().getAvailableControlID(),10,10,10,10,"")
+REM                 tmp!.focus()
+REM                 tmp!.destroy()
+REM             fi
+REM 
+REM             #EditedRec! = null()
+REM             #EditedFields! = null()
+REM 
+REM             if #RestoreControllerFilter! <> null() then
+REM                #getBC().setQueryFilter(#RestoreControllerFilter!)
+REM                #RestoreControllerFilter! = null()
+REM             fi
+REM             #emptyForm()
+REM             #newRecord()
+REM         fi
 
         rem #enableControls(isEditing,0)
+
+        if isEditing=0 then
+            #getWnd().focus()
+        fi
 
     methodend
 

@@ -274,7 +274,6 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
         fi
 
         #EditedFields!.put(ev!.getControl().getName(),null())
-        print ev!.getControl().getName(),"-> null()"
         rem put null() to mark that the field has gained the focus. lostFocus will then asynchronously collect the data
 
     methodend
@@ -409,15 +408,15 @@ class public SimpleFormComponent extends UIComponent implements UIWidget
     rem * @param BBjNumber width: the width
     rem * @param BBjNumber height: the height
     rem */
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
-        #super!.setSize(w,h)
+        #super!.setSize(w!,h!)
 
         if #ToolbarWnd! <> null() AND #this!.getShowToolBar() then
-            #ToolbarWnd!.setSize(w,UIComponent.getToolbarHeight())
-            #FormWnd!.setSize(w, h-UIComponent.getToolbarHeight())
+            #ToolbarWnd!.setSize(w!,UIComponent.getToolbarHeight())
+            #FormWnd!.setSize(w!, h!-UIComponent.getToolbarHeight())
         else
-            #FormWnd!.setSize(w, h)
+            #FormWnd!.setSize(w!, h!)
         fi
 
     methodend

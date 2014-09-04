@@ -169,8 +169,8 @@ class public testWidget implements UIWidget
         #Cw!.getControl(101).setText(str(#Cw!.getWidth())+","+str(#Cw!.getHeight()))
     methodend
     
-    method public void setSize(BBjNumber w, BBjNumber h)
-        #Cw!.setSize(w,h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
+        #Cw!.setSize(w!,h!)
         #render()
     methodend
 

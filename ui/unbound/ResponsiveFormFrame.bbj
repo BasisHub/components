@@ -45,7 +45,7 @@ class public ResponsiveFormFrame implements UIWidget
         #CwCanvas!.setLocation(x,y)
     methodend
     
-    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
     
         if h<1 then
             h=999999

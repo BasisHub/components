@@ -2,7 +2,7 @@ interface public UIWidget
 
     method public void setLocation(BBjNumber x, BBjNumber y)
 
-    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
     method public BBjNumber getX()
 

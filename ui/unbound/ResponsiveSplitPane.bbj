@@ -49,13 +49,13 @@ class public ResponsiveSplitPane
         #activateLeft()
     methodend
 
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
     
-        #H = h
-        #W = w
-        #CwCanvas!.setSize(w,h)
+        #H = h!
+        #W = w!
+        #CwCanvas!.setSize(w!,h!)
    
-        if w >2*#PreferredLeftSize or h >900 then
+        if w! >2*#PreferredLeftSize or h! >900 then
             #DisplayMode = 0   ; rem tablet
         else
             if #DisplayMode <>2 then
@@ -64,15 +64,15 @@ class public ResponsiveSplitPane
         fi
         switch #DisplayMode
             case 0
-              #CwLeft!.setSize(#PreferredLeftSize,h)
+              #CwLeft!.setSize(#PreferredLeftSize,h!)
               if #UiwLeft!<>null() then
-                #UiwLeft!.setSize(#PreferredLeftSize,h)
+                #UiwLeft!.setSize(#PreferredLeftSize,h!)
               fi                 
               #CwLeft!.setLocation(0,0)
               #CwLeft!.setVisible(1)              
-              #CwRight!.setSize(w-#PreferredLeftSize,h)
+              #CwRight!.setSize(w!-#PreferredLeftSize,h!)
               if #UiwRight!<>null() then
-                #UiwRight!.setSize(w-#PreferredLeftSize,h)
+                #UiwRight!.setSize(w!-#PreferredLeftSize,h!)
               fi              
               #CwRight!.setLocation(#PreferredLeftSize+1,0)
               #CwRight!.setVisible(1)

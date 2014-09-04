@@ -13,6 +13,8 @@ class public ControlWidget extends UIComponent  implements BBjControl
     field protected BBjString     BindField$
     field protected BBjString     BindClass$
     field protected BBjNumber     Length
+    field protected BBjNumber     Edited = 0 
+    field protected BBjNumber     Focus = 0        
     
     field protected static BBjNumber charw = BBjAPI().getSysGui().getMeasure("W") +2
 
@@ -26,6 +28,20 @@ class public ControlWidget extends UIComponent  implements BBjControl
 
     method public void setBindClass(BBjString class$)
         #BindClass$=class$
+    methodend
+    
+    method protected void setCtrl (BBjControl ctrl!)
+
+        #Ctrl!= ctrl!
+        #Ctrl!.setCallback(BBjAPI.ON_GAINED_FOCUS,#this!,"onCtrlGainedFocus",err=*next)
+        #Ctrl!.setCallback(BBjAPI.ON_LOST_FOCUS,#this!,"onCtrlLostFocus",err=*next)
+REM         #Ctrl!.setCallback(BBjAPI.ON_EDIT_MODIFY,#this!,"onCtrlEditModify",err=*next)
+
+REM PRIM KEY?
+REM                     if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and ctrl!.getControlType() <> 17 and ctrl!.getControlType() <> 19 then
+REM                         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onCtrlInputKeypress",err=*next)
+REM                     fi
+    
     methodend
     
     method public void setLength(BBjNumber length)
@@ -77,12 +93,12 @@ class public ControlWidget extends UIComponent  implements BBjControl
         methodret #getCtrl().getName()
     methodend
     
-    method public void setLocation(com.basis.util.common.BBjNumber x!, com.basis.util.common.BBjNumber y!)
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
         #getWnd().setLocation(x!,y!)
         
     methodend
 
-    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
         #getWnd().setSize(w!,h!) 
         #getCtrl().setSize(w!-30,h!) 
     methodend
@@ -108,9 +124,106 @@ class public ControlWidget extends UIComponent  implements BBjControl
                 
                 #Ctrl!.setText(text$)
             else
-                #Ctrl!.setText("<mult>")
+                #Ctrl!.setText("")
             fi
 
+            #Edited = 0
+
     methodend    
+
+
+   method public void onCtrlGainedFocus(BBjGainedFocusEvent ev!)
+
+        if #getBC().getSelection().size() then
+            recno=#getBC().getSelection().getItem(0)
+            #getBC().setEditedRecord(recno)
+        fi
+        
+        #Edited = 1
+        #Focus = 1
+
+REM         if #EditedRec! = null() and #Rec! <> null() then
+REM             #EditedRec! = cast(DataRow,#Rec!.clone())
+REM         fi
+REM 
+REM         if #EditedFields! = null() then
+REM             #EditedFields! = new java.util.HashMap()
+REM         fi
+REM 
+REM         #EditedFields!.put(ev!.getControl().getName(),null())
+REM         rem put null() to mark that the field has gained the focus. lostFocus will then asynchronously collect the data
+
+    methodend
+
+
+REM     method public void onCtrlInputKeypress(BBjInputKeypressEvent ev!)
+REM 
+REM         if ev!.getControl().getText()>"" and (ev!.getKeyCode() = 13 or ev!.getKeyCode() = 9) then
+REM             #searchRecord()
+REM         fi
+REM 
+REM     methodend
+
+
+    method public void onCtrlLostFocus(BBjLostFocusEvent ev!)
+
+        #Focus = 0
+
+REM         ctrl_name$=ev!.getControl().getName()
+REM 
+REM         if #EditedFields! <> null() and #ControlList!.get(ctrl_name$)<>null() then
+REM             v$=ev!.getText()
+REM 
+REM             if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and v$="" then
+REM                 methodret
+REM                 rem don't validate primary key fields as long as they're empty
+REM             fi
+REM 
+REM             if #EditedRec! = null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
+REM                 #EditedFields!.put(ctrl_name$,v$)
+REM 
+REM                 validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
+REM                 #this!.markValidationErrors()
+REM             else
+REM                 #EditedFields!.remove(ctrl_name$)
+REM                 print ctrl_name$,"-> deleted"
+REM             fi
+REM         fi
+REM 
+    methodend
+REM 
+REM 
+REM     method public void onCtrlEditModify(BBjEditModifyEvent ev!)
+REM 
+REM         text$=ev!.getText()
+REM         #getBC().broadcastEdit(ev!.getControl().getName(),text$,err=*next)
+REM 
+REM     methodend
+
+    rem /**
+    rem * Method setEditing:
+    rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
+    rem * @param BBjNumber isEditing: -1 = i
+    rem */
+    method public void setEditing(BBjNumber isEditing)
+    
+        if isEditing=0 then
+            #Ctrl!.setText("")
+            #Edited=0
+        fi
+    
+    methodend
+
+    rem /**
+    rem * Method restoreEditedField:
+    rem * invoked from BusinessComponent, broadcast that the user wants to restore the field currently being edited
+    rem */
+    method public void restoreEditedField()
+
+        if #Focus then
+            #displayData()
+        fi
+        
+    methodend
 
 classend

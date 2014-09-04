@@ -111,7 +111,7 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
 
     methodend
 
-    method public void setSize(com.basis.util.common.BBjNumber w!, com.basis.util.common.BBjNumber h!)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
         #super!.setSize(w!,h!)
 

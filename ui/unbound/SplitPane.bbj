@@ -67,14 +67,14 @@ rem        #Split!     = #CwCanvas!.addChildWindow(200,0,#SplitPos-2,w,4,$$,$000
             
     methodend
     
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
         BBjAPI().removeTimer("delay",err=*next)
         
         ratio = #SplitPos/#H
     
-        #H = h
-        #W = w
+        #H = h!
+        #W = w!
         #SplitPos = int(#H*ratio)
         
         

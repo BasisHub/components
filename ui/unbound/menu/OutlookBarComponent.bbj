@@ -203,22 +203,22 @@ REM             wend
     
     methodend
     
-    method public void setSize(BBjNumber w, BBjNumber h)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
 
-        #Frame!.setSize(w,h)
+        #Frame!.setSize(w!,h!)
         
 REM         #Buttons! 
 REM         #SubButtons! 
 REM         #ChildFrames! 
         level1! = #Menu!.getChildren(null())
-        panelHeight = h - level1!.size() * 25
+        panelHeight = h! - level1!.size() * 25
 
-        if #W <> w then
+        if #W <> w! then
         
             j=0
             while j<#Buttons!.size()
                 btn! = #Buttons!.getItem(j)
-                btn!.setSize(w,25)
+                btn!.setSize(w!,25)
                 j=j+1
             wend
             
@@ -227,14 +227,14 @@ REM         #ChildFrames!
         j=0
         while j<#ChildFrames!.size()
             cf! = #ChildFrames!.getItem(j)
-            cf!.setSize(w,panelHeight)
-            cf!.getControl(100).setSize(w,panelHeight)
+            cf!.setSize(w!,panelHeight)
+            cf!.getControl(100).setSize(w!,panelHeight)
             j=j+1
         wend
 
          
-        #W=w
-        #H=h
+        #W=w!
+        #H=h!
         
         c=#Buttons!.size()
         for i=0 to c-1  

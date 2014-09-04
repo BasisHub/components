@@ -29,11 +29,11 @@ class public TestWidget implements UIWidget
         #CwCanvas!.setLocation(x,y)
     methodend
     
-    method public void setSize(BBjNumber w, BBjNumber h)
-        #W=w
-        #H=h
-        #CwCanvas!.setSize(w,h)
-        #CwCanvas!.getControl(100).setSize(w-10,h-10)
+    method public void setSize(BBjNumber w!, BBjNumber h!)
+        #W=w!
+        #H=h!
+        #CwCanvas!.setSize(w!,h!)
+        #CwCanvas!.getControl(100).setSize(w!-10,h!-10)
         
     methodend
     
