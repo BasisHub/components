@@ -156,13 +156,18 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
 
     method public void onBtnFirst(BBjEvent ev!)
 
+
         if #getBC().canSelectionChange(0,#this!) then
 
             v!=new BBjVector()
             v!.addItem(0)
             #getBC().setSelection(v!)
-
+            
+            
         fi
+        
+        
+
 
     methodend
 

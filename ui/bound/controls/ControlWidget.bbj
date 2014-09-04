@@ -116,8 +116,9 @@ REM                     fi
     
     rem override for widgets like Date or so
    method public void displayData()
-            
+
             if #getBC().getSelection().size()=1 then
+                #getBC().prepareResultSet(0,0)
                 sel=#getBC().getSelection().getItem(i)
                 r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                 text$     = r!.getFieldAsString(#BindField$)
@@ -225,5 +226,43 @@ REM     methodend
         fi
         
     methodend
+
+    rem /**
+    rem * Method isEdited:
+    rem * @return BBjNumber isEdited: 1 if the widget contains unsaved alternations 
+    rem */
+    method public BBjNumber isEdited()
+        methodret #Edited
+    methodend
+    
+    rem /**
+    rem * Method prepareSave:
+    rem * add the field's unsaved contents to the DataRow object
+    rem  * 
+    rem  * override to handle special formats, like date!!!
+    rem  * 
+    rem * @param DataRow row!: the row to collect the changes
+    rem * @return DataRow: the row with the changes being added
+    rem */
+    method public DataRow prepareSave(DataRow r!)
+    
+        if #Edited then
+            r!.setFieldValue(#BindField$,#Ctrl!.getText())
+        fi
+        
+        methodret r!
+        
+    methodend  
+    
+    rem /**
+    rem * Method refresh:
+    rem * refresh the displayed data
+    rem * @param BusinessComponent bc!: the business component
+    rem */
+    method public void refresh(BBjNumber resetFilter)
+
+        #displayData()
+
+    methodend    
 
 classend

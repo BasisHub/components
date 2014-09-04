@@ -55,7 +55,13 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
     field private java.util.HashMap RestoreControllerFilter!
 
     field private BBjNumber ReadOnly
-
+    
+    
+    
+    rem new flexiform variables
+    
+    field private BBjVector ElementList!        = new BBjVector()
+    field private java.util.HashMap BCList!     = new java.util.HashMap()
 
     rem /**
     rem * Constructor FlexiFormComponent
@@ -218,6 +224,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                                         el!.setBindClass(bindClass$)
                                         cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
                                         Layout!.add( el!, layc$ )
+                                        
                                         PRINT "+++Element: ",element+1,name$        
                                         
                                         if bindClass$>"" then
@@ -450,6 +457,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                 while it!.hasNext()
                   el! = it!.next()
                   el!.setBC(bc!)
+                  #BCList!.put(bindClass$,bc!)
                 wend
             fi
             
@@ -674,6 +682,50 @@ REM         fi
     method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
 
         methodret editedFields!
+
+    methodend
+
+    rem /**
+    rem * Method newRecord:
+    rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
+    rem */
+    method public void newRecord()
+        #getWnd().focus() 
+    methodend
+
+    rem /**
+    rem * Method saveRecord:
+    rem * invoked from BusinessComponent, broadcast that the user wants to save the record
+    rem * @return BBjNumber: 0 = record saved without errors, 1 = validation errors
+    rem */
+    method public BBjNumber saveRecord()
+
+
+        DataRows!     = new java.util.HashMap()
+        ks! = #BCList!.keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            bclass$ = it!.next()
+            bc! = #BCList!.get(bclass$)
+            r! = new DataRow()
+            DataRows!.put(bclass$,r!)
+            
+            widgets! = #ControlsByBcClass!.get(bclass$)
+            it! = widgets!.iterator()
+            while it!.hasNext()
+                widget! = it!.next()
+                if !widget!.willDoOwnSave() then
+                    r! = widget!.prepareSave(r!)
+                fi
+            wend
+            
+            bc!.saveRecord(bc!.getEditingRecNo(),r!)
+            bc!.clearValidationErrors()
+            bc!.clearFieldValidationErrors()
+            
+        wend
+        
+        methodret 0
 
     methodend
 

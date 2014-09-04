@@ -773,4 +773,43 @@ class public UIComponent
         methodret h
     methodend 
 
+    rem methods for data binding 
+
+    rem /**
+    rem * Method isEdited:
+    rem * @return BBjNumber isEdited: 1 if the widget contains unsaved alternations 
+    rem */
+    method public BBjNumber isEdited()
+        methodret 0
+    methodend
+    
+    rem /**
+    rem * Method prepareSave:
+    rem * add the field's unsaved contents to the DataRow object
+    rem * @param DataRow row!: the row to collect the changes
+    rem * @return DataRow: the row with the changes being added
+    rem */
+    method public DataRow prepareSave(DataRow r!)
+    methodend     
+    
+    rem /**
+    rem * Method willDoOwnSave:
+    rem * @return BBjNumber willDoOwnSave: 1 if the widget has its own provisions to update the database
+    rem */
+    method public BBjNumber willDoOwnSave()
+        methodret 0
+    methodend
+    
+    rem /**
+    rem * Method save:
+    rem * perform own save inside the widget
+    rem * @return BBjNumber: 0 = record saved without errors, 1 = validation errors 
+    rem */
+    method public BBjNumber save()
+        methodret 0
+    methodend
+    
+   
+    
+
 classend
