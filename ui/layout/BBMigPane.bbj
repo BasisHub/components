@@ -434,7 +434,8 @@ rem methods of interface UIWidget
     method public void destroy()
     methodend
     
-    method public BBjChildWindow getWnd()	
+    method public BBjChildWindow getWnd()
+    	methodret #canvas!
     methodend
     
 classend

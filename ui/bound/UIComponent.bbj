@@ -172,7 +172,7 @@ class public UIComponent
             #H = h
         fi
 
-        #Wnd!=#ParentWnd!.addChildWindow(id,#X,#Y,#W,#H,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #Wnd!=#ParentWnd!.addChildWindow(id,#X,#Y,#W,#H,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         #Laf!.prepareWindow(#Wnd!)
         #Wnd!.setClientEdge(0)
         #Wnd!.setOpaque(0)

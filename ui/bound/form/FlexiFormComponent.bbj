@@ -118,7 +118,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
         
         sg!=BBjAPI().getSysGui()
 
-        #FormWnd! = #getWnd().addChildWindow( #getWnd().getAvailableControlID(),0,0,100,100,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #FormWnd! = #getWnd().addChildWindow( #getWnd().getAvailableControlID(),0,0,100,100,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         
         #FormFrame! = new ResponsiveFormFrame(#FormWnd!,100,0,0,#FormWnd!.getWidth(),#FormWnd!.getHeight())
 
@@ -157,7 +157,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                             name$= #getNodeValue(paneNode!,"name")
 
                             rem create pane
-                            cwCanvas! = f2!.getWnd().addChildWindow(f2!.getWnd().getAvailableControlID(),0,0,100,100,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+                            cwCanvas! = f2!.getWnd().addChildWindow(f2!.getWnd().getAvailableControlID(),0,0,100,100,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
         
                             declare BBjFont font!
@@ -244,6 +244,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
         
                           
                         Layout!.layoutChildren()
+                        ? Layout!.getHeight()
                         f2!.addWidget(Layout!)
                         
                             
@@ -300,7 +301,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
 
             rem initialize the toolbar
 
-            #ToolbarWnd! = #getWnd().addChildWindow(100,0,0,#getWnd().getWidth(),0,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+            #ToolbarWnd! = #getWnd().addChildWindow(100,0,0,#getWnd().getWidth(),0,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
             #getLaf().prepareWindow(#ToolbarWnd!)
             #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
             

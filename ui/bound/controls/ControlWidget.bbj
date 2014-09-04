@@ -111,6 +111,7 @@ REM                     fi
     method public void onSelectionChange()
 
         #displayData()
+        #enableControl(1)
 
     methodend
     
@@ -129,9 +130,19 @@ REM                     fi
             fi
 
             #Edited = 0
-
+            
     methodend    
 
+
+    method protected void enableControl(BBjNumber fEditing)
+    
+            if #getBC().getPrimaryKeySegments().indexOf(#BindField$)>-1 then
+                #Ctrl!.setEnabled(!fEditing)
+            else
+                #Ctrl!.setEnabled(fEditing)
+            fi
+              
+   methodend    
 
    method public void onCtrlGainedFocus(BBjGainedFocusEvent ev!)
 
@@ -216,6 +227,14 @@ REM     methodend
     methodend
 
     rem /**
+    rem * Method newRecord:
+    rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
+    rem */
+    method public void newRecord()
+        #Ctrl!.setEnabled(1)
+    methodend
+    
+    rem /**
     rem * Method restoreEditedField:
     rem * invoked from BusinessComponent, broadcast that the user wants to restore the field currently being edited
     rem */
@@ -264,5 +283,7 @@ REM     methodend
         #displayData()
 
     methodend    
+
+
 
 classend
