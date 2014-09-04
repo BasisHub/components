@@ -501,7 +501,7 @@ REM                 fi
                     PRINT (ch)"    <type>components/ui/bound/controls/LabelWidget</type> "
                     PRINT (ch)"    <text>"+col_label$+":</text> "
                     PRINT (ch)"    <name>"+col_name$+".label</name> "
-                    PRINT (ch)"    <layoutconstraints></layoutconstraints> "
+                    PRINT (ch)"    <cellconstraints></cellconstraints> "
                     PRINT (ch)"</element>      "
                 endif
 
@@ -512,7 +512,7 @@ REM                 fi
                     PRINT (ch)"    <length>"+str(col_size)+"</length>" 
                     PRINT (ch)"    <bindClass>"+tbl_nice$+"BusinessComponent</bindClass>"
                     PRINT (ch)"    <bindField>"+col_name$+"</bindField>"
-                    PRINT (ch)"    <layoutconstraints>wrap</layoutconstraints> "
+                    PRINT (ch)"    <cellconstraints>wrap</cellconstraints> "
                     PRINT (ch)"</element>"
                 endif
 REM                 if ctrl$="INPUTE" then
