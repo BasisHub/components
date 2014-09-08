@@ -88,16 +88,17 @@ class public ResponsiveFormFrame implements UIWidget
     methodend
     
     method private void resizeCanvas()
-    
-        if #MaxH<=#H or #InnerWidth > #W then
-            #CwCanvas!.setTrack(1)
-            #CwCanvas!.setSize(max(#InnerWidth-30,#W-30),#H)
-            #CwCanvas!.setTrack(0)
-            #CwCanvas!.setSize(#W,min(#H,#MaxH))
-        else
+
+REM don't show scrollbars. Maybe we need to make this an option.    
+REM         if #MaxH<=#H or #InnerWidth > #W then
+REM             #CwCanvas!.setTrack(1)
+REM             #CwCanvas!.setSize(max(#InnerWidth-30,#W-30),#H)
+REM             #CwCanvas!.setTrack(0)
+REM             #CwCanvas!.setSize(#W,min(#H,#MaxH))
+REM         else
             #CwCanvas!.setTrack(1)
             #CwCanvas!.setSize(#W,#H)
-        fi
+REM         fi
           
     methodend
     
@@ -166,11 +167,13 @@ class public ResponsiveFormFrame implements UIWidget
             wend
             totalWidth=totalWidth+maxLocalWidth
             
+
             if totalWidth > #W and cols>1 then
                 cols=cols-1
                 continue
             fi 
-            
+
+                        
             #H = maxColHeight
             #InnerWidth = totalWidth
             #resizeCanvas()
@@ -200,7 +203,6 @@ class public ResponsiveFormFrame implements UIWidget
             wend
         fi
         
-
         
     methodend
 
