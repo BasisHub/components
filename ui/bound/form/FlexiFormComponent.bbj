@@ -383,7 +383,6 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
 
         w=w!
         h=h!
-        #super!.setSize(w,h)
 
         if #ToolbarWnd! <> null() AND #this!.getShowToolBar() then
             #ToolbarWnd!.setSize(w,UIComponent.getToolbarHeight())
@@ -393,6 +392,9 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
             #FormWnd!.setSize(w, h)
             #FormFrame!.setSize(w, h)
         fi
+
+        #super!.setSize(w,h)
+
 
     methodend
 

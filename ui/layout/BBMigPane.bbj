@@ -405,6 +405,7 @@ rem methods of interface UIWidget
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
         #canvas!.setSize(w!,h!)
+        #layoutChildren()
     methodend
 
     method public BBjNumber getX()
