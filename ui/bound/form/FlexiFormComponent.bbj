@@ -62,6 +62,8 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
     
     field private BBjVector ElementList!        = new BBjVector()
     field private java.util.HashMap BCList!     = new java.util.HashMap()
+    field private BBjNumber NewW
+    field private BBjNumber NewH
 
     rem /**
     rem * Constructor FlexiFormComponent
@@ -380,20 +382,31 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
     rem * @param BBjNumber height: the height
     rem */
     method public void setSize(BBjNumber w!, BBjNumber h!)
+        DECLARE BBjAPI api!
+        api! = BBjAPI()
+        api!.removeTimer("delayedSetSize",err=*next)
+        #NewW=w!
+        #NewH=h!
+REM         #delayedSetSize(null())
+        api!.createTimer("delayedSetSize",0.4,#this!,"delayedSetSize")
+    methodend
+    
+    method public void delayedSetSize(BBjTimerEvent ev!)
+    
 
-        w=w!
-        h=h!
+        BBjAPI().removeTimer("delayedSetSize",err=*next)
+          
 
         if #ToolbarWnd! <> null() AND #this!.getShowToolBar() then
-            #ToolbarWnd!.setSize(w,UIComponent.getToolbarHeight())
-            #FormWnd!.setSize(w, h-UIComponent.getToolbarHeight())
-            #FormFrame!.setSize(w, h-UIComponent.getToolbarHeight())
+            #ToolbarWnd!.setSize(#NewW,UIComponent.getToolbarHeight())
+            #FormWnd!.setSize(#NewW, #NewH-UIComponent.getToolbarHeight())
+            #FormFrame!.setSize(#NewW, #NewH-UIComponent.getToolbarHeight())
         else
-            #FormWnd!.setSize(w, h)
-            #FormFrame!.setSize(w, h)
+            #FormWnd!.setSize(#NewW, #NewH)
+            #FormFrame!.setSize(#NewW, #NewH)
         fi
 
-        #super!.setSize(w,h)
+        #super!.setSize(#NewW,#NewH)
 
 
     methodend

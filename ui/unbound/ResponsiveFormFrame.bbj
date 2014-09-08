@@ -47,6 +47,7 @@ class public ResponsiveFormFrame implements UIWidget
     
     method public void setSize(BBjNumber w!, BBjNumber h!)
     
+        
         if h<1 then
             h=999999
         fi
@@ -59,9 +60,10 @@ class public ResponsiveFormFrame implements UIWidget
             while it!.hasNext()
                 widget! = it!.next()
                 dummy$=str(widget!)
-                if pos("ResponsiveFormFrame"=dummy$)>0 then
+                if pos("ResponsiveFormFrame"=dummy$)>0 or pos("BBMigPane"=dummy$)>0 then
+                    REM TODO implement a better solution by introducing preferred, min & max sizes to UIWidget
                     o=widget!.getHeight()
-                    widget!.setSize(max(#InnerWidth-30,w!-30),widget!.getHeight())
+                    widget!.setSize(w!,widget!.getHeight())
                     n=widget!.getHeight()
                     if o<>n then
                         #CurCols=-1
@@ -70,7 +72,8 @@ class public ResponsiveFormFrame implements UIWidget
             wend
 
         fi
-        #W=w!
+
+        #W=num(w!)
         #MaxH=h!
         
         if update then
@@ -172,7 +175,6 @@ REM         fi
                 cols=cols-1
                 continue
             fi 
-
                         
             #H = maxColHeight
             #InnerWidth = totalWidth

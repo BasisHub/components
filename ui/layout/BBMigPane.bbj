@@ -44,6 +44,9 @@ class public BBMigPane implements UIWidget
     field private LC layoutConstraints! = null()
     field private AC columnConstraints! = null()
     field private AC rowConstraints! = null()
+    
+    field private BBjNumber PreferredWidth
+    field private BBjNumber PreferredHeight
 
 	rem ======================================================
 	rem CONSTRUCTOR
@@ -283,6 +286,12 @@ class public BBMigPane implements UIWidget
         Array.set( lBounds!, 2, new Integer(#container!.getControl().getWidth()) )
         Array.set( lBounds!, 3, new Integer(#container!.getControl().getHeight()) )
 		#migGrid!.layout( lBounds!, #getLayoutConstraints().getAlignX(), #getLayoutConstraints().getAlignY(), #iDebug!, BBjAPI().TRUE )
+		
+		if #PreferredWidth=0 and #PreferredHeight=0 then
+		    #PreferredWidth=#canvas!.getWidth()
+		    #PreferredHeight=#canvas!.getHeight()
+		fi
+		
 	methodend
 	
 	rem /**
@@ -404,8 +413,8 @@ rem methods of interface UIWidget
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
-        #canvas!.setSize(w!,h!)
-        #layoutChildren()
+        #canvas!.setSize(min(#PreferredWidth,w!),min(#PreferredHeight,h!))
+        #layoutChildren() 
     methodend
 
     method public BBjNumber getX()
@@ -437,6 +446,14 @@ rem methods of interface UIWidget
     
     method public BBjChildWindow getWnd()
     	methodret #canvas!
+    methodend
+    
+    method public BBjNumber getPreferredWidth()
+        methodret #PreferredWidth
+    methodend
+
+    method public BBjNumber getPreferredHeight()
+        methodret #PreferredHeight
     methodend
     
 classend
