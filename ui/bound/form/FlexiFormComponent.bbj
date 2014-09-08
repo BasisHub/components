@@ -157,9 +157,24 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                             colc$= #getNodeValue(paneNode!,"colconstraints")
                             rowc$= #getNodeValue(paneNode!,"rowconstraints")
                             name$= #getNodeValue(paneNode!,"name")
+                            width$= #getNodeValue(paneNode!,"width")
+                            height$= #getNodeValue(paneNode!,"height")
+                            
+                            if width$="" then
+                                width=100
+                            else
+                                width=num(width$,err=*next)
+                            fi
+
+                            if height$="" then
+                                height=100
+                            else
+                                height=num(height$,err=*next)
+                            fi
+
 
                             rem create pane
-                            cwCanvas! = f2!.getWnd().addChildWindow(f2!.getWnd().getAvailableControlID(),0,0,100,100,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+                            cwCanvas! = f2!.getWnd().addChildWindow(f2!.getWnd().getAvailableControlID(),0,0,width,height,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
         
                             declare BBjFont font!
@@ -215,12 +230,15 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                                             erase temp$                                
                                         
                                         el!.setSize(100,font_height+ihpad)
-                                        el!.setText(text$)
-                                        el!.setName(name$)
+                                        if text$>"" then
+                                            el!.setText(text$)
+                                        fi
+                                        el!.setName(name$,err=*next)
                                         el!.setUserData(new HashMap())
-                                        el!.setFont(font!)
+                                        el!.setFont(font!,err=*next)
                                         if length>0 then
-                                        el!.setLength(length)
+                                        el!.setLength(length,err=*next) 
+                                       
                                         fi
                                         el!.setBindField(bindField$)
                                         el!.setBindClass(bindClass$)
@@ -239,14 +257,18 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                                         fi
         
                                     fi
-                                
+                                    
+                               
                               next; rem element
                               
                           fi
         
                           
                         Layout!.layoutChildren()
+                        
                         ? Layout!.getHeight()
+                        
+                        
                         f2!.addWidget(Layout!)
                         
                             
@@ -406,6 +428,7 @@ REM         #delayedSetSize(null())
             #FormFrame!.setSize(#NewW, #NewH)
         fi
 
+
         #super!.setSize(#NewW,#NewH)
 
 
@@ -462,6 +485,31 @@ REM         #delayedSetSize(null())
         wend
         
         #bindBC(cl$,bc!)
+
+        ks! = #ControlsByBcClass!.keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            c$=it!.next()
+            if c$(1,1)="(" and c$(len(c$),1)=")" then
+                ctrllist! = #ControlsByBcClass!.get(c$)
+                
+                c$=c$(2,len(c$)-2)
+                bc1! = bc!.getForeignKeyPointerBcList().get(c$)
+                ? bc!.getForeignKeyPointerBcList().keySet()
+                ? c$
+                ? bc1!
+                
+                if bc1!<>null() and ctrllist!<>null() then
+                    it1! = ctrllist!.iterator()
+                    while it1!.hasNext()
+                        ctrl! = it1!.next()
+                        ctrl!.setBC(bc1!)
+                    wend
+                fi
+                
+                 
+            fi
+        wend
 
     methodend
 

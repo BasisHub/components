@@ -282,7 +282,7 @@ class public DistinctFilterPopup
 classend
 
 
-class public NavigationGridComponent extends UIComponent implements UIWidget
+class public NavigationGridComponent extends UIComponent implements UIWidget, BBjControl
 
     field private BBjButton         DropButton!
     field private BBjStandardGrid   Grid!

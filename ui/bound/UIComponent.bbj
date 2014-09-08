@@ -25,6 +25,8 @@ class public UIComponent
 
     field protected BBjChildWindow      Wnd!
     field protected BusinessComponent   BC!
+    field protected BBjString     BindField$
+    field protected BBjString     BindClass$
 
     field protected BBjWindow           ParentWnd!
     field protected BBjNumber           X
@@ -355,7 +357,7 @@ class public UIComponent
     rem * check if component is currently visible
     rem * @return BBjNumber visible: 0=invisible, 1=visible
     rem */
-    method public BBjNumber isVisible()
+    method public Boolean isVisible()
 
         methodret #Wnd!.isVisible()
 
@@ -809,7 +811,37 @@ class public UIComponent
         methodret 0
     methodend
     
-   
+     method public void setUserData(Object ud!)
+        #Wnd!.setUserData(ud!)
+    methodend  
     
+     method public Object getUserData()
+        methodret #Wnd!.getUserData()
+    methodend    
 
+    method public void setBindField(BBjString field$)
+        #BindField$=field$
+    methodend
+
+    method public void setBindClass(BBjString class$)
+        #BindClass$=class$
+    methodend    
+
+    method public BBjNumber getWidth()
+        methodret #getWnd().getWidth()
+    methodend
+
+    method public BBjNumber getHeight()
+        methodret #getWnd().getHeight()
+    methodend
+    
+    
+    method public String getName()
+        methodret #this!.toString()
+    methodend
+    
+    method public void setLocation (BBjNumber x!, BBjNumber y!)
+        #getWnd().setLocation(x!,y!)
+    methodend
+    
 classend

@@ -10,8 +10,6 @@ class public ControlWidget extends UIComponent  implements BBjControl
  
     
     field protected BBjControl    Ctrl!
-    field protected BBjString     BindField$
-    field protected BBjString     BindClass$
     field protected BBjNumber     Length
     field protected BBjNumber     Edited = 0 
     field protected BBjNumber     Focus = 0        
@@ -22,14 +20,7 @@ class public ControlWidget extends UIComponent  implements BBjControl
         #super!(cwCanvas!)
     methodend
     
-    method public void setBindField(BBjString field$)
-        #BindField$=field$
-    methodend
 
-    method public void setBindClass(BBjString class$)
-        #BindClass$=class$
-    methodend
-    
     method protected void setCtrl (BBjControl ctrl!)
 
         #Ctrl!= ctrl!
@@ -61,13 +52,7 @@ REM                     fi
         #getCtrl().setName(text$)
     methodend    
  
-     method public void setUserData(Object ud!)
-        #getCtrl().setUserData(ud!)
-    methodend  
-    
-     method public Object getUserData()
-        methodret #getCtrl().getUserData()
-    methodend      
+     
 
      method public void setFont(BBjFont font!)
         #getCtrl().setFont(font!)
@@ -110,6 +95,7 @@ REM                     fi
     rem */
     method public void onSelectionChange()
 
+        
         #displayData()
         #enableControl(1)
 
@@ -118,11 +104,13 @@ REM                     fi
     rem override for widgets like Date or so
    method public void displayData()
 
+    
             if #getBC().getSelection().size()=1 then
-                #getBC().prepareResultSet(0,0)
+                rem #getBC().prepareResultSet(0,0)
                 sel=#getBC().getSelection().getItem(i)
+                
                 r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
-                text$     = r!.getFieldAsString(#BindField$)
+                text$     = r!.getFieldAsString(#getBindField(),err=*next)
                 
                 #Ctrl!.setText(text$)
             else
@@ -136,7 +124,7 @@ REM                     fi
 
     method protected void enableControl(BBjNumber fEditing)
     
-            if #getBC().getPrimaryKeySegments().indexOf(#BindField$)>-1 then
+            if #getBC().getPrimaryKeySegments().indexOf(#getBindField())>-1 then
                 #Ctrl!.setEnabled(!fEditing)
             else
                 #Ctrl!.setEnabled(fEditing)
@@ -266,7 +254,7 @@ REM     methodend
     method public DataRow prepareSave(DataRow r!)
     
         if #Edited then
-            r!.setFieldValue(#BindField$,#Ctrl!.getText())
+            r!.setFieldValue(#getBindField(),#Ctrl!.getText())
         fi
         
         methodret r!

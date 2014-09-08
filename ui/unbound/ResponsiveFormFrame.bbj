@@ -46,6 +46,10 @@ class public ResponsiveFormFrame implements UIWidget
     methodend
     
     method public void setSize(BBjNumber w!, BBjNumber h!)
+        #setSize(w!,h!,1)
+    methodend
+    
+    method protected void setSize(BBjNumber w!, BBjNumber h!, BBjNumber resizeCanvas)
     
         
         if h<1 then
@@ -60,15 +64,30 @@ class public ResponsiveFormFrame implements UIWidget
             while it!.hasNext()
                 widget! = it!.next()
                 dummy$=str(widget!)
-                if pos("ResponsiveFormFrame"=dummy$)>0 or pos("BBMigPane"=dummy$)>0 then
+                if pos("ResponsiveFormFrame"=dummy$)>0  then
                     REM TODO implement a better solution by introducing preferred, min & max sizes to UIWidget
                     o=widget!.getHeight()
                     widget!.setSize(w!,widget!.getHeight())
+                    widget!.setSize(w!,widget!.getHeight())
+                    REM FIXME this is an ugly workaround, something is still messy when reducing the column count in a group
+                    REM the child window is not correctly resized
                     n=widget!.getHeight()
                     if o<>n then
                         #CurCols=-1
                     fi
                 fi
+                if  pos("BBMigPane"=dummy$)>0 then
+                    REM TODO implement a better solution by introducing preferred, min & max sizes to UIWidget
+                    o=widget!.getHeight()
+                    widget!.setSize(w!,widget!.getHeight())
+                    n=widget!.getHeight()
+                    
+                    if o<>n then
+                        ? 'BR',fill(80,"-"),"n=",n,'ER'
+                        #CurCols=-1
+                    fi
+                fi
+                
             wend
 
         fi
@@ -76,11 +95,12 @@ class public ResponsiveFormFrame implements UIWidget
         #W=num(w!)
         #MaxH=h!
         
+        
         if update then
             #updateUI()
         fi
         
-        #resizeCanvas()
+        #resizeCanvas(resizeCanvas)
         
     methodend
     
@@ -90,19 +110,23 @@ class public ResponsiveFormFrame implements UIWidget
         #updateUI()
     methodend
     
-    method private void resizeCanvas()
-
-REM don't show scrollbars. Maybe we need to make this an option.    
-REM         if #MaxH<=#H or #InnerWidth > #W then
-REM             #CwCanvas!.setTrack(1)
-REM             #CwCanvas!.setSize(max(#InnerWidth-30,#W-30),#H)
-REM             #CwCanvas!.setTrack(0)
-REM             #CwCanvas!.setSize(#W,min(#H,#MaxH))
-REM         else
+    method private void resizeCanvas(BBjNumber fScrollbar)
+   
+        if fScrollbar AND (#MaxH<#H ) then
+            if (#MaxH<#H ) then
+                ? 'BR',"#MaxH=",#MaxH,'ER'
+                ? "#H=",#H
+                
+            fi
+            #CwCanvas!.setTrack(1)
+            #CwCanvas!.setSize(max(#InnerWidth-30,#W-30),#H)
+            #CwCanvas!.setTrack(0)
+            #CwCanvas!.setSize(#W,min(#H,#MaxH))
+        else
             #CwCanvas!.setTrack(1)
             #CwCanvas!.setSize(#W,#H)
-REM         fi
-          
+        fi
+     
     methodend
     
     method public BBjNumber getX()
@@ -168,6 +192,7 @@ REM         fi
                 colHeight=colHeight+uiw!.getHeight()+#Spacing
                 maxColHeight=max(maxColHeight,colHeight)
             wend
+            
             totalWidth=totalWidth+maxLocalWidth
             
 
@@ -178,7 +203,7 @@ REM         fi
                         
             #H = maxColHeight
             #InnerWidth = totalWidth
-            #resizeCanvas()
+            #resizeCanvas(0)
 
             break
         wend
@@ -198,6 +223,7 @@ REM         fi
                     uiw!.setLocation(x,y)
                     
                     y=y+uiw!.getHeight()+#Spacing
+                    
                     maxW = max(maxW,uiw!.getWidth()+#Spacing)
                     
                 wend

@@ -8,7 +8,7 @@ use ::components/db/DataRow.bbj::DataField
 use ::components/i18n/i18n.bbj::i18n
 use ::util/string/json.bbj::json
 
-class public GoogleMapsComponent extends UIComponent implements UIWidget
+class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjControl 
 
 
     field private WebBrowserComponent BrowserWidget!
@@ -60,7 +60,7 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget
     method private void initialize()
 
 
-        #BrowserWidget! = new WebBrowserComponent(#super!.getWnd(),101,10,40,#getW()-20,#getH()-50)
+        #BrowserWidget! = new WebBrowserComponent(#super!.getWnd(),101,0,0,#getW(),#getH())
 
         port$ = java.lang.System.getProperty("com.basis.jetty.port")
         host$ = java.lang.System.getProperty("com.basis.jetty.host")
@@ -80,21 +80,22 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget
 
         #BrowserWidget!.navigate(#Url$)
 
-        #ProgressBar! = #super!.getWnd().addProgressBar(102,int(#getW()/4*3),10,int(#getW()/4),20)
+        #ProgressBar! = #getWnd().addProgressBar(#getWnd().getAvailableControlID(),int(#getW()/4*3),10,int(#getW()/4),20)
         #ProgressBar!.setVisible(0)
 
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
-
+        
         #super!.setSize(w!,h!)
 
-        #BrowserWidget!.setSize(w!-20,h!-50)
-        #ProgressBar!.setLocation(int(w!/4*3),10)
+        #BrowserWidget!.setSize(w!,h!)
+        #ProgressBar!.setLocation(int(w!/4*3)-5,10)
         #ProgressBar!.setSize(int(w!/4),20)
+        
 
     methodend
-
+    
     method public void setVisible(BBjNumber v)
 
         #super!.setVisible(v)

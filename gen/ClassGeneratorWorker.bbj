@@ -432,7 +432,8 @@ class public ClassGeneratorWorker
             print (ch)"<form>"
             print (ch)"<group>"
             print (ch)"<panel>"
-
+            print (ch)"<layoutconstraints>insets dialog,fillx, wrap 2</layoutconstraints>"
+            print (ch)"<columnconstraints>[align label]rel[grow,fill]</columnconstraints>"
             rsmd!=JDBCResultSet!.getMetaData()
 
             for i=1 to rsmd!.getColumnCount()
@@ -509,10 +510,10 @@ REM                 fi
                     PRINT (ch)"<element>"
                     PRINT (ch)"    <type>components/ui/bound/controls/"+ctrl$+"</type> "
                     PRINT (ch)"    <name>"+col_name$+"</name> "
-                    PRINT (ch)"    <length>"+str(col_size)+"</length>" 
+                    PRINT (ch)"    <length>"+str(min(25,col_size))+"</length>" 
                     PRINT (ch)"    <bindClass>"+tbl_nice$+"BusinessComponent</bindClass>"
                     PRINT (ch)"    <bindField>"+col_name$+"</bindField>"
-                    PRINT (ch)"    <cellconstraints>wrap</cellconstraints> "
+                    PRINT (ch)"    <cellconstraints></cellconstraints> "
                     PRINT (ch)"</element>"
                 endif
 REM                 if ctrl$="INPUTE" then
