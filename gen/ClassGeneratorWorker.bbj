@@ -431,7 +431,7 @@ class public ClassGeneratorWorker
 
             print (ch)"<form>"
             print (ch)"<group>"
-            print (ch)"<pane>"
+            print (ch)"<panel>"
 
             rsmd!=JDBCResultSet!.getMetaData()
 
@@ -524,7 +524,7 @@ REM                     PRINT (ch)"            PADCHARACTER 32"
 REM                 fi
             next i
         endif
-        print (ch)"</pane>"
+        print (ch)"</panel>"
         print (ch)"</group>"
         print (ch)"</form>"
         close (ch)

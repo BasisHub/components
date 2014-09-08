@@ -144,7 +144,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                     f2!.setNumCols(num(maxCols$,err=*next))
                  
                     rem determine panes
-                    paneElmntLst! = fstElmnt!.getElementsByTagName("pane")
+                    paneElmntLst! = fstElmnt!.getElementsByTagName("panel")
                  
                     for pane = 0  to  paneElmntLst!.getLength()-1
                   
