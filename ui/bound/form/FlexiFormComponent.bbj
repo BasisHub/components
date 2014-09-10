@@ -185,8 +185,7 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                             
                             font! = BBjAPI().getSysGui().makeFont("Dialog",font_size,BBjAPI().getSysGui().PLAIN)
                             font_height=iff(font!.getStyle()=BBjAPI().getSysGui().BOLD,int(font_size*1.1),font_size)
-                            
-                            cwCanvas!.setFont(font!)
+REM                             cwCanvas!.setFont(font!)
                             cast(HashMap, cwCanvas!.getUserData()).put("prefFontSize",font!.getSize())
                             
                     
@@ -209,6 +208,9 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                                         text$= #getNodeValue(elNode!,"text")
                                         bindClass$= #getNodeValue(elNode!,"bindClass")
                                         bindField$= #getNodeValue(elNode!,"bindField")
+                                        
+                                        cssClass$= #getNodeValue(elNode!,"cssClass")
+                                        
                                         length=0
                                         length= num(#getNodeValue(elNode!,"length"),err=*next)
                                         
@@ -235,14 +237,16 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                                         fi
                                         el!.setName(name$,err=*next)
                                         el!.setUserData(new HashMap())
-                                        el!.setFont(font!,err=*next)
+REM                                         el!.setFont(font!,err=*next)
                                         if length>0 then
                                         el!.setLength(length,err=*next) 
                                        
                                         fi
                                         el!.setBindField(bindField$)
                                         el!.setBindClass(bindClass$)
-                                        cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
+                                        if font!<>null() then
+                                            cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
+                                        fi
                                         Layout!.add( el!, layc$ )
                                         
                                         PRINT "+++Element: ",element+1,name$        
@@ -255,6 +259,29 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
                                             fi
                                             v!.addItem(el!)
                                         fi
+                                        
+                                        if cssClass$>"" then
+                                            el!.setCssClass(cssClass$) 
+                                        fi
+                                        
+                                        
+                                        rem events?
+                                        eventLst! = paneNode!.getElementsByTagName("event")
+                            
+                                        if eventLst!.getLength() then
+                                            for event = 0  to  eventLst!.getLength()-1
+                              
+                                                eventNode! = eventLst!.item(event)
+                                
+                                                    if eventNode!.getNodeType() = Node.ELEMENT_NODE then
+                                                        type$= #getNodeValue(elNode!,"type")
+                                                        method$= #getNodeValue(elNode!,"method")
+                                                        el!.setCallback(2,#this!,method$)
+                                                    fi
+                                             next
+                                        fi
+                                    
+                                        
         
                                     fi
                                     

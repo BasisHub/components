@@ -27,6 +27,8 @@ class public UIComponent
     field protected BusinessComponent   BC!
     field protected BBjString     BindField$
     field protected BBjString     BindClass$
+    
+    field private BBjString         CssClass$
 
     field protected BBjWindow           ParentWnd!
     field protected BBjNumber           X
@@ -842,6 +844,15 @@ class public UIComponent
     
     method public void setLocation (BBjNumber x!, BBjNumber y!)
         #getWnd().setLocation(x!,y!)
+    methodend
+    
+    method public void setCssClass(BBjString class$)
+        #CssClass$ = class$
+        #Wnd!.addStyle(class$)
+    methodend
+
+    method public BBjString getCssClass()
+        methodret #CssClass$ 
     methodend
     
 classend

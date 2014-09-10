@@ -3,6 +3,7 @@ use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/layout/BBMigPane.bbj::BBMigPane
 use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
 use net.miginfocom.layout.PlatformDefaults
 
@@ -32,7 +33,10 @@ REM PRIM KEY?
 REM                     if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>-1 and ctrl!.getControlType() <> 17 and ctrl!.getControlType() <> 19 then
 REM                         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onCtrlInputKeypress",err=*next)
 REM                     fi
-    
+        a! = #Ctrl!
+        a!.setEditable(0,err=*next) 
+        a!.setFocusable(0,err=*next)
+        
     methodend
     
     method public void setLength(BBjNumber length)
@@ -272,6 +276,32 @@ REM     methodend
 
     methodend    
 
+    method public void setCssClass(BBjString class$)
+        #super!.setCssClass(class$)
+        #Ctrl!.addStyle(class$)
+    methodend
 
+    method public void setCallback(int eventtype!, CustomObject o!, String method!)
+    
+        #Ctrl!.setCallback(eventtype!,o!,method!)
+        
+    methodend
+
+        rem /**
+    rem * Method setBC:
+    rem * set the business component to drive this UI component
+    rem * @param BusinessComponent bc!: the business component
+    rem */
+    method public void setBC(BusinessComponent bc!)
+
+        #super!.setBC(bc!)
+
+        ctrl_name$=#getCtrl().getName()
+        if pos(".label"=ctrl_name$)>0 then
+            lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL",err=*endif)
+            #Ctrl!.setText(lbl$+":")
+        fi
+        
+    methodend
 
 classend

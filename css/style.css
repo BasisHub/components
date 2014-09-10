@@ -446,6 +446,11 @@ color: #802A50;
 font: normal 22px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
 
+.GroupSubTitle{
+color: #802A50;
+font: normal 16px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+
 .picker {
 	display:none;
 }
