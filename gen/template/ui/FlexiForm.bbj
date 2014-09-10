@@ -34,7 +34,7 @@ class public (DB_NICE)(TBL_NICE)FlexiForm extends FlexiFormComponent
     rem * @param BBjNumber w: width
     rem * @param BBjNumber h:height
     rem */
-    method public (DB_NICE)(TBL_NICE)Form (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
+    method public (DB_NICE)(TBL_NICE)FlexiForm (BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
         #super!(wnd!,id,x,y,w,h)
         #super!.loadLayout("arc/(DB_NICE)(TBL_NICE)Form.xml")
@@ -47,7 +47,7 @@ class public (DB_NICE)(TBL_NICE)FlexiForm extends FlexiFormComponent
     rem * constructor to generate the component inside an existing child window
     rem * @param BBjWindow wnd!: the child window to use for this component
     rem */
-    method public (DB_NICE)(TBL_NICE)Form (BBjChildWindow wnd!)
+    method public (DB_NICE)(TBL_NICE)FlexiForm (BBjChildWindow wnd!)
 
         #super!(wnd!)
         #super!.loadLayout("arc/(DB_NICE)(TBL_NICE)Form.xml")
