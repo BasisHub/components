@@ -1,0 +1,14 @@
+use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+
+class public  ButtonWidget extends ControlWidget
+ 
+    method public ButtonWidget(BBjChildWindow cwCanvas!)
+        #super!(cwCanvas!)
+        
+        cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        #setWnd(cwWidget!)
+        #setCtrl(#getWnd().addButton(100,0,0,1,1,"..."))
+    
+    methodend
+
+classend
