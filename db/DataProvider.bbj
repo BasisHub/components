@@ -383,7 +383,7 @@ REM         close (999)
         declare auto DataRow row!
         row! = #EntityClass!.newInstance()
 
-        JDBCResultSet! = md!.getColumns(null(),null(),#PrimaryTable$,"%")
+        JDBCResultSet! = md!.getColumns(null(),#Schema$,#PrimaryTable$,"%")
 
         while JDBCResultSet!.next()
             col_type=JDBCResultSet!.getInt("DATA_TYPE")
