@@ -285,7 +285,7 @@ class public ClassGeneratorWorker
         if #Connection! <> null() then
             md! = #Connection!.getMetaData()
 
-            JDBCResultSet! = md!.getColumns(null(),null(),t$,"%")
+            JDBCResultSet! = md!.getColumns(null(),#Schema$,t$,"%")
 
             while JDBCResultSet!.next() 
                 declare BBjTemplatedString t!
@@ -368,7 +368,6 @@ class public ClassGeneratorWorker
     rem * Method generateXmlForm:
     rem * generate the GUI mask for a table as a .ARC file using a template
     rem * @param BBjString tpl$: the templates directory
-    rem * @param BBjString schema$: the schema name
     rem * @param BBjString table$: the table name for which the GUI should be generated
     rem * @param BBjString targetdir$: the target dir for the .ARC file
     rem */
