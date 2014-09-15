@@ -105,11 +105,12 @@ class public FlexiFormComponent extends UIComponent implements UIWidget
     rem */
     method public void loadLayout(BBjString resFile$)
 
+
         ch=unt
         open (ch)resFile$
-        read record (ch,siz=1000000)xml$
+        read record (ch,siz=1000000)xml!
         close (ch)
-        is! = new InputSource(new StringReader(xml$))
+        is! = new InputSource(new String(xml!))
 
         #ControlsByBcClass! = new java.util.HashMap()
     
