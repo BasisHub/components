@@ -931,12 +931,17 @@ REM                 endif
             tpl$=tpl$(pos("\"=tpl$)+1)
         wend
 
-        if len(tpl$)>13 and tpl$(1,13)="(DB_NICENAME)" then
-            f$=targetdir$+db_nicename$+tpl$(14)
+        if tpl$(1,2)="()" then
+            rem "() prefix means no naming
+            f$=targetdir$+tpl$(3)
         else
-            f$=targetdir$+db_nice$+tbl_nice$+tpl$
+            if len(tpl$)>13 and tpl$(1,13)="(DB_NICENAME)" then
+                f$=targetdir$+db_nicename$+tpl$(14)
+            else
+                f$=targetdir$+db_nice$+tbl_nice$+tpl$
+            fi
         fi
-        
+      
         if !#Overwrite then
             if pos("T.bbj"=tpl$)=0 then
                  ch1=unt

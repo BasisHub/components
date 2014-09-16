@@ -1,11 +1,11 @@
 use ::translations/bbtranslator.bbj::BBTranslator
 use ::components/i18n/i18n.bbj::i18n
 
-class public (DB_NICENAME)Translator extends BBTranslator
+class public CustomTranslator extends BBTranslator
 
     field private static BBTranslator Translator! 
     
-    method public (DB_NICENAME)Translator()
+    method public CustomTranslator()
 
         if #Translator! = null() then
     
