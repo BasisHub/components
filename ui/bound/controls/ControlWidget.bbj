@@ -108,20 +108,22 @@ REM                     fi
     rem override for widgets like Date or so
    method public void displayData()
 
+            if #getBindField() >""then
+            
+                if #getBC().getSelection().size()=1 then
+                    rem #getBC().prepareResultSet(0,0)
+                    sel=#getBC().getSelection().getItem(i)
+                    
+                    r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                    text$     = r!.getFieldAsString(#getBindField(),err=*next)
+                    
+                    #Ctrl!.setText(text$)
+                else
+                    #Ctrl!.setText("")
+                fi
     
-            if #getBC().getSelection().size()=1 then
-                rem #getBC().prepareResultSet(0,0)
-                sel=#getBC().getSelection().getItem(i)
-                
-                r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
-                text$     = r!.getFieldAsString(#getBindField(),err=*next)
-                
-                #Ctrl!.setText(text$)
-            else
-                #Ctrl!.setText("")
+                #Edited = 0
             fi
-
-            #Edited = 0
             
     methodend    
 
