@@ -501,6 +501,7 @@ REM                 fi
                     PRINT (ch)"    <type>components/ui/bound/controls/LabelWidget</type> "
                     PRINT (ch)"    <text>"+col_label$+":</text> "
                     PRINT (ch)"    <name>"+col_name$+".label</name> "
+                    PRINT (ch)"    <bindClass>"+tbl_nice$+"BusinessComponent</bindClass>"
                     PRINT (ch)"    <cellconstraints></cellconstraints> "
                     PRINT (ch)"</element>      "
                 endif
@@ -930,7 +931,11 @@ REM                 endif
             tpl$=tpl$(pos("\"=tpl$)+1)
         wend
 
-        f$=targetdir$+db_nice$+tbl_nice$+tpl$
+        if len(tpl$)>13 and tpl$(1,13)="(DB_NICENAME)" then
+            f$=targetdir$+db_nicename$+tpl$(14)
+        else
+            f$=targetdir$+db_nice$+tbl_nice$+tpl$
+        fi
         
         if !#Overwrite then
             if pos("T.bbj"=tpl$)=0 then

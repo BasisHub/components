@@ -2,6 +2,7 @@ use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
 use ::components/bl/DataProviderBusinessComponent.bbj::DataProviderBusinessComponent
 use ::translations/bbtranslator.bbj::BBTranslator
+use ::i18n/(DB_NICENAME)Translator.bbj::(DB_NICENAME)Translator
 
 use ::db/(DB_NICE)(TBL_NICE)DataProvider.bbj::(DB_NICE)(TBL_NICE)DataProvider
 
@@ -34,7 +35,9 @@ class public (DB_NICE)(TBL_NICE)BusinessComponentT extends DataProviderBusinessC
             #super!.setLocale(stbl("!LOCALE"))
         fi
 
-        #Translator! = BBTranslator.getInstance("(DB_NICENAME)",#getLocale(),"en","i18n/")
+        #Translator! = new (DB_NICENAME)Translator()
+        rem old: #Translator! = BBTranslator.getInstance("(DB_NICENAME)",#getLocale(),"en","i18n/")
+        
         #super!.setTitle(#Translator!.getTranslation("(TBL).label"))
 
 

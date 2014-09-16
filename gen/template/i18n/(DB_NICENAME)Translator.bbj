@@ -1,0 +1,29 @@
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::components/i18n/i18n.bbj::i18n
+
+class public (DB_NICENAME)Translator extends BBTranslator
+
+    field private static BBTranslator Translator! 
+    
+    method public (DB_NICENAME)Translator()
+
+        if #Translator! = null() then
+    
+            locale$ = BBjAPI().getThinClient(err=*next).getClientLocale()
+    
+            if locale$ = ""
+                locale$ = stbl("!LOCALE")
+            fi
+    
+            #Translator! = BBTranslator.getInstance("(DB_NICENAME)",locale$,"en","i18n/")
+        fi
+        
+    methodend
+
+    method public BBjString getTranslation(BBjString TransKey$)
+    
+          methodret  #Translator!.getTranslation(TransKey$)
+    
+    methodend
+
+classend
