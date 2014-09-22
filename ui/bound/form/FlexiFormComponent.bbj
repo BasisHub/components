@@ -217,6 +217,7 @@ REM                             cwCanvas!.setFont(font!)
                                         name$= #getNodeValue(elNode!,"name")
                                         type$= #getNodeValue(elNode!,"type")
                                         text$= #getNodeValue(elNode!,"text")
+                                        textkey$= #getNodeValue(elNode!,"textkey")
                                         bindClass$= #getNodeValue(elNode!,"bindClass")
                                         bindField$= #getNodeValue(elNode!,"bindField")
                                         
@@ -246,6 +247,9 @@ REM                             cwCanvas!.setFont(font!)
                                         if text$>"" then
                                             el!.setText(text$)
                                         fi
+                                        if textkey$>"" then
+                                            el!.setTextKey(textkey$)
+                                        fi                                        
                                         el!.setName(name$,err=*next)
                                         el!.setUserData(new HashMap())
 REM                                         el!.setFont(font!,err=*next)

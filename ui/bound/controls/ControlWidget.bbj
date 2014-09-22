@@ -5,6 +5,9 @@ use ::components/db/DataRow.bbj::DataRow
 use ::components/db/DataRow.bbj::DataField
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::i18n/CustomTranslator.bbj::CustomTranslator
+
 use net.miginfocom.layout.PlatformDefaults
 
 class public ControlWidget extends UIComponent  implements BBjControl 
@@ -16,9 +19,16 @@ class public ControlWidget extends UIComponent  implements BBjControl
     field protected BBjNumber     Focus = 0        
     
     field protected static BBjNumber charw = BBjAPI().getSysGui().getMeasure("W") +2
+    
+    field public static BBTranslator CustomTranslator!
 
     method protected ControlWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
+        
+        if #CustomTranslator! = null() then
+             #CustomTranslator! = new CustomTranslator()
+        fi
+        
     methodend
     
 
@@ -51,6 +61,11 @@ REM                     fi
     method public void setText(BBjString text$)
         #getCtrl().setText(text$)
     methodend
+
+    method public void setTextKey(BBjString textkey$)
+        #getCtrl().setText( #CustomTranslator!.getTranslation(textkey$)  )
+    methodend
+    
     
     method public void setName(BBjString text$)
         #getCtrl().setName(text$)
