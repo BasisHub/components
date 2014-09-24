@@ -134,7 +134,7 @@ REM         is! = new InputSource(new String(xml$))
         #FormWnd! = #getWnd().addChildWindow( #getWnd().getAvailableControlID(),0,0,100,100,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         
         #FormFrame! = new ResponsiveFormFrame(#FormWnd!,100,0,0,#FormWnd!.getWidth(),#FormWnd!.getHeight())
-
+        #FormWnd!.setVisible(0)
 
         rem iterate groups
         nodeLst! = doc!.getElementsByTagName("group")
@@ -333,7 +333,7 @@ REM                             cwCanvas!.setFont(font!)
 
         rem #getLaf().prepareWindow(#FormWnd!)
         rem #getLaf().setStyle(#FormWnd!,"ShadowedPanel")
-        #FormWnd!.setVisible(0)
+        
         #FormWnd!.setTrack(0)
         #FormWnd!.setSize(#getW(), #getH())
         #FormFrame!.setSize(#getW(), #getH())
