@@ -7,7 +7,7 @@ class public  LabelWidget extends ControlWidget
         
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         #setWnd(cwWidget!)
-        #setCtrl(#getWnd().addStaticText(100,0,0,1,1,"..."))
+        #setCtrl(#getWnd().addStaticText(100,0,0,1,1,""))
     
     methodend
 

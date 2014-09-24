@@ -16,7 +16,8 @@ class public ControlWidget extends UIComponent  implements BBjControl
     field protected BBjControl    Ctrl!
     field protected BBjNumber     Length
     field protected BBjNumber     Edited = 0 
-    field protected BBjNumber     Focus = 0        
+    field protected BBjNumber     Focus = 0     
+       
     
     field protected static BBjNumber charw = BBjAPI().getSysGui().getMeasure("W") +2
     
@@ -60,6 +61,11 @@ REM                     fi
     
     method public void setText(BBjString text$)
         #getCtrl().setText(text$)
+    methodend
+    
+    method public void setMask(BBjString mask$)
+        c! = #getCtrl()
+        c!.setMask(mask$,err=*next)
     methodend
 
     method public void setTextKey(BBjString textkey$)

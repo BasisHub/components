@@ -218,6 +218,7 @@ REM                             cwCanvas!.setFont(font!)
                                         type$= #getNodeValue(elNode!,"type")
                                         text$= #getNodeValue(elNode!,"text")
                                         textkey$= #getNodeValue(elNode!,"textkey")
+                                        mask$= #getNodeValue(elNode!,"mask")                                        
                                         bindClass$= #getNodeValue(elNode!,"bindClass")
                                         bindField$= #getNodeValue(elNode!,"bindField")
                                         
@@ -231,39 +232,42 @@ REM                             cwCanvas!.setFont(font!)
                                         while pos("/"=typet$)
                                             typet$=typet$(pos("/"=typet$)+1)
                                         wend
-                                                                      
-                                        x$="el! = new ::"+type$+".bbj::"+typet$+"(cwCanvas!)"
-                                        rem execute x$
-                                        rem workaround execute
-                                            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
-                                            ch=unt
-                                            open (ch)temp$
-                                            write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
-                                            close (ch)
-                                            call temp$
-                                            erase temp$                                
-                                        
-                                        el!.setSize(100,font_height+ihpad)
-                                        if text$>"" then
-                                            el!.setText(text$)
-                                        fi
-                                        if textkey$>"" then
-                                            el!.setTextKey(textkey$)
-                                        fi                                        
-                                        el!.setName(name$,err=*next)
-                                        el!.setUserData(new HashMap())
-REM                                         el!.setFont(font!,err=*next)
-                                        if length>0 then
-                                        el!.setLength(length,err=*next) 
-                                       
-                                        fi
-                                        el!.setBindField(bindField$)
-                                        el!.setBindClass(bindClass$)
-                                        if font!<>null() then
-                                            cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
-                                        fi
-                                        Layout!.add( el!, layc$ )
-                                        
+                                                                                
+                                          x$="el! = new ::"+type$+".bbj::"+typet$+"(cwCanvas!)"
+                                          rem execute x$
+                                          rem workaround execute
+                                              temp$ = str(java.io.File.createTempFile("blabla", ".call"))
+                                              ch=unt
+                                              open (ch)temp$
+                                              write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+                                              close (ch)
+                                              call temp$
+                                              erase temp$                                
+                                          
+                                          el!.setSize(100,font_height+ihpad)
+                                          if text$>"" then
+                                              el!.setText(text$)
+                                          fi
+                                          if mask$>"" then
+                                              el!.setMask(mask$)
+                                          fi
+                                          if textkey$>"" then
+                                              el!.setTextKey(textkey$)
+                                          fi                                        
+                                          el!.setName(name$,err=*next)
+                                          el!.setUserData(new HashMap())
+  REM                                         el!.setFont(font!,err=*next)
+                                          if length>0 then
+                                          el!.setLength(length,err=*next) 
+                                         
+                                          fi
+                                          el!.setBindField(bindField$)
+                                          el!.setBindClass(bindClass$)
+                                          if font!<>null() then
+                                              cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
+                                          fi
+                                          Layout!.add( el!, layc$ )
+
                                         PRINT "+++Element: ",element+1,name$        
                                         
                                         if bindClass$>"" then
