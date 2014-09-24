@@ -6,7 +6,7 @@ class public TestWidget implements UIWidget
     field private BBjNumber X
     field private BBjNumber Y
     field private BBjNumber W=250+RND(50)
-    field private BBjNumber H=50+RND(50)
+    field private BBjNumber H=30+RND(90)
     field private BBjChildWindow CwCanvas!
     field private static BBjNumber Number
     
@@ -17,8 +17,8 @@ class public TestWidget implements UIWidget
     
         #CwCanvas! = wnd!.addChildWindow(id,#X,#Y,#W,#H,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
         #CwCanvas!.setBackColor(BBjAPI().makeColor("RED"))
-    
         st! = #CwCanvas!.addStaticText(100,5,5,#W-10,#H-10,"#"+str(#Number)+" ("+str(#W)+"x"+str(#H)+")")
+        st!.setFont( BBjAPI().getSysGui().makeFont("Helvetica",16,1))
         #Number=#Number+1
     
     methodend
