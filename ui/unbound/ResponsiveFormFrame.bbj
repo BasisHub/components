@@ -22,6 +22,7 @@ class public ResponsiveFormFrame implements UIWidget
     field private BBjNumber CurCols
 
     field private BBjNumber Spacing=5
+    field private BBjNumber fHorizontalAlign=0
 
     method private ResponsiveFormFrame()
     methodend
@@ -83,7 +84,6 @@ class public ResponsiveFormFrame implements UIWidget
                     n=widget!.getHeight()
                     
                     if o<>n then
-                        ? 'BR',fill(80,"-"),"n=",n,'ER'
                         #CurCols=-1
                     fi
                 fi
@@ -95,12 +95,12 @@ class public ResponsiveFormFrame implements UIWidget
         #W=num(w!)
         #MaxH=h!
         
-        
         if update then
             #updateUI()
         fi
-        
+
         #resizeCanvas(resizeCanvas)
+        
         
     methodend
     
@@ -112,12 +112,8 @@ class public ResponsiveFormFrame implements UIWidget
     
     method private void resizeCanvas(BBjNumber fScrollbar)
    
+   
         if fScrollbar AND (#MaxH<#H ) then
-            if (#MaxH<#H ) then
-                ? 'BR',"#MaxH=",#MaxH,'ER'
-                ? "#H=",#H
-                
-            fi
             #CwCanvas!.setTrack(1)
             #CwCanvas!.setSize(max(#InnerWidth-30,#W-30),#H)
             #CwCanvas!.setTrack(0)
@@ -178,7 +174,7 @@ class public ResponsiveFormFrame implements UIWidget
             maxColHeight=0
             while it!.hasNext()
                 uiw! = it!.next()
-                ?stbl("ESCAPE",err=*next); ? uiw!.getHeight()
+                
                 if abs(avg-colHeight) < abs(avg-(colHeight+uiw!.getHeight()+#Spacing)) and cols!.size()<cols and col!.size()>0 then
                     col! = new BBjVector()
                     cols!.addItem(col!)
@@ -201,37 +197,113 @@ class public ResponsiveFormFrame implements UIWidget
                 continue
             fi 
                         
-            #H = maxColHeight
+             
             #InnerWidth = totalWidth
-            #resizeCanvas(0)
-
             break
         wend
  
         if cols <> #CurCols then
-            REM now render that stuff, but only if something changed
-            #CurCols=cols
-            it! = cols!.iterator()
-            x=0
-            while it!.hasNext()
-                col! = it!.next()
-                it1! = col!.iterator()
-                y=0
-                maxW = 0
-                while it1!.hasNext()
-                    uiw! = it1!.next()
-                    uiw!.setLocation(x,y)
-                    
-                    y=y+uiw!.getHeight()+#Spacing
-                    
-                    maxW = max(maxW,uiw!.getWidth()+#Spacing)
-                    
+                REM now render that stuff, but only if something changed
+                
+            if #fHorizontalAlign then 
+                REM vertical (columnar) reading order, but areas horizontally aligned as possible 
+                #CurCols=cols
+                
+                it! = cols!.iterator()
+
+                REM determine x-coord for each column and add it to colX!
+                DIM colX[cols-1]
+                col=0
+                x=0
+                while it!.hasNext()
+                    colX[col]=x
+                    col! = it!.next()
+                    it1! = col!.iterator()
+                    maxW = 0
+                    while it1!.hasNext()
+                        uiw! = it1!.next()
+                        maxW = max(maxW,uiw!.getWidth()+#Spacing)
+                    wend
+                    col=col+1
+                    x=x+maxW
                 wend
-                x=x+maxW
-            wend
+
+
+                DIM pointer[cols-1]
+                y=0
+                while 1
+                    maxH=0
+                    i=0
+                    it! = cols!.iterator()
+                    while it!.hasNext()
+                        col! = it!.next()
+                        p=pointer[i]
+                        if p<col!.size() then
+                            uiw! = col!.getItem(p)
+                            maxH=max(maxH,uiw!.getHeight())
+                        fi
+                        i=i+1
+                    wend
+
+                    it! = cols!.iterator()
+                    col=0
+                    fStop=1
+
+                    maxH=0
+                    while it!.hasNext()
+                        col! = it!.next()
+                        p=pointer[col]
+                        if p<col!.size() then
+                            uiw! = col!.getItem(p)
+                            uiw!.setLocation(colX[col],y)
+                            maxH=max(maxH,uiw!.getHeight())
+                            pointer[col]=pointer[col]+1
+                            if pointer[col]<col!.size() then
+                                fStop=0
+                            fi
+                        fi
+                        col=col+1
+                    wend
+                    y=y+maxH+#Spacing
+                    totalMaxH = max(totalMaxH,y)
+                    if fStop then break
+                wend
+
+                 
+                #H = totalMaxH
+                
+            
+            else
+                REM vertical (columnar) reading order, like in a newspaper
+                #H = maxColHeight
+                #CurCols=cols
+                it! = cols!.iterator()
+                x=0
+                while it!.hasNext()
+                    col! = it!.next()
+                    it1! = col!.iterator()
+                    y=0
+                    maxW = 0
+                    while it1!.hasNext()
+                        uiw! = it1!.next()
+                        uiw!.setLocation(x,y)
+                        
+                        y=y+uiw!.getHeight()+#Spacing
+                        
+                        maxW = max(maxW,uiw!.getWidth()+#Spacing)
+                        
+                    wend
+                    x=x+maxW
+                wend            
+            fi
+            #resizeCanvas(0)
         fi
         
         
+    methodend
+    
+    method public void setHorizontalAlign(BBjNumber fAlignHorizontally)
+        #fHorizontalAlign=fAlignHorizontally
     methodend
 
 classend
@@ -256,7 +328,8 @@ f1!.addWidget(w!)
 
 
 f2! = new ResponsiveFormFrame(f1!.getWnd(),101,0,301,1024,0)
-f2!.setNumCols(3)
+f2!.setHorizontalAlign(1)
+f2!.setNumCols(5)
 for i=1 to 10
     w!=new TestWidget(f2!.getWnd(),100+i)
     f2!.addWidget(w!)
@@ -264,6 +337,9 @@ next
 f1!.addWidget(f2!)
 
 w!=new TestWidget(f1!.getWnd(),104)
+f1!.addWidget(w!)
+
+w!=new TestWidget(f1!.getWnd(),105)
 f1!.addWidget(w!)
 
 

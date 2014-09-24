@@ -150,10 +150,13 @@ REM         is! = new InputSource(new String(xml$))
                     fstElmnt! = CAST(Element,fstNode!)
         
                     maxCols$= #getNodeValue(fstNode!,"maxcols")
+                    horizontalAlign=0
+                    horizontalAlign = num(#getNodeValue(fstNode!,"horizontalalign"),err=*next)
         
                     f2! = new ResponsiveFormFrame(#FormFrame!.getWnd(),#FormFrame!.getWnd().getAvailableControlID(),0,301,1024,0)
                     f2!.setNumCols(num(maxCols$,err=*next))
-                 
+                    f2!.setHorizontalAlign(horizontalAlign)
+                    
                     rem determine panes
                     paneElmntLst! = fstElmnt!.getElementsByTagName("panel")
                  
