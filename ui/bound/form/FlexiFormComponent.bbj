@@ -270,6 +270,7 @@ REM                             cwCanvas!.setFont(font!)
                                               cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
                                           fi
                                           Layout!.add( el!, layc$ )
+                                          #ElementList!.addItem(el!)
 
                                         PRINT "+++Element: ",element+1,name$        
                                         
@@ -307,7 +308,7 @@ REM                             cwCanvas!.setFont(font!)
         
                                     fi
                                     
-                               
+                              
                               next; rem element
                               
                           fi
@@ -860,5 +861,36 @@ REM         fi
                  methodret lay$
                  
      methodend
+     
+     
+    method public void destroy()
+
+        if #NavigationToolbar! <> null() then
+            #NavigationToolbar!.destroy()
+        fi
+      
+        if #FormEditToolbar!<>null() then
+            #FormEditToolbar!.destroy()
+        fi
+      
+        
+        ks! = #ForeignKeyPickerList!.keySet()
+        it! = ks!.iterator() 
+        while it!.hasNext()
+            uic! = #ForeignKeyPickerList!.get(it!.next())
+            uic!.destroy()
+        wend
+        #ForeignKeyPickerList!.clear()
+        
+        it! = #ElementList!.iterator()
+        while it!.hasNext()
+            uic! = it!.next()
+            uic!.destroy()
+        wend
+        #ElementList!.clear()            
+        
+        #super!.destroy()
+    
+    methodend     
 
 classend

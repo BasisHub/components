@@ -210,8 +210,10 @@ class public UIComponent
     rem */
     method public void destroy()
 
-        #BC!.unregisterUI(#this!)
-        #BC! = null()
+        if #BC!<> null() then
+            #BC!.unregisterUI(#this!)
+            #BC! = null()
+        fi
         #Wnd!.destroy()
 
     methodend
