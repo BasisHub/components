@@ -9,6 +9,9 @@ class public  InputNWidget extends ControlWidget
         ipe! = cwWidget!.addInputN(100,0,0,10,10,"")
         ipe!.setEditable(1) 
         #setCtrl(ipe!)
+        
+        ipe!.setDotCharacter(",")
+        ipe!.setCommaCharacter(".")
     methodend
 
 classend
