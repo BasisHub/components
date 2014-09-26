@@ -1459,12 +1459,14 @@ class public BusinessComponent
     method public BBjVector getForeignKeyPointerBcList()
         
         map! = new BBjVector()
+        
         ks! = #ForeignKeyPointerBcList!.keySet()
         it! = ks!.iterator()
         while it!.hasNext()
             map!.addItem(it!.next())
         wend
-
+        
+        rem TODO: lazy loaded BCs ?
         methodret   map!
 
     methodend

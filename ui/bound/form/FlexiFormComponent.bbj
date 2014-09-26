@@ -544,10 +544,8 @@ REM         #delayedSetSize(null())
                 ctrllist! = #ControlsByBcClass!.get(c$)
                 
                 c$=c$(2,len(c$)-2)
-                bc1! = bc!.getForeignKeyPointerBcList().get(c$)
-                ? bc!.getForeignKeyPointerBcList().keySet()
-                ? c$
-                ? bc1!
+                
+                bc1! = bc!.getForeignKeyBC(c$)
                 
                 if bc1!<>null() and ctrllist!<>null() then
                     it1! = ctrllist!.iterator()
@@ -575,18 +573,18 @@ REM         #delayedSetSize(null())
                 wend
             fi
             
-            fkmap! = bc!.getForeignKeyPointerBcList()
-            ks! = fkmap!.keySet()
-            it! = ks!.iterator()
-            while it!.hasNext()
-                bc1! = fkmap!.get(it!.next())
-                cl$ = str(bc1!)
-                while pos("::"=cl$)
-                    cl$=cl$(pos("::"=cl$)+2)
-                wend
-                #bindBC(cl$,bc1!)
-            wend
-            
+REM             fkmap! = bc!.getForeignKeyPointerBcList()
+REM             it! = fkmap!.iterator()
+REM             while it!.hasNext()
+REM                 it$=it!.next()
+REM                 bc1! = bc!.getForeignKeyBC(it$)
+REM                 cl$ = str(bc1!)
+REM                 while pos("::"=cl$)
+REM                     cl$=cl$(pos("::"=cl$)+2)
+REM                 wend
+REM                 #bindBC(cl$,bc1!)
+REM             wend
+REM TODO: lazy loading!            
             
     
     methodend 
