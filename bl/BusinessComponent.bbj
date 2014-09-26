@@ -16,7 +16,7 @@ use ::components/bl/ValidationError.bbj::ValidationError
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/UIController.bbj::UIController
 use ::components/ui/bound/form/GoogleMapsComponent.bbj::GoogleMapsComponent
-
+use ::components/util/Util.bbj::Util
 use ::util/string/json.bbj::json
 
 class public BusinessComponent
@@ -48,6 +48,10 @@ class public BusinessComponent
     field private   java.util.HashMap   ForeignKeyPointerBcList!       = new java.util.HashMap()
     field private   java.util.HashMap   ForeignKeyPointerKeyFieldList! = new java.util.HashMap()
     field private   UIController        ForeignKeyPointerController!   = new UIController()
+
+    field private   java.util.HashMap   ForeignKeyPointerClassesList!           = new java.util.HashMap()
+    field private   java.util.HashMap   ForeignKeyPointerClassesKeyFieldList!   = new java.util.HashMap()
+
 
     field private   BBjNumber           EditingRecNo                   = -1
     field private   BBjVector           ValidationErrors!              = new BBjVector()
@@ -1173,13 +1177,46 @@ class public BusinessComponent
 
 
     rem /**
+    rem * Method registerForeignKeyPointerClass:
+    rem * register another BusinessComponent class for a field which is a foreign key
+    rem * for later lazy loading 
+    rem * @param BBjString fieldname$: the field name that is a foreign key
+    rem * @param BBjString class$: the BusinessComponent class for the foreign key
+    rem * @param BBjString fkfield$: the foreign field name
+    rem */
+    method public void registerForeignKeyPointerClass(BBjString fieldname$, BBjString class$, BBjString fkfield$)
+    
+        #ForeignKeyPointerClassesList!.put(fieldname$,class$)
+        #ForeignKeyPointerClassesKeyFieldList!.put(fieldname$,fkfield$)
+
+    methodend
+
+    rem /**
     rem * Method getForeignKeyBC:
     rem * Get the BusinessComponent for a foreign key field
     rem * @param BBjString fieldname$: the foreign key field name
     rem */
     method public BusinessComponent getForeignKeyBC(BBjString fieldname$)
 
-        methodret cast(BusinessComponent,#ForeignKeyPointerBcList!.get(fieldname$))
+        bc! =  cast(BusinessComponent,#ForeignKeyPointerBcList!.get(fieldname$))
+        
+        if bc! = null() then
+            bcClass! = #ForeignKeyPointerClassesList!.get(fieldname$)
+            if bcClass! <> null() then
+                fkfield! = #ForeignKeyPointerClassesKeyFieldList!.get(fieldname$)
+                if fkfield! <> null() then
+                    bc! = Util.newInstance(str(bcClass!))
+                    if bc! <> null() then                    
+                        #setForeignKeyPointer(fieldname$,bc!,str(fkfield!))
+                    fi
+                    #ForeignKeyPointerClassesList!.remove(fieldname$)
+                    #ForeignKeyPointerClassesKeyFieldList!.remove(fieldname$)
+                fi
+            fi
+        fi
+        
+        
+        methodret bc!
 
     methodend
 
@@ -1419,9 +1456,17 @@ class public BusinessComponent
         methodret ""
     methodend
 
-    method public java.util.HashMap getForeignKeyPointerBcList()
-        map! = #ForeignKeyPointerBcList!.clone()
+    method public BBjVector getForeignKeyPointerBcList()
+        
+        map! = new BBjVector()
+        ks! = #ForeignKeyPointerBcList!.keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            map!.addItem(it!.next())
+        wend
+
         methodret   map!
+
     methodend
 
 

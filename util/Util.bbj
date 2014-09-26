@@ -33,11 +33,14 @@ class public Util
     rem */
     method public static Object newInstance(BBjString class$)
 
+        
         x$="x! = new "+class$+"()"
         temp$ = str(java.io.File.createTempFile("blabla", ".call"))
         ch=unt
         open (ch)temp$
+        write (ch)"SETERR my_trap"
         write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+        write(ch)"my_trap:"+$0a$+"EXIT"+$0a$
         close (ch)
         call temp$
         erase temp$
