@@ -51,6 +51,10 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
         rem fk_bc! = new ::bl/xyzBusinessComponent.bbj::xyzBusinessComponent()
         rem #setForeignKeyPointer("COLUMNNAME",fk_bc!,"KEY_COLUMN_NAME_IN_OTHER_TABLE")
 
+        rem or, to do lazy loading, do:
+        
+        rem #registerForeignKeyPointerClass("COLUMNNAME","::bl/xyzBusinessComponent.bbj::xyzBusinessComponent","KEY_COLUMN_NAME_IN_OTHER_TABLE")
+
     methodend
 
     rem /**

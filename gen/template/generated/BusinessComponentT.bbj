@@ -64,12 +64,16 @@ class public (DB_NICE)(TBL_NICE)BusinessComponentT extends DataProviderBusinessC
         next
 
         <importedkey>
-        seterr err_(DB_NICE)(PKTABLE_NAME_NICE)(PKCOLUMN_NAME)(FKCOLUMN_NAME)
-            fk_bc! = new ::bl/(DB_NICE)(PKTABLE_NAME_NICE)BusinessComponent.bbj::(DB_NICE)(PKTABLE_NAME_NICE)BusinessComponent()
-            #setForeignKeyPointer("(FKCOLUMN_NAME)",fk_bc!,"(PKCOLUMN_NAME)")
-        err_(DB_NICE)(PKTABLE_NAME_NICE)(PKCOLUMN_NAME)(FKCOLUMN_NAME):
-        seterr 0
+        
+REM         rem this would be deprecated as the following line offers lazy loading of the objects only when needed         
+REM         seterr err_(DB_NICE)(PKTABLE_NAME_NICE)(PKCOLUMN_NAME)(FKCOLUMN_NAME)
+REM             fk_bc! = new ::bl/(DB_NICE)(PKTABLE_NAME_NICE)BusinessComponent.bbj::(DB_NICE)(PKTABLE_NAME_NICE)BusinessComponent()
+REM             #setForeignKeyPointer("(FKCOLUMN_NAME)",fk_bc!,"(PKCOLUMN_NAME)")
+REM         err_(DB_NICE)(PKTABLE_NAME_NICE)(PKCOLUMN_NAME)(FKCOLUMN_NAME):
+REM         seterr 0
 
+        #registerForeignKeyPointerClass("(FKCOLUMN_NAME)","::bl/(DB_NICE)(PKTABLE_NAME_NICE)BusinessComponent.bbj::(DB_NICE)(PKTABLE_NAME_NICE)BusinessComponent","(PKCOLUMN_NAME)")
+            
         </importedkey>
 
     methodend
