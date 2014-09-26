@@ -52,7 +52,7 @@ class public TouchGrid implements UIWidget
         
     methodend
 
-    method public voic clear()
+    method public void clear()
         #DataSet! = new BBjVector()
     methodend
     
