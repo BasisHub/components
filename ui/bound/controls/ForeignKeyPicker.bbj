@@ -1,8 +1,8 @@
 rem package components.ui.bound.controls
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
 use ::components/util/Util.bbj::Util

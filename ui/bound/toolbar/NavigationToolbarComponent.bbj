@@ -1,8 +1,8 @@
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
 
 
@@ -49,7 +49,9 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
 
     method private void initialize()
     
-        #getLaf().prepareWindow(#getWnd())
+        declare BBjWindow wnd!
+        wnd! = #getWnd()
+        #getLaf().prepareWindow(wnd!)
         rem #getLaf().setStyle(#getWnd(), "ShadowedPanel")
 
         imgMan! = BBjAPI().getSysGui().getImageManager()
@@ -60,35 +62,35 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
             stepping=48
         fi
 
-        #BtnSearch! = #getWnd().addToolButton(99,offs,0,stepping,stepping,"")
+        #BtnSearch! = wnd!.addToolButton(99,offs,0,stepping,stepping,"")
         #BtnSearch!.setImage(imgMan!.loadImageFromBytes(#getIconSearch()))
         #BtnSearch!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnSearch")
         #BtnSearch!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_SEARCH"))
         #BtnSearch!.setOpaque(0)
         offs=offs+stepping+5
         
-        #BtnFirst! = #getWnd().addToolButton(100,offs,0,stepping,stepping,"")
+        #BtnFirst! = wnd!.addToolButton(100,offs,0,stepping,stepping,"")
         #BtnFirst!.setImage(imgMan!.loadImageFromBytes(#getIconFirst()))
         #BtnFirst!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnFirst")
         #BtnFirst!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_FIRST"))
         #BtnFirst!.setOpaque(0)
         offs=offs+stepping
 
-        #BtnPrev! = #getWnd().addToolButton(101,offs,0,stepping,stepping,"")
+        #BtnPrev! = wnd!.addToolButton(101,offs,0,stepping,stepping,"")
         #BtnPrev!.setImage(imgMan!.loadImageFromBytes(#getIconPrev()))
         #BtnPrev!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnPrev")
         #BtnPrev!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_PREV"))
         #BtnPrev!.setOpaque(0)
         offs=offs+stepping
 
-        #BtnNext! = #getWnd().addToolButton(102,offs,0,stepping,stepping,"")
+        #BtnNext! = wnd!.addToolButton(102,offs,0,stepping,stepping,"")
         #BtnNext!.setImage(imgMan!.loadImageFromBytes(#getIconNext()))
         #BtnNext!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnNext")
         #BtnNext!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_NEXT"))
         #BtnNext!.setOpaque(0)
         offs=offs+stepping
 
-        #BtnLast! = #getWnd().addToolButton(103,offs,0,stepping,stepping,"")
+        #BtnLast! = wnd!.addToolButton(103,offs,0,stepping,stepping,"")
         #BtnLast!.setImage(imgMan!.loadImageFromBytes(#getIconLast()))
         #BtnLast!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnLast")
         #BtnLast!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_LAST"))

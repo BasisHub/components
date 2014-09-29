@@ -1,8 +1,8 @@
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 
 use ::translations/bbtranslator.bbj::BBTranslator
 use ::components/i18n/i18n.bbj::i18n
@@ -52,7 +52,9 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
 
     method private void initialize()
 
-        #getLaf().prepareWindow(#getWnd())
+        declare BBjWindow wnd!
+        wnd! = #getWnd()
+        #getLaf().prepareWindow(wnd!)
         rem #getLaf().setStyle(#getWnd(), "ShadowedPanel")
 
         imgMan! = BBjAPI().getSysGui().getImageManager()
@@ -64,42 +66,42 @@ class public FormEditToolbarComponent extends UIComponent implements UIWidget
             stepping=48
         fi
 
-        #BtnNew! = #getWnd().addToolButton(100,offs,0,stepping,stepping,"")
+        #BtnNew! = wnd!.addToolButton(100,offs,0,stepping,stepping,"")
         #BtnNew!.setImage(imgMan!.loadImageFromBytes(#getIconNew()))
         #BtnNew!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnNew")
         #BtnNew!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_NEW"))
         #BtnNew!.setOpaque(0)
         offs=offs+stepping
 
-        #BtnSave! = #getWnd().addToolButton(101,offs,0,stepping,stepping,"")
+        #BtnSave! = wnd!.addToolButton(101,offs,0,stepping,stepping,"")
         #BtnSave!.setImage(imgMan!.loadImageFromBytes(#getIconSave()))
         #BtnSave!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnSave")
         #BtnSave!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_SAVE"))
         #BtnSave!.setOpaque(0)
         offs=offs+stepping
 
-        #BtnDel! = #getWnd().addToolButton(102,offs,0,stepping,stepping,"")
+        #BtnDel! = wnd!.addToolButton(102,offs,0,stepping,stepping,"")
         #BtnDel!.setImage(imgMan!.loadImageFromBytes(#getIconDel()))
         #BtnDel!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnDel")
         #BtnDel!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_DELETE"))
         #BtnDel!.setOpaque(0)
         offs=offs+stepping+5
 
-        #BtnRestore! = #getWnd().addToolButton(103,offs,0,stepping,stepping,"")
+        #BtnRestore! = wnd!.addToolButton(103,offs,0,stepping,stepping,"")
         #BtnRestore!.setImage(imgMan!.loadImageFromBytes(#getIconRestore()))
         #BtnRestore!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnRestore")
         #BtnRestore!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_UNDO"))
         #BtnRestore!.setOpaque(0)
         offs=offs+stepping
 
-        #BtnRestoreAll! = #getWnd().addToolButton(104,offs,0,stepping,stepping,"")
+        #BtnRestoreAll! = wnd!.addToolButton(104,offs,0,stepping,stepping,"")
         #BtnRestoreAll!.setImage(imgMan!.loadImageFromBytes(#getIconRestoreAll()))
         #BtnRestoreAll!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnRestoreAll")
         #BtnRestoreAll!.setToolTipText(#super!.getTranslator().getTranslation("TOOLTIP_UNDOALL"))
         #BtnRestoreAll!.setOpaque(0)
         offs=offs+stepping+5
 
-        #BtnLock! = #getWnd().addToolButton(105,offs,0,stepping,stepping,"")
+        #BtnLock! = wnd!.addToolButton(105,offs,0,stepping,stepping,"")
         #BtnLock!.setImage(imgMan!.loadImageFromBytes(#getIconLock()))
         #BtnLock!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onBtnLock")
         #BtnLock!.setOpaque(0)

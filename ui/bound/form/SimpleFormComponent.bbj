@@ -1,7 +1,7 @@
 rem package components.ui.bound.form
 
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/bl/ValidationError.bbj::ValidationError

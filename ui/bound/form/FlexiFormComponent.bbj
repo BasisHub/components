@@ -9,8 +9,8 @@ use org.w3c.dom.Node
 use org.w3c.dom.NodeList
 use java.util.HashMap
 
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/bl/ValidationError.bbj::ValidationError
@@ -131,9 +131,12 @@ REM         is! = new InputSource(new String(xml$))
         
         sg!=BBjAPI().getSysGui()
 
-        #FormWnd! = #getWnd().addChildWindow( #getWnd().getAvailableControlID(),0,0,100,100,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
-        
+        declare BBjWindow wnd!
+        wnd! = #getWnd()
+        #FormWnd! = wnd!.addChildWindow( wnd!.getAvailableControlID(),0,0,100,100,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+                
         #FormFrame! = new ResponsiveFormFrame(#FormWnd!,100,0,0,#FormWnd!.getWidth(),#FormWnd!.getHeight())
+        #FormFrame!.getWnd().addStyle("FormWnd")
         #FormWnd!.setVisible(0)
 
         rem iterate groups
@@ -156,6 +159,7 @@ REM         is! = new InputSource(new String(xml$))
                     f2! = new ResponsiveFormFrame(#FormFrame!.getWnd(),#FormFrame!.getWnd().getAvailableControlID(),0,301,1024,0)
                     f2!.setNumCols(num(maxCols$,err=*next))
                     f2!.setHorizontalAlign(horizontalAlign)
+                    f2wnd! = f2!.getWnd()
                     
                     rem determine panes
                     paneElmntLst! = fstElmnt!.getElementsByTagName("panel")
@@ -188,7 +192,7 @@ REM         is! = new InputSource(new String(xml$))
 
 
                             rem create pane
-                            cwCanvas! = f2!.getWnd().addChildWindow(f2!.getWnd().getAvailableControlID(),0,0,width,height,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+                            cwCanvas! = f2wnd!.addChildWindow(f2wnd!.getAvailableControlID(),0,0,width,height,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
         
                             declare BBjFont font!
@@ -340,7 +344,7 @@ REM                             cwCanvas!.setFont(font!)
         #FormFrame!.setSize(#getW(), #getH())
 
         if #this!.getShowToolBar() then
-            #ToolbarWnd!.setSize(#getWnd().getWidth(), 25)
+            #ToolbarWnd!.setSize(wnd!.getWidth(), 25)
             #FormWnd!.setLocation(0,26)
             #setSize(#getW(), #getH()) 
         fi
@@ -375,11 +379,14 @@ REM                             cwCanvas!.setFont(font!)
 
             rem initialize the toolbar
 
-            #ToolbarWnd! = #getWnd().addChildWindow(100,0,0,#getWnd().getWidth(),0,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+            
+
+            declare BBjWindow wnd!
+            wnd! = #getWnd()
+
+            #ToolbarWnd! = wnd!.addChildWindow(100,0,0,wnd!.getWidth(),0,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
             #getLaf().prepareWindow(#ToolbarWnd!)
             #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
-            
-            
             
             #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,9*UIComponent.getToolbarHeight(),UIComponent.getToolbarHeight())
             if #this!.getBC()<>null() then 
@@ -572,18 +579,19 @@ REM         #delayedSetSize(null())
                   #BCList!.put(bindClass$,bc!)
                 wend
             fi
+            ? #ControlsByBcClass!.keySet()
             
-REM             fkmap! = bc!.getForeignKeyPointerBcList()
-REM             it! = fkmap!.iterator()
-REM             while it!.hasNext()
-REM                 it$=it!.next()
-REM                 bc1! = bc!.getForeignKeyBC(it$)
-REM                 cl$ = str(bc1!)
-REM                 while pos("::"=cl$)
-REM                     cl$=cl$(pos("::"=cl$)+2)
-REM                 wend
-REM                 #bindBC(cl$,bc1!)
-REM             wend
+            fkmap! = bc!.getForeignKeyPointerList()
+            it! = fkmap!.iterator()
+            while it!.hasNext()
+                it$=it!.next()
+                bc1! = bc!.getForeignKeyBC(it$)
+                cl$ = str(bc1!)
+                while pos("::"=cl$)
+                    cl$=cl$(pos("::"=cl$)+2)
+                wend
+                #bindBC(cl$,bc1!)
+            wend
 REM TODO: lazy loading!            
             
     

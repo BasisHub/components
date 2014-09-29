@@ -2,8 +2,8 @@ rem package components.ui.bound
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/ui/bound/UIComponent.bbj::UIComponent
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
 
 use ::translations/bbtranslator.bbj::BBTranslator

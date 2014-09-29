@@ -1,8 +1,8 @@
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/layout/BBMigPane.bbj::BBMigPane
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
 use ::translations/bbtranslator.bbj::BBTranslator
@@ -17,11 +17,13 @@ class public ControlWidget extends UIComponent  implements BBjControl
     field protected BBjNumber     Length
     field protected BBjNumber     Edited = 0 
     field protected BBjNumber     Focus = 0     
-       
+    
+    field private BBjChildWindow WndCache!   
     
     field protected static BBjNumber charw = BBjAPI().getSysGui().getMeasure("W") +2
     
     field public static BBTranslator CustomTranslator!
+
 
     method protected ControlWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)

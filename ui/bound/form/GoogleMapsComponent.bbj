@@ -2,13 +2,13 @@ use ::components/ui/unbound/WebBrowserComponent.bbj::WebBrowserComponent
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 
 use ::components/i18n/i18n.bbj::i18n
 use ::util/string/json.bbj::json
 
-class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjControl 
+class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjControl
 
 
     field private WebBrowserComponent BrowserWidget!
@@ -86,16 +86,16 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
-        
+
         #super!.setSize(w!,h!)
 
         #BrowserWidget!.setSize(w!,h!)
         #ProgressBar!.setLocation(int(w!/4*3)-5,10)
         #ProgressBar!.setSize(int(w!/4),20)
-        
+
 
     methodend
-    
+
     method public void setVisible(BBjNumber v)
 
         #super!.setVisible(v)
@@ -266,7 +266,7 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
 
             for i=0 to a!.size()-1
 
-                if a!.getItem(i)="" then continue
+                if a!.getItem(i)=null() or a!.getItem(i)="" then continue
 
                 if a!.getItem(i)="COUNTRY" then
                     #GeoCountry$=str(n!.getItem(i))
@@ -306,7 +306,7 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
 
             #ProgressBar!.setMinimum(0)
 
-            
+
             if #TbShowAllOrSelected!=null() or #TbShowAllOrSelected!.isSelected() then
 
                 if #getBC().getSelection().size() then
@@ -398,6 +398,8 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
 
     method public void updateMap(BBjVector markers!, BBjTemplatedString center!, BBjNumber circleRadius)
 
+        BBjAPI().removeTimer("GoogleMapsBrowserRefresh",err=*next)
+        
         #Markers! = markers!
         #Center! = center!
         #CircleRadius = circleRadius * 1000
@@ -420,10 +422,15 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
         write (ch)HTML$
         close (ch)
 
-        wait .5
+        BBjAPI().createTimer("GoogleMapsBrowserRefresh",.5,#this!,"refreshBrowserWidget")
+        
+
+    methodend
+    
+    method public void refreshBrowserWidget(BBjTimerEvent ev!)
+        
+        BBjAPI().removeTimer("GoogleMapsBrowserRefresh",err=*next)
         #BrowserWidget!.refresh()
-
-
     methodend
 
     method public BBjString getDynamicHtml()
@@ -571,22 +578,22 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
         wend
         in!.close()
 
-        
-        
+
+
         if pos("""status"" : ""OK"""=result$)=0 then goto skip
-        
-        
+
+
         lat$=result$(pos("""lat"" : "=result$)+7)
         lat$=cvs(lat$(1,pos(","=lat$)-1),144)
-        
-        
+
+
         lng$=result$(pos("""lng"" : "=result$)+7)
         lng$=cvs(lng$(1,pos("}"=lng$)-1),144)
-                
-        
+
+
         REM FIXME: use clean json parsing!
-        
-        
+
+
         LatLong!.setFieldValue("LAT",lat$)
         LatLong!.setFieldValue("LONG",lng$)
 
@@ -682,15 +689,3 @@ BrowserWidget!.setShowToolbar(1)
 BrowserWidget!.updateMap(v!,a1!,0)
 
 process_events
-
-
-
-
-
-
-
-
-
-
-
-
