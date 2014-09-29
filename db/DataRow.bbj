@@ -917,6 +917,7 @@ classend
 
 
 
+
 rem /**
 rem * DataRow
 rem *
@@ -1331,18 +1332,7 @@ class public DataRow
     methodend
 
 
-    rem /**
-    rem * Method getFieldNames:
-    rem * returns the field names as a java.lang.String (comma separated)
-    rem * @return BBjVector vec!: a vector containing the field names
-    rem */
-    method public java.lang.String toString()
 
-        methodret str(#FieldNames!)
-
-        rem TODO write nice toString method
-
-    methodend
 
 
     rem /**
@@ -1720,7 +1710,12 @@ class public DataRow
 classend
 
 
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 
+t=System.currentTimeMillis()
+
+for i=1 to 10000
 declare DataRow r!
 r!=new DataRow()
 r!.setFieldValue("NAME","Wald")
@@ -1750,3 +1745,10 @@ r2!.setFieldAttribute("FIRST_NAME","LABEL","Vorname")
 
 
 ? r1!.equals(r!)
+
+next 
+
+t=System.currentTimeMillis()-t
+
+
+print t

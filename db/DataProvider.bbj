@@ -7,7 +7,7 @@ rem *
 rem * @version 1.0
 rem */
 
-use ::components/db/DataRow.bbj::DataRow
+use com.basis.dbcomponents.DataRow
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::admin/admin.bbj::Admin
 use ::admin/admin.bbj::UserCredentials
