@@ -1,5 +1,5 @@
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
-use ::components/db/DataRow.bbj::DataRow
+use com.basis.dbcomponents.DataRow
 use ::components/util/Util.bbj::Util
 
 class public TouchGrid implements UIWidget

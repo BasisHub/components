@@ -11,10 +11,13 @@ class public ResponsiveSplitPane
     field private BBjChildWindow CwLeft!
     field private BBjChildWindow CwRight!
     field private BBjButton      BtnBack!
+    field private BBjButton      BtnSlideOpen!
     field private UIWidget UiwLeft!
     field private UIWidget UiwRight!
     field private BBjNumber DisplayMode
     field private BBjNumber PreferredLeftSize = 300
+    
+    field private BBjNumber AutoHideLeft = 1
 
     method public ResponsiveSplitPane(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
@@ -36,13 +39,22 @@ class public ResponsiveSplitPane
     methodend
     
     method private void setup()
-        #CwLeft!     = #CwCanvas!.addChildWindow(100,0,0,10,10,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        
         #CwRight!    = #CwCanvas!.addChildWindow(101,10,10,10,10,"",$00000810$,BBjAPI().getSysGui().getAvailableContext())
+        #CwRight!.addStyle("FormWnd")
+        #CwRight!.setName("CwRight") 
+        #CwLeft!     = #CwCanvas!.addChildWindow(100,0,0,10,10,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
         #BtnBack! = #CwCanvas!.addButton(200,5,5,80,30,"",$0010$)
         #BtnBack!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
         #BtnBack!.setName("BackButton")
         #BtnBack!.addStyle("BackButtonStyle")
+        #BtnSlideOpen! = #CwCanvas!.addButton(201,0,0,25,80,"",$0010$)
+        #BtnSlideOpen!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
+        #BtnSlideOpen!.setName("SlideOpenButton")
+        #BtnSlideOpen!.addStyle("SlideOpenButtonStyle")
+              
         #setSize(#W,#H)
+        
     methodend
     
     method public void onButtonBack( BBjButtonPushEvent ev!)
@@ -72,17 +84,42 @@ class public ResponsiveSplitPane
               #CwLeft!.setVisible(1)              
               #CwRight!.setSize(w!-#PreferredLeftSize,h!)
               if #UiwRight!<>null() then
-                #UiwRight!.setSize(w!-#PreferredLeftSize,h!)
-              fi              
-              #CwRight!.setLocation(#PreferredLeftSize+1,0)
+                 if #AutoHideLeft then
+                    #UiwRight!.setSize(w!-29,h!)
+                 else
+                    #UiwRight!.setSize(w!-#PreferredLeftSize,h!)
+                 fi
+              fi
+                     
+              if #AutoHideLeft then
+                    #CwRight!.setLocation(28,0)
+              else      
+                    #CwRight!.setLocation(#PreferredLeftSize+1,0)
+              fi
+              
               #CwRight!.setVisible(1)
               #BtnBack!.setVisible(0)
+              #BtnBack!.setLocation(0,0)
+              #BtnBack!.setSize(25,h!)
+              
+              if #DisplayMode = 0 AND #AutoHideLeft then
+                if #BtnSlideOpen!.isVisible() then
+                  #CwRight!.setEnabled(1)
+                  #CwLeft!.setVisible(0)
+                else
+                  #CwRight!.setEnabled(0)
+                  #CwLeft!.setVisible(1)
+                fi
+              fi
+
+              
 REM               #CwLeft!.setBackColor(BBjAPI().makeColor("RED"))
 REM               #CwRight!.setBackColor(BBjAPI().makeColor("GREEN"))
             break
             
             case 1
               #activateLeft()
+              #BtnSlideOpen!.setVisible(0)
 REM               #CwLeft!.setBackColor(BBjAPI().makeColor("BLUE"))
 REM               #CwRight!.setBackColor(BBjAPI().makeColor("YELLOW"))              
             break
@@ -90,42 +127,57 @@ REM               #CwRight!.setBackColor(BBjAPI().makeColor("YELLOW"))
             case 2
             
               #activateRight()
+                  #BtnSlideOpen!.setVisible(0)
 REM               #CwLeft!.setBackColor(BBjAPI().makeColor("BLUE"))
 REM               #CwRight!.setBackColor(BBjAPI().makeColor("YELLOW"))              
             break
         swend
+        
+        
     
     methodend
     
     method public void activateRight()
 
-              if #DisplayMode = 0 then methodret
-              #DisplayMode = 2 
-              #CwRight!.setSize(#W,#H-40)
-              if #UiwRight!<>null() then
-                #UiwRight!.setSize(#W,#H-40)
+              if #DisplayMode = 0 then 
+                if #AutoHideLeft then
+                    #CwLeft!.setVisible(0)
+                    #BtnSlideOpen!.setVisible(1)    
+                    #CwRight!.setEnabled(1)
+                fi
+              else
+                  #DisplayMode = 2 
+                  #CwRight!.setSize(#W,#H-40)
+                  if #UiwRight!<>null() then
+                    #UiwRight!.setSize(#W,#H-40)
+                  fi
+                  #CwRight!.setLocation(0,40)
+                  #CwRight!.setVisible(1)
+                  #CwLeft!.setVisible(0)
+                  #BtnBack!.setVisible(1)        
               fi
-              #CwRight!.setLocation(0,40)
-              #CwRight!.setVisible(1)
-              #CwLeft!.setVisible(0)
-              #BtnBack!.setVisible(1)        
-        
 
     methodend
 
     method public void activateLeft()
 
-              if #DisplayMode = 0 then methodret
-              #DisplayMode=1
-              #CwLeft!.setSize(#W,#H)
-              if #UiwLeft!<>null() then
-                #UiwLeft!.setSize(#W,#H)
-              fi              
-              #CwLeft!.setLocation(0,0)
-              #CwLeft!.setVisible(1)
-              #CwRight!.setVisible(0)
-              #BtnBack!.setVisible(0)        
-        
+              if #DisplayMode = 0 then 
+                if #AutoHideLeft then
+                    #CwLeft!.setVisible(1)
+                    #BtnSlideOpen!.setVisible(0)  
+                    #CwRight!.setEnabled(0)  
+                fi
+              else
+                  #DisplayMode=1
+                  #CwLeft!.setSize(#W,#H)
+                  if #UiwLeft!<>null() then
+                    #UiwLeft!.setSize(#W,#H)
+                  fi              
+                  #CwLeft!.setLocation(0,0)
+                  #CwLeft!.setVisible(1)
+                  #CwRight!.setVisible(0)
+                  #BtnBack!.setVisible(0)        
+              fi
 
     methodend
 
@@ -199,6 +251,7 @@ resize:
     ev! = BBjAPI().getLastEvent()
     w = ev!.getWidth()
     h = ev!.getHeight()
+    
     split!.setSize(w,h)
 return
 
