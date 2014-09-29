@@ -26,8 +26,12 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements UIWidget
       #Wnd! = wnd!
       
       #Split! = new ResponsiveSplitPane(wnd!)
+
+      searchbox_bg! =   #Split!.getLeft()
+      searchbox_bg!.addStyle("SearchWnd")
+
       
-      #NavGrid! = new TouchGridComponent(#Split!.getLeft(),200,0,50,280,300)
+      #NavGrid! = new TouchGridComponent(searchbox_bg!,200,0,50,280,300)
       #NavGrid!.loadRowTemplate("html/(DB_NICE)(TBL_NICE)TouchGridRow.html")
       #NavGrid!.setBC(#Bc!)
       
@@ -39,7 +43,7 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements UIWidget
        
 
         
-      searchbox! = #Split!.getLeft().addInputE(300,10,10,280,30,"")
+      searchbox! = searchbox_bg!.addInputE(300,10,10,280,30,"")
       searchbox!.addStyle("searchbox")
 
       fields!=new BBjVector()

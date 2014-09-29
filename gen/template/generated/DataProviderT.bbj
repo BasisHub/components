@@ -1,7 +1,5 @@
 use ::components/db/DataProvider.bbj::DataProvider
-use ::components/db/DataRow.bbj::DataRow
-
-use ::bl/(DB_NICE)(TBL_NICE)Entity.bbj::(DB_NICE)(TBL_NICE)Entity
+use com.basis.dbcomponents.DataRow
 
 rem /**
 rem * (DB_NICE)(TBL_NICE)DataProviderT
@@ -45,7 +43,7 @@ class public (DB_NICE)(TBL_NICE)DataProviderT extends DataProvider
         </keyseg>
         rem template because of ms sql server problem
         rem #addPrimaryKeySegment("intID")
-        #setEntityClass((DB_NICE)(TBL_NICE)Entity.newInstance())
+        #setEntityClass(DataRow.newInstance())
 
     methodend
 

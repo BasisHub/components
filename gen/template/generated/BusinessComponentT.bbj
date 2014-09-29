@@ -1,5 +1,5 @@
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 use ::components/bl/DataProviderBusinessComponent.bbj::DataProviderBusinessComponent
 use ::translations/bbtranslator.bbj::BBTranslator
 use ::i18n/CustomTranslator.bbj::CustomTranslator

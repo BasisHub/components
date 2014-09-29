@@ -1,7 +1,6 @@
 use ::components/db/DataProvider.bbj::DataProvider
-use ::components/db/DataRow.bbj::DataRow
+use com.basis.dbcomponents.DataRow
 
-use ::bl/(DB_NICE)(TBL_NICE)Entity.bbj::(DB_NICE)(TBL_NICE)Entity
 use ::generated/(DB_NICE)(TBL_NICE)DataProviderT.bbj::(DB_NICE)(TBL_NICE)DataProviderT
 
 rem /**
@@ -50,7 +49,7 @@ class public (DB_NICE)(TBL_NICE)DataProvider extends (DB_NICE)(TBL_NICE)DataProv
         <keyseg>
         rem #addPrimaryKeySegment("(KEYSEG)")
         </keyseg>
-        rem #setEntityClass((DB_NICE)(TBL_NICE)Entity.newInstance())
+        rem #setEntityClass(DataRow.newInstance())
 
         #super!.setupDatabaseLink()
 

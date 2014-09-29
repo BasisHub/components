@@ -1,4 +1,4 @@
-use ::components/db/DataRow.bbj::DataRow
+use com.basis.dbcomponents.DataRow
 
 rem /**
 rem * (DB_NICE)(TBL_NICE)EntityT
