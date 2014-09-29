@@ -10,8 +10,8 @@ rem * @version 1.0
 rem */
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 
 use ::components/db/DataProvider.bbj::DataProvider
 

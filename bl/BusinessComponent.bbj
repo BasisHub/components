@@ -9,8 +9,8 @@ rem *
 rem * @version 1.0
 rem */
 
-use ::components/db/DataRow.bbj::DataRow
-use ::components/db/DataRow.bbj::DataField
+use com.basis.dbcomponents.DataRow
+use com.basis.dbcomponents.DataField
 use ::components/db/DataProvider.bbj::DataProvider
 use ::components/bl/ValidationError.bbj::ValidationError
 use ::components/ui/bound/UIComponent.bbj::UIComponent
@@ -1206,7 +1206,8 @@ class public BusinessComponent
                 fkfield! = #ForeignKeyPointerClassesKeyFieldList!.get(fieldname$)
                 if fkfield! <> null() then
                     bc! = Util.newInstance(str(bcClass!))
-                    if bc! <> null() then                    
+                    if bc! <> null() then
+                        rem a=msgbox("instance: "+str(bcClass!))
                         #setForeignKeyPointer(fieldname$,bc!,str(fkfield!))
                     fi
                     #ForeignKeyPointerClassesList!.remove(fieldname$)
@@ -1456,7 +1457,7 @@ class public BusinessComponent
         methodret ""
     methodend
 
-    method public BBjVector getForeignKeyPointerBcList()
+    method public BBjVector getForeignKeyPointerList()
         
         map! = new BBjVector()
         
