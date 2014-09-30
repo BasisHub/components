@@ -49,7 +49,7 @@ class public SearchBoxController
         REM SEE also below
         REM for now: if we have less that 50 records show all items
         if (bc!.size() > 50) then        
-            #prepareQueryFilter("noop")
+            #prepareQueryFilter("noopblablablabla")
         else
             #prepareQueryFilter("")
         fi
