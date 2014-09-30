@@ -1542,7 +1542,8 @@ REM         fi
         row=0
 
         #Grid!.setNumRows(#VisibleRows-1)
-
+        #getBC().prepareResultSet(startRow, endRow)
+        
         loop:
 
         rec!=#GridContents!.getItem(i)
