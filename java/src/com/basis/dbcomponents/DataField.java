@@ -322,36 +322,85 @@ public class DataField
 		}
   
 		if (this.Type =='N' )
-			ret=this.DoubleValue.toString();
+			if (this.DoubleValue == null)
+			{
+				ret="";
+			}
+			else
+			{			
+				ret=this.DoubleValue.toString();
+			}
 
 		if (this.Type =='I' )
-			ret=this.IntegerValue.toString();
+			if (this.IntegerValue == null)
+			{
+				ret="";
+			}
+			else
+			{			
+				ret=this.IntegerValue.toString();
+			}
   
 		if (this.Type == 'B' )
-			if (this.BooleanValue)
-				ret="1";
+			if (this.BooleanValue == null)
+			{
+				ret="";
+			}
 			else
-				ret="0";
+			{			
+				if (this.BooleanValue)
+					ret="1";
+				else
+					ret="0";
+			}
 
 		if (this.Type == 'D' )
 		{
 			//	TODO: nice formatting honoring locale
-			ret=this.DateValue.toString();
+			if (this.DateValue == null)
+			{
+				ret="";
+			}
+			else
+			{			
+				ret=this.DateValue.toString();
+			}
 		}
 		if (this.Type =='X' )
 		{
 			//TODO: nice formatting honoring locale
-			ret=this.TimestampValue.toString();
+			if (this.TimestampValue == null)
+			{
+				ret="";
+			}
+			else
+			{			
+				ret=this.TimestampValue.toString();
+			}
 		}
 		if (this.Type == 'Y' )
 		{
 			//TODO: nice formatting honoring locale
-			ret=this.BigDecimalValue.toString();
+			if (this.BigDecimalValue == null)
+			{
+				ret="";
+			}
+			else
+			{			
+				ret=this.BigDecimalValue.toString();
+			}
 		}
 		if (this.Type == 'T' )
 		{
 			//TODO: nice formatting honoring locale
-			ret=this.TimeValue.toString();
+			if (this.TimeValue == null)
+			{
+				ret="";
+			}
+			else
+			{			
+				ret=this.TimeValue.toString();
+			}
 		}
   	
 		return ret;
