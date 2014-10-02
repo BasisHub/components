@@ -1,4 +1,4 @@
-package com.basis.dbcomponents;
+package com.basiscomponents.db;
 
 import java.math.BigDecimal;
 import java.sql.Time;

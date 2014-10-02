@@ -1,4 +1,4 @@
-package com.basis.dbcomponents;
+package com.basiscomponents.db;
 
 import java.util.ArrayList;
 import java.util.HashMap;
