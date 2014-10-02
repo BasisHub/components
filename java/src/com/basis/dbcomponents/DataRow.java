@@ -287,14 +287,14 @@ public class DataRow
 	}
 	
 
-	public char getFieldType(String name) throws Exception
+	public String getFieldType(String name) throws Exception
 	{
 		DataField field=this.FieldList.get(name);
 
 		if (field == null) 
           	throw new Exception("Field "+name+" does not exist");
 
-		return field.getType();		
+		return Character.toString(field.getType());		
 		
 	}
 

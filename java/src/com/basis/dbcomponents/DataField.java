@@ -3,6 +3,7 @@ package com.basis.dbcomponents;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -522,6 +523,7 @@ public class DataField
 		return obj;
 	}
 
+	@SuppressWarnings("deprecation")
 	public Double getValueAsNumber() throws Exception
 	{
 		Double ret = 0.0;
@@ -540,8 +542,7 @@ public class DataField
                 ret=-1.0;
             else
             {
-                String ret1=this.DateValue.toString();
-                Integer ret2=com.basis.util.BasisDate.jul(Integer.valueOf(ret1.substring(0,3)),Integer.valueOf(ret1.substring(5,6)), Integer.valueOf(ret1.substring(8,9)));
+                Integer ret2=com.basis.util.BasisDate.jul(new java.util.Date(this.DateValue.getTime()));
                 ret=ret2.doubleValue();
             }
 
@@ -550,7 +551,8 @@ public class DataField
                 ret=-1.0;
             else
             {
-                Integer ret2=com.basis.util.BasisDate.jul(this.TimestampValue.getYear(),this.TimestampValue.getMonth(), this.TimestampValue.getDay());
+            	
+                Integer ret2=com.basis.util.BasisDate.jul(new java.util.Date(this.TimestampValue.getTime()));
         		ret=ret2.doubleValue();
             }
 
@@ -577,8 +579,17 @@ public class DataField
                 ret=-1.0;
             else
             {
-            	Integer ret2=com.basis.util.BasisDate.jul(this.TimeValue.getYear(),this.TimeValue.getMonth(), this.TimeValue.getDay());
-            	ret=ret2.doubleValue();
+
+            	
+				Double d = (double) this.TimeValue.getHours();
+            	Double d1 = (double)(this.TimeValue.getMinutes());
+            	d1=d1/60;
+            	d+=d1;
+            	d1 = (double)(this.TimeValue.getSeconds());
+            	d1=d1/3600;
+            	d+=d1;
+
+            	ret=d;
             }                                   
 
 		return ret;
