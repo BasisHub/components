@@ -17,7 +17,7 @@ class public ResponsiveSplitPane
     field private BBjNumber DisplayMode
     field private BBjNumber PreferredLeftSize = 300
     
-    field private BBjNumber AutoHideLeft = 1
+    field private BBjNumber AutoHideLeft = 0
 
     method public ResponsiveSplitPane(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
@@ -44,17 +44,17 @@ class public ResponsiveSplitPane
         #CwRight!.addStyle("FormWnd")
         #CwRight!.setName("CwRight") 
         #CwLeft!     = #CwCanvas!.addChildWindow(100,0,0,10,10,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
-        #BtnBack! = #CwCanvas!.addButton(200,5,5,80,30,"",$0010$)
+        #BtnBack! = #CwCanvas!.addButton(200,5,5,80,30,"<<<",$0010$)
         #BtnBack!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
         #BtnBack!.setName("BackButton")
         #BtnBack!.addStyle("BackButtonStyle")
-        #BtnSlideOpen! = #CwCanvas!.addButton(201,0,0,25,80,"",$0010$)
+        #BtnSlideOpen! = #CwCanvas!.addButton(201,0,10,25,80,"",$0010$)
         #BtnSlideOpen!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
         #BtnSlideOpen!.setName("SlideOpenButton")
         #BtnSlideOpen!.addStyle("SlideOpenButtonStyle")
               
         #setSize(#W,#H)
-        
+
     methodend
     
     method public void onButtonBack( BBjButtonPushEvent ev!)
@@ -100,7 +100,7 @@ class public ResponsiveSplitPane
               #CwRight!.setVisible(1)
               #BtnBack!.setVisible(0)
               #BtnBack!.setLocation(0,0)
-              #BtnBack!.setSize(25,h!)
+REM               #BtnBack!.setSize(25,h!)
               
               if #DisplayMode = 0 AND #AutoHideLeft then
                 if #BtnSlideOpen!.isVisible() then

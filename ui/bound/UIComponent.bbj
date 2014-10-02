@@ -1,9 +1,10 @@
 rem package components.ui.bound
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/ui/bound/UIComponent.bbj::UIComponent
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
 
 use ::translations/bbtranslator.bbj::BBTranslator
@@ -21,7 +22,7 @@ rem *
 rem * 
 rem * @version 1.0
 rem */
-class public UIComponent
+class public UIComponent implements UIWidget
 
     field protected BBjChildWindow      Wnd!
     field protected BusinessComponent   BC!

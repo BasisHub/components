@@ -1,8 +1,8 @@
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/layout/BBMigPane.bbj::BBMigPane
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
 use ::translations/bbtranslator.bbj::BBTranslator
@@ -47,8 +47,8 @@ REM                     if #getBC().getPrimaryKeySegments().indexOf(ctrl_name$)>
 REM                         ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onCtrlInputKeypress",err=*next)
 REM                     fi
         a! = #Ctrl!
-        a!.setEditable(0,err=*next) 
-        a!.setFocusable(0,err=*next)
+REM         a!.setEditable(0,err=*next) 
+REM         a!.setFocusable(0,err=*next)
         
     methodend
     
@@ -123,31 +123,33 @@ REM                     fi
     method public void onSelectionChange()
 
         
-        #displayData()
-        #enableControl(1)
-
+          #displayData()
+          #enableControl(1)
+      
     methodend
     
     rem override for widgets like Date or so
    method public void displayData()
 
-            if #getBindField() >""then
-            
-                if #getBC().getSelection().size()=1 then
-                    rem #getBC().prepareResultSet(0,0)
-                    sel=#getBC().getSelection().getItem(i)
-                    
-                    r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
-                    text$     = r!.getFieldAsString(#getBindField(),err=*next)
-                    
-                    #Ctrl!.setText(text$)
-                else
-                    #Ctrl!.setText("")
+            if pos(".label"=#getName())=0 then
+                if #getBindField() >"" then
+                
+                    if #getBC().getSelection().size()=1 then
+                        rem #getBC().prepareResultSet(0,0)
+                        sel=#getBC().getSelection().getItem(i)
+                        
+                        r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                        text$     = r!.getFieldAsString(#getBindField(),err=*next)
+                        
+                        #Ctrl!.setText(text$)
+                    else
+                        #Ctrl!.setText("")
+                    fi
+        
+                    #Edited = 0
                 fi
-    
-                #Edited = 0
-            fi
-            
+             fi
+             
     methodend    
 
 
@@ -163,13 +165,13 @@ REM                     fi
 
    method public void onCtrlGainedFocus(BBjGainedFocusEvent ev!)
 
-        if #getBC().getSelection().size() then
+        if #getBC()<>null() and #getBC().getSelection().size() then
             recno=#getBC().getSelection().getItem(0)
             #getBC().setEditedRecord(recno)
+            #Edited = 1
+            #Focus = 1
         fi
         
-        #Edited = 1
-        #Focus = 1
 
 REM         if #EditedRec! = null() and #Rec! <> null() then
 REM             #EditedRec! = cast(DataRow,#Rec!.clone())
@@ -236,7 +238,7 @@ REM     methodend
     rem */
     method public void setEditing(BBjNumber isEditing)
     
-        if isEditing=0 then
+        if isEditing=0 and pos(".label"=#getName())=0 then
             #Ctrl!.setText("")
             #Edited=0
         fi

@@ -1,8 +1,8 @@
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
 
 
@@ -164,7 +164,7 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
             v!=new BBjVector()
             v!.addItem(0)
             #getBC().setSelection(v!)
-            
+            #getBC().prepareResultSet(0,0)
             
         fi
         
@@ -185,6 +185,7 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
 
             v!=new BBjVector()
             v!.addItem(recno)
+            #getBC().prepareResultSet(recno,recno)
             #getBC().setSelection(v!)
 
         fi
@@ -209,7 +210,7 @@ class public NavigationToolbarComponent extends UIComponent implements UIWidget
                 v!.addItem(recno)
                 #getBC().setSelection(v!)
             fi
-
+            #getBC().prepareResultSet(recno,recno)
         fi
 
 

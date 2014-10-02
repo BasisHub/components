@@ -7,7 +7,7 @@ rem *
 rem * @version 1.0
 rem */
 
-use com.basis.dbcomponents.DataRow
+use com.basiscomponents.db.DataRow
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::admin/admin.bbj::Admin
 use ::admin/admin.bbj::UserCredentials
@@ -500,7 +500,7 @@ REM         close (999)
             if #RecordCountInResultSet > 500 then
                 print "clean up resultset"
                 if #ResultSet!.size() then
-                    for i=0 to #ResultSet!.size()
+                    for i=0 to #ResultSet!.size()-1
                         if i>=first and i<=last then
                             continue
                         fi

@@ -1,0 +1,189 @@
+use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/ui/unbound/ISizeChangeNotifyTarget.bbj::ISizeChangeNotifyTarget
+
+
+class public CollapsiblePanel implements UIWidget
+
+    field private BBjChildWindow CwCanvas!
+    field private BBjChildWindow CwClient!
+    field private UIWidget       ClientWidget!
+    
+    field private BBjStaticText StHeadline!
+    field private BBjToolButton BtnCollapse!
+
+    field private Boolean     ShowFrame!=false
+    field private Boolean     ShowTitleBar!=false
+    field private Boolean     Collapsible!=false
+    field private Boolean     IsCollapsed! = false
+    
+    field private BBjColor    FrameColor!
+    field private String      Text!
+      
+    field private BBjNumber   W
+    field private BBjNumber   H
+    field private BBjNumber   X
+    field private BBjNumber   Y
+    
+    field private ISizeChangeNotifyTarget SizeChangeNotifyTarget!
+    
+    method public CollapsiblePanel(BBjWindow wnd!, BBjNumber id, BBjNumber x!, BBjNumber y!, BBjNumber w!, BBjNumber h!)
+
+        #CwCanvas! = wnd!.addChildWindow(id,x!,y!,w!,h!,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #CwClient! = #CwCanvas!.addChildWindow(100,0,0,w!,h!,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #W = w!
+        #H = h!
+        #X = x!
+        #Y= y!
+        
+        #StHeadline! = #CwCanvas!.addStaticText(200,4,4,0,0,"")
+        #BtnCollapse! = #CwCanvas!.addToolButton(201,0,0,16,16,"",$0010$)
+        #BtnCollapse!.setOpaque(1)
+        #BtnCollapse!.setCallback( BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onCollapse")
+        
+        #setFrameColor(BBjAPI().makeColor("PINK"))
+        
+
+        if INFO(3,6)="5" then 
+            #CwClient!.setBackColor(BBjAPI().makeColor("WHITE"))
+        fi
+
+    methodend
+
+    method public BBjNumber getX()
+        methodret #X
+    methodend
+    
+    method public BBjNumber getY()
+        methodret #Y
+    methodend
+    
+    method public BBjNumber getWidth()
+        methodret #W
+    methodend
+    
+    method public BBjNumber getHeight()
+
+        if #IsCollapsed! then
+            methodret 20
+        else
+            methodret #H
+        fi
+    methodend
+
+
+    method public void setLocation(BBjNumber x, BBjNumber y)
+        #CwCanvas!.setLocation(x,y)
+        #X = x
+        #Y = y
+    methodend
+
+    method public void setSize(BBjNumber w!, BBjNumber h!)
+
+        #W = w!
+        #H = h!
+
+        if #IsCollapsed! then
+            #CwCanvas!.setSize(#W,20)
+        else
+            #CwCanvas!.setSize(#W,#H)
+        fi 
+
+        
+        if #ShowFrame! then
+        
+            dw=2
+            dh=2
+            x=1
+            y=1
+        fi
+        
+        if #ShowTitleBar! then
+            dh=dh+20
+            y=y+20
+            #StHeadline!.setSize(#W,16)
+        else
+            #StHeadline!.setSize(0,0)
+        fi
+        
+        #CwClient!.setSize(#W-dw,#H-dh)
+        #CwClient!.setLocation(x,y)
+        
+        if #Collapsible! then
+            #BtnCollapse!.setLocation(#W-20,2)
+            #BtnCollapse!.setVisible(1)
+            
+        else
+            #BtnCollapse!.setVisible(0)
+        fi
+        
+        if #SizeChangeNotifyTarget! <> null() then
+            #SizeChangeNotifyTarget!.notifySizeChange()
+        fi
+        
+        
+    methodend
+    
+    method public void setText(String text!)
+        #Text! = text!
+        #StHeadline!.setText(text!)
+    methodend
+
+    method public void setShowFrame(Boolean fShow!)
+        #ShowFrame! = fShow!
+        #setSize(#W,#H)
+    methodend
+
+    method public void setShowTitleBar(Boolean fShow!)
+        #ShowTitleBar! = fShow!
+        #setSize(#W,#H)
+    methodend
+
+    method public void setCollapsible(Boolean fCollapsible!)
+        #Collapsible! = fCollapsible!
+        #setSize(#W,#H)
+    methodend
+        
+    method public void setFrameColor(BBjColor color!)
+        #FrameColor! = color!
+        #CwCanvas!.setBackColor(color!)
+        #StHeadline!.setBackColor(color!)
+    methodend
+
+    method public void onCollapse(BBjToolButtonPushEvent ev!)
+        #IsCollapsed! = ! #IsCollapsed!  
+        #setSize(#W,#H)
+    methodend
+
+    method public void setSizeChangeNotifyTarget(ISizeChangeNotifyTarget t!)
+        #SizeChangeNotifyTarget!= t!
+    methodend
+
+    method public BBjChildWindow getChildWindow()
+        methodret #CwClient!
+    methodend
+
+classend  
+
+
+sg! = BBjAPI().openSysGui("X0")
+wnd! = sg!.addWindow(10,10,800,600,"test")
+wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
+
+panel! = new CollapsiblePanel(wnd!,100,10,10,200,100)
+panel!.setShowFrame(1)
+panel!.setFrameColor(BBjAPI().makeColor("PINK"))
+panel!.setText("TEST")
+
+panel!.setCollapsible(1)
+g! = panel!.getChildWindow().addGroupBox(100,1,1,195,75,"TEST")
+
+wait 1
+
+panel!.setShowTitleBar(1)
+panel!.setSize(400,200)
+g!.setSize(395,175)
+
+process_events
+
+byebye:
+bye

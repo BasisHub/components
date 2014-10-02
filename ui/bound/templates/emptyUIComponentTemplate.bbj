@@ -1,5 +1,5 @@
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 use ::components/bl/businesscomponent.bbj::BusinessComponent
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 

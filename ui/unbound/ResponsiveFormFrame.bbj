@@ -2,9 +2,11 @@ chdir "../../../"
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/unbound/TestWidget.bbj::TestWidget
 
+use ::components/ui/unbound/CollapsiblePanel.bbj::CollapsiblePanel
+use ::components/ui/unbound/ISizeChangeNotifyTarget.bbj::ISizeChangeNotifyTarget
 
 
-class public ResponsiveFormFrame implements UIWidget
+class public ResponsiveFormFrame implements UIWidget, ISizeChangeNotifyTarget
 
     field private BBjNumber X
     field private BBjNumber Y
@@ -15,6 +17,7 @@ class public ResponsiveFormFrame implements UIWidget
     field private BBjChildWindow CwCanvas!
     field private BBjVector WidgetList!=new BBjVector()
     
+    field private BBjNumber ExternalUpdate=0
     field private BBjNumber MaxWidgetHeight
     field private BBjNumber TotalWidgetHeight
     
@@ -51,13 +54,12 @@ class public ResponsiveFormFrame implements UIWidget
     methodend
     
     method protected void setSize(BBjNumber w!, BBjNumber h!, BBjNumber resizeCanvas)
-    
-        
+ 
         if h<1 then
             h=999999
         fi
         
-        if #W<>num(w!) then
+        if #W<>num(w!) or #ExternalUpdate then
             update=1
 
             rem notify nested form frames:
@@ -68,7 +70,7 @@ class public ResponsiveFormFrame implements UIWidget
                 if pos("ResponsiveFormFrame"=dummy$)>0  then
                     REM TODO implement a better solution by introducing preferred, min & max sizes to UIWidget
                     o=widget!.getHeight()
-                    widget!.setSize(w!,widget!.getHeight())
+                    widget!.setSize(w!+10,widget!.getHeight())
                     widget!.setSize(w!,widget!.getHeight())
                     REM FIXME this is an ugly workaround, something is still messy when reducing the column count in a group
                     REM the child window is not correctly resized
@@ -95,7 +97,7 @@ class public ResponsiveFormFrame implements UIWidget
         #W=num(w!)
         #MaxH=h!
         
-        if update then
+        if update or #ExternalUpdate then
             #updateUI()
         fi
 
@@ -202,8 +204,9 @@ class public ResponsiveFormFrame implements UIWidget
             break
         wend
  
-        if cols <> #CurCols then
+        if cols <> #CurCols or #ExternalUpdate then
                 REM now render that stuff, but only if something changed
+                
                 
             if #fHorizontalAlign then 
                 REM vertical (columnar) reading order, but areas horizontally aligned as possible 
@@ -305,6 +308,24 @@ class public ResponsiveFormFrame implements UIWidget
     method public void setHorizontalAlign(BBjNumber fAlignHorizontally)
         #fHorizontalAlign=fAlignHorizontally
     methodend
+    
+    method public void notifySizeChange()
+
+            
+            #MaxWidgetHeight=0
+            #TotalWidgetHeight=0
+            it! = #WidgetList!.iterator()
+            while it!.hasNext()
+                uiw! = it!.next()
+                #MaxWidgetHeight    = max(#MaxWidgetHeight,uiw!.getHeight()+#Spacing)
+                #TotalWidgetHeight  = #TotalWidgetHeight + uiw!.getHeight()+#Spacing
+            wend
+
+            #ExternalUpdate=1
+            #CurCols=-1
+            #setSize(#W,#H)
+            #ExternalUpdate=0
+    methodend
 
 classend
 
@@ -328,12 +349,24 @@ f1!.addWidget(w!)
 
 
 f2! = new ResponsiveFormFrame(f1!.getWnd(),101,0,301,1024,0)
-f2!.setHorizontalAlign(1)
+f2!.setHorizontalAlign(0)
 f2!.setNumCols(5)
+
+for i=1 to 5
+  cp1! = new CollapsiblePanel(f2!.getWnd(),200+i,0,0,300,200)
+  cp1!.setShowFrame(1)
+  cp1!.setText("TEST "+str(i))
+  cp1!.setShowTitleBar(1)
+  cp1!.setCollapsible(1)
+  cp1!.setSizeChangeNotifyTarget(f2!)
+  f2!.addWidget(cp1!)
+next 
 for i=1 to 10
     w!=new TestWidget(f2!.getWnd(),100+i)
     f2!.addWidget(w!)
 next
+
+
 f1!.addWidget(f2!)
 
 w!=new TestWidget(f1!.getWnd(),104)

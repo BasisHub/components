@@ -1,8 +1,8 @@
 rem package components.ui.bound.controls
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 use com.basis.lucene.BBjSearchGizmo
 use com.basis.lucene.BBjSearchGizmoDoc
 

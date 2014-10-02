@@ -9,8 +9,8 @@ use org.w3c.dom.Node
 use org.w3c.dom.NodeList
 use java.util.HashMap
 
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/bl/ValidationError.bbj::ValidationError
@@ -317,15 +317,8 @@ REM                             cwCanvas!.setFont(font!)
                               
                           fi
         
-                          
                         Layout!.layoutChildren()
-                        
-                        ? Layout!.getHeight()
-                        
-                        
                         f2!.addWidget(Layout!)
-                        
-                            
                             
                         fi
                   next; rem pane

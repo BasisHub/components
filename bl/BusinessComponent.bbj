@@ -9,8 +9,8 @@ rem *
 rem * @version 1.0
 rem */
 
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 use ::components/db/DataProvider.bbj::DataProvider
 use ::components/bl/ValidationError.bbj::ValidationError
 use ::components/ui/bound/UIComponent.bbj::UIComponent

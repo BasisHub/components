@@ -1710,8 +1710,8 @@ class public DataRow
 classend
 
 
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 
 t=System.currentTimeMillis()
 

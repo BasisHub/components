@@ -534,7 +534,7 @@ REM                 fi
 
         method_end:
             if ch then close (ch)
-            a=msgbox("Error "+str(err)+" in line "+str(tcb(5))+" generating classes for "+t$+" ("+errmes(-1)+")",0,"Error")
+            rem a=msgbox("Error "+str(err)+" in line "+str(tcb(5))+" generating classes for "+t$+" ("+errmes(-1)+")",0,"Error")
 
     methodend
 
@@ -736,7 +736,7 @@ REM                 endif
 
         method_end_arc:
             if ch then close (ch)
-            a=msgbox("Error "+str(err)+" in line "+str(tcb(5))+" generating classes for "+t$+" ("+errmes(-1)+")",0,"Error")
+            rem a=msgbox("Error "+str(err)+" in line "+str(tcb(5))+" generating classes for "+t$+" ("+errmes(-1)+")",0,"Error")
 
     methodend
 

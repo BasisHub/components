@@ -1,8 +1,8 @@
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 use ::components/ui/unbound/TouchGrid.bbj::TouchGrid
 use ::components/util/Util.bbj::Util
 

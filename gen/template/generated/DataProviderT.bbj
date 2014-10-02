@@ -1,5 +1,5 @@
 use ::components/db/DataProvider.bbj::DataProvider
-use com.basis.dbcomponents.DataRow
+use com.basiscomponents.db.DataRow
 
 rem /**
 rem * (DB_NICE)(TBL_NICE)DataProviderT

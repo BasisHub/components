@@ -1,5 +1,5 @@
-use com.basis.dbcomponents.DataRow
-use com.basis.dbcomponents.DataField
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 use ::components/bl/ValidationError.bbj::ValidationError
 
 use ::generated/(DB_NICE)(TBL_NICE)BusinessComponentT.bbj::(DB_NICE)(TBL_NICE)BusinessComponentT
