@@ -899,7 +899,7 @@ class public BusinessComponent
     rem * @return BBjNumber size: the number of records in the result set
     rem */
     method public BBjNumber size()
-
+        methodret 0
     methodend
 
 

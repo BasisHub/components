@@ -1218,7 +1218,7 @@ REM         else
 REM             #ScrollBar!.setVisible(1)
 REM         fi
 
-        #GridContents! = #getBC().getResultSet()
+        #GridContents! = CAST(BBjVector,#getBC().getResultSet())
 
 
         if #GridContents!.size() = 0 then
