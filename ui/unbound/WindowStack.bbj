@@ -3,6 +3,7 @@ if INFO(3,6)<>"5" then
 fi
 
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/util/Util.bbj::Util
 
 class public WindowStackHelper
 
@@ -26,8 +27,12 @@ classend
 
 class public WindowStack
 
+    rem todo: make this poor implementation i little more slick by introducing a container class and one single stack 
     field private static BBjVector WindowList! = new BBjVector()
     field private static BBjVector WidgetList! = new BBjVector()
+    field private static BBjVector BackActionList! = new BBjVector()
+    field private static BBjVector BackActionObjectList! = new BBjVector()
+    field private static BBjVector BackActionPayloadList! = new BBjVector()
 
     rem this is for BUI only, when embedded in another child window
     field private static BBjWindow ContainerWnd!
@@ -68,15 +73,21 @@ class public WindowStack
         fi
         #WindowList!.addItem(wnd!)
         #WidgetList!.addItem(null())
+        #BackActionList!.addItem("")
+        #BackActionObjectList!.addItem("")
+        #BackActionPayloadList!.addItem("")
 
         yoffs=0 
-        if 1 or INFO(3,6)="5" and #WindowList!.size()>1 then
+        
+        if INFO(3,6)="5" then
             yoffs=40
         fi
+        
         cw!     = wnd!.addChildWindow(100,0,yoffs,wnd!.getWidth(),wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
+        
         if yoffs then
 
-            backButton!=wnd!.addButton(101,10,10,125,30,"Back")
+            backButton!=wnd!.addButton(101,5,5,30,30,"Back")
             backButton!.addStyle("BackButton")
             backButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onBackButton")
             
@@ -84,6 +95,10 @@ class public WindowStack
             st!.addStyle("GroupTitle")
             
         fi
+
+REM         if #WindowList!.size()=1 then
+REM             backButton!.setVisible(0)
+REM         fi
         
         wnd!.setVisible(1)
         methodret cw!
@@ -91,16 +106,62 @@ class public WindowStack
     methodend
     
 
+    method public static void setShowBackButton(BBjNumber visible)
+         wnd! = #WindowList!.getItem(#WindowList!.size()-1)        
+         wnd!.getControl(101).setVisible(visible)
+    methodend 
+    
+    method public static BBjNumber getShowBackButton()
+        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        if wnd! <> null() then
+          c! = wnd!.getControl(101)
+          if c! <> null() then 
+              ret=c!.isVisible()
+          fi
+        fi
+        methodret ret
+         
+    methodend     
+    
+    method public static void setBackButtonAction(Object target!, BBjString callback$, Object payload!)
+        #BackActionList!.removeItem(#BackActionList!.size()-1)
+        #BackActionList!.addItem(callback$)
+        #BackActionObjectList!.removeItem(#BackActionObjectList!.size()-1)          
+        #BackActionObjectList!.addItem(target!)
+        #BackActionPayloadList!.removeItem(#BackActionPayloadList!.size()-1)
+        #BackActionPayloadList!.addItem(payload!)        
+    methodend     
     
     method public static void closeWindow()
     
+    
         if #WindowList!.size() then
-            wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-            uiw! = #WidgetList!.getItem(#WindowList!.size()-1)
-            #WindowList!.removeItem(#WindowList!.size()-1)
-            #WidgetList!.removeItem(#WidgetList!.size()-1)
-            uiw!.destroy()
-            wnd!.destroy()
+            if #BackActionList!.size() then
+                action$ = #BackActionList!.getItem(#BackActionList!.size()-1)
+                if cvs(action$,3)="" then 
+
+                    wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+                    uiw! = #WidgetList!.getItem(#WindowList!.size()-1)
+                    #WindowList!.removeItem(#WindowList!.size()-1)
+                    #WidgetList!.removeItem(#WidgetList!.size()-1)
+                    #BackActionList!.removeItem(#BackActionList!.size()-1) 
+                    #BackActionObjectList!.removeItem(#BackActionObjectList!.size()-1)          
+                    #BackActionPayloadList!.removeItem(#BackActionPayloadList!.size()-1)
+                    uiw!.destroy()
+                    wnd!.destroy()
+                else
+                    obj! = #BackActionObjectList!.getItem(#BackActionObjectList!.size()-1)          
+                    pay! = #BackActionPayloadList!.getItem(#BackActionPayloadList!.size()-1)
+
+                    if payl! = null() then
+                    
+                        Util.invoke(obj!,action$)
+                    else
+                        Util.invoke(obj!,action$,payl!)
+                    fi
+                    methodret
+                fi
+            fi
         fi
     
         if #WindowList!.size()=0 then
@@ -133,7 +194,7 @@ class public WindowStack
     methodend
     
     method public static void setWidget(UIWidget uiw!)
-        #WidgetList!.setItem(#WidgetList!.size()-1,uiw!)
+            #WidgetList!.setItem(#WidgetList!.size()-1,uiw!)
         
             if INFO(3,6)="5" and #ContainerWnd! <>null() then
                 #resize(#ContainerWnd!.getWidth(), #ContainerWnd!.getHeight())

@@ -24,6 +24,29 @@ class public Util
         fi
 
     methodend
+
+    rem /**
+    rem * Method invoke:
+    rem * invoke a method in a given class and pass an object with data
+    rem * @param Object obj!: the object that holds the method that will be called
+    rem * @param BBjString nethodName$: the name of the method
+    rem * @param Object payload!: the object that is passed to the method
+    rem */
+    method public static void invoke(Object obj!, BBjString methodName$)
+
+        if obj!<>null() and methodName$>""  then
+
+            x$="obj!."+methodname$+"()"
+            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
+            ch=unt
+            open (ch)temp$
+            write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+            close (ch)
+            call temp$
+            erase temp$
+        fi
+
+    methodend
     
     rem /**
     rem * Method static newInstance:

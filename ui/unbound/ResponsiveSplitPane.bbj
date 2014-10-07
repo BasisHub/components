@@ -1,4 +1,5 @@
 use ::components/ui/unbound/UIWidget.bbj::UIWidget
+use ::components/ui/unbound/WindowStack.bbj::WindowStack
 
 class public ResponsiveSplitPane
 
@@ -10,14 +11,15 @@ class public ResponsiveSplitPane
     field private BBjChildWindow CwCanvas!
     field private BBjChildWindow CwLeft!
     field private BBjChildWindow CwRight!
-    field private BBjButton      BtnBack!
-    field private BBjButton      BtnSlideOpen!
+    field private BBjNumber WasBackButtonInvisible=1
+    field private BBjNumber SlideOpen
+    field private BBjCheckBox    CbPin!
     field private UIWidget UiwLeft!
     field private UIWidget UiwRight!
     field private BBjNumber DisplayMode
     field private BBjNumber PreferredLeftSize = 300
     
-    field private BBjNumber AutoHideLeft = 0
+    field private BBjNumber AutoHideLeft = 1
 
     method public ResponsiveSplitPane(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
@@ -44,92 +46,108 @@ class public ResponsiveSplitPane
         #CwRight!.addStyle("FormWnd")
         #CwRight!.setName("CwRight") 
         #CwLeft!     = #CwCanvas!.addChildWindow(100,0,0,10,10,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
-        #BtnBack! = #CwCanvas!.addButton(200,5,5,80,30,"<<<",$0010$)
-        #BtnBack!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
-        #BtnBack!.setName("BackButton")
-        #BtnBack!.addStyle("BackButtonStyle")
-        #BtnSlideOpen! = #CwCanvas!.addButton(201,0,10,25,80,"",$0010$)
-        #BtnSlideOpen!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
-        #BtnSlideOpen!.setName("SlideOpenButton")
-        #BtnSlideOpen!.addStyle("SlideOpenButtonStyle")
+REM         #BtnBack! = #CwCanvas!.addButton(200,10,10,30,30,"",$0010$)
+REM         #BtnBack!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
+REM         #BtnBack!.setName("BackButton")
+REM         #BtnBack!.addStyle("BackButtonStyle")
+
+        #CbPin! = #CwLeft!.addCheckBox(202,1000,1000,16,16,"")
+        #CbPin!.setCallback(BBjAPI.ON_CHECK_ON,#this!,"onCbPinCheck")
+        #CbPin!.setCallback(BBjAPI.ON_CHECK_OFF,#this!,"onCbPinUncheck")
+        
+        #CbPin!.addStyle("PinButtonStyle")
+        
+        #AutoHideLeft = num(BBjAPI().getThinClient().getUserProperty("ResponsiveSplitPaneAutoHide",err=*next),err=*next)
+        #CbPin!.setSelected (#AutoHideLeft) 
               
         #setSize(#W,#H)
-
+        
     methodend
     
     method public void onButtonBack( BBjButtonPushEvent ev!)
         #activateLeft()
     methodend
 
+    method public void onCbPinCheck( BBjCheckOnEvent ev!)
+        #AutoHideLeft = 1
+        BBjAPI().getThinClient().setUserProperty("ResponsiveSplitPaneAutoHide","1")
+        #setSize(#W,#H)
+    methodend
+
+    method public void onCbPinUncheck( BBjCheckOffEvent ev!)
+        #AutoHideLeft = 0
+        BBjAPI().getThinClient().setUserProperty("ResponsiveSplitPaneAutoHide","0")
+        #setSize(#W,#H)
+    methodend
+
+
     method public void setSize(BBjNumber w!, BBjNumber h!)
     
         #H = h!
         #W = w!
         #CwCanvas!.setSize(w!,h!)
-   
-        if w! >2*#PreferredLeftSize or h! >900 then
+        
+        
+        if w! >2*#PreferredLeftSize then
             #DisplayMode = 0   ; rem tablet
         else
             if #DisplayMode <>2 then
                 #DisplayMode = 1 ; rem show left pane in phone mode when mode was tablet before
             fi
         fi
+
+        
+        
         switch #DisplayMode
             case 0
               #CwLeft!.setSize(#PreferredLeftSize,h!)
+              #CbPin!.setLocation(#PreferredLeftSize-20,h!-20)
+              #CbPin!.setVisible(1)
+              
               if #UiwLeft!<>null() then
-                #UiwLeft!.setSize(#PreferredLeftSize,h!)
-              fi                 
+                #UiwLeft!.setSize(#PreferredLeftSize,h!-40)
+              fi       
+                        
               #CwLeft!.setLocation(0,0)
               #CwLeft!.setVisible(1)              
               #CwRight!.setSize(w!-#PreferredLeftSize,h!)
               if #UiwRight!<>null() then
                  if #AutoHideLeft then
-                    #UiwRight!.setSize(w!-29,h!)
+                    #UiwRight!.setSize(w!,h!)
                  else
                     #UiwRight!.setSize(w!-#PreferredLeftSize,h!)
                  fi
               fi
                      
-              if #AutoHideLeft then
-                    #CwRight!.setLocation(28,0)
-              else      
-                    #CwRight!.setLocation(#PreferredLeftSize+1,0)
-              fi
               
               #CwRight!.setVisible(1)
-              #BtnBack!.setVisible(0)
-              #BtnBack!.setLocation(0,0)
-REM               #BtnBack!.setSize(25,h!)
+REM               #BtnBack!.setVisible(0)
               
-              if #DisplayMode = 0 AND #AutoHideLeft then
-                if #BtnSlideOpen!.isVisible() then
+              if #AutoHideLeft then
+                #CwRight!.setLocation(0,0)
+                if #SlideOpen then
                   #CwRight!.setEnabled(1)
                   #CwLeft!.setVisible(0)
                 else
                   #CwRight!.setEnabled(0)
                   #CwLeft!.setVisible(1)
                 fi
+              else
+              
+                #CwRight!.setLocation(#PreferredLeftSize+1,0)
+                #CwRight!.setEnabled(1)
               fi
 
-              
-REM               #CwLeft!.setBackColor(BBjAPI().makeColor("RED"))
-REM               #CwRight!.setBackColor(BBjAPI().makeColor("GREEN"))
             break
             
             case 1
               #activateLeft()
-              #BtnSlideOpen!.setVisible(0)
-REM               #CwLeft!.setBackColor(BBjAPI().makeColor("BLUE"))
-REM               #CwRight!.setBackColor(BBjAPI().makeColor("YELLOW"))              
+              #SlideOpen=0
             break
 
             case 2
-            
-              #activateRight()
-                  #BtnSlideOpen!.setVisible(0)
-REM               #CwLeft!.setBackColor(BBjAPI().makeColor("BLUE"))
-REM               #CwRight!.setBackColor(BBjAPI().makeColor("YELLOW"))              
+                  #activateRight()
+                  #SlideOpen=1
             break
         swend
         
@@ -142,21 +160,27 @@ REM               #CwRight!.setBackColor(BBjAPI().makeColor("YELLOW"))
               if #DisplayMode = 0 then 
                 if #AutoHideLeft then
                     #CwLeft!.setVisible(0)
-                    #BtnSlideOpen!.setVisible(1)    
+                    #SlideOpen=1    
                     #CwRight!.setEnabled(1)
                 fi
               else
                   #DisplayMode = 2 
-                  #CwRight!.setSize(#W,#H-40)
                   if #UiwRight!<>null() then
-                    #UiwRight!.setSize(#W,#H-40)
+                    #UiwRight!.setSize(#W,#H)
                   fi
-                  #CwRight!.setLocation(0,40)
                   #CwRight!.setVisible(1)
                   #CwLeft!.setVisible(0)
-                  #BtnBack!.setVisible(1)        
               fi
-
+   
+              if #AutoHideLeft then
+                if WindowStack.getShowBackButton() = 0 then
+                    #WasBackButtonInvisible=1
+                else
+                    #WasBackButtonInvisible=0
+                fi
+                WindowStack.setShowBackButton(1)
+                WindowStack.setBackButtonAction(#this!,"activateLeft",null())
+              fi
     methodend
 
     method public void activateLeft()
@@ -164,21 +188,19 @@ REM               #CwRight!.setBackColor(BBjAPI().makeColor("YELLOW"))
               if #DisplayMode = 0 then 
                 if #AutoHideLeft then
                     #CwLeft!.setVisible(1)
-                    #BtnSlideOpen!.setVisible(0)  
+                    #SlideOpen=0  
                     #CwRight!.setEnabled(0)  
                 fi
               else
                   #DisplayMode=1
-                  #CwLeft!.setSize(#W,#H)
-                  if #UiwLeft!<>null() then
-                    #UiwLeft!.setSize(#W,#H)
-                  fi              
-                  #CwLeft!.setLocation(0,0)
                   #CwLeft!.setVisible(1)
                   #CwRight!.setVisible(0)
-                  #BtnBack!.setVisible(0)        
               fi
-
+              WindowStack.setBackButtonAction(null(),"",null())
+              if #WasBackButtonInvisible then
+              
+                WindowStack.setShowBackButton(0)
+              fi
     methodend
 
 
