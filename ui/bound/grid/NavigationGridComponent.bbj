@@ -1561,7 +1561,7 @@ REM         fi
 
             f$=columnConfig!.getFieldAsString("NAME")
 
-            attrs! = rec!.getFieldAttributes(f$)
+            attrs! = rec!.getFieldAttributes(f$,err=*continue)
 
             ks! = attrs!.keySet()
             it! = ks!.iterator()

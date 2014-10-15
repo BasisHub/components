@@ -226,9 +226,9 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
             disp2$=""
             disp3$=""
 
-            disp1$ = r!.getFieldAsString(disp_1$,err=*next)
-            disp2$ = r!.getFieldAsString(disp_2$,err=*next)
-            disp3$ = r!.getFieldAsString(disp_3$,err=*next)
+            disp1$ = r!.getFieldAsString(#GeoDisp_1$,err=*next)
+            disp2$ = r!.getFieldAsString(#GeoDisp_2$,err=*next)
+            disp3$ = r!.getFieldAsString(#GeoDisp_3$,err=*next)
 
             marker!.setFieldValue("CAPTION",disp1$+"\n"+disp2$+"\n"+disp3$)
 
@@ -451,12 +451,12 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
         HTML$=HTML$+"          function initialize() {"
         HTML$=HTML$+"            var myOptions = {"
         HTML$=HTML$+"              center: new google.maps.LatLng("+#Center!.getFieldAsString("LAT",err=*next)+","+#Center!.getFieldAsString("LONG",err=*next)+"),"
-        HTML$=HTML$+"              zoom: 5,"
+        HTML$=HTML$+"              zoom: 6,"
         HTML$=HTML$+"              mapTypeId: google.maps.MapTypeId.ROADMAP"
         HTML$=HTML$+"            };"
         HTML$=HTML$+"            var map = new google.maps.Map(document.getElementById(""map_canvas""),"
         HTML$=HTML$+"                myOptions);"
-
+        
         if circleRadius>0 then
             HTML$=HTML$+"     var circle = new google.maps.Circle({strokeColor: ""#FF0000"",strokeOpacity: 0.8,strokeWeight: 2,fillColor: ""#FF0000"",fillOpacity: 0.35,map: map,center: new google.maps.LatLng("+center!.getFieldAsString("LAT")+","+center!.getFieldAsString("LONG")+"), radius: "+str(circleRadius)+"});"
         fi
@@ -468,8 +468,9 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
             for i=0 to #Markers!.size()-1
                 marker! = #Markers!.getItem(i)
                 caption$ = ""
-                caption$ = #Marker!.getFieldAsString("CAPTION",err=*next)
+                caption$ = marker!.getFieldAsString("CAPTION",err=*next)
                 HTML$=HTML$+"                marker = new google.maps.Marker({position: new google.maps.LatLng("+marker!.getFieldAsString("LAT")+","+marker!.getFieldAsString("LONG")+"),title:"""+caption$+"""}); marker.setMap(map); "
+
             next
 
         endif
@@ -491,6 +492,7 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
 
         w=#BrowserWidget!.getWidth()
         h=#BrowserWidget!.getHeight()
+
 
         HTML$="<HTML><BODY>"
         HTML$=HTML$+"<IMG SRC='"
