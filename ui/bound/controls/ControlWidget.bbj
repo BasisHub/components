@@ -141,9 +141,26 @@ REM         a!.setFocusable(0,err=*next)
                         r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
                         
-                        #Ctrl!.setText(text$)
+                        rem #ToDo setValue method for Widget specify handling in subclass. 
+                        switch #Ctrl!.getControlType() 
+                        case BBjControl.CHECKBOX_CONTROL
+                            tmpVal!=BBjAPI().FALSE
+                            if num(text$,err=*ENDIF)<>0 then tmpVal!=BBjAPI().TRUE endif 
+                            cast(BBjCheckBox,#Ctrl!).setSelected(tmpVal!)
+                            break
+                        case default
+                            #Ctrl!.setText(text$)
+                            break 
+                        swend 
                     else
-                        #Ctrl!.setText("")
+                        switch #Ctrl!.getControlType()
+                        case BBjControl.CHECKBOX_CONTROL
+                            cast(BBjCheckBox,#Ctrl!).setSelected(BBjAPI().FALSE)
+                            break
+                        case default
+                            #Ctrl!.setText("")
+                            break 
+                        swend
                     fi
         
                     #Edited = 0
@@ -285,7 +302,17 @@ REM     methodend
     method public DataRow prepareSave(DataRow r!)
     
         if #Edited then
-            r!.setFieldValue(#getBindField(),#Ctrl!.getText())
+        
+            switch #Ctrl!.getControlType()
+            case BBjControl.CHECKBOX_CONTROL
+                tmpVal$="0"
+                if cast(BBjCheckBox,#Ctrl!).isSelected() then tmpVal$="1" endif 
+                 r!.setFieldValue(#getBindField(),tmpVal$)
+                break
+            case default    
+                r!.setFieldValue(#getBindField(),#Ctrl!.getText())
+                break
+            swend
         fi
         
         methodret r!

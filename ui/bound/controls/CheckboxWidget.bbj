@@ -1,0 +1,13 @@
+use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+
+class public  CheckboxWidget extends ControlWidget
+ 
+    method public CheckboxWidget(BBjChildWindow cwCanvas!)
+        #super!(cwCanvas!)
+        cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        #setWnd(cwWidget!)
+        ck! = cwWidget!.addCheckBox(100,0,0,10,10,"")
+        #setCtrl(ck!)
+    methodend
+    
+classend
