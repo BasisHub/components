@@ -25,7 +25,48 @@ class public  HTMLViewWidget extends ControlWidget
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
                         
                         html! = #super!.getCtrl()
-                        html!.setUrl("/files/deliver/25092014125036800.pdf")
+REM                         html!.setUrl("/files/deliver/25092014125036800.pdf",err=*next)
+
+                        rem html!.setText(text$) 
+                        
+                        port$ = java.lang.System.getProperty("com.basis.jetty.port")
+                        host$ = java.lang.System.getProperty("com.basis.jetty.host")
+                        d$    = java.lang.System.getProperty("com.basis.server.configDirectory")
+                        d$=d$(1,pos("cfg"=d$)-1)
+                
+                
+                        mkdir d$+"htdocs/deliver",err=*next
+                        t$=str(dec(info(3,0)))+"_"+date(0:"%Dz.%Mz.%Yl.%Hz%mz%Sz")
+                        mkdir d$+"htdocs/deliver/"+t$+"/",err=*next
+                
+                        f$=text$
+                        while pos("/"=f$) 
+                            f$=f$(pos("/"=f$)+1)
+                        wend
+                        while pos("\"=f$)
+                            f$=f$(pos("\"=f$)+1)
+                        wend
+                        
+                        ch=unt
+                        open (ch)text$
+                        
+                        ch1=unt
+                        open (ch1,mode="O_CREATE,O_TRUNC")d$+"htdocs/deliver/"+t$+"/"+f$
+                        
+                        while 1
+                            read record (ch,siz=1000,end=*break)block$
+                            write (ch1)block$,
+                        wend
+                        
+                         close (ch)
+                         close (ch1)
+                         
+                         
+                          
+                        Url$ = "http://"+host$+":"+port$+"/files/deliver/"+t$+"/"+java.net.URLEncoder.encode(f$,"UTF-8").replace("+", "%20")
+                        
+
+                        html!.setUrl(Url$)                        
 
                      fi
                  fi
