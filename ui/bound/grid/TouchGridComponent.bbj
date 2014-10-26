@@ -52,6 +52,7 @@ class public TouchGridComponent extends UIComponent implements UIWidget
         
         #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,#getTranslator().getTranslation("NO_RESULT")))
         #ResultInfo!.addStyle("TouchGridResultinfo")
+        #ResultInfo!.setVisible(0)
 
     methodend
 

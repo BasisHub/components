@@ -1,0 +1,34 @@
+use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+
+class public  HTMLViewWidget extends ControlWidget
+ 
+    method public HTMLViewWidget(BBjChildWindow cwCanvas!)
+        #super!(cwCanvas!)
+        
+        cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        #setWnd(cwWidget!)
+        #setCtrl(#getWnd().addHtmlView(100,0,0,1,1,""))
+    
+    methodend
+    
+    method public void displayData()
+                if #getBindField() >"" then
+                
+                    if #getBC().getSelection().size()=1 then
+                        rem #getBC().prepareResultSet(0,0)
+                        sel=#getBC().getSelection().getItem(i)
+                        
+                        r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                        text$     = r!.getFieldAsString(#getBindField(),err=*next)
+                        
+                        html! = #super!.getCtrl()
+                        html!.setUrl("/files/deliver/25092014125036800.pdf")
+
+                     fi
+                 fi
+    methodend
+
+classend

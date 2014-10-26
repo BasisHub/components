@@ -10,4 +10,43 @@ class public  CheckboxWidget extends ControlWidget
         #setCtrl(ck!)
     methodend
     
+    
+   method public void displayData()
+
+            if pos(".label"=#getName())=0 then
+                if #getBindField() >"" then
+                
+                    if #getBC().getSelection().size()=1 then
+                        rem #getBC().prepareResultSet(0,0)
+                        sel=#getBC().getSelection().getItem(i)
+                        
+                        r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                        text$     = r!.getFieldAsString(#getBindField(),err=*next)
+                        
+                        rem #ToDo setValue method for Widget specify handling in subclass. 
+                            tmpVal!=BBjAPI().FALSE
+                            if num(text$,err=*ENDIF)<>0 then tmpVal!=BBjAPI().TRUE endif 
+                            cast(BBjCheckBox,#Ctrl!).setSelected(tmpVal!)
+                    else
+                            cast(BBjCheckBox,#Ctrl!).setSelected(BBjAPI().FALSE)
+                    fi
+        
+                    #Edited = 0
+                fi
+             fi
+             
+    methodend   
+
+    method public DataRow prepareSave(DataRow r!)
+    
+        if #Edited then
+            tmpVal$="0"
+            if cast(BBjCheckBox,#Ctrl!).isSelected() then tmpVal$="1" endif 
+             r!.setFieldValue(#getBindField(),tmpVal$)
+        fi
+        
+        methodret r!
+        
+    methodend  
+        
 classend
