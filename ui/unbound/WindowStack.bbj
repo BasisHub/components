@@ -1,4 +1,4 @@
-if INFO(3,6)<>"5" then 
+if INFO(3,6)<>"5" then
     ::components/util/Util.bbj::Util.runAsBui(pgm(-1))
 fi
 
@@ -8,13 +8,13 @@ use ::components/util/Util.bbj::Util
 class public WindowStackHelper
 
     method public void onClose(BBjCloseEvent ev!)
-        WindowStack.closeWindow() 
+        WindowStack.closeWindow()
     methodend
 
     method public void onBackButton(BBjButtonPushEvent ev!)
-        WindowStack.closeWindow() 
+        WindowStack.closeWindow()
     methodend
-        
+
     method public void onResize( BBjResizeEvent ev!)
         WindowStack.resize(ev!.getWidth(),ev!.getHeight())
     methodend
@@ -22,7 +22,7 @@ class public WindowStackHelper
     method public void onScreenResize( BBjScreenResizeEvent ev!)
         WindowStack.resize(ev!.getWidth(),ev!.getHeight())
     methodend
-    
+
 classend
 
 class public WindowStack
@@ -36,13 +36,13 @@ class public WindowStack
 
     rem this is for BUI only, when embedded in another child window
     field private static BBjWindow ContainerWnd!
-    
+
     method public static void setContainerWnd(BBjChildWindow cw!)
         #ContainerWnd! = cw!
     methodend
-    
+
     method public static BBjChildWindow openWindow(BBjString name$)
-        
+
         sg! = BBjAPI().getSysGui(err=*next); goto got_sysgui
             sg! = BBjAPI().openSysGui("X0")
         got_sysgui:
@@ -67,7 +67,7 @@ class public WindowStack
                 wnd! = #WindowList!.getItem(#WindowList!.size()-1)
                 wnd!.setVisible(0)
             fi
-            
+
             wnd!     = #ContainerWnd!.addChildWindow(#ContainerWnd!.getAvailableControlID(),0,0,#ContainerWnd!.getWidth(),#ContainerWnd!.getHeight(),"",$00000800$,sg!.getAvailableContext())
             wnd!.setVisible(1)
         fi
@@ -77,84 +77,84 @@ class public WindowStack
         #BackActionObjectList!.addItem("")
         #BackActionPayloadList!.addItem("")
 
-        yoffs=0 
-        
+        yoffs=0
+
         if INFO(3,6)="5" then
             yoffs=40
         fi
-        
+
         cw!     = wnd!.addChildWindow(100,0,yoffs,wnd!.getWidth(),wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
-        
+
         if yoffs then
 
             backButton!=wnd!.addButton(101,5,5,30,30,"Back")
             backButton!.addStyle("BackButton")
             backButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onBackButton")
-            
+
             st! = wnd!.addStaticText(102,150,10,2000,30,name$)
             st!.addStyle("GroupTitle")
-            
+
         fi
 
 REM         if #WindowList!.size()=1 then
 REM             backButton!.setVisible(0)
 REM         fi
-        
+
         wnd!.setVisible(1)
         methodret cw!
-        
+
     methodend
-    
+
 
     method public static void setShowBackButton(BBjNumber visible)
-         wnd! = #WindowList!.getItem(#WindowList!.size()-1)        
-         wnd!.getControl(101).setVisible(visible)
-    methodend 
-    
+         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+         wnd!.getControl(101).setVisible(visible,err=*next)
+    methodend
+
     method public static BBjNumber getShowBackButton()
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
         if wnd! <> null() then
           c! = wnd!.getControl(101)
-          if c! <> null() then 
+          if c! <> null() then
               ret=c!.isVisible()
           fi
         fi
         methodret ret
-         
-    methodend     
-    
+
+    methodend
+
     method public static void setBackButtonAction(Object target!, BBjString callback$, Object payload!)
         #BackActionList!.removeItem(#BackActionList!.size()-1)
         #BackActionList!.addItem(callback$)
-        #BackActionObjectList!.removeItem(#BackActionObjectList!.size()-1)          
+        #BackActionObjectList!.removeItem(#BackActionObjectList!.size()-1)
         #BackActionObjectList!.addItem(target!)
         #BackActionPayloadList!.removeItem(#BackActionPayloadList!.size()-1)
-        #BackActionPayloadList!.addItem(payload!)        
-    methodend     
-    
+        #BackActionPayloadList!.addItem(payload!)
+    methodend
+
     method public static void closeWindow()
-    
-    
+
+
         if #WindowList!.size() then
             if #BackActionList!.size() then
                 action$ = #BackActionList!.getItem(#BackActionList!.size()-1)
-                if cvs(action$,3)="" then 
+                if cvs(action$,3)="" then
 
                     wnd! = #WindowList!.getItem(#WindowList!.size()-1)
                     uiw! = #WidgetList!.getItem(#WindowList!.size()-1)
                     #WindowList!.removeItem(#WindowList!.size()-1)
                     #WidgetList!.removeItem(#WidgetList!.size()-1)
-                    #BackActionList!.removeItem(#BackActionList!.size()-1) 
-                    #BackActionObjectList!.removeItem(#BackActionObjectList!.size()-1)          
+                    #BackActionList!.removeItem(#BackActionList!.size()-1)
+                    #BackActionObjectList!.removeItem(#BackActionObjectList!.size()-1)
                     #BackActionPayloadList!.removeItem(#BackActionPayloadList!.size()-1)
                     uiw!.destroy()
                     wnd!.destroy()
                 else
-                    obj! = #BackActionObjectList!.getItem(#BackActionObjectList!.size()-1)          
+                    obj! = #BackActionObjectList!.getItem(#BackActionObjectList!.size()-1)
                     pay! = #BackActionPayloadList!.getItem(#BackActionPayloadList!.size()-1)
 
                     if payl! = null() then
-                    
+
                         Util.invoke(obj!,action$)
                     else
                         Util.invoke(obj!,action$,payl!)
@@ -163,49 +163,49 @@ REM         fi
                 fi
             fi
         fi
-    
+
         if #WindowList!.size()=0 then
             BBjAPI().postPriorityCustomEvent("WindowStackEmpty","")
         else
             wnd! = #WindowList!.getItem(#WindowList!.size()-1)
             wnd!.setVisible(1)
-        
+
             if INFO(3,6)="5" and #ContainerWnd! <>null() then
                 #resize(#ContainerWnd!.getWidth(), #ContainerWnd!.getHeight())
             fi
         fi
-    
-    methodend 
-    
+
+    methodend
+
     method public static void resize (BBjNumber w, BBjNumber h)
         if #WindowList!.size() then
 
             yoffs=0
             if ( INFO(3,6)="5" and #WindowList!.size()>1 ) or #ContainerWnd! <> null() then
                 yoffs=40
-            fi        
+            fi
             wnd! = #WindowList!.getItem(#WindowList!.size()-1)
             wnd!.setSize(w,h)
             uiw! = #WidgetList!.getItem(#WidgetList!.size()-1)
             if uiw! <> null() then
                 uiw!.setSize(w,h-yoffs)
             fi
-        fi        
+        fi
     methodend
-    
+
     method public static void setWidget(UIWidget uiw!)
             #WidgetList!.setItem(#WidgetList!.size()-1,uiw!)
-        
+
             if INFO(3,6)="5" and #ContainerWnd! <>null() then
                 #resize(#ContainerWnd!.getWidth(), #ContainerWnd!.getHeight())
             fi
-                    
+
             if INFO(3,6)="5" then
                 wnd! = #WindowList!.getItem(#WindowList!.size()-1)
                 #resize(wnd!.getWidth(),wnd!.getHeight())
             fi
     methodend
-   
+
 
 classend
 
@@ -215,21 +215,21 @@ class public testWidget implements UIWidget
 
     method private testWidget()
     methodend
-    
+
     method public testWidget(BBjChildWindow cw!)
         #Cw! = cw!
         cw!.addStaticText(101,10,50,400,25,"")
         #render()
     methodend
-    
+
     method public void onClose(BBjButtonPushEvent ev!)
         WindowStack.closeWindow()
     methodend
-    
+
     method private void render()
         #Cw!.getControl(101).setText(str(#Cw!.getWidth())+","+str(#Cw!.getHeight()))
     methodend
-    
+
     method public void setSize(BBjNumber w!, BBjNumber h!)
         #Cw!.setSize(w!,h!)
         #render()
@@ -265,7 +265,7 @@ process_events
 openZwei:
     cw2! = WindowStack.openWindow("Zwei")
     t1!  = new testWidget(cw2!)
-    WindowStack.setWidget(t1!)    
+    WindowStack.setWidget(t1!)
     btn2! = cw2!.addButton(100,10,10,200,25,"open ZweiA")
     btn2!.setCallback(BBjAPI.ON_BUTTON_PUSH,"openZweiA")
     return
@@ -277,5 +277,3 @@ openZweiA:
 
 byebye:
     release
- 
-
