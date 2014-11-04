@@ -55,10 +55,8 @@ class public bbmigtest
         #Window!.setCallback(#Window!.ON_CLOSE, #this!, "closeWindow")
         #Window!.setCallback(#Window!.ON_RESIZE, #this!, "windowResize")
         #Window!.setCallback(#Window!.ON_SCREEN_RESIZE, #this!, "screenResize")
-        if info(3,6)<>"5" then
-            #Window!.setCallback(#Window!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
-            #cWindow!.setCallback(#cWindow!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
-        endif
+        #Window!.setCallback(#Window!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
+        #cWindow!.setCallback(#cWindow!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
         #Window!.setVisible(#TRUE)
         #Window!.focus()
         process_events
@@ -162,7 +160,7 @@ class public bbmigtest
         WinFlags$=IOR(WinFlags$,$00010000$); rem Activates keyboard navigation in the window. If this flag is specified, key pressed ("t") events for arrow keys and the tab key will not be reported.
         rem WinFlags$=IOR(WinFlags$,$00020000$); rem Always positions the window on top of other windows.
         rem WinFlags$=IOR(WinFlags$,$00040000$); rem Creates a border around the dialog.
-        rem WinFlags$=IOR(WinFlags$,$00080000$); rem Sets the window to behave as a dialog.
+        WinFlags$=IOR(WinFlags$,$00080000$); rem Sets the window to behave as a dialog.
         rem WinFlags$=IOR(WinFlags$,$00100000$); rem Automatically arranges all controls and child windows placed in the window to fit.
         WinFlags$=IOR(WinFlags$,$00400000$); rem Allows use of a custom color palette. This provides a more accurate display of colors in bitmapped images.
         WinFlags$=IOR(WinFlags$,$00800000$); rem Sets the <Enter> key to behave as a <Tab> key.
