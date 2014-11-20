@@ -2,14 +2,14 @@
 use ::components/ui/unbound/menu/menu.bbj::Menu
 use ::components/ui/unbound/menu/menu.bbj::MenuItem
 use ::components/ui/laf/laffactory.bbj::laffactory
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 laf! = laffactory.getLaf()
 
 rem ##################################################################################################
 rem class OutlookBarComponent
 rem ##################################################################################################
 
-class public OutlookBarComponent implements UIWidget
+class public OutlookBarComponent implements BBjControl
 
 
     field private BBjNumber X

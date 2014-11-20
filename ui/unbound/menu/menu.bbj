@@ -105,6 +105,10 @@ class public MenuItem
         methodret img!
 
     methodend
+    
+    method public MenuItem getParent()
+        methodret #Parent!
+    methodend
 
 classend
 
