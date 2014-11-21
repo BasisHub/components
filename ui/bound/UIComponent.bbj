@@ -1,5 +1,4 @@
 rem package components.ui.bound
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/ui/bound/UIComponent.bbj::UIComponent
@@ -22,7 +21,7 @@ rem *
 rem * 
 rem * @version 1.0
 rem */
-class public UIComponent implements UIWidget
+class public UIComponent implements BBjControl
 
     field protected BBjChildWindow      Wnd!
     field protected BusinessComponent   BC!
@@ -329,20 +328,6 @@ class public UIComponent implements UIWidget
 
     methodend
 
-
-    rem /**
-    rem * Method setLocation
-    rem * set the location of the component on the parent window
-    rem * @param BBjNumber x: x-coordinate
-    rem * @param BBjNumber y: y-coordinate
-    rem */
-    method public void setLocation(BBjNumber x, BBjNumber y)
-
-        #Wnd!.setLocation(x,y)
-        #X=x
-        #Y=y
-
-    methodend
 
 
     rem /**

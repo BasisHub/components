@@ -1,4 +1,4 @@
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 use ::components/ui/unbound/WindowStack.bbj::WindowStack
 
 class public ResponsiveSplitPane
@@ -14,8 +14,8 @@ class public ResponsiveSplitPane
     field private BBjNumber WasBackButtonInvisible=1
     field private BBjNumber SlideOpen
     field private BBjCheckBox    CbPin!
-    field private UIWidget UiwLeft!
-    field private UIWidget UiwRight!
+    field private BBjControl UiwLeft!
+    field private BBjControl UiwRight!
     field private BBjNumber DisplayMode
     field private BBjNumber PreferredLeftSize = 300
     
@@ -216,13 +216,13 @@ REM               #BtnBack!.setVisible(0)
         
     methodend
     
-    method public void setUiwLeft(UIWidget uiw!)
+    method public void setUiwLeft(BBjControl uiw!)
         
             #UiwLeft! = uiw!
             
     methodend
 
-    method public void setUiwRight(UIWidget uiw!)
+    method public void setUiwRight(BBjControl uiw!)
         
             #UiwRight! = uiw!
             

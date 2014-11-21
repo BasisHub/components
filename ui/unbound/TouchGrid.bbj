@@ -1,8 +1,8 @@
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 use com.basiscomponents.db.DataRow
 use ::components/util/Util.bbj::Util
 
-class public TouchGrid implements UIWidget
+class public TouchGrid implements BBjControl
 
 
     field private BBjChildWindow    CwCanvas!
@@ -46,9 +46,9 @@ class public TouchGrid implements UIWidget
         
     methodend
 
-    method public void setLocation(BBjNumber x, BBjNumber y)
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
 
-        #CwCanvas!.setLocation(x,y)
+        #CwCanvas!.setLocation(x!,y!)
         
     methodend
 
@@ -107,10 +107,10 @@ class public TouchGrid implements UIWidget
     
     methodend
     
-    method public void setCallback(BBjNumber event, Object o!, BBjString method$)
+    method public void setCustomCallback(BBjNumber event!, Object o!, BBjString method!)
     
         #SelChangeObject! = o!
-        #SelChangeMethod$ = method$
+        #SelChangeMethod$ = method!
     
     methodend
     

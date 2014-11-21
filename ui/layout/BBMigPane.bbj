@@ -24,7 +24,6 @@ use com.basiscomponents.ui.layout.BBContainer
 use com.basiscomponents.ui.layout.BBComponentWrapper
 use com.basiscomponents.ui.layout.BBContainerWrapper
 
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
 
 
 rem /**
@@ -32,7 +31,7 @@ rem * Manages components with MigLayout added via add(component, CC)
 rem * 
 rem * @author Adapted from JavaFX to BBj by Ralph Lance
 rem */
-class public BBMigPane implements UIWidget
+class public BBMigPane implements BBjControl
 
 
     field private BBContainer container!
@@ -404,11 +403,11 @@ class public BBMigPane implements UIWidget
 	
 	
 	
-rem methods of interface UIWidget
+rem methods of interface BBjControl
     
-    method public void setLocation(BBjNumber x, BBjNumber y)
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
     
-        #canvas!.setLocation(x,y)
+        #canvas!.setLocation(x!,y!)
         
     methodend
 

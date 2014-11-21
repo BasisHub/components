@@ -1,4 +1,3 @@
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
@@ -7,7 +6,7 @@ use ::components/ui/unbound/TouchGrid.bbj::TouchGrid
 use ::components/util/Util.bbj::Util
 
 
-class public TouchGridComponent extends UIComponent implements UIWidget
+class public TouchGridComponent extends UIComponent implements BBjControl
 
     field private TouchGrid TouchGrid!
     field private BBjStaticText ResultInfo!
@@ -37,10 +36,10 @@ class public TouchGridComponent extends UIComponent implements UIWidget
         methodret #ON_SELCHANGE
     methodend 
     
-    method public void setCallback(BBjNumber event, Object o!, BBjString method$)
+    method public void setCustomCallback(BBjNumber event!, Object o!, BBjString method!)
     
         #SelChangeObject! = o!
-        #SelChangeMethod$ = method$
+        #SelChangeMethod$ = method!
     
     methodend    
     
@@ -48,7 +47,7 @@ class public TouchGridComponent extends UIComponent implements UIWidget
     
         cw! = #super!.getWnd()
         #TouchGrid! = new TouchGrid(cw!,100,0,0,cw!.getWidth(),cw!.getHeight())
-        #TouchGrid!.setCallback(#TouchGrid!.ON_SELCHANGE(),#this!,"onGridSelChange")
+        #TouchGrid!.setCustomCallback(#TouchGrid!.ON_SELCHANGE(),#this!,"onGridSelChange")
         
         #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,#getTranslator().getTranslation("NO_RESULT")))
         #ResultInfo!.addStyle("TouchGridResultinfo")

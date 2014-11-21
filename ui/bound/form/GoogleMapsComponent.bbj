@@ -1,5 +1,4 @@
 use ::components/ui/unbound/WebBrowserComponent.bbj::WebBrowserComponent
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
@@ -7,8 +6,9 @@ use com.basiscomponents.db.DataField
 
 use ::components/i18n/i18n.bbj::i18n
 use ::util/string/json.bbj::json
+use ::components/util/Util.bbj::Util
 
-class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjControl
+class public GoogleMapsComponent extends UIComponent implements BBjControl
 
 
     field private WebBrowserComponent BrowserWidget!
@@ -61,16 +61,14 @@ class public GoogleMapsComponent extends UIComponent implements UIWidget,BBjCont
 
 
         #BrowserWidget! = new WebBrowserComponent(#super!.getWnd(),101,0,0,#getW(),#getH())
-
-        port$ = java.lang.System.getProperty("com.basis.jetty.port")
-        host$ = java.lang.System.getProperty("com.basis.jetty.host")
         d$    = java.lang.System.getProperty("com.basis.server.configDirectory")
         d$=d$(1,pos("cfg"=d$)-1)
 
         mkdir d$+"htdocs/deliver",err=*next
 
         #FileName$=str(dec(info(3,0)))+"_"+date(0:"%Dz.%Mz.%Yl.%Hz%mz%Sz")+"_maps.html"
-        #Url$ = "http://"+host$+":"+port$+"/files/deliver/"+#FileName$
+        baseurl$=Util.getJettyBaseUrl()
+        #Url$ = baseurl$+"files/deliver/"+#FileName$
         #FileName$=d$+"htdocs/deliver/"+#FileName$
 
         ch=unt

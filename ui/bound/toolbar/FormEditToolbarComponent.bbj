@@ -1,4 +1,3 @@
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
@@ -7,7 +6,7 @@ use com.basiscomponents.db.DataField
 use ::translations/bbtranslator.bbj::BBTranslator
 use ::components/i18n/i18n.bbj::i18n
 
-class public FormEditToolbarComponent extends UIComponent implements UIWidget
+class public FormEditToolbarComponent extends UIComponent implements BBjControl
 
 
     field private BBjNumber IsFormLocked
