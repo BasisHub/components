@@ -139,9 +139,23 @@ class public Util
      
     method public static BBjString getLuceneBaseDir(BBjString file$)
     
-        methodret dsk("")+"\\componentsindex\\"+file$+"\\"
+        methodret "/componentsindex/"+file$+"/"
     
-    methodend     
+    methodend   
+    
+    method public static BBjString getJettyBaseUrl()
+        if INFO(3,6)<>"5" then
+            port$ = java.lang.System.getProperty("com.basis.jetty.port")
+            host$ = java.lang.System.getProperty("com.basis.jetty.host")    
+            url$="http://"+host$+":"+port$+"/"
+        else
+            rem for BUI take the base url out of the url itself
+            bui! = bbjapi().getBuiManager()
+            url$=bui!.getUrl()
+            url$=url$(1,pos("/"=url$,1,3))
+        fi
+        methodret url$
+    methodend  
 
 
 classend
