@@ -112,6 +112,8 @@ rem horizontal
         if item! = null() or (c! <> null() and c!.size()) then
             #Level! = item!
             #updateUI()
+        else
+            item!.doScall()
         fi
     methodend
     
@@ -120,6 +122,11 @@ classend
 
 
 
+class public test
+    method public void execute(Object payl!)
+        a=msgbox(str(payl!))
+    methodend
+classend
 
 declare Menu menu!
 declare auto MenuItem item!
@@ -127,7 +134,7 @@ declare auto MenuItem item!
 menu! = new Menu()
 it! = menu!.addMenuItem(null(),"item 1","")
 
-menu!.addMenuItem(it!,"item 1.1","")
+menu!.addMenuItem(it!,"item 1.1","",new test(), "execute", "Hello World!")
 menu!.addMenuItem(it!,"item 1.2","")
 menu!.addMenuItem(it!,"item 1.3","")
 it1! = menu!.addMenuItem(it!,"item 1.4","")
