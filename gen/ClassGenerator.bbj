@@ -221,7 +221,7 @@ rem /** DLGWIZ_INI_END **/
             a$=a$(pos($0a$=a$)+1)
         wend
 
-        #C_EDTPLDIR!.setText(dir("")+"template/")
+        #C_EDTPLDIR!.setText(dir("")+"gen/template/")
 
         #C_LEDB!.selectIndex(0)
         db$=BBjAPI().getThinClient().getUserProperty("components.classgenerator.db",err=*next)
@@ -430,7 +430,12 @@ rem /** DLGWIZ_INI_END **/
         tc!.setUserProperty("components.classgenerator.tpldir",tpldir$) 
         tc!.setUserProperty("components.classgenerator.prependdbname",prepend$) 
 
-        mkdir targetdir$,err=*next
+        tmp_dir!=targetdir$
+        targetdir$=tmp_dir!.replace("\","/")
+        dir_segs=pos("/"=targetdir$,1,0)
+        for dir_seg=1 to dir_segs
+            mkdir targetdir$(1,pos("/"=targetdir$,1,dir_seg)),err=*next
+        next dir_seg
 
         ch=unt
         open (ch)targetdir$
