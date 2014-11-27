@@ -8,7 +8,7 @@ rem ############################################################################
 rem class RibbonComponent
 rem ##################################################################################################
 
-class public RibbonComponent implements UIWidget
+class public RibbonComponent implements BBjControl
 
     field private BBjNumber X
     field private BBjNumber Y

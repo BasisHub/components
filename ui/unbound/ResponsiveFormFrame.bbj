@@ -1,12 +1,12 @@
 chdir "../../../"
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 use ::components/ui/unbound/TestWidget.bbj::TestWidget
 
 use ::components/ui/unbound/CollapsiblePanel.bbj::CollapsiblePanel
 use ::components/ui/unbound/ISizeChangeNotifyTarget.bbj::ISizeChangeNotifyTarget
 
 
-class public ResponsiveFormFrame implements UIWidget, ISizeChangeNotifyTarget
+class public ResponsiveFormFrame implements BBjControl, ISizeChangeNotifyTarget
 
     field private BBjNumber X
     field private BBjNumber Y
@@ -43,10 +43,10 @@ class public ResponsiveFormFrame implements UIWidget, ISizeChangeNotifyTarget
         
     methodend
     
-    method public void setLocation(BBjNumber x, BBjNumber y)
-        #X=x
-        #Y=Y
-        #CwCanvas!.setLocation(x,y)
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
+        #X=x!
+        #Y=Y!
+        #CwCanvas!.setLocation(x!,y!)
     methodend
     
     method public void setSize(BBjNumber w!, BBjNumber h!)
@@ -147,7 +147,7 @@ class public ResponsiveFormFrame implements UIWidget, ISizeChangeNotifyTarget
         methodret #CwCanvas!
     methodend    
 
-    method public void addWidget(UIWidget uiw!)
+    method public void addWidget(BBjControl uiw!)
         #WidgetList!.addItem(uiw!)
         #MaxWidgetHeight    = max(#MaxWidgetHeight,uiw!.getHeight()+#Spacing)
         #TotalWidgetHeight  = #TotalWidgetHeight + uiw!.getHeight()+#Spacing

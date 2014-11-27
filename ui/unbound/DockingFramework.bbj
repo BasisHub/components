@@ -1,6 +1,6 @@
 use ::components/ui/unbound/DockingTabsComponent.bbj::DockingTabsComponent
 rem use ::components/ui/bound/UIController.bbj::UIController
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 
 rem /**
 rem * FrameSet
@@ -307,7 +307,7 @@ class public FrameCell implements FrameElement
 
     field public BBjString Title$
     field public BBjChildWindow Wnd!
-    field public UIWidget UIWidget!
+    field public BBjControl Widget!
 
     field private BBjNumber X
     field private BBjNumber Y
@@ -323,21 +323,21 @@ class public FrameCell implements FrameElement
     methodend
 
 
-    method public FrameCell(BBjString Title$, BBjChildWindow wnd!, UIWidget widget!)
+    method public FrameCell(BBjString Title$, BBjChildWindow wnd!, BBjControl widget!)
 
         #Title$ = Title$
         #Wnd! = wnd!
-        #UIWidget! = widget!
+        #Widget! = widget!
         #showClose! = Boolean.TRUE
         #allowTabDrag! = Boolean.TRUE
 
     methodend
 
-    method public FrameCell(BBjString Title$, BBjChildWindow wnd!, UIWidget widget!, Boolean showClose!, Boolean allowTabDrag!)
+    method public FrameCell(BBjString Title$, BBjChildWindow wnd!, BBjControl widget!, Boolean showClose!, Boolean allowTabDrag!)
 
         #Title$ = Title$
         #Wnd! = wnd!
-        #UIWidget! = widget!
+        #Widget! = widget!
         #showClose! = showClose!
         #allowTabDrag! = allowTabDrag!
 
@@ -347,22 +347,22 @@ class public FrameCell implements FrameElement
 
         #Wnd!.setVisible(vis)
 
-        if #UIWidget! <>null() then
-            #UIWidget!.setVisible(vis)
+        if #Widget! <>null() then
+            #Widget!.setVisible(vis)
         fi
 
     methodend
 
-    method public void setLocation(BBjNumber x, BBjNumber y)
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
 
-        #Wnd!.setLocation(x+10,y+10)
+        #Wnd!.setLocation(x!+10,y!+10)
 
-        if #UIWidget! <> null() then
-            #UIWidget!.setLocation(x+10,y+10)
+        if #Widget! <> null() then
+            #Widget!.setLocation(x!+10,y!+10)
         fi
 
-        #X=x
-        #Y=y
+        #X=x!
+        #Y=y!
 
         #Wnd!.getControl(10,err=*next).setText(#Title$+" X="+str(#X)+" Y="+str(#Y)+" W="+str(#W)+" H="+str(#H))
 
@@ -373,8 +373,8 @@ class public FrameCell implements FrameElement
 
         #Wnd!.setSize(w!-20,h!-20)
 
-        if #UIWidget! <> null() then
-            #UIWidget!.setSize(w!-20,h!-20)
+        if #Widget! <> null() then
+            #Widget!.setSize(w!-20,h!-20)
         fi
 
 
@@ -519,10 +519,10 @@ class public FrameList implements FrameElement
     methodend
 
 
-    method public void setLocation(BBjNumber x, BBjNumber y)
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
 
-        #X=x
-        #Y=y
+        #X=x!
+        #Y=y!
 
     methodend
 

@@ -6,9 +6,9 @@ rem *
 rem * 
 rem * @version 1.0
 rem */
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
 
-class public WebBrowserComponent implements UIWidget
+
+class public WebBrowserComponent implements BBjControl
 
 
     field private BBjNumber             X
@@ -79,11 +79,11 @@ class public WebBrowserComponent implements UIWidget
     methodend
 
 
-    method public void setLocation(BBjNumber x, BBjNumber y)
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
 
-        #Wnd!.setLocation(x,y)
-        #X = x
-        #Y = y
+        #Wnd!.setLocation(x!,y!)
+        #X = x!
+        #Y = y!
 
     methodend
 

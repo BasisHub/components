@@ -2,13 +2,13 @@ use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/ui/bound/grid/TouchGridComponent.bbj::TouchGridComponent
 use ::components/ui/bound/controls/SearchBoxController.bbj::SearchBoxController
 use ::components/ui/unbound/ResponsiveSplitPane.bbj::ResponsiveSplitPane
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 
 use ::ui/(DB_NICE)(TBL_NICE)Form.bbj::(DB_NICE)(TBL_NICE)Form
 use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
 
 
-class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements UIWidget
+class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements BBjControl
 
     field private BBjChildWindow Wnd!
     field private (DB_NICE)(TBL_NICE)BusinessComponent Bc!
@@ -75,7 +75,7 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements UIWidget
 
 classend
 
-class public SearchBoxAndGrid implements UIWidget
+class public SearchBoxAndGrid implements BBjControl
 
     field private TouchGridComponent    NavGrid!
     field private BBjInputE             SearchBox!

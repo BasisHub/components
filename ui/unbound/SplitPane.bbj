@@ -1,4 +1,4 @@
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 
 class public SplitPane
 
@@ -10,8 +10,8 @@ class public SplitPane
     field private BBjChildWindow CwCanvas!
     field private BBjChildWindow CwTop!
     field private BBjChildWindow CwBottom!
-    field private UIWidget UiwTop!
-    field private UIWidget UiwBottom!
+    field private BBjControl UiwTop!
+    field private BBjControl UiwBottom!
     
     field private BBjStaticText Split!
     field private BBjNumber      SplitPos
@@ -55,13 +55,13 @@ rem        #Split!     = #CwCanvas!.addChildWindow(200,0,#SplitPos-2,w,4,$$,$000
         
     methodend
     
-    method public void setUiwTop(UIWidget uiw!)
+    method public void setUiwTop(BBjControl uiw!)
         
             #UiwTop! = uiw!
             
     methodend
 
-    method public void setUiwBottom(UIWidget uiw!)
+    method public void setUiwBottom(BBjControl uiw!)
         
             #UiwBottom! = uiw!
             

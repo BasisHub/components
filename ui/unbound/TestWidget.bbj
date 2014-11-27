@@ -1,7 +1,7 @@
 chdir "../../../"
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
 
-class public TestWidget implements UIWidget
+
+class public TestWidget implements BBjControl
 
     field private BBjNumber X
     field private BBjNumber Y
@@ -23,10 +23,10 @@ class public TestWidget implements UIWidget
     
     methodend
     
-    method public void setLocation(BBjNumber x, BBjNumber y)
-        #X=x
-        #Y=Y
-        #CwCanvas!.setLocation(x,y)
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
+        #X=x!
+        #Y=Y!
+        #CwCanvas!.setLocation(x!,y!)
     methodend
     
     method public void setSize(BBjNumber w!, BBjNumber h!)

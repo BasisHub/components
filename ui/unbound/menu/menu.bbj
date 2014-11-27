@@ -2,47 +2,27 @@ use ::components/util/Util.bbj::Util
 
 class public MenuItem
 
-    field public  BBjString Caption!
+    field private BBjNumber NodeId
+    field private BBjString Caption!
     field private BBjString IconFileName!
-    field private MenuItem Parent!
+    field private BBjString ToolTip!
+    field private MenuItem  Parent!
     field private BBjVector Children! = new BBjVector()
-    field private BBjString RunProgram!
-    field private BBjString Wd!
-    field private BBjString Cfg!
-    field private BBjString Args!
 
     field private Object    NotifyObj!
     field private BBjString NotifyMethod$
     field private Object    NotifyPayload!
 
+
     method private MenuItem()
     methodend
 
 
-    method public MenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!, BBjString runprog!, BBjString wd!, BBjString cfg!, BBjString args!)
+    method public MenuItem(MenuItem parentItem!, BBjNumber nodeId, BBjString caption!, BBjString toolTip!, BBjString iconFilename!)
 
-        #this!(parentItem!, caption!, iconFilename!)
-        #RunProgram! = runprog!
-        #Wd! = wd!
-        #Cfg! = cfg!
-        #Args! = args!
-
-    methodend
-
-    method public MenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!, Object NotifyObj!, BBjString NotifyMethod$, Object NotifyPayload!)
-    
-        #this!(parentItem!, caption!, iconFilename!)
-        
-        #NotifyObj!         = NotifyObj! 
-        #NotifyMethod$      = NotifyMethod$
-        #NotifyPayload!     = NotifyPayload!
-        
-    methodend
-
-    method public MenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!)
-    
-        
+        #NodeId = nodeId
         #Caption! = caption!
+        #ToolTip! = toolTip!
         #IconFileName! = iconFilename!
 
         #Parent! = parentItem!
@@ -52,50 +32,54 @@ class public MenuItem
 
     methodend
 
-    method public void setRunProgram(BBjString runprog!)
 
-        #RunProgram! = runprog!
+    method public MenuItem(MenuItem parentItem!, BBjNumber nodeId, BBjString caption!, BBjString toolTip!, BBjString iconFilename!, Object NotifyObj!, BBjString NotifyMethod$, Object NotifyPayload!)
+
+        #this!(parentItem!, nodeId, caption!, toolTip!, iconFilename!)
+
+        #NotifyObj!         = NotifyObj!
+        #NotifyMethod$      = NotifyMethod$
+        #NotifyPayload!     = NotifyPayload!
 
     methodend
 
+
     method public void doScall()
-       
-        if #RunProgram! <>null() then
-            s$="bbj "
-            if #Wd! >"" then
-                s$=s$+"-WD"+#Wd!+" "
-            fi
-            if #Cfg! >"" then
-                s$=s$+"-c"+#Cfg!+" "
-            fi
-            s$=s$+#RunProgram!+" "
-            if #Args!>"" then
-                s$=s$+" - "+#Args!
-            fi
-            s$=s$+"&"
-            a=scall(s$)
-        else
-            if #NotifyObj! <> null() and #NotifyMethod$ <> "" and #NotifyPayload! <> null() then
-                Util.invoke(#NotifyObj!,#NotifyMethod$,#NotifyPayload!)
-            fi
+
+        if #NotifyObj! <> null() and #NotifyMethod$ <> "" and #NotifyPayload! <> null() then
+            Util.invoke(#NotifyObj!,#NotifyMethod$,#NotifyPayload!)
         fi
 
     methodend
 
 
-    method public void addChild(MenuItem item!)
-        #Children!.addItem(item!)
+    method public BBjNumber getNodeId()
+
+        methodret #NodeId
+
     methodend
 
-    method public BBjVector getChildren()
-        methodret #Children!
+
+    method public BBjString getCaption()
+
+        methodret #Caption!
+
     methodend
+
+
+    method public BBjString getToolTip()
+
+        methodret #ToolTip!
+
+    methodend
+
 
     method public BBjString getIconFileName()
 
         methodret str(IconFileName!)
 
     methodend
+
 
     method public BBjImage getImage()
 
@@ -106,46 +90,66 @@ class public MenuItem
 
     methodend
 
+
+    method public MenuItem getParent()
+
+        methodret #Parent!
+
+    methodend
+
+
+    method public BBjVector getChildren()
+
+        methodret #Children!
+
+    methodend
+
+
+    method public void addChild(MenuItem item!)
+
+        #Children!.addItem(item!)
+
+    methodend
+
 classend
+
 
 rem ##################################################################################################
 rem class Menu
 rem ##################################################################################################
 
-class public Menu 
+class public Menu
 
-    
-    field private MenuItem RootItem! = new MenuItem(null(),"root","")
+    field private java.util.HashMap menuMap! = new java.util.HashMap()
+    field private MenuItem RootItem!
 
-    method public MenuItem addMenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!)
 
+    method public Menu()
+    methodend
+
+
+    method public MenuItem addMenuItem(MenuItem parentItem!, BBjNumber nodeId, BBjString caption!, BBjString toolTip!, BBjString iconFilename!)
+
+        declare MenuItem item!
+
+        item! = new MenuItem(parentItem!, nodeId, caption!, toolTip!, iconFilename!)
         if parentItem! = null() then
-            parentItem! = #RootItem!
+            #RootItem! = item!
         fi
-        item! = new MenuItem(parentItem!, caption!, iconFilename!)
+
         methodret item!
 
     methodend
 
-    method public MenuItem addMenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!,BBjString runprog!, BBjString wd!, BBjString cfg!, BBjString args!)
 
+    method public MenuItem addMenuItem(MenuItem parentItem!, BBjNumber nodeId, BBjString caption!, BBjString toolTip!, BBjString iconFilename!, Object NotifyObj!, BBjString NotifyMethod$, Object NotifyPayload!)
 
+        declare MenuItem item!
+
+        item! = new MenuItem(parentItem!, nodeId, caption!, toolTip!, iconFilename!, NotifyObj!, NotifyMethod$, NotifyPayload!)
         if parentItem! = null() then
-            parentItem! = #RootItem!
+            #RootItem! = item!
         fi
-        item! = new MenuItem(parentItem!, caption!, iconFilename!, runprog!, wd!, cfg!, args!)
-
-        methodret item!
-
-    methodend
-
-    method public MenuItem addMenuItem(MenuItem parentItem!, BBjString caption!, BBjString iconFilename!, Object NotifyObj!, BBjString NotifyMethod$, Object NotifyPayload!)
-
-
-        if parentItem! = null() then
-            parentItem! = #RootItem!
-        fi
-        item! = new MenuItem(parentItem!, caption!, iconFilename!,  NotifyObj!,  NotifyMethod$,  NotifyPayload!)
 
         methodret item!
 

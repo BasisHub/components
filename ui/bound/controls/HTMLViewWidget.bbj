@@ -2,6 +2,7 @@ use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
 use com.basiscomponents.db.DataRow
 use com.basiscomponents.db.DataField
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
+use ::components/util/Util.bbj::Util
 
 class public  HTMLViewWidget extends ControlWidget
  
@@ -28,9 +29,6 @@ class public  HTMLViewWidget extends ControlWidget
 REM                         html!.setUrl("/files/deliver/25092014125036800.pdf",err=*next)
 
                         rem html!.setText(text$) 
-                        
-                        port$ = java.lang.System.getProperty("com.basis.jetty.port")
-                        host$ = java.lang.System.getProperty("com.basis.jetty.host")
                         d$    = java.lang.System.getProperty("com.basis.server.configDirectory")
                         d$=d$(1,pos("cfg"=d$)-1)
                 
@@ -62,8 +60,8 @@ REM                         html!.setUrl("/files/deliver/25092014125036800.pdf",
                          close (ch1)
                          
                          
-                          
-                        Url$ = "http://"+host$+":"+port$+"/files/deliver/"+t$+"/"+java.net.URLEncoder.encode(f$,"UTF-8").replace("+", "%20")
+                        BaseUrl$ = Util.getJettyBaseUrl()
+                        Url$ = BaseUrl$+"/files/deliver/"+t$+"/"+java.net.URLEncoder.encode(f$,"UTF-8").replace("+", "%20")
                         
 
                         html!.setUrl(Url$)                        

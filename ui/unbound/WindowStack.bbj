@@ -2,7 +2,7 @@ if INFO(3,6)<>"5" then
     ::components/util/Util.bbj::Util.runAsBui(pgm(-1))
 fi
 
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 use ::components/util/Util.bbj::Util
 
 class public WindowStackHelper
@@ -193,7 +193,7 @@ REM         fi
         fi
     methodend
 
-    method public static void setWidget(UIWidget uiw!)
+    method public static void setWidget(BBjControl uiw!)
             #WidgetList!.setItem(#WidgetList!.size()-1,uiw!)
 
             if INFO(3,6)="5" and #ContainerWnd! <>null() then
@@ -209,7 +209,7 @@ REM         fi
 
 classend
 
-class public testWidget implements UIWidget
+class public testWidget implements BBjControl
 
     field private BBjChildWindow Cw!
 

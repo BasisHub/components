@@ -1,12 +1,12 @@
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
+
 use ::components/ui/unbound/ISizeChangeNotifyTarget.bbj::ISizeChangeNotifyTarget
 
 
-class public CollapsiblePanel implements UIWidget
+class public CollapsiblePanel implements BBjControl
 
     field private BBjChildWindow CwCanvas!
     field private BBjChildWindow CwClient!
-    field private UIWidget       ClientWidget!
+    field private BBjControl       ClientWidget!
     
     field private BBjStaticText StHeadline!
     field private BBjToolButton BtnCollapse!
@@ -71,10 +71,10 @@ class public CollapsiblePanel implements UIWidget
     methodend
 
 
-    method public void setLocation(BBjNumber x, BBjNumber y)
-        #CwCanvas!.setLocation(x,y)
-        #X = x
-        #Y = y
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
+        #CwCanvas!.setLocation(x!,y!)
+        #X = x!
+        #Y = y!
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)

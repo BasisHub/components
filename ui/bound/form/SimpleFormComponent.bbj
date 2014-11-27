@@ -6,7 +6,6 @@ use com.basiscomponents.db.DataField
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/bl/ValidationError.bbj::ValidationError
 
-use ::components/ui/unbound/UIWidget.bbj::UIWidget
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/toolbar/NavigationToolbarComponent.bbj::NavigationToolbarComponent
 use ::components/ui/bound/toolbar/FormEditToolbarComponent.bbj::FormEditToolbarComponent
@@ -21,7 +20,7 @@ rem *
 rem * 
 rem * @version 1.0
 rem */
-class public SimpleFormComponent extends UIComponent implements UIWidget
+class public SimpleFormComponent extends UIComponent implements BBjControl
 
     field private BBjNumber IsFormLocked
     field protected BBjChildWindow FormWnd!
