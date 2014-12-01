@@ -107,7 +107,7 @@ class public TouchGrid implements BBjControl
     
     methodend
     
-    method public void setCustomCallback(BBjNumber event!, Object o!, BBjString method!)
+    method public void setCallback(BBjNumber event!, CustomObject o!, BBjString method!)
     
         #SelChangeObject! = o!
         #SelChangeMethod$ = method!
