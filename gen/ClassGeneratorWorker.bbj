@@ -432,7 +432,7 @@ class public ClassGeneratorWorker
             print (ch)"<group>"
             print (ch)"<panel>"
             print (ch)"<layoutconstraints>insets dialog,fillx, wrap 2</layoutconstraints>"
-            print (ch)"<columnconstraints>[align label]rel[grow,fill]</columnconstraints>"
+            print (ch)"<columnconstraints>[align label,grow,fill, shrink 20]unrel[grow,fill, shrink 80]</columnconstraints>"
             rsmd!=JDBCResultSet!.getMetaData()
 
             for i=1 to rsmd!.getColumnCount()

@@ -172,7 +172,7 @@ REM         is! = new InputSource(new String(xml$))
                            
                         
                             layc$= #getNodeValue(paneNode!,"layoutconstraints")
-                            colc$= #getNodeValue(paneNode!,"colconstraints")
+                            colc$= #getNodeValue(paneNode!,"columnconstraints")
                             rowc$= #getNodeValue(paneNode!,"rowconstraints")
                             name$= #getNodeValue(paneNode!,"name")
                             width$= #getNodeValue(paneNode!,"width")
@@ -194,6 +194,7 @@ REM         is! = new InputSource(new String(xml$))
                             rem create pane
                             cwCanvas! = f2wnd!.addChildWindow(f2wnd!.getAvailableControlID(),0,0,width,height,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
+                            
         
                             declare BBjFont font!
                             font_size=10
@@ -276,7 +277,7 @@ REM                             cwCanvas!.setFont(font!)
                                           Layout!.add( el!, layc$ )
                                           #ElementList!.addItem(el!)
 
-                                        PRINT "+++Element: ",element+1,name$        
+                                                
                                         
                                         if bindClass$>"" then
                                             v! = #ControlsByBcClass!.get(bindClass$)
