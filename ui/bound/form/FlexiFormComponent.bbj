@@ -387,10 +387,10 @@ REM                             cwCanvas!.setFont(font!)
                 #FormEditToolbar!.setBC(#this!.getBC())
             fi
 
-            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
-            if #this!.getBC()<>null() then
-                #NavigationToolbar!.setBC(#this!.getBC())
-            fi
+REM             #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
+REM             if #this!.getBC()<>null() then
+REM                 #NavigationToolbar!.setBC(#this!.getBC())
+REM             fi
 
     methodend
 
