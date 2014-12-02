@@ -136,12 +136,6 @@ class public Util
 
      methodend
 
-     
-    method public static BBjString getLuceneBaseDir(BBjString file$)
-    
-        methodret "/componentsindex/"+file$+"/"
-    
-    methodend   
     
     method public static BBjString getJettyBaseUrl()
         if INFO(3,6)<>"5" then

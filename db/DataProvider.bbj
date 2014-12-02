@@ -26,6 +26,8 @@ class public DataProvider
 
     field protected BBjString           SortField$
     field protected BBjNumber           SortAscending
+    field protected BBjString           FulltextFilter$
+    field protected BBjVector           FulltextFilterFields!       = new BBjVector()
     field private   java.util.HashMap   QueryFilter!
     field private   java.util.HashMap   ControllerFilter!           = new java.util.HashMap()
     field private   java.util.HashMap   ControllerFilterUnlock!     = new java.util.HashMap()
@@ -134,9 +136,9 @@ class public DataProvider
 
         filter! = new java.util.HashMap()
 
-        print "#ControllerFilter!=",#ControllerFilter!
-        print "#QueryFilter!=",#QueryFilter!
-
+REM         print "#ControllerFilter!=",#ControllerFilter!
+REM         print "#QueryFilter!=",#QueryFilter!
+         print "#FulltextFilter$=",#FulltextFilter$
         if fIgnoreFilterAndOrder then
             if #ControllerFilter! = null() then
                 filter! = new java.util.HashMap()
@@ -261,6 +263,27 @@ class public DataProvider
 
             wend
         fi
+
+
+        
+       
+        if #FulltextFilter$>"" then
+            rem naive brute force generic method
+            tf$=cvs(#FulltextFilter$,4)
+            it! = #FulltextFilterFields!.iterator()
+            while it!.hasNext()
+                f$ = it!.next()
+                if wh1$>"" then
+                    wh1$=wh1$+" OR "
+                fi
+                wh1$=wh1$+"( UCASE("""+f$+""") LIKE '%"+tf$+"%')" 
+            wend
+            if wh$>"" then
+                wh$=wh$+" AND "
+            fi
+            wh$=wh$+"( "+wh1$+ ") "
+        fi
+
 
         
         if wh$>"" then
@@ -801,6 +824,19 @@ REM         close (999)
     method public void setQueryFilter(java.util.HashMap filter!)
 
         #QueryFilter!=filter!
+        #Size=-1
+
+    methodend
+
+
+    rem /**
+    rem * Method setFulltextFilter:
+    rem * filters the result set
+    rem * @param BBjString filter$: the search query 
+    rem */
+    method public void setFulltextFilter(BBjString filter$)
+
+        #FulltextFilter$=filter$
         #Size=-1
 
     methodend

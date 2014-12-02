@@ -50,7 +50,7 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements BBjControl
 <field>	  
       fields!.addItem("(FLD)")</field>
        
-      sbc! = new SearchBoxController(searchbox!,#Bc!,fields!,::components/util/Util.bbj::Util.getLuceneBaseDir("(DB_NICE)(TBL_NICE)"))
+      sbc! = new SearchBoxController(searchbox!,#Bc!)
       
       #Bc!.refresh()         
 

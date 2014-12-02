@@ -3,21 +3,11 @@ rem package components.ui.bound.controls
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
 use com.basiscomponents.db.DataField
-use com.basis.lucene.BBjSearchGizmo
-use com.basis.lucene.BBjSearchGizmoDoc
-
-dir$="D:\\ORSTM01.index\\"
-
-
 
 class public SearchBoxController 
 
     field private BBjControl        BoundCtrl!
     field private BusinessComponent BC!
-    field private BBjVector         PkFieldnames! = new BBjVector()
-    
-    field private BBjVector         Fields!
-    field private BBjSearchGizmo    SearchEngine!
     
     rem /**
     rem * Constructor SearchBox
@@ -28,13 +18,7 @@ class public SearchBoxController
     methodend
 
     rem this is lucene based for multiple fields
-    method public SearchBoxController(BBjInputE ctrl!, BusinessComponent bc!, BBjVector fields!,  BBjString indexDir$)
-
-        #PkFieldnames! = bc!.getPrimaryKeySegments()
-        
-        #Fields! = fields!
-       
-        #SearchEngine! = new BBjSearchGizmo(indexDir$)
+    method public SearchBoxController(BBjInputE ctrl!, BusinessComponent bc!)
 
         #BoundCtrl! = ctrl!
         ctrl!.setPassEnter(0)
@@ -48,6 +32,7 @@ class public SearchBoxController
         REM TODO make this as well programmeable
         REM SEE also below
         REM for now: if we have less that 50 records show all items
+
         if (bc!.size() > 50) then        
             #prepareQueryFilter("noopblablablabla")
         else
@@ -57,27 +42,6 @@ class public SearchBoxController
     
     methodend
 
-
-    rem this is standard SQL based for one field
-    method public SearchBoxController(BBjInputE ctrl!, BusinessComponent bc!, BBjString fieldname$)
-        
-        #Fieldname$ = fieldname$
-
-        #BoundCtrl! = ctrl!
-        ctrl!.setPassEnter(0)
-        #setBC(bc!)
-        ctrl!.setCallback(BBjAPI.ON_INPUT_KEYPRESS,#this!,"onInputKeypress")
-        REM TODO add more granular rules for when to display all items and when
-        REM TODO make this as well programmeable
-        REM SEE also above
-        REM for now: if we have less that 50 records show all items        
-        if (bc!.size() > 50) then
-            #prepareQueryFilter("noop")
-        else
-            #prepareQueryFilter("")            
-        fi
-
-    methodend
     
     method public void onInputKeypress( BBjInputKeypressEvent ev!)
         
@@ -95,94 +59,17 @@ class public SearchBoxController
     method private void prepareQueryFilter(BBjString search$)
     
     
-    if INFO(3,6)="5" then
-        bui! = bbjapi().getBuiManager()
-        b! = bui!.getBusyIndicator(err=*next)
-        rem b!.setText("Busy...")
-        b!.setVisible(1)
-    fi
-
-        QueryFilter! = new java.util.HashMap()
-
-        if #SearchEngine! <> null() then
-            s! = cvs(search$,35)
-            search$="+*"+s!.replace(" ","* +*")+"*"
-            rem search$=s!.replace(" ","* ")+"*"
-            
-            fields! =  java.lang.reflect.Array.newInstance(Class.forName("java.lang.String"),#Fields!.size())
-            for i=0 to #Fields!.size()-1
-                java.lang.reflect.Array.set(fields!,i,#Fields!.getItem(i))
-            next 
-            
-            result! = #SearchEngine!.doSearch(search$,fields!)
-            
-            it! = #PkFieldnames!.iterator()
-            hm! = new java.util.HashMap()
-            while it!.hasNext()
-                v!=new BBjVector()
-                hm!.put(it!.next(),v!)
-            wend
-                
-            if result!.size() then
-                ? result!
-                
-
-
-                trenn_condition = #PkFieldnames!.size()-1 
-                count=0
-                it! = result!.iterator()
-                while it!.hasNext()
-                    
-                    x$=it!.next()
-
-                    if trenn_condition and pos("++++"=x$,1,0)<> trenn_condition then
-                        ? "skipping result "+x$
-                        continue
-                    fi
-                    x$=x$+"++++"
-
-                    it1! = #PkFieldnames!.iterator()
-                    while it1!.hasNext()
-                        v! = hm!.get(it1!.next())
-                        x1$=x$(1,pos("++++"=x$)-1)
-                        x$=x$(pos("++++"=x$)+4)
-                        v!.addItem(x1$)
-                    wend                    
-                    
-                    count=count+1
-                wend
-
-            else
-            
-                it1! = #PkFieldnames!.iterator()
-                while it1!.hasNext()
-                    v! = hm!.get(it1!.next())
-                    v!.addItem("0")
-                wend                     
-                rem TODO load the MRU list instead
-            fi
-
-            it1! = #PkFieldnames!.iterator()
-            while it1!.hasNext()
-                x$=it1!.next()
-                QueryFilter!.put(x$,hm!.get(x$))
-            wend             
-
+        if INFO(3,6)="5" then
+            bui! = bbjapi().getBuiManager()
+            b! = bui!.getBusyIndicator(err=*next)
+            b!.setVisible(1)
         fi
         
-        if count=0 then
-            v!=new BBjVector()
-            v!.addItem("0")
-            QueryFilter!.put(#PkFieldnames!.getItem(0),v!)
+        #BC!.setFulltextFilter(search$)
+        
+        if INFO(3,6)="5" and b! <> null() then
+            b!.setVisible(0)
         fi
-REM TODO: add option if all items should be loaded w/o search or none
-
-        
-        #BC!.setQueryFilter(QueryFilter!)
-        
-    if INFO(3,6)="5" and b! <> null() then
-        b!.setVisible(0)
-    fi
     
          
     methodend
