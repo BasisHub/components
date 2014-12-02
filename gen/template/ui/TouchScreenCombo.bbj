@@ -4,7 +4,7 @@ use ::components/ui/bound/controls/SearchBoxController.bbj::SearchBoxController
 use ::components/ui/unbound/ResponsiveSplitPane.bbj::ResponsiveSplitPane
 
 
-use ::ui/(DB_NICE)(TBL_NICE)Form.bbj::(DB_NICE)(TBL_NICE)Form
+use ::ui/(DB_NICE)(TBL_NICE)FlexiForm.bbj::(DB_NICE)(TBL_NICE)FlexiForm
 use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
 
 
@@ -13,7 +13,7 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements BBjControl
     field private BBjChildWindow Wnd!
     field private (DB_NICE)(TBL_NICE)BusinessComponent Bc!
     field private TouchGridComponent NavGrid!
-    field private (DB_NICE)(TBL_NICE)Form EditForm!
+    field private (DB_NICE)(TBL_NICE)FlexiForm EditForm!
     field private ResponsiveSplitPane Split!
     
     method private (DB_NICE)(TBL_NICE)TouchScreenCombo()
@@ -37,7 +37,7 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements BBjControl
       
       #NavGrid!.setCallback(#NavGrid!.ON_SELCHANGE(),#this!,"onGridSelChange")
       
-      #EditForm! = new (DB_NICE)(TBL_NICE)Form(#Split!.getRight())
+      #EditForm! = new (DB_NICE)(TBL_NICE)FlexiForm(#Split!.getRight())
       #EditForm!.setBC(#Bc!)
       #EditForm!.setShowToolBar(0)   
        
