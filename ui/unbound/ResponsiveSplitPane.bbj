@@ -143,11 +143,19 @@ REM               #BtnBack!.setVisible(0)
             case 1
               #activateLeft()
               #SlideOpen=0
+              #CbPin!.setVisible(0)
+              #CwLeft!.setSize(w!,h!)
+              #CwRight!.setSize(w!,h!)
             break
 
             case 2
-                  #activateRight()
-                  #SlideOpen=1
+              #activateRight()
+              #SlideOpen=1
+              #CbPin!.setVisible(0)
+              #CwRight!.setEnabled(1)
+              #CwLeft!.setSize(w!,h!)
+              #CwRight!.setSize(w!,h!)
+              
             break
         swend
         
@@ -169,10 +177,12 @@ REM               #BtnBack!.setVisible(0)
                     #UiwRight!.setSize(#W,#H)
                   fi
                   #CwRight!.setVisible(1)
+                  #CwRight!.setLocation(0,0)
                   #CwLeft!.setVisible(0)
+                  #CwRight!.setEnabled(1)
               fi
    
-              if #AutoHideLeft then
+              if #AutoHideLeft or #DisplayMode = 2 then
                 if WindowStack.getShowBackButton() = 0 then
                     #WasBackButtonInvisible=1
                 else
@@ -181,6 +191,7 @@ REM               #BtnBack!.setVisible(0)
                 WindowStack.setShowBackButton(1)
                 WindowStack.setBackButtonAction(#this!,"activateLeft",null())
               fi
+              
     methodend
 
     method public void activateLeft()
@@ -193,6 +204,10 @@ REM               #BtnBack!.setVisible(0)
                 fi
               else
                   #DisplayMode=1
+                  if #UiwLeft!<>null() then
+                    #UiwLeft!.setSize(#W,#H)
+
+                  fi                  
                   #CwLeft!.setVisible(1)
                   #CwRight!.setVisible(0)
               fi
