@@ -267,7 +267,7 @@ REM         print "#QueryFilter!=",#QueryFilter!
 
         
        
-        if #FulltextFilter$>"" then
+        if #FulltextFilter$>"" and #FulltextFilterFields!.size() then
             rem naive brute force generic method
             tf$=cvs(#FulltextFilter$,4)
             it! = #FulltextFilterFields!.iterator()
