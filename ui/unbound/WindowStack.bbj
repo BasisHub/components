@@ -33,7 +33,7 @@ class public WindowStack
     field private static BBjVector BackActionList! = new BBjVector()
     field private static BBjVector BackActionObjectList! = new BBjVector()
     field private static BBjVector BackActionPayloadList! = new BBjVector()
-
+    
     rem this is for BUI only, when embedded in another child window
     field private static BBjWindow ContainerWnd!
 
@@ -88,6 +88,8 @@ class public WindowStack
         if yoffs then
 
             backButton!=wnd!.addButton(101,5,5,30,30,"Back")
+            backButton!.setVisible(0) 
+            rem check -> is this maybe only conditionally
             backButton!.addStyle("BackButton")
             backButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onBackButton")
 
