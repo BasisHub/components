@@ -39,7 +39,7 @@ class public (DB_NICE)(TBL_NICE)TouchScreenCombo implements BBjControl
       
       #EditForm! = new (DB_NICE)(TBL_NICE)FlexiForm(#Split!.getRight())
       #EditForm!.setBC(#Bc!)
-      #EditForm!.setShowToolBar(0)   
+      #EditForm!.setShowToolBar(1)   
        
 
         
