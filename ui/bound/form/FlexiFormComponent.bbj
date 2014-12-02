@@ -232,15 +232,15 @@ REM                             cwCanvas!.setFont(font!)
                                         
                                         cssClass$= #getNodeValue(elNode!,"cssClass")
                                         
-                                        length=0
-                                        length= num(#getNodeValue(elNode!,"length"),err=*next)
                                         
+                                        length= num(#getNodeValue(elNode!,"length"),err=*next)
+                                         
                                         layc$= #getNodeValue(elNode!,"cellconstraints")
                                         typet$=type$
                                         while pos("/"=typet$)
                                             typet$=typet$(pos("/"=typet$)+1)
                                         wend
-                                                                                
+
                                           x$="el! = new ::"+type$+".bbj::"+typet$+"(cwCanvas!)"
                                           rem execute x$
                                           rem workaround execute
@@ -252,10 +252,11 @@ REM                             cwCanvas!.setFont(font!)
                                               call temp$
                                               erase temp$                                
                                           
-                                          el!.setSize(100,font_height+ihpad)
+                                          el!.setSize((length+1)*25,font_height+ihpad)
                                           if text$>"" then
                                               el!.setText(text$)
                                           fi
+                                          
                                           if mask$>"" then
                                               el!.setMask(mask$)
                                           fi
@@ -265,10 +266,10 @@ REM                             cwCanvas!.setFont(font!)
                                           el!.setName(name$,err=*next)
                                           el!.setUserData(new HashMap())
   REM                                         el!.setFont(font!,err=*next)
-                                          if length>0 then
-                                          el!.setLength(length,err=*next) 
-                                         
-                                          fi
+REM                                           if length>0 then
+REM                                                 el!.setLength(length,err=*next) 
+REM                                           fi
+                                          
                                           el!.setBindField(bindField$)
                                           el!.setBindClass(bindClass$)
                                           if font!<>null() then

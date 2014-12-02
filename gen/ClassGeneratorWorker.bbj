@@ -502,18 +502,20 @@ REM                 fi
                     PRINT (ch)"    <text>"+col_label$+":</text> "
                     PRINT (ch)"    <name>"+col_name$+".label</name> "
                     PRINT (ch)"    <bindClass>"+tbl_nice$+"BusinessComponent</bindClass>"
-                    PRINT (ch)"    <cellconstraints></cellconstraints> "
+                    PRINT (ch)"    <cellconstraints>w 100:200:200</cellconstraints> "
                     PRINT (ch)"</element>      "
                 endif
 
+                tmp_colsiz=max(10,min(25,col_size))
+                if ctrl$="InputNWidget" or ctrl$="InputDWidget" then let tmp_colsiz=10
                 if ctrl$="InputEWidget" or ctrl$="InputNWidget" or ctrl$="InputDWidget" then
                     PRINT (ch)"<element>"
                     PRINT (ch)"    <type>components/ui/bound/controls/"+ctrl$+"</type> "
                     PRINT (ch)"    <name>"+col_name$+"</name> "
-                    PRINT (ch)"    <length>"+str(min(25,col_size))+"</length>" 
+                    PRINT (ch)"    <length>"+str(tmp_colsiz)+"</length>" 
                     PRINT (ch)"    <bindClass>"+tbl_nice$+"BusinessComponent</bindClass>"
                     PRINT (ch)"    <bindField>"+col_name$+"</bindField>"
-                    PRINT (ch)"    <cellconstraints></cellconstraints> "
+                    PRINT (ch)"    <cellconstraints>w "+str(tmp_colsiz*5)+":"+str(tmp_colsiz*10)+":"+str(tmp_colsiz*15)+"</cellconstraints> "
                     PRINT (ch)"</element>"
                 endif
 REM                 if ctrl$="INPUTE" then
