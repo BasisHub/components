@@ -27,14 +27,25 @@ class public ResponsiveTouchMenuBar implements BBjControl
         #Menu! = menu!
 
         #Frame! = parentWnd!.addChildWindow( id, x!, y!, w!, h!, "", $00000800$, BBjAPI().getSysGui().getAvailableContext())
-        #Frame!.setBackColor(BBjAPI().makeColor("RED"))
         #Frame!.setClientEdge(0)
         #Frame!.setOpaque(0)
-
         #updateUI()
 
     methodend
     
+    method public void setSize(BBjNumber w!, BBjNumber h!)
+        #W!=w!
+        #H!=h!
+        #Frame!.setSize(w!,h!)
+        #updateUI() 
+    methodend
+
+    method public void setLocation(BBjNumber x!, BBjNumber y!)
+        #X!=x!
+        #Y!=y!
+        #Frame!.setLocation(x!,y!)
+    methodend
+        
     method public void updateUI()
     
         it! = #ButtonList!.iterator()
@@ -64,10 +75,11 @@ rem horizontal
             count=count+1
         fi
         
-        w=int(#Frame!.getWidth()/count)
+REM         w=int(#Frame!.getWidth()/max(1,count))
+        w=h
         if #Level! <> null() then
             caption$ = "Home"
-            btn! = #Frame!.addButton(1000+i,x,0,w-10,h,caption$)
+            btn! = #Frame!.addButton(1000+i,x,0,w,h,caption$)
             btn!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonPush")
             #ButtonList!.addItem(btn!)
             #MenuItemList!.addItem(null())
@@ -77,7 +89,7 @@ rem horizontal
 
         if #Level! <> null() and #Level!.getParent().getParent()<> null() then
             caption$ = #Level!.getCaption()
-            btn! = #Frame!.addButton(1000+i,x,0,w-10,h,caption$)
+            btn! = #Frame!.addButton(1000+i,x,0,w,h,caption$)
             btn!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonPush")
             #ButtonList!.addItem(btn!)
             #MenuItemList!.addItem(#Level!.getParent())
@@ -121,41 +133,4 @@ rem horizontal
 classend
 
 
-
-class public test
-    method public void execute(Object payl!)
-        a=msgbox(str(payl!))
-    methodend
-classend
-
-declare Menu menu!
-declare auto MenuItem item!
-
-menu! = new Menu()
-it! = menu!.addMenuItem(null(),"item 1","")
-
-menu!.addMenuItem(it!,"item 1.1","",new test(), "execute", "Hello World!")
-menu!.addMenuItem(it!,"item 1.2","")
-menu!.addMenuItem(it!,"item 1.3","")
-it1! = menu!.addMenuItem(it!,"item 1.4","")
-
-menu!.addMenuItem(it1!,"item 1.4.1","")
-menu!.addMenuItem(it1!,"item 1.4.2","")
-menu!.addMenuItem(it1!,"item 1.4.3","")
-
-menu!.addMenuItem(null(),"item 2","")
-menu!.addMenuItem(null(),"item 3","")
-menu!.addMenuItem(null(),"item 4","")
-menu!.addMenuItem(null(),"item 5","")
-menu!.addMenuItem(null(),"item 6","")
-
-wnd! = BBjAPI().openSysGui("X0").addWindow(10,10,800,600,"TEST")
-wnd!.setCallback(BBjAPI.ON_CLOSE,"byebye")
-
-m! = new ResponsiveTouchMenuBar(wnd!,100,0,0,800,25,menu!) 
-
-
-PROCESS_EVENTS
-
-byebye:bye
 

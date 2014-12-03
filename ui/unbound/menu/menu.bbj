@@ -141,6 +141,12 @@ class public Menu
 
     methodend
 
+    method public MenuItem addMenuItem(MenuItem parentItem!, BBjString caption!, BBjString toolTip!)
+
+   
+        methodret #addMenuItem( parentItem!, 1,  caption!,  "",iconFilename!,null(),"",null())
+
+    methodend
 
     method public MenuItem addMenuItem(MenuItem parentItem!, BBjNumber nodeId, BBjString caption!, BBjString toolTip!, BBjString iconFilename!, Object NotifyObj!, BBjString NotifyMethod$, Object NotifyPayload!)
 
