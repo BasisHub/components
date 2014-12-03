@@ -60,6 +60,19 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
 
     rem /**
+    rem * Method setFulltextFilter:
+    rem * filters the result set
+    rem * @param BBjString filter$: the search query 
+    rem */
+    method public void setFulltextFilter(BBjString filter$)
+
+        #super!.setFulltextFilter(filter$)
+        #super!.getDataProvider().setFulltextFilter(filter$)
+        #refresh(0)
+
+    methodend
+
+    rem /**
     rem * Method drive:
     rem * called by the controller when a change of the selection occured (from outside)
     rem * @param BBjString var$: the variable that changed

@@ -1,5 +1,7 @@
 rem package components.gen
 
+
+
 rem /** 
 rem * ClassGenerator
 rem * 
@@ -19,7 +21,8 @@ use java.sql.ResultSet
 use java.sql.Connection
 use java.sql.DatabaseMetaData
 
-use ::ClassGeneratorWorker.bbj::ProgressCallback
+use ::components/gen/ClassGeneratorWorker.bbj::ProgressCallback
+use ::components/gen/ClassGeneratorWorker.bbj::ClassGeneratorWorker
 
 
 class public ClassGenerator extends BBDialog implements ProgressCallback
@@ -82,7 +85,7 @@ rem /** DLGWIZ_FLC_END **/
     rem * Constructor ClassGenerator
     rem */
     method public ClassGenerator()
-        #super!("ClassGenerator.arc",101)
+        #super!("components/gen/ClassGenerator.arc",101)
         if stbl("+USER_LOCALE",err=*endif)<>"" then
             #ClientLocale$ = stbl("+USER_LOCALE")
             #Translator! = BBTranslator.getInstance("ClassGenerator",#ClientLocale$,"en",#PgmDirectory$)
@@ -218,7 +221,7 @@ rem /** DLGWIZ_INI_END **/
             a$=a$(pos($0a$=a$)+1)
         wend
 
-        #C_EDTPLDIR!.setText(dir("")+"template/")
+        #C_EDTPLDIR!.setText(dir("")+"gen/template/")
 
         #C_LEDB!.selectIndex(0)
         db$=BBjAPI().getThinClient().getUserProperty("components.classgenerator.db",err=*next)
@@ -291,7 +294,7 @@ rem /** DLGWIZ_INI_END **/
         pwd$ = #C_EDPWD!.getText()
         schema$ = #C_EDSCHEMA!.getText()
 
-        Connection! = ::ClassGeneratorWorker.bbj::ClassGeneratorWorker.connect(db$,user$,pwd$)
+        Connection! = ClassGeneratorWorker.connect(db$,user$,pwd$)
 
         if Connection!<>null()
             md! = Connection!.getMetaData()
@@ -427,14 +430,19 @@ rem /** DLGWIZ_INI_END **/
         tc!.setUserProperty("components.classgenerator.tpldir",tpldir$) 
         tc!.setUserProperty("components.classgenerator.prependdbname",prepend$) 
 
-        mkdir targetdir$,err=*next
+        tmp_dir!=targetdir$
+        targetdir$=tmp_dir!.replace("\","/")
+        dir_segs=pos("/"=targetdir$,1,0)
+        for dir_seg=1 to dir_segs
+            mkdir targetdir$(1,pos("/"=targetdir$,1,dir_seg)),err=*next
+        next dir_seg
 
         ch=unt
         open (ch)targetdir$
         close (ch)
 
 
-        gen! = new ::ClassGeneratorWorker.bbj::ClassGeneratorWorker(db$,schema$,user$,pwd$,v!,targetdir$, tpldir$, prepend$="1")
+        gen! = new ClassGeneratorWorker(db$,schema$,user$,pwd$,v!,targetdir$, tpldir$, prepend$="1")
         gen!.setProgressCb(#this!)
         if #C_CBOVERWRITE!.isSelected() then
             gen!.setOverwrite(1)

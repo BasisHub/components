@@ -26,6 +26,9 @@ class public DataProvider
 
     field protected BBjString           SortField$
     field protected BBjNumber           SortAscending
+    field protected BBjString           FulltextFilter$
+    field protected BBjVector           FulltextFilterFields!       = new BBjVector()
+    field private   BBjNumber           IsBBjTextSearch             = -1             
     field private   java.util.HashMap   QueryFilter!
     field private   java.util.HashMap   ControllerFilter!           = new java.util.HashMap()
     field private   java.util.HashMap   ControllerFilterUnlock!     = new java.util.HashMap()
@@ -134,9 +137,9 @@ class public DataProvider
 
         filter! = new java.util.HashMap()
 
-        print "#ControllerFilter!=",#ControllerFilter!
-        print "#QueryFilter!=",#QueryFilter!
-
+REM         print "#ControllerFilter!=",#ControllerFilter!
+REM         print "#QueryFilter!=",#QueryFilter!
+         print "#FulltextFilter$=",#FulltextFilter$
         if fIgnoreFilterAndOrder then
             if #ControllerFilter! = null() then
                 filter! = new java.util.HashMap()
@@ -262,6 +265,32 @@ class public DataProvider
             wend
         fi
 
+       
+        if #FulltextFilter$>"" then 
+        
+          if #PrimaryTable$="CUSTOMER"  then
+              rem bbj text search -> find out if it's a BBj database and if there's a text search enabled  
+           
+          else 
+              if #FulltextFilterFields!.size() then
+                  rem naive brute force generic method
+                  tf$=cvs(#FulltextFilter$,4)
+                  it! = #FulltextFilterFields!.iterator()
+                  while it!.hasNext()
+                      f$ = it!.next()
+                      if wh1$>"" then
+                          wh1$=wh1$+" OR "
+                      fi
+                      wh1$=wh1$+"( UCASE("""+f$+""") LIKE '%"+tf$+"%')" 
+                  wend
+                  if wh$>"" then
+                      wh$=wh$+" AND "
+                  fi
+                  wh$=wh$+"( "+wh1$+ ") "
+              fi
+          fi
+        fi
+
         
         if wh$>"" then
             
@@ -360,6 +389,71 @@ REM         close (999)
 
     methodend
 
+    method public void setupTextFilter()
+
+        
+            if #IsBBjTextSearch=0 then   
+                methodret
+            fi
+            
+            #openDatabase()
+            
+            f$=#FulltextFilter$
+            if pos("*"=f$)=0 and pos("~"=f$)=0 then
+                f$="*"+f$+"*"
+            fi
+            
+            sql$="CALL BBJ_SEARCH('"+#PrimaryTable$+"','"+f$+"')" 
+            stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+            #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$,err=nobbjtextsearch))
+            #IsBBjTextSearch=1
+
+            k! = #getPrimaryKeySegments()
+
+            if #this!.getQueryFilter() = null() then
+                #this!.setQueryFilter(new java.util.HashMap())
+            fi
+
+            it! = k!.iterator()
+            while it!.hasNext()
+                k$=it!.next()
+                #this!.getQueryFilter().put(k$,new BBjVector())
+            wend
+            
+            while #JDBCResultSet!.next()
+                foundone = 1
+                it! = k!.iterator()
+                while it!.hasNext()
+                    k$=it!.next()
+                    v$=#JDBCResultSet!.getString(k$)
+                    qf! = #this!.getQueryFilter().get(k$)
+                    qf!.addItem(v$)
+                wend
+             
+            wend
+
+            #closeDatabase()
+
+            if foundone=0 then
+            it! = k!.iterator()
+              while it!.hasNext()
+                  k$=it!.next()
+                    qf! = #this!.getQueryFilter().get(k$)
+                    qf!.addItem("noopnevernohits in this query!!!")
+              wend 
+            fi
+            it! = k!.iterator()
+            while it!.hasNext()
+                k$=it!.next()
+                print k$,":",#this!.getQueryFilter().get(k$) 
+            wend            
+        
+            methodret
+            
+            nobbjtextsearch:
+                #IsBBjTextSearch=0
+                
+    methodend
 
     rem /**
     rem * Method getAttributesRecord:
@@ -801,6 +895,20 @@ REM         close (999)
     method public void setQueryFilter(java.util.HashMap filter!)
 
         #QueryFilter!=filter!
+        #Size=-1
+
+    methodend
+
+
+    rem /**
+    rem * Method setFulltextFilter:
+    rem * filters the result set
+    rem * @param BBjString filter$: the search query 
+    rem */
+    method public void setFulltextFilter(BBjString filter$)
+
+        #FulltextFilter$=filter$
+        #setupTextFilter()
         #Size=-1
 
     methodend

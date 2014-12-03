@@ -140,7 +140,7 @@ REM         a!.setFocusable(0,err=*next)
                         r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
                         
-                        #Ctrl!.setText(text$)
+                        #Ctrl!.setText(cvs(text$,2))
                     else
                         #Ctrl!.setText("")
                     fi

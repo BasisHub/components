@@ -36,6 +36,7 @@ class public BusinessComponent
     field public    BBjString           Title$
 
     field protected java.util.HashMap   QueryFilter!
+    field protected BBjString           FulltextFilter$
 
     field protected java.util.HashMap   Controller!                    = new java.util.HashMap()
     field protected java.util.HashMap   ControllerVars!                = new java.util.HashMap()
@@ -157,6 +158,17 @@ class public BusinessComponent
 
         #QueryFilter! = filter!
         rem #refresh(0)
+
+    methodend
+    
+    rem /**
+    rem * Method setFulltextFilter:
+    rem * filters the result set
+    rem * @param BBjString filter$: the search query 
+    rem */
+    method public void setFulltextFilter(BBjString filter$)
+
+        #FulltextFilter$=filter$
 
     methodend
 

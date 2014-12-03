@@ -172,7 +172,7 @@ REM         is! = new InputSource(new String(xml$))
                            
                         
                             layc$= #getNodeValue(paneNode!,"layoutconstraints")
-                            colc$= #getNodeValue(paneNode!,"colconstraints")
+                            colc$= #getNodeValue(paneNode!,"columnconstraints")
                             rowc$= #getNodeValue(paneNode!,"rowconstraints")
                             name$= #getNodeValue(paneNode!,"name")
                             width$= #getNodeValue(paneNode!,"width")
@@ -194,6 +194,7 @@ REM         is! = new InputSource(new String(xml$))
                             rem create pane
                             cwCanvas! = f2wnd!.addChildWindow(f2wnd!.getAvailableControlID(),0,0,width,height,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
+                            
         
                             declare BBjFont font!
                             font_size=10
@@ -231,15 +232,15 @@ REM                             cwCanvas!.setFont(font!)
                                         
                                         cssClass$= #getNodeValue(elNode!,"cssClass")
                                         
-                                        length=0
-                                        length= num(#getNodeValue(elNode!,"length"),err=*next)
                                         
+                                        length= num(#getNodeValue(elNode!,"length"),err=*next)
+                                         
                                         layc$= #getNodeValue(elNode!,"cellconstraints")
                                         typet$=type$
                                         while pos("/"=typet$)
                                             typet$=typet$(pos("/"=typet$)+1)
                                         wend
-                                                                                
+
                                           x$="el! = new ::"+type$+".bbj::"+typet$+"(cwCanvas!)"
                                           rem execute x$
                                           rem workaround execute
@@ -251,10 +252,11 @@ REM                             cwCanvas!.setFont(font!)
                                               call temp$
                                               erase temp$                                
                                           
-                                          el!.setSize(100,font_height+ihpad)
+                                          el!.setSize((length+1)*25,font_height+ihpad)
                                           if text$>"" then
                                               el!.setText(text$)
                                           fi
+                                          
                                           if mask$>"" then
                                               el!.setMask(mask$)
                                           fi
@@ -264,10 +266,10 @@ REM                             cwCanvas!.setFont(font!)
                                           el!.setName(name$,err=*next)
                                           el!.setUserData(new HashMap())
   REM                                         el!.setFont(font!,err=*next)
-                                          if length>0 then
-                                          el!.setLength(length,err=*next) 
-                                         
-                                          fi
+REM                                           if length>0 then
+REM                                                 el!.setLength(length,err=*next) 
+REM                                           fi
+                                          
                                           el!.setBindField(bindField$)
                                           el!.setBindClass(bindClass$)
                                           if font!<>null() then
@@ -276,7 +278,7 @@ REM                             cwCanvas!.setFont(font!)
                                           Layout!.add( el!, layc$ )
                                           #ElementList!.addItem(el!)
 
-                                        PRINT "+++Element: ",element+1,name$        
+                                                
                                         
                                         if bindClass$>"" then
                                             v! = #ControlsByBcClass!.get(bindClass$)
@@ -386,10 +388,10 @@ REM                             cwCanvas!.setFont(font!)
                 #FormEditToolbar!.setBC(#this!.getBC())
             fi
 
-            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
-            if #this!.getBC()<>null() then
-                #NavigationToolbar!.setBC(#this!.getBC())
-            fi
+REM             #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
+REM             if #this!.getBC()<>null() then
+REM                 #NavigationToolbar!.setBC(#this!.getBC())
+REM             fi
 
     methodend
 

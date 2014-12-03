@@ -51,6 +51,11 @@ class public (DB_NICE)(TBL_NICE)DataProvider extends (DB_NICE)(TBL_NICE)DataProv
         </keyseg>
         rem #setEntityClass(DataRow.newInstance())
 
+        REM ENABLE LINES FOR THOSE FIELDS YOU WANT TO HAVE FULLTEXT SEARCHEABLE
+        REM NOTE THIS SHOULD FIT THE BBJ TEXTSEARCH INDEX WHEN USING A BBJ DATABASE
+        <field>REM #super!.getFulltextFilterFields().addItem("(FLD)")        
+        </field>
+
         #super!.setupDatabaseLink()
 
     methodend

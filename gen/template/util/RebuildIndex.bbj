@@ -1,3 +1,7 @@
+REM OBSOLETE!
+REM THIS SHOULD BE REDONE USING THE NEW BBJ TEXTSEARCH IMPLEMENTATION OF BBJ
+
+
 use com.basis.lucene.BBjSearchGizmo
 use com.basis.lucene.BBjSearchGizmoDoc
 use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
