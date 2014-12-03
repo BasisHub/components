@@ -81,6 +81,8 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
             caption$ = "Home"
             btn! = #Frame!.addButton(1000+i,x,0,w,h,caption$)
             btn!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonPush")
+            btn!.addStyle("menu")
+            btn!.addStyle("homebutton")
             #ButtonList!.addItem(btn!)
             #MenuItemList!.addItem(null())
             x=x+w
@@ -91,6 +93,9 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
             caption$ = #Level!.getCaption()
             btn! = #Frame!.addButton(1000+i,x,0,w,h,caption$)
             btn!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonPush")
+            btn!.addStyle("menu")
+            btn!.addStyle("levelupbutton")
+            btn!.addStyle(caption$)
             #ButtonList!.addItem(btn!)
             #MenuItemList!.addItem(#Level!.getParent())
             x=x+w
@@ -105,11 +110,16 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
             print caption$
             btn! = #Frame!.addButton(1000+i,x,0,w,h,caption$)
             btn!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonPush")
+            btn!.addStyle("menu")
+            btn!.addStyle("levelbutton")
+            btn!.addStyle("ID"+str(item!.getNodeId()))
             #ButtonList!.addItem(btn!)
             #MenuItemList!.addItem(item!)
             x=x+w
             i=i+1
         wend
+        
+        #Frame!.setSize(x,#Frame!.getHeight())
         
     methodend
 
