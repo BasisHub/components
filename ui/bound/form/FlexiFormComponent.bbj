@@ -388,10 +388,10 @@ REM                                           fi
                 #FormEditToolbar!.setBC(#this!.getBC())
             fi
 
-REM             #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
-REM             if #this!.getBC()<>null() then
-REM                 #NavigationToolbar!.setBC(#this!.getBC())
-REM             fi
+            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
+            if #this!.getBC()<>null() then
+                #NavigationToolbar!.setBC(#this!.getBC())
+            fi
 
     methodend
 
@@ -443,7 +443,9 @@ REM             fi
             #FormEditToolbar!.setupMenu(editMenu!)
 
             navMenu! = #super!.getMenuBar().addMenu(-3,"&Record")
-            #NavigationToolbar!.setupMenu(navMenu!)
+            if #NavigationToolbar! <> null() then
+                #NavigationToolbar!.setupMenu(navMenu!)
+            fi
         fi
 
     methodend
