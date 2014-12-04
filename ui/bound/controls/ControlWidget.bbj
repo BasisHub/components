@@ -1,4 +1,6 @@
 use ::components/ui/bound/UIComponent.bbj::UIComponent
+use ::components/ui/bound/controls/ForeignKeyPicker.bbj::ForeignKeyPicker
+
 use ::components/ui/layout/BBMigPane.bbj::BBMigPane
 use com.basiscomponents.db.DataRow
 use com.basiscomponents.db.DataField
@@ -23,6 +25,12 @@ class public ControlWidget extends UIComponent  implements BBjControl
     
     field public static BBTranslator CustomTranslator!
 
+
+    field protected BusinessComponent   FillBC!
+    field protected BBjString           FillField$
+    field protected BBjString           FillClass$
+
+    field protected ForeignKeyPicker    FkPicker!
 
     method protected ControlWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
@@ -110,8 +118,18 @@ REM         a!.setFocusable(0,err=*next)
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
-        #getWnd().setSize(w!,h!) 
-        #getCtrl().setSize(w!-30,h!) 
+        dist=30
+        if #FkPicker!<>null()  and #getCtrl().getControlType() <> BBjControl.LISTBUTTON_TYPE and #getCtrl().getControlType() <> BBjControl.LISTBOX_TYPE then
+            dist=100
+        fi
+        #getWnd().setSize(w!,h!)
+         
+        #getCtrl().setSize(w!-dist,h!) 
+        
+        if #FkPicker! <> null() then
+            #FkPicker!.relocate()
+        fi
+        
     methodend
 
 
@@ -134,10 +152,11 @@ REM         a!.setFocusable(0,err=*next)
                 if #getBindField() >"" then
                 
                     if #getBC().getSelection().size()=1 then
-                        rem #getBC().prepareResultSet(0,0)
+                        #getBC().prepareResultSet(sel,sel)
+                         
                         sel=#getBC().getSelection().getItem(i)
-                        
                         r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
                         
                         #Ctrl!.setText(cvs(text$,2))
@@ -284,7 +303,13 @@ REM     methodend
     method public DataRow prepareSave(DataRow r!)
     
         if #Edited then
-            r!.setFieldValue(#getBindField(),#Ctrl!.getText())
+        
+            if #getFkPicker() <> null() then
+                t$=#getFkPicker().getSelectedForeignKeyValue()
+                r!.setFieldValue(#getBindField(),t$)
+            else
+                r!.setFieldValue(#getBindField(),#Ctrl!.getText())
+            fi
         fi
         
         methodret r!
@@ -327,6 +352,38 @@ REM     methodend
             lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL",err=*endif)
             #Ctrl!.setText(lbl$+":")
         fi
+        
+    methodend
+
+
+rem ------------medthods for fill BC
+
+
+    method public void setFillField(BBjString field$)
+        #FillField$=field$
+    methodend
+
+    method public void setFillClass(BBjString class$)
+        #FillClass$=class$
+    methodend    
+
+    rem /**
+    rem * Method setFillBC:
+    rem * set the business component to drive this UI component
+    rem * @param BusinessComponent bc!: the business component
+    rem */
+    method public void setFillBC(BusinessComponent bc!)
+
+        #FillBC! = bc!
+        rem todo: introduce a proxy class for the BC so this thing can also register for the update / 
+        rem refresh callbacks of the businesscomponent
+
+        
+        fk$=#getBC().getForeignKeyFkField(#getName())
+        
+        #FkPicker! = new ForeignKeyPicker(#getWnd(),#getWnd().getAvailableControlID(),#getCtrl(),#FillBC!,fk$)
+        #setSize(#getWnd().getWidth(),#getWnd().getHeight())
+        #FkPicker!.setShowLinkedRecord(0)
         
     methodend
 

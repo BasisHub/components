@@ -1,0 +1,44 @@
+use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
+
+
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
+
+class public  ComboboxWidget extends ControlWidget
+ 
+    field private BBjComboBox Cb!
+ 
+    method public ComboboxWidget(BBjChildWindow cwCanvas!)
+        #super!(cwCanvas!)
+        cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        #setWnd(cwWidget!)
+        #Cb! = cast(BBjListButton,cwWidget!.addListButton(100,0,0,10,10,"..."))
+        #Cb!.setEditable(1) 
+        #setCtrl(#Cb!)
+    methodend
+    
+    method public void displayData()
+          #setEdited(0)
+    methodend
+    
+    method public void setSize(BBjNumber w!, BBjNumber h!)
+        #super!.setSize(w!,h!)
+        #Cb!.setSize(w!,200)
+    methodend    
+
+    rem /**
+    rem * Method setEditing:
+    rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
+    rem * @param BBjNumber isEditing: -1 = i
+    rem */
+    method public void setEditing(BBjNumber isEditing)
+    
+        if isEditing=0  then
+            #Cb!.selectIndex(-1)
+            #setEdited(0)
+        fi
+        
+    methodend
+
+classend

@@ -42,16 +42,16 @@ class public ResponsiveSplitPane
     
     method private void setup()
         
-        #CwRight!    = #CwCanvas!.addChildWindow(101,10,10,10,10,"",$00000810$,BBjAPI().getSysGui().getAvailableContext())
+        #CwRight!    = #CwCanvas!.addChildWindow(101,10,10,30,30,"",$00000810$,BBjAPI().getSysGui().getAvailableContext())
         #CwRight!.addStyle("FormWnd")
         #CwRight!.setName("CwRight") 
-        #CwLeft!     = #CwCanvas!.addChildWindow(100,0,0,10,10,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #CwLeft!     = #CwCanvas!.addChildWindow(100,0,0,30,30,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
 REM         #BtnBack! = #CwCanvas!.addButton(200,10,10,30,30,"",$0010$)
 REM         #BtnBack!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
 REM         #BtnBack!.setName("BackButton")
 REM         #BtnBack!.addStyle("BackButtonStyle")
 
-        #CbPin! = #CwLeft!.addCheckBox(202,1000,1000,16,16,"")
+        #CbPin! = #CwLeft!.addCheckBox(202,1,1,16,16,"")
         #CbPin!.setCallback(BBjAPI.ON_CHECK_ON,#this!,"onCbPinCheck")
         #CbPin!.setCallback(BBjAPI.ON_CHECK_OFF,#this!,"onCbPinUncheck")
         
@@ -82,7 +82,6 @@ REM         #BtnBack!.addStyle("BackButtonStyle")
 
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
-    
         #H = h!
         #W = w!
         #CwCanvas!.setSize(w!,h!)
