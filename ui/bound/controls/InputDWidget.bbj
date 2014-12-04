@@ -14,7 +14,7 @@ class public  InputDWidget extends ControlWidget
         #setCtrl(#Ipd!)
         
         h=#Ipd!.getHeight()
-        #TbPick! = cast(BBjToolButton,cwWidget!.addToolButton(cwWidget!.getAvailableControlID(),#Ipd!.getX()+#Ipd!.getWidth(),#Ipd!.getY(),h,h,"")) 
+        #TbPick! = cast(BBjToolButton,cwWidget!.addToolButton(cwWidget!.getAvailableControlID(),0,0,1,1,""))  
         #TbPick!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onTbDatePick")
         #TbPick!.setName(ctrl_name$+".pick")
         
@@ -36,7 +36,6 @@ class public  InputDWidget extends ControlWidget
         #getCtrl().setSize(w!-50,h!) 
         #TbPick!.setLocation(w!-50,0)
         #TbPick!.setSize(#Ipd!.getHeight(),#Ipd!.getHeight())
-        
     methodend
 
     rem /**
