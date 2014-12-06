@@ -1,14 +1,77 @@
 use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 
 class public  InputDWidget extends ControlWidget
+ 
+    field private BBjToolButton TbPick!
+    field private BBjInputD Ipd!
  
     method public InputDWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         #setWnd(cwWidget!)
-        ipd! = cwWidget!.addInputD(100,0,0,10,10,"")
-        ipd!.setEditable(1) 
-        #setCtrl(ipd!)
+        #Ipd! = cast(BBjInputD,cwWidget!.addInputD(100,0,0,10,10,""))
+        #Ipd!.setEditable(1) 
+        #setCtrl(#Ipd!)
+        
+        h=#Ipd!.getHeight()
+        #TbPick! = cast(BBjToolButton,cwWidget!.addToolButton(cwWidget!.getAvailableControlID(),0,0,1,1,""))  
+        #TbPick!.setCallback(BBjAPI.ON_TOOL_BUTTON_PUSH,#this!,"onTbDatePick")
+        #TbPick!.setName(ctrl_name$+".pick")
+        
+        img!=BBjAPI().getSysGui().getImageManager().loadImageFromBytes($89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001D44944415478DA9592CF8BA96114C7FD23B397C558D8584959DD9D85A494A69464C1BD4AA424126F162232C34674576C6E6ED9988D158532C68F894C29228A895828BEE339DD5BF3C4D4CC53DFDEE73DCF399F739E731E91E8DFBACF26F15D893E2EE1E1277A6F7FBE2CE6CF01EE7E29715F34E1E12F2FB7DB8DE7D747CEC6FC983F0730FB6EF1BBF1E3CB62FE1780EF8A03D86C3694CB6508C51B12DB339BCBE5422E97E3CE2A950A1C0E070F608EF57A1D8D46E353B55A2D74BB5D0C0603040281EB8042A100854201B1584C41D96C166AB51A72B91C068301A5520993C904E170F83A402693412291402A9512C0683442A552A156AB41A3D1C0EFF763B55A211A8D5E0744221168B55A28954AB4DB6DBABF4EA783C5622155AB55ECF77B241289CF7B60B55A29DB7038442814A2FF7EBF0F8FC743573C1E8F482693978066B349597D3E1F659B4EA76463E5068341A4D3698CC7639C4EA74B007B719D4E87B232A7F97C8EF57A8DDD6E87C3E14041FF173BBB0078BD5E8C46230A7E3CCFFCE93CB2423E8F5EAF879773F9CBE592FA93C964108FC761369B79009BEB6C36A30E2F160BACCFDFCD6683ED764B628F27954AD1F8583293C9C403D801CB108BC5A8C3ACC48F12040176BB1D7ABD9EFAE3743A09F00ED76A5070D91CEE300000000049454E44AE426082$)
+        #TbPick!.setImage(img!)
+        #TbPick!.setOpaque(0)
+        #TbPick!.addStyle("DatePickerButton")
+        
+        #TbPick!.setVisible(0) 
+
+    methodend
+
+ method public void displayData()
+
+          if #getBindField() >"" then
+              if #getBC().getSelection().size()=1 then
+                  rem #getBC().prepareResultSet(0,0)
+                  sel=#getBC().getSelection().getItem(i)
+                  declare DataRow r! 
+                  r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                  d     = r!.getFieldAsNumber(#getBindField(),err=*next)
+                  #Ipd!.setValue(d)
+                  
+              fi
+          fi
+          #setEdited(0)
+             
+    methodend   
+    
+    method public void onTbDatePick(BBjToolButtonPushEvent ev!)
+        #Ipd!.calendar() 
+    methodend
+
+    method public void setSize(BBjNumber w!, BBjNumber h!)
+        #getWnd().setSize(w!,h!) 
+        #getCtrl().setSize(w!-50,h!) 
+        #TbPick!.setLocation(w!-50,0)
+        #TbPick!.setSize(#Ipd!.getHeight(),#Ipd!.getHeight())
+    methodend
+
+    rem /**
+    rem * Method setEditing:
+    rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
+    rem * @param BBjNumber isEditing: -1 = i
+    rem */
+    method public void setEditing(BBjNumber isEditing)
+    
+        #super!.setEditing(isEditing)
+        #TbPick!.setVisible(isEditing) 
+        
+    methodend
+    
+    method public void onCtrlGainedFocus(BBjGainedFocusEvent ev!)
+        #super!.onCtrlGainedFocus(ev!)
+        #TbPick!.setVisible(1)  
     methodend
 
 classend

@@ -1,4 +1,5 @@
 use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
 class public  ButtonWidget extends ControlWidget
  

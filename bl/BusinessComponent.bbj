@@ -103,6 +103,23 @@ class public BusinessComponent
         methodret #ResultSet!
 
     methodend
+    
+    rem /**
+    rem * Method getRecordAsString:
+    rem * return the toString for a record
+    rem * @return BBjString disp$: the current result set
+    rem */
+    method public BBjString getRecordAsString(BBjNumber sel)
+
+        #prepareResultSet(sel,sel)
+        r! = #ResultSet!.getItem(sel)
+        methodret "Record:"+r!.toString()
+
+    methodend
+    
+    
+        
+    
 
 
     rem /**

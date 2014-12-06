@@ -233,40 +233,21 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
 
     methodend
 
+    rem /**
+    rem * Method getRecordAsString:
+    rem * return the toString for a record
+    rem * @return BBjString disp$: the current result set
+    rem */
+    method public BBjString getRecordAsString(BBjNumber sel)
+
+        #prepareResultSet(sel,sel)
+        r! = #getResultSet().getItem(sel)
+
+        rem use r!.getFieldAsString("NAME") etc to build string representation 
+        methodret r!.toString()
+
+    methodend  
+
 classend
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

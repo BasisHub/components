@@ -71,7 +71,7 @@ class public ForeignKeyPicker extends UIComponent
 
             while x<s
                 r! = bc!.getResultSet().getItem(x)
-                fkdisp$ = r!.toString()
+                fkdisp$ = bc!.getRecordAsString(x)
 
                 fkval$     = r!.getFieldAsString(fk$)
                 fkval!     = r!.getField(fk$)
@@ -89,7 +89,7 @@ class public ForeignKeyPicker extends UIComponent
             w=ctrl!.getWidth()
             h=ctrl!.getHeight()
             
-            #super!.getWnd().setLocation(x+w+2,y)
+            #super!.getWnd().setLocation(x+w,y) 
             #super!.getWnd().setSize(h+300,h)
             #super!.getWnd().addStyle("picker")
             
@@ -136,6 +136,12 @@ class public ForeignKeyPicker extends UIComponent
     methodend
 
 
+    method public void setShowLinkedRecord(BBjNumber fShow)
+        if #StDisp! <>null() then
+            #StDisp!.setVisible(0)
+        fi
+    methodend
+
     rem /**
     rem * Method refresh:
     rem * refresh the displayed data
@@ -159,6 +165,19 @@ class public ForeignKeyPicker extends UIComponent
     methodend
 
 
+    method public void relocate()
+    
+        if #TbPick! <> null() then
+            h=#BoundCtrl!.getHeight()
+            w=#BoundCtrl!.getWidth()
+            x=#BoundCtrl!.getX()
+            y=#BoundCtrl!.getY()
+
+            #super!.getWnd().setLocation(x+w,y)
+        fi
+            
+    methodend
+
     rem /**
     rem * Method displayData:
     rem * display the data on the user component
@@ -174,7 +193,7 @@ class public ForeignKeyPicker extends UIComponent
                 declare DataRow r!
                 r! = cast(DataRow,#getBC().getResultSet().getItem(0))
                 fk!     = r!.getField(#Fk$)
-                fkdisp$ = cvs(r!.toString(),3)
+                fkdisp$ = cvs(#getBC().getRecordAsString(0),3)
                 i!= #KeyMap!.get(fk!)
 
                 if i!=null() then
@@ -194,7 +213,7 @@ class public ForeignKeyPicker extends UIComponent
                 r! = cast(DataRow,#getBC().getResultSet().getItem(0))
 
                 fk$     = r!.getFieldAsString(#Fk$)
-                fkdisp$ = cvs(r!.toString(),3)
+                fkdisp$ = cvs(#getBC().getRecordAsString(0),3)
                 #BoundCtrl!.setText(fk$)
                 #StDisp!.setText(cvs(fkdisp$,3))
                 #StDisp!.setOpaque(0)
@@ -205,6 +224,8 @@ class public ForeignKeyPicker extends UIComponent
                 #TbClear!.setEnabled(0)
             fi
         fi
+        
+
 
     methodend
 
@@ -244,7 +265,7 @@ class public ForeignKeyPicker extends UIComponent
                 row! = #super!.getBC().getResultSet().getItem(row)
 
                 newText$=row!.getFieldAsString(#Fk$)
-                newfkdisp$ = row!.toString()
+                newfkdisp$ = #getBC().getRecordAsString(row)
             fi
         fi
 

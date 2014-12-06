@@ -40,6 +40,7 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
     field protected BBjChildWindow ToolbarWnd!
 
     field protected java.util.HashMap ControlsByBcClass! = new java.util.HashMap()
+    field protected java.util.HashMap ControlsByFillBcClass! = new java.util.HashMap()
 
     field protected NavigationToolbarComponent NavigationToolbar!
     field protected FormEditToolbarComponent FormEditToolbar!
@@ -229,6 +230,11 @@ REM                             cwCanvas!.setFont(font!)
                                         mask$= #getNodeValue(elNode!,"mask")                                        
                                         bindClass$= #getNodeValue(elNode!,"bindClass")
                                         bindField$= #getNodeValue(elNode!,"bindField")
+
+                                        fillClass$=""
+                                        fillField$=""
+                                        fillClass$= #getNodeValue(elNode!,"fillClass")
+                                        fillField$= #getNodeValue(elNode!,"fillField")
                                         
                                         cssClass$= #getNodeValue(elNode!,"cssClass")
                                         
@@ -272,6 +278,10 @@ REM                                           fi
                                           
                                           el!.setBindField(bindField$)
                                           el!.setBindClass(bindClass$)
+                                          
+                                          el!.setFillField(fillField$)
+                                          el!.setFillClass(fillClass$)
+                                          
                                           if font!<>null() then
                                               cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
                                           fi
@@ -288,6 +298,15 @@ REM                                           fi
                                             fi
                                             v!.addItem(el!)
                                         fi
+                                        
+                                        if fillClass$>"" then
+                                            v! = #ControlsByFillBcClass!.get(fillClass$)
+                                            if v! = null() then
+                                                v!=new BBjVector()
+                                                #ControlsByFillBcClass!.put(fillClass$,v!)
+                                            fi
+                                            v!.addItem(el!)
+                                        fi                                        
                                         
                                         if cssClass$>"" then
                                             el!.setCssClass(cssClass$) 
@@ -388,10 +407,12 @@ REM                                           fi
                 #FormEditToolbar!.setBC(#this!.getBC())
             fi
 
-REM             #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
-REM             if #this!.getBC()<>null() then
-REM                 #NavigationToolbar!.setBC(#this!.getBC())
-REM             fi
+            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
+            if #this!.getBC()<>null() then
+                #NavigationToolbar!.setBC(#this!.getBC())
+            fi
+            
+            #setEditing(0)
 
     methodend
 
@@ -443,7 +464,9 @@ REM             fi
             #FormEditToolbar!.setupMenu(editMenu!)
 
             navMenu! = #super!.getMenuBar().addMenu(-3,"&Record")
-            #NavigationToolbar!.setupMenu(navMenu!)
+            if #NavigationToolbar! <> null() then
+                #NavigationToolbar!.setupMenu(navMenu!)
+            fi
         fi
 
     methodend
@@ -556,10 +579,29 @@ REM         #delayedSetSize(null())
                         ctrl!.setBC(bc1!)
                     wend
                 fi
-                
-                 
             fi
         wend
+        
+        ks! = #ControlsByFillBcClass!.keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            c$=it!.next()
+            if c$(1,1)="(" and c$(len(c$),1)=")" then
+                ctrllist! = #ControlsByFillBcClass!.get(c$)
+                
+                c$=c$(2,len(c$)-2)
+                
+                bc1! = bc!.getForeignKeyBC(c$)
+                
+                if bc1!<>null() and ctrllist!<>null() then
+                    it1! = ctrllist!.iterator()
+                    while it1!.hasNext()
+                        ctrl! = it1!.next()
+                        ctrl!.setFillBC(bc1!)
+                    wend
+                fi
+            fi
+        wend        
 
     methodend
 
@@ -574,7 +616,6 @@ REM         #delayedSetSize(null())
                   #BCList!.put(bindClass$,bc!)
                 wend
             fi
-            ? #ControlsByBcClass!.keySet()
             
             fkmap! = bc!.getForeignKeyPointerList()
             it! = fkmap!.iterator()
