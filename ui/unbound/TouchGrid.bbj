@@ -27,7 +27,8 @@ class public TouchGrid implements BBjControl
     method public TouchGrid(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
         #CwCanvas! = wnd!.addChildWindow(id,x,y,w,h,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
-        #LbList! = #CwCanvas!.addListBox(200,0,0,w-20,h-20,"")
+
+        #LbList! = #CwCanvas!.addListBox(200,10,10,w-20,h-20,"")
         #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
     methodend
 
@@ -42,7 +43,7 @@ class public TouchGrid implements BBjControl
     method public void setSize(BBjNumber w!, BBjNumber h!)
 
         #CwCanvas!.setSize(w!,h!)
-        #LbList!.setSize(w!,h!)
+        #LbList!.setSize(w!-20,h!-20)
         
     methodend
 
