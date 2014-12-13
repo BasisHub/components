@@ -666,23 +666,23 @@ REM         escape
             
             rem print "(prepare "+str(first)+"-"+str(last)+")"+sql$
             
-            cc=#JDBCResultSet!.getMetaData().getColumnCount()
-            if cc  then
-                ColNames!   = new java.util.ArrayList(cc)
-                ColLabels!  = new java.util.ArrayList(cc)
-                ColTypes!   = new java.util.ArrayList(cc)
-                dim ColNames$[cc]
-                dim ColLabels$[cc]
-                dim ColTypes[cc]
-                for i=1 to cc
-REM                                 ColNames!.add(#JDBCResultSet!.getMetaData().getColumnName(i))
-REM                                 ColLabels!.add(#JDBCResultSet!.getMetaData().getColumnName(i))
-REM                                 ColTypes!.add(#JDBCResultSet!.getMetaData().getColumnType(i))
-                                ColNames$[i]    =#JDBCResultSet!.getMetaData().getColumnName(i)
-                                ColLabels$[i]   =#JDBCResultSet!.getMetaData().getColumnName(i)
-                                ColTypes[i]     =#JDBCResultSet!.getMetaData().getColumnType(i)
-                next
-            fi
+REM             cc=#JDBCResultSet!.getMetaData().getColumnCount()
+REM             if cc  then
+REM                 ColNames!   = new java.util.ArrayList(cc)
+REM                 ColLabels!  = new java.util.ArrayList(cc)
+REM                 ColTypes!   = new java.util.ArrayList(cc)
+REM                 dim ColNames$[cc]
+REM                 dim ColLabels$[cc]
+REM                 dim ColTypes[cc]
+REM                 for i=1 to cc
+REM REM                                 ColNames!.add(#JDBCResultSet!.getMetaData().getColumnName(i))
+REM REM                                 ColLabels!.add(#JDBCResultSet!.getMetaData().getColumnName(i))
+REM REM                                 ColTypes!.add(#JDBCResultSet!.getMetaData().getColumnType(i))
+REM                                 ColNames$[i]    =#JDBCResultSet!.getMetaData().getColumnName(i)
+REM                                 ColLabels$[i]   =#JDBCResultSet!.getMetaData().getColumnName(i)
+REM                                 ColTypes[i]     =#JDBCResultSet!.getMetaData().getColumnType(i)
+REM                 next
+REM             fi
             
             if #RecordCountInResultSet > 500 then
                 print "clean up resultset"
@@ -716,103 +716,104 @@ REM                                 ColTypes!.add(#JDBCResultSet!.getMetaData().
                 while 1
                     if #ResultSet!.size()=first+x-1 or #ResultSet!.getItem(first+x-1)=null() then
                         declare auto DataRow row!
-                        row! = #EntityClass!.newInstance()
-
-                        for i=1 to cc
-REM                               col_name$ =   ColNames!.get(i-1)
-REM                               col_label$ =  ColLabels!.get(i-1)
-REM                               col_type =    ColTypes!.get(i-1) 
-                              col_name$ =   ColNames$[i]
-                              col_label$ =  ColLabels$[i]
-                              col_type =    ColTypes[i] 
-                              
-                            rem TODO: set / map all java.sql.Types and set additional attributes like maxlen...
-
-                            switch col_type
-                                case VARCHAR
-                                case CHAR
-                                case LONGVARCHAR
-                                case LONGNVARCHAR
-                                case NCHAR
-                                s!=#JDBCResultSet!.getString(col_name$)
-                                row!.setFieldValue(col_name$,cast(String,s!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-                                case java.sql.Types.NVARCHAR 
-                                    s!=#JDBCResultSet!.getString(col_name$)
-                                    row!.setFieldValue(col_name$,cast(String,s!))
-                                    row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.NUMERIC
-                                case java.sql.Types.DECIMAL
-                                d!=#JDBCResultSet!.getBigDecimal(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.math.BigDecimal,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.REAL
-                                case java.sql.Types.DOUBLE
-                                case java.sql.Types.FLOAT
-                                d!=#JDBCResultSet!.getDouble(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.lang.Double,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.INTEGER
-                                case java.sql.Types.SMALLINT
-                                case java.sql.Types.TINYINT
-                                d!=#JDBCResultSet!.getInt(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.lang.Integer,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.DATE
-                                d!=#JDBCResultSet!.getDate(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.sql.Date,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.TIMESTAMP
-                                d!=#JDBCResultSet!.getTimestamp(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.sql.Timestamp,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.TIME
-                                d!=#JDBCResultSet!.getTimestamp(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.sql.Time,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.BIT
-                                case java.sql.Types.BOOLEAN
-                                d!=#JDBCResultSet!.getBoolean(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.lang.Boolean,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-
-                                case java.sql.Types.BINARY
-                                case java.sql.Types.VARBINARY
-                                case java.sql.Types.BLOB
-                                case java.sql.Types.CLOB
-                                case java.sql.Types.LONGVARBINARY
-                                rem these types tend to be blobs
-                                rem dunno what to do with these TODO
-                                rem simply skip...
-                                continue
-                                break
-
-                                case default
-                                row!.setFieldValue(col_name$,#JDBCResultSet!.getString(col_name$))
-                                row!.setFieldAttribute(col_name$,"LABEL","<unkown type>"+col_label$)
-                                print col_name$," unkown/unmapped type ",col_type
-                                break
-                            swend
-
-                            row!.setSQLType(col_name$,col_type)
-                        next
+                        row! = new DataRow(#JDBCResultSet!)
+REM                         row! = #EntityClass!.newInstance()
+REM 
+REM                         for i=1 to cc
+REM REM                               col_name$ =   ColNames!.get(i-1)
+REM REM                               col_label$ =  ColLabels!.get(i-1)
+REM REM                               col_type =    ColTypes!.get(i-1) 
+REM                               col_name$ =   ColNames$[i]
+REM                               col_label$ =  ColLabels$[i]
+REM                               col_type =    ColTypes[i] 
+REM                               
+REM                             rem TODO: set / map all java.sql.Types and set additional attributes like maxlen...
+REM 
+REM                             switch col_type
+REM                                 case java.sql.Types.VARCHAR
+REM                                 case java.sql.Types.CHAR
+REM                                 case java.sql.Types.LONGVARCHAR
+REM                                 case java.sql.Types.LONGNVARCHAR
+REM                                 case java.sql.Types.NCHAR
+REM                                 s!=#JDBCResultSet!.getString(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(String,s!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM                                 case java.sql.Types.NVARCHAR 
+REM                                     s!=#JDBCResultSet!.getString(col_name$)
+REM                                     row!.setFieldValue(col_name$,cast(String,s!))
+REM                                     row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.NUMERIC
+REM                                 case java.sql.Types.DECIMAL
+REM                                 d!=#JDBCResultSet!.getBigDecimal(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.math.BigDecimal,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.REAL
+REM                                 case java.sql.Types.DOUBLE
+REM                                 case java.sql.Types.FLOAT
+REM                                 d!=#JDBCResultSet!.getDouble(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.lang.Double,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.INTEGER
+REM                                 case java.sql.Types.SMALLINT
+REM                                 case java.sql.Types.TINYINT
+REM                                 d!=#JDBCResultSet!.getInt(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.lang.Integer,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.DATE
+REM                                 d!=#JDBCResultSet!.getDate(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.sql.Date,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.TIMESTAMP
+REM                                 d!=#JDBCResultSet!.getTimestamp(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.sql.Timestamp,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.TIME
+REM                                 d!=#JDBCResultSet!.getTimestamp(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.sql.Time,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.BIT
+REM                                 case java.sql.Types.BOOLEAN
+REM                                 d!=#JDBCResultSet!.getBoolean(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.lang.Boolean,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM 
+REM                                 case java.sql.Types.BINARY
+REM                                 case java.sql.Types.VARBINARY
+REM                                 case java.sql.Types.BLOB
+REM                                 case java.sql.Types.CLOB
+REM                                 case java.sql.Types.LONGVARBINARY
+REM                                 rem these types tend to be blobs
+REM                                 rem dunno what to do with these TODO
+REM                                 rem simply skip...
+REM                                 continue
+REM                                 break
+REM 
+REM                                 case default
+REM                                 row!.setFieldValue(col_name$,#JDBCResultSet!.getString(col_name$))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL","<unkown type>"+col_label$)
+REM                                 print col_name$," unkown/unmapped type ",col_type
+REM                                 break
+REM                             swend
+REM 
+REM                             row!.setSQLType(col_name$,col_type)
+REM                         next
 
                         if #BC! <> null() then
                             

@@ -1,9 +1,13 @@
 package com.basiscomponents.db;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.sql.*;
+import java.sql.Types.*;
 
 public class TestMyStuff {
 
+	
 	public static void main(String[] args) throws Exception 
 	{
 		// TODO Auto-generated method stub
@@ -30,6 +34,34 @@ public class TestMyStuff {
 		System.out.println(r);
 		System.out.println(r.getFieldAsNumber("TIM"));
 		System.out.println(r.getFieldAsString("TIM"));
+		
+
+		Class.forName("com.basis.jdbc.BasisDriver");
+
+		String url = "jdbc:basis:beff8?DATABASE=xmlmedia&SSL=false";
+		Connection con = DriverManager.getConnection(url, "admin", "admin123");
+		Statement stmt = con.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT TOP 2500 * FROM ARTICLES");
+
+        		
+		
+        long start=System.currentTimeMillis();
+        
+		while (rs.next())
+		{
+			DataRow row = new DataRow(rs);
+//			System.out.println(row);
+            
+		}
+		start = System.currentTimeMillis()-start;
+		System.out.print("duration: ");
+		System.out.println(start);
+		rs.close();
+		stmt.close();
+		con.close();
+		
+		
+		
 
 		
 	}

@@ -1,5 +1,6 @@
 package com.basiscomponents.db;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +29,108 @@ public class DataRow
 
 	public DataRow() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	public DataRow(java.sql.ResultSet rs) throws Exception
+	{
+		
+        int cc=rs.getMetaData().getColumnCount();
+		
+        for (int i=1; i<=cc; i++)
+        {
+             String ColName = rs.getMetaData().getColumnName(i);
+             String ColLabel = rs.getMetaData().getColumnName(i);
+             Integer ColType = rs.getMetaData().getColumnType(i);
+             
+             String s;
+
+             switch (ColType)
+             {
+                 case java.sql.Types.VARCHAR:
+                 case java.sql.Types.CHAR:
+                 case java.sql.Types.LONGVARCHAR:
+                 case java.sql.Types.LONGNVARCHAR:
+                 case java.sql.Types.NCHAR:
+                     s=rs.getString(ColName);
+                     setFieldValue(ColName,s);
+                     setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+                 
+                 case java.sql.Types.NVARCHAR:
+                     s=rs.getString(ColName);
+                     setFieldValue(ColName,s);
+                     setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+
+                 case java.sql.Types.NUMERIC:
+                 case java.sql.Types.DECIMAL:
+                	 java.math.BigDecimal d=rs.getBigDecimal(ColName);
+                     setFieldValue(ColName,d);
+                     setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+
+                 case java.sql.Types.REAL:
+                 case java.sql.Types.DOUBLE:
+                 case java.sql.Types.FLOAT:
+                	 java.lang.Double dbl=rs.getDouble(ColName);
+                     setFieldValue(ColName,dbl);
+                     setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+
+                 case java.sql.Types.INTEGER:
+                 case java.sql.Types.SMALLINT:
+                 case java.sql.Types.TINYINT:
+                     java.lang.Integer inte=rs.getInt(ColName);
+                     setFieldValue(ColName,inte);
+                     setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+
+                 case java.sql.Types.DATE:
+                	 java.sql.Date dt=rs.getDate(ColName);
+                	 setFieldValue(ColName,dt);
+                	 setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+
+                 case java.sql.Types.TIMESTAMP:
+                     java.sql.Timestamp ts=rs.getTimestamp(ColName);
+                     setFieldValue(ColName,ts);
+                     setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+
+                 case java.sql.Types.TIME:
+                	 java.sql.Time tm=rs.getTime(ColName);
+                     setFieldValue(ColName,tm);
+                     setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+
+                 case java.sql.Types.BIT:
+                 case java.sql.Types.BOOLEAN:
+                     java.lang.Boolean bl=rs.getBoolean(ColName);
+                     setFieldValue(ColName,bl);
+                     setFieldAttribute(ColName,"LABEL",ColLabel);
+                 break;
+
+
+                 case java.sql.Types.BINARY:
+                 case java.sql.Types.VARBINARY:
+                 case java.sql.Types.BLOB:
+                 case java.sql.Types.CLOB:
+                 case java.sql.Types.LONGVARBINARY:
+//                     rem these types tend to be blobs
+//                     rem dunno what to do with these TODO
+//                     rem simply skip...
+                	 continue;
+//                 break;
+
+                 default:
+                	 setFieldValue(ColName,rs.getString(ColName));
+                	 setFieldAttribute(ColName,"LABEL","<unkown type>"+ColLabel);
+                 break;
+             }
+
+             setSQLType(ColName,ColType);                 
+             
+        }	
 	}
 
 	public static DataRow newInstance()
