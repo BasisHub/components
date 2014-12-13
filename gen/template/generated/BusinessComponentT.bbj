@@ -27,6 +27,7 @@ class public (DB_NICE)(TBL_NICE)BusinessComponentT extends DataProviderBusinessC
     method public (DB_NICE)(TBL_NICE)BusinessComponentT()
 
         #super!.setDataProvider(new (DB_NICE)(TBL_NICE)DataProvider())
+        #super!.getDataProvider().setBC(#this!)
         #super!.setResultSet(#getDataProvider().getResultSet())
 
         #super!.setLocale(BBjAPI().getThinClient(err=*next).getClientLocale())

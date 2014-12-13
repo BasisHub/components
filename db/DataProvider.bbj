@@ -16,6 +16,7 @@ use ::admin/admin.bbj::UserCredentials
 class public DataProvider
 
     field private   BBjVector           ResultSet!                 = new BBjVector()
+    field private   BBjVector           LastPrepareResultSet! 
     field private   BBjNumber           RecordCountInResultSet
     field protected BBjString           SQL$
     field protected BBjString           DataSource$
@@ -32,6 +33,7 @@ class public DataProvider
     field private   java.util.HashMap   QueryFilter!
     field private   java.util.HashMap   ControllerFilter!           = new java.util.HashMap()
     field private   java.util.HashMap   ControllerFilterUnlock!     = new java.util.HashMap()
+    field private   java.util.HashMap   QueryConditions!            = new java.util.HashMap()
 
     field private   BBjNumber           Size                        =-1
     field protected BusinessComponent   BC!
@@ -39,8 +41,21 @@ class public DataProvider
     field protected java.sql.ResultSet  JDBCResultSet!
     field protected BBjString           ConnMode$
     field public    DataRow             EntityClass!                = new DataRow()
-    field private   DataRow             AttributesRecord!           
+    field private   DataRow             AttributesRecord!       
+        
+    field private java.util.ArrayList   ColNames!
+    field private java.util.ArrayList   ColLabels!
+    field private java.util.ArrayList   ColTypes!
 
+
+    rem /**
+    rem * Method setBC:
+    rem * register a businesscomponent to receive callback calls
+    rem * @param BusinessComponent bc!: the business component linked with this data provider
+    rem */
+    method public void setBC(BusinessComponent bc!)
+        #BC!= bc!
+    methodend
 
     rem /**
     rem * Method addPrimaryKeySegment:
@@ -289,6 +304,25 @@ class public DataProvider
           fi
         fi
 
+        if #QueryConditions!.size() then 
+        
+                  ks! = #QueryConditions!.keySet()
+                  it! = ks!.iterator()
+                  while it!.hasNext()
+                      f$ = it!.next()
+                      qc$=#QueryConditions!.get(f$)
+                      if wh1$>"" then
+                          wh1$=wh1$+" AND  "
+                      fi
+                      wh1$=wh1$+"("+qc$+")" 
+                  wend
+                  
+                  if wh$>"" then
+                      wh$=wh$+" AND "
+                  fi
+                  wh$=wh$+"( "+wh1$+ ") "
+                  
+        fi
         
         if wh$>"" then
             
@@ -321,11 +355,8 @@ class public DataProvider
         fi
 
         sql$=sql$+orderby$
-
-REM         open (999,mode="O_CREATE,O_APPEND")"sql.txt"
-REM         print (999)sql$
-REM         close (999)
-
+REM         clipfromstr 1,sql$
+REM         escape 
         methodret sql$
 
     methodend
@@ -365,12 +396,13 @@ REM         close (999)
                 sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
 
                 stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
-                #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+                JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+                
 
                 print "(determine size)"
 
-                if #JDBCResultSet!.next() then
-                    size = #JDBCResultSet!.getInt("COUNT")
+                if JDBCResultSet!.next() then
+                    size = JDBCResultSet!.getInt("COUNT")
                 else
                     size=-1
                 fi
@@ -379,7 +411,6 @@ REM         close (999)
             fi
 
             #closeDatabase()
-
             #Size=size
         endif
 
@@ -466,6 +497,13 @@ REM         close (999)
         else
             
             v! = #prepareResultSet(0,0)
+            if #AttributesRecord!=null() then 
+                methodret new DataRow()
+            else
+                methodret #AttributesRecord!
+            fi
+            
+            rem -----------------schnipp------------------------------            
             if #getResultSet().size() then
                 rec! = #getResultSet().getItem(0)
                 fieldnames! = rec!.getFieldNames()
@@ -578,21 +616,73 @@ REM         close (999)
     rem */
     method public BBjVector prepareResultSet(BBjNumber first, BBjNumber last)
 
+        if first=0 and last=0 then
+            canExit=1
+        fi
+
+        if #getResultSet().size()=#Size and #BC!<>null() and #BC!.isPreFiltering() and #LastPrepareResultSet! <> null() then
+            methodret #LastPrepareResultSet!
+        fi
+
         v! = new BBjVector()
 
         rem JDBC Resultset is not zero-based
         first=max(1,first+1)
-
         last = last+1
 
         #openDatabase()
         sql$=#buildSQLStatement()
+        
+        rem now determine size for later use - it's probably needed anyway
+
+        rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
+        rem sollte ein order by im Satement sein muss dieses entfernt werden
+        count$ = sql$
+        if pos("ORDER BY"= sql$) > 0 then
+            count$ = sql$(1,pos("ORDER BY"= sql$)-1)
+        endif
+        sqlc$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
+
+        stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+        JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sqlc$))
+
+        if JDBCResultSet!.next() then
+            #Size = int(JDBCResultSet!.getInt("COUNT"))-skew
+        else
+            #Size=0
+        fi
+
+
+        if #BC!<> null() and #BC!.isPreFiltering() then
+            first=1
+            last=#Size
+            #ResultSet!.clear()  
+        fi
 
         if pos("1=2"=sql$)=0 then
+            
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
             
             rem print "(prepare "+str(first)+"-"+str(last)+")"+sql$
+            
+            cc=#JDBCResultSet!.getMetaData().getColumnCount()
+            if cc  then
+                ColNames!   = new java.util.ArrayList(cc)
+                ColLabels!  = new java.util.ArrayList(cc)
+                ColTypes!   = new java.util.ArrayList(cc)
+                dim ColNames$[cc]
+                dim ColLabels$[cc]
+                dim ColTypes[cc]
+                for i=1 to cc
+REM                                 ColNames!.add(#JDBCResultSet!.getMetaData().getColumnName(i))
+REM                                 ColLabels!.add(#JDBCResultSet!.getMetaData().getColumnName(i))
+REM                                 ColTypes!.add(#JDBCResultSet!.getMetaData().getColumnType(i))
+                                ColNames$[i]    =#JDBCResultSet!.getMetaData().getColumnName(i)
+                                ColLabels$[i]   =#JDBCResultSet!.getMetaData().getColumnName(i)
+                                ColTypes[i]     =#JDBCResultSet!.getMetaData().getColumnType(i)
+                next
+            fi
             
             if #RecordCountInResultSet > 500 then
                 print "clean up resultset"
@@ -616,25 +706,34 @@ REM         close (999)
                 while #ResultSet!.size() < first-1
                     #ResultSet!.addItem(null())
                 wend
+                
+                VARCHAR         = java.sql.Types.VARCHAR
+                CHAR            = java.sql.Types.CHAR
+                LONGVARCHAR     = java.sql.Types.LONGVARCHAR
+                LONGNVARCHAR    = java.sql.Types.LONGNVARCHAR
+                NCHAR           = java.sql.Types.NCHAR                
 
                 while 1
                     if #ResultSet!.size()=first+x-1 or #ResultSet!.getItem(first+x-1)=null() then
                         declare auto DataRow row!
                         row! = #EntityClass!.newInstance()
 
-                        for i=1 to #JDBCResultSet!.getMetaData().getColumnCount()
-                            col_name$ = #JDBCResultSet!.getMetaData().getColumnName(i)
-                            col_label$ = #JDBCResultSet!.getMetaData().getColumnName(i)
-                            col_type = #JDBCResultSet!.getMetaData().getColumnType(i)
-
+                        for i=1 to cc
+REM                               col_name$ =   ColNames!.get(i-1)
+REM                               col_label$ =  ColLabels!.get(i-1)
+REM                               col_type =    ColTypes!.get(i-1) 
+                              col_name$ =   ColNames$[i]
+                              col_label$ =  ColLabels$[i]
+                              col_type =    ColTypes[i] 
+                              
                             rem TODO: set / map all java.sql.Types and set additional attributes like maxlen...
 
                             switch col_type
-                                case java.sql.Types.VARCHAR
-                                case java.sql.Types.CHAR
-                                case java.sql.Types.LONGVARCHAR
-                                case java.sql.Types.LONGNVARCHAR
-                                case java.sql.Types.NCHAR
+                                case VARCHAR
+                                case CHAR
+                                case LONGVARCHAR
+                                case LONGNVARCHAR
+                                case NCHAR
                                 s!=#JDBCResultSet!.getString(col_name$)
                                 row!.setFieldValue(col_name$,cast(String,s!))
                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
@@ -715,6 +814,28 @@ REM         close (999)
                             row!.setSQLType(col_name$,col_type)
                         next
 
+                        if #BC! <> null() then
+                            
+                            row! = #BC!.preProcessRecord(row!)
+                            if row! = null() then
+                                rem if preProcessRecord returns null,
+                                rem then business logic decided to skip this
+                                rem record 
+                                skew=skew+1
+                                goto nextRecord
+                            fi
+                        fi
+
+                        if #AttributesRecord! = null()  and row! <> null() then
+                            #AttributesRecord! = row!
+                            if canExit then 
+                                methodret null()
+                            fi
+                            rem this is really ugly, assuming that we can abandon the query with the first
+                            rem record as long as #AttributesRecord! is null
+                            rem as this is most probably just a prelude of finding out out about the structure of the
+                            rem result set
+                        fi
 
                         if #ResultSet!.size()=first+x-1 then
                             #ResultSet!.addItem(row!)
@@ -728,6 +849,7 @@ REM         close (999)
 
                     x=x+1
 
+                 nextRecord:
                     if #JDBCResultSet!.next() then
                         if first+x<=last then
                             continue
@@ -738,24 +860,7 @@ REM         close (999)
                 wend
             fi
 
-            rem now determine size for later use - it's probably needed anyway
-
-            rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
-            rem sollte ein order by im Satement sein muss dieses entfernt werden
-            count$ = sql$
-            if pos("ORDER BY"= sql$) > 0 then
-                count$ = sql$(1,pos("ORDER BY"= sql$)-1)
-            endif
-            sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
-
-            stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
-            JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
-
-            if JDBCResultSet!.next() then
-                #Size = int(JDBCResultSet!.getInt("COUNT"))
-            else
-                #Size=0
-            fi
+            #Size=#Size-skew 
         else
             print "empty result set where was 1=2"
             v! = new BBjVector()
@@ -764,7 +869,8 @@ REM         close (999)
         print
 
         #closeDatabase()
-
+        
+        #LastPrepareResultSet! = cast(BBjVector,v!)
         methodret v!
 
     methodend
@@ -902,6 +1008,35 @@ REM         close (999)
 
     methodend
 
+    rem /**
+    rem * Method addQueryCondition:
+    rem * filters the result set by freestyle query conditions on the SQL
+    rem * @param BBjString ConditionTag$: a tag under which the business component knows the condition
+    rem * @param BBjString Condition$: the condition to be embedded in the SQL where clause
+    rem */
+    method public void addQueryCondition(BBjString ConditionTag$, BBjString Condition$)
+
+        if Condition$="" then
+            #removeQueryCondition(ConditionTag$)
+        else
+          #QueryConditions!.put(ConditionTag$,Condition$)
+          #Size=-1
+        fi
+
+    methodend    
+    
+    rem /**
+    rem * Method addQueryCondition:
+    rem * filters the result set by freestyle query conditions on the SQL
+    rem * @param BBjString ConditionTag$: a tag under which the business component knows the condition
+    rem * @param BBjString Condition$: the condition to be embedded in the SQL where clause
+    rem */
+    method public void removeQueryCondition(BBjString ConditionTag$)
+
+        #QueryConditions!.remove(ConditionTag$)
+        #Size=-1
+
+    methodend        
 
     rem /**
     rem * Method setFulltextFilter:

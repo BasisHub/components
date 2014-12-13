@@ -91,6 +91,37 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
     methodend
 
     rem /**
+    rem * Method isPreFiltering:
+    rem * return 1 if preProcessRecord is filtering records out
+    rem * in derived class, always call #super!.processRecord(row!) first
+    rem * note: this will lead to performance loss as more records will be processed 
+    rem * @return BBjNumber isPreFiltering: 1 if preProcessRecord filters data 
+    rem */
+    method public BBjNumber isPreFiltering()
+
+        methodret 1
+
+    methodend 
+
+    rem /**
+    rem * Method preProcessRecord:
+    rem * override to enrich each record by formatting rules
+    rem * in derived class, always call #super!.processRecord(row!) first
+    rem * this method is called for _each_ record in the database
+    rem * so compute only that information that is used to make decisions on if the record should
+    rem * be processed or not
+    rem * @see processRecord for preparing a record for UI display   
+    rem * @param DataRow attributes!: record passed into method
+    rem * @return DataRow attributes!: record with added formatting and calculated fields; return null() if the record should be ignored
+    rem */
+    method public DataRow preProcessRecord(DataRow row!)
+
+        rem TODO: filter out records you don't want to handle by returning null()
+        methodret row!
+
+    methodend
+
+    rem /**
     rem * Method processRecord:
     rem * override to set your own field attributes for each row
     rem * @param DataRow row!: the entity to be examined and enriched

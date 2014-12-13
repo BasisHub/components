@@ -54,7 +54,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
         #getDataProvider().setQueryFilter(filter!)
 
-        #refresh(0)
+REM         #refresh(0)
 
     methodend
 
@@ -68,7 +68,7 @@ class public DataProviderBusinessComponent extends BusinessComponent
 
         #super!.setFulltextFilter(filter$)
         #super!.getDataProvider().setFulltextFilter(filter$)
-        #refresh(0)
+REM         #refresh(0)
 
     methodend
 
