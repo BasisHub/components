@@ -167,6 +167,29 @@ class public BusinessComponent
 
 
     rem /**
+    rem * Method addQueryCondition:
+    rem * filters the result set by freestyle query conditions on the SQL
+    rem * @param BBjString ConditionTag$: a tag under which the business component knows the condition
+    rem * @param BBjString Condition$: the condition to be embedded in the SQL where clause
+    rem */
+    method public void addQueryCondition(BBjString ConditionTag$, BBjString Condition$)
+
+        #getDataProvider().addQueryCondition(ConditionTag$, Condition$)
+
+    methodend    
+    
+    rem /**
+    rem * Method removeQueryCondition:
+    rem * filters the result set by freestyle query conditions on the SQL
+    rem * @param BBjString ConditionTag$: a tag under which the business component knows the condition
+    rem */
+    method public void removeQueryCondition(BBjString ConditionTag$)
+
+        #getDataProvider().removeQueryCondition(ConditionTag$)
+
+    methodend     
+
+    rem /**
     rem * Method setQueryFilter:
     rem * filters the result set
     rem * @param java.util.HashMap filter!: a hash map that holds the filter information, key is the column, data is a BBjVector holding the values for the filter

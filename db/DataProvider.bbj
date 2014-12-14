@@ -1027,10 +1027,9 @@ REM                         next
     methodend    
     
     rem /**
-    rem * Method addQueryCondition:
+    rem * Method removeQueryCondition:
     rem * filters the result set by freestyle query conditions on the SQL
     rem * @param BBjString ConditionTag$: a tag under which the business component knows the condition
-    rem * @param BBjString Condition$: the condition to be embedded in the SQL where clause
     rem */
     method public void removeQueryCondition(BBjString ConditionTag$)
 

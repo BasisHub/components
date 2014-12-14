@@ -38,10 +38,10 @@ public class TestMyStuff {
 
 		Class.forName("com.basis.jdbc.BasisDriver");
 
-		String url = "jdbc:basis:beff8?DATABASE=xmlmedia&SSL=false";
+		String url = "jdbc:basis:beff8?DATABASE=CC&SSL=false";
 		Connection con = DriverManager.getConnection(url, "admin", "admin123");
 		Statement stmt = con.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT TOP 2500 * FROM ARTICLES");
+		ResultSet rs = stmt.executeQuery("SELECT * FROM CLBASE WHERE CLBREF='1433012'");
 
         		
 		
