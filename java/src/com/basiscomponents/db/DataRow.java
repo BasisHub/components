@@ -31,7 +31,7 @@ public class DataRow
 		// TODO Auto-generated constructor stub
 	}
 	
-	public DataRow(java.sql.ResultSet rs) throws Exception
+	public DataRow(java.sql.ResultSet rs) throws Exception 
 	{
 		
         int cc=rs.getMetaData().getColumnCount();
@@ -42,7 +42,7 @@ public class DataRow
              String ColLabel = rs.getMetaData().getColumnName(i);
              Integer ColType = rs.getMetaData().getColumnType(i);
              
-             String s;
+             String s=null;
 
              switch (ColType)
              {
@@ -51,13 +51,23 @@ public class DataRow
                  case java.sql.Types.LONGVARCHAR:
                  case java.sql.Types.LONGNVARCHAR:
                  case java.sql.Types.NCHAR:
-                     s=rs.getString(ColName);
+				try {
+					s=rs.getString(ColName);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                      setFieldValue(ColName,s);
                      setFieldAttribute(ColName,"LABEL",ColLabel);
                  break;
                  
                  case java.sql.Types.NVARCHAR:
-                     s=rs.getString(ColName);
+				try {
+					s=rs.getString(ColName);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                      setFieldValue(ColName,s);
                      setFieldAttribute(ColName,"LABEL",ColLabel);
                  break;
@@ -65,7 +75,12 @@ public class DataRow
                  case java.sql.Types.NUMERIC:
                  case java.sql.Types.DECIMAL:
                 	 java.math.BigDecimal d=rs.getBigDecimal(ColName);
-                     setFieldValue(ColName,d);
+				try {
+					setFieldValue(ColName,d);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                      setFieldAttribute(ColName,"LABEL",ColLabel);
                  break;
 
@@ -80,32 +95,62 @@ public class DataRow
                  case java.sql.Types.INTEGER:
                  case java.sql.Types.SMALLINT:
                  case java.sql.Types.TINYINT:
-                     java.lang.Integer inte=rs.getInt(ColName);
+				java.lang.Integer inte=null;
+				try {
+					inte = rs.getInt(ColName);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                      setFieldValue(ColName,inte);
                      setFieldAttribute(ColName,"LABEL",ColLabel);
                  break;
 
                  case java.sql.Types.DATE:
-                	 java.sql.Date dt=rs.getDate(ColName);
+				java.sql.Date dt=null;
+				try {
+					dt = rs.getDate(ColName);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                 	 setFieldValue(ColName,dt);
                 	 setFieldAttribute(ColName,"LABEL",ColLabel);
                  break;
 
                  case java.sql.Types.TIMESTAMP:
-                     java.sql.Timestamp ts=rs.getTimestamp(ColName);
+				java.sql.Timestamp ts=null;
+				try {
+					ts = rs.getTimestamp(ColName);
+				} catch (SQLException e3) {
+					// TODO Auto-generated catch block
+					e3.printStackTrace();
+				}
                      setFieldValue(ColName,ts);
                      setFieldAttribute(ColName,"LABEL",ColLabel);
                  break;
 
                  case java.sql.Types.TIME:
-                	 java.sql.Time tm=rs.getTime(ColName);
+				java.sql.Time tm=null;
+				try {
+					tm = rs.getTime(ColName);
+				} catch (SQLException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
                      setFieldValue(ColName,tm);
                      setFieldAttribute(ColName,"LABEL",ColLabel);
                  break;
 
                  case java.sql.Types.BIT:
                  case java.sql.Types.BOOLEAN:
-                     java.lang.Boolean bl=rs.getBoolean(ColName);
+				java.lang.Boolean bl=null;
+				try {
+					bl = rs.getBoolean(ColName);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
                      setFieldValue(ColName,bl);
                      setFieldAttribute(ColName,"LABEL",ColLabel);
                  break;
@@ -123,7 +168,15 @@ public class DataRow
 //                 break;
 
                  default:
-                	 setFieldValue(ColName,rs.getString(ColName));
+				try {
+					setFieldValue(ColName,rs.getString(ColName));
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                 	 setFieldAttribute(ColName,"LABEL","<unkown type>"+ColLabel);
                  break;
              }
