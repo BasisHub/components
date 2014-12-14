@@ -16,6 +16,7 @@ use ::admin/admin.bbj::UserCredentials
 class public DataProvider
 
     field private   BBjVector           ResultSet!                 = new BBjVector()
+    field private   BBjVector           LastPrepareResultSet! 
     field private   BBjNumber           RecordCountInResultSet
     field protected BBjString           SQL$
     field protected BBjString           DataSource$
@@ -32,6 +33,7 @@ class public DataProvider
     field private   java.util.HashMap   QueryFilter!
     field private   java.util.HashMap   ControllerFilter!           = new java.util.HashMap()
     field private   java.util.HashMap   ControllerFilterUnlock!     = new java.util.HashMap()
+    field private   java.util.HashMap   QueryConditions!            = new java.util.HashMap()
 
     field private   BBjNumber           Size                        =-1
     field protected BusinessComponent   BC!
@@ -39,7 +41,21 @@ class public DataProvider
     field protected java.sql.ResultSet  JDBCResultSet!
     field protected BBjString           ConnMode$
     field public    DataRow             EntityClass!                = new DataRow()
+    field private   DataRow             AttributesRecord!       
+        
+    field private java.util.ArrayList   ColNames!
+    field private java.util.ArrayList   ColLabels!
+    field private java.util.ArrayList   ColTypes!
 
+
+    rem /**
+    rem * Method setBC:
+    rem * register a businesscomponent to receive callback calls
+    rem * @param BusinessComponent bc!: the business component linked with this data provider
+    rem */
+    method public void setBC(BusinessComponent bc!)
+        #BC!= bc!
+    methodend
 
     rem /**
     rem * Method addPrimaryKeySegment:
@@ -137,9 +153,6 @@ class public DataProvider
 
         filter! = new java.util.HashMap()
 
-REM         print "#ControllerFilter!=",#ControllerFilter!
-REM         print "#QueryFilter!=",#QueryFilter!
-         print "#FulltextFilter$=",#FulltextFilter$
         if fIgnoreFilterAndOrder then
             if #ControllerFilter! = null() then
                 filter! = new java.util.HashMap()
@@ -165,7 +178,7 @@ REM         print "#QueryFilter!=",#QueryFilter!
                     it! = ks!.iterator()
                     while it!.hasNext()
                         k$=it!.next()
-                        if allKeys!.contains(k$)=0 then
+                        if allKeys!.contains(k$)=0  then
                             allKeys!.addItem(k$)
                         fi
                     wend    
@@ -291,6 +304,25 @@ REM         print "#QueryFilter!=",#QueryFilter!
           fi
         fi
 
+        if #QueryConditions!.size() then 
+        
+                  ks! = #QueryConditions!.keySet()
+                  it! = ks!.iterator()
+                  while it!.hasNext()
+                      f$ = it!.next()
+                      qc$=#QueryConditions!.get(f$)
+                      if wh1$>"" then
+                          wh1$=wh1$+" AND  "
+                      fi
+                      wh1$=wh1$+"("+qc$+")" 
+                  wend
+                  
+                  if wh$>"" then
+                      wh$=wh$+" AND "
+                  fi
+                  wh$=wh$+"( "+wh1$+ ") "
+                  
+        fi
         
         if wh$>"" then
             
@@ -323,11 +355,8 @@ REM         print "#QueryFilter!=",#QueryFilter!
         fi
 
         sql$=sql$+orderby$
-
-REM         open (999,mode="O_CREATE,O_APPEND")"sql.txt"
-REM         print (999)sql$
-REM         close (999)
-
+REM         clipfromstr 1,sql$
+REM         escape 
         methodret sql$
 
     methodend
@@ -367,12 +396,13 @@ REM         close (999)
                 sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
 
                 stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
-                #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+                JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+                
 
                 print "(determine size)"
 
-                if #JDBCResultSet!.next() then
-                    size = #JDBCResultSet!.getInt("COUNT")
+                if JDBCResultSet!.next() then
+                    size = JDBCResultSet!.getInt("COUNT")
                 else
                     size=-1
                 fi
@@ -381,7 +411,6 @@ REM         close (999)
             fi
 
             #closeDatabase()
-
             #Size=size
         endif
 
@@ -463,105 +492,117 @@ REM         close (999)
     method public DataRow getAttributesRecord()
 
         declare auto BBjVector fieldnames!
-        
-        v! = #prepareResultSet(0,0)
-        if #getResultSet().size() then
-            rec! = #getResultSet().getItem(0)
-            fieldnames! = rec!.getFieldNames()
-        fi
-        
-        #openDatabase()
-
-        md! = #Connection!.getMetaData()
-
-        declare auto DataRow row!
-        row! = #EntityClass!.newInstance()
-
-        JDBCResultSet! = md!.getColumns(null(),#Schema$,#PrimaryTable$,"%")
-
-        while JDBCResultSet!.next()
-            col_type=JDBCResultSet!.getInt("DATA_TYPE")
-            col_name$=JDBCResultSet!.getString("COLUMN_NAME")
-
-            if (fieldnames! <> null() AND ! fieldnames!.contains(col_name$)) then 
-                continue
+        if #AttributesRecord!<> null() then
+            methodret #AttributesRecord!
+        else
+            
+            v! = #prepareResultSet(0,0)
+            if #AttributesRecord!=null() then 
+                methodret new DataRow()
+            else
+                methodret #AttributesRecord!
             fi
-
-            switch col_type
-                case java.sql.Types.VARCHAR
-                case java.sql.Types.CHAR
-                case java.sql.Types.LONGVARCHAR
-                case java.sql.Types.LONGNVARCHAR
-                case java.sql.Types.NCHAR
-                row!.setFieldValue(col_name$,cast(String,null()))
-                break
-                case java.sql.Types.NVARCHAR 
+            
+            rem -----------------schnipp------------------------------            
+            if #getResultSet().size() then
+                rec! = #getResultSet().getItem(0)
+                fieldnames! = rec!.getFieldNames()
+            fi
+            
+            #openDatabase()
+    
+            md! = #Connection!.getMetaData()
+    
+            declare auto DataRow row!
+            row! = #EntityClass!.newInstance()
+    
+            JDBCResultSet! = md!.getColumns(null(),#Schema$,#PrimaryTable$,"%")
+    
+            while JDBCResultSet!.next()
+                col_type=JDBCResultSet!.getInt("DATA_TYPE")
+                col_name$=JDBCResultSet!.getString("COLUMN_NAME")
+    
+                if (fieldnames! <> null() AND ! fieldnames!.contains(col_name$)) then 
+                    continue
+                fi
+    
+                switch col_type
+                    case java.sql.Types.VARCHAR
+                    case java.sql.Types.CHAR
+                    case java.sql.Types.LONGVARCHAR
+                    case java.sql.Types.LONGNVARCHAR
+                    case java.sql.Types.NCHAR
                     row!.setFieldValue(col_name$,cast(String,null()))
-                break
-                case java.sql.Types.NUMERIC
-                case java.sql.Types.DECIMAL
-                row!.setFieldValue(col_name$,cast(java.math.BigDecimal,null()))
-                break
+                    break
+                    case java.sql.Types.NVARCHAR 
+                        row!.setFieldValue(col_name$,cast(String,null()))
+                    break
+                    case java.sql.Types.NUMERIC
+                    case java.sql.Types.DECIMAL
+                    row!.setFieldValue(col_name$,cast(java.math.BigDecimal,null()))
+                    break
+    
+                    case java.sql.Types.REAL
+                    case java.sql.Types.DOUBLE
+                    case java.sql.Types.FLOAT
+                    row!.setFieldValue(col_name$,cast(java.lang.Double,null()))
+                    break
+    
+                    case java.sql.Types.INTEGER
+                    case java.sql.Types.SMALLINT
+                    case java.sql.Types.TINYINT
+                    row!.setFieldValue(col_name$,cast(java.lang.Integer,null()))
+                    break
+    
+                    case 9
+                    rem hack to compensate flaw in BBj ODBC driver
+                    rem 9=BASIS Date
+                    rem reported to jash 21.02.2013 SW
+                    case java.sql.Types.DATE
+                    row!.setFieldValue(col_name$,cast(java.sql.Date,null()))
+                    break
+    
+                    case 11
+                    rem hack for BASIS Timestamp
+                    case java.sql.Types.TIMESTAMP
+                    row!.setFieldValue(col_name$,cast(java.sql.Timestamp,null()))
+                    break
+    
+                    case java.sql.Types.TIME
+                    row!.setFieldValue(col_name$,cast(java.sql.Time,null()))
+                    break
+    
+                    case java.sql.Types.BIT
+                    case java.sql.Types.BOOLEAN
+                    row!.setFieldValue(col_name$,cast(java.lang.Boolean,null()))
+                    break
+    
+                    case java.sql.Types.BINARY
+                    case java.sql.Types.VARBINARY
+                    case java.sql.Types.BLOB
+                    case java.sql.Types.CLOB
+                    case java.sql.Types.LONGVARBINARY
+                    rem these types tend to be blobs
+                    rem dunno what to do with these TODO
+                    rem simply skip...
+                    continue
+                    break
+    
+                    case default
+                    row!.setFieldValue(col_name$,"")
+                    print col_name$," unkown/unmapped type ",col_type
+                    break
+                swend
+    
+                row!.setSQLType(col_name$,col_type)
+    
+            wend
+    
+            #closeDatabase()
+            #AttributesRecord! = row!
+        fi
 
-                case java.sql.Types.REAL
-                case java.sql.Types.DOUBLE
-                case java.sql.Types.FLOAT
-                row!.setFieldValue(col_name$,cast(java.lang.Double,null()))
-                break
-
-                case java.sql.Types.INTEGER
-                case java.sql.Types.SMALLINT
-                case java.sql.Types.TINYINT
-                row!.setFieldValue(col_name$,cast(java.lang.Integer,null()))
-                break
-
-                case 9
-                rem hack to compensate flaw in BBj ODBC driver
-                rem 9=BASIS Date
-                rem reported to jash 21.02.2013 SW
-                case java.sql.Types.DATE
-                row!.setFieldValue(col_name$,cast(java.sql.Date,null()))
-                break
-
-                case 11
-                rem hack for BASIS Timestamp
-                case java.sql.Types.TIMESTAMP
-                row!.setFieldValue(col_name$,cast(java.sql.Timestamp,null()))
-                break
-
-                case java.sql.Types.TIME
-                row!.setFieldValue(col_name$,cast(java.sql.Time,null()))
-                break
-
-                case java.sql.Types.BIT
-                case java.sql.Types.BOOLEAN
-                row!.setFieldValue(col_name$,cast(java.lang.Boolean,null()))
-                break
-
-                case java.sql.Types.BINARY
-                case java.sql.Types.VARBINARY
-                case java.sql.Types.BLOB
-                case java.sql.Types.CLOB
-                case java.sql.Types.LONGVARBINARY
-                rem these types tend to be blobs
-                rem dunno what to do with these TODO
-                rem simply skip...
-                continue
-                break
-
-                case default
-                row!.setFieldValue(col_name$,"")
-                print col_name$," unkown/unmapped type ",col_type
-                break
-            swend
-
-            row!.setSQLType(col_name$,col_type)
-
-        wend
-
-        #closeDatabase()
-
-        methodret row!
+        methodret #AttributesRecord!
 
     methodend
 
@@ -575,21 +616,73 @@ REM         close (999)
     rem */
     method public BBjVector prepareResultSet(BBjNumber first, BBjNumber last)
 
+        if first=0 and last=0 then
+            canExit=1
+        fi
+
+        if #getResultSet().size()=#Size and #BC!<>null() and #BC!.isPreFiltering() and #LastPrepareResultSet! <> null() then
+            methodret #LastPrepareResultSet!
+        fi
+
         v! = new BBjVector()
 
         rem JDBC Resultset is not zero-based
         first=max(1,first+1)
-
         last = last+1
 
         #openDatabase()
         sql$=#buildSQLStatement()
+        
+        rem now determine size for later use - it's probably needed anyway
+
+        rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
+        rem sollte ein order by im Satement sein muss dieses entfernt werden
+        count$ = sql$
+        if pos("ORDER BY"= sql$) > 0 then
+            count$ = sql$(1,pos("ORDER BY"= sql$)-1)
+        endif
+        sqlc$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
+
+        stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+        JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sqlc$))
+
+        if JDBCResultSet!.next() then
+            #Size = int(JDBCResultSet!.getInt("COUNT"))-skew
+        else
+            #Size=0
+        fi
+
+
+        if #BC!<> null() and #BC!.isPreFiltering() then
+            first=1
+            last=#Size
+            #ResultSet!.clear()  
+        fi
 
         if pos("1=2"=sql$)=0 then
+            
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
             
             rem print "(prepare "+str(first)+"-"+str(last)+")"+sql$
+            
+REM             cc=#JDBCResultSet!.getMetaData().getColumnCount()
+REM             if cc  then
+REM                 ColNames!   = new java.util.ArrayList(cc)
+REM                 ColLabels!  = new java.util.ArrayList(cc)
+REM                 ColTypes!   = new java.util.ArrayList(cc)
+REM                 dim ColNames$[cc]
+REM                 dim ColLabels$[cc]
+REM                 dim ColTypes[cc]
+REM                 for i=1 to cc
+REM REM                                 ColNames!.add(#JDBCResultSet!.getMetaData().getColumnName(i))
+REM REM                                 ColLabels!.add(#JDBCResultSet!.getMetaData().getColumnName(i))
+REM REM                                 ColTypes!.add(#JDBCResultSet!.getMetaData().getColumnType(i))
+REM                                 ColNames$[i]    =#JDBCResultSet!.getMetaData().getColumnName(i)
+REM                                 ColLabels$[i]   =#JDBCResultSet!.getMetaData().getColumnName(i)
+REM                                 ColTypes[i]     =#JDBCResultSet!.getMetaData().getColumnType(i)
+REM                 next
+REM             fi
             
             if #RecordCountInResultSet > 500 then
                 print "clean up resultset"
@@ -613,105 +706,137 @@ REM         close (999)
                 while #ResultSet!.size() < first-1
                     #ResultSet!.addItem(null())
                 wend
+                
+                VARCHAR         = java.sql.Types.VARCHAR
+                CHAR            = java.sql.Types.CHAR
+                LONGVARCHAR     = java.sql.Types.LONGVARCHAR
+                LONGNVARCHAR    = java.sql.Types.LONGNVARCHAR
+                NCHAR           = java.sql.Types.NCHAR                
 
                 while 1
                     if #ResultSet!.size()=first+x-1 or #ResultSet!.getItem(first+x-1)=null() then
                         declare auto DataRow row!
-                        row! = #EntityClass!.newInstance()
+                        row! = new DataRow(#JDBCResultSet!)
+REM                         row! = #EntityClass!.newInstance()
+REM 
+REM                         for i=1 to cc
+REM REM                               col_name$ =   ColNames!.get(i-1)
+REM REM                               col_label$ =  ColLabels!.get(i-1)
+REM REM                               col_type =    ColTypes!.get(i-1) 
+REM                               col_name$ =   ColNames$[i]
+REM                               col_label$ =  ColLabels$[i]
+REM                               col_type =    ColTypes[i] 
+REM                               
+REM                             rem TODO: set / map all java.sql.Types and set additional attributes like maxlen...
+REM 
+REM                             switch col_type
+REM                                 case java.sql.Types.VARCHAR
+REM                                 case java.sql.Types.CHAR
+REM                                 case java.sql.Types.LONGVARCHAR
+REM                                 case java.sql.Types.LONGNVARCHAR
+REM                                 case java.sql.Types.NCHAR
+REM                                 s!=#JDBCResultSet!.getString(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(String,s!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM                                 case java.sql.Types.NVARCHAR 
+REM                                     s!=#JDBCResultSet!.getString(col_name$)
+REM                                     row!.setFieldValue(col_name$,cast(String,s!))
+REM                                     row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.NUMERIC
+REM                                 case java.sql.Types.DECIMAL
+REM                                 d!=#JDBCResultSet!.getBigDecimal(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.math.BigDecimal,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.REAL
+REM                                 case java.sql.Types.DOUBLE
+REM                                 case java.sql.Types.FLOAT
+REM                                 d!=#JDBCResultSet!.getDouble(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.lang.Double,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.INTEGER
+REM                                 case java.sql.Types.SMALLINT
+REM                                 case java.sql.Types.TINYINT
+REM                                 d!=#JDBCResultSet!.getInt(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.lang.Integer,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.DATE
+REM                                 d!=#JDBCResultSet!.getDate(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.sql.Date,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.TIMESTAMP
+REM                                 d!=#JDBCResultSet!.getTimestamp(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.sql.Timestamp,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.TIME
+REM                                 d!=#JDBCResultSet!.getTimestamp(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.sql.Time,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM                                 case java.sql.Types.BIT
+REM                                 case java.sql.Types.BOOLEAN
+REM                                 d!=#JDBCResultSet!.getBoolean(col_name$)
+REM                                 row!.setFieldValue(col_name$,cast(java.lang.Boolean,d!))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL",col_label$)
+REM                                 break
+REM 
+REM 
+REM                                 case java.sql.Types.BINARY
+REM                                 case java.sql.Types.VARBINARY
+REM                                 case java.sql.Types.BLOB
+REM                                 case java.sql.Types.CLOB
+REM                                 case java.sql.Types.LONGVARBINARY
+REM                                 rem these types tend to be blobs
+REM                                 rem dunno what to do with these TODO
+REM                                 rem simply skip...
+REM                                 continue
+REM                                 break
+REM 
+REM                                 case default
+REM                                 row!.setFieldValue(col_name$,#JDBCResultSet!.getString(col_name$))
+REM                                 row!.setFieldAttribute(col_name$,"LABEL","<unkown type>"+col_label$)
+REM                                 print col_name$," unkown/unmapped type ",col_type
+REM                                 break
+REM                             swend
+REM 
+REM                             row!.setSQLType(col_name$,col_type)
+REM                         next
 
-                        for i=1 to #JDBCResultSet!.getMetaData().getColumnCount()
-                            col_name$ = #JDBCResultSet!.getMetaData().getColumnName(i)
-                            col_label$ = #JDBCResultSet!.getMetaData().getColumnName(i)
-                            col_type = #JDBCResultSet!.getMetaData().getColumnType(i)
+                        if #BC! <> null() then
+                            
+                            row! = #BC!.preProcessRecord(row!)
+                            if row! = null() then
+                                rem if preProcessRecord returns null,
+                                rem then business logic decided to skip this
+                                rem record 
+                                skew=skew+1
+                                goto nextRecord
+                            fi
+                        fi
 
-                            rem TODO: set / map all java.sql.Types and set additional attributes like maxlen...
-
-                            switch col_type
-                                case java.sql.Types.VARCHAR
-                                case java.sql.Types.CHAR
-                                case java.sql.Types.LONGVARCHAR
-                                case java.sql.Types.LONGNVARCHAR
-                                case java.sql.Types.NCHAR
-                                s!=#JDBCResultSet!.getString(col_name$)
-                                row!.setFieldValue(col_name$,cast(String,s!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-                                case java.sql.Types.NVARCHAR 
-                                    s!=#JDBCResultSet!.getString(col_name$)
-                                    row!.setFieldValue(col_name$,cast(String,s!))
-                                    row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.NUMERIC
-                                case java.sql.Types.DECIMAL
-                                d!=#JDBCResultSet!.getBigDecimal(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.math.BigDecimal,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.REAL
-                                case java.sql.Types.DOUBLE
-                                case java.sql.Types.FLOAT
-                                d!=#JDBCResultSet!.getDouble(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.lang.Double,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.INTEGER
-                                case java.sql.Types.SMALLINT
-                                case java.sql.Types.TINYINT
-                                d!=#JDBCResultSet!.getInt(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.lang.Integer,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.DATE
-                                d!=#JDBCResultSet!.getDate(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.sql.Date,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.TIMESTAMP
-                                d!=#JDBCResultSet!.getTimestamp(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.sql.Timestamp,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.TIME
-                                d!=#JDBCResultSet!.getTimestamp(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.sql.Time,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-                                case java.sql.Types.BIT
-                                case java.sql.Types.BOOLEAN
-                                d!=#JDBCResultSet!.getBoolean(col_name$)
-                                row!.setFieldValue(col_name$,cast(java.lang.Boolean,d!))
-                                row!.setFieldAttribute(col_name$,"LABEL",col_label$)
-                                break
-
-
-                                case java.sql.Types.BINARY
-                                case java.sql.Types.VARBINARY
-                                case java.sql.Types.BLOB
-                                case java.sql.Types.CLOB
-                                case java.sql.Types.LONGVARBINARY
-                                rem these types tend to be blobs
-                                rem dunno what to do with these TODO
-                                rem simply skip...
-                                continue
-                                break
-
-                                case default
-                                row!.setFieldValue(col_name$,#JDBCResultSet!.getString(col_name$))
-                                row!.setFieldAttribute(col_name$,"LABEL","<unkown type>"+col_label$)
-                                print col_name$," unkown/unmapped type ",col_type
-                                break
-                            swend
-
-                            row!.setSQLType(col_name$,col_type)
-                        next
-
+                        if #AttributesRecord! = null()  and row! <> null() then
+                            #AttributesRecord! = row!
+                            if canExit then 
+                                methodret null()
+                            fi
+                            rem this is really ugly, assuming that we can abandon the query with the first
+                            rem record as long as #AttributesRecord! is null
+                            rem as this is most probably just a prelude of finding out out about the structure of the
+                            rem result set
+                        fi
 
                         if #ResultSet!.size()=first+x-1 then
                             #ResultSet!.addItem(row!)
@@ -725,6 +850,7 @@ REM         close (999)
 
                     x=x+1
 
+                 nextRecord:
                     if #JDBCResultSet!.next() then
                         if first+x<=last then
                             continue
@@ -735,24 +861,7 @@ REM         close (999)
                 wend
             fi
 
-            rem now determine size for later use - it's probably needed anyway
-
-            rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
-            rem sollte ein order by im Satement sein muss dieses entfernt werden
-            count$ = sql$
-            if pos("ORDER BY"= sql$) > 0 then
-                count$ = sql$(1,pos("ORDER BY"= sql$)-1)
-            endif
-            sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
-
-            stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
-            JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
-
-            if JDBCResultSet!.next() then
-                #Size = int(JDBCResultSet!.getInt("COUNT"))
-            else
-                #Size=0
-            fi
+            #Size=#Size-skew 
         else
             print "empty result set where was 1=2"
             v! = new BBjVector()
@@ -761,7 +870,8 @@ REM         close (999)
         print
 
         #closeDatabase()
-
+        
+        #LastPrepareResultSet! = cast(BBjVector,v!)
         methodret v!
 
     methodend
@@ -899,6 +1009,35 @@ REM         close (999)
 
     methodend
 
+    rem /**
+    rem * Method addQueryCondition:
+    rem * filters the result set by freestyle query conditions on the SQL
+    rem * @param BBjString ConditionTag$: a tag under which the business component knows the condition
+    rem * @param BBjString Condition$: the condition to be embedded in the SQL where clause
+    rem */
+    method public void addQueryCondition(BBjString ConditionTag$, BBjString Condition$)
+
+        if Condition$="" then
+            #removeQueryCondition(ConditionTag$)
+        else
+          #QueryConditions!.put(ConditionTag$,Condition$)
+          #Size=-1
+        fi
+
+    methodend    
+    
+    rem /**
+    rem * Method addQueryCondition:
+    rem * filters the result set by freestyle query conditions on the SQL
+    rem * @param BBjString ConditionTag$: a tag under which the business component knows the condition
+    rem * @param BBjString Condition$: the condition to be embedded in the SQL where clause
+    rem */
+    method public void removeQueryCondition(BBjString ConditionTag$)
+
+        #QueryConditions!.remove(ConditionTag$)
+        #Size=-1
+
+    methodend        
 
     rem /**
     rem * Method setFulltextFilter:

@@ -240,9 +240,7 @@ background: #eff0f0 !important;
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAzklEQVQ4jZ3SMWpCQRSF4Q+RV4hFimApksoqdcgSxAWIi3AXFmLpAlIESSGSIkUqixQWIWuwELKDoGgRYvEM+J6O4/PAbebyn3vmzlBMA0yQFORAF3/7eitqco/VgUEhkxsscvB/TUsRuIQx7gL99anDNp7xgXlg8ha9PJjgNQAc1hIPocjDCPyO2xAcM/mS7iSqGn4CBkfKO5bxgio2ud73JdP7+2mfqMtepxuDW/jFSPaHDTE7kTajhvR5OoF+5Ryc4AnNWMSQHqVLu0o73dZGDb+oGgYAAAAASUVORK5CYII=');
 	background-repeat: no-repeat;
 	background-position: center; 
-	background-size: 16px 16px;*/
-	
-
+	background-size: 16px 16px;
 }
 
 .BBjCheckBox.PinButtonStyle:not(bbj-checked) {
@@ -254,7 +252,7 @@ background: #eff0f0 !important;
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAE+SURBVDhPnZKxrkRQEIbPVYiIZ9jCM4hCsYVKNgqFUuEBlKLwCioPIR5A9hm2plGKcrMtEhHmmrPnuty1m937JRPnjJl/mJkvmCH/oGkaUhQFISjwKWVZguu60Pc9PBVo25adtqRpCofDAaqqovddgXEcQdd18H2feYBW8zwPOI6D8/nMvE8EkiTBvlBDkbquQVVVeg/DkEXd2RWwLGsRQBMEgT7xq4ZhYFF3dgUURdkIoEmSBNfrlUX8ws0vN0zTxE5bcGxRFLHbCiZEud1uYBjGQ/W1rRuLLAKXy4WOZy9pbdgfnMgPVCCOY+B5fjdB0zQ4Ho/gOA5kWUaT1hB8sZeIdjqd6E68guu6bo59RJZlMu8DmReHeZ6A/2Oa5qayKIqQ5zmr8Rrag78iuInvskwBRWzbhiAImOcdAL4Bu6OMKV6ZJIIAAAAASUVORK5CYII=');
 	background-repeat: no-repeat;
 	background-position: center; 
-	background-size: 16px 16px;*/		
+	background-size: 16px 16px;		
 
 	-webkit-transform: rotate(30deg);
 	-moz-transform: rotate(30deg);
@@ -334,7 +332,7 @@ td .infoTitle {
   color: #802A50;
 }
 td.disclosureImage:after {
-  content: '>;
+  content: '>';
   font: normal 30px "AdventPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
   line-height: 28px !important;
   color: #e3e5e8;
@@ -472,7 +470,7 @@ td .infoMiscValue {
 .BBjGroupBox {
 -webkit-box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
 -moz-box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
-box-shadow: 0 0 0pxrgba(0, 0, 0, 0.25);
+box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
 border: 0px;
 -webkit-border-radius: 0px;
 -moz-border-radius: 0px;
@@ -576,7 +574,3 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71p
 //  -o-transition: all 0.4s ease-out !important;
 	
 }
-
-
-
-)

@@ -923,6 +923,34 @@ class public BusinessComponent
 
 
     rem /**
+    rem * Method preProcessRecord:
+    rem * override to enrich each record by formatting rules
+    rem * in derived class, always call #super!.processRecord(row!) first
+    rem * @param DataRow attributes!: record passed into method
+    rem * @return DataRow attributes!: record with added formatting and calculated fields; return null() if the record should be ignored
+    rem */
+    method public DataRow preProcessRecord(DataRow row!)
+
+        methodret row!
+
+    methodend
+    
+    
+    rem /**
+    rem * Method isPreFiltering:
+    rem * return 1 if preProcessRecord is filtering records out
+    rem * in derived class, always call #super!.processRecord(row!) first
+    rem * note: this will lead to performance loss as more records will be processed 
+    rem * @return BBjNumber isPreFiltering: 1 if preProcessRecord filters data 
+    rem */
+    method public BBjNumber isPreFiltering()
+
+        methodret 0
+
+    methodend
+    
+
+    rem /**
     rem * Method size:
     rem * override to return the total size of the resultset
     rem * @return BBjNumber size: the number of records in the result set
