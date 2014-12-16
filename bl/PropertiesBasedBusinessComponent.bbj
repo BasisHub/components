@@ -454,6 +454,10 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         methodret "PROPERTIESTABLE"
     methodend
     
+    method public TreeMap getAttributeList(BBjString attribute!)
+        methodret #getAttributeList(attribute!,#getLocale())
+    methodend
+     
     rem /**
     rem  *  Checks in the property File of the given locale for Keys matching to the given attribute. If some keys were found,
     rem  *  then a map will be created in the GlobalNamespace, if it is not already created, 
@@ -468,7 +472,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem  * @throws Error 11 - This Error is thrown if no key was found either in the property file for the given 
     rem  * locale as in the property file for the default locale
     rem  */
-    method public TreeMap getAttributeList(BBjString attribute!, BBjString locale!)
+    method private  TreeMap getAttributeList(BBjString attribute!, BBjString locale!)
         Declare TreeMap currentMap!
         Declare TreeMap globalMap!
         Declare BBTranslator translator!
@@ -480,7 +484,6 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         fi
         
         rem Initialize the tranlsator with the given locale
-        escape
         translator! = BBTranslator.getInstance(#AtbListProperties$, locale! , null() , #AtbListPropertiesFolder$) 
         
         rem Get a TreeMap containing all keys matching with the given attribute
@@ -513,7 +516,6 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
             if(currentMap! <> null() AND !currentMap!.isEmpty()) then 
                 methodret currentMap!
             fi
-            
             rem Initialize the tranlsator with the given locale
             translator! = BBTranslator.getInstance(#AtbListProperties$, locale! , null() , #AtbListPropertiesFolder$) 
             rem Get a TreeMap containing all keys matching with the given attribute
@@ -568,6 +570,10 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         methodret null()
     methodend
     
+    method public BBjString getAttributeValue(BBjString attributeKey!)
+        methodret #getAttributeValue(#getAttribute(), #getLocale(),  attributeKey!) 
+    methodend
+    
     rem /**
     rem  * Returns the value of the given attribute and the given locale
     rem  * 
@@ -577,7 +583,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem  * 
     rem  * @return value -  The value for the given attribute
     rem  */
-    method public BBjString getAttributeValue(BBjString attribute!, BBjString locale!, BBjString attributeKey!)
+    method private BBjString getAttributeValue(BBjString attribute!, BBjString locale!, BBjString attributeKey!)
         Declare TreeMap currentMap!
         
         rem Check if the demanded Map is already cached
