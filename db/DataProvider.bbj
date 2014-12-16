@@ -616,12 +616,14 @@ REM         escape
     rem */
     method public BBjVector prepareResultSet(BBjNumber first, BBjNumber last)
 
+        
+
         if first=0 and last=0 then
             canExit=1
         fi
 
         if #getResultSet().size()=#Size and #BC!<>null() and #BC!.isPreFiltering() and #LastPrepareResultSet! <> null() then
-            methodret #LastPrepareResultSet!
+            methodret new BBjVector()
         fi
 
         v! = new BBjVector()
@@ -647,13 +649,13 @@ REM         escape
         JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sqlc$))
 
         if JDBCResultSet!.next() then
-            #Size = int(JDBCResultSet!.getInt("COUNT"))-skew
+            #Size = int(JDBCResultSet!.getInt("COUNT"))
         else
             #Size=0
         fi
 
 
-        if #BC!<> null() and #BC!.isPreFiltering() then
+        if #Size<1000 or (#BC!<> null() and #BC!.isPreFiltering()) then
             first=1
             last=#Size
             #ResultSet!.clear()  
