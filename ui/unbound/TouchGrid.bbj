@@ -108,7 +108,7 @@ class public TouchGrid implements BBjControl
         wend
         close (ch)
 
-        #RowTemplate$ = t$
+        #setRowTemplate(t$) 
         
     
     methodend
