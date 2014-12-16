@@ -12,7 +12,7 @@ class public ResponsiveTouchMenuBar implements BBjControl
     field private Menu Menu!
     field private MenuItem Level!
     field private BBjVector ButtonList!=new BBjVector()
-    field private BBjVector MenuItemList!=new BBjVector()  
+    field private BBjVector MenuItemList!=new BBjVector()
 
 
     method private ResponsiveTouchMenuBar()
@@ -29,15 +29,16 @@ class public ResponsiveTouchMenuBar implements BBjControl
         #Frame! = parentWnd!.addChildWindow( id, x!, y!, w!, h!, "", $00000800$, BBjAPI().getSysGui().getAvailableContext())
         #Frame!.setClientEdge(0)
         #Frame!.setOpaque(0)
+
         #updateUI()
 
     methodend
-    
+
     method public void setSize(BBjNumber w!, BBjNumber h!)
         #W!=w!
         #H!=h!
         #Frame!.setSize(w!,h!)
-        #updateUI() 
+        #updateUI()
     methodend
 
     method public void setLocation(BBjNumber x!, BBjNumber y!)
@@ -45,36 +46,36 @@ class public ResponsiveTouchMenuBar implements BBjControl
         #Y!=y!
         #Frame!.setLocation(x!,y!)
     methodend
-        
+
     method public void updateUI()
-    
+
         it! = #ButtonList!.iterator()
         while it!.hasNext()
             c! = it!.next()
             c!.destroy()
         wend
-        
+
         #ButtonList!.clear()
-        #MenuItemList!.clear() 
-    
+        #MenuItemList!.clear()
+
         items! = #Menu!.getChildren( #Level! )
-        
+
 rem horizontal
 
         it! = items!.iterator()
         x=0
         h=#Frame!.getHeight()
         i=0
-        
+
         count = items!.size()
-        
-        if #Level! <> null() then 
+
+        if #Level! <> null() then
             count=count+1
         fi
         if #Level! <> null() and #Level!.getParent().getParent()<> null() then
             count=count+1
         fi
-        
+
 REM         w=int(#Frame!.getWidth()/max(1,count))
         w=h
         if #Level! <> null() then
@@ -86,7 +87,7 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
             #ButtonList!.addItem(btn!)
             #MenuItemList!.addItem(null())
             x=x+w
-            i=i+1        
+            i=i+1
         fi
 
         if #Level! <> null() and #Level!.getParent().getParent()<> null() then
@@ -99,13 +100,12 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
             #ButtonList!.addItem(btn!)
             #MenuItemList!.addItem(#Level!.getParent())
             x=x+w
-            i=i+1        
-        fi          
-        
-       
+            i=i+1
+        fi
+
+
         while it!.hasNext()
-            
-            item! = it!.next() 
+            item! = it!.next()
             caption$ = item!.getCaption()
             print caption$
             btn! = #Frame!.addButton(1000+i,x,0,w,h,caption$)
@@ -118,19 +118,19 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
             x=x+w
             i=i+1
         wend
-        
+
         #Frame!.setSize(x,#Frame!.getHeight())
-        
+
     methodend
 
     method public void onButtonPush(BBjButtonPushEvent ev!)
-        declare auto MenuItem item! 
+        declare auto MenuItem item!
         id = ev!.getButton().getID()
         item! = #MenuItemList!.getItem(id-1000)
         if item! <> null() then
             c! = item!.getChildren()
         fi
-        
+
         if item! = null() or (c! <> null() and c!.size()) then
             #Level! = item!
             #updateUI()
@@ -138,7 +138,7 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
             item!.doScall()
         fi
     methodend
-    
+
 
 classend
 
