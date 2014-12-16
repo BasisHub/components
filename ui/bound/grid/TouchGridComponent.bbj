@@ -4,7 +4,7 @@ use com.basiscomponents.db.DataRow
 use com.basiscomponents.db.DataField
 use ::components/ui/unbound/TouchGrid.bbj::TouchGrid
 use ::components/util/Util.bbj::Util
-
+use ::i18n/CustomTranslator.bbj::CustomTranslator
 
 class public TouchGridComponent extends UIComponent implements BBjControl
 
@@ -75,13 +75,43 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         #super!.setBC(bc!)
 
     methodend
+
+    method private BBjString replaceLabels(BBjString t$)
+     
+        t! = new CustomTranslator()   
  
+        while pos("$T{"=T$)>0 
+            o=pos("$T{"=T$)
+            lbl$=t$(o+3)
+            if pos("}"=lbl$)=0 then
+                break
+            else
+                lbl$=lbl$(1,pos("}"=lbl$)-1)
+            fi
+            trl$ = t!.getTranslation(lbl$)
+            t$=t$(1,o-1)+trl$+t$(o+len(lbl$)+4)
+        wend
+          
+        methodret t$
+        
+     methodend
+     
      method public void setRowTemplate(BBjString html$)
+        
+        html$=#replaceLabels(html$)
         #TouchGrid!.setRowTemplate(html$)
     methodend
 
     method public void loadRowTemplate(BBjString file$)
-        #TouchGrid!.loadRowTemplate(file$)
+        ch=unt
+        open (ch)file$
+        while 1
+            read record (ch,siz=1000,end=*break)l$
+            t$=t$+l$
+        wend
+        close (ch)
+
+        #setRowTemplate(t$)     
     methodend
 
     method public void refresh( BBjNumber resetFilter)
