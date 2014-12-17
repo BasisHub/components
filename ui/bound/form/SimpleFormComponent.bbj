@@ -1028,15 +1028,17 @@ REM                 print "Fields:",#EditedFields!
     rem * clear all validation error marks on the form
     rem */
     method private void clearValidationErrorSignage()
-
-        if #WarningIcons!.size() then
-            for i=0 to #WarningIcons!.size()-1
-                c! = #WarningIcons!.get(i)
+        
+        it! = #WarningIcons!.iterator()
+        while it!.hasNext() 
+                c! = it!.next()
+                c!.setVisible(0)
+                wait .1
+                rem hä?
                 c!.destroy()
-            next i
-
-            #WarningIcons!.clear()
-        fi
+        wend
+        
+        #WarningIcons!.clear()
 
     methodend
 
