@@ -116,7 +116,7 @@ REM         fi
     method public static BBjNumber getShowBackButton()
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
         if wnd! <> null() then
-          c! = wnd!.getControl(101)
+          c! = wnd!.getControl(101,err=*next)
           if c! <> null() then
               ret=c!.isVisible()
           fi
