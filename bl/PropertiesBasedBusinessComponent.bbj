@@ -31,6 +31,8 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     field protected BBjString NoAtbListFoundErrorMessage$ = "No attribute List was found for the given attribute"
     field protected static BBjNamespace Namespace! = BBjAPI().getGlobalNamespace()
     field protected BBjString Attribute$
+    
+    field private BBjNumber NeedRebuild=0
 
     method protected PropertiesBasedBusinessComponent(BBjString atbListProperties$, BBjString atbListPropertiesFolder$, BBjString attribute$, BBjString locale$)
     
@@ -50,9 +52,33 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem * @return BBjNumber size: the size of the whole result set
     rem */
     method public BBjNumber size()
-                  
+            if #NeedRebuild >0 then
+                #prepareResultSet(0,9999)
+            fi
         methodret #getResultSet().size()
         
+    methodend
+
+    rem /**
+    rem * Method refresh:
+    rem * refreshes the data and all connected UI controls
+    rem * filters get reset
+    rem */
+    method public void refresh()
+
+        #refresh(1)
+
+    methodend
+
+
+    rem /**
+    rem * Method refresh:
+    rem * refreshes the data and all connected UI controls
+    rem * @param: BBjNumber resetFilter: if set to 1, all filters set in UI components will be reset
+    rem */
+    method public void refresh (BBjNumber resetFilter)
+        #NeedRebuild=1
+        #super!.refresh(resetFilter)
     methodend
 
 
@@ -191,6 +217,10 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
         
+        if #NeedRebuild = 0 then
+            methodret 
+        fi
+        
         al! = #getAttributeList(#Attribute$, #getLocale())
         tm! = new TreeMap()
         ks! = al!.keySet()
@@ -245,9 +275,12 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
 
         
         cf! = #getControllerFilter()
+        
+        
         if cf! <> null() and #getControllerFilterUnlock().size()=0 then 
           keycf!     = cf!.get("KEY")
         fi
+
         
         while it!.hasNext()
             K$=it!.next()
@@ -264,7 +297,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
             v!.addItem(r!)
         wend        
         
-        
+        #NeedRebuild=0
         #super!.setResultSet(v!)
         
     methodend
@@ -638,6 +671,19 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
             fi
         wend
         methodret map!
+    methodend
+
+    rem /**
+    rem * Method getRecordAsString:
+    rem * return the toString for a record
+    rem * @return BBjString disp$: the current result set
+    rem */
+    method public BBjString getRecordAsString(BBjNumber sel)
+
+        #prepareResultSet(sel,sel)
+        r! = #getResultSet().getItem(sel)
+        methodret r!.getFieldAsString("VALUE")
+
     methodend
         
     rem /**
