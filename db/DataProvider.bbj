@@ -124,7 +124,7 @@ class public DataProvider
     rem */
     method public DataRow getNewEntity()
 
-        methodret #getAttributesRecord()
+        methodret new DataRow()
 
     methodend
 
