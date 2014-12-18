@@ -180,7 +180,12 @@ public class DataField
         	}
         	else
         	{
-        		this.DateValue = new java.sql.Date( com.basis.util.BasisDate.date(Integer.valueOf(value)).getTime() );
+        		int i=Integer.valueOf(value);
+        		if (i>-1) 
+        			this.DateValue = new java.sql.Date( com.basis.util.BasisDate.date(i).getTime() );
+        		else
+        			this.DateValue = null; 
+        		
         	}
         	
 		}    	
@@ -225,7 +230,6 @@ public class DataField
 
         if (this.Type =='C' )
             this.StringValue=value.toString();
-
 
         if (this.Type =='N' )
         	this.DoubleValue = value.doubleValue();	
@@ -286,9 +290,22 @@ public class DataField
 		this.DoubleValue=value;
 	}
 	
-	public void setValue(java.lang.Integer value)
+	public void setValue(java.lang.Integer value) throws Exception
 	{
-		this.IntegerValue=value;
+		
+        if (this.Type =='D' )
+	        {
+	            if (value.compareTo(0) == 0  )
+	                this.DateValue = new java.sql.Date(new java.util.Date().getTime());
+	
+	            if ( value.compareTo(0) < 0 )
+	                this.DateValue = null;
+	
+	            if ( value.compareTo(0) > 0 )
+	                this.DateValue = java.sql.Date.valueOf(com.basis.util.BasisDate.date(value.intValue(),0.0,"%Yl-%Mz-%Dz")); 
+	        }
+        else
+        	this.IntegerValue=value;
 	}
 	
 	public void setValue(java.lang.Boolean value)

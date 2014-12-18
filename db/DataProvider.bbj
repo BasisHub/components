@@ -1278,7 +1278,8 @@ REM                         next
             fi
         fi
 
-        primrow! = #getPrimaryTableLayout().getFieldNames()
+        prow! = #getPrimaryTableLayout()
+        primrow! = prow!.getFieldNames()
         hm! = rec!.getObjects()
 
         ks! = hm!.keySet()
@@ -1291,6 +1292,8 @@ REM                         next
               s$=s$+","+k$
               v$=v$+",? "
               uhm!.put(k$,hm!.get(k$)) 
+              o! = hm!.get(k$)
+              prow!.setFieldValue(k$,o!)
             fi              
         wend
 
@@ -1310,9 +1313,8 @@ REM                         next
 
         while it!.hasNext()
             k$=it!.next()
-            obj! = uhm!.get(k$)
-            type$=rec!.getFieldType(k$)
-
+            obj!= prow!.getField(k$)
+            type$=prow!.getFieldType(k$)
 
             if type$="C" then
                 stmt!.setString(i,obj!)
@@ -1389,7 +1391,8 @@ REM                         next
             wh$=wh$+"' ) "
         wend
 
-        primrow! = #getPrimaryTableLayout().getFieldNames()
+        prow! = #getPrimaryTableLayout()
+        primrow! = prow!.getFieldNames()
         hm! = rec!.getObjects()
 
         ks! = hm!.keySet()
@@ -1401,6 +1404,7 @@ REM                         next
             if primrow!.contains(k$) then 
                 s$=s$+", "+k$+" = ? "
                 uhm!.put(k$,hm!.get(k$)) 
+                prow!.setFieldValue(k$,hm!.get(k$))
             fi
         wend
         
@@ -1420,8 +1424,9 @@ REM                         next
             
             while it!.hasNext()
                 k$=it!.next()
-                obj! = uhm!.get(k$)
-                type$=rec!.getFieldType(k$)
+                obj!= prow!.getField(k$)
+                type$=prow!.getFieldType(k$)
+   
     
                 if type$="C" then
                     stmt!.setString(i,obj!)
