@@ -629,6 +629,8 @@ class public SimpleFormComponent extends UIComponent implements BBjControl
     rem */
     method protected void displayField(BBjString ctrl_name$)
 
+        if #Rec!= null() then methodret
+        
         contents$ = #Rec!.getFieldAsString(ctrl_name$)
 
         ControlMap! = #ControlList!.get(ctrl_name$)
