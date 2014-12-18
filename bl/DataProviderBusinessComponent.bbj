@@ -307,7 +307,7 @@ REM         #refresh(0)
     rem * Method saveRecord
     rem * saves a record within the result set
     rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
-    rem * @param java.util.HashMap fields!: the fields
+    rem * @param DataRow row!: the fields
     rem */
     method public void saveRecord(BBjNumber recno, DataRow row!)
 
@@ -389,8 +389,6 @@ REM         #refresh(0)
                 v!=fields!.get(f$)
                 row!.setFieldValue(f$,v!)
             wend
-
-            ? row!.toString()
 
             row! = #onBeforeUpdate(row!, orig_row!)
 

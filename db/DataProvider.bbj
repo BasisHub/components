@@ -124,7 +124,7 @@ class public DataProvider
     rem */
     method public DataRow getNewEntity()
 
-        methodret #getAttributesRecord()
+        methodret new DataRow()
 
     methodend
 
@@ -484,6 +484,113 @@ REM         escape
                 
     methodend
 
+
+    
+    rem /**
+    rem * Method getPrimaryTableLayout:
+    rem * returns an empty DataRow with the sql attributes
+    rem * @return DataRow row!: an empty DataRow with the sql attributes
+    rem */
+    method public DataRow getPrimaryTableLayout()
+
+            #openDatabase()
+    
+            md! = #Connection!.getMetaData()
+    
+            declare auto DataRow row!
+            row! = #EntityClass!.newInstance()
+    
+            JDBCResultSet! = md!.getColumns(null(),#Schema$,#PrimaryTable$,"%")
+    
+            while JDBCResultSet!.next()
+                col_type=JDBCResultSet!.getInt("DATA_TYPE")
+                col_name$=JDBCResultSet!.getString("COLUMN_NAME")
+    
+                if (fieldnames! <> null() AND ! fieldnames!.contains(col_name$)) then 
+                    continue
+                fi
+    
+                switch col_type
+                    case java.sql.Types.VARCHAR
+                    case java.sql.Types.CHAR
+                    case java.sql.Types.LONGVARCHAR
+                    case java.sql.Types.LONGNVARCHAR
+                    case java.sql.Types.NCHAR
+                    row!.setFieldValue(col_name$,cast(String,null()))
+                    break
+                    case java.sql.Types.NVARCHAR 
+                        row!.setFieldValue(col_name$,cast(String,null()))
+                    break
+                    case java.sql.Types.NUMERIC
+                    case java.sql.Types.DECIMAL
+                    row!.setFieldValue(col_name$,cast(java.math.BigDecimal,null()))
+                    break
+    
+                    case java.sql.Types.REAL
+                    case java.sql.Types.DOUBLE
+                    case java.sql.Types.FLOAT
+                    row!.setFieldValue(col_name$,cast(java.lang.Double,null()))
+                    break
+    
+                    case java.sql.Types.INTEGER
+                    case java.sql.Types.SMALLINT
+                    case java.sql.Types.TINYINT
+                    row!.setFieldValue(col_name$,cast(java.lang.Integer,null()))
+                    break
+    
+                    case 9
+                    rem hack to compensate flaw in BBj ODBC driver
+                    rem 9=BASIS Date
+                    rem reported to jash 21.02.2013 SW
+                    case java.sql.Types.DATE
+                    row!.setFieldValue(col_name$,cast(java.sql.Date,null()))
+                    break
+    
+                    case 11
+                    rem hack for BASIS Timestamp
+                    case java.sql.Types.TIMESTAMP
+                    row!.setFieldValue(col_name$,cast(java.sql.Timestamp,null()))
+                    break
+    
+                    case java.sql.Types.TIME
+                    row!.setFieldValue(col_name$,cast(java.sql.Time,null()))
+                    break
+    
+                    case java.sql.Types.BIT
+                    case java.sql.Types.BOOLEAN
+                    row!.setFieldValue(col_name$,cast(java.lang.Boolean,null()))
+                    break
+    
+                    case java.sql.Types.BINARY
+                    case java.sql.Types.VARBINARY
+                    case java.sql.Types.BLOB
+                    case java.sql.Types.CLOB
+                    case java.sql.Types.LONGVARBINARY
+                    rem these types tend to be blobs
+                    rem dunno what to do with these TODO
+                    rem simply skip...
+                    continue
+                    break
+    
+                    case default
+                    row!.setFieldValue(col_name$,"")
+                    print col_name$," unkown/unmapped type ",col_type
+                    break
+                swend
+    
+                row!.setSQLType(col_name$,col_type)
+    
+            wend
+    
+            #closeDatabase()
+            
+        fi
+        
+        methodret row!
+     
+    methodend
+    
+    
     rem /**
     rem * Method getAttributesRecord:
     rem * returns an empty DataRow with the sql attributes
@@ -1171,16 +1278,20 @@ REM                         next
             fi
         fi
 
-
+        primrow! = #getPrimaryTableLayout().getFieldNames()
         hm! = rec!.getObjects()
 
         ks! = hm!.keySet()
         it! = ks!.iterator()
+        uhm! = new java.util.HashMap()
 
         while it!.hasNext()
             k$=it!.next()
-            s$=s$+","+k$
-            v$=v$+",? "
+            if primrow!.contains(k$) then 
+              s$=s$+","+k$
+              v$=v$+",? "
+              uhm!.put(k$,hm!.get(k$)) 
+            fi              
         wend
 
         s$=s$(2)
@@ -1193,13 +1304,13 @@ REM                         next
         #openDatabase()
         declare java.sql.PreparedStatement stmt!
         stmt! = #Connection!.prepareStatement(sql$)
-        ks! = hm!.keySet()
+        ks! = uhm!.keySet()
         it! = ks!.iterator()
         i=1
 
         while it!.hasNext()
             k$=it!.next()
-            obj! = hm!.get(k$)
+            obj! = uhm!.get(k$)
             type$=rec!.getFieldType(k$)
 
 
@@ -1262,12 +1373,13 @@ REM                         next
     rem */
     method public void updateRecord(DataRow rec!, DataRow orig_rec!)
 
-        for i=0 to #PrimaryKeySegments!.size()-1
+        it!=#PrimaryKeySegments!.iterator()
+        while it!.hasNext()
+            seg$=it!.next()
             if i>0 then
                 wh$=wh$+" AND "
             fi
-
-            seg$    = #PrimaryKeySegments!.getItem(i)
+            
             v$      = orig_rec!.getFieldAsString(seg$)
 
             wh$=wh$+" ( "
@@ -1275,88 +1387,94 @@ REM                         next
             wh$=wh$+" = '"
             wh$=wh$+v$
             wh$=wh$+"' ) "
-        next i
+        wend
 
+        primrow! = #getPrimaryTableLayout().getFieldNames()
         hm! = rec!.getObjects()
 
         ks! = hm!.keySet()
         it! = ks!.iterator()
-
+        uhm! = new java.util.HashMap()
+        
         while it!.hasNext()
             k$=it!.next()
-            s$=s$+", "+k$+" = ? "
+            if primrow!.contains(k$) then 
+                s$=s$+", "+k$+" = ? "
+                uhm!.put(k$,hm!.get(k$)) 
+            fi
         wend
+        
+        if len(s$) then
+            s$=s$(2)
+            sql$="UPDATE "+#SchemaPfx$+#PrimaryTable$+" SET "+s$+" WHERE "+wh$
+            
+            rem print sql$
+    
+            #openDatabase()
+            declare java.sql.PreparedStatement stmt!
+    
+            stmt! = #Connection!.prepareStatement(sql$)
+            i=1
+            ks! = uhm!.keySet()
+            it! = ks!.iterator()
+            
+            while it!.hasNext()
+                k$=it!.next()
+                obj! = uhm!.get(k$)
+                type$=rec!.getFieldType(k$)
+    
+                if type$="C" then
+                    stmt!.setString(i,obj!)
+                fi
+    
+                if type$="N" then
+                    stmt!.setDouble(i,obj!)
+                fi
+    
+                if type$="I" then
+                    stmt!.setInt(i,obj!)
+                fi
+    
+                if type$="B" then
+                    stmt!.setBoolean(i,obj!)
+                fi
+    
+                if type$="D" then
+                    stmt!.setDate(i,obj!)
+                fi
+    
+                if type$="X" then
+                    stmt!.setTimestamp(i,obj!)
+                fi
+    
+                if type$="Y" then
+                    stmt!.setBigDecimal(i,obj!)
+                fi
+    
+                if type$="T" then
+                    stmt!.setTime(i,obj!)
+                fi
 
-        s$=s$(2)
+                i=i+1
 
-
-        sql$="UPDATE "+#SchemaPfx$+#PrimaryTable$+" SET "+s$+" WHERE "+wh$
-        rem print sql$
-
-        #openDatabase()
-        declare java.sql.PreparedStatement stmt!
-
-        stmt! = #Connection!.prepareStatement(sql$)
-
-        ks! = hm!.keySet()
-        it! = ks!.iterator()
-        i=1
-
-        while it!.hasNext()
-            k$=it!.next()
-            obj! = hm!.get(k$)
-            type$=rec!.getFieldType(k$)
-
-            if type$="C" then
-                stmt!.setString(i,obj!)
+            wend
+    
+            rem TODO: catch error
+            ret=stmt!.executeUpdate(err=*next)
+            ? "(",ret,")"
+    
+            if ret=0 then
+                ex! = BBjAPI().getLastJavaException()
+    
+                if ex! <> null() then
+                    a=msgbox(ex!.toString(),0,"Error")
+                fi
             fi
-
-            if type$="N" then
-                stmt!.setDouble(i,obj!)
-            fi
-
-            if type$="I" then
-                stmt!.setInt(i,obj!)
-            fi
-
-            if type$="B" then
-                stmt!.setBoolean(i,obj!)
-            fi
-
-            if type$="D" then
-                stmt!.setDate(i,obj!)
-            fi
-
-            if type$="X" then
-                stmt!.setTimestamp(i,obj!)
-            fi
-
-            if type$="Y" then
-                stmt!.setBigDecimal(i,obj!)
-            fi
-
-            if type$="T" then
-                stmt!.setTime(i,obj!)
-            fi
-
-            i=i+1
-        wend
-
-        rem TODO: catch error
-        ret=stmt!.executeUpdate(err=*next)
-        ? "(",ret,")"
-
-        if ret=0 then
-            ex! = BBjAPI().getLastJavaException()
-
-            if ex! <> null() then
-                a=msgbox(ex!.toString(),0,"Error")
-            fi
+    
+            stmt!.close()
+            #closeDatabase()
         fi
-
-        stmt!.close()
-        #closeDatabase()
-
+        
     methodend
 
 
