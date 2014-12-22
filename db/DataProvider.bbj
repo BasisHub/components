@@ -42,7 +42,8 @@ class public DataProvider
     field protected BBjString           ConnMode$
     field public    DataRow             EntityClass!                = new DataRow()
     field private   DataRow             AttributesRecord!   
-    field private   DataRow             PrimaryTableLayout!     
+    field private   DataRow             PrimaryTableLayout!   
+    field private   DataRow             QueryLayout!
         
     field private java.util.ArrayList   ColNames!
     field private java.util.ArrayList   ColLabels!
@@ -339,8 +340,7 @@ class public DataProvider
 
 
         if #SortField$>"" and fIgnoreFilterAndOrder=0 then
-            prow! = #getAttributesRecord()
-            primrow! = prow!.getFieldNames() 
+            primrow! = #QueryLayout!.getFieldNames() 
             if primrow!.contains(#SortField$) then       
                 orderby$=" ORDER BY "+#SortField$
     
@@ -605,6 +605,7 @@ class public DataProvider
 
         declare auto BBjVector fieldnames!
         if #AttributesRecord!<> null() then
+
             methodret #AttributesRecord!
         else
          
@@ -613,7 +614,9 @@ class public DataProvider
         if #AttributesRecord! = null() then 
             methodret new DataRow()
         else
+
             methodret #AttributesRecord!
+            
         fi
 
     methodend
@@ -672,6 +675,15 @@ class public DataProvider
             last=#Size
             #ResultSet!.clear()  
         fi
+        
+        if #SortField$>"" and #QueryLayout! <> null() then
+            if ! #QueryLayout!.getFieldNames().contains(#SortField$) then
+                first=1
+                last=#Size
+                #ResultSet!.clear()  
+            fi
+        fi
+        
 
         if pos("1=2"=sql$)=0 then
             
@@ -714,6 +726,22 @@ class public DataProvider
                         declare auto DataRow row!
                         row! = new DataRow(#JDBCResultSet!)
 
+                        
+                        if #QueryLayout!= null() then
+                            #QueryLayout! = row!.clone()
+                        fi
+                        
+                        if #AttributesRecord! = null()  and row! <> null() then
+                            #AttributesRecord! = row!.clone()
+                            if canExit then 
+                                methodret null()
+                            fi
+                            rem this is really ugly, assuming that we can abandon the query with the first
+                            rem record as long as #AttributesRecord! is null
+                            rem as this is most probably just a prelude of finding out out about the structure of the
+                            rem result set
+                        fi
+
                         if #BC! <> null() then
                             
                             row! = #BC!.preProcessRecord(row!)
@@ -726,16 +754,7 @@ class public DataProvider
                             fi
                         fi
 
-                        if #AttributesRecord! = null()  and row! <> null() then
-                            #AttributesRecord! = row!
-                            if canExit then 
-                                methodret null()
-                            fi
-                            rem this is really ugly, assuming that we can abandon the query with the first
-                            rem record as long as #AttributesRecord! is null
-                            rem as this is most probably just a prelude of finding out out about the structure of the
-                            rem result set
-                        fi
+
 
                         if #ResultSet!.size()=first+x-1 then
                             #ResultSet!.addItem(row!)
@@ -769,6 +788,38 @@ class public DataProvider
         print
 
         #closeDatabase()
+
+        rem now resort the resultset
+        rem maybe this needs a more clever place and way in the future
+        if #SortField$>"" and #QueryLayout! <> null() then
+            if ! #QueryLayout!.getFieldNames().contains(#SortField$) then
+                map! = new java.util.TreeMap()
+                vec! = #getResultSet()
+                it! = vec!.iterator()
+                i=0
+                while it!.hasNext()
+                    row! = it!.next()
+                    rem todo: other data types (num, date)
+                    s$=row!.getFieldAsString(#SortField$)
+                    s$=s$+str(i:"0000000000") 
+                    i=i+1
+                    if #SortAscending = 1 then
+                        s$=#invert(s$)
+                    fi
+                    map!.put(s$,row!)
+                wend
+
+                vec!.clear()
+                ks! = map!.keySet()
+                it! = ks!.iterator()
+                while it!.hasNext()
+                    k$=it!.next()
+                    vec!.addItem(map!.get(k$))
+                wend
+                #setResultSet(vec!)
+            fi
+        fi
+        
         
         #LastPrepareResultSet! = cast(BBjVector,v!)
         methodret v!
@@ -1332,6 +1383,13 @@ class public DataProvider
             #Size=-1
         fi
 
+    methodend
+
+    method private BBjString invert(BBjString in$)
+        for i=1 to len(in$)
+            out$=out$+chr(255-asc(in$(i,1)))
+        next
+        methodret out$
     methodend
 
 classend
