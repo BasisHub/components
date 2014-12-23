@@ -792,15 +792,21 @@ class public DataProvider
         rem now resort the resultset
         rem maybe this needs a more clever place and way in the future
         if #SortField$>"" and #QueryLayout! <> null() then
-            if ! #QueryLayout!.getFieldNames().contains(#SortField$) then
+            if ! #QueryLayout!.getFieldNames().contains(#SortField$)  then
+            
                 map! = new java.util.TreeMap()
                 vec! = #getResultSet()
                 it! = vec!.iterator()
                 i=0
+                ft$ = row!.getFieldType(#SortField$)
                 while it!.hasNext()
                     row! = it!.next()
                     rem todo: other data types (num, date)
-                    s$=row!.getFieldAsString(#SortField$)
+                    if ft$="N" then
+                        s$=str(row!.getFieldAsNumber(#SortField$,err=skip_sorting):"-000000000000000000.00000")
+                    else
+                        s$=row!.getFieldAsString(#SortField$,err=skip_sorting)
+                    fi
                     s$=s$+str(i:"0000000000") 
                     i=i+1
                     if #SortAscending = 1 then
@@ -817,6 +823,8 @@ class public DataProvider
                     vec!.addItem(map!.get(k$))
                 wend
                 #setResultSet(vec!)
+                
+                skip_sorting:
             fi
         fi
         
