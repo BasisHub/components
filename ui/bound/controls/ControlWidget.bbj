@@ -387,4 +387,17 @@ rem ------------medthods for fill BC
         
     methodend
 
+    method public void destroy()
+        
+        if #getBC()<>null() then
+            #getBC().unregisterUI(#this!) 
+        fi
+        
+        #getCtrl().destroy()
+        if #FkPicker! <> null() then
+            #FkPicker!.destroy()
+        fi
+        
+    methodend
+
 classend

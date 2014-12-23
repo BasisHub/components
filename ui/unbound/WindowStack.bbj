@@ -11,9 +11,13 @@ class public WindowStackHelper
         WindowStack.closeWindow()
     methodend
 
+    method public void onExitButton(BBjButtonPushEvent ev!)
+        WindowStack.exitAll()
+    methodend
+    
     method public void onBackButton(BBjButtonPushEvent ev!)
         WindowStack.closeWindow()
-    methodend
+    methodend    
 
     method public void onResize( BBjResizeEvent ev!)
         WindowStack.resize(ev!.getWidth(),ev!.getHeight())
@@ -33,7 +37,10 @@ class public WindowStack
     field private static BBjVector BackActionList! = new BBjVector()
     field private static BBjVector BackActionObjectList! = new BBjVector()
     field private static BBjVector BackActionPayloadList! = new BBjVector()
-    
+    field private static BBjVector ExitActionList! = new BBjVector()
+    field private static BBjVector ExitActionObjectList! = new BBjVector()
+    field private static BBjVector ExitActionPayloadList! = new BBjVector()
+        
     rem this is for BUI only, when embedded in another child window
     field private static BBjWindow ContainerWnd!
 
@@ -76,20 +83,23 @@ class public WindowStack
         #BackActionList!.addItem("")
         #BackActionObjectList!.addItem("")
         #BackActionPayloadList!.addItem("")
+        #ExitActionList!.addItem("")
+        #ExitActionObjectList!.addItem("")
+        #ExitActionPayloadList!.addItem("")
 
         yoffs=0
 
-        if INFO(3,6)="5" then
+REM         if INFO(3,6)="5"  or #ContainerWnd!<>null() then
             yoffs=40
-        fi
+REM         fi
+        
+        w=wnd!.getWidth()
+        cw!     = wnd!.addChildWindow(100,0,yoffs,w,wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
 
-        cw!     = wnd!.addChildWindow(100,0,yoffs,wnd!.getWidth(),wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
-
-        if yoffs then
+        if yoffs or #ContainerWnd!<>null() then
 
             backButton!=wnd!.addButton(101,5,5,30,30,"Back")
             backButton!.setVisible(0) 
-            rem check -> is this maybe only conditionally
             backButton!.addStyle("BackButton")
             backButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onBackButton")
 
@@ -97,6 +107,12 @@ class public WindowStack
             st!.addStyle("GroupTitle")
 
         fi
+
+        exitButton!=wnd!.addButton(103,w-50,5,30,30,"Exit")
+        exitButton!.setVisible(1) 
+        exitButton!.addStyle("ExitButton")
+        exitButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onExitButton")
+
 
 REM         if #WindowList!.size()=1 then
 REM             backButton!.setVisible(0)
@@ -110,8 +126,13 @@ REM         fi
 
     method public static void setShowBackButton(BBjNumber visible)
          wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-         wnd!.getControl(101).setVisible(visible,err=*next)
+         wnd!.getControl(101).setVisible(visible)
     methodend
+    
+    method public static void setShowExitButton(BBjNumber visible)
+         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+         wnd!.getControl(103).setVisible(visible)
+    methodend    
 
     method public static BBjNumber getShowBackButton()
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
@@ -134,36 +155,46 @@ REM         fi
         #BackActionPayloadList!.addItem(payload!)
     methodend
 
-    method public static void closeWindow()
+    method public static void setExitButtonAction(Object target!, BBjString callback$, Object payload!)
+        #ExitActionList!.removeItem(#ExitActionList!.size()-1)
+        #ExitActionList!.addItem(callback$)
+        #ExitActionObjectList!.removeItem(#ExitActionObjectList!.size()-1)
+        #ExitActionObjectList!.addItem(target!)
+        #ExitActionPayloadList!.removeItem(#ExitActionPayloadList!.size()-1)
+        #ExitActionPayloadList!.addItem(payload!)
+    methodend
 
+    method public static void closeWindow()
 
         if #WindowList!.size() then
             if #BackActionList!.size() then
                 action$ = #BackActionList!.getItem(#BackActionList!.size()-1)
-                if cvs(action$,3)="" then
-
-                    wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-                    uiw! = #WidgetList!.getItem(#WindowList!.size()-1)
-                    #WindowList!.removeItem(#WindowList!.size()-1)
-                    #WidgetList!.removeItem(#WidgetList!.size()-1)
-                    #BackActionList!.removeItem(#BackActionList!.size()-1)
-                    #BackActionObjectList!.removeItem(#BackActionObjectList!.size()-1)
-                    #BackActionPayloadList!.removeItem(#BackActionPayloadList!.size()-1)
-                    uiw!.destroy()
-                    wnd!.destroy()
-                else
-                    obj! = #BackActionObjectList!.getItem(#BackActionObjectList!.size()-1)
-                    pay! = #BackActionPayloadList!.getItem(#BackActionPayloadList!.size()-1)
-
+                obj!    = #BackActionObjectList!.getItem(#BackActionObjectList!.size()-1)
+                pay!    = #BackActionPayloadList!.getItem(#BackActionPayloadList!.size()-1)
+                if obj!<>null() and cvs(action$,3)<>"" then
                     if payl! = null() then
-
+    
                         Util.invoke(obj!,action$)
                     else
                         Util.invoke(obj!,action$,payl!)
                     fi
-                    methodret
                 fi
+
+                wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+                uiw! = #WidgetList!.getItem(#WindowList!.size()-1)
+                #WindowList!.removeItem(#WindowList!.size()-1)
+                #WidgetList!.removeItem(#WidgetList!.size()-1)
+                #BackActionList!.removeItem(#BackActionList!.size()-1)
+                #BackActionObjectList!.removeItem(#BackActionObjectList!.size()-1)
+                #BackActionPayloadList!.removeItem(#BackActionPayloadList!.size()-1)
+                #ExitActionList!.removeItem(#ExitActionList!.size()-1)
+                #ExitActionObjectList!.removeItem(#ExitActionObjectList!.size()-1)
+                #ExitActionPayloadList!.removeItem(#ExitActionPayloadList!.size()-1)
+                
+
             fi
+            uiw!.destroy()
+            wnd!.destroy()
         fi
 
         if #WindowList!.size()=0 then
@@ -177,6 +208,20 @@ REM         fi
             fi
         fi
 
+    methodend
+    
+    method public static void exitAll()
+        action$ = #ExitActionList!.getItem       (#ExitActionList!.size()-1)
+        obj!    = #ExitActionObjectList!.getItem (#ExitActionObjectList!.size()-1)
+        pay!    = #ExitActionPayloadList!.getItem(#ExitActionPayloadList!.size()-1)
+        #closeWindow()
+        if obj! <> null() and cvs(action$,3)>"" then
+            if payl! = null() then
+                Util.invoke(obj!,action$)
+            else
+                Util.invoke(obj!,action$,payl!)
+            fi
+        fi
     methodend
 
     method public static void resize (BBjNumber w, BBjNumber h)
@@ -192,6 +237,9 @@ REM         fi
             if uiw! <> null() then
                 uiw!.setSize(w,h-yoffs)
             fi
+            
+            wnd!.getControl(103).setLocation(w-50,5)
+            
         fi
     methodend
 

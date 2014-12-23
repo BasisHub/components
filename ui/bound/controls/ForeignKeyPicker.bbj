@@ -387,4 +387,12 @@ class public ForeignKeyPicker extends UIComponent
 
     methodend
 
+    method public void destroy()
+        
+        if #getBC() <>null() then
+            #getBC().unregisterUI(#this!)
+        fi
+        
+    methodend
+
 classend

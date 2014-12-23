@@ -214,7 +214,7 @@ REM                             cwCanvas!.setFont(font!)
                             
                             rem determine elements (aka ontrols or widgets)
                             elElmntLst! = paneNode!.getElementsByTagName("element")
-                            
+                            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
                             if elElmntLst!.getLength() then
                                 for element = 0  to  elElmntLst!.getLength()-1
                               
@@ -250,13 +250,13 @@ REM                             cwCanvas!.setFont(font!)
                                           x$="el! = new ::"+type$+".bbj::"+typet$+"(cwCanvas!)"
                                           rem execute x$
                                           rem workaround execute
-                                              temp$ = str(java.io.File.createTempFile("blabla", ".call"))
-                                              ch=unt
-                                              open (ch)temp$
-                                              write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
-                                              close (ch)
-                                              call temp$
-                                              erase temp$                                
+                                              
+                                          ch=unt
+                                          open (ch,mode="O_CREATE,O_TRUNC")temp$
+                                          write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+                                          close (ch)
+                                          call temp$
+                          
                                           
                                           el!.setSize((length+1)*25,font_height+ihpad)
                                           if text$>"" then
@@ -337,7 +337,7 @@ REM                                           fi
                               next; rem element
                               
                           fi
-        
+                        erase temp$,err=*next              
                         Layout!.layoutChildren()
                         f2!.addWidget(Layout!)
                             
@@ -930,6 +930,15 @@ REM         fi
             uic!.destroy()
         wend
         #ElementList!.clear()            
+
+        ks! = #BCList!.keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            k$=it!.next()
+            bc! = #BCList!.get(k$)
+            bc!.unregisterUI(#this!)
+        wend
+
         
         #super!.destroy()
     
