@@ -108,8 +108,9 @@ REM         fi
 
         fi
 
-        exitButton!=wnd!.addButton(103,w-50,5,30,30,"Exit")
+        exitButton!=wnd!.addButton(103,w-80,5,30,30,"Exit")
         exitButton!.setVisible(1) 
+        myExit!.setName("exitButton")
         exitButton!.addStyle("ExitButton")
         exitButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onExitButton")
 
@@ -238,7 +239,7 @@ REM         fi
                 uiw!.setSize(w,h-yoffs)
             fi
             
-            wnd!.getControl(103).setLocation(w-50,5)
+            wnd!.getControl(103).setLocation(w-80,5)
             
         fi
     methodend
