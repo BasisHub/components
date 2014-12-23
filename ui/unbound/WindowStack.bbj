@@ -1,6 +1,6 @@
-if INFO(3,6)<>"5" then
-    ::components/util/Util.bbj::Util.runAsBui(pgm(-1))
-fi
+REM if INFO(3,6)<>"5" then
+REM     ::components/util/Util.bbj::Util.runAsBui(pgm(-1))
+REM fi
 
 
 use ::components/util/Util.bbj::Util
@@ -194,7 +194,9 @@ REM         fi
                 
 
             fi
-            uiw!.destroy()
+            if uiw! <> null() then
+                uiw!.destroy()
+            fi
             wnd!.destroy()
         fi
 
@@ -285,6 +287,10 @@ class public testWidget implements BBjControl
         #Cw!.setSize(w!,h!)
         #render()
     methodend
+    
+    method public void destroy()
+        
+    methodend
 
 classend
 
@@ -317,12 +323,14 @@ openZwei:
     cw2! = WindowStack.openWindow("Zwei")
     t1!  = new testWidget(cw2!)
     WindowStack.setWidget(t1!)
+    WindowStack.setShowBackButton(1)
     btn2! = cw2!.addButton(100,10,10,200,25,"open ZweiA")
     btn2!.setCallback(BBjAPI.ON_BUTTON_PUSH,"openZweiA")
     return
 
 openZweiA:
     cw2a! = WindowStack.openWindow("ZweiA")
+    WindowStack.setShowBackButton(1)
     return
 
 
