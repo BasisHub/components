@@ -41,6 +41,7 @@ class public WindowStack
     field private static BBjVector ExitActionObjectList! = new BBjVector()
     field private static BBjVector ExitActionPayloadList! = new BBjVector()
         
+        
     rem this is for BUI only, when embedded in another child window
     field private static BBjWindow ContainerWnd!
 
@@ -260,6 +261,42 @@ REM         fi
     methodend
 
 
+    method public static BBjNumber addButton(BBjString name$, BBjString caption$, BBjString cssclass$, CustomObject CallbackObj!, BBjString CallbackMethod$)
+        id=2000
+        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        while 1
+            test! = wnd!.getControl(i,err=*break)
+            i=i+1
+        wend
+        declare auto BBjButton button!
+        Button!=wnd!.addButton(id,35*(id-2000+1),5,30,30,caption$)
+        if cvs(name$,3)>"" then
+            Button!.setName(name$)
+        fi
+        if cvs(cssclass$,3)>"" then
+            Button!.addStyle(cssclass$)
+        fi
+        Button!.setCallback(BBjAPI.ON_BUTTON_PUSH,CallbackObj!,CallbackMethod$)    
+        methodret id    
+    methodend 
+    
+    method public static void addButtonStyle(BBjNumber id, BBjString style$)
+        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        ctrl! = wnd!.getControl(id,err=*next)
+        if ctrl!<>null() then
+            ctrl!.addStyle(style$)
+        fi
+    methodend 
+
+    method public static void removeButtonStyle(BBjNumber id, BBjString style$)
+        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        ctrl! = wnd!.getControl(id,err=*next)
+        if ctrl!<>null() then
+            ctrl!.removeStyle(style$)
+        fi
+    methodend 
+
+
 classend
 
 class public testWidget implements BBjControl
@@ -313,7 +350,7 @@ btn! = cw!.addButton(100,10,10,200,25,"open Zwei")
 btn!.setCallback(BBjAPI.ON_BUTTON_PUSH,"openZwei")
 
 BBjAPI().setCustomEventCallback("WindowStackEmpty","byebye")
-
+helper! = new helper()
 
 process_events
 
@@ -324,6 +361,12 @@ openZwei:
     t1!  = new testWidget(cw2!)
     WindowStack.setWidget(t1!)
     WindowStack.setShowBackButton(1)
+
+    b=WindowStack.addButton("test","test","test",helper!,"bark")
+    WindowStack.addButtonStyle(b,"blabla")
+    WindowStack.removeButtonStyle(b,"test")
+
+
     btn2! = cw2!.addButton(100,10,10,200,25,"open ZweiA")
     btn2!.setCallback(BBjAPI.ON_BUTTON_PUSH,"openZweiA")
     return
@@ -336,3 +379,10 @@ openZweiA:
 
 byebye:
     release
+
+    
+    class public helper
+        method public void bark(BBjEvent ev!)
+            a=msgbox("wuff")
+        methodend
+    classend
