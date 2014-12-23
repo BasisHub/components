@@ -264,9 +264,10 @@ REM         fi
     method public static BBjNumber addButton(BBjString name$, BBjString caption$, BBjString cssclass$, CustomObject CallbackObj!, BBjString CallbackMethod$)
         id=2000
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        
         while 1
-            test! = wnd!.getControl(i,err=*break)
-            i=i+1
+            test! = wnd!.getControl(id,err=*break)
+            id=id+1
         wend
         declare auto BBjButton button!
         Button!=wnd!.addButton(id,35*(id-2000+1),5,30,30,caption$)
@@ -287,6 +288,15 @@ REM         fi
             ctrl!.addStyle(style$)
         fi
     methodend 
+
+    method public static void setImageFile(BBjNumber id, BBjString img$)
+        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        ctrl! = wnd!.getControl(id,err=*next)
+        if ctrl!<>null() then
+            ctrl!.setImageFile(img$) 
+        fi
+    methodend 
+    
 
     method public static void removeButtonStyle(BBjNumber id, BBjString style$)
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
