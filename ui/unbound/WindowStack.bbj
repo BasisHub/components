@@ -311,6 +311,11 @@ REM         fi
         fi
     methodend 
 
+    rem deprecated - remove asap
+    method public static void setImageFile(BBjNumber id, BBjString img$)
+        #setButtonImageFile(id,img$)
+    methodend 
+
     method public static void setButtonEnabled(BBjNumber id, BBjNumber enable)
         ctrl! = #getButton(id)
         if ctrl!<>null() then
