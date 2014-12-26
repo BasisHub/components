@@ -95,23 +95,34 @@ REM         if INFO(3,6)="5"  or #ContainerWnd!<>null() then
 REM         fi
         
         w=wnd!.getWidth()
+        tb!     = wnd!.addChildWindow(101,0,0,w,yoffs,"",$00000800$,sg!.getAvailableContext())
+        tb!.addStyle("ToolBar")
         cw!     = wnd!.addChildWindow(100,0,yoffs,w,wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
 
         if yoffs or #ContainerWnd!<>null() then
 
-            backButton!=wnd!.addButton(101,5,5,30,30,"Back")
+            backButton!=tb!.addButton(101,5,0,45,45,"Back")
             backButton!.setVisible(0) 
+            backButton!.setName("backButton")
             backButton!.addStyle("BackButton")
             backButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onBackButton")
-
-            st! = wnd!.addStaticText(102,150,10,2000,30,name$)
+            backButton!.setOpaque(0)
+            backButton!.setClientEdge(0)
+            backButton!.setImageFile("ico/back.png")
+            
+            st! = tb!.addStaticText(102,150,10,2000,30,name$)
             st!.addStyle("GroupTitle")
+            st!.setVisible(0)
+            rem todo: find a better place for that piece
 
         fi
 
-        exitButton!=wnd!.addButton(103,w-50,5,30,30,"Exit")
+        exitButton!=tb!.addButton(103,w-50,0,45,45,"Exit")
         exitButton!.setVisible(1) 
+        exitButton!.setOpaque(0)
+        exitButton!.setClientEdge(0)
         exitButton!.setName("exitButton")
+        exitButton!.setImageFile("ico/exit.png")
         exitButton!.addStyle("ExitButton")
         exitButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onExitButton")
 
@@ -128,18 +139,18 @@ REM         fi
 
     method public static void setShowBackButton(BBjNumber visible)
          wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-         wnd!.getControl(101).setVisible(visible)
+         wnd!.getControl(101).getControl(101).setVisible(visible)
     methodend
     
     method public static void setShowExitButton(BBjNumber visible)
          wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-         wnd!.getControl(103).setVisible(visible)
+         wnd!.getControl(101).getControl(103).setVisible(visible)
     methodend    
 
     method public static BBjNumber getShowBackButton()
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
         if wnd! <> null() then
-          c! = wnd!.getControl(101,err=*next)
+          c! = wnd!.getControl(101).getControl(101,err=*next)
           if c! <> null() then
               ret=c!.isVisible()
           fi
@@ -242,7 +253,9 @@ REM         fi
                 uiw!.setSize(w,h-yoffs)
             fi
             
-            wnd!.getControl(103).setLocation(w-50,5)
+            tb! = wnd!.getControl(101)
+            tb!.setSize(w,yoffs)
+            tb!.getControl(103).setLocation(w-50,0)
             
         fi
     methodend
@@ -264,13 +277,16 @@ REM         fi
     method public static BBjNumber addButton(BBjString name$, BBjString caption$, BBjString cssclass$, CustomObject CallbackObj!, BBjString CallbackMethod$)
         id=2000
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        tb! = wnd!.getControl(101)
         
         while 1
-            test! = wnd!.getControl(id,err=*break)
+            test! = tb!.getControl(id,err=*break)
             id=id+1
         wend
         declare auto BBjButton button!
-        Button!=wnd!.addButton(id,35*(id-2000+1),5,30,30,caption$)
+        Button!=tb!.addButton(id,50*(id-2000+1),0,45,45,caption$)
+        Button!.setOpaque(0)
+        Button!.setClientEdge(0)
         if cvs(name$,3)>"" then
             Button!.setName(name$)
         fi
@@ -283,7 +299,8 @@ REM         fi
     
     method public static void addButtonStyle(BBjNumber id, BBjString style$)
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-        ctrl! = wnd!.getControl(id,err=*next)
+        tb! = wnd!.getControl(101)
+        ctrl! = tb!.getControl(id,err=*next)
         if ctrl!<>null() then
             ctrl!.addStyle(style$)
         fi
@@ -291,7 +308,8 @@ REM         fi
 
     method public static void setImageFile(BBjNumber id, BBjString img$)
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-        ctrl! = wnd!.getControl(id,err=*next)
+        tb! = wnd!.getControl(101)
+        ctrl! = tb!.getControl(id,err=*next)
         if ctrl!<>null() then
             ctrl!.setImageFile(img$) 
         fi
@@ -300,7 +318,8 @@ REM         fi
 
     method public static void removeButtonStyle(BBjNumber id, BBjString style$)
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-        ctrl! = wnd!.getControl(id,err=*next)
+        tb! = wnd!.getControl(101)
+        ctrl! = tb!.getControl(id,err=*next)
         if ctrl!<>null() then
             ctrl!.removeStyle(style$)
         fi
