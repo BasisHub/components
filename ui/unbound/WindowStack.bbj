@@ -298,32 +298,39 @@ REM         fi
     methodend 
     
     method public static void addButtonStyle(BBjNumber id, BBjString style$)
-        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-        tb! = wnd!.getControl(101)
-        ctrl! = tb!.getControl(id,err=*next)
+        ctrl! = #getButton(id)
         if ctrl!<>null() then
             ctrl!.addStyle(style$)
         fi
     methodend 
 
-    method public static void setImageFile(BBjNumber id, BBjString img$)
-        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-        tb! = wnd!.getControl(101)
-        ctrl! = tb!.getControl(id,err=*next)
+    method public static void setButtonImageFile(BBjNumber id, BBjString img$)
+        ctrl! = #getButton(id)
         if ctrl!<>null() then
             ctrl!.setImageFile(img$) 
         fi
     methodend 
-    
+
+    method public static void setButtonEnabled(BBjNumber id, BBjNumber enable)
+        ctrl! = #getButton(id)
+        if ctrl!<>null() then
+            ctrl!.setEnabled(enable) 
+        fi
+    methodend     
 
     method public static void removeButtonStyle(BBjNumber id, BBjString style$)
-        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-        tb! = wnd!.getControl(101)
-        ctrl! = tb!.getControl(id,err=*next)
+        ctrl! = #getButton(id)
         if ctrl!<>null() then
             ctrl!.removeStyle(style$)
         fi
     methodend 
+    
+    method private static BBjButton getButton(BBjNumber id)
+        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        tb! = wnd!.getControl(101)
+        methodret tb!.getControl(id,err=*next)
+        methodret null()
+    methodend
 
 
 classend
