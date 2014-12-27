@@ -59,6 +59,7 @@ class public BusinessComponent
     field private   java.util.HashMap   FieldValidationErrors!         = new java.util.HashMap()
 
     field protected DataProvider        DataProvider!
+    field public    BBjNumber           Enabled = 1 
 
     rem *********************set / get methods ****************************
 
@@ -144,7 +145,7 @@ class public BusinessComponent
     rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
 
-        if #DataProvider!<>null() then
+        if #DataProvider!<>null() and #Enabled then
             #DataProvider!.prepareResultSet(first, last)
         fi
 

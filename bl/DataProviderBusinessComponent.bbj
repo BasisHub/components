@@ -38,7 +38,11 @@ class public DataProviderBusinessComponent extends BusinessComponent
     rem */
     method public BBjNumber size()
 
-        methodret #getDataProvider().size()
+        if #getEnabled() then
+            methodret #getDataProvider().size()
+        else
+            methodret 0
+        fi
 
     methodend
 
@@ -195,29 +199,30 @@ REM         #refresh(0)
     rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
 
-        if max(first,last)>=#getResultSet().size() then
-            doIt=1
-        else
-            for i=first to last
-                if #getResultSet().getItem(i)=null() then
-                    doIt=1
-                    break
-                fi
-            next
-        fi
-
-        if doIt then
-            v! = #getDataProvider().prepareResultSet(first, last + abs(min(10,int((first-last) /4))))
-
-            if v!.size() then
-                for i=0 to v!.size()-1
-                    rec = v!.getItem(i)
-                    rec!=#getResultSet().getItem(rec)
-                    #getResultSet().setItem(rec,#processRecord(rec!))
+        if #getEnabled()  then
+            if max(first,last)>=#getResultSet().size() then
+                doIt=1
+            else
+                for i=first to last
+                    if #getResultSet().getItem(i)=null() then
+                        doIt=1
+                        break
+                    fi
                 next
             fi
+    
+            if doIt then
+                v! = #getDataProvider().prepareResultSet(first, last + abs(min(10,int((first-last) /4))))
+    
+                if v!.size() then
+                    for i=0 to v!.size()-1
+                        rec = v!.getItem(i)
+                        rec!=#getResultSet().getItem(rec)
+                        #getResultSet().setItem(rec,#processRecord(rec!))
+                    next
+                fi
+            fi
         fi
-
     methodend
 
 
