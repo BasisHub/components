@@ -1206,7 +1206,7 @@ class public DataProvider
         ? "(",ret,")"
 
         if ret=0 then
-            a=msgbox(BBjAPI().getLastJavaException().toString(),0,"Error")
+            a=msgbox(BBjAPI().getLastJavaException().toString()+" "+sql$+" Line "+str(tcb(5))+" Obj: "+str(obj!),0,"Error")
         fi
 
         #closeDatabase()
@@ -1321,7 +1321,7 @@ class public DataProvider
                 ex! = BBjAPI().getLastJavaException()
     
                 if ex! <> null() then
-                    a=msgbox(ex!.toString(),0,"Error")
+                    a=msgbox(ex!.toString()+" "+sql$+" Line "+str(tcb(5))+" Obj: "+str(obj!),0,"Error")
                 fi
             fi
     
