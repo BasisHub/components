@@ -33,7 +33,9 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     field protected BBjString Attribute$
     
     field private BBjNumber NeedRebuild=0
-
+    field private BBTranslator Translator!
+    field private TreeMap GlobalMap!
+    field private TreeMap CurrentMap!
     method protected PropertiesBasedBusinessComponent(BBjString atbListProperties$, BBjString atbListPropertiesFolder$, BBjString attribute$, BBjString locale$)
     
         #setAllowFilter(1)
@@ -42,7 +44,16 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         #setAtbListPropertiesFolder(atbListPropertiesFolder$)
         #setLocale(locale$)
         #setAttribute(attribute$) 
-
+        
+        #Translator! = BBTranslator.getInstance(#AtbListProperties$, locale! , null() , #AtbListPropertiesFolder$)
+        #GlobalMap! = cast(TreeMap, #Namespace!.getValue(#AtbListMap$,err=*next))
+        if #GlobalMap! = null() then
+                #GlobalMap! = new TreeMap()
+                mapName$ = #Attribute$ + #Separator$ + locale!
+                #Namespace!.setValue(#AtbListMap$, #GlobalMap!)
+        fi
+        #CurrentMap! = #getAttributeList()
+        
     methodend
 
 
@@ -221,7 +232,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
             methodret 
         fi
         
-        al! = #getAttributeList(#Attribute$, #getLocale())
+        al! = #getAttributeList()
         tm! = new TreeMap()
         ks! = al!.keySet()
         it! = ks!.iterator()
@@ -332,7 +343,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
 
           tm! = new TreeMap()
-          al! = #getAttributeList(#Attribute$, #getLocale())
+          al! = #getAttributeList()
           ks! = al!.keySet()
           it! = ks!.iterator()
           while it!.hasNext()
@@ -487,9 +498,6 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         methodret "PROPERTIESTABLE"
     methodend
     
-    method public TreeMap getAttributeList(BBjString attribute!)
-        methodret #getAttributeList(attribute!,#getLocale())
-    methodend
      
     rem /**
     rem  *  Checks in the property File of the given locale for Keys matching to the given attribute. If some keys were found,
@@ -505,39 +513,23 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem  * @throws Error 11 - This Error is thrown if no key was found either in the property file for the given 
     rem  * locale as in the property file for the default locale
     rem  */
-    method private  TreeMap getAttributeList(BBjString attribute!, BBjString locale!)
+    method public TreeMap getAttributeList()
+
         Declare TreeMap currentMap!
-        Declare TreeMap globalMap!
-        Declare BBTranslator translator!
         
+        locale! = #getLocale() 
         rem Check if the demanded Map is already cached
-        currentMap! = #getMapFromNamespace(attribute! + #Separator$ + locale!)
+        currentMap! = #getMapFromNamespace(#Attribute$ + #Separator$ + locale!)
         if(currentMap! <> null() AND !currentMap!.isEmpty()) then 
             methodret currentMap!
         fi
-        
-        rem Initialize the tranlsator with the given locale
-        translator! = BBTranslator.getInstance(#AtbListProperties$, locale! , null() , #AtbListPropertiesFolder$) 
-        
+
         rem Get a TreeMap containing all keys matching with the given attribute
-        currentMap! = #addToMap(attribute!, locale!, translator!)
+        currentMap! = #addToMap(locale!)
       
         rem Check if matching keys were found
         if(currentMap! <> null()) then
-            rem check if the global map is already inserted to the GlobalNamespace
-            if(#Namespace!.getKeys().contains(#AtbListMap$)) then
-                rem Extend the current value of the global map
-                globalMap! = cast(TreeMap,#Namespace!.getValue(#AtbListMap$))
-                mapName$ = attribute! + #Separator$ + locale!
-                globalMap!.put(mapName$,currentMap!) 
-                #Namespace!.setValue(#AtbListMap$, globalMap!)
-            else
-                rem Create the global Map in the GlobalNamespace
-                globalMap! = new TreeMap()
-                mapName$ = attribute! + #Separator$ + locale!
-                globalMap!.put(mapName$,currentMap!) 
-                #Namespace!.setValue(#AtbListMap$, globalMap!)
-            fi 
+            #GlobalMap!.put(mapName$,currentMap!) 
             methodret currentMap!
         fi
         rem Check if the given locale is the default locale
@@ -545,34 +537,18 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
             rem If not then Check if the property file for the default locale contains any matching Keys
         
             rem Check if the demanded Map is already cached
-            currentMap! = #getMapFromNamespace(attribute! + #Separator$ + "")
+            currentMap! = #getMapFromNamespace(#Attribute$ + #Separator$ + "")
             if(currentMap! <> null() AND !currentMap!.isEmpty()) then 
                 methodret currentMap!
             fi
-            rem Initialize the tranlsator with the given locale
-            translator! = BBTranslator.getInstance(#AtbListProperties$, locale! , null() , #AtbListPropertiesFolder$) 
             rem Get a TreeMap containing all keys matching with the given attribute
-            currentMap! = #addToMap(attribute!, "" , translator!)
+            currentMap! = #addToMap("" )
             
-            rem Get a TreeMap containing all keys matching with the given attribute
-            currentMap! = #addToMap(collection!, attribute!, translator!)
             
             rem Check if matching keys were found
             if(currentMap! <> null()) then
                 rem check if the global map is already inserted to the GlobalNamespace
-                if(#Namespace!.getKeys().contains(#AtbListMap$)) then
-                    rem Extend the current value of the global map
-                    globalMap! = cast(TreeMap,#Namespace!.getValue(#AtbListMap$))
-                    mapName$ = attribute! + #Separator$
-                    globalMap!.put(mapName$, currentMap!) 
-                    #Namespace!.setValue(#AtbListMap$, globalMap!)
-                else
-                    rem Create the global Map in the GlobalNamespace
-                    globalMap! = new TreeMap()
-                    mapName$ = attribute! + #Separator$
-                    globalMap!.put(mapName$,currentMap!) 
-                    #Namespace!.setValue(#AtbListMap$, globalMap!)
-                fi
+                #GlobalMap!.put(mapName$, currentMap!) 
                 methodret currentMap!
             
             fi        
@@ -589,23 +565,14 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem  * @param str$ - The Name of the map which contains the required list of attributes
     rem  */
     method private TreeMap getMapFromNamespace(BBjString mapName$)
-        Declare TreeMap globalMap!
         
-        rem Check if the global map is already existing in the GlobalNamespace
-        if(#Namespace!.getKeys().contains(#AtbListMap$)) then
-            rem Get the global map
-            globalMap! = cast(TreeMap, #Namespace!.getValue(#AtbListMap$))
-            rem check if the global map conatins the required map
-            if(globalMap!.containsKey(mapName$)) then
-                methodret cast(TreeMap,globalMap!.get(mapName$))
-            fi
-        fi
+        methodret cast(TreeMap,#GlobalMap!.get(mapName$,err=noop))
+
+        noop:   
         methodret null()
     methodend
     
-    method public BBjString getAttributeValue(BBjString attributeKey!)
-        methodret #getAttributeValue(#getAttribute(), #getLocale(),  attributeKey!) 
-    methodend
+
     
     rem /**
     rem  * Returns the value of the given attribute and the given locale
@@ -616,21 +583,11 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem  * 
     rem  * @return value -  The value for the given attribute
     rem  */
-    method private BBjString getAttributeValue(BBjString attribute!, BBjString locale!, BBjString attributeKey!)
-        Declare TreeMap currentMap!
+    method public BBjString getAttributeValue(BBjString attributeKey!)
         
-        rem Check if the demanded Map is already cached
-        currentMap! = #getMapFromNamespace(attribute! + #Separator$ + locale!)
-        if(currentMap! <> null() AND !currentMap!.isEmpty()) then 
-            methodret cast(String, currentMap!.get(attributeKey!))
-        fi    
-        
-        currentMap! = #getAttributeList(attribute!, locale!)
-        if(currentMap!.containsKey(attributeKey!))
-            methodret cast(String, currentMap!.get(attributeKey!))
-        else
+            methodret str(#CurrentMap!.get(attributeKey!,err=*next))
             throw "No attribute was found for the given Key", 11 
-        fi    
+        
     methodend
     
     rem /**
@@ -643,19 +600,19 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem  * 
     rem  * @return map! - The TreeMap which contains every Key and value matching to the searched attribute or null() if none was found  
     rem  */
-    method private TreeMap addToMap( BBjString attribute!, BBjString locale!, BBTranslator translator!)
+    method private TreeMap addToMap( BBjString locale!)
         Declare TreeMap map!
         Declare Iterator it!
         
         rem Get all keys from the property file for the given locale
-        collection! = translator!.getTranslationBundle().getTranslations(new Locale(locale!)).getKeys()
+        collection! = #Translator!.getTranslationBundle().getTranslations(new Locale(locale!)).getKeys()
         rem Get the Iterator for the collection containg all Keys of the property file registered in the translator
         it! = cast(Iterator, collection!.iterator())
         while it!.hasNext()
             rem Get the Key
             key! = cast(String, it!.next())
             rem check if the Key matches the searched attribute
-            if(key!.matches(attribute! + "_.*")) then
+            if(key!.matches(#Attribute$ + "_.*")) then
                 rem check if the map is already created
                 if(map! = null()) then
                      map! = new TreeMap()
@@ -667,7 +624,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
                 rem map!.put(elements![1],translator!.getTranslation(key!))
                 
                 rem Add the key and value pair to the map
-                map!.put(keyValue$,translator!.getTranslation(key!))
+                map!.put(keyValue$,#Translator!.getTranslation(key!))
             fi
         wend
         methodret map!
@@ -690,11 +647,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem  * Removes the global map from the GlobalNamespace if it exists.
     rem  */
     method public void clearCache()
-        rem Check if the global map exists in the GlobalNamespace
-        if(#Namespace!.getKeys().contains(#AtbListMap$)) then
-              rem Remove it
-              #Namespace!.removeValue(#AtbListMap$)
-        fi
+          #Namespace!.removeValue(#AtbListMap$,err=*next)
     methodend
     
     method private BBjString invert(BBjString in$)
