@@ -49,7 +49,9 @@ class public DataProvider
     field private java.util.ArrayList   ColLabels!
     field private java.util.ArrayList   ColTypes!
 
-
+    rem set to 1 if the SQL engine does not support the COUNT and you need to go to the last record in the resultset
+    field protected BBjNumber FallbackCount
+    
     rem /**
     rem * Method setBC:
     rem * register a businesscomponent to receive callback calls
@@ -358,6 +360,10 @@ class public DataProvider
              fi
         fi
 
+        ? sql$
+        clipfromstr 1,sql$
+REM         input *
+
         methodret sql$
 
     methodend
@@ -386,33 +392,39 @@ class public DataProvider
         if #Size = -1 then
             #openDatabase()
             sql$=#buildSQLStatement()
-
-            if pos("1=2" =sql$) = 0 then 
-                rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
-                rem sollte ein order by im Satement sein muss dieses entfernt werden
-                count$ = sql$
-                if pos("ORDER BY"= sql$) > 0 then
-                    count$ = sql$(1,pos("ORDER BY"= sql$)-1)
-                endif
-                sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
-
-                stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
-                JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+            count$ = sql$
+            
+            if pos("1=2" =sql$) = 0 then
+                if #FallbackCount=0 then
+                    rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
+                    rem sollte ein order by im Satement sein muss dieses entfernt werden
+                    
+                    if pos("ORDER BY"= sql$) > 0 then
+                        count$ = sql$(1,pos("ORDER BY"= sql$)-1)
+                    endif
+                    sql$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
+    
+                    stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+                    JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+                fi
                 
-
-                print "(determine size)"
-
-                if JDBCResultSet!.next() then
-                    size = JDBCResultSet!.getInt("COUNT")
+                if JDBCResultSet!<>null() and JDBCResultSet!.next() and #FallbackCount=0 then
+                    #Size = JDBCResultSet!.getInt("COUNT")
                 else
-                    size=-1
+                    #FallbackCount=1
+                    declare java.sql.ResultSet JDBCResultSet!  
+                    stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+                    JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(count$))
+                    JDBCResultSet!.last()
+                    #Size =  JDBCResultSet!.getRow()
+
                 fi
             else
                 size=-1
             fi
 
             #closeDatabase()
-            #Size=size
+            
         endif
 
         methodret #Size
@@ -605,7 +617,6 @@ class public DataProvider
 
         declare auto BBjVector fieldnames!
         if #AttributesRecord!<> null() then
-
             methodret #AttributesRecord!
         else
          
@@ -631,7 +642,6 @@ class public DataProvider
     rem */
     method public BBjVector prepareResultSet(BBjNumber first, BBjNumber last)
 
-        
 
         if first=0 and last=0 then
             canExit=1
@@ -646,31 +656,16 @@ class public DataProvider
         rem JDBC Resultset is not zero-based
         first=max(1,first+1)
         last = last+1
-
         
         sql$=#buildSQLStatement()
         
         rem now determine size for later use - it's probably needed anyway
-
-        rem TimBB fix für MS SQL Die ORDER BY-Klausel ist in Sichten, Inlinefunktionen, abgeleiteten Tabellen, Unterabfragen und allgemeinen Tabellenausdrücken nur dann gültig, wenn auch TOP oder FROM XML angegeben wird.
-        rem sollte ein order by im Satement sein muss dieses entfernt werden
-        count$ = sql$
-        if pos("ORDER BY"= sql$) > 0 then
-            count$ = sql$(1,pos("ORDER BY"= sql$)-1)
-        endif
-        sqlc$="SELECT COUNT(*) AS COUNT FROM ("+count$+") AS X"
-        #openDatabase()
-        stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
-        JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sqlc$))
-
-        if JDBCResultSet!.next() then
-            #Size = int(JDBCResultSet!.getInt("COUNT"))
-        else
-            #Size=0
+        
+        if #Size = -1 and canExit=0 then
+            #size()
         fi
 
-
-        if #Size<1000 or (#BC!<> null() and #BC!.isPreFiltering()) then
+        if (#Size>-1 and #Size<500) or (#BC!<> null() and #BC!.isPreFiltering()) then
             first=1
             last=#Size
             #ResultSet!.clear()  
@@ -679,14 +674,16 @@ class public DataProvider
         if #SortField$>"" and #QueryLayout! <> null() then
             if ! #QueryLayout!.getFieldNames().contains(#SortField$) then
                 first=1
-                last=#Size
+                if #Size>-1 then
+                    last=#Size
+                fi 
                 #ResultSet!.clear()  
             fi
         fi
         
 
         if pos("1=2"=sql$)=0 then
-            
+            #openDatabase()
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
             
@@ -780,6 +777,7 @@ class public DataProvider
             fi
 
             #Size=#Size-skew 
+
         else
             print "empty result set where was 1=2"
             v! = new BBjVector()
