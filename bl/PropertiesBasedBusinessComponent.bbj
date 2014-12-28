@@ -49,6 +49,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         #GlobalMap! = cast(TreeMap, #Namespace!.getValue(#AtbListMap$,err=*next))
         if #GlobalMap! = null() then
                 #GlobalMap! = new TreeMap()
+                locale! = #getLocale()
                 mapName$ = #Attribute$ + #Separator$ + locale!
                 #Namespace!.setValue(#AtbListMap$, #GlobalMap!)
         fi
