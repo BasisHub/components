@@ -45,7 +45,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         #setLocale(locale$)
         #setAttribute(attribute$) 
         
-        #Translator! = BBTranslator.getInstance(#AtbListProperties$, locale! , null() , #AtbListPropertiesFolder$)
+        #Translator! = BBTranslator.getInstance(#AtbListProperties$, locale$ , null() , #AtbListPropertiesFolder$)
         #GlobalMap! = cast(TreeMap, #Namespace!.getValue(#AtbListMap$,err=*next))
         if #GlobalMap! = null() then
                 #GlobalMap! = new TreeMap()
@@ -53,6 +53,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
                 mapName$ = #Attribute$ + #Separator$ + locale!
                 #Namespace!.setValue(#AtbListMap$, #GlobalMap!)
         fi
+        
         #CurrentMap! = #getAttributeList()
         
     methodend
@@ -233,7 +234,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
             methodret 
         fi
         
-        al! = #getAttributeList()
+        al! = #CurrentMap! 
         tm! = new TreeMap()
         ks! = al!.keySet()
         it! = ks!.iterator()
@@ -344,7 +345,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
 
           tm! = new TreeMap()
-          al! = #getAttributeList()
+          al! = #CurrentMap!
           ks! = al!.keySet()
           it! = ks!.iterator()
           while it!.hasNext()
@@ -606,8 +607,12 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         Declare Iterator it!
         
         rem Get all keys from the property file for the given locale
+        
         collection! = #Translator!.getTranslationBundle().getTranslations(new Locale(locale!)).getKeys()
         rem Get the Iterator for the collection containg all Keys of the property file registered in the translator
+        ? collection!
+        
+        
         it! = cast(Iterator, collection!.iterator())
         while it!.hasNext()
             rem Get the Key
@@ -615,6 +620,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
             rem check if the Key matches the searched attribute
             if(key!.matches(#Attribute$ + "_.*")) then
                 rem check if the map is already created
+                ? key!
                 if(map! = null()) then
                      map! = new TreeMap()
                 fi
@@ -623,7 +629,6 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
                 rem let elements![] = key!.split(#Separator$)
                 rem Add the key and value pair to the map
                 rem map!.put(elements![1],translator!.getTranslation(key!))
-                
                 rem Add the key and value pair to the map
                 map!.put(keyValue$,#Translator!.getTranslation(key!))
             fi
