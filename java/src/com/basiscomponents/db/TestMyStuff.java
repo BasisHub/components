@@ -25,11 +25,13 @@ public class TestMyStuff {
 		r.setFieldValue("TS",t);
 		System.out.println(r);
 		System.out.println(r.getFieldAsNumber("TS"));
+		r.setFieldValue("TS", "");
 
 		System.out.println("-------------------------");
 		r.setFieldValue("DT",new java.sql.Date(now.getTime()));
 		System.out.println(r);
 		System.out.println(r.getFieldAsNumber("DT"));
+		r.setFieldValue("DT", "");
 		
 		r.setFieldValue("DT",-1);
 		System.out.println(r);
@@ -40,6 +42,10 @@ public class TestMyStuff {
 		System.out.println(r);
 		System.out.println(r.getFieldAsNumber("TIM"));
 		System.out.println(r.getFieldAsString("TIM"));
+		
+		r.setFieldValue("INTE",new java.sql.Date( com.basis.util.BasisDate.date(2457019).getTime() ));
+		r.setFieldValue("INTE","");
+		System.out.println(r.getFieldAsString("INTE"));
 //		
 //
 //		Class.forName("com.basis.jdbc.BasisDriver");

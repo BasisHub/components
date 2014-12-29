@@ -135,7 +135,10 @@ public class DataField
         	}
         	else
         	{
-        		this.DoubleValue = java.lang.Double.valueOf(value);
+        		if (value.isEmpty()) 
+        			this.DoubleValue = 0.0;
+        		else
+        			this.DoubleValue = java.lang.Double.valueOf(value);
         	}
 		}
 
@@ -147,7 +150,10 @@ public class DataField
         	}
         	else
         	{
-        		this.IntegerValue = java.lang.Integer.valueOf(value);
+        		if (value.isEmpty()) 
+        			this.IntegerValue = 0;
+        		else
+        			this.IntegerValue = java.lang.Integer.valueOf(value);
         	}
         	
 		}
@@ -180,11 +186,23 @@ public class DataField
         	}
         	else
         	{
-        		int i=Integer.valueOf(value);
-        		if (i>-1) 
-        			this.DateValue = new java.sql.Date( com.basis.util.BasisDate.date(i).getTime() );
-        		else
+        		
+        		if (value.isEmpty())
         			this.DateValue = null; 
+        		else
+        		{
+        			int i=-1;
+        			try{
+	        		i=Integer.valueOf(value);
+        			}
+        			finally
+        			{
+        			}
+	        		if (i>-1) 
+	        			this.DateValue = new java.sql.Date( com.basis.util.BasisDate.date(i).getTime() );
+	        		else
+	        			this.DateValue = null;
+        		}
         		
         	}
         	
@@ -192,14 +210,26 @@ public class DataField
 
 		if (this.Type == 'I') 
 		{
-			this.TimestampValue = null;
-	    	if (value == null )
-	    	{
-	    		this.TimestampValue = java.sql.Timestamp.valueOf(value);
-	    	}
-	    	
+			
+			if (value=="")
+    			this.IntegerValue = null; 
+    		else
+    		{
+        		int i=Integer.valueOf(value);
+    		}
+    	
 		}
-	
+
+		if (this.Type == 'X') 
+		{
+			
+			if (value=="")
+    			this.TimestampValue = null;
+			
+    	
+		}
+
+		
 		if (this.Type == 'Y') 
 		{
 	    	if (value == null )
@@ -208,13 +238,17 @@ public class DataField
 	    	}
 	    	else
 	    	{
-	    		if (value == "") 
+	    		if (value.isEmpty()) 
 	    		{
 	    			this.BigDecimalValue = new java.math.BigDecimal(0);
 	    		}
 	    		else
-	    		{	
-	    			this.BigDecimalValue = new java.math.BigDecimal(value);
+	    		{	try
+	    			{
+	    				this.BigDecimalValue = new java.math.BigDecimal(value);
+	    			}
+	    			finally {}
+	    				
 	    		}
 	//          rem TODO DTB
 	    		
