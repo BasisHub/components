@@ -1334,7 +1334,7 @@ REM         fi
         HeaderString$=#GridAttributes!.getFieldAsString("{ROW_HEADER}",err=*next)
 
 
-        if #InitGrid then
+        if #InitGrid or #ColumnNames!.size()=0 then
             #InitGrid=0
 
             #Grid!.setNumColumns(0)
@@ -1511,6 +1511,8 @@ REM         fi
 
                 i=i+1
             next col
+            
+            
 
 
             #Grid!.setColumnHeaderText(columnHeaderText!)
@@ -1559,131 +1561,133 @@ REM         fi
             fi
 
             f$=columnConfig!.getFieldAsString("NAME")
-
-            attrs! = rec!.getFieldAttributes(f$,err=*continue)
-
-            ks! = attrs!.keySet()
-            it! = ks!.iterator()
-
-            cellmask$=""
-            celltype$=""
-            related$=""
-
-            while it!.hasNext()
-                k$=it!.next()
-
-                if k$="BGCOLOR" then
-                    bgcol$=attrs!.get(k$)
-
-                    if bgcol$>"" then
-                        col!= BBjAPI().makeColor(asc(bgcol$(1,1)),asc(bgcol$(2,1)),asc(bgcol$(3,1)))
-                        #Grid!.setCellBackColor(row,j,col!)
-                    fi
-                fi
-
-                if k$="FGCOLOR" then
-                    fgcol$=attrs!.get(k$)
-
-                    if fgcol$>"" then
-                        col!= BBjAPI().makeColor(asc(fgcol$(1,1)),asc(fgcol$(2,1)),asc(fgcol$(3,1)))
-                        #Grid!.setCellForeColor(row,j,col!)
-                    fi
-                fi
-
-                if k$="FONTSTYLE" then
-                    style$=attrs!.get(k$)
-
-                    if style$>"" then
-                        declare BBjFont font!
-                        font! = #Grid!.getCellFont(row,j)
-                        style=0
-
-                        if pos("BOLD"=style$)>0         then let style=style+1
-
-                        if pos("ITALIC"=style$)>0       then let style=style+2
-
-                        if pos("UNDERLINE"=style$)>0    then let style=style+16
-                        newfont! = BBjAPI().getSysGui().makeFont(font!.getName(), font!.getSize(), style)
-                        #Grid!.setCellFont(row,j,newfont!)
-                    fi
-                fi
-
-                img! = null()
-
-                if k$="IMAGEFILE" then
-                    img! = BBjAPI().getSysGui().getImageManager().loadImageFromFile(attrs!.get(k$),err=*next)
-                fi
-
-                if k$="IMAGEBYTES" then
-                    img! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes(attrs!.get(k$),err=*next)
-                fi
-
-                if img! <>null() then
-                    #Grid!.setCellImage(row,j,img!)
-                fi
-
-
-                if k$="CONTROL" then
-                    ctrl$=attrs!.get(k$)
-                    found=0
-
-                    if ctrl$="INPUTE" then
-                        style=BBjGrid.GRID_STYLE_INPUTE
-                    fi
-
-                    if ctrl$="INPUTD" then
-                        style=BBjGrid.GRID_STYLE_INPUTD
-                    fi
-
-                    if ctrl$="INPUTN" then
-                        style=BBjGrid.GRID_STYLE_INPUTN
-                    fi
-
-                    if ctrl$="HTML" then
-                        style=BBjGrid.GRID_STYLE_TEXT
-                    fi
-
-                    if style then
-                        #Grid!.setCellStyle(row,j,style)
-                        celltype$=ctrl$
-                    fi
-                fi
-
-                if k$="MASK" then
-                    m$=attrs!.get(k$)
-                    #Grid!.setCellMask(row,j,m$)
-                    cellmask$=m$
-                fi
-
-                if k$="TOOLTIP" then
-                    m$=attrs!.get(k$)
-                    #Grid!.setToolTipText(row,j,m$)
-                fi
-
-                if k$="RELATED" then
-                    related$=attrs!.get(k$)
-                fi
-
-                if k$="ALIGN" then
-                    align$=attrs!.get(k$)
-
-                    if align$="LEFT" then
-                        align=BBjGrid.GRID_ALIGN_LEFT
-                    fi
-
-                    if align$="RIGHT" then
-                        align=BBjGrid.GRID_ALIGN_RIGHT
-                    fi
-
-                    if align$="CENTER" then
-                        align=BBjGrid.GRID_ALIGN_CENTER
-                    fi
-
-                    #Grid!.setCellAlignment(row,j,align)
-                fi
-            wend
-
-            f1$=str(rec!.getFieldAsString(f$))
+            
+            attrs! = null()
+            attrs! = rec!.getFieldAttributes(f$,err=*next)
+            if attrs! <>null() then
+                  ks! = attrs!.keySet()
+                  it! = ks!.iterator()
+      
+                  cellmask$=""
+                  celltype$=""
+                  related$=""
+      
+                  while it!.hasNext()
+                      k$=it!.next()
+      
+                      if k$="BGCOLOR" then
+                          bgcol$=attrs!.get(k$)
+      
+                          if bgcol$>"" then
+                              col!= BBjAPI().makeColor(asc(bgcol$(1,1)),asc(bgcol$(2,1)),asc(bgcol$(3,1)))
+                              #Grid!.setCellBackColor(row,j,col!)
+                          fi
+                      fi
+      
+                      if k$="FGCOLOR" then
+                          fgcol$=attrs!.get(k$)
+      
+                          if fgcol$>"" then
+                              col!= BBjAPI().makeColor(asc(fgcol$(1,1)),asc(fgcol$(2,1)),asc(fgcol$(3,1)))
+                              #Grid!.setCellForeColor(row,j,col!)
+                          fi
+                      fi
+      
+                      if k$="FONTSTYLE" then
+                          style$=attrs!.get(k$)
+      
+                          if style$>"" then
+                              declare BBjFont font!
+                              font! = #Grid!.getCellFont(row,j)
+                              style=0
+      
+                              if pos("BOLD"=style$)>0         then let style=style+1
+      
+                              if pos("ITALIC"=style$)>0       then let style=style+2
+      
+                              if pos("UNDERLINE"=style$)>0    then let style=style+16
+                              newfont! = BBjAPI().getSysGui().makeFont(font!.getName(), font!.getSize(), style)
+                              #Grid!.setCellFont(row,j,newfont!)
+                          fi
+                      fi
+      
+                      img! = null()
+      
+                      if k$="IMAGEFILE" then
+                          img! = BBjAPI().getSysGui().getImageManager().loadImageFromFile(attrs!.get(k$),err=*next)
+                      fi
+      
+                      if k$="IMAGEBYTES" then
+                          img! = BBjAPI().getSysGui().getImageManager().loadImageFromBytes(attrs!.get(k$),err=*next)
+                      fi
+      
+                      if img! <>null() then
+                          #Grid!.setCellImage(row,j,img!)
+                      fi
+      
+      
+                      if k$="CONTROL" then
+                          ctrl$=attrs!.get(k$)
+                          found=0
+      
+                          if ctrl$="INPUTE" then
+                              style=BBjGrid.GRID_STYLE_INPUTE
+                          fi
+      
+                          if ctrl$="INPUTD" then
+                              style=BBjGrid.GRID_STYLE_INPUTD
+                          fi
+      
+                          if ctrl$="INPUTN" then
+                              style=BBjGrid.GRID_STYLE_INPUTN
+                          fi
+      
+                          if ctrl$="HTML" then
+                              style=BBjGrid.GRID_STYLE_TEXT
+                          fi
+      
+                          if style then
+                              #Grid!.setCellStyle(row,j,style)
+                              celltype$=ctrl$
+                          fi
+                      fi
+      
+                      if k$="MASK" then
+                          m$=attrs!.get(k$)
+                          #Grid!.setCellMask(row,j,m$)
+                          cellmask$=m$
+                      fi
+      
+                      if k$="TOOLTIP" then
+                          m$=attrs!.get(k$)
+                          #Grid!.setToolTipText(row,j,m$)
+                      fi
+      
+                      if k$="RELATED" then
+                          related$=attrs!.get(k$)
+                      fi
+      
+                      if k$="ALIGN" then
+                          align$=attrs!.get(k$)
+      
+                          if align$="LEFT" then
+                              align=BBjGrid.GRID_ALIGN_LEFT
+                          fi
+      
+                          if align$="RIGHT" then
+                              align=BBjGrid.GRID_ALIGN_RIGHT
+                          fi
+      
+                          if align$="CENTER" then
+                              align=BBjGrid.GRID_ALIGN_CENTER
+                          fi
+      
+                          #Grid!.setCellAlignment(row,j,align)
+                      fi
+                  wend
+            endif; Rem "attrs! <> null()
+            
+            f1$=str(rec!.getFieldAsString(f$,err=*next))
 
             if celltype$="INPUTD" then
                 f=num(f1$)
@@ -2603,8 +2607,8 @@ REM         fi
 
     method private void applyFilter()
 
-        #QueryFilter! = new java.util.HashMap()
-
+REM         #QueryFilter! = new java.util.HashMap()
+REM         #QueryFilter! = #getBC().getQueryFilter()
         ks! = #FilterStrings!.keySet()
         it!=ks!.iterator()
 
@@ -2657,6 +2661,7 @@ REM         fi
         wend
 
         #super!.getBC().setQueryFilter(#QueryFilter!)
+        #super!.getBC().refresh(0) 
 
     methodend
 
