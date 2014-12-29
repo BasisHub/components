@@ -1,0 +1,17 @@
+use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+
+class public  MultiLineInputWidget extends ControlWidget
+
+    method public MultiLineInputWidget(BBjChildWindow cwCanvas!)
+        #super!(cwCanvas!)
+        cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        #setWnd(cwWidget!)
+        ipe! = cwWidget!.addCEdit(100,0,0,10,10,"")
+        ipe!.setLineWrap(1)
+        ipe!.setEditable(1)
+        ipe!.setOvertypeMode(1)
+        #setCtrl(ipe!)
+
+    methodend
+
+classend
