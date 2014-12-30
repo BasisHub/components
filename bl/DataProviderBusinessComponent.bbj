@@ -213,13 +213,13 @@ REM         #refresh(0)
     
             if doIt then
                 v! = #getDataProvider().prepareResultSet(first, last + abs(min(10,int((first-last) /4))))
-    
-                if v!.size() then
-                    for i=0 to v!.size()-1
-                        rec = v!.getItem(i)
+                if v!<>null() then
+                    it! = v!.iterator()
+                    while it!.hasNext()
+                        rec = it!.next()
                         rec!=#getResultSet().getItem(rec)
                         #getResultSet().setItem(rec,#processRecord(rec!))
-                    next
+                    wend
                 fi
             fi
         fi
