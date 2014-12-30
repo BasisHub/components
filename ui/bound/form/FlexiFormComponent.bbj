@@ -942,6 +942,8 @@ REM         fi
      
      
     method public void destroy()
+    
+        #getBC().setEditedRecord(-1)
 
         if #NavigationToolbar! <> null() then
             #NavigationToolbar!.destroy()
@@ -977,6 +979,7 @@ REM         fi
 
         
         #super!.destroy()
+         
     
     methodend     
 
@@ -992,5 +995,6 @@ REM         fi
           fi 
       
     methodend
+
 
 classend
