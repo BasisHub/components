@@ -129,7 +129,10 @@ class public FileManager implements BBjControl
     rem  * @param e BBjListClickEvent
     rem  */
     method public void filesListClick(BBjListClickEvent e!)
-         #currentFile$ = e!.getListBox().getItemAt(e!.getSelectedIndex())
+        selectedIndex=e!.getSelectedIndex()
+        if selectedIndex>-1 then 
+            #currentFile$ = e!.getListBox().getItemAt()
+        endif 
     methodend
 
     rem /**
