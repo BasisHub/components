@@ -317,15 +317,14 @@ REM         #refresh(0)
     method public void saveRecord(BBjNumber recno, DataRow row!)
 
         if recno=-2 then
-
             row! = #onBeforeInsert(row!)
 
             #getDataProvider().insertRecord(row!)
             
             #onAfterInsert(row!)
             
-            #refresh(0)
             #setEditedRecord(-1)
+            #refresh(0)
         fi
 
         if recno>-1 then
@@ -339,18 +338,10 @@ REM         #refresh(0)
             
             #onAfterUpdate(row!, orig_row!)
             
-            
-
-REM             if recno <#getResultSet().size() then
-REM                 #getResultSet().setItem(recno,null()); escape
-REM             fi
-
             #setEditedRecord(-1)
             #refresh(0)
             rem todo reReadRecord(recno)
             #setSelection(recno)
-            
-
         fi
 
     methodend
@@ -358,12 +349,12 @@ REM             fi
     rem /**
     rem * Method saveRecord
     rem * saves a record within the result set
+    rem * @deprecated
     rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
     rem * @param java.util.HashMap fields!: the fields
     rem */
     method public void saveRecord(BBjNumber recno, java.util.HashMap fields!)
-
-        if recno=-2 then
+            
             row! = #getNewEntity()
             ks! = fields!.keySet()
             it!=ks!.iterator()
@@ -373,50 +364,8 @@ REM             fi
                 v!=fields!.get(f$)
                 row!.setFieldValue(f$,v!)
             wend
-
-            row! = #onBeforeInsert(row!)
-
-            #getDataProvider().insertRecord(row!)
             
-            #onAfterInsert(row!)
-            
-            #refresh(0)
-            #setEditedRecord(-1)
-        fi
-
-        if recno>-1 then
-            orig_row! = #getResultSet().getItem(recno)
-            rem TODO:  re-read the record from the database, compare to this version
-            rem and abort operation if one of the edited fields has changed in the meantime
-
-            row! = #getNewEntity()
-
-            ks! = fields!.keySet()
-            it!=ks!.iterator()
-
-            while it!.hasNext()
-                f$=it!.next()
-                v!=fields!.get(f$)
-                row!.setFieldValue(f$,v!)
-            wend
-
-            row! = #onBeforeUpdate(row!, orig_row!)
-
-            #getDataProvider().updateRecord(row!, orig_row!)
-            
-            #onAfterUpdate(row!, orig_row!)
-            
-            
-
-REM             if recno <#getResultSet().size() then
-REM                 #getResultSet().setItem(recno,null()); escape
-REM             fi
-            #setEditedRecord(-1)
-            #refresh(0)
-            rem todo reReadRecord(recno)
-            #setSelection(recno)
-            
-        fi
+            #saveRecord(recno,row!)
 
     methodend
 
