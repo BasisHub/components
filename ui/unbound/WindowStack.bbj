@@ -306,7 +306,7 @@ REM         fi
 
     method public static void setButtonImageFile(BBjNumber id, BBjString img$)
         ctrl! = #getButton(id)
-        if ctrl!<>null() then
+        if ctrl!<>null() and img$>"" then
             ctrl!.setImageFile(img$) 
         fi
     methodend 
