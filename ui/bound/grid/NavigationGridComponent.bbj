@@ -2630,11 +2630,17 @@ REM          #QueryFilter! = new java.util.HashMap()
         rem now remove all filter entries that are not in #ExemptFromFiltering!
         ks! = #QueryFilter!.keySet()
         it! = ks!.iterator()
+        v! = new BBjVector()
         while it!.hasNext()
             k$=it!.next()
             if ! #ExemptFromFiltering!.contains(K$) then
-                #QueryFilter!.remove(k$)
+                v!.addItem(k$)
             fi
+        wend
+        
+        it! = v!.iterator()
+        while it!.hasNext()
+            #QueryFilter!.remove(it!.next())
         wend
         
         
@@ -3087,6 +3093,16 @@ REM          #QueryFilter! = new java.util.HashMap()
             next
         fi
 
+    methodend
+
+    method public void destroy()
+    
+    if #FilterGrid! <> null() then
+        #toggleFilter(null())
+    fi
+    
+    #super!.destroy()
+    
     methodend
 
 classend
