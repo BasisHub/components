@@ -57,7 +57,7 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
 
     field private BBjNumber ReadOnly
     
-    
+    field protected BBjNumber SelectiveEditMode =0
     
     rem new flexiform variables
     
@@ -393,29 +393,36 @@ REM                                           fi
 
             rem initialize the toolbar
 
-            
+                
 
-            declare BBjWindow wnd!
-            wnd! = #getWnd()
-
-            #ToolbarWnd! = wnd!.addChildWindow(100,0,0,wnd!.getWidth(),0,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
-            #getLaf().prepareWindow(#ToolbarWnd!)
-            #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
-            
-            #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,9*UIComponent.getToolbarHeight(),UIComponent.getToolbarHeight())
-            if #this!.getBC()<>null() then 
-                #FormEditToolbar!.setBC(#this!.getBC())
-            fi
-
-            #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
-            if #this!.getBC()<>null() then
-                #NavigationToolbar!.setBC(#this!.getBC())
+                declare BBjWindow wnd!
+                wnd! = #getWnd()
+    
+                #ToolbarWnd! = wnd!.addChildWindow(100,0,0,wnd!.getWidth(),0,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+                #getLaf().prepareWindow(#ToolbarWnd!)
+                #getLaf().setStyle(#ToolbarWnd!, "ToolBarLike")
+            if #getShowToolBar() then    
+                #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,9*UIComponent.getToolbarHeight(),UIComponent.getToolbarHeight())
+                if #this!.getBC()<>null() then 
+                    #FormEditToolbar!.setBC(#this!.getBC())
+                fi
+    
+                #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
+                if #this!.getBC()<>null() then
+                    #NavigationToolbar!.setBC(#this!.getBC())
+                fi
             fi
             
             #setEditing(0)
 
     methodend
 
+    method protected void setSelectiveEditMode(BBjNumber selective)
+        #SelectiveEditMode= selective
+        if selective then
+            #enableControls(0) 
+        fi
+    methodend
 
     rem /**
     rem * Method setShowToolBar:
@@ -460,6 +467,19 @@ REM                                           fi
         #super!.setShowMenuBar(fShow)
 
         if fShow then
+            if #FormEditToolbar! = null() then
+                #FormEditToolbar! = new FormEditToolbarComponent(#ToolbarWnd!,10,0,2,9*UIComponent.getToolbarHeight(),UIComponent.getToolbarHeight())
+                if #this!.getBC()<>null() then 
+                    #FormEditToolbar!.setBC(#this!.getBC())
+                fi
+            fi
+            if #NavigationToolbar! = null() then
+                #NavigationToolbar! = new NavigationToolbarComponent(#ToolbarWnd!,11,8*UIComponent.getToolbarHeight(),2,250,UIComponent.getToolbarHeight())
+                if #this!.getBC()<>null() then
+                    #NavigationToolbar!.setBC(#this!.getBC())
+                fi
+            fi
+            
             editMenu! = #super!.getMenuBar().addMenu(-2,"&Edit")
             #FormEditToolbar!.setupMenu(editMenu!)
 
@@ -686,6 +706,10 @@ REM TODO: lazy loading!
     rem */
     method public void displayData()
 
+        if #SelectiveEditMode=0 then
+            #enableControls(1) 
+        fi  
+
 
     methodend
 
@@ -823,10 +847,19 @@ REM         fi
 
         if isEditing=0 then
             #getWnd().focus()
+            if #SelectiveEditMode then
+                #enableControls(0) 
+            fi  
+        else
+            #enableControls(1)
         fi
+        
 
     methodend
 
+    method protected void enableControls(BBjNumber enable)
+        #getWnd().setEnabled(enable)
+    methodend
 
 
     rem /**
@@ -846,7 +879,10 @@ REM         fi
     rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
     rem */
     method public void newRecord()
+
+        #enableControls(1) 
         #getWnd().focus() 
+        
     methodend
 
     rem /**
@@ -943,5 +979,18 @@ REM         fi
         #super!.destroy()
     
     methodend     
+
+    rem /**
+    rem * Method onSelectionChange:
+    rem * This method is called from the business component when the selection changed
+    rem */
+    method public void onSelectionChange()
+
+        
+          if #SelectiveEditMode=0 then
+            #enableControls(1)
+          fi 
+      
+    methodend
 
 classend

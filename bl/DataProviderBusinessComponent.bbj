@@ -339,13 +339,18 @@ REM         #refresh(0)
             
             #onAfterUpdate(row!, orig_row!)
             
-            #refresh(0)
+            
 
-            if recno <#getResultSet().size() then
-                #getResultSet().setItem(recno,null())
-            fi
+REM             if recno <#getResultSet().size() then
+REM                 #getResultSet().setItem(recno,null()); escape
+REM             fi
 
             #setEditedRecord(-1)
+            #refresh(0)
+            rem todo reReadRecord(recno)
+            #setSelection(recno)
+            
+
         fi
 
     methodend
@@ -401,13 +406,16 @@ REM         #refresh(0)
             
             #onAfterUpdate(row!, orig_row!)
             
-            #refresh(0)
+            
 
-            if recno <#getResultSet().size() then
-                #getResultSet().setItem(recno,null())
-            fi
-
+REM             if recno <#getResultSet().size() then
+REM                 #getResultSet().setItem(recno,null()); escape
+REM             fi
             #setEditedRecord(-1)
+            #refresh(0)
+            rem todo reReadRecord(recno)
+            #setSelection(recno)
+            
         fi
 
     methodend
