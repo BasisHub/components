@@ -1130,6 +1130,7 @@ REM         input *
         hm! = rec!.getObjects()
 
         ks! = hm!.keySet()
+        
         it! = ks!.iterator()
         uhm! = new java.util.HashMap()
 
@@ -1139,8 +1140,6 @@ REM         input *
               s$=s$+","+k$
               v$=v$+",? "
               uhm!.put(k$,hm!.get(k$)) 
-              o! = hm!.get(k$)
-              prow!.setFieldValue(k$,o!)
             fi              
         wend
 
@@ -1157,6 +1156,8 @@ REM         input *
 
 
         #openDatabase()
+        
+
         declare java.sql.PreparedStatement stmt!
         stmt! = #Connection!.prepareStatement(sql$)
         ks! = uhm!.keySet()
@@ -1165,8 +1166,9 @@ REM         input *
 
         while it!.hasNext()
             k$=it!.next()
-            obj!= prow!.getField(k$)
-            type$=prow!.getFieldType(k$)
+            obj!= rec!.getField(k$)
+            type$=rec!.getFieldType(k$)
+            
 
             if type$="C" then
                 stmt!.setString(i,obj!)
