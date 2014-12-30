@@ -308,6 +308,7 @@ class public NavigationGridComponent extends UIComponent implements BBjControl
     field private BBjNumber         ShowTbConfig =1
 
     field private BBjNumber         AllowFilterByDistinct =1
+    field private BBjVector         ExemptFromFiltering!
 
     field public BBjNumber          MultipleSelection =0
 
@@ -2404,6 +2405,18 @@ REM         fi
     method public void toggleFilter(BBjToolButtonPushEvent ev!)
 
         if #FilterGrid! = null() then
+            
+            qf!=#getBC().getQueryFilter()
+            ks! = qf!.keySet()
+            it! = ks!.iterator()
+            #ExemptFromFiltering! = new BBjVector()
+            while it!.hasNext()
+                k$=it!.next()
+                #ExemptFromFiltering!.addItem(k$)
+            wend
+            
+             
+        
             if #Grid!.getHasRowHeader() then
                 rhw = #Grid!.getRowHeaderWidth()
             fi
@@ -2411,11 +2424,14 @@ REM         fi
             #FilterGrid! = #getWnd().addGrid(111,rhw,26,#getW(),25,$0010$,1,0)
 
             #this!.setGridPosition()
-            #adjustFilterGrid()
 
             #FilterGrid!.setVisible(1)
             #FilterGrid!.setEditClickCount(1)
             #FilterGrid!.setEditable(1)
+            
+            #adjustFilterGrid()
+
+            
             #FilterGrid!.setRowHeight(#GridRowHeight)
 
             #FilterGrid!.setCallback(BBjGrid.ON_GRID_EDIT_STOP,#this!,"onFilterEditStop")
@@ -2431,6 +2447,7 @@ REM         fi
             #FilterByDistinct! = new java.util.HashMap()
 
             #applyFilter()
+            #ExemptFromFiltering!=null()
             #TbFilter!.setSelected(0)
         fi
 
@@ -2607,8 +2624,20 @@ REM         fi
 
     method private void applyFilter()
 
-REM         #QueryFilter! = new java.util.HashMap()
-REM         #QueryFilter! = #getBC().getQueryFilter()
+REM          #QueryFilter! = new java.util.HashMap()
+        #QueryFilter! = #getBC().getQueryFilter()
+        
+        rem now remove all filter entries that are not in #ExemptFromFiltering!
+        ks! = #QueryFilter!.keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            k$=it!.next()
+            if ! #ExemptFromFiltering!.contains(K$) then
+                #QueryFilter!.remove(k$)
+            fi
+        wend
+        
+        
         ks! = #FilterStrings!.keySet()
         it!=ks!.iterator()
 
@@ -2675,23 +2704,35 @@ REM         #QueryFilter! = #getBC().getQueryFilter()
             reldata! = new BBjVector()
 
             i=0
-
+            
             for col=0 to #ColumnConfig!.size()-1
                 columnConfig! = #ColumnConfig!.getItem(col)
-
+                
                 if columnConfig!.getFieldAsNumber("VISIBLE")=0 then
                     continue
+                fi
+
+               x$=columnConfig!.getFieldAsString("NAME")
+                reldata!.addItem(x$)
+
+                if #ExemptFromFiltering!.contains(x$) then
+                    enabled=0
+                else
+                    enabled=1
                 fi
 
                 #FilterGrid!.setColumnAlignment(i,#Grid!.GRID_ALIGN_LEFT)
                 #FilterGrid!.setColumnWidth(i,columnConfig!.getFieldAsNumber("WIDTH"))
 
-                if #AllowFilterByDistinct then
+                if #AllowFilterByDistinct and enabled then
                     #FilterGrid!.setCellHasQuery(0,i,1)
                 fi
-
-                x$=columnConfig!.getFieldAsString("NAME")
-                reldata!.addItem(x$)
+                
+                
+                if enabled=0 then
+                    #FilterGrid!.setCellEditable(0,i,0)
+                    #FilterGrid!.setCellBackColor(0,i,BBjAPI().makeColor("GRAY"))
+                fi
 
                 i=i+1
             next
