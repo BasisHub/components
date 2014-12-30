@@ -291,9 +291,10 @@ class public ForeignKeyPicker extends UIComponent
 
         if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             ctrl! = #BoundCtrl!
-
             i=ctrl!.getSelectedIndex()
-            fk!=#IndexToKeyMap!.get(i)
+            if i>-1 then
+                fk!=#IndexToKeyMap!.get(i,err=*next)
+            endif
         else
             fk!=#BoundCtrl!.getText()
         fi
