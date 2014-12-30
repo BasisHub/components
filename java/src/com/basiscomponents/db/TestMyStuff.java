@@ -46,6 +46,10 @@ public class TestMyStuff {
 		r.setFieldValue("INTE",new java.sql.Date( com.basis.util.BasisDate.date(2457019).getTime() ));
 		r.setFieldValue("INTE","");
 		System.out.println(r.getFieldAsString("INTE"));
+		
+		System.out.println(r.getFieldNames());
+		System.out.println(r.clone().getFieldNames());
+		
 //		
 //
 //		Class.forName("com.basis.jdbc.BasisDriver");

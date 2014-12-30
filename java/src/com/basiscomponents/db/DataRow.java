@@ -610,19 +610,16 @@ public class DataRow
 			
 		DataRow dRow = new DataRow();
 	
-	    Set<String> ks = this.FieldList.keySet();
-	    Iterator<String> it = ks.iterator();
-	
-	    
-	    while (it.hasNext())
-	    {
+		Iterator<String> it = this.FieldNames.iterator();
+		while (it.hasNext())
+		{
 			String k = it.next();
 			DataField f = this.FieldList.get(k);
 			DataField f1 = f.clone();
 			dRow.addDataField(k,f1);
-	    }
-	
-	      return dRow;
+		}		
+		
+	    return dRow;
 	}
 
 	public String getInsertStatement()
