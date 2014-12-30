@@ -1548,7 +1548,7 @@ REM         fi
         
         loop:
 
-        rec!=#GridContents!.getItem(i)
+        rec!=#GridContents!.getItem(i,err=end_loop)
 
         rem -------------------------------------------------------------------------------------------------
 
@@ -1783,7 +1783,9 @@ REM         fi
         row=row+1
 
         if i<=endRow and i<#getBC().getResultSet().size() then goto loop
-
+        
+        end_loop:
+        
         #Grid!.setNumRows(rec_count)
         #LastRecordInGrid = #FirstRecordInGrid + rec_count
 
