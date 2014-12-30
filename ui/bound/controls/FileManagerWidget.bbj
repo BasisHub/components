@@ -1,0 +1,49 @@
+use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+use ::components/ui/unbound/FileManager.bbj::FileManager
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
+
+
+class public  FileManagerWidget extends ControlWidget
+ 
+    field private FileManager Fm!  
+ 
+    method public FileManagerWidget(BBjChildWindow cwCanvas!)
+        #super!(cwCanvas!)
+        cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,10,10,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        #setWnd(cwWidget!)
+        #Fm!=new FileManager(cwWidget!,101,10,10,10,10)
+        #setCtrl(#Fm!)
+    methodend
+    
+    method public void displayData()
+
+                if #getBindField() >"" then
+                
+                    if #getBC().getSelection().size()=1 then
+                        #getBC().prepareResultSet(sel,sel)
+                         
+                        sel=#getBC().getSelection().getItem(i)
+                        r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                        text$="attachments"
+                        text$     = r!.getFieldAsString(#getBindField(),err=*next)
+                        #Fm!.setPathToFiles(text$)
+                        #getWnd().setEnabled(1)
+                    else
+                        #getWnd().setEnabled(0)
+                    fi
+        
+                    
+                fi    
+    
+    methodend
+    
+    rem /**
+    rem * Method willDoOwnSave:
+    rem * @return BBjNumber willDoOwnSave: 1 if the widget has its own provisions to update the database
+    rem */
+    method public BBjNumber willDoOwnSave()
+        methodret 1
+    methodend    
+    
+classend

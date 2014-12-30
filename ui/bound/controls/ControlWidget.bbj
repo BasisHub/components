@@ -6,8 +6,9 @@ use com.basiscomponents.db.DataRow
 use com.basiscomponents.db.DataField
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
-use ::translations/bbtranslator.bbj::BBTranslator
 use ::i18n/CustomTranslator.bbj::CustomTranslator
+use ::translations/bbtranslator.bbj::BBTranslator
+
 
 use net.miginfocom.layout.PlatformDefaults
 
@@ -69,7 +70,8 @@ REM         a!.setFocusable(0,err=*next)
     methodend 
     
     method public void setText(BBjString text$)
-        #getCtrl().setText(text$)
+        x!= #getCtrl()
+        x!.setText(text$)
     methodend
     
     method public void setMask(BBjString mask$)
@@ -78,12 +80,14 @@ REM         a!.setFocusable(0,err=*next)
     methodend
 
     method public void setTextKey(BBjString textkey$)
-        #getCtrl().setText( #CustomTranslator!.getTranslation(textkey$)  )
+        x!=#getCtrl()
+        x!.setText( #CustomTranslator!.getTranslation(textkey$)  )
     methodend
     
     
     method public void setName(BBjString text$)
-        #getCtrl().setName(text$)
+        x! = #getCtrl()
+        x!.setName(text$)
     methodend    
  
      
@@ -109,7 +113,8 @@ REM         a!.setFocusable(0,err=*next)
     methodend
 
     method public String getName()
-        methodret #getCtrl().getName()
+        x!=#getCtrl()
+        methodret x!.getName()
     methodend
     
     method public void setLocation(BBjNumber x!, BBjNumber y!)
@@ -159,9 +164,11 @@ REM         a!.setFocusable(0,err=*next)
 
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
                         
-                        #Ctrl!.setText(cvs(text$,2))
+                        x!=#Ctrl!
+                        x!.setText(cvs(text$,2))
                     else
-                        #Ctrl!.setText("")
+                        x!=#Ctrl!
+                        x!.setText("")
                     fi
         
                     #Edited = 0
@@ -173,10 +180,11 @@ REM         a!.setFocusable(0,err=*next)
 
     method protected void enableControl(BBjNumber fEditing)
     
+            x! = #Ctrl! 
             if #getBC().getPrimaryKeySegments().indexOf(#getBindField())>-1 then
-                #Ctrl!.setEnabled(!fEditing)
+                x!.setEnabled(!fEditing)
             else
-                #Ctrl!.setEnabled(fEditing)
+                x!.setEnabled(fEditing)
             fi
               
    methodend    
@@ -257,7 +265,8 @@ REM     methodend
     method public void setEditing(BBjNumber isEditing)
     
         if isEditing=0 and pos(".label"=#getName())=0 then
-            #Ctrl!.setText("")
+            x!=#Ctrl!
+            x!.setText("")
             #Edited=0
         fi
     
@@ -268,7 +277,8 @@ REM     methodend
     rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
     rem */
     method public void newRecord()
-        #Ctrl!.setEnabled(1)
+        x! = #Ctrl!
+        x!.setEnabled(1)
     methodend
     
     rem /**
@@ -350,7 +360,8 @@ REM     methodend
         ctrl_name$=#getCtrl().getName()
         if pos(".label"=ctrl_name$)>0 then
             lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL",err=*endif)
-            #Ctrl!.setText(lbl$+":")
+            x!=#Ctrl!
+            x!.setText(lbl$+":")
         fi
         
     methodend
