@@ -1,0 +1,257 @@
+REM /**
+REM  * FileManager.bbj
+REM  * @author atimm
+REM  *
+REM  */
+use ::translations/bbtranslator.bbj::BBTranslator
+use ::components/i18n/i18n.bbj::i18n
+use ::FileChooser/FileChooser.bbj::FileChooser
+use java.io.File
+use java.nio.file.Files
+use java.nio.file.Path
+use java.io.FileOutputStream
+use java.util.UUID
+
+
+class public FileManager implements BBjControl
+    
+    field private static BBjSysGui  SysGui! = bbjapi().getSysGui()
+    field private BBjChildWindow    CwCanvas!
+    field private BBjListBox        Files!
+    field private BBjButton         Refresh!
+    field private BBjButton         Upload!
+    field private BBjButton         ShowFile!
+    field private static Boolean TRUE! = bbjapi().TRUE
+    field private static Boolean FALSE!= bbjapi().FALSE
+    field private BBjString pathToFiles$
+    field private BBjNumber space=10
+    field private BBjNumber icoSize=16
+    field private BBjString currentFile$=""
+    field private static BBjString htdocs$=System.getProperty("basis.BBjHome")+java.io.File.separator+"htdocs/deliver"
+    field private static BBjString jettyPort$ = "8888"
+    field private static BBjString separator$ = java.io.File.separator    
+    field private static BBTranslator  Translator! = i18n.getTranslator()
+    
+    rem /**
+    rem  * Public constructor
+    rem  * @param wnd BBjWindow container the FileNamager will be placed on
+    rem  * @param id  unique id for the childWindow 
+    rem  * @param x x location
+    rem  * @param y y location
+    rem  * @param w width 
+    rem  * @param h height 
+    rem  */
+    method public FileManager(BBjTopLevelWindow wnd!, BBjNumber id,BBjNumber x,BBjNumber y,BBjNumber width, BBjNumber height)            
+        #CwCanvas!  = wnd!.addChildWindow(id,x,y,width,height,"",$00000800$,#SysGui!.getAvailableContext())
+        #Files!     = #CwCanvas!.addListBox(#CwCanvas!.getAvailableControlID(),0,0,#CwCanvas!.getWidth()-(2*#space),#CwCanvas!.getHeight()-(3*#space+#icoSize),"")
+        #Refresh!   = #CwCanvas!.addButton(#CwCanvas!.getAvailableControlID(),#space,#CwCanvas!.getHeight()-(2*#space+#icoSize),#icoSize,#icoSize,"R")
+        #Refresh!.setImageFile("concordia/webfleet/app/ico/refresh.png")
+        #Upload!    = #CwCanvas!.addButton(#CwCanvas!.getAvailableControlID(),(2*#space)+#icoSize,#CwCanvas!.getHeight()-(2*#space+#icoSize),#icoSize,#icoSize,"U") 
+        #Upload!.setImageFile("concordia/webfleet/app/ico/refresh.png")
+        #ShowFile!    = #CwCanvas!.addButton(#CwCanvas!.getAvailableControlID(),(3*#space)+2*#icoSize,#CwCanvas!.getHeight()-(2*#space+#icoSize),#icoSize,#icoSize,"S")
+        #ShowFile!.setImageFile("concordia/webfleet/app/ico/refresh.png")
+        pathToFiles$ = System.getProperty("java.io.tmpdir")
+        #setCallback()
+    methodend
+    
+    rem /**
+    rem  * sets File location for the FileManager
+    rem  * @param pathToFiles$  path to the files
+    rem  */
+    method public void setPathToFiles(BBjString pathToFiles$)
+        #pathToFiles$=pathToFiles$
+        #refreshFileList()
+    methodend 
+    
+    rem /**
+    rem  * register callbacks
+    rem  */
+    method public void setCallback()
+        #Refresh!.setCallback(#Refresh!.ON_BUTTON_PUSH,#this!,"refreshButtonPush")
+        #Upload!.setCallback(#Upload!.ON_BUTTON_PUSH,#this!,"uploadButtonPush")
+        #Files!.setCallback(#Files!.ON_LIST_CLICK,#this!,"filesListClick")
+        #ShowFile!.setCallback(#ShowFile!.ON_BUTTON_PUSH,#this!,"showFileButtonPush")
+    methodend 
+
+    rem /**
+    rem  * handles refreshButton BUTTON_PUSH event 
+    rem  * @param e BBjButtonPushEvent
+    rem  */
+    method public void refreshButtonPush(BBjButtonPushEvent e!)
+        #refreshFileList() 
+    methodend 
+    
+    rem /**
+    rem  * handles uploadButton BUTTON_PUSH event
+    rem  * @param e BBjButtonPushEvent 
+    rem  */
+    method public void uploadButtonPush(BBjButtonPushEvent e!)
+        #upload()
+    methodend
+ 
+    rem  */
+    rem  * handles showFileButtonPush BUTTON_PUSH event
+    rem  * @param e BBjButtonPushEvent 
+    rem  */
+    method public void showFileButtonPush(BBjButtonPushEvent e!) 
+        #showFile()
+    methodend
+    
+    rem /**
+    rem  * copy selected file to client
+    rem  */
+    method public void showFile() 
+        seterr errorShowFile
+        if #currentFile$<>"" then      
+          cPath$=""
+          if info(3,6)<>"5" then
+              cPath$=str(System@.getProperty("user.home"))+#separator$
+          endif
+          cfs! = bbjapi().getThinClient().getClientFileSystem()
+          cf! = cfs!.getClientFile(cPath$+#currentFile$) 
+          cf!.copyToClient(#pathToFiles$+#separator$+#currentFile$)        
+        endif 
+        
+        methodret 
+        errorShowFile: 
+        System.out.println("err:"+str(err)+" in "+str(pgm(-2))+" "+str(tcb(5))+" "+errmes(-1))
+    methodend   
+    
+    rem /**
+    rem  * updates the currentSelected file #currentFile$
+    rem  * @param e BBjListClickEvent
+    rem  */
+    method public void filesListClick(BBjListClickEvent e!)
+         #currentFile$ = e!.getListBox().getItemAt(e!.getSelectedIndex())
+    methodend
+
+    rem /**
+    rem  * retrives the file list from the pathToFiles directory
+    rem  * @return vec vector that holds the file list
+    rem  */
+    method public BBjVector getFileList()
+        declare BBjVector vec!
+        vec! = new BBjVector() 
+        
+        ch=unt 
+        open(ch)#pathToFiles$
+        while 1 
+            read record(ch,end=*break)file$ 
+            if file$(1,1)="." then continue
+            tmpch=unt 
+            open(tmpch,err=*continue)#pathToFiles$+#separator$+file$
+            tmpFid$=fid(tmpch);close(tmpch) 
+            if tmpfid$(1,1)=$05$ then continue endif
+            vec!.addItem(file$)
+        wend  
+        close(ch)
+        methodret vec!
+    methodend
+   
+    rem /**
+    rem  * handles file updload using the FileChooser
+    rem  */
+    method public void upload()
+        declare FileChooser  fc!
+        declare BBjNamespace ns!
+        declare BBjVector    paths!
+        declare BBjClientFileSystem cfs! 
+
+        cfs! = bbjapi().getThinClient().getClientFileSystem()
+
+        nsVar$ = pgm(-2)+info(3,0)
+        ns! = BBjAPI().getGroupNamespace()
+        ns!.setValue(nsVar$,"process_events")
+        fc! = new FileChooser("",nsVar$,1)
+        user_action$=ns!.getValue(nsVar$+"_user_action")
+        if user_action$ = "::CANCEL::" then
+            methodret
+        else
+          paths! = fc!.getSelectedFiles()
+          if paths!.size()>0 then
+          
+              
+          declare String cFileName!
+          declare File source!
+          declare FileOutputStream target!
+          for i=0 to paths!.size()-1 
+              cFileName! = paths!.getItem(i).toString()
+              cFile! = cfs!.getClientFile(cFileName!) 
+              serverFile! = cFile!.copyFromClient()
+              
+              if cFileName!.contains(java.io.File.separator) then
+              fileName$ = cFileName!.substring(cFileName!.lastIndexOf(java.io.File.separator))
+              else 
+              fileName$=cFileName!
+              endif
+              source! = new File(serverFile!)
+              target! = new FileOutputStream(#pathToFiles$+fileName$) 
+              
+              Files.copy(source!.toPath(),target!)
+              target!.close()
+              source!.delete()
+            
+            next i 
+            endif
+        endif
+        #refreshFileList()
+        a=msgbox(#Translator!.getTranslation("FILE_UPLOAD_COMPLETE"),64,"")
+    methodend 
+    
+    rem /**
+    rem  * refreshes the file list
+    rem  */
+    method public void refreshFileList()
+        #Files!.removeAllItems()
+        files! = #getFileList()
+        #Files!.insertItems(0,files!)
+    methodend
+    
+    rem /**
+    rem  * set the location of the FileManger ( child window )
+    rem  * @param x x location
+    rem  * @param y y location
+    rem  */
+    method public void setLocation(BBjNumber x!,BBjNumber y!)
+        #CwCanvas!.setLocation(x!,y!)
+    methodend 
+
+    rem /**
+    rem  * sets the size of the FileManager child window and resizes the controls on the FileManager's childwindow
+    rem  * @param width
+    rem  * @param height
+    rem  */
+    method public void setSize(BBjNumber width!,BBjNumber height!)
+        #Files!.setSize(width!-(2*#space),height!-(3*#space+#icoSize))
+        #Refresh!.setLocation(#space,height!-(2*#space+#icoSize))
+        #Upload!.setLocation((2*#space)+#icoSize,height!-(2*#space+#icoSize))
+        #ShowFile!.setLocation((3*#space)+2*#icoSize,height!-(2*#space+#icoSize))
+        #CwCanvas!.setSize(width!,height!)
+    methodend 
+
+classend 
+
+
+REM /**
+REM  * sample 
+REM  */
+wnd! = BBjAPI().openSysGui("X0").addWindow(10,10,800,700,"FileManager")
+wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
+wnd!.setCallback(wnd!.ON_RESIZE,"resize")
+declare FileManager c!
+
+c! = new FileManager(wnd!,101,10,10,wnd!.getWidth(),wnd!.getHeight())
+c!.setPathToFiles("/usr2/tmp/")
+
+
+
+process_events
+byebye:bye
+
+
+resize: 
+    declare BBjResizeEvent rEvent! 
+    rEvent! = cast(BBjResizeEvent,bbjapi().getLastEvent())
+    c!.setSize(rEvent!.getWidth(),rEvent!.getHeight())
+    return
+    
