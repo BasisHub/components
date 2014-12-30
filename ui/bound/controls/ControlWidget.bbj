@@ -194,10 +194,11 @@ REM         a!.setFocusable(0,err=*next)
         if #getBC()<>null() and #getBC().getSelection().size() then
             recno=#getBC().getSelection().getItem(0)
             #getBC().setEditedRecord(recno)
-            #Edited = 1
-            #Focus = 1
+
         fi
-        
+
+        #Edited = 1
+        #Focus = 1
 
 REM         if #EditedRec! = null() and #Rec! <> null() then
 REM             #EditedRec! = cast(DataRow,#Rec!.clone())

@@ -1144,6 +1144,11 @@ REM         input *
             fi              
         wend
 
+        if len(s$)=0 then
+            a=msgbox("nothing to add!"+str(rec!),0,"SQL Error")
+            methodret
+        fi
+        
         s$=s$(2)
         v$=v$(2)
 
