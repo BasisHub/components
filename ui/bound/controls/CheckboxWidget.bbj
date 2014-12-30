@@ -1,7 +1,10 @@
 use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
 
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
+
 class public  CheckboxWidget extends ControlWidget
- 
+
     method public CheckboxWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
@@ -9,42 +12,42 @@ class public  CheckboxWidget extends ControlWidget
         ck! = cwWidget!.addCheckBox(100,0,0,10,10,"")
         #setCtrl(ck!)
     methodend
-    
-    
-   method public void displayData()
 
-          if #getBindField() >"" then
-          
-              if #getBC().getSelection().size()=1 then
-                  rem #getBC().prepareResultSet(0,0)
-                  sel=#getBC().getSelection().getItem(i)
-                  
-                  r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
-                  text$     = r!.getFieldAsString(#getBindField(),err=*next)
-                  
-                  rem #ToDo setValue method for Widget specify handling in subclass. 
-                      tmpVal!=BBjAPI().FALSE
-                      if num(text$,err=*ENDIF)<>0 then tmpVal!=BBjAPI().TRUE endif 
-                      cast(BBjCheckBox,#Ctrl!).setSelected(tmpVal!)
-              else
-                      cast(BBjCheckBox,#Ctrl!).setSelected(BBjAPI().FALSE)
-              fi
-  
-              #Edited = 0
-          fi
-             
-    methodend   
+
+    method public void displayData()
+
+        if #getBindField() >"" then
+            if #getBC().getSelection().size()=1 then
+                rem #getBC().prepareResultSet(0,0)
+                sel=#getBC().getSelection().getItem(i)
+
+                r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                text$ = r!.getFieldAsString(#getBindField(),err=*next)
+
+                rem #ToDo setValue method for Widget specify handling in subclass.
+                tmpVal!=BBjAPI().FALSE
+                if num(text$,err=*ENDIF)<>0 then tmpVal!=BBjAPI().TRUE endif
+                cast(BBjCheckBox,#getCtrl()).setSelected(tmpVal!)
+            else
+                cast(BBjCheckBox,#getCtrl()).setSelected(BBjAPI().FALSE)
+            fi
+
+            #setEdited(0)
+        fi
+
+    methodend
+
 
     method public DataRow prepareSave(DataRow r!)
-    
-        if #Edited then
+
+        if #getEdited() then
             tmpVal$="0"
-            if cast(BBjCheckBox,#Ctrl!).isSelected() then tmpVal$="1" endif 
-             r!.setFieldValue(#getBindField(),tmpVal$)
+            if cast(BBjCheckBox,#getCtrl()).isSelected() then tmpVal$="1" endif
+            r!.setFieldValue(#getBindField(),tmpVal$)
         fi
-        
+
         methodret r!
-        
-    methodend  
-        
+
+    methodend
+
 classend
