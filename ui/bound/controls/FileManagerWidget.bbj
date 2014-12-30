@@ -27,10 +27,11 @@ class public  FileManagerWidget extends ControlWidget
                         r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                         text$="attachments"
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
+                        a=msgbox(text$)
                         #Fm!.setPathToFiles(text$)
-                        #getWnd().setEnabled(1)
+                        #Fm!.setEnabled(1)
                     else
-                        #getWnd().setEnabled(0)
+                        #Fm!.setEnabled(0)
                     fi
         
                     
@@ -46,4 +47,12 @@ class public  FileManagerWidget extends ControlWidget
         methodret 1
     methodend    
     
+    rem /**
+    rem * Method newRecord:
+    rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
+    rem */
+    method public void newRecord()
+        #Fm!.setEnabled(0)
+    methodend
+        
 classend
