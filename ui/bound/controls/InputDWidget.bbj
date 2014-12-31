@@ -48,6 +48,7 @@ class public  InputDWidget extends ControlWidget
     
     method public void onTbDatePick(BBjToolButtonPushEvent ev!)
         #Ipd!.calendar() 
+        #setEdited(1)
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
@@ -73,5 +74,31 @@ class public  InputDWidget extends ControlWidget
         #super!.onCtrlGainedFocus(ev!)
         #TbPick!.setVisible(1)  
     methodend
+    
+    rem /**
+    rem * Method prepareSave:
+    rem * add the field's unsaved contents to the DataRow object
+    rem  * 
+    rem  * override to handle special formats, like date!!!
+    rem  * 
+    rem * @param DataRow row!: the row to collect the changes
+    rem * @return DataRow: the row with the changes being added
+    rem */
+    method public DataRow prepareSave(DataRow r!)
+    
+        if #getEdited() then
+            c! = #getCtrl() 
+            d=c!.getValue()
+            if d=-1 then
+                r!.setFieldValue(#getName(),null())
+            else
+                d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
+                r!.setFieldValue(#getName(),d!)
+            fi
+        fi
+        
+        methodret r!
+        
+    methodend     
 
 classend
