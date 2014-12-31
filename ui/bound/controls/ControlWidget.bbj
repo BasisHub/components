@@ -312,8 +312,12 @@ REM     methodend
         if #Edited then
         
             if #getFkPicker() <> null() then
-                t$=#getFkPicker().getSelectedForeignKeyValue()
-                r!.setFieldValue(#getBindField(),t$)
+                t!=#getFkPicker().getSelectedForeignKeyValue()
+                if t!<>null() then
+                    r!.setFieldValue(#getBindField(),str(t!))
+                else
+                    r!.setFieldValue(#getBindField(),"")
+                fi
             else
                 r!.setFieldValue(#getBindField(),#Ctrl!.getText())
             fi
