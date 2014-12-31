@@ -199,7 +199,7 @@ public class DataRow
              
         }	
         t=System.currentTimeMillis()-t;
-        System.out.println("finished new for "+cc+" columns: "+t+" ms ");
+//        System.out.println("finished new for "+cc+" columns: "+t+" ms ");
 	}
 
 	public static DataRow newInstance()
