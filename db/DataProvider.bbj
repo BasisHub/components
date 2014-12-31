@@ -686,7 +686,7 @@ REM         input *
             #openDatabase()
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
-            
+            jrs! = #JDBCResultSet!
 
             
             if #RecordCountInResultSet > 500 then
@@ -707,7 +707,7 @@ REM         input *
                  fi
             fi
 
-            if #JDBCResultSet!.absolute(first) then
+            if jrs!.absolute(first) then
                 while #ResultSet!.size() < first-1
                     #ResultSet!.addItem(null())
                 wend
@@ -718,10 +718,12 @@ REM         input *
                 LONGNVARCHAR    = java.sql.Types.LONGNVARCHAR
                 NCHAR           = java.sql.Types.NCHAR                
 
+                
                 while 1
+                    
                     if #ResultSet!.size()=first+x-1 or #ResultSet!.getItem(first+x-1)=null() then
                         declare auto DataRow row!
-                        row! = new DataRow(#JDBCResultSet!)
+                        row! = new DataRow(jrs!)
 
                         
                         if #QueryLayout!= null() then
@@ -766,7 +768,7 @@ REM         input *
                     x=x+1
 
                  nextRecord:
-                    if #JDBCResultSet!.next() then
+                    if jrs!.next() then
                         if first+x<=last then
                             continue
                         fi
