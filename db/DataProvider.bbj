@@ -1234,7 +1234,7 @@ REM         input *
         it!=#PrimaryKeySegments!.iterator()
         while it!.hasNext()
             seg$=it!.next()
-            if i>0 then
+            if wh$>"" then
                 wh$=wh$+" AND "
             fi
             
