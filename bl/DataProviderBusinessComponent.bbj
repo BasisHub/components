@@ -370,57 +370,6 @@ REM         #refresh(0)
     methodend
 
 
-    rem /**
-    rem * Method validateRecord
-    rem * saves a record within the result set
-    rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
-    rem * @param java.util.HashMap fields!: the fields
-    rem * @return BBjNumber passed: 0= no errors, 1=errors were reported
-    rem */
-    method public BBjNumber validateRecord(BBjNumber recno, java.util.HashMap fields!)
-
-        if recno = -1 then
-            methodret 0
-        fi
-
-        if recno=-2 then
-            row! = #getNewEntity()
-            ks! = fields!.keySet()
-            it!=ks!.iterator()
-
-            while it!.hasNext()
-                f$=it!.next()
-                v$=fields!.get(f$)
-                row!.setFieldValue(f$,v$)
-            wend
-
-            methodret  #validateRecord(row!,null())
-        fi
-
-        if recno>-1 then
-            orig_row! = #getResultSet().getItem(recno)
-            rem TODO:  re-read the record from the database, compare to this version
-            rem and abort operation if one of the edited fields has changed in the meantime
-
-            row! = #getResultSet().getItem(recno)
-
-            ks! = fields!.keySet()
-            it!=ks!.iterator()
-
-            while it!.hasNext()
-                f$=it!.next()
-                v!=fields!.get(f$)
-                row!.setFieldValue(f$,v!)
-            wend
-
-            ? row!.toString()
-
-            methodret #validateRecord(row!,orig_row!)
-
-        fi
-
-    methodend
-
 
     rem /**
     rem * Method updateResultsetForSingleRecord

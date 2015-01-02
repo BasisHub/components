@@ -55,6 +55,7 @@ class public BusinessComponent
 
 
     field private   BBjNumber           EditingRecNo                   = -1
+    field protected DataRow             EditedRec!                     
     field private   BBjVector           ValidationErrors!              = new BBjVector()
     field private   java.util.HashMap   FieldValidationErrors!         = new java.util.HashMap()
 
@@ -570,6 +571,9 @@ class public BusinessComponent
                 next
             fi
         wend
+        
+        #setEditedRecord(-1)
+        
 
     methodend
 
@@ -830,6 +834,27 @@ class public BusinessComponent
 
     methodend
 
+    method public ValidationError getValidationError(String fieldname!)
+    
+        e! = #FieldValidationErrors!.get(fieldname!,err=*next)
+        if e!<>null() then
+            methodret e!
+        fi
+        
+        it! = #ValidationErrors!.iterator()
+        while it!.hasNext()
+        
+            e! = it!.next()
+            if e!.doesConcernField(fieldname!) then
+                methodret e!
+            fi
+            
+        wend
+        
+        methodret null()
+        
+    methodend
+
 
     rem /**
     rem * Method getFieldValidationErrorLevel:
@@ -1027,14 +1052,17 @@ class public BusinessComponent
     rem */
     method public void setEditedRecord(BBjNumber recno)
 
+        #clearValidationErrors()
+        #clearFieldValidationErrors()
+        #EditingRecNo = recno
+        #EditedRec! = new DataRow()
+        
         if #UIList!.size() then
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
                 ui!.setEditing(recno>-1 OR recno = -2)
             next
         fi
-
-        #EditingRecNo = recno
 
     methodend
 
@@ -1381,8 +1409,10 @@ class public BusinessComponent
     rem * @param java.util.HashMap otherEdits: other edits that are currently unsaved
     rem * @return BBjNumber fail: 0=passed, 1=errors were reported
     rem */
-    method public BBjNumber validateField(BBjString fieldName$, BBjString fieldValue$, DataRow origRow!, java.util.HashMap otherEdits!)
+    method public BBjNumber validateField(BBjString fieldName$, Object fieldValue!, DataRow origRow!, DataRow EditedRow!)
 
+
+        #clearValidationError(fieldName$)
         methodret 0
 
     methodend
@@ -1398,24 +1428,12 @@ class public BusinessComponent
     rem * @param DataRow orig_row!: the original row from the resultset; if null() the record is new
     rem * @return BBjNumber passed: 0= no errors, 1=errors were reported
     rem */
-    method protected BBjNumber validateRecord(DataRow row!, DataRow orig_row!)
+    method public BBjNumber validateRecord(DataRow row!, DataRow orig_row!)
 
         methodret 0
 
     methodend
 
-    rem /**
-    rem * Method validateRecord
-    rem * saves a record within the result set
-    rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
-    rem * @param java.util.HashMap fields!: the fields
-    rem * @return BBjNumber passed: 0= no errors, 1=errors were reported
-    rem */
-    method public BBjNumber validateRecord(BBjNumber recno, java.util.HashMap fields!)
-
-        methodret 0
-
-    methodend
 
 
     rem /**
@@ -1554,4 +1572,20 @@ class public BusinessComponent
     methodend
 
 
+    method public DataRow getEditedRecord()
+        if #EditedRec!=null() then
+            #EditedRec!=new DataRow()
+        fi
+        methodret #EditedRec!
+    methodend
+
+    method public DataRow getEditedOriginalRecord()
+        r! = null()
+        if #EditingRecNo>-1 then
+            r! = #getResultSet().getItem(#EditingRecNo)
+        fi
+        methodret r!
+    methodend
+    
+    
 classend

@@ -90,11 +90,26 @@ class public  InputDWidget extends ControlWidget
     rem */
     method public DataRow prepareSave(DataRow r!)
 
+        if #getFocus() then
+            edrow! = #getBC().getEditedRecord()
+            n$=#getName()
+            c! = #getCtrl()
+            d=c!.getValue()
+            if d=-1 then
+                edrow!.setFieldValue(#getName(),cast(java.sql.Date,null()))
+            else
+                d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
+                edrow!.setFieldValue(#getName(),d!)
+            fi
+            validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
+            #markValidationErrors()
+        fi
+
         if #getEdited() then
             c! = #getCtrl()
             d=c!.getValue()
             if d=-1 then
-                r!.setFieldValue(#getName(),"")
+                r!.setFieldValue(#getName(),cast(java.sql.Date,null()))
             else
                 d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
                 r!.setFieldValue(#getName(),d!)
@@ -105,7 +120,23 @@ class public  InputDWidget extends ControlWidget
 
     methodend
 
-    
+    method public void onCtrlLostFocus(BBjLostFocusEvent ev!)
+
+            edrow! = #getBC().getEditedRecord()
+            n$=#getName()
+            c! = #getCtrl()
+            d=c!.getValue()
+            if d=-1 then
+                edrow!.setFieldValue(#getName(),cast(java.sql.Date,null()))
+            else
+                d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
+                edrow!.setFieldValue(#getName(),d!)
+            fi
+            
+            validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
+            #markValidationErrors()
+
+    methodend    
 
 
 classend

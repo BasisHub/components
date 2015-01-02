@@ -1,11 +1,11 @@
 use ::components/ui/unbound/SplitPane.bbj::SplitPane
 
-use ::ui/(DB_NICE)(TBL_NICE)Form.bbj::(DB_NICE)(TBL_NICE)Form
+use ::ui/(DB_NICE)(TBL_NICE)FlexiForm.bbj::(DB_NICE)(TBL_NICE)FlexiForm
 use ::ui/(DB_NICE)(TBL_NICE)Grid.bbj::(DB_NICE)(TBL_NICE)Grid
 use ::bl/(DB_NICE)(TBL_NICE)BusinessComponent.bbj::(DB_NICE)(TBL_NICE)BusinessComponent
 
 
-declare (DB_NICE)(TBL_NICE)Form        EditEditForm!
+declare (DB_NICE)(TBL_NICE)FlexiForm        EditEditForm!
 declare (DB_NICE)(TBL_NICE)Grid        NavGrid!
 declare SplitPane SplitPane!
 
@@ -24,7 +24,7 @@ NavGrid!.setBC(bc!)
 NavGrid!.setShowToolbar(1)
 NavGrid!.setMultipleSelection(0)
 
-EditForm! = new (DB_NICE)(TBL_NICE)Form(SplitPane!.getBottom())
+EditForm! = new (DB_NICE)(TBL_NICE)FlexiForm(SplitPane!.getBottom())
 SplitPane!.setUiwBottom(EditForm!)
 EditForm!.setBC(bc!)
 EditForm!.setShowToolBar(1)

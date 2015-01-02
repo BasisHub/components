@@ -286,17 +286,15 @@ REM                             cwCanvas!.setFont(font!)
                                           fi
                                           Layout!.add( el!, layc$ )
                                           #ElementList!.addItem(el!)
-
-                                                
                                         
-                                        if bindClass$>"" then
-                                            v! = #ControlsByBcClass!.get(bindClass$)
-                                            if v! = null() then
-                                                v!=new BBjVector()
-                                                #ControlsByBcClass!.put(bindClass$,v!)
-                                            fi
-                                            v!.addItem(el!)
-                                        fi
+                                          if bindClass$>"" then
+                                              v! = #ControlsByBcClass!.get(bindClass$)
+                                              if v! = null() then
+                                                  v!=new BBjVector()
+                                                  #ControlsByBcClass!.put(bindClass$,v!)
+                                              fi
+                                              v!.addItem(el!)
+                                          fi
                                         
                                         if fillClass$>"" then
                                             v! = #ControlsByFillBcClass!.get(fillClass$)
@@ -717,6 +715,16 @@ REM TODO: lazy loading!
         #getWnd().focus() 
         
     methodend
+    
+    method private void markValidationErrors()
+        
+        it! = #ElementList!.iterator()
+        while it!.hasNext()
+            e! = it!.next()
+            e!.markValidationErrors()
+        wend
+        
+    methodend
 
     rem /**
     rem * Method saveRecord:
@@ -744,11 +752,69 @@ REM TODO: lazy loading!
                 fi
             wend
             
+            
+
+            bc!.clearValidationErrors()
+            val = bc!.validateRecord(bc!.getEditedRecord(),bc!.getEditedOriginalRecord())
+            val = max(val,bc!.getFieldValidationErrorLevel())
+
+            if val>0 then
+                #markValidationErrors()
+
+                if val=ValidationError.ERROR() then
+                    a=msgbox(bc!.getValidationErrorMessage(),16,"validation failed")
+
+                    methodret 1
+
+                    rem aborting save and going back
+                    rem todo: maybe nicer to collect info for all bc's and show them combined?
+                else
+                    if val=ValidationError.NOTICE() then
+                        icon=64
+                    fi
+
+                    if val=ValidationError.WARN() then
+                        icon=48
+                    fi
+
+                    a=msgbox(bc!.getValidationErrorMessage(),icon+1,"validation failed")
+
+                    if a=2 then
+                        methodret 1
+
+                        rem "cancel - abort saving operation
+                    fi
+                fi
+            fi            
+           
+        wend
+            
+
+        DataRows!     = new java.util.HashMap()
+        ks! = #BCList!.keySet()
+        it! = ks!.iterator()
+        while it!.hasNext()
+            bclass$ = it!.next()
+            bc! = #BCList!.get(bclass$)
+            r! = new DataRow()
+            DataRows!.put(bclass$,r!)
+            
+            widgets! = #ControlsByBcClass!.get(bclass$)
+            it! = widgets!.iterator()
+            while it!.hasNext()
+                widget! = it!.next()
+                if !widget!.willDoOwnSave() then
+                    r! = widget!.prepareSave(r!)
+                fi
+            wend
+            
             bc!.saveRecord(bc!.getEditingRecNo(),r!)
             bc!.clearValidationErrors()
             bc!.clearFieldValidationErrors()
             
         wend
+        
+        #markValidationErrors()
         
         methodret 0
 

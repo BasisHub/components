@@ -46,6 +46,14 @@ class public ValidationError
         #Message! = message!
 
     methodend
+    
+    method public java.lang.Boolean doesConcernField(String fieldname!)
+        if #FieldList!.contains(fieldname!) then
+            methodret java.lang.Boolean.TRUE
+        else
+            methodret java.lang.Boolean.FALSE
+        fi
+    methodend
 
 
     rem /**
