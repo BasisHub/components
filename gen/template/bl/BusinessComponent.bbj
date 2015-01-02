@@ -218,17 +218,13 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
         rem put additional validation here
         rem sample:
 
-        rem if row!.getFieldAsString("TITLE")="" then
-        rem  v_err! = new ValidationError(ValidationError.ERROR(),"TITLE","Title must not be empty!")
-        rem  #addValidationError(v_err!)
-        rem  fail=max(fail,ValidationError.ERROR())
-        rem fi
+REM         t$=row!.getFieldAsString("TITLE",err=*next)
+REM         if (t$="" and orig_row! = null()) or (t$="" and row!.contains("TITLE") and orig_row!<>null()) then
+REM          v_err! = new ValidationError(ValidationError.ERROR(),"TITLE","Title must not be empty!")
+REM          #addValidationError(v_err!)
+REM          fail=max(fail,ValidationError.ERROR())
+REM         fi
 
-        rem if row!.getFieldAsString("ARTIST")="" then
-        rem  v_err! = new ValidationError(ValidationError.NOTICE(),"ARTIST","Artist not set.")
-        rem  #addValidationError(v_err!)
-        rem  fail=max(fail,ValidationError.NOTICE())
-        rem fi
 
         methodret fail
 
@@ -243,15 +239,15 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
     rem * @param java.util.HashMap otherEdits: other edits that are currently unsaved
     rem * @return BBjNumber fail: 0=passed, 1=errors were reported
     rem */
-    method public BBjNumber validateField(BBjString fieldName$, BBjString fieldValue$, DataRow origRow!, java.util.HashMap otherEdits!)
+    method public BBjNumber validateField(BBjString fieldName$, BBjString fieldValue!, DataRow origRow!, DataRow EditedRow!)
 
-        fail=#super!.validateField(fieldName$, fieldValue$, origRow!, otherEdits!)
+        fail=#super!.validateField(fieldName$, fieldValue!, origRow!, EditedRow!)
 
         rem put additional validation here
         rem sample:
 
         rem  if fieldName$ = "RECORDINGTYPE" then
-        rem      if pos(fieldValue$="AAA AAD ADD DDD")=0 then
+        rem      if pos(str(fieldValue!)="AAA AAD ADD DDD")=0 then
         rem            v_err! = new ValidationError(ValidationError.WARN(),"RECORDINGTYPE","Unknown Recording Type!")
         rem            #addValidationError(fieldName$,v_err!)
         rem            fail=ValidationError.NOTICE()
