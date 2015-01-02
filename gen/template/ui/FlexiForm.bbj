@@ -96,6 +96,8 @@ class public (DB_NICE)(TBL_NICE)FlexiForm extends FlexiFormComponent
     
     method protected void initialize()
 
+        #setShowToolBar(1)
+
         #super!.initialize()
         rem do additional initialization here
     
