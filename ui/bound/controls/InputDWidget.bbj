@@ -127,7 +127,7 @@ class public  InputDWidget extends ControlWidget
             c! = #getCtrl()
             d=c!.getValue()
             if d=-1 then
-                edrow!.setFieldValue(#getName(),cast(java.sql.Date,null()))
+                edrow!.setFieldValue(#getName(),"")
             else
                 d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
                 edrow!.setFieldValue(#getName(),d!)
