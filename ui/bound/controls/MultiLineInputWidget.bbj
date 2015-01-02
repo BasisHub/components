@@ -10,6 +10,7 @@ class public  MultiLineInputWidget extends ControlWidget
         ipe!.setLineWrap(1)
         ipe!.setEditable(1)
         ipe!.setOvertypeMode(1)
+        ipe!.setLimitToOneParagraph(1)
         #setCtrl(ipe!)
 
     methodend
