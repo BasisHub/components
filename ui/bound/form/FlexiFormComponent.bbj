@@ -46,9 +46,8 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
     field protected FormEditToolbarComponent FormEditToolbar!
 
     field protected DataRow   Rec!
-
     field protected DataRow   EditedRec!
-    field protected java.util.HashMap EditedFields!
+
     field protected java.util.HashMap ForeignKeyPickerList! = new java.util.HashMap()
 
     field protected BBjVector WarningIcons! = new BBjVector()
@@ -504,7 +503,6 @@ REM                             cwCanvas!.setFont(font!)
         api!.removeTimer("delayedSetSize",err=*next)
         #NewW=w!
         #NewH=h!
-REM         #delayedSetSize(null())
         api!.createTimer("delayedSetSize",0.4,#this!,"delayedSetSize")
     methodend
     
@@ -540,20 +538,6 @@ REM         #delayedSetSize(null())
         #super!.setVisible(v)
 
     methodend
-
-
-    rem /**
-    rem * Method setReadOnly:
-    rem * set the form component as read only
-    rem * @param BBjNumber ro: 1 = read only, 0 = editable
-    rem */
-    method public void setReadOnly(BBjNumber ro)
-
-        #ReadOnly = ro
-        #enableControls(0,0)
-
-    methodend
-
 
     rem /**
     rem * Method setBC:
@@ -663,7 +647,7 @@ REM TODO: lazy loading!
     rem */
     method public BBjNumber canSelectionChange(BBjNumber force)
 
-        if  #EditedRec! = null() or #EditedFields! = null() then
+        if  #EditedRec! = null() then
             methodret 1
         fi
 
@@ -699,151 +683,12 @@ REM TODO: lazy loading!
 
     methodend
 
-
-    rem /**
-    rem * Method displayData:
-    rem * display the data on the user component
-    rem */
-    method public void displayData()
-
-        if #SelectiveEditMode=0 then
-            #enableControls(1) 
-        fi  
-
-
-    methodend
-
-
-    rem /**
-    rem * Method displayField:
-    rem * shows the data of a field on a form control
-    rem * @param BBjString name$: the name of the control
-    rem */
-    method protected void displayField(BBjString ctrl_name$)
-
-        contents$ = #Rec!.getFieldAsString(ctrl_name$)
-
-        ControlMap! = #ControlList!.get(ctrl_name$)
-        ctrl!       = ControlMap!.get("ControlInstance")
-        ctrl_obj!   = ControlMap!.get("ControlObject")
-
-        switch ctrl!.getControlType()
-            case BBjControl.INPUTD_TYPE
-                if #Rec!.getFieldType(ctrl_name$)="D" then
-                    ctrl!.setValue(#Rec!.getFieldAsNumber(ctrl_name$))
-                else
-                    goto default_set
-                fi
-            break
-
-            case BBjControl.CHECKBOX_TYPE
-                ctrl!.setSelected(#Rec!.getFieldAsNumber(ctrl_name$))
-            break
-
-            case BBjControl.LISTBUTTON_TYPE
-            case BBjControl.LISTBOX_TYPE
-                rem TODO optimize - save list serverside and save roundtrips!
-                declare auto BBjVector list!
-                list! = ctrl!.getAllItems()
-
-                if list!.size() then
-                    for i=0 to list!.size()-1
-                        if list!.getItem(i)=contents$ then
-                            ctrl!.selectIndex(i)
-                            break
-                        fi
-                    next i
-                fi
-            break
-
-            case default
-            default_set:
-            ctrl!.setText(cvs(contents$,2))
-            break
-        swend
-
-    methodend
-
-
-    rem /**
-    rem * Method emptyForm:
-    rem * empty all controls in the form
-    rem */
-    method private void emptyForm()
-
-        if #ControlList! = null() or #ControlList!.size() = 0 then
-            methodret
-        fi
-
-        ks! = #ControlList!.keySet()
-        it! = ks!.iterator()
-
-        while it!.hasNext()
-            ctrl_name$=it!.next()
-
-            if #getBC().getForeignKeyBC(ctrl_name$)=null() then
-                ControlMap! = #ControlList!.get(ctrl_name$)
-                ctrl! = ControlMap!.get("ControlInstance")
-
-                switch ctrl!.getControlType()
-                    case BBjControl.LISTBUTTON_TYPE
-                    case BBjControl.LISTBOX_TYPE
-
-                    break
-
-                    case BBjControl.CHECKBOX_TYPE
-                    ctrl!.setSelected(0)
-                    break
-
-                    case default
-                    ctrl!.setText("")
-                    break
-                swend
-            fi
-        wend
-
-    methodend
-
-
     rem /**
     rem * Method setEditing:
     rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
     rem * @param BBjNumber isEditing: -1 = i
     rem */
     method public void setEditing(BBjNumber isEditing)
-
-REM         if isEditing=0 then
-REM             if #EditedRec! <> null() and #getBC().getSelection().size()=1 then
-REM                 recno=#getBC().getSelection().getItem(0)
-REM                 #getBC().getResultSet().setItem(recno,null())
-REM                 #getBC().prepareResultSet(recno,recno)
-REM                 #getBC().refresh(0)
-REM             fi
-REM 
-REM             #this!.displayData()
-REM             #getWnd().focus()
-REM 
-REM             rem workaround for BUI to drag focus away from input field
-REM             rem https://bugzilla.basis.com/show_bug.cgi?id=25084
-REM 
-REM             if info(3,6)="5" then
-REM                 tmp! = #getWnd().addEditBox(#getWnd().getAvailableControlID(),10,10,10,10,"")
-REM                 tmp!.focus()
-REM                 tmp!.destroy()
-REM             fi
-REM 
-REM             #EditedRec! = null()
-REM             #EditedFields! = null()
-REM 
-REM             if #RestoreControllerFilter! <> null() then
-REM                #getBC().setQueryFilter(#RestoreControllerFilter!)
-REM                #RestoreControllerFilter! = null()
-REM             fi
-REM             #emptyForm()
-REM             #newRecord()
-REM         fi
-
-        rem #enableControls(isEditing,0)
 
         if isEditing=0 then
             #getWnd().focus()
@@ -861,18 +706,6 @@ REM         fi
         #getWnd().setEnabled(enable)
     methodend
 
-
-    rem /**
-    rem * Method onBeforeSave:
-    rem * This method is called from the business component before saving the record
-    rem * (needs overriding)
-    rem * @return java.util.HashMap: a java.util.HashMap with the edited fields
-    rem */
-    method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
-
-        methodret editedFields!
-
-    methodend
 
     rem /**
     rem * Method newRecord:
