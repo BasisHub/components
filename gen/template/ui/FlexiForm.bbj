@@ -119,12 +119,6 @@ class public (DB_NICE)(TBL_NICE)FlexiForm extends FlexiFormComponent
     methodend    
     
 
-    method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
-
-        methodret editedFields!
-
-    methodend    
-
 classend
 
 
