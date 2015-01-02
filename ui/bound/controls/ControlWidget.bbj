@@ -246,6 +246,10 @@ REM     methodend
 
         #clearValidationErrors()
         
+        if #getBC()=null() then
+                methodret
+        endif
+        
         v_err!=#getBC().getValidationError(#getName())
 
         if v_err! <>null() then
