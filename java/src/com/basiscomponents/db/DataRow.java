@@ -206,6 +206,11 @@ public class DataRow
 	{
 		return new DataRow();
 	}
+	
+	public Boolean contains(String field)
+	{
+		return this.FieldList.containsKey(field);
+	}
 
 	public void setString (String rec) throws Exception
 	{
