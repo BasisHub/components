@@ -65,10 +65,6 @@ REM         a!.setFocusable(0,err=*next)
         #setSize(30+length*#charw,#getHeight())
     methodend 
     
-    method public void getLength(BBjNumber length)
-        methodret #getLength()
-    methodend 
-    
     method public void setText(BBjString text$)
         x!= #getCtrl()
         x!.setText(text$)
@@ -316,8 +312,12 @@ REM     methodend
         if #Edited then
         
             if #getFkPicker() <> null() then
-                t$=#getFkPicker().getSelectedForeignKeyValue()
-                r!.setFieldValue(#getBindField(),t$)
+                t!=#getFkPicker().getSelectedForeignKeyValue()
+                if t!<>null() then
+                    r!.setFieldValue(#getBindField(),str(t!))
+                else
+                    r!.setFieldValue(#getBindField(),"")
+                fi
             else
                 r!.setFieldValue(#getBindField(),#Ctrl!.getText())
             fi

@@ -34,16 +34,19 @@ public class DataRow
 	public DataRow(java.sql.ResultSet rs) throws Exception 
 	{
 		
+		long t=System.currentTimeMillis();
         int cc=rs.getMetaData().getColumnCount();
-		
-        for (int i=1; i<=cc; i++)
+		int i=0;
+		while (i<cc)
         {
+			i++;
              String ColName = rs.getMetaData().getColumnName(i);
              String ColLabel = rs.getMetaData().getColumnName(i);
              Integer ColType = rs.getMetaData().getColumnType(i);
              
              String s=null;
-
+             
+             
              switch (ColType)
              {
                  case java.sql.Types.VARCHAR:
@@ -107,15 +110,22 @@ public class DataRow
                  break;
 
                  case java.sql.Types.DATE:
-				java.sql.Date dt=null;
-				try {
-					dt = rs.getDate(ColName);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+                	  
+					java.sql.Date dt=null;
+					
+						try {
+							dt = rs.getDate(ColName);
+						} 
+						catch (SQLException e) 
+						{
+//						e.printStackTrace();
+	//						System.out.println("object: "+rs.getObject(ColName)); 
+						}
+	
+					
                 	 setFieldValue(ColName,dt);
                 	 setFieldAttribute(ColName,"LABEL",ColLabel);
+
                  break;
 
                  case java.sql.Types.TIMESTAMP:
@@ -125,6 +135,7 @@ public class DataRow
 				} catch (SQLException e3) {
 					// TODO Auto-generated catch block
 					e3.printStackTrace();
+					System.out.println("object: "+rs.getObject(ColName)); 
 				}
                      setFieldValue(ColName,ts);
                      setFieldAttribute(ColName,"LABEL",ColLabel);
@@ -137,6 +148,7 @@ public class DataRow
 				} catch (SQLException e2) {
 					// TODO Auto-generated catch block
 					e2.printStackTrace();
+					System.out.println("object: "+rs.getObject(ColName)); 
 				}
                      setFieldValue(ColName,tm);
                      setFieldAttribute(ColName,"LABEL",ColLabel);
@@ -148,7 +160,7 @@ public class DataRow
 				try {
 					bl = rs.getBoolean(ColName);
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
+					System.out.println("object: "+rs.getObject(ColName)); 
 					e1.printStackTrace();
 				}
                      setFieldValue(ColName,bl);
@@ -183,7 +195,11 @@ public class DataRow
 
              setSQLType(ColName,ColType);                 
              
+
+             
         }	
+        t=System.currentTimeMillis()-t;
+//        System.out.println("finished new for "+cc+" columns: "+t+" ms ");
 	}
 
 	public static DataRow newInstance()

@@ -272,9 +272,9 @@ REM                             cwCanvas!.setFont(font!)
                                           el!.setName(name$,err=*next)
                                           el!.setUserData(new HashMap())
   REM                                         el!.setFont(font!,err=*next)
-REM                                           if length>0 then
-REM                                                 el!.setLength(length,err=*next) 
-REM                                           fi
+                                          if length>0 then
+                                                el!.setLength(length) 
+                                          fi
                                           
                                           el!.setBindField(bindField$)
                                           el!.setBindClass(bindClass$)

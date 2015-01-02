@@ -6,9 +6,17 @@ class public  InputEWidget extends ControlWidget
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         #setWnd(cwWidget!)
+        
         ipe! = cwWidget!.addInputE(100,0,0,10,10,"...")
         ipe!.setEditable(1) 
         #setCtrl(ipe!)
     methodend
+    
+    method public void setLength(BBjNumber length)
+        #super!.setLength(length)
+        ipe! = #getCtrl()
+        ipe!.setLength(length) 
+    methodend 
+    
 
 classend

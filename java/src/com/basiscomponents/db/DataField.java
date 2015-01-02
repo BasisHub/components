@@ -195,9 +195,11 @@ public class DataField
         			try{
 	        		i=Integer.valueOf(value);
         			}
-        			finally
-        			{
-        			}
+	    			catch (Exception e)
+		    		{
+	    				System.err.println(e.toString());
+		    		}
+
 	        		if (i>-1) 
 	        			this.DateValue = new java.sql.Date( com.basis.util.BasisDate.date(i).getTime() );
 	        		else
@@ -215,7 +217,7 @@ public class DataField
     			this.IntegerValue = null; 
     		else
     		{
-        		int i=Integer.valueOf(value);
+    			this.IntegerValue=Integer.valueOf(value);
     		}
     	
 		}
@@ -247,7 +249,12 @@ public class DataField
 	    			{
 	    				this.BigDecimalValue = new java.math.BigDecimal(value);
 	    			}
-	    			finally {}
+	    			catch (Exception e)
+		    		{
+	    				System.err.println(e.toString());
+		    		}
+	    		
+
 	    				
 	    		}
 	//          rem TODO DTB
