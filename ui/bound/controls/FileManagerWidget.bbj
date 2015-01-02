@@ -27,7 +27,7 @@ class public  FileManagerWidget extends ControlWidget
                         r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                         text$="attachments"
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
-                        a=msgbox(text$)
+                       rem  a=msgbox(text$)
                         #Fm!.setPathToFiles(text$)
                         #Fm!.setEnabled(1)
                     else
