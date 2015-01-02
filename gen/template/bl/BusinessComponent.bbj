@@ -211,7 +211,7 @@ class public (DB_NICE)(TBL_NICE)BusinessComponent extends (DB_NICE)(TBL_NICE)Bus
     rem * @param DataRow orig_row!: the original row from the resultset; if null() the record is new
     rem * @return BBjNumber fail: 0=passed, 1=errors were reported
     rem */
-    method protected BBjNumber validateRecord(DataRow row!, DataRow orig_row!)
+    method public BBjNumber validateRecord(DataRow row!, DataRow orig_row!)
 
         fail=#super!.validateRecord(row!, orig_row!)
 
@@ -239,7 +239,7 @@ REM         fi
     rem * @param java.util.HashMap otherEdits: other edits that are currently unsaved
     rem * @return BBjNumber fail: 0=passed, 1=errors were reported
     rem */
-    method public BBjNumber validateField(BBjString fieldName$, BBjString fieldValue!, DataRow origRow!, DataRow EditedRow!)
+    method public BBjNumber validateField(BBjString fieldName$, Object fieldValue!, DataRow origRow!, DataRow EditedRow!)
 
         fail=#super!.validateField(fieldName$, fieldValue!, origRow!, EditedRow!)
 
