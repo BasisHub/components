@@ -91,17 +91,17 @@ class public WindowStack
         yoffs=0
 
 REM         if INFO(3,6)="5"  or #ContainerWnd!<>null() then
-            yoffs=40
+            yoffs=60
 REM         fi
         
         w=wnd!.getWidth()
-        tb!     = wnd!.addChildWindow(101,0,0,w,yoffs,"",$00000800$,sg!.getAvailableContext())
+        tb!     = wnd!.addChildWindow(101,0,0,w,yoffs-4,"",$00000800$,sg!.getAvailableContext())
         tb!.addStyle("ToolBar")
         cw!     = wnd!.addChildWindow(100,0,yoffs,w,wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
 
         if yoffs or #ContainerWnd!<>null() then
 
-            backButton!=tb!.addButton(101,5,0,45,45,"Back")
+            backButton!=tb!.addButton(101,5,5,45,45,"Back")
             backButton!.setVisible(0) 
             backButton!.setName("backButton")
             backButton!.addStyle("BackButton")
@@ -117,7 +117,7 @@ REM         fi
 
         fi
 
-        exitButton!=tb!.addButton(103,w-50,0,45,45,"Exit")
+        exitButton!=tb!.addButton(103,w-50,5,45,45,"Exit")
         exitButton!.setVisible(1) 
         exitButton!.setOpaque(0)
         exitButton!.setClientEdge(0)
@@ -244,7 +244,7 @@ REM         fi
 
             yoffs=0
             if ( INFO(3,6)="5" and #WindowList!.size()>1 ) or #ContainerWnd! <> null() then
-                yoffs=40
+                yoffs=60
             fi
             wnd! = #WindowList!.getItem(#WindowList!.size()-1)
             wnd!.setSize(w,h)
@@ -254,8 +254,8 @@ REM         fi
             fi
             
             tb! = wnd!.getControl(101)
-            tb!.setSize(w,yoffs)
-            tb!.getControl(103).setLocation(w-50,0)
+            tb!.setSize(w,yoffs-4)
+            tb!.getControl(103).setLocation(w-50,5)
             
         fi
     methodend
@@ -284,7 +284,7 @@ REM         fi
             id=id+1
         wend
         declare auto BBjButton button!
-        Button!=tb!.addButton(id,50*(id-2000+1),0,45,45,caption$)
+        Button!=tb!.addButton(id,50*(id-2000+1),5,45,45,caption$)
         Button!.setOpaque(0)
         Button!.setClientEdge(0)
         if cvs(name$,3)>"" then
