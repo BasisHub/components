@@ -169,6 +169,12 @@ class public  InputDWidget extends ControlWidget
     method public void setCssClass(BBjString class$)
         #super!.setCssClass(class$)
         #Static!.addStyle(class$) 
+    methodend
+    
+    method public void setMask(BBjString m$) 
+        
+        #Ipd!.setMask(m$) 
+    
     methodend    
 
 classend
