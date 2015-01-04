@@ -78,7 +78,7 @@ class public GoogleMapsComponent extends UIComponent implements BBjControl
 
         #BrowserWidget!.navigate(#Url$)
 
-        #ProgressBar! = #getWnd().addProgressBar(#getWnd().getAvailableControlID(),int(#getW()/4*3),10,int(#getW()/4),20)
+        #ProgressBar! = #getWnd().addProgressBar(#getWnd().getAvailableControlID(),10,10,max(100,int(#getW()/4)),20)
         #ProgressBar!.setVisible(0)
 
     methodend
