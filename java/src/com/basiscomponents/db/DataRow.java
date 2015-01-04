@@ -622,10 +622,20 @@ public class DataRow
 
 	public void addDataField(String name, DataField field)
 	{
+	  if (FieldList.containsKey(name))
+	  {
+		  FieldList.remove(name);
+		  FieldNames.remove(name);
+	  }
 	  this.FieldList.put(name,field);
 	  this.FieldNames.add(name);
 	}
 
+	public DataField getDataField(String name)
+	{
+	  return this.FieldList.get(name);
+	}	
+	
 	public DataRow clone()
 	{
 			
@@ -725,5 +735,20 @@ public class DataRow
 		field.setSQLType(SQLType);		
 		
 	}	
+	
+	public void mergeRecord(DataRow r) throws Exception
+	{
+		BBjVector v = r.getFieldNames();
+		Iterator it = v.iterator();
+		while (it.hasNext())
+		{
+			
+			String f=(String)it.next();
+			this.addDataField(f, r.getDataField(f));
+			
+		}
+		
+	}
+	
 	
 }

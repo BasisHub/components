@@ -1631,15 +1631,10 @@ REM         fi
 
     method public DataRow getResultingEditedRecord()
         r! = #getEditedOriginalRecord()
+        
         if r!<>null() then
             r1! = #getEditedRecord()
-            f! = r1!.getFieldNames()
-            it! = f!.iterator()
-            while it!.hasNext()
-                f$=it!.next()
-                o!=r1!.getField(f$)
-                r!.setFieldValue(f$,o!)
-            wend
+            r!.mergeRecord(r1!)
         fi
         methodret r!
     methodend

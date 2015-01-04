@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.basis.util.common.BBjNumber;
+import com.basis.util.common.BasisNumber;
  
 
 public class DataField 
@@ -283,13 +284,14 @@ public class DataField
 
         if (this.Type =='D' )
         {
-            if (value.compareTo(0) == 0  )
+        	int f=value.compareTo(BasisNumber.createBasisNumber(0));
+            if (f ==0   )
                 this.DateValue = new java.sql.Date(new java.util.Date().getTime());
 
-            if ( value.compareTo(0) < 0 )
+            if ( f < 0 )
                 this.DateValue = null;
 
-            if ( value.compareTo(0) > 0 )
+            if ( f > 0 )
                 this.DateValue = java.sql.Date.valueOf(com.basis.util.BasisDate.date(value.intValue(),0.0,"%Yl-%Mz-%Dz")); 
         }
 

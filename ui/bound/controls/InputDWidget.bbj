@@ -105,7 +105,8 @@ class public  InputDWidget extends ControlWidget
             c! = #getCtrl()
             d=c!.getValue()
             if d=-1 then
-                edrow!.setFieldValue(#getName(),new java.sql.Date(d))
+                edrow!.setFieldValue(n$,new java.sql.Date(0))
+                edrow!.setFieldValue(n$,-1)
             else
                 d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
                 edrow!.setFieldValue(n$,d!)
@@ -118,7 +119,8 @@ class public  InputDWidget extends ControlWidget
             c! = #getCtrl()
             d=c!.getValue()
             if d=-1 then
-                r!.setFieldValue(n$,new java.sql.Date(d))
+                r!.setFieldValue(n$,new java.sql.Date(0))
+                r!.setFieldValue(n$,-1)
             else
                 d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
                 r!.setFieldValue(n$,d!)
@@ -135,11 +137,13 @@ class public  InputDWidget extends ControlWidget
             n$=#getName()
             c! = #getCtrl()
             d=c!.getValue()
+            
             if d=-1 then
-                edrow!.setFieldValue(#getName(),new java.sql.Date(d))
+                edrow!.setFieldValue(n$,new java.sql.Date(0))
+                edrow!.setFieldValue(n$,-1)
             else
                 d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
-                edrow!.setFieldValue(#getName(),d!)
+                edrow!.setFieldValue(n$,d!)
             fi
             
             validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
