@@ -130,8 +130,9 @@ class public FileManager implements BBjControl
     rem  */
     method public void filesListClick(BBjListClickEvent e!)
         selectedIndex=e!.getSelectedIndex()
+        lb! = e!.getControl()
         if selectedIndex>-1 then 
-            #currentFile$ = e!.getListBox().getItemAt()
+            #currentFile$ = str(lb!.getItemAt(selectedIndex))
         endif 
     methodend
 
@@ -229,7 +230,8 @@ class public FileManager implements BBjControl
 
     
     method public void setEnabled(BBjNumber x!)
-        #CwCanvas!.setEnabled(x!)
+        #Refresh!.setVisible(x!)
+        #Upload!.setVisible(x!)
     methodend 
 
     rem /**

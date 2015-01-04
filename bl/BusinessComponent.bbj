@@ -573,7 +573,7 @@ class public BusinessComponent
         wend
         
         #setEditedRecord(-1)
-        
+        #broadcastEnableControls()
 
     methodend
 
@@ -1096,16 +1096,17 @@ class public BusinessComponent
     method public void broadcastNewRecord()
 
         #this!.deselectAll()
-
-        if #UIList!.size() then
-            for i=0 to #UIList!.size()-1
-                ui! = CAST(UIComponent,#UIList!.getItem(i))
-                ui!.newRecord()
-            next
-        fi
-
         #setEditedRecord(-2)
+        #broadcastEnableControls()
+        
+REM         if #UIList!.size() then
+REM             for i=0 to #UIList!.size()-1
+REM                 ui! = CAST(UIComponent,#UIList!.getItem(i))
+REM                 ui!.newRecord()
+REM             next
+REM         fi
 
+        
     methodend
 
 
@@ -1185,6 +1186,7 @@ class public BusinessComponent
     rem * Method getEditingRecNo
     rem * retrieve the record number within the result set currently being edited
     rem * @return BBjNumber recno: -2 = new record, -1 = no editing operation pending, >=0: the record number in the resultset
+    rem */
     method public BBjNumber getEditingRecNo()
 
         methodret #EditingRecNo
@@ -1237,7 +1239,33 @@ class public BusinessComponent
 
     methodend
 
+    rem /**
+    rem * Method broadcastEnableControls:
+    rem * notify UIs about an ongoing edit so they can update all control enablements 
+    rem */
+    method private void broadcastEnableControls()
+        
+        
+        r! = #getResultingEditedRecord()
+        if r!<>null() then
+            
+            if #UIList!.size()  then
+                for i=0 to #UIList!.size()-1
+                    ui! = CAST(UIComponent,#UIList!.getItem(i))
+                    ui!.enableControls(r!)
+                next
+            fi
+    
+            if #UIList!.size() then
+                for i=0 to #UIList!.size()-1
+                    ui! = CAST(UIComponent,#UIList!.getItem(i))
+                    ui!.performEnablements(r!)
+                next
+            fi
+        fi
 
+    methodend
+    
     rem /**
     rem * Method beforeUpdateRecord:
     rem * override this method before updating a record
@@ -1411,8 +1439,9 @@ class public BusinessComponent
     rem */
     method public BBjNumber validateField(BBjString fieldName$, Object fieldValue!, DataRow origRow!, DataRow EditedRow!)
 
-
         #clearValidationError(fieldName$)
+        
+        #broadcastEnableControls()
         methodret 0
 
     methodend
@@ -1580,9 +1609,37 @@ class public BusinessComponent
     methodend
 
     method public DataRow getEditedOriginalRecord()
-        r! = null()
-        if #EditingRecNo>-1 then
-            r! = #getResultSet().getItem(#EditingRecNo)
+        if #EditingRecNo = -2 then
+            r! = #getNewEntity()
+        else
+            if #EditingRecNo>-1 then
+                r! = #getResultSet().getItem(#EditingRecNo)
+            else
+                if #Selection!.size()=1 then
+                    sel=#Selection!.get(0)
+                    r! = #getResultSet().getItem(sel)
+                fi
+            fi
+        fi
+        methodret r!
+    methodend
+
+    rem needs override
+    method public DataRow getNewEntity()
+        methodret new DataRow()
+    methodend
+
+    method public DataRow getResultingEditedRecord()
+        r! = #getEditedOriginalRecord()
+        if r!<>null() then
+            r1! = #getEditedRecord()
+            f! = r1!.getFieldNames()
+            it! = f!.iterator()
+            while it!.hasNext()
+                f$=it!.next()
+                o!=r1!.getField(f$)
+                r!.setFieldValue(f$,o!)
+            wend
         fi
         methodret r!
     methodend

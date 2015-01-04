@@ -128,7 +128,7 @@ class public DataProvider
     rem */
     method public DataRow getNewEntity()
 
-        methodret new DataRow()
+        methodret #getAttributesRecord().clone()
 
     methodend
 

@@ -6,7 +6,8 @@ class public  InputDWidget extends ControlWidget
  
     field private BBjToolButton TbPick!
     field private BBjInputD Ipd!
- 
+    field private BBjStaticText Static!
+    
     method public InputDWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
@@ -24,8 +25,12 @@ class public  InputDWidget extends ControlWidget
         #TbPick!.setImage(img!)
         #TbPick!.setOpaque(0)
         #TbPick!.addStyle("DatePickerButton")
-        
         #TbPick!.setVisible(0) 
+        
+        
+        #Static! = cast(BBjStaticText,cwWidget!.addStaticText(102,0,0,10,10,""))
+        #Static!.setVisible(1)
+        #Static!.addStyle("StaticRepresentation")        
 
     methodend
 
@@ -39,7 +44,7 @@ class public  InputDWidget extends ControlWidget
                   r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                   d     = r!.getFieldAsNumber(#getBindField(),err=*next)
                   #Ipd!.setValue(d)
-                  
+                  #Static!.setText(#Ipd!.getText())
               fi
           fi
           #setEdited(0)
@@ -59,6 +64,10 @@ class public  InputDWidget extends ControlWidget
         #getCtrl().setSize(w!-50,h!) 
         #TbPick!.setLocation(w!-50,0)
         #TbPick!.setSize(#Ipd!.getHeight(),#Ipd!.getHeight())
+        
+        x!= #getWnd().getControl(102)
+        x!.setSize(w!,h!)
+                
     methodend
 
     rem /**
@@ -89,17 +98,17 @@ class public  InputDWidget extends ControlWidget
     rem * @return DataRow: the row with the changes being added
     rem */
     method public DataRow prepareSave(DataRow r!)
-
+        n$=#getName()
         if #getFocus() then
             edrow! = #getBC().getEditedRecord()
-            n$=#getName()
+            
             c! = #getCtrl()
             d=c!.getValue()
             if d=-1 then
                 edrow!.setFieldValue(#getName(),cast(java.sql.Date,null()))
             else
                 d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
-                edrow!.setFieldValue(#getName(),d!)
+                edrow!.setFieldValue(n$,d!)
             fi
             validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
             #markValidationErrors()
@@ -109,10 +118,10 @@ class public  InputDWidget extends ControlWidget
             c! = #getCtrl()
             d=c!.getValue()
             if d=-1 then
-                r!.setFieldValue(#getName(),cast(java.sql.Date,null()))
+                r!.setFieldValue(n$,cast(java.sql.Date,null()))
             else
                 d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
-                r!.setFieldValue(#getName(),d!)
+                r!.setFieldValue(n$,d!)
             fi
         fi
 
@@ -137,6 +146,25 @@ class public  InputDWidget extends ControlWidget
             #markValidationErrors()
 
     methodend    
-
+    
+    method public void setEnabled(BBjNumber fEnabled!)
+    
+        if fEnabled! <> #getEnabled() then
+            #super!.setEnabled(fEnabled!)
+            
+            x!= #getWnd().getControl(100)
+            x!.setVisible(fEnabled!)
+            
+            x!= #getWnd().getControl(102)
+            x!.setVisible(!fEnabled!)
+                    
+            #TbPick!.setVisible(fEnabled!)
+        fi
+        
+    methodend    
+    method public void setCssClass(BBjString class$)
+        #super!.setCssClass(class$)
+        #Static!.addStyle(class$) 
+    methodend    
 
 classend

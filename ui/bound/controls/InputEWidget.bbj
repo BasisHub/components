@@ -2,6 +2,8 @@ use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
 
 class public  InputEWidget extends ControlWidget
  
+    field private BBjStaticText Static!
+ 
     method public InputEWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
@@ -10,6 +12,12 @@ class public  InputEWidget extends ControlWidget
         ipe! = cwWidget!.addInputE(100,0,0,10,10,"...")
         ipe!.setEditable(1) 
         #setCtrl(ipe!)
+        
+        
+        #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
+        #Static!.setVisible(1)
+        #Static!.addStyle("StaticRepresentation")
+        
     methodend
     
     method public void setLength(BBjNumber length)
@@ -18,5 +26,43 @@ class public  InputEWidget extends ControlWidget
         ipe!.setLength(length) 
     methodend 
     
+    method public void setText(BBjString text!)
 
+        x!= #getWnd().getControl(100)
+        x!.setText(text!)
+        
+        x!= #getWnd().getControl(101)
+        x!.setText(text!)        
+    methodend
+    
+    method public void setEnabled(BBjNumber fEnabled!)
+    
+        if fEnabled! <> #getEnabled() then
+            #super!.setEnabled(fEnabled!)
+            
+            x!= #getWnd().getControl(100)
+            x!.setVisible(fEnabled!)
+            
+            x!= #getWnd().getControl(101)
+            x!.setVisible(!fEnabled!)
+                    
+        fi
+        
+    methodend    
+
+    method public void setSize(BBjNumber w!, BBjNumber h!)
+        #super!.setSize(w!,h!)
+        x!= #getWnd().getControl(101)
+        x!.setSize(w!,h!)
+    methodend
+    
+    method public void setCssClass(BBjString class$)
+        #super!.setCssClass(class$)
+        #getWnd().getControl(101).addStyle(class$)
+    methodend
+    
+    method public BBjNumber getControlType()
+        methodret -1
+    methodend
+        
 classend

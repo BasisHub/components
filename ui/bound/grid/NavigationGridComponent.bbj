@@ -688,6 +688,7 @@ REM         #getLaf().prepareWindow(panel!)
         fi
 
         p=ev!.getPosition()
+        a=msgbox(str(p),0,"Scroll Event")  
         #getBC().prepareResultSet(max(0,p-2), p+#Grid!.getVisibleRowCount()+2)
         #pullRowsToGrid(p)
 

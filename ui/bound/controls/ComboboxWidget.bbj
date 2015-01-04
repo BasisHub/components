@@ -8,6 +8,7 @@ use com.basiscomponents.db.DataField
 class public  ComboboxWidget extends ControlWidget
  
     field private BBjComboBox Cb!
+    field private BBjStaticText Static!
  
     method public ComboboxWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
@@ -16,15 +17,34 @@ class public  ComboboxWidget extends ControlWidget
         #Cb! = cast(BBjListButton,cwWidget!.addListButton(100,0,0,10,10,"..."))
         #Cb!.setEditable(1) 
         #setCtrl(#Cb!)
+        
+        #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
+        #Static!.setVisible(1)
+        #Static!.addStyle("StaticRepresentation")   
+       
+    methodend
+    
+    method public void OnListChange(BBjListChangeEvent ev!)
+        #Static!.setText(ev!.getSelectedItem())
     methodend
     
     method public void displayData()
           #setEdited(0)
+          if !#getEnabled() then
+              id=#Cb!.getSelectedIndex()
+              if id>-1 then
+                  #Static!.setText(#Cb!.getItemAt(id))
+              else
+                    #Static!.setText("-")
+              fi
+          fi          
+          
     methodend
     
     method public void setSize(BBjNumber w!, BBjNumber h!)
         #super!.setSize(w!,h!)
         #Cb!.setSize(w!,200)
+        #Static!.setSize(w!,h!)
     methodend    
 
     rem /**
@@ -40,5 +60,51 @@ class public  ComboboxWidget extends ControlWidget
         fi
         
     methodend
+    
+    method public void setEnabled(BBjNumber fEnabled!)
+    
+        if fEnabled! <> #getEnabled() then
+            #super!.setEnabled(fEnabled!)
+            #Cb!.setVisible(fEnabled!)
+            #Static!.setVisible(!fEnabled!)
+            if !fEnabled! then
+                id=#Cb!.getSelectedIndex()
+                if id>-1 then
+                    #Static!.setText(#Cb!.getItemAt(id))
+                fi
+            fi
+        fi
+        
+    methodend        
 
+    method public BBjNumber getControlType()
+        methodret -2
+    methodend
+    
+    method public void removeAllItems()
+        #Static!.setText( "")
+        #Cb!.removeAllItems()
+    methodend
+
+    method public void addItem(BBjString x!)
+        #Cb!.addItem(x!)
+    methodend
+    
+    method public void insertItems(BBjNumber id!, BBjVector v!)
+        #Cb!.insertItems(id!, v!)
+    methodend
+    
+    method public void selectIndex(BBjNumber x!)
+        #Cb!.selectIndex(x!)
+        t$=""
+        if x!>-1 then
+            t$=#Cb!.getItemAt(x!)
+        fi
+        #Static!.setText(t$)
+   methodend
+   
+   method public BBjNumber getSelectedIndex()
+        methodret #Cb!.getSelectedIndex()
+   methodend
+   
 classend

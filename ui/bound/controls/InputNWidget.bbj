@@ -1,6 +1,10 @@
 use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.DataField
 
 class public  InputNWidget extends ControlWidget
+ 
+    field private BBjStaticText Static!
  
     method public InputNWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
@@ -12,6 +16,87 @@ class public  InputNWidget extends ControlWidget
         
         ipe!.setDotCharacter(",")
         ipe!.setCommaCharacter(".")
+        
+        #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
+        #Static!.setVisible(1)
+        #Static!.addStyle("StaticRepresentation")
+                
+    methodend
+    
+    
+    
+    method public void setText(BBjString text!)
+
+        x!= #getWnd().getControl(100)
+        x!.setText(text!)
+        
+        x!= #getWnd().getControl(101)
+        x!.setText(text!)        
+    methodend
+    
+    method public void setValue(BBjNumber val)
+        #getCtrl!.setValue(val)
+        x!= #getWnd().getControl(101)
+        m$=#getMask()
+        m1$=str(val)
+        if m$>"" then
+            m1$=str(val:m$,err=*next)
+        fi
+        c!.setText(m1$)
     methodend
 
+    method public void getValue()
+        c! = #getCtrl()
+        methodret c!.getValue()
+    methodend
+    
+    method public void setEnabled(BBjNumber fEnabled!)
+    
+        if fEnabled! <> #getEnabled() then
+            #super!.setEnabled(fEnabled!)
+            
+            x!= #getWnd().getControl(100)
+            x!.setVisible(fEnabled!)
+            
+            x!= #getWnd().getControl(101)
+            x!.setVisible(!fEnabled!)
+            
+            
+        fi
+        
+    methodend    
+
+    method public void setSize(BBjNumber w!, BBjNumber h!)
+        #super!.setSize(w!,h!)
+        x!= #getWnd().getControl(101)
+        x!.setSize(w!,h!)
+    methodend
+    
+    method public DataRow prepareSave(DataRow r!)
+        n$=#getName()
+        if #getFocus() then
+            edrow! = #getBC().getEditedRecord()
+           
+            c! = #getCtrl()
+            d=c!.getValue()
+            edrow!.setFieldValue(n$,d)
+            validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
+            #markValidationErrors()
+        fi
+
+        if #getEdited() then
+            c! = #getCtrl()
+            d=c!.getValue()
+            r!.setFieldValue(n$,d)
+        fi
+
+        methodret r!
+
+    methodend    
+    
+    method public void setCssClass(BBjString class$)
+        #super!.setCssClass(class$)
+        #getWnd().getControl(101).addStyle(class$)
+    methodend    
+    
 classend

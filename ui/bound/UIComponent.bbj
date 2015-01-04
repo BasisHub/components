@@ -27,7 +27,8 @@ class public UIComponent implements BBjControl
     field protected BusinessComponent   BC!
     field protected BBjString     BindField$
     field protected BBjString     BindClass$
-    
+    field protected BBjNumber     IsPrimaryKeyField
+     
     field private BBjString         CssClass$
 
     field protected BBjWindow           ParentWnd!
@@ -201,6 +202,10 @@ class public UIComponent implements BBjControl
             #ParentWnd!.setText(#getBC().getTitle())
         fi
 
+        if #getBindField()<>"" and #getBC().getPrimaryKeySegments().indexOf(#getBindField())>-1 then
+            #IsPrimaryKeyField=1
+        fi
+
     methodend
 
 
@@ -335,9 +340,9 @@ class public UIComponent implements BBjControl
     rem * make component visible or invisible
     rem * @parem BBjNumber visible: 0=invisible, 1=visible
     rem */
-    method public void setVisible(BBjNumber visible)
+    method public void setVisible(BBjNumber visible!)
 
-        #Wnd!.setVisible(visible)
+        #Wnd!.setVisible(visible!)
 
     methodend
 
@@ -646,7 +651,25 @@ class public UIComponent implements BBjControl
     method public void onPartialUpdate(BBjNumber recno)
 
     methodend
+    
+    rem /**
+    rem * Method enableControls:
+    rem * override in UI component to set enablement attributes in the DataRow record
+    rem * @param DataRow resultingEditedRec!: the currently edited record
+    rem */    
+    method public void enableControls(DataRow resultingEditedRecord!) 
+    
+    methodend    
 
+    rem /**
+    rem * Method performEnablements:
+    rem * override in rendering UI (mostly widget) components to do the actual enablements 
+    rem * @param DataRow resultingEditedRec!: the currently edited record
+    rem */    
+    method public void performEnablements(DataRow row!)
+    
+    
+    methodend
 
     rem /**
     rem * Method onPartialUpdate
@@ -811,6 +834,9 @@ class public UIComponent implements BBjControl
 
     method public void setBindField(BBjString field$)
         #BindField$=field$
+        if #getBC()<>null() and #getBC().getPrimaryKeySegments().indexOf(#getBindField())>-1 then
+            #IsPrimaryKeyField=1
+        fi
     methodend
 
     method public void setBindClass(BBjString class$)
@@ -843,4 +869,22 @@ class public UIComponent implements BBjControl
         methodret #CssClass$ 
     methodend
     
+    method public BBjNumber getX()
+        methodret #Wnd!.getX()
+    methodend
+
+    method public BBjNumber getY()
+        methodret #Wnd!.getY()
+    methodend
+    
+    method public BBjNumber getContextID()
+        methodret #Wnd!.getContextID()
+    methodend
+    
+    method public void setVisible (BBjNumber v!)
+        #getWnd().setVisible(v!)
+    methodend    
+
+
+        
 classend

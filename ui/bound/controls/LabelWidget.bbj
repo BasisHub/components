@@ -10,5 +10,11 @@ class public  LabelWidget extends ControlWidget
         #setCtrl(#getWnd().addStaticText(100,0,0,1,1,""))
     
     methodend
+    
+    method public void setEnabled(BBjNumber fEnabled!)
+        
+            #super!.setEnabled(1)
+        
+    methodend     
 
 classend

@@ -39,8 +39,8 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
     field protected ResponsiveFormFrame FormFrame!
     field protected BBjChildWindow ToolbarWnd!
 
-    field protected java.util.HashMap ControlsByBcClass! = new java.util.HashMap()
-    field protected java.util.HashMap ControlsByFillBcClass! = new java.util.HashMap()
+    field protected HashMap ControlsByBcClass! = new HashMap()
+    field protected HashMap ControlsByFillBcClass! = new HashMap()
 
     field protected NavigationToolbarComponent NavigationToolbar!
     field protected FormEditToolbarComponent FormEditToolbar!
@@ -48,20 +48,21 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
     field protected DataRow   Rec!
     field protected DataRow   EditedRec!
 
-    field protected java.util.HashMap ForeignKeyPickerList! = new java.util.HashMap()
+    field protected HashMap ForeignKeyPickerList! = new HashMap()
 
     field protected BBjVector WarningIcons! = new BBjVector()
 
-    field private java.util.HashMap RestoreControllerFilter!
+    field private HashMap RestoreControllerFilter!
 
-    field private BBjNumber ReadOnly
+    field private BBjNumber Enabled=1
+    field private BBjNumber Editable=1
     
     field protected BBjNumber SelectiveEditMode =0
     
     rem new flexiform variables
     
-    field private BBjVector ElementList!        = new BBjVector()
-    field private java.util.HashMap BCList!     = new java.util.HashMap()
+    field private HashMap ElementList!= new HashMap()
+    field private HashMap BCList!     = new HashMap()
     field private BBjNumber NewW
     field private BBjNumber NewH
 
@@ -122,7 +123,7 @@ REM         read record (ch,siz=1000000)xml$
 REM         close (ch)
 REM         is! = new InputSource(new String(xml$))
 
-        #ControlsByBcClass! = new java.util.HashMap()
+        #ControlsByBcClass! = new HashMap()
     
         dbf! = DocumentBuilderFactory.newInstance()
         db! = dbf!.newDocumentBuilder()
@@ -221,8 +222,23 @@ REM                             cwCanvas!.setFont(font!)
                                 
                                     if elNode!.getNodeType() = Node.ELEMENT_NODE then
                                         
-                                    
+                                        name$=""
                                         name$= #getNodeValue(elNode!,"name")
+                                        if name$="" then
+                                            name$=java.util.UUID.randomUUID()
+                                        fi
+                                        
+                                        
+                                        if #ElementList!.containsKey(name$)
+                                            name1$=name$
+                                            namei=0
+                                            while #ElementList!.containsKey(name$)
+                                                namei=namei+1
+                                                name$=name1$+str(namei)
+                                            wend
+                                        fi
+
+                                        
                                         type$= #getNodeValue(elNode!,"type")
                                         text$= #getNodeValue(elNode!,"text")
                                         textkey$= #getNodeValue(elNode!,"textkey")
@@ -285,7 +301,8 @@ REM                             cwCanvas!.setFont(font!)
                                               cast(HashMap, el!.getUserData()).put("prefFontSize",font!.getSize())
                                           fi
                                           Layout!.add( el!, layc$ )
-                                          #ElementList!.addItem(el!)
+                                          
+                                          #ElementList!.put(name$,el!)
                                         
                                           if bindClass$>"" then
                                               v! = #ControlsByBcClass!.get(bindClass$)
@@ -360,6 +377,7 @@ REM                             cwCanvas!.setFont(font!)
             #setSize(#getW(), #getH()) 
         fi
 
+        #enableControls()
         #FormWnd!.setVisible(1)
 
     methodend
@@ -374,13 +392,10 @@ REM                             cwCanvas!.setFont(font!)
         methodret #NavigationToolbar!
     methodend    
 
-    rem /**
-    rem * Method getAllControlsRecursive:
-    rem * Get all controls recursively
-    rem * @param BBjWindow pWindow!: the window with the controls
-    rem * @return BBjVector: vector of all control information
-    rem */
-
+    method protected BBjControl getWidget(BBjString name$)
+        c! = #ElementList!.get(name$,err=*next)
+        methodret c!
+    methodend
 
     rem /**
     rem * Method initialize:
@@ -416,9 +431,8 @@ REM                             cwCanvas!.setFont(font!)
 
     method protected void setSelectiveEditMode(BBjNumber selective)
         #SelectiveEditMode= selective
-        if selective then
-            #enableControls(0) 
-        fi
+        
+        #enableControls()
     methodend
 
     rem /**
@@ -691,36 +705,73 @@ REM TODO: lazy loading!
         if isEditing=0 then
             #getWnd().focus()
             if #SelectiveEditMode then
-                #enableControls(0) 
+                #setEnabled(0) 
             fi  
         else
-            #enableControls(1)
+            #setEnabled(1)
         fi
         
 
     methodend
 
-    method protected void enableControls(BBjNumber enable)
-        #getWnd().setEnabled(enable)
+    method public void setEnabled(BBjNumber enable!)
+        if enable! <> #Enabled then
+            #Enabled = enable!
+            #enableControls()
+        fi
+        
+    methodend
+
+    method public void setEditable(BBjNumber editable!)
+        if #Editable <> editable! then
+            #Editable=editable!
+            #enableControld()
+        fi
     methodend
 
 
+    method public void enableControls()
+
+        ks! = #ElementList!.keySet()
+        it!=ks!.iterator()
+        e = #Editable AND #Enabled
+        
+        bc! = #getBC()
+        if bc!<>null() then
+            if #SelectiveEditMode and bc!.getEditingRecNo()=-1 then
+                e=0
+            fi
+        else
+            if #SelectiveEditMode then
+                e=0
+            fi 
+        fi
+        
+        while it!.hasNext()
+            k$ = it!.next()
+            c!=#ElementList!.get(k$)
+            c!.setEnabled(e)
+        wend
+        
+    methodend
+    
     rem /**
     rem * Method newRecord:
     rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
     rem */
     method public void newRecord()
 
-        #enableControls(1) 
-        #getWnd().focus() 
+        #enableControls()
         
     methodend
     
     method private void markValidationErrors()
         
-        it! = #ElementList!.iterator()
+        ks! = #ElementList!.keySet()
+        it! = ks!.iterator()
         while it!.hasNext()
-            e! = it!.next()
+            k$ = it!.next()
+            e!=#ElementList!.get(k$)
             e!.markValidationErrors()
         wend
         
@@ -734,7 +785,7 @@ REM TODO: lazy loading!
     method public BBjNumber saveRecord()
 
 
-        DataRows!     = new java.util.HashMap()
+        DataRows!     = new HashMap()
         ks! = #BCList!.keySet()
         it! = ks!.iterator()
         while it!.hasNext()
@@ -790,7 +841,7 @@ REM TODO: lazy loading!
         wend
             
 
-        DataRows!     = new java.util.HashMap()
+        DataRows!     = new HashMap()
         ks! = #BCList!.keySet()
         it! = ks!.iterator()
         while it!.hasNext()
@@ -861,9 +912,11 @@ REM TODO: lazy loading!
         wend
         #ForeignKeyPickerList!.clear()
         
-        it! = #ElementList!.iterator()
+        ks! = #ElementList!.keySet()
+        it! = ks!.iterator()
         while it!.hasNext()
-            uic! = it!.next()
+            k$ = it!.next()
+            uic! = #ElementList!.get(k$)
             uic!.destroy()
         wend
         #ElementList!.clear()            
@@ -887,11 +940,8 @@ REM TODO: lazy loading!
     rem * This method is called from the business component when the selection changed
     rem */
     method public void onSelectionChange()
-
         
-          if #SelectiveEditMode=0 then
-            #enableControls(1)
-          fi 
+         #enableControls()
       
     methodend
 

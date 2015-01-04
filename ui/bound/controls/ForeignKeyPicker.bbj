@@ -54,7 +54,7 @@ class public ForeignKeyPicker extends UIComponent
 
         #BoundCtrl! = ctrl!
 
-        if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
+        if #BoundCtrl!.getControlType() =-2 or #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             bc!.setControllerFilterUnlock(fk$,1)
 
             #KeyMap!        = new java.util.HashMap()
@@ -65,8 +65,8 @@ class public ForeignKeyPicker extends UIComponent
 
             ctrl1! = #BoundCtrl!
             ctrl1!.removeAllItems()
-
-            ctrl1!.addItem("")
+            v! = new BBjVector()
+            v!.addItem("")
             #IndexToKeyMap!.addItem("")
 
             while x<s
@@ -75,13 +75,14 @@ class public ForeignKeyPicker extends UIComponent
 
                 fkval$     = r!.getFieldAsString(fk$)
                 fkval!     = r!.getField(fk$)
-                ctrl1!.addItem(cvs(FkDisp$,3))
+                v!.addItem(cvs(FkDisp$,3))
 
                 x=x+1
                 #KeyMap!.put(fkval!,x)
                 #IndexToKeyMap!.addItem(fkval!)
             wend
-
+            ctrl1!.insertItems(0, v!)
+            
             bc!.setControllerFilterUnlock(fk$,0)
         else
             x=ctrl!.getX()
@@ -184,7 +185,7 @@ class public ForeignKeyPicker extends UIComponent
     rem */
     method public void displayData()
 
-        if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE or #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
+        if #BoundCtrl!.getControlType() =-2 or #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE or #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             #getBC().prepareResultSet(0,0)
 
             ctrl! = #BoundCtrl!
@@ -214,12 +215,14 @@ class public ForeignKeyPicker extends UIComponent
 
                 fk$     = r!.getFieldAsString(#Fk$)
                 fkdisp$ = cvs(#getBC().getRecordAsString(0),3)
-                #BoundCtrl!.setText(fk$)
+                x!=#BoundCtrl!
+                x!.setText(fk$)
                 #StDisp!.setText(cvs(fkdisp$,3))
                 #StDisp!.setOpaque(0)
                 #TbClear!.setEnabled(1)
             else
-                #BoundCtrl!.setText("")
+                x!=#BoundCtrl!
+                x!.setText("")
                 #StDisp!.setText("")
                 #TbClear!.setEnabled(0)
             fi
@@ -289,7 +292,7 @@ class public ForeignKeyPicker extends UIComponent
     rem */
     method public Object getSelectedForeignKeyValue()
 
-        if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
+        if #BoundCtrl!.getControlType() =-2 or  #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             ctrl! = #BoundCtrl!
             i=ctrl!.getSelectedIndex()
             if i>-1 then
@@ -332,7 +335,7 @@ class public ForeignKeyPicker extends UIComponent
     
     method private void createForeignKeyLink()
     
-        if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
+        if #BoundCtrl!.getControlType() =-2 or  #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
             rem TODO implement foreign key form link, maybe by rightclick popup
         else
             #StDisp!.setForeColor(BBjAPI().makeColor("BLUE"))
@@ -376,16 +379,27 @@ class public ForeignKeyPicker extends UIComponent
     rem * enable/disable the UI component control
     rem * @param BBjNumber fEnable: 1 = enabled, 0 = disabled
     rem */
-    method public void setEnabled(BBjNumber fEnable)
+    method public void setEnabled(BBjNumber fEnable!)
 
-        if #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
-            #BoundCtrl!.setEnabled(fEnable)
+        if #BoundCtrl!.getControlType() =-2 or #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
+            #BoundCtrl!.setEnabled(fEnable!)
         else
-            #BoundCtrl!.setEnabled(fEnable)
-            #TbPick!.setEnabled(fEnable)
-            #TbClear!.setEnabled(fEnable)
+            #BoundCtrl!.setEnabled(fEnable!)
+            #TbPick!.setEnabled(fEnable!)
+            #TbClear!.setEnabled(fEnable!)
         fi
 
+    methodend
+    
+    method public void setVisible(BBjNumber visible!)
+
+        if #BoundCtrl!.getControlType() =-2 or #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
+            rem
+        else
+            #TbPick!.setVisible(visible!)
+            #TbClear!.setVisible(visible!)
+        fi    
+            
     methodend
 
     method public void destroy()

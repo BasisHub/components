@@ -12,7 +12,7 @@ use ::translations/bbtranslator.bbj::BBTranslator
 
 use net.miginfocom.layout.PlatformDefaults
 
-class public ControlWidget extends UIComponent  implements BBjControl 
+class public ControlWidget extends UIComponent 
  
     
     field protected BBjControl    Ctrl!
@@ -34,6 +34,9 @@ class public ControlWidget extends UIComponent  implements BBjControl
     field protected ForeignKeyPicker    FkPicker!
     
     field protected BBjToolButton       WarningIcon!
+    
+    field protected BBjNumber           Enabled=-1
+
 
     method protected ControlWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
@@ -59,6 +62,7 @@ REM                     fi
         a! = #Ctrl!
 REM         a!.setEditable(0,err=*next) 
 REM         a!.setFocusable(0,err=*next)
+
         
     methodend
     
@@ -67,19 +71,18 @@ REM         a!.setFocusable(0,err=*next)
         #setSize(30+length*#charw,#getHeight())
     methodend 
     
-    method public void setText(BBjString text$)
+    method public void setText(BBjString text!)
         x!= #getCtrl()
-        x!.setText(text$)
+        x!.setText(text!)
     methodend
     
-    method public void setMask(BBjString mask$)
+    method public void setMask(BBjString mask!)
         c! = #getCtrl()
         c!.setMask(mask$)
     methodend
 
     method public void setTextKey(BBjString textkey$)
-        x!=#getCtrl()
-        x!.setText( #CustomTranslator!.getTranslation(textkey$)  )
+        #setText( #CustomTranslator!.getTranslation(textkey$)  )
     methodend
     
     
@@ -144,8 +147,7 @@ REM         a!.setFocusable(0,err=*next)
 
           #clearValidationErrors()
           #displayData()
-          #enableControl(1)
-      
+
     methodend
     
     rem override for widgets like Date or so
@@ -163,10 +165,10 @@ REM         a!.setFocusable(0,err=*next)
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
                         
                         x!=#Ctrl!
-                        x!.setText(cvs(text$,2))
+                        #setText(cvs(text$,2))
                     else
                         x!=#Ctrl!
-                        x!.setText("")
+                        #setText("")
                     fi
         
                     #Edited = 0
@@ -175,17 +177,6 @@ REM         a!.setFocusable(0,err=*next)
              
     methodend    
 
-
-    method protected void enableControl(BBjNumber fEditing)
-    
-            x! = #Ctrl! 
-            if #getBC().getPrimaryKeySegments().indexOf(#getBindField())>-1 then
-                x!.setEnabled(!fEditing)
-            else
-                x!.setEnabled(fEditing)
-            fi
-              
-   methodend    
 
    method public void onCtrlGainedFocus(BBjGainedFocusEvent ev!)
 
@@ -223,13 +214,15 @@ REM     methodend
 
     method public void onCtrlLostFocus(BBjLostFocusEvent ev!)
 
-        #Focus = 0
-        edrow! = #getBC().getEditedRecord()
-        n$=#getName()
-        v$=ev!.getText()
-        edrow!.setFieldValue(n$,v$)
-        validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
-        #markValidationErrors()
+        if #getBC()<>null() then
+            #Focus = 0
+            edrow! = #getBC().getEditedRecord()
+            n$=#getName()
+            v$=ev!.getText()
+            edrow!.setFieldValue(n$,v$)
+            validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
+            #markValidationErrors()
+        fi
 
     methodend
     
@@ -245,7 +238,10 @@ REM     methodend
     method public void markValidationErrors()
 
         #clearValidationErrors()
-        
+        bc! = #getBC()
+        if bc! = null() then
+            methodret
+        fi
         v_err!=#getBC().getValidationError(#getName())
 
         if v_err! <>null() then
@@ -302,9 +298,7 @@ REM     methodend
     rem * invoked from BusinessComponent, broadcast that the user wants to create a new record
     rem */
     method public void newRecord()
-        x! = #Ctrl!
-        x!.setEnabled(1)
-        
+        #Edited=0 
         #clearValidationErrors()
     methodend
     
@@ -349,7 +343,7 @@ REM     methodend
             #markValidationErrors()
         fi
     
-        if #Edited then
+        if #isEdited() then
         
             if #getFkPicker() <> null() then
                 t!=#getFkPicker().getSelectedForeignKeyValue()
@@ -404,7 +398,7 @@ REM     methodend
         if pos(".label"=ctrl_name$)>0 then
             lbl$ = #getBC().getColumnAttributes().getFieldAttribute(ctrl_name$(1,len(ctrl_name$)-6),"LABEL",err=*endif)
             x!=#Ctrl!
-            x!.setText(lbl$+":")
+            #setText(lbl$+":")
         fi
         
     methodend
@@ -435,9 +429,13 @@ rem ------------medthods for fill BC
         
         fk$=#getBC().getForeignKeyFkField(#getName())
         
-        #FkPicker! = new ForeignKeyPicker(#getWnd(),#getWnd().getAvailableControlID(),#getCtrl(),#FillBC!,fk$)
+        #FkPicker! = new ForeignKeyPicker(#getWnd(),#getWnd().getAvailableControlID(),#this!,#FillBC!,fk$)
+        
+        
         #setSize(#getWnd().getWidth(),#getWnd().getHeight())
         #FkPicker!.setShowLinkedRecord(0)
+
+        #FkPicker!.setVisible(#Enabled)
         
     methodend
 
@@ -453,5 +451,67 @@ rem ------------medthods for fill BC
         fi
         
     methodend
+    
+    
+    method public void setEnabled(BBjNumber fEnabled!)
+    
+        
+          c!=#getCtrl()
+          c!.setEnabled(fEnabled!)
+          
+          if #FkPicker!<>null() then
+            
+             #FkPicker!.setVisible(fEnabled!)
+          fi
+          #Enabled = fEnabled!
+          
+        
+        
+    methodend
+    
+    method public BBjNumber getControlType()
+        methodret -1
+    methodend
+
+    rem /**
+    rem * Method performEnablements:
+    rem * override in rendering UI (mostly widget) components to do the actual enablements 
+    rem * @param DataRow resultingEditedRec!: the currently edited record
+    rem */    
+    method public void performEnablements(DataRow row!)
+            
+            n$=#getName()
+            visible=1
+            visible$=row!.getFieldAttribute(n$,"VISIBLE",err=*next)
+            if visible$>"" then
+                visible=num(visible$,err=*next)
+            fi
+            #setVisible(visible)
+
+            enabled=1
+            enabled$=row!.getFieldAttribute(n$,"ENABLED",err=*next)
+            if enabled$>"" then
+                enabled=num(enabled$,err=*next)
+            fi
+            
+            if #getBC().getEditingRecNo()<>-2 then
+                enabled = enabled AND (#getIsPrimaryKeyField()=0)
+            fi 
+            
+            #setEnabled(enabled)
+    
+    methodend
+
+REM method protected void enableControl(BBjNumber fEditing)
+REM     
+REM             x! = #Ctrl!
+REM             escape 
+REM             if #getBC().getPrimaryKeySegments().indexOf(#getBindField())>-1 then
+REM                 #setEnabled(!fEditing AND #Enabled)
+REM             else
+REM                 #setEnabled(fEditing and #Enabled)
+REM             fi
+REM               
+REM    methodend 
 
 classend

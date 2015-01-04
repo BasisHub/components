@@ -29,9 +29,6 @@ class public  FileManagerWidget extends ControlWidget
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
                        rem  a=msgbox(text$)
                         #Fm!.setPathToFiles(text$)
-                        #Fm!.setEnabled(1)
-                    else
-                        #Fm!.setEnabled(0)
                     fi
         
                     
@@ -54,5 +51,9 @@ class public  FileManagerWidget extends ControlWidget
     method public void newRecord()
         #Fm!.setEnabled(0)
     methodend
+    
+    method public void setEnabled(BBjNumber fEnabled!)
+        #Fm!.setEnabled(fEnabled!)
+    methodend   
         
 classend

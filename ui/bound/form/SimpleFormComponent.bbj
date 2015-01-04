@@ -302,7 +302,8 @@ class public SimpleFormComponent extends UIComponent implements BBjControl
             if #EditedRec! = null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
                 #EditedFields!.put(ctrl_name$,v$)
 
-                validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
+                rem todo refactor to pass a DataRow
+                validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, null())
                 #this!.markValidationErrors()
             else
                 #EditedFields!.remove(ctrl_name$)
@@ -902,7 +903,7 @@ class public SimpleFormComponent extends UIComponent implements BBjControl
 
                             if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
                                 #EditedFields!.put(ctrl_name$,str(v))
-                                validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
+                                validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, null())
                             else
                                 #EditedFields!.remove(ctrl_name$)
                                 exitto startover; rem to avoid concurrent edit exception
@@ -914,7 +915,7 @@ class public SimpleFormComponent extends UIComponent implements BBjControl
 
                             if #EditedRec! = null() or v<>#EditedRec!.getFieldAsNumber(ctrl_name$) then
                                 #EditedFields!.put(ctrl_name$,str(v))
-                                validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, #EditedFields!)
+                                validate = #getBC().validateField(ctrl_name$, str(v), #EditedRec!, null())
                             else
                                 #EditedFields!.remove(ctrl_name$)
                                 exitto startover; rem to avoid concurrent edit exception
@@ -927,7 +928,7 @@ class public SimpleFormComponent extends UIComponent implements BBjControl
 
                             if #EditedRec!=null() or v$<>cvs(#EditedRec!.getFieldAsString(ctrl_name$),2) then
                                 #EditedFields!.put(ctrl_name$,v$)
-                                validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, #EditedFields!)
+                                validate = #getBC().validateField(ctrl_name$, v$, #EditedRec!, null())
                             else
                                 #EditedFields!.remove(ctrl_name$)
                                 exitto startover; rem to avoid concurrent edit exception
@@ -1012,17 +1013,17 @@ REM                 print "Fields:",#EditedFields!
     methodend
 
 
-    rem /**
-    rem * Method onBeforeSave:
-    rem * This method is called from the business component before saving the record
-    rem * (needs overriding)
-    rem * @return java.util.HashMap: a java.util.HashMap with the edited fields
-    rem */
-    method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
-
-        methodret editedFields!
-
-    methodend
+REM     rem /**
+REM     rem * Method onBeforeSave:
+REM     rem * This method is called from the business component before saving the record
+REM     rem * (needs overriding)
+REM     rem * @return java.util.HashMap: a java.util.HashMap with the edited fields
+REM     rem */
+REM     method protected java.util.HashMap onBeforeSave(java.util.HashMap editedFields!)
+REM 
+REM         methodret editedFields!
+REM 
+REM     methodend
 
 
     rem /**
