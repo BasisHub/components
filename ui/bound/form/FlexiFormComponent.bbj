@@ -225,7 +225,7 @@ REM                             cwCanvas!.setFont(font!)
                                         name$=""
                                         name$= #getNodeValue(elNode!,"name")
                                         if name$="" then
-                                            name$=java.util.UUID.randomUUID()
+                                            name$=str(java.util.UUID.randomUUID())
                                         fi
                                         
                                         
