@@ -5,18 +5,19 @@ use com.basiscomponents.db.DataField
 class public  InputNWidget extends ControlWidget
  
     field private BBjStaticText Static!
- 
+    field private BBjInputN Ipn!
+    
     method public InputNWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         #setWnd(cwWidget!)
-        ipe! = cwWidget!.addInputN(100,0,0,10,10,"")
-        ipe!.setEditable(1) 
-        #setCtrl(ipe!)
+        #Ipn! = cast(BBjInputN,cwWidget!.addInputN(100,0,0,10,10,""))
+        #Ipn!.setEditable(1) 
+        #setCtrl(#Ipn!)
         
-        ipe!.setDotCharacter(",")
-        ipe!.setCommaCharacter(".")
-        
+        #Ipn!.setDotCharacter(",")
+        #Ipn!.setCommaCharacter(".")
+         
         #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
         #Static!.setVisible(1)
         #Static!.addStyle("StaticRepresentation")
@@ -98,5 +99,9 @@ class public  InputNWidget extends ControlWidget
         #super!.setCssClass(class$)
         #getWnd().getControl(101).addStyle(class$)
     methodend    
+
+    method public void setMask(BBjString m$) 
+        #Ipn!.setMask(m$) 
+    methodend   
     
 classend
