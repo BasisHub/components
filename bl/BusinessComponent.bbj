@@ -1063,6 +1063,8 @@ class public BusinessComponent
                 ui!.setEditing(recno>-1 OR recno = -2)
             next
         fi
+        
+        #broadcastEnableControls()
 
     methodend
 

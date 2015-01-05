@@ -151,10 +151,10 @@ class public  InputDWidget extends ControlWidget
 
     methodend    
     
-    method public void setEnabled(BBjNumber fEnabled!)
+    method public void performSetEnabled(BBjNumber fEnabled!)
     
-        if fEnabled! <> #getEnabled() then
-            #super!.setEnabled(fEnabled!)
+        
+          #super!.performSetEnabled(fEnabled!)
             
             x!= #getWnd().getControl(100)
             x!.setVisible(fEnabled!)

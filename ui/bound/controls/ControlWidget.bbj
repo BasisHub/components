@@ -455,18 +455,17 @@ rem ------------medthods for fill BC
     
     method public void setEnabled(BBjNumber fEnabled!)
     
+            #Enabled = fEnabled!
+    methodend
+    
+    method public void performSetEnabled(BBjNumber fEnabled!)
         
           c!=#getCtrl()
           c!.setEnabled(fEnabled!)
           
           if #FkPicker!<>null() then
-            
              #FkPicker!.setVisible(fEnabled!)
           fi
-          #Enabled = fEnabled!
-          
-        
-        
     methodend
     
     method public BBjNumber getControlType()
@@ -498,20 +497,12 @@ rem ------------medthods for fill BC
                 enabled = enabled AND (#getIsPrimaryKeyField()=0)
             fi 
             
-            #setEnabled(enabled)
+            enabled = enabled AND #Enabled
+
+            #performSetEnabled(enabled)
     
     methodend
 
-REM method protected void enableControl(BBjNumber fEditing)
-REM     
-REM             x! = #Ctrl!
-REM             escape 
-REM             if #getBC().getPrimaryKeySegments().indexOf(#getBindField())>-1 then
-REM                 #setEnabled(!fEditing AND #Enabled)
-REM             else
-REM                 #setEnabled(fEditing and #Enabled)
-REM             fi
-REM               
-REM    methodend 
+
 
 classend

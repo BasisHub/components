@@ -750,6 +750,7 @@ REM TODO: lazy loading!
         while it!.hasNext()
             k$ = it!.next()
             c!=#ElementList!.get(k$)
+            ? 'SHOW',k$,"->",e
             c!.setEnabled(e)
         wend
         

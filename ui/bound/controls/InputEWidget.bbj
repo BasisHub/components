@@ -35,10 +35,10 @@ class public  InputEWidget extends ControlWidget
         x!.setText(text!)        
     methodend
     
-    method public void setEnabled(BBjNumber fEnabled!)
+    method public void performSetEnabled(BBjNumber fEnabled!)
     
-        if fEnabled! <> #getEnabled() then
-            #super!.setEnabled(fEnabled!)
+        
+          #super!.performSetEnabled(fEnabled!)
             
             x!= #getWnd().getControl(100)
             x!.setVisible(fEnabled!)
@@ -46,9 +46,10 @@ class public  InputEWidget extends ControlWidget
             x!= #getWnd().getControl(101)
             x!.setVisible(!fEnabled!)
                     
+            
         fi
         
-    methodend    
+    methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
         #super!.setSize(w!,h!)
