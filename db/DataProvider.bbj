@@ -1116,7 +1116,6 @@ REM         input *
 
                     if v!.size() then
                         fields!.put(k$,v!.getItem(0))
-
                         rem flaw: when multiple selection it's always taking the first record
                     fi
                 wend
@@ -1137,7 +1136,7 @@ REM         input *
             if primrow!.contains(k$) then 
               s$=s$+","+k$
               v$=v$+",? "
-              uhm!.put(k$,hm!.get(k$)) 
+              uhm!.put(k$,hm!.get(k$))
             fi              
         wend
 
@@ -1156,7 +1155,7 @@ REM         input *
         #openDatabase()
         
 
-        declare java.sql.PreparedStatement stmt!
+
         stmt! = #Connection!.prepareStatement(sql$)
         ks! = uhm!.keySet()
         it! = ks!.iterator()
@@ -1201,20 +1200,93 @@ REM         input *
             fi
 
             i=i+1
+            
+            if wh$>"" then
+                wh$=wh$+" AND "
+            fi
+            wh$=wh$+" ("+k$+"=?) "
         wend
 
         rem TODO: catch error
         ret=stmt!.executeUpdate(err=*next)
 
         ? "(",ret,")"
-
+        
         if ret=0 then
             a=msgbox(BBjAPI().getLastJavaException().toString()+" "+sql$+" Line "+str(tcb(5))+" Obj: "+str(obj!),0,"Error")
         fi
 
+        
+        
+        rem re-read the just added record and put it into the result set on first position 
+        rem TODO find a better implementation when the database generates the primary index 
+        sql$=#getSQL()
+        if pos("WHERE"=cvs(sql$,4))>0 then
+            sql$=sql$(1,pos("WHERE"=cvs(sql$,4))-1)
+        fi
+        sql$=sql$+" WHERE "+wh$
+        
+        stmt! = #Connection!.prepareStatement(sql$,java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+        
+
+        ks! = uhm!.keySet()
+        it! = ks!.iterator()
+        i=1
+
+        while it!.hasNext()
+            k$=it!.next()
+            obj!= rec!.getField(k$)
+            type$=rec!.getFieldType(k$)
+
+
+            if type$="C" then
+                stmt!.setString(i,obj!)
+            fi
+
+            if type$="N" then
+                stmt!.setDouble(i,obj!)
+            fi
+
+            if type$="I" then
+                stmt!.setInt(i,obj!)
+            fi
+
+            if type$="B" then
+                stmt!.setBoolean(i,obj!)
+            fi
+
+            if type$="D" then
+                stmt!.setDate(i,obj!)
+            fi
+
+            if type$="X" then
+                stmt!.setTimestamp(i,obj!)
+            fi
+
+            if type$="Y" then
+                stmt!.setBigDecimal(i,obj!)
+            fi
+
+            if type$="T" then
+                stmt!.setTime(i,obj!)
+            fi
+            i=i+1
+        wend
+        jrs! = cast(java.sql.ResultSet,stmt!.executeQuery())
+        jrs!.beforeFirst() 
+        declare java.sql.ResultSet jrs!
+        
+        
+        #Size=max(#Size,0)
+        while jrs!.next()
+            r! = new DataRow(jrs!)
+            #ResultSet!.addItem(r!)
+            #Size=#Size+1 
+        wend
+        
         #closeDatabase()
 
-        #Size=-1
+        
 
     methodend
 
@@ -1263,9 +1335,7 @@ REM         input *
         if len(s$) then
             s$=s$(2)
             sql$="UPDATE "+#SchemaPfx$+#PrimaryTable$+" SET "+s$+" WHERE "+wh$
-            
-            rem print sql$
-    
+   
             #openDatabase()
             declare java.sql.PreparedStatement stmt!
     
@@ -1278,7 +1348,6 @@ REM         input *
                 k$=it!.next()
                 obj!= prow!.getField(k$)
                 type$=prow!.getFieldType(k$)
-   
     
                 if type$="C" then
                     stmt!.setString(i,obj!)
@@ -1386,8 +1455,11 @@ REM         input *
             ret=stmt!.executeUpdate(sql$,err=*next)
             ? "(",ret,")"
 
+
             if ret=0 then
                 a=msgbox(BBjAPI().getLastJavaException().toString(),0,"Error")
+                ? sql$
+                escape
             fi
 
             #closeDatabase()

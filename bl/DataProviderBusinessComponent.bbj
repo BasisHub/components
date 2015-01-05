@@ -199,6 +199,13 @@ REM         #refresh(0)
     rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
 
+        if first<0 then
+            first=0
+        fi
+        if last<first then
+            last=first
+        fi
+        
         if #getEnabled()  then
             if max(first,last)>=#getResultSet().size() then
                 doIt=1
@@ -324,28 +331,39 @@ REM         #refresh(0)
             #getDataProvider().insertRecord(row!)
             
             #onAfterInsert(row!)
-            
+            rec=#getResultSet().size()-1
+            rec!=#getResultSet().getItem(rec)
+            #getResultSet().setItem(rec,#processRecord(rec!)) 
+            #setSelection(rec)
             #setEditedRecord(-1)
-            #refresh(0)
-        fi
-
-        if recno>-1 then
-            orig_row! = #getResultSet().getItem(recno)
-            rem TODO:  re-read the record from the database, compare to this version
-            rem and abort operation if one of the edited fields has changed in the meantime
-
-            row! = #onBeforeUpdate(row!, orig_row!)
-
-            #getDataProvider().updateRecord(row!, orig_row!)
             
-            #onAfterUpdate(row!, orig_row!)
-            
-            #setEditedRecord(-1)
-            #refresh(0)
-            rem todo reReadRecord(recno)
-            #setSelection(recno)
-        fi
+        else
 
+              if recno>-1 then
+                  orig_row! = #getResultSet().getItem(recno)
+                  rem TODO:  re-read the record from the database, compare to this version
+                  rem and abort operation if one of the edited fields has changed in the meantime
+      
+                  row! = #onBeforeUpdate(row!, orig_row!)
+      
+                  #getDataProvider().updateRecord(row!, orig_row!)
+                  
+                  #onAfterUpdate(row!, orig_row!)
+                  
+                  #setEditedRecord(-1)
+REM                   #refresh(0)
+REM                   #setSelection(recno)
+                    v!=#getSelection()
+                  if v!.size() then
+                      recno=num(v!.getItem(0),err=*next)
+                      #setSelection(recno)
+
+                  fi
+              fi
+        fi
+        
+        #setEditedRec(null())
+        
     methodend
 
     rem /**

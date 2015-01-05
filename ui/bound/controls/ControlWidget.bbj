@@ -160,10 +160,10 @@ REM         a!.setFocusable(0,err=*next)
                         #getBC().prepareResultSet(sel,sel)
                          
                         sel=#getBC().getSelection().getItem(i)
-                        r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
-
-                        text$     = r!.getFieldAsString(#getBindField(),err=*next)
-                        
+                        if sel>-1 then
+                            r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                            text$     = r!.getFieldAsString(#getBindField(),err=*next)
+                        fi
                         x!=#Ctrl!
                         #setText(cvs(text$,2))
                     else

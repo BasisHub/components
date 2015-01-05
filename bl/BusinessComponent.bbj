@@ -532,6 +532,8 @@ class public BusinessComponent
     rem */
     method public void onSelectionChange()
 
+        #setEditedRec(null())
+
         if #UIList!.size() then
             for i=0 to #UIList!.size()-1
                 ui! = CAST(UIComponent,#UIList!.getItem(i))
@@ -571,8 +573,11 @@ class public BusinessComponent
                 next
             fi
         wend
+
         
         #setEditedRecord(-1)
+
+
         #broadcastEnableControls()
 
     methodend
@@ -1246,24 +1251,25 @@ REM         fi
     rem * notify UIs about an ongoing edit so they can update all control enablements 
     rem */
     method private void broadcastEnableControls()
-        
-        
+
+                
         r! = #getResultingEditedRecord()
         if r!<>null() then
-            
+                        
             if #UIList!.size()  then
                 for i=0 to #UIList!.size()-1
                     ui! = CAST(UIComponent,#UIList!.getItem(i))
                     ui!.enableControls(r!)
                 next
             fi
-    
+          
             if #UIList!.size() then
                 for i=0 to #UIList!.size()-1
                     ui! = CAST(UIComponent,#UIList!.getItem(i))
                     ui!.performEnablements(r!)
                 next
             fi
+
         fi
 
     methodend
@@ -1632,12 +1638,18 @@ REM         fi
     methodend
 
     method public DataRow getResultingEditedRecord()
+    
+    
+            
         r! = #getEditedOriginalRecord()
-        
+                
         if r!<>null() then
             r1! = #getEditedRecord()
             r!.mergeRecord(r1!)
         fi
+
+
+                
         methodret r!
     methodend
     
