@@ -307,7 +307,7 @@ class public SimpleFormComponent extends UIComponent implements BBjControl
                 #this!.markValidationErrors()
             else
                 #EditedFields!.remove(ctrl_name$)
-                print ctrl_name$,"-> deleted"
+
             fi
         fi
 
@@ -809,7 +809,6 @@ class public SimpleFormComponent extends UIComponent implements BBjControl
                     ctrl! = ControlMap!.get("ControlInstance")
                     ctrl!.setText(fixvalue$)
                      #EditedFields!.put(ctrl_name$,fixvalue$)
-                     print ctrl_name$," ->",fixvalue$,"(fix)"
                 fi
             wend
         fi

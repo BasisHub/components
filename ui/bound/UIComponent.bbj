@@ -756,7 +756,6 @@ class public UIComponent implements BBjControl
             class! = #ForeignKeyFormClassList!.get(fieldName$)
             if class! <> null() then
                 form! = Util.newInstance(str(class!))
-                print "instantiating "+str(class!)
             fi
         fi
 
