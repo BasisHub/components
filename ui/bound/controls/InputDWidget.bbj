@@ -163,7 +163,7 @@ class public  InputDWidget extends ControlWidget
             x!.setVisible(!fEnabled!)
                     
             #TbPick!.setVisible(fEnabled!)
-        fi
+
         
     methodend    
     method public void setCssClass(BBjString class$)

@@ -11,6 +11,7 @@ class public  InputEWidget extends ControlWidget
         
         ipe! = cwWidget!.addInputE(100,0,0,10,10,"...")
         ipe!.setEditable(1) 
+        ipe!.setVisible(0)
         #setCtrl(ipe!)
         
         
@@ -45,9 +46,7 @@ class public  InputEWidget extends ControlWidget
             
             x!= #getWnd().getControl(101)
             x!.setVisible(!fEnabled!)
-                    
-            
-        fi
+
         
     methodend
 

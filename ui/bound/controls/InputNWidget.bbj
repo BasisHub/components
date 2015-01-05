@@ -13,6 +13,7 @@ class public  InputNWidget extends ControlWidget
         #setWnd(cwWidget!)
         #Ipn! = cast(BBjInputN,cwWidget!.addInputN(100,0,0,10,10,""))
         #Ipn!.setEditable(1) 
+        #Ipn!.setVisible(0)  
         #setCtrl(#Ipn!)
         
         #Ipn!.setDotCharacter(",")
@@ -53,17 +54,14 @@ class public  InputNWidget extends ControlWidget
     
     method public void performSetEnabled(BBjNumber fEnabled!)
     
-        
-          #super!.performSetEnabled(fEnabled!)
+            
+            #super!.performSetEnabled(fEnabled!)
             
             x!= #getWnd().getControl(100)
             x!.setVisible(fEnabled!)
             
             x!= #getWnd().getControl(101)
             x!.setVisible(!fEnabled!)
-                    
-           
-        fi
         
     methodend
 
