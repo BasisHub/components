@@ -8,10 +8,10 @@ rem * @version 1.0
 rem */
 
 use com.basiscomponents.db.DataRow
+use java.util.HashMap
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::admin/admin.bbj::Admin
 use ::admin/admin.bbj::UserCredentials
-
 
 class public DataProvider
 
@@ -30,10 +30,10 @@ class public DataProvider
     field protected BBjString           FulltextFilter$
     field protected BBjVector           FulltextFilterFields!       = new BBjVector()
     field private   BBjNumber           IsBBjTextSearch             = -1             
-    field private   java.util.HashMap   QueryFilter!
-    field private   java.util.HashMap   ControllerFilter!           = new java.util.HashMap()
-    field private   java.util.HashMap   ControllerFilterUnlock!     = new java.util.HashMap()
-    field private   java.util.HashMap   QueryConditions!            = new java.util.HashMap()
+    field private   HashMap   QueryFilter!
+    field private   HashMap   ControllerFilter!           = new HashMap()
+    field private   HashMap   ControllerFilterUnlock!     = new HashMap()
+    field private   HashMap   QueryConditions!            = new HashMap()
 
     field private   BBjNumber           Size                        =-1
     field protected BusinessComponent   BC!
@@ -155,16 +155,16 @@ class public DataProvider
 
         sql$=#getSQL()
 
-        filter! = new java.util.HashMap()
+        filter! = new HashMap()
 
         if fIgnoreFilterAndOrder then
             if #ControllerFilter! = null() then
-                filter! = new java.util.HashMap()
+                filter! = new HashMap()
             else
                 filter! = #ControllerFilter!.clone()
             fi
         else
-                filter! = new java.util.HashMap()
+                filter! = new HashMap()
 
                 declare BBjVector allKeys!
                 allKeys! = new BBjVector()
@@ -453,7 +453,7 @@ REM         input *
             k! = #getPrimaryKeySegments()
 
             if #this!.getQueryFilter() = null() then
-                #this!.setQueryFilter(new java.util.HashMap())
+                #this!.setQueryFilter(new HashMap())
             fi
 
             it! = k!.iterator()
@@ -685,8 +685,8 @@ REM         input *
             #openDatabase()
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+            
             jrs! = #JDBCResultSet!
-
             
             if #RecordCountInResultSet > 500 then
                 if #ResultSet!.size() then
@@ -954,9 +954,9 @@ REM         input *
     rem /**
     rem * Method setQueryFilter:
     rem * filters the result set
-    rem * @param java.util.HashMap filter!: a hash map that holds the filter information, key is the column, data is a BBjVector holding the values for the filter
+    rem * @param HashMap filter!: a hash map that holds the filter information, key is the column, data is a BBjVector holding the values for the filter
     rem */
-    method public void setQueryFilter(java.util.HashMap filter!)
+    method public void setQueryFilter(HashMap filter!)
 
         #QueryFilter!=filter!
         #Size=-1
@@ -1051,7 +1051,18 @@ REM         input *
 
     methodend
 
+    rem /**
+    rem * Method getControllerFilter:
+    rem * get controller filter
+    rem * @param BBjString var$: the name of the field on which the filter was set
+    rem */
+    method public HashMap getControllerFilter()
 
+        cf! = #ControllerFilter!.clone()
+        methodret cf! 
+        
+    methodend
+    
     rem /**
     rem * Method getDistinctValues:
     rem * returns distinct values in a given column of the resultset
@@ -1101,8 +1112,8 @@ REM         input *
         fi
 
 
-        if 0 then
-            rem TODO: wenn controller filter gesetzt dann die Feldwerte fest auch setzen
+        
+        
 
             cf! = #getControllerFilter()
 
@@ -1115,12 +1126,14 @@ REM         input *
                     v!=cf!.get(k$)
 
                     if v!.size() then
-                        fields!.put(k$,v!.getItem(0))
-                        rem flaw: when multiple selection it's always taking the first record
+                        value$=v!.getItem(0)
+                        if !rec!.contains(k$) then
+                            rec!.setFieldValue(K$,value$)
+                        fi 
                     fi
                 wend
             fi
-        fi
+        
 
         prow! = #getPrimaryTableLayout()
         primrow! = prow!.getFieldNames()
@@ -1129,7 +1142,7 @@ REM         input *
         ks! = hm!.keySet()
         
         it! = ks!.iterator()
-        uhm! = new java.util.HashMap()
+        uhm! = new HashMap()
 
         while it!.hasNext()
             k$=it!.next()
@@ -1213,77 +1226,77 @@ REM         input *
         ? "(",ret,")"
         
         if ret=0 then
-            a=msgbox(BBjAPI().getLastJavaException().toString()+" "+sql$+" Line "+str(tcb(5))+" Obj: "+str(obj!),0,"Error")
+            a=msgbox(BBjAPI().getLastJavaException().toString()+" "+sql$+" Line "+str(tcb(5)),0,"Error")
         fi
 
         
-        
-        rem re-read the just added record and put it into the result set on first position 
-        rem TODO find a better implementation when the database generates the primary index 
-        sql$=#getSQL()
-        if pos("WHERE"=cvs(sql$,4))>0 then
-            sql$=sql$(1,pos("WHERE"=cvs(sql$,4))-1)
+        if ret=1 then
+              rem re-read the just added record and put it into the result set on first position 
+              rem TODO find a better implementation when the database generates the primary index 
+              sql$=#getSQL()
+              if pos("WHERE"=cvs(sql$,4))>0 then
+                  sql$=sql$(1,pos("WHERE"=cvs(sql$,4))-1)
+              fi
+              sql$=sql$+" WHERE "+wh$
+              
+              stmt! = #Connection!.prepareStatement(sql$,java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+              
+      
+              ks! = uhm!.keySet()
+              it! = ks!.iterator()
+              i=1
+      
+              while it!.hasNext()
+                  k$=it!.next()
+                  obj!= rec!.getField(k$)
+                  type$=rec!.getFieldType(k$)
+      
+      
+                  if type$="C" then
+                      stmt!.setString(i,obj!)
+                  fi
+      
+                  if type$="N" then
+                      stmt!.setDouble(i,obj!)
+                  fi
+      
+                  if type$="I" then
+                      stmt!.setInt(i,obj!)
+                  fi
+      
+                  if type$="B" then
+                      stmt!.setBoolean(i,obj!)
+                  fi
+      
+                  if type$="D" then
+                      stmt!.setDate(i,obj!)
+                  fi
+      
+                  if type$="X" then
+                      stmt!.setTimestamp(i,obj!)
+                  fi
+      
+                  if type$="Y" then
+                      stmt!.setBigDecimal(i,obj!)
+                  fi
+      
+                  if type$="T" then
+                      stmt!.setTime(i,obj!)
+                  fi
+                  i=i+1
+              wend
+              jrs! = cast(java.sql.ResultSet,stmt!.executeQuery())
+              jrs!.beforeFirst() 
+              declare java.sql.ResultSet jrs!
+             
+              #Size=max(#Size,0)
+              while jrs!.next(err=skip)
+                  r! = new DataRow(jrs!)
+                  #ResultSet!.addItem(r!)
+                  #Size=#Size+1 
+              wend
+              skip:
         fi
-        sql$=sql$+" WHERE "+wh$
-        
-        stmt! = #Connection!.prepareStatement(sql$,java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
-        
-
-        ks! = uhm!.keySet()
-        it! = ks!.iterator()
-        i=1
-
-        while it!.hasNext()
-            k$=it!.next()
-            obj!= rec!.getField(k$)
-            type$=rec!.getFieldType(k$)
-
-
-            if type$="C" then
-                stmt!.setString(i,obj!)
-            fi
-
-            if type$="N" then
-                stmt!.setDouble(i,obj!)
-            fi
-
-            if type$="I" then
-                stmt!.setInt(i,obj!)
-            fi
-
-            if type$="B" then
-                stmt!.setBoolean(i,obj!)
-            fi
-
-            if type$="D" then
-                stmt!.setDate(i,obj!)
-            fi
-
-            if type$="X" then
-                stmt!.setTimestamp(i,obj!)
-            fi
-
-            if type$="Y" then
-                stmt!.setBigDecimal(i,obj!)
-            fi
-
-            if type$="T" then
-                stmt!.setTime(i,obj!)
-            fi
-            i=i+1
-        wend
-        jrs! = cast(java.sql.ResultSet,stmt!.executeQuery())
-        jrs!.beforeFirst() 
-        declare java.sql.ResultSet jrs!
-        
-        
-        #Size=max(#Size,0)
-        while jrs!.next()
-            r! = new DataRow(jrs!)
-            #ResultSet!.addItem(r!)
-            #Size=#Size+1 
-        wend
-        
         #closeDatabase()
 
         
@@ -1321,7 +1334,7 @@ REM         input *
 
         ks! = hm!.keySet()
         it! = ks!.iterator()
-        uhm! = new java.util.HashMap()
+        uhm! = new HashMap()
         
         while it!.hasNext()
             k$=it!.next()

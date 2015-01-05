@@ -646,12 +646,36 @@ class public BusinessComponent
     rem * called by the controller when a change of the selection occured (from outside)
     rem * @param BBjString var$: the variable that changed
     rem * @param BBjVector selection!: the new selection
+    rem * @param BBjNumber immediately: 
     rem */
-    method public void drive(BBjString var$, BBjVector selection!)
+    method public void drive(BBjString var$, BBjVector selection!, BBjNumber immediately)
 
         #ControllerFilter!.put(var$,selection!)
 
+        if immediately then
+            #prepareResultSet(0,0)
+            if #getResultSet().size()>0 then
+                v! = new BBjVector()
+                v!.addItem(0)
+                #setSelection(v!)
+            fi
+         fi
+    
     methodend
+    
+
+    rem /**
+    rem * Method drive:
+    rem * called by the controller when a change of the selection occured (from outside)
+    rem * @param BBjString var$: the variable that changed
+    rem * @param BBjVector selection!: the new selection
+    rem */
+    method public void drive(BBjString var$, BBjVector selection!)
+
+        #drive(var$, selection!,1)
+        
+    methodend
+
 
 
     rem /**
@@ -660,18 +684,12 @@ class public BusinessComponent
     rem * @param BBjString var$: the variable that changed
     rem * @param BBjString selection$: the new selection (one item only)
     rem */
-    method public void drive(BBjString var$, BBjString selection$)
+    method public void drive(BBjString var$, BBjString selection$, BBjNumber immediately)
 
         v! = new BBjVector()
         v!.addItem(selection$)
-        #ControllerFilter!.put(var$,v!)
 
-        #prepareResultSet(0,0)
-        if #getResultSet().size()>0 then
-            v! = new BBjVector()
-            v!.addItem(0)
-            #setSelection(v!)
-        fi
+        #drive (var$,v!, immediately)
 
     methodend
 

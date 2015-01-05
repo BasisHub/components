@@ -9,7 +9,7 @@ use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::i18n/CustomTranslator.bbj::CustomTranslator
 use ::translations/bbtranslator.bbj::BBTranslator
 
-
+use java.util.HashMap
 use net.miginfocom.layout.PlatformDefaults
 
 class public ControlWidget extends UIComponent 
@@ -109,6 +109,11 @@ REM         a!.setFocusable(0,err=*next)
         methodret #getWnd().getHeight()
     methodend
 
+
+    method public BBjString getText()
+        methodret #getCtrl().getText()
+    methodend
+    
     method public Boolean isVisible()
         methodret #getWnd().isVisible()
     methodend
@@ -194,7 +199,7 @@ REM             #EditedRec! = cast(DataRow,#Rec!.clone())
 REM         fi
 REM 
 REM         if #EditedFields! = null() then
-REM             #EditedFields! = new java.util.HashMap()
+REM             #EditedFields! = new HashMap()
 REM         fi
 REM 
 REM         #EditedFields!.put(ev!.getControl().getName(),null())
@@ -480,6 +485,8 @@ rem ------------medthods for fill BC
     method public void performEnablements(DataRow row!)
             
             n$=#getName()
+            rno=#getBC().getEditingRecNo()
+            
             visible=1
             visible$=row!.getFieldAttribute(n$,"VISIBLE",err=*next)
             if visible$>"" then
@@ -493,11 +500,27 @@ rem ------------medthods for fill BC
                 enabled=num(enabled$,err=*next)
             fi
             
-            if #getBC().getEditingRecNo()<>-2 then
+            if rno<>-2 then
                 enabled = enabled AND (#getIsPrimaryKeyField()=0)
-            fi 
+            fi
+            
             
             enabled = enabled AND #Enabled
+            
+            if enabled then
+                declare HashMap cf!
+                cf! = #getBC().getControllerFilter()
+                if cf!.containsKey(n$) then
+                    enabled=0
+                    if rno=-2 then
+                      cfv! = cf!.get(n$)
+                      if cfv!.size() then
+                          cfv$=cfv!.getItem(0)
+                          #setText(cfv$)
+                      fi
+                    fi
+                fi
+            fi 
 
             #performSetEnabled(enabled)
     
