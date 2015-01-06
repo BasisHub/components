@@ -360,10 +360,11 @@ class public DataProvider
              fi
         fi
 
-        ? sql$
-        clipfromstr 1,sql$
+REM         ? sql$
+REM         clipfromstr 1,sql$
 REM         input *
-
+    
+        
         methodret sql$
 
     methodend
@@ -433,7 +434,7 @@ REM         input *
 
     method public void setupTextFilter()
 
-        
+         
             if #IsBBjTextSearch=0 then   
                 methodret
             fi
@@ -445,8 +446,9 @@ REM         input *
                 f$="*"+f$+"*"
             fi
             
-            sql$="CALL BBJ_SEARCH('"+#PrimaryTable$+"','"+f$+"')" 
+            sql$="CALL BBJ_INDEX('"+#PrimaryTable$+"','"+f$+"',0)" 
             stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+            
             #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$,err=nobbjtextsearch))
             #IsBBjTextSearch=1
 
