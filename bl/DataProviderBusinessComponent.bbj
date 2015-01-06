@@ -86,12 +86,12 @@ REM         #refresh(0)
     method public void drive(BBjString var$, BBjVector selection!, BBjNumber immediately)
 
         #super!.getControllerFilter().put(var$,selection!)
-
         #getDataProvider().putControllerFilter(var$,selection!)
 
-        if immediately
+        if immediately then
+            
             #refresh(0)
-    
+ 
             #prepareResultSet(0,0)
             if #getResultSet().size()>0 then
                 v! = new BBjVector()
@@ -228,7 +228,7 @@ REM         #refresh(0)
             fi
     
             if doIt then
-                v! = #getDataProvider().prepareResultSet(first, last + abs(min(10,int((first-last) /4))))
+                v! = #getDataProvider().prepareResultSet(first, last + abs(min(10,int((first-last) /4))))   
                 if v!<>null() then
                     it! = v!.iterator()
                     while it!.hasNext()

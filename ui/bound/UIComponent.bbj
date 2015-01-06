@@ -196,6 +196,7 @@ class public UIComponent implements BBjControl
     method public void setBC(BusinessComponent bc!)
 
         #BC! = bc!
+
         bc!.registerUI(#this!)
 
         if #IsStandalone then
@@ -884,6 +885,12 @@ class public UIComponent implements BBjControl
         #getWnd().setVisible(v!)
     methodend    
 
+    method public void setName(BBjString name!)
+        #getWnd().setName(name!)
+    methodend 
 
+    method public void setEnabled(BBjNumber enabled!)
+        #getWnd().setEnabled(enabled!)
+    methodend 
         
 classend

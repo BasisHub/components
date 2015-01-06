@@ -222,6 +222,9 @@ class public BusinessComponent
     rem */
     method public java.util.HashMap getQueryFilter()
 
+        if #QueryFilter! = null() then
+            #QueryFilter! = new java.util.HashMap()
+        fi
         methodret #QueryFilter!
 
     methodend

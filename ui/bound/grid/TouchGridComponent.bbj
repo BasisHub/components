@@ -117,7 +117,8 @@ class public TouchGridComponent extends UIComponent implements BBjControl
     method public void refresh( BBjNumber resetFilter)
 
             s=#getBC().size()
-REM             s=min(s,200)
+            
+REM             s=min(s,1000)
             rem fixme limited max count!!!
             #getBC().prepareResultSet(0,s)
             #TouchGrid!.setItems(#getBC().getResultSet())

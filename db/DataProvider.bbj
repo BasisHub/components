@@ -8,6 +8,9 @@ rem * @version 1.0
 rem */
 
 use com.basiscomponents.db.DataRow
+use com.basiscomponents.lucene.BBjSearchGizmo
+use com.basiscomponents.lucene.BBjSearchGizmoDoc
+
 use java.util.HashMap
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::admin/admin.bbj::Admin
@@ -48,6 +51,9 @@ class public DataProvider
     field private java.util.ArrayList   ColNames!
     field private java.util.ArrayList   ColLabels!
     field private java.util.ArrayList   ColTypes!
+    
+    field protected BBjSearchGizmo      SearchEngine!
+    field protected BBjVector           SearchEngineFields!
 
     rem set to 1 if the SQL engine does not support the COUNT and you need to go to the last record in the resultset
     field protected BBjNumber FallbackCount
@@ -364,7 +370,6 @@ REM         ? sql$
 REM         clipfromstr 1,sql$
 REM         input *
     
-        
         methodret sql$
 
     methodend
@@ -434,7 +439,60 @@ REM         input *
 
     method public void setupTextFilter()
 
-         
+            if #SearchEngine! <>null() and #SearchEngineFields! <> null() then
+            
+                 f$=#FulltextFilter$
+                 if pos("*"=f$)=0 and pos("~"=f$)=0 then
+                        f$="*"+f$+"*"
+                 fi
+                 
+                 seFields! = java.lang.reflect.Array.newInstance(Class.forName("java.lang.String"),#SearchEngineFields!.size())
+                 index=0
+                 itfields! = #SearchEngineFields!.iterator()
+                 while itfields!.hasNext()
+                    fieldname$=itfields!.next()
+                    java.lang.reflect.Array.set(seFields!,index,fieldname$)
+                    index=index+1
+                 wend
+                 
+                 result!=#SearchEngine!.doSearch(f$,seFields!)
+                 
+                 if #this!.getQueryFilter() = null() then
+                        #this!.setQueryFilter(new HashMap())
+                 fi
+                                        
+                 if result!.size() then
+                       
+      
+                       k! = #getPrimaryKeySegments()
+            
+                       
+          
+                       v! = new BBjVector()
+                       it! = result!.iterator()
+                       while it!.hasNext()
+                          v!.addItem(it!.next())
+                       wend 
+          
+                       it! = k!.iterator()
+                       if it!.hasNext()
+                          k$=it!.next()
+                          #this!.getQueryFilter().put(k$,v!)
+                       fi
+                 else
+                        k! = #getPrimaryKeySegments()
+                        it! = k!.iterator()
+                        if it!.hasNext()
+                            k$=it!.next()
+                            v! = new BBjVector()
+                            v!.addItem("noopnevernohits in this query!!!")
+                            #this!.getQueryFilter().put(k$,v!)
+                        fi 
+                 
+                 fi
+                 methodret 
+            fi
+           
             if #IsBBjTextSearch=0 then   
                 methodret
             fi
