@@ -347,7 +347,7 @@ class public DataProvider
         fi
 
 
-        if #SortField$>"" and fIgnoreFilterAndOrder=0 then
+        if #SortField$>"" and fIgnoreFilterAndOrder=0 and #QueryLayout!<>null() then
             primrow! = #QueryLayout!.getFieldNames() 
             if primrow!.contains(#SortField$) then       
                 orderby$=" ORDER BY "+#SortField$
@@ -364,6 +364,15 @@ class public DataProvider
                 
                 sql$=sql$+orderby$
              fi
+        fi
+        
+        sqldebug$=stbl("SQLDEBUG",err=*next)
+        if sqldebug$>"" then
+            ch=unt
+            open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+            print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
+            print (ch)sql$
+            close (ch)
         fi
 
 REM         ? sql$
