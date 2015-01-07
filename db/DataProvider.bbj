@@ -1231,12 +1231,10 @@ REM         input *
         v$=v$(2)
 
         sql$="INSERT INTO "+#SchemaPfx$+#PrimaryTable$+" ("+s$+") VALUES ("+v$+")"
-        rem print sql$
 
+        dbg$=sql$+$0a$
 
         #openDatabase()
-        
-
 
         stmt! = #Connection!.prepareStatement(sql$)
         ks! = uhm!.keySet()
@@ -1248,6 +1246,7 @@ REM         input *
             obj!= rec!.getField(k$)
             type$=rec!.getFieldType(k$)
             
+            dbg$=dbg$+"Field "+str(i)+":"+k$+" Type:"+type$+" Contents:"+str(obj!)+$0a$
 
             if type$="C" then
                 stmt!.setString(i,obj!)
@@ -1295,9 +1294,17 @@ REM         input *
         ? "(",ret,")"
         
         if ret=0 then
-            a=msgbox(BBjAPI().getLastJavaException().toString()+" "+sql$+" Line "+str(tcb(5)),0,"Error")
+            a=msgbox(dbg$,0,"Error on SQL Insert")
         fi
 
+        sqldebug$=stbl("SQLDEBUG",err=*next)
+        if sqldebug$>"" then
+            ch=unt
+            open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+            print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
+            print (ch)dbg$
+            close (ch)
+        fi
         
         if ret=1 then
               rem re-read the just added record and put it into the result set on first position 
@@ -1417,8 +1424,11 @@ REM         input *
         if len(s$) then
             s$=s$(2)
             sql$="UPDATE "+#SchemaPfx$+#PrimaryTable$+" SET "+s$+" WHERE "+wh$
-   
+            
+            dbg$=sql$+$0a$
+            
             #openDatabase()
+            
             declare java.sql.PreparedStatement stmt!
     
             stmt! = #Connection!.prepareStatement(sql$)
@@ -1430,7 +1440,9 @@ REM         input *
                 k$=it!.next()
                 obj!= prow!.getField(k$)
                 type$=prow!.getFieldType(k$)
-    
+                
+                dbg$=dbg$+"Field "+str(i)+":"+k$+" Type:"+type$+" Contents:"+str(obj!)+$0a$
+                
                 if type$="C" then
                     stmt!.setString(i,obj!)
                 fi
@@ -1475,12 +1487,22 @@ REM         input *
                 ex! = BBjAPI().getLastJavaException()
     
                 if ex! <> null() then
-                    a=msgbox(ex!.toString()+" "+sql$+" Line "+str(tcb(5))+" Obj: "+str(obj!),0,"Error")
+                    a=msgbox(dbg$,0,"Error on SQL Update")
                 fi
             fi
     
             stmt!.close()
             #closeDatabase()
+            
+            sqldebug$=stbl("SQLDEBUG",err=*next)
+            if sqldebug$>"" then
+                ch=unt
+                open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+                print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
+                print (ch)dbg$
+                close (ch)
+            fi
+            
         fi
         
     methodend
