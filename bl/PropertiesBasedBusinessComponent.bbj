@@ -45,7 +45,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         #setLocale(locale$)
         #setAttribute(attribute$) 
         
-        #Translator! = BBTranslator.getInstance(#AtbListProperties$, locale$ , null() , #AtbListPropertiesFolder$)
+        #Translator! = BBTranslator.getInstance(#AtbListProperties$, locale$ , "" , #AtbListPropertiesFolder$)
         #GlobalMap! = cast(TreeMap, #Namespace!.getValue(#AtbListMap$,err=*next))
         if #GlobalMap! = null() then
                 #GlobalMap! = new TreeMap()
