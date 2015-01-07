@@ -449,7 +449,11 @@ class public GoogleMapsComponent extends UIComponent implements BBjControl
         HTML$=HTML$+"          function initialize() {"
         HTML$=HTML$+"            var myOptions = {"
         HTML$=HTML$+"              center: new google.maps.LatLng("+#Center!.getFieldAsString("LAT",err=*next)+","+#Center!.getFieldAsString("LONG",err=*next)+"),"
-        HTML$=HTML$+"              zoom: 6,"
+        if #Markers!.size() = 1 then
+            HTML$=HTML$+"              zoom: 10,"
+        else
+            HTML$=HTML$+"              zoom: 6,"
+        fi
         HTML$=HTML$+"              mapTypeId: google.maps.MapTypeId.ROADMAP"
         HTML$=HTML$+"            };"
         HTML$=HTML$+"            var map = new google.maps.Map(document.getElementById(""map_canvas""),"
@@ -508,7 +512,9 @@ class public GoogleMapsComponent extends UIComponent implements BBjControl
 
         endif
 
-        if #Markers!.size() = 1 then HTML$ = HTML$ + "&zoom=8" endif
+        if #Markers!.size() = 1 then 
+            HTML$ = HTML$ + "&zoom=10" 
+        endif
         HTML$=HTML$+"&size="+str(w-10)+"x"+str(h-10)+"&language="+STBL("!LOCALE")+"&sensor=false&key=ABQIAAAAap0HEV-ixXMRUaYIBuBfmRT77L4N76s2HcFsGSkrxDTwKN97jRQmWLW6hTKLmlPz92AuJhUvgis35Q"
         HTML$=HTML$+"'>"
         HTML$=HTML$+"      </body>"
