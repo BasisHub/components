@@ -1303,7 +1303,11 @@ REM         input *
             open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
             print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
             print (ch)dbg$
+            if ret=0 then   
+                print (ch)"Execute failed!"
+            fi
             close (ch)
+            
         fi
         
         if ret=1 then
@@ -1484,11 +1488,7 @@ REM         input *
             ? "(",ret,")"
     
             if ret=0 then
-                ex! = BBjAPI().getLastJavaException()
-    
-                if ex! <> null() then
                     a=msgbox(dbg$,0,"Error on SQL Update")
-                fi
             fi
     
             stmt!.close()
@@ -1500,6 +1500,9 @@ REM         input *
                 open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
                 print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
                 print (ch)dbg$
+                if ret=0 then   
+                    print (ch)"Execute failed!"
+                fi
                 close (ch)
             fi
             
