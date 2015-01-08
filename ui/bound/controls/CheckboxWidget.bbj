@@ -40,10 +40,22 @@ class public  CheckboxWidget extends ControlWidget
 
     method public DataRow prepareSave(DataRow r!)
 
+        if #getFocus() then
+            edrow! = #getBC().getEditedRecord()
+            n$=#getName()
+            
+            tmpVal$=iff(cast(BBjCheckBox,#getCtrl()).isSelected(),"1","0")
+
+            edrow!.setFieldValue(n$,tmpVal$)
+            validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
+            #markValidationErrors()
+        fi
+
         if #getEdited() then
-            tmpVal$="0"
-            if cast(BBjCheckBox,#getCtrl()).isSelected() then tmpVal$="1" endif
+            
+            tmpVal$=iff(cast(BBjCheckBox,#getCtrl()).isSelected(),"1","0")
             r!.setFieldValue(#getBindField(),tmpVal$)
+            
         fi
 
         methodret r!
@@ -51,3 +63,4 @@ class public  CheckboxWidget extends ControlWidget
     methodend
 
 classend
+
