@@ -27,6 +27,9 @@ class public UIComponent implements BBjControl
     field protected BusinessComponent   BC!
     field protected BBjString     BindField$
     field protected BBjString     BindClass$
+    field protected BBjString     FillField$
+    field protected BBjString     FillClass$
+    
     field protected BBjNumber     IsPrimaryKeyField
      
     field private BBjString         CssClass$
@@ -294,6 +297,13 @@ class public UIComponent implements BBjControl
         fi
 
     methodend
+    
+    
+    method public void setLength(BBjNumber x!)
+        rem needs override
+    methodend
+    
+    
 
 
     rem /**
@@ -842,6 +852,14 @@ class public UIComponent implements BBjControl
     method public void setBindClass(BBjString class$)
         #BindClass$=class$
     methodend    
+    
+    method public void setFillField(BBjString field$)
+        #FillField$=field$
+    methodend
+
+    method public void setFillClass(BBjString class$)
+        #FillClass$=class$
+    methodend     
 
     method public BBjNumber getWidth()
         methodret #getWnd().getWidth()

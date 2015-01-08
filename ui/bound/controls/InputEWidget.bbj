@@ -21,10 +21,10 @@ class public  InputEWidget extends ControlWidget
         
     methodend
     
-    method public void setLength(BBjNumber length)
-        #super!.setLength(length)
+    method public void setLength(BBjNumber length!)
+        #super!.setLength(length!)
         ipe! = #getCtrl()
-        ipe!.setLength(length) 
+        ipe!.setLength(length!) 
     methodend 
     
     method public void setText(BBjString text!)

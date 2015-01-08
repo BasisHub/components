@@ -28,9 +28,7 @@ class public ControlWidget extends UIComponent
 
 
     field protected BusinessComponent   FillBC!
-    field protected BBjString           FillField$
-    field protected BBjString           FillClass$
-
+    
     field protected ForeignKeyPicker    FkPicker!
     
     field protected BBjToolButton       WarningIcon!
@@ -66,9 +64,9 @@ REM         a!.setFocusable(0,err=*next)
         
     methodend
     
-    method public void setLength(BBjNumber length)
-        #Length=length
-        #setSize(30+length*#charw,#getHeight())
+    method public void setLength(BBjNumber length!)
+        #Length=length!
+        #setSize(30+length!*#charw,#getHeight())
     methodend 
     
     method public void setText(BBjString text!)
@@ -412,13 +410,7 @@ REM     methodend
 rem ------------medthods for fill BC
 
 
-    method public void setFillField(BBjString field$)
-        #FillField$=field$
-    methodend
-
-    method public void setFillClass(BBjString class$)
-        #FillClass$=class$
-    methodend    
+   
 
     rem /**
     rem * Method setFillBC:
@@ -427,7 +419,7 @@ rem ------------medthods for fill BC
     rem */
     method public void setFillBC(BusinessComponent bc!)
 
-        #FillBC! = bc!
+        #setFillBC(bc!)
         rem todo: introduce a proxy class for the BC so this thing can also register for the update / 
         rem refresh callbacks of the businesscomponent
 

@@ -144,8 +144,11 @@ class public UIController
         if positionOnFirstRecord then
             #TargetAutoSelectFirstRecord!.put(fieldname$,1)
         fi
-
-        bc!.drive(fieldname$,null())
+        
+        v! = new BBjVector()
+        v!.addItem("null()")
+        bc!.drive(fieldname$,v!)
+        
 
 
         if positionOnFirstRecord then
