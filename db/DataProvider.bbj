@@ -12,6 +12,7 @@ use com.basiscomponents.lucene.BBjSearchGizmo
 use com.basiscomponents.lucene.BBjSearchGizmoDoc
 
 use java.util.HashMap
+use java.util.ArrayList
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::admin/admin.bbj::Admin
 use ::admin/admin.bbj::UserCredentials
@@ -48,9 +49,9 @@ class public DataProvider
     field private   DataRow             PrimaryTableLayout!   
     field private   DataRow             QueryLayout!
         
-    field private java.util.ArrayList   ColNames!
-    field private java.util.ArrayList   ColLabels!
-    field private java.util.ArrayList   ColTypes!
+    field private ArrayList   ColNames!
+    field private ArrayList   ColLabels!
+    field private ArrayList   ColTypes!
     
     field protected BBjSearchGizmo      SearchEngine!
     field protected BBjVector           SearchEngineFields!
@@ -1211,14 +1212,15 @@ REM         input *
         ks! = hm!.keySet()
         
         it! = ks!.iterator()
-        uhm! = new HashMap()
+        
+        alf! = new BBjVector()
 
         while it!.hasNext()
             k$=it!.next()
             if primrow!.contains(k$) then 
               s$=s$+","+k$
               v$=v$+",? "
-              uhm!.put(k$,hm!.get(k$))
+              alf!.addItem(k$)
             fi              
         wend
 
@@ -1237,8 +1239,7 @@ REM         input *
         #openDatabase()
 
         stmt! = #Connection!.prepareStatement(sql$)
-        ks! = uhm!.keySet()
-        it! = ks!.iterator()
+        it! = alf!.iterator()
         i=1
 
         while it!.hasNext()
@@ -1320,10 +1321,8 @@ REM         input *
               sql$=sql$+" WHERE "+wh$
               
               stmt! = #Connection!.prepareStatement(sql$,java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
-              
-      
-              ks! = uhm!.keySet()
-              it! = ks!.iterator()
+
+              it! = alf!.iterator()
               i=1
       
               while it!.hasNext()
@@ -1414,13 +1413,13 @@ REM         input *
 
         ks! = hm!.keySet()
         it! = ks!.iterator()
-        uhm! = new HashMap()
+        alf! = new BBjVector()
         
         while it!.hasNext()
             k$=it!.next()
             if primrow!.contains(k$) then 
                 s$=s$+", "+k$+" = ? "
-                uhm!.put(k$,hm!.get(k$)) 
+                alf!.addItem(k$) 
                 prow!.setFieldValue(k$,hm!.get(k$))
             fi
         wend
@@ -1437,8 +1436,8 @@ REM         input *
     
             stmt! = #Connection!.prepareStatement(sql$)
             i=1
-            ks! = uhm!.keySet()
-            it! = ks!.iterator()
+            
+            it! = alf!.iterator()
             
             while it!.hasNext()
                 k$=it!.next()
