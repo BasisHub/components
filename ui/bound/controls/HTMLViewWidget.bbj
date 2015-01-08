@@ -25,49 +25,75 @@ class public  HTMLViewWidget extends ControlWidget
                         r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                         text$     = r!.getFieldAsString(#getBindField(),err=*next)
                         
-                        html! = #super!.getCtrl()
-REM                         html!.setUrl("/files/deliver/25092014125036800.pdf",err=*next)
-
-                        rem html!.setText(text$) 
-                        d$    = java.lang.System.getProperty("com.basis.server.configDirectory")
-                        d$=d$(1,pos("cfg"=d$)-1)
-                
-                
-                        mkdir d$+"htdocs/deliver",err=*next
-                        t$=str(dec(info(3,0)))+"_"+date(0:"%Dz.%Mz.%Yl.%Hz%mz%Sz")
-                        mkdir d$+"htdocs/deliver/"+t$+"/",err=*next
-                
-                        f$=text$
-                        while pos("/"=f$) 
-                            f$=f$(pos("/"=f$)+1)
-                        wend
-                        while pos("\"=f$)
-                            f$=f$(pos("\"=f$)+1)
-                        wend
                         
-                        ch=unt
-                        open (ch)text$
+                        if len(text$)>4 and text$(1,4)="http" then
+                            rem field contains an URL, so simply use that one
+                            Url$=text$
+                        else
+                            
+                            
+                            d$    = java.lang.System.getProperty("com.basis.server.configDirectory")
+                            d$=d$(1,pos("cfg"=d$)-1)
+                    
+                    
+                            mkdir d$+"htdocs/deliver",err=*next
+                            t$=str(dec(info(3,0)))+"_"+date(0:"%Dz.%Mz.%Yl.%Hz%mz%Sz")
+                            mkdir d$+"htdocs/deliver/"+t$+"/",err=*next
+                    
+                            f$=text$
+                            while pos("/"=f$) 
+                                f$=f$(pos("/"=f$)+1)
+                            wend
+                            while pos("\"=f$)
+                                f$=f$(pos("\"=f$)+1)
+                            wend
                         
-                        ch1=unt
-                        open (ch1,mode="O_CREATE,O_TRUNC")d$+"htdocs/deliver/"+t$+"/"+f$
+                            seterr file_error
                         
-                        while 1
-                            read record (ch,siz=1000,end=*break)block$
-                            write (ch1)block$,
-                        wend
-                        
-                         close (ch)
-                         close (ch1)
-                         
-                         
-                        BaseUrl$ = Util.getJettyBaseUrl()
-                        Url$ = BaseUrl$+"/files/deliver/"+t$+"/"+java.net.URLEncoder.encode(f$,"UTF-8").replace("+", "%20")
-                        
-
-                        html!.setUrl(Url$)                        
+                            if len(text$)>2 and (text$(1,2)="//" or text$(1,2)="\\") then
+                                ds_prefix$=stbl("!DS_UNC",err=*next)
+                            fi
+                             
+                            ch=unt
+                            open (ch)ds_prefix$+text$
+                            
+                            ch1=unt
+                            open (ch1,mode="O_CREATE,O_TRUNC")d$+"htdocs/deliver/"+t$+"/"+f$
+                            
+                            while 1
+                                read record (ch,siz=1000,end=*break)block$
+                                write (ch1)block$,
+                            wend
+                            
+                             close (ch)
+                             close (ch1)
+                             
+                             seterr 0
+                             
+                            BaseUrl$ = Util.getJettyBaseUrl()
+                               
+                            Url$ = BaseUrl$+"files/deliver/"+t$+"/"+java.net.URLEncoder.encode(f$,"UTF-8").replace("+", "%20")
+                        fi    
+                        html! = #getCtrl()
+                        html!.setUrl(Url$)
+                        html!.setEnabled(1)                        
 
                      fi
                  fi
+                 
+                 methodret
+                 
+                 file_error:
+                    html! = #getCtrl()
+                    html!.setText("Error accessing file")
+                 methodret
     methodend
+    
+    method public void performSetEnabled(BBjNumber fEnabled!)
+    
+        
+        #getCtrl().setEnabled(1) 
+        
+    methodend   
 
 classend
