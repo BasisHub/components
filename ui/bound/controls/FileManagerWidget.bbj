@@ -52,8 +52,15 @@ class public  FileManagerWidget extends ControlWidget
         #Fm!.setEnabled(0)
     methodend
     
-    method public void setEnabled(BBjNumber fEnabled!)
-        #Fm!.setEnabled(fEnabled!)
-    methodend   
+
+    
+    method public void performSetEnabled(BBjNumber fEnabled!)
+    
+        
+          #super!.performSetEnabled(fEnabled!)
+          #Fm!.setEnabled(fEnabled! AND #Fm!.getPathToFiles()<>"")
+
+        
+    methodend      
         
 classend
