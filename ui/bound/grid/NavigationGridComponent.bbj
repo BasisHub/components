@@ -1947,6 +1947,9 @@ REM         fi
                     #LedFilterSave!.setTabTraversable(0)
                     #fillLedFilterSave()
                     #LedFilterSave!.setCallback(#LedFilterSave!.ON_EDIT_MODIFY,#this!,"onLedFilterSaveEditModify")
+                    rem Bug 27982 - BBjListEdit fires both ON_EDIT_MODIFY and ON_LIST_SELECT in GUI, but only ON_LIST_SELECT in BUI  
+                    #LedFilterSave!.setCallback(#LedFilterSave!.ON_LIST_SELECT,#this!,"onLedFilterSaveEditModify")
+                    
 
                     offs=offs+125
 
@@ -1991,6 +1994,8 @@ REM         fi
                     #LedConfigSave!.setTabTraversable(0)
                     #fillLedConfigSave()
                     #LedConfigSave!.setCallback(#LedConfigSave!.ON_EDIT_MODIFY,#this!,"onLedConfigSaveEditModify")
+                    rem Bug 27982 - BBjListEdit fires both ON_EDIT_MODIFY and ON_LIST_SELECT in GUI, but only ON_LIST_SELECT in BUI  
+                    #LedConfigSave!.setCallback(#LedFilterSave!.ON_LIST_SELECT,#this!,"onLedConfigSaveEditModify")
 
                     offs=offs+125
 
@@ -2137,7 +2142,7 @@ REM         fi
     methodend
 
 
-    method public void onLedConfigSaveEditModify(BBjEditModifyEvent ev!)
+    method public void onLedConfigSaveEditModify(BBjEvent ev!)
 
         sav$=#LedConfigSave!.getEditText()
 
@@ -2289,8 +2294,9 @@ REM         fi
     methodend
 
 
-    method public void onLedFilterSaveEditModify(BBjEditModifyEvent ev!)
-
+    method public void onLedFilterSaveEditModify(BBjEvent ev!)
+        
+        
         sav$=#LedFilterSave!.getText()
 
         #enableFilterSaveButtons()
