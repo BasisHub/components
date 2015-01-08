@@ -1127,12 +1127,12 @@ class public BusinessComponent
         #setEditedRecord(-2)
         #broadcastEnableControls()
         
-REM         if #UIList!.size() then
-REM             for i=0 to #UIList!.size()-1
-REM                 ui! = CAST(UIComponent,#UIList!.getItem(i))
-REM                 ui!.newRecord()
-REM             next
-REM         fi
+        if #UIList!.size() then
+            for i=0 to #UIList!.size()-1
+                ui! = CAST(UIComponent,#UIList!.getItem(i))
+                ui!.newRecord()
+            next
+        fi
 
         
     methodend
