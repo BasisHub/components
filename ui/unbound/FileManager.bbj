@@ -69,6 +69,13 @@ class public FileManager implements BBjControl
     methodend
 
     rem /**
+    rem  * gets File location for the FileManager
+    rem  */
+    method public BBjString getPathToFiles()
+        methodret #pathToFiles$
+    methodend
+
+    rem /**
     rem  * register callbacks
     rem  */
     method public void setCallback()
