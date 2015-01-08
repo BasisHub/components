@@ -342,11 +342,12 @@ REM         #refresh(0)
             
             #onAfterInsert(row!)
             rec=#getResultSet().size()-1
-            rec!=#getResultSet().getItem(rec)
-            #getResultSet().setItem(rec,#processRecord(rec!)) 
-            #setSelection(rec)
-            #setEditedRecord(-1)
-
+            if rec>-1 then
+                rec!=#getResultSet().getItem(rec)
+                #getResultSet().setItem(rec,#processRecord(rec!)) 
+                #setSelection(rec)
+                #setEditedRecord(-1)
+            fi
         else
 
               if recno>-1 then
