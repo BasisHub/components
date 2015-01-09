@@ -419,7 +419,7 @@ rem ------------medthods for fill BC
     rem */
     method public void setFillBC(BusinessComponent bc!)
 
-        #setFillBC(bc!)
+        #FillBC!=bc!
         rem todo: introduce a proxy class for the BC so this thing can also register for the update / 
         rem refresh callbacks of the businesscomponent
 
