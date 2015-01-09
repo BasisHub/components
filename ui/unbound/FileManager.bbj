@@ -140,8 +140,9 @@ class public FileManager implements BBjControl
     method public void filesListClick(BBjListClickEvent e!)
         selectedIndex=e!.getSelectedIndex()
         lb! = e!.getControl()
-        if selectedIndex>-1 then
-            #currentFile$ = str(lb!.getItemAt(selectedIndex))
+        vec! = lb!.getUserData()
+        if selectedIndex>-1 and vec! <> null() then
+            #currentFile$ = cast(BBjString,vec!.getItem(selectedIndex))
         endif
     methodend
 
@@ -161,9 +162,10 @@ class public FileManager implements BBjControl
             if file$(1,1)="." then continue
             tmpch=unt
             open(tmpch,err=*continue)#pathToFiles$+#separator$+file$
-            tmpFid$=fid(tmpch);close(tmpch)
+            tmpFid$=fid(tmpch);date$=fin(tmpch)(27,4);close(tmpch)
             if tmpfid$(1,1)=$05$ then continue endif
             vec!.addItem(file$)
+            rem d$=date(jul(dec($00$+AND(date$(1,2),$FE00$))/512+1980, dec($00$+AND(date$(1,2),$01E0$))/32, dec($00$+AND(date$(1,2),$001F$))), dec($00$+AND(date$(3,2),$F800$))/2048 + dec($00$+AND(date$(3,2),$07E0$))/32/60 + dec($00$+AND(date$(3,2),$001F$))*2/3600: "%Dz.%Mz.%Yl %Hz:%mz:%sz")
         wend
         close(ch)
         methodret vec!
@@ -222,7 +224,15 @@ class public FileManager implements BBjControl
     method public void refreshFileList()
         #Files!.removeAllItems()
         files! = #getFileList()
-        #Files!.insertItems(0,files!)
+        rem #Files!.insertItems(0,files!)
+        #Files!.setUserData(files!)
+        format! = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+        it! = files!.iterator()
+        while it!.hasNext()
+            file! = new java.io.File(#pathToFiles$+java.io.File.separator+it!.next())
+            dateModified! = new java.util.Date(file!.lastModified())
+            #Files!.addItem(file!.getName() + " (" + format!.format(dateModified!) + ")")
+        wend
     methodend
 
     rem /**
@@ -319,7 +329,8 @@ wnd!.setCallback(wnd!.ON_RESIZE,"resize")
 declare FileManager c!
 
 c! = new FileManager(wnd!,101,10,10,wnd!.getWidth(),wnd!.getHeight())
-c!.setPathToFiles("D:/tmp/test123/")
+rem c!.setPathToFiles("D:/tmp/test123/")
+c!.setPathToFiles(System.getProperty("java.io.tmpdir"))
 
 c!.setName("TEST")
 
