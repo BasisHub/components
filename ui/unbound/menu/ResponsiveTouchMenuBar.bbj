@@ -139,6 +139,9 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
         fi
     methodend
 
+    method public void addStyle(BBjString styleName$)
+        #Frame!.addStyle(styleName$)
+    methodend
 
 classend
 
