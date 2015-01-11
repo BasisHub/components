@@ -350,7 +350,6 @@ REM     methodend
             n$=#getName()
             v!=#getCtrl().getText()
             if #getFkPicker() <> null() then
-                escape
                 v!=#getFkPicker().getSelectedForeignKeyValue()
                 if v!=null() then
                     v!=""
