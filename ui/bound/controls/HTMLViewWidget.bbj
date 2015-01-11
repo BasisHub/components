@@ -77,7 +77,7 @@ class public  HTMLViewWidget extends ControlWidget
                         html! = #getCtrl()
                         html!.setUrl(Url$)
                         html!.setEnabled(1)                        
-
+                        a=msgbox(BBjAPI().getRuntime().getBBjStackTrace(),0,Url$)
                      fi
                  fi
                  
@@ -95,5 +95,16 @@ class public  HTMLViewWidget extends ControlWidget
         #getCtrl().setEnabled(1) 
         
     methodend   
+
+    rem /**
+    rem * Method setEditing:
+    rem * invoked from BusinessComponent if a UI component started editing a record in the resultset
+    rem * @param BBjNumber isEditing: -1 = i
+    rem */
+    method public void setEditing(BBjNumber isEditing)
+    
+        rem this is a noop on this control type
+   
+    methodend
 
 classend
