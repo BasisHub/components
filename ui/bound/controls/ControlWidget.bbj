@@ -221,9 +221,17 @@ REM     methodend
             #Focus = 0
             edrow! = #getBC().getEditedRecord()
             n$=#getName()
-            v$=ev!.getText()
-            edrow!.setFieldValue(n$,v$)
-            validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
+            v!=ev!.getText()
+            if #getFkPicker() <> null() then
+                
+                v!=#getFkPicker().getSelectedForeignKeyValue()
+                if v!=null() then
+                    v!=""
+                fi
+            fi
+
+            edrow!.setFieldValue(n$,v!)
+            validate = #getBC().validateField(n$,v!,#getBC().getEditedOriginalRecord(), edrow!)
             #markValidationErrors()
         fi
 
@@ -340,9 +348,16 @@ REM     methodend
         if #Focus then
             edrow! = #getBC().getEditedRecord()
             n$=#getName()
-            v$=#getCtrl().getText()
-            edrow!.setFieldValue(n$,v$)
-            validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
+            v!=#getCtrl().getText()
+            if #getFkPicker() <> null() then
+                escape
+                v!=#getFkPicker().getSelectedForeignKeyValue()
+                if v!=null() then
+                    v!=""
+                fi
+            fi
+            edrow!.setFieldValue(n$,v!)
+            validate = #getBC().validateField(n$,v!,#getBC().getEditedOriginalRecord(), edrow!)
             #markValidationErrors()
         fi
     
