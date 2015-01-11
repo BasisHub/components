@@ -13,13 +13,13 @@ class public ResponsiveSplitPane
     field private BBjChildWindow CwRight!
     field private BBjNumber WasBackButtonInvisible=1
     field private BBjNumber SlideOpen
-    field private BBjCheckBox    CbPin!
+REM     field private BBjCheckBox    CbPin!
     field private BBjControl UiwLeft!
     field private BBjControl UiwRight!
     field private BBjNumber DisplayMode
     field private BBjNumber PreferredLeftSize = 300
     
-    field private BBjNumber AutoHideLeft = 1
+    field private BBjNumber AutoHideLeft = 0
 
     method public ResponsiveSplitPane(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
@@ -51,14 +51,16 @@ REM         #BtnBack!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
 REM         #BtnBack!.setName("BackButton")
 REM         #BtnBack!.addStyle("BackButtonStyle")
 
-        #CbPin! = #CwLeft!.addCheckBox(202,1,1,16,16,"")
-        #CbPin!.setCallback(BBjAPI.ON_CHECK_ON,#this!,"onCbPinCheck")
-        #CbPin!.setCallback(BBjAPI.ON_CHECK_OFF,#this!,"onCbPinUncheck")
-        
-        #CbPin!.addStyle("PinButtonStyle")
-        
-        #AutoHideLeft = num(BBjAPI().getThinClient().getUserProperty("ResponsiveSplitPaneAutoHide",err=*next),err=*next)
-        #CbPin!.setSelected (#AutoHideLeft) 
+
+REM  FIXME this is broken!!!
+REM         #CbPin! = #CwLeft!.addCheckBox(202,1,1,16,16,"")
+REM         #CbPin!.setCallback(BBjAPI.ON_CHECK_ON,#this!,"onCbPinCheck")
+REM         #CbPin!.setCallback(BBjAPI.ON_CHECK_OFF,#this!,"onCbPinUncheck")
+REM         
+REM         #CbPin!.addStyle("PinButtonStyle")
+REM         #AutoHideLeft = num(BBjAPI().getThinClient().getUserProperty("ResponsiveSplitPaneAutoHide",err=*next),err=*next)
+REM          
+REM         #CbPin!.setSelected (#AutoHideLeft) 
               
         #setSize(#W,#H)
         
@@ -100,8 +102,8 @@ REM         #BtnBack!.addStyle("BackButtonStyle")
         switch #DisplayMode
             case 0
               #CwLeft!.setSize(#PreferredLeftSize,h!)
-              #CbPin!.setLocation(#PreferredLeftSize-20,h!-20)
-              #CbPin!.setVisible(1)
+REM               #CbPin!.setLocation(#PreferredLeftSize-20,h!-20)
+REM               #CbPin!.setVisible(1)
               
               if #UiwLeft!<>null() then
                 #UiwLeft!.setSize(#PreferredLeftSize,h!-40)
@@ -142,7 +144,7 @@ REM               #BtnBack!.setVisible(0)
             case 1
               #activateLeft()
               #SlideOpen=0
-              #CbPin!.setVisible(0)
+REM               #CbPin!.setVisible(0)
               #CwLeft!.setSize(w!,h!)
               #CwRight!.setSize(w!,h!)
             break
@@ -150,7 +152,7 @@ REM               #BtnBack!.setVisible(0)
             case 2
               #activateRight()
               #SlideOpen=1
-              #CbPin!.setVisible(0)
+REM               #CbPin!.setVisible(0)
               #CwRight!.setEnabled(1)
               #CwLeft!.setSize(w!,h!)
               #CwRight!.setSize(w!,h!)
