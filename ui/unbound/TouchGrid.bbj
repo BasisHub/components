@@ -15,6 +15,8 @@ class public TouchGrid implements BBjControl
     
     field private static BBjNumber ON_SELCHANGE=100
     
+    field private BBjNumber CurrentSel = -1 
+    
     method private TouchGrid()
 
 
@@ -59,6 +61,7 @@ class public TouchGrid implements BBjControl
 
     method public void clear()
         #DataSet! = new BBjVector()
+        #CurrentSel=-1
     methodend
     
     method public void addItem(DataRow row!)
@@ -73,6 +76,7 @@ class public TouchGrid implements BBjControl
         
         #DataSet! = v!
         #updateUI()
+        #CurrentSel=-1
         
     methodend
     
@@ -124,7 +128,8 @@ class public TouchGrid implements BBjControl
     
         sel = ev!.getSelectedIndex()
         rem a=msgbox(str(sel),0,"Touch!")
-        if sel>-1 and #SelChangeObject!<>null() and #SelChangeMethod$<>"" then
+        if sel>-1 and #SelChangeObject!<>null() and #SelChangeMethod$<>"" and sel <>#CurrentSel then
+            #CurrentSel = sel
             Util.invoke(#SelChangeObject!, #SelChangeMethod$, sel)
         fi
          #LbList!.deselectAll()
@@ -132,6 +137,23 @@ REM        #LbList!.focus()
         if sel>-1 then
             #LbList!.selectIndex(sel)
         fi
+    methodend
+    
+    method public void setName (BBjString name!)
+        #CwCanvas!.setName(name!)
+    methodend 
+
+    method public BBjString getName ()
+        methodret #CwCanvas!.getName()
+    methodend 
+
+
+    method public void setEnabled(BBjNumber enabled!)
+        #CwCanvas!.setEnabled(enabled!)
+    methodend 
+    
+    method public void destroy()
+        
     methodend
 
 classend
