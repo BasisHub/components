@@ -92,7 +92,7 @@ REM         #refresh(0)
             
             #refresh(0)
  
-            #prepareResultSet(0,0)
+REM             #prepareResultSet(0,0)
             if #getResultSet().size()>0 then
                 v! = new BBjVector()
                 v!.addItem(0)

@@ -367,14 +367,7 @@ class public DataProvider
              fi
         fi
         
-        sqldebug$=stbl("SQLDEBUG",err=*next)
-        if sqldebug$>"" then
-            ch=unt
-            open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
-            print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
-            print (ch)sql$
-            close (ch)
-        fi
+
 
 REM         ? sql$
 REM         clipfromstr 1,sql$
@@ -406,6 +399,8 @@ REM         input *
     method public BBjNumber size()
 
         if #Size = -1 then
+            
+            startTime = java.lang.System.currentTimeMillis()
             #openDatabase()
             sql$=#buildSQLStatement()
             count$ = sql$
@@ -440,6 +435,22 @@ REM         input *
             fi
 
             #closeDatabase()
+
+            sqldebug$=stbl("SQLDEBUG",err=*next)
+            if sqldebug$>"" then
+                ch=unt
+                open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+                print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
+                print (ch)sql$
+                totalTime = java.lang.System.currentTimeMillis() - startTime
+                print (ch)"Duration: ",totalTime,"ms"
+                
+                  if sqldebug$="2" then
+                      print (ch) BBjAPI().getRuntime().getBBjStackTrace()
+                  fi
+                 
+                close (ch)
+            fi
             
         endif
 
@@ -711,12 +722,20 @@ REM         input *
     rem */
     method public BBjVector prepareResultSet(BBjNumber first, BBjNumber last)
 
+        startTime = java.lang.System.currentTimeMillis()
+        sqldebug$=stbl("SQLDEBUG",err=*next)
 
         if first=0 and last=0 then
             canExit=1
         fi
 
         if #getResultSet().size()=#Size and #BC!<>null() and #BC!.isPreFiltering() and #LastPrepareResultSet! <> null() then
+            if sqldebug$>"" then
+                ch=unt
+                open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+                print (ch)"(not executed)"
+                close (ch)
+            fi        
             methodret new BBjVector()
         fi
 
@@ -727,7 +746,15 @@ REM         input *
         last = last+1
         
         sql$=#buildSQLStatement()
-        
+
+        if sqldebug$>"" then
+            ch=unt
+            open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+            print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
+            print (ch)sql$
+            close (ch)
+        fi
+                
         rem now determine size for later use - it's probably needed anyway
         
         if #Size = -1 and canExit=0 then
@@ -801,6 +828,14 @@ REM         input *
                         if #AttributesRecord! = null()  and row! <> null() then
                             #AttributesRecord! = row!.clone()
                             if canExit then 
+                            
+                                if sqldebug$>"" then
+                                    ch=unt
+                                    open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+                                    print (ch)"(only for attributes record)"
+                                    close (ch)
+                                fi          
+                                                  
                                 methodret null()
                             fi
                             rem this is really ugly, assuming that we can abandon the query with the first
@@ -896,6 +931,21 @@ REM         input *
         
         
         #LastPrepareResultSet! = cast(BBjVector,v!)
+        
+        
+        totalTime = java.lang.System.currentTimeMillis() - startTime
+
+        if sqldebug$>"" then
+            ch=unt
+            open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+            print (ch)"Duration: ",totalTime," ms"
+            if sqldebug$="2" then
+                print (ch) BBjAPI().getRuntime().getBBjStackTrace()
+            fi
+            
+            close (ch)
+        fi
+                
         methodret v!
 
     methodend
