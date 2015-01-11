@@ -77,7 +77,6 @@ class public  HTMLViewWidget extends ControlWidget
                         html! = #getCtrl()
                         html!.setUrl(Url$)
                         html!.setEnabled(1)                        
-                        a=msgbox(BBjAPI().getRuntime().getBBjStackTrace(),0,Url$)
                      fi
                  fi
                  
