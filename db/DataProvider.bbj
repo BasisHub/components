@@ -1359,7 +1359,6 @@ REM         input *
         rem TODO: catch error
         ret=stmt!.executeUpdate(err=*next)
 
-        ? "(",ret,")"
         
         if ret=0 then
             a=msgbox(dbg$,0,"Error on SQL Insert")
@@ -1375,7 +1374,6 @@ REM         input *
                 print (ch)"Execute failed!"
             fi
             close (ch)
-            
         fi
         
         if ret=1 then
@@ -1387,6 +1385,7 @@ REM         input *
               fi
               sql$=sql$+" WHERE "+wh$
               
+              dbg$=sql$+$0a$
               stmt! = #Connection!.prepareStatement(sql$,java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
 
               it! = alf!.iterator()
@@ -1397,6 +1396,7 @@ REM         input *
                   obj!= rec!.getField(k$)
                   type$=rec!.getFieldType(k$)
       
+                  dbg$=dbg$+"Field "+str(i)+":"+k$+" Type:"+type$+" Contents:"+str(obj!)+$0a$
       
                   if type$="C" then
                       stmt!.setString(i,obj!)
@@ -1431,6 +1431,17 @@ REM         input *
                   fi
                   i=i+1
               wend
+
+              sqldebug$=stbl("SQLDEBUG",err=*next)
+              if sqldebug$>"" then
+                  ch=unt
+                  open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+                  print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
+                  print (ch)"Re-read record"
+                  print (ch)dbg$
+                  close (ch)
+              fi              
+              
               jrs! = cast(java.sql.ResultSet,stmt!.executeQuery())
               jrs!.beforeFirst() 
               declare java.sql.ResultSet jrs!
@@ -1447,6 +1458,73 @@ REM         input *
 
         
 
+    methodend
+
+    method public void reReadRecord(BBjNumber sel)
+
+        rec!=#getResultSet().getItem(sel,err=skip1)
+
+       it!=#PrimaryKeySegments!.iterator()
+        while it!.hasNext()
+            seg$=it!.next()
+            if wh$>"" then
+                wh$=wh$+" AND "
+            fi
+            
+            v$      = rec!.getFieldAsString(seg$)
+
+            wh$=wh$+" ( "
+            wh$=wh$+seg$
+            wh$=wh$+" = '"
+            wh$=wh$+v$
+            wh$=wh$+"' ) "
+        wend
+
+REM         prow! = #getPrimaryTableLayout()
+REM         primrow! = prow!.getFieldNames()
+REM         hm! = rec!.getObjects()
+REM 
+REM         ks! = hm!.keySet()
+REM         it! = ks!.iterator()
+REM         alf! = new BBjVector()
+REM         
+REM         while it!.hasNext()
+REM             k$=it!.next()
+REM             if primrow!.contains(k$) then 
+REM                 s$=s$+", "+k$+" = ? "
+REM                 alf!.addItem(k$) 
+REM                 prow!.setFieldValue(k$,hm!.get(k$))
+REM             fi
+REM         wend
+    
+        sql$=#buildSQLStatement(1)
+        if pos("WHERE"=cvs(sql$,4))=0 then
+            sql$=sql$+" WHERE "
+        else
+            sql$=sql$+" AND "
+        fi
+        sql$=sql$+"("+wh$+")"
+
+
+            #openDatabase()
+            stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_SENSITIVE, java.sql.ResultSet.CONCUR_READ_ONLY)
+            jrs! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+              jrs!.beforeFirst() 
+              
+             
+              
+              if jrs!.next(err=skip2) then
+                  r! = new DataRow(jrs!)
+                  #ResultSet!.setItem(sel,r!)
+                  
+              fi
+              skip2:
+            
+            #closeDatabase()
+        
+        
+        skip1: 
+        
     methodend
 
 
