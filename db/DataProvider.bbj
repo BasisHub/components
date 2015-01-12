@@ -835,7 +835,7 @@ REM         input *
                                     print (ch)"(only for attributes record)"
                                     close (ch)
                                 fi          
-                                                  
+                                #closeDatabase()              
                                 methodret null()
                             fi
                             rem this is really ugly, assuming that we can abandon the query with the first
@@ -1021,6 +1021,16 @@ REM         input *
 
             count = 0
             while count < 3
+
+                sqldebug$=stbl("SQLDEBUG",err=*next)
+                if sqldebug$>"" then
+                    ch=unt
+                    open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+                    print (ch)"openDatabase try"+str(count)
+                    close (ch)
+                fi
+            
+            
                 #Connection! = BBjAPI().getJDBCConnection(#DataSource$,connMode$,err=*next); break
                 if err <> 12 then exitto connectError
                 count = count + 1
@@ -1051,6 +1061,13 @@ REM         input *
 
         if #Connection! <> null() then
             #Connection!.close()
+            sqldebug$=stbl("SQLDEBUG",err=*next)
+            if sqldebug$>"" then
+                ch=unt
+                open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+                print (ch)"closeDatabase"
+                close (ch)
+            fi            
             #Connection! = null()
         fi
 
