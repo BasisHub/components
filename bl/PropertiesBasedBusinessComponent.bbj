@@ -587,7 +587,12 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem  */
     method public BBjString getAttributeValue(BBjString attributeKey!)
         
-            methodret str(#CurrentMap!.get(attributeKey!,err=*next))
+            obj!  = #CurrentMap!.get(attributeKey!,err=*next)
+            if obj!=null() then
+               methodret ""
+            endif
+            
+            methodret obj!.toString()
             throw "No attribute was found for the given Key", 11 
         
     methodend
