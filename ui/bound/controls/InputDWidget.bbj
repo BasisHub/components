@@ -52,8 +52,10 @@ class public  InputDWidget extends ControlWidget
     methodend   
     
     method public void onTbDatePick(BBjToolButtonPushEvent ev!)
+        #Ipd!.focus()
         #Ipd!.calendar() 
         #setEdited(1)
+        #setFocus(1) 
     methodend
     
     
