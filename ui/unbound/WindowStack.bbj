@@ -110,7 +110,7 @@ REM         fi
             backButton!.setClientEdge(0)
             backButton!.setImageFile("ico/back.png")
             
-            st! = tb!.addStaticText(102,150,10,2000,30,name$)
+            st! = tb!.addStaticText(102,150,10,w-200,30,name$)
             st!.addStyle("GroupTitle")
             st!.setVisible(1)
             rem todo: find a better place for that piece
@@ -256,6 +256,10 @@ REM         fi
             tb! = wnd!.getControl(101)
             tb!.setSize(w,yoffs-4)
             tb!.getControl(103).setLocation(w-50,5)
+
+            st! = tb!.getControl(102)
+            x=st!.getX()
+            st!.setSize(wnd!.getWidth()-x-50,st!.getHeight())
             
         fi
     methodend
@@ -296,8 +300,9 @@ REM         fi
         Button!.setCallback(BBjAPI.ON_BUTTON_PUSH,CallbackObj!,CallbackMethod$)    
         
         st! = tb!.getControl(102)
-        st!.setLocation(50*(id-2000+3),10)
-        
+        x=int(50*(id-2000+3))
+        st!.setLocation(x,10)
+        st!.setSize(wnd!.getWidth()-x-50,st!.getHeight())
         methodret id    
     methodend 
     
