@@ -14,6 +14,7 @@ class public  InputDWidget extends ControlWidget
         #setWnd(cwWidget!)
         #Ipd! = cast(BBjInputD,cwWidget!.addInputD(100,0,0,10,10,""))
         #Ipd!.setEditable(1) 
+        #Ipd!.setVisible(0) 
         #setCtrl(#Ipd!)
         
         h=#Ipd!.getHeight()
