@@ -134,7 +134,7 @@ REM             s=min(s,1000)
 
 
     method public void onSelectionChange()
-
+            #TouchGrid!.deselect()
     methodend
     
     method public void onGridSelChange(BBjNumber sel)

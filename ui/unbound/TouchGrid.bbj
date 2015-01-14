@@ -139,6 +139,11 @@ REM        #LbList!.focus()
         fi
     methodend
     
+    method public void deselect()
+        #LbList!.deselectAll()
+        #CurrentSel=-1
+    methodend
+    
     method public void setName (BBjString name!)
         #CwCanvas!.setName(name!)
     methodend 
