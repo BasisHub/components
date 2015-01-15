@@ -86,6 +86,10 @@ REM         #refresh(0)
     method public void drive(BBjString var$, BBjVector selection!, BBjNumber immediately)
 
         #super!.getControllerFilter().put(var$,selection!)
+        
+        if selection!.size()=0 then
+            selection!.addItem("null()")
+        fi
         #getDataProvider().putControllerFilter(var$,selection!)
 
         if immediately then
