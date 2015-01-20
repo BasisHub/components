@@ -28,9 +28,13 @@ class public TouchGrid implements BBjControl
 
     method public TouchGrid(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
-        #CwCanvas! = wnd!.addChildWindow(id,x,y,w,h,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
-
+        #CwCanvas! = wnd!.addChildWindow(id,x,y,w-5,h-5,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #CwCanvas!.setName("TouchGrid")
+        #CwCanvas!.addStyle("TouchGrid")
+        
         #LbList! = #CwCanvas!.addListBox(200,10,10,w-20,h-20,"")
+        #LbList!.addStyle("TouchGrid")
+        #LbList!.setFocusable(0)
         #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
     methodend
 

@@ -274,11 +274,10 @@ background: #eff0f0 !important;
 }
 td.itemBG {
   background: #ffffff;
-  border-bottom: 1px solid #c9cccf !important;
-  border-left: 1px solid #c9cccf !important;
-  border-right: 1px solid #c9cccf !important;
+  border: 1px solid #c9cccf !important;
   cursor: hand !important;
   height: 55px !important;
+  padding: 10px !important;
 }
 td.itemBG:hover {
   background: #f7f9fc;
@@ -291,7 +290,7 @@ td {
   color: #222;
 }
 td .infoTitle {
-  font: normal 16px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  font: normal 16px "SourceSansPro", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
   color: #802A50;
 }
 td.disclosureImage:after {
@@ -305,10 +304,10 @@ td:hover .disclosureImage:after {
   color: #abb1ba;
 }
 td .infoSubTitle {
-  font: normal 14px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  font: normal 14px "SourceSansPro", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
 td .infoMisc {
-  font: normal 11px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  font: normal 11px "SourceSansPro", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
   padding-bottom: 2px;
 }
 td .infoMiscValue {
@@ -542,4 +541,23 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71p
 {
 background-color: #802A50 !important;
 box-shadow: 0 2px 5px rgba(0,0,0,0.26);
+}
+
+.BBjListBox.TouchGrid
+{
+	background: #FFFFFF !important;
+	
+}
+
+.BBjChildWindow-container.TouchGrid,
+.BBjChildWindow-container.SearchWnd
+{
+	background: #FFFFFF !important;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.26);	
+}
+
+
+.BBjStaticText:not(.GroupTitle)
+ {
+  font: 14px normal "SourceSansPro-Light", Arial, Helvetica, Geneva, sans-serif !important;
 }
