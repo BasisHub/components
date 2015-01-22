@@ -30,48 +30,7 @@ public class PropertyReader {
 	public PropertyReader(String filename, String lang){
 		this.filename = filename;
 		this.lang = lang;
-		
-		Properties properties = getProperties(filename + PROPERTIES);
-		Properties desiredproperties = null;
-		if(!lang.isEmpty()){
-			desiredproperties = getProperties(filename + "_" + lang + PROPERTIES);
-		}
-			
-		HashMap<String, HashMap<String,String>> desiredLangMap = new HashMap<String, HashMap<String,String>>() ;
-		
-		Iterator<Object> it = properties.keySet().iterator();
-		HashMap<String, String> tmpMap;
-		String key;
-		String defaultValue;
-		String desiredValue = null;
-		while (it.hasNext()) {
-			key = (String) it.next();
-			
-			defaultValue = properties.getProperty(key);
-			if(desiredproperties != null){
-				desiredValue = desiredproperties.getProperty(key);
-			}
-			
-			String keyName = getKeyName(key);
-			String keyID = getKeyID(key);
-			if(keyName == null || keyID == null){
-				continue;
-			}
-			
-			if(desiredValue == null){
-				desiredValue = defaultValue;
-			}
-			
-			if(desiredLangMap.containsKey(keyName)){
-				tmpMap = desiredLangMap.get(keyName);
-				tmpMap.put(keyID, desiredValue);
-			}else{					
-				tmpMap = new LinkedHashMap<String, String>();
-				tmpMap.put(keyID, desiredValue);
-				desiredLangMap.put(keyName, tmpMap);
-			}
-		}
-		createFinalMap(desiredLangMap);
+		reload();
 	}
 	
 
