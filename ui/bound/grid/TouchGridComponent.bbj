@@ -10,6 +10,7 @@ class public TouchGridComponent extends UIComponent implements BBjControl
 
     field private TouchGrid TouchGrid!
     field private BBjStaticText ResultInfo!
+    field private BBjButton NewButton! 
 
     field private Object            SelChangeObject!
     field private BBjString         SelChangeMethod$
@@ -49,10 +50,14 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         #TouchGrid! = new TouchGrid(cw!,100,0,0,cw!.getWidth(),cw!.getHeight())
         #TouchGrid!.setCallback(#TouchGrid!.ON_SELCHANGE(),#this!,"onGridSelChange")
         
-        #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,#getTranslator().getTranslation("NO_RESULT")))
+        #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,#getTranslator().getTranslation("NO_RESULT"),$0010$ ))
         #ResultInfo!.addStyle("TouchGridResultinfo")
-        #ResultInfo!.setVisible(0)
 
+        
+        #NewButton! = cast(BBjButton, cw!.addButton (102,cw!.getWidth()-50,cw!.getHeight()-50,40,40,"",$0010$ ) )
+        #NewButton!.addStyle("NewButton") 
+        #NewButton!.setFocusable(0)
+        #NewButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onBtnNew")
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
@@ -60,7 +65,7 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         #super!.setSize(w!,h!)
         #TouchGrid!.setSize(w!,h!)
         #ResultInfo!.setSize(w!-20,40)
-
+        #NewButton!.setLocation(w!-50,h!-50)
     methodend
 
 
@@ -157,6 +162,19 @@ REM             s=min(s,1000)
 
         #getWnd().setEnabled(!isEditing)
         
+    methodend
+    
+    
+    method public void setShowNewButton(BBjNumber show)
+    
+        #NewButton!.setVisible(show)
+    
+    methodend
+    
+    method public void onBtnNew(BBjEvent ev!)
+
+        #getBC().broadcastNewRecord()
+
     methodend
 
   
