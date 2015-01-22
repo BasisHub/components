@@ -80,13 +80,15 @@ class public UIComponent implements BBjControl
     rem */
     method public UIComponent(BBjChildWindow cw!)
 
-        #Wnd! = cw!
-        #ParentWnd! = BBjAPI().getSysGui().getWindow(cw!.getParentWindow().getContextID())
-        #W = cw!.getWidth()
-        #H = cw!.getHeight()
-        #X = 0
-        #Y = 0
-
+        if cw!<>null() then
+            #Wnd! = cw!
+            #ParentWnd! = BBjAPI().getSysGui().getWindow(cw!.getParentWindow().getContextID())
+            #W = cw!.getWidth()
+            #H = cw!.getHeight()
+            #X = 0
+            #Y = 0
+        fi
+        
     methodend
 
 
