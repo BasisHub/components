@@ -24,7 +24,7 @@ class public ResponsiveFormFrame implements BBjControl, ISizeChangeNotifyTarget
     field private BBjNumber Cols=1
     field private BBjNumber CurCols
 
-    field private BBjNumber Spacing=5
+    field private BBjNumber Spacing=15 
     field private BBjNumber fHorizontalAlign=0
 
     method private ResponsiveFormFrame()
