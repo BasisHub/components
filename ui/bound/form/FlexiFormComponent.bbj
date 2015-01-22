@@ -233,7 +233,8 @@ REM         is! = new InputSource(new String(xml$))
                             rowc$= #getNodeValue(paneNode!,"rowconstraints")
                             name$= #getNodeValue(paneNode!,"name")
                             width$= #getNodeValue(paneNode!,"width")
-                            height$= #getNodeValue(paneNode!,"height")
+                            height$ = #getNodeValue(paneNode!,"height")
+                            cssClass$= #getNodeValue(paneNode!,"cssClass")
                             
                             if width$="" then
                                 width=100
@@ -251,7 +252,9 @@ REM         is! = new InputSource(new String(xml$))
                             rem create pane
                             cwCanvas! = f2wnd!.addChildWindow(f2wnd!.getAvailableControlID(),0,0,width,height,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
-                            
+                            if cssClass$<>"" then
+                                cwCanvas!.addStyle(cssClass$) 
+                            fi 
         
                             declare BBjFont font!
                             font_size=10

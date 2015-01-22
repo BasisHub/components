@@ -561,3 +561,30 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.26);
  {
   font: 14px normal "SourceSansPro-Light", Arial, Helvetica, Geneva, sans-serif !important;
 }
+
+
+.NewButton,
+.NewButton:hover {
+  -webkit-border-radius: 20px !important;
+  -moz-border-radius: 20px !important;
+  border-radius: 20px !important;
+  font: normal 15px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.26);
+  font-size: 14px !important;
+  background-color: #802A50 !important;
+  padding: 5px 10px 5px 10px;
+  text-decoration: none;
+	background-repeat: no-repeat !important;
+	background-position: center !important; 
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAABGSURBVEhLY2AYBdQKgf9ogFrmws0ZtYBgkI4GETiI0IOBXD7O8CbXQKLjZ+hbgC+tEh0MBBM8DgWjFhAMudEgIhhEI1cBAHj5/hDNei0LAAAAAElFTkSuQmCC) !important;
+  }
+  
+.Panel
+{
+      background-color: #fff;
+      box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2);
+      margin: 8px;	
+}
+
+// TODO see for material design samples and transitions  http://codepen.io/iraycd/pen/dHrxv
