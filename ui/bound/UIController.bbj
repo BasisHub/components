@@ -240,16 +240,14 @@ class public UIController
                     bc! = bclist!.getItem(i)
                     v$  = vlist!.getItem(i)
                     bc!.drive(v$,selection!)
-
                     autSel! = #TargetAutoSelectFirstRecord!.get(v$)
                     if autSel! <> null() then
-                        bc!.prepareResultSet(0,0)
+                        bc!.prepareResultSet(0,1)
                         if bc!.getResultSet().size()>0 then
-                            v! = new BBjVector()
-                            v!.addItem(0)
-                            bc!.setSelection(v!)
+                            bc!.setSelection(0)
                         fi
                     fi
+                    
                 next i
             fi
         fi

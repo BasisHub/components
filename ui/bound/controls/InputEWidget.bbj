@@ -11,13 +11,13 @@ class public  InputEWidget extends ControlWidget
         
         ipe! = cwWidget!.addInputE(100,0,0,10,10,"...")
         ipe!.setEditable(1) 
-        ipe!.setVisible(0)
+
         #setCtrl(ipe!)
         
-        
         #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
-        #Static!.setVisible(1)
         #Static!.addStyle("StaticRepresentation")
+        #performSetEnabled(0)
+        
         
     methodend
     
@@ -34,6 +34,7 @@ class public  InputEWidget extends ControlWidget
         
         x!= #getWnd().getControl(101)
         x!.setText(text!)        
+        
     methodend
     
     method public void performSetEnabled(BBjNumber fEnabled!)
@@ -46,6 +47,8 @@ class public  InputEWidget extends ControlWidget
             
             x!= #getWnd().getControl(101)
             x!.setVisible(!fEnabled!)
+            
+
 
         
     methodend
