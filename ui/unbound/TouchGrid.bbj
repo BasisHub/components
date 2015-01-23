@@ -87,19 +87,19 @@ class public TouchGrid implements BBjControl
     method public void updateUI()
     
         #LbList!.removeAllItems()
-        
-        v! = new BBjVector()
-        it! = #DataSet!.iterator()
-        while it!.hasNext()
-                
-            r! = it!.next()
-            if r! <> null() then
-                v!.addItem(r!.replaceFields(#RowTemplate$))
-            fi
-        wend
-        
-        #LbList!.insertItems(0,v!)
-    
+        if #DataSet! <> null() then
+            v! = new BBjVector()
+            it! = #DataSet!.iterator()
+            while it!.hasNext()
+                    
+                r! = it!.next()
+                if r! <> null() then
+                    v!.addItem(r!.replaceFields(#RowTemplate$))
+                fi
+            wend
+            
+            #LbList!.insertItems(0,v!)
+         fi
     methodend
     
     method public void setRowTemplate(BBjString html$)
