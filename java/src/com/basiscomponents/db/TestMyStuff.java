@@ -2,6 +2,7 @@ package com.basiscomponents.db;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.sql.*;
 import java.sql.Types.*;
 
@@ -15,6 +16,15 @@ public class TestMyStuff {
 	{
 		// TODO Auto-generated method stub
 
+		
+		HashMap hm = new HashMap();
+		hm.put("A","AA");
+		hm.put("BB", "BBB");
+		DataRow rh = new DataRow(hm);
+		System.out.println(rh);
+		
+		
+		
 		
 		DataRow r = new DataRow();
 //		r.setFieldValue("VISTADRZIP", "112     ");

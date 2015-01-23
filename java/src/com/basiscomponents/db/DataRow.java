@@ -31,6 +31,22 @@ public class DataRow
 		// TODO Auto-generated constructor stub
 	}
 	
+	@SuppressWarnings("rawtypes")
+	public DataRow(java.util.Map map) throws Exception
+	{
+		Set ks = map.keySet();
+		Iterator it = ks.iterator();
+		while (it.hasNext())
+		{
+			String k = (String) it.next();
+			String o = (String) map.get(k);
+			
+			setFieldValue(k, o);
+					
+		}
+		
+	}
+	
 	public DataRow(java.sql.ResultSet rs) throws Exception 
 	{
 		
@@ -532,6 +548,11 @@ public class DataRow
 
 		 field.removeAttribute(attrname);		
 		
+	}
+	
+	public void removeField(String name)
+	{
+		this.FieldList.remove(name);
 	}
 
 
