@@ -557,10 +557,19 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.26);
 }
 
 
-.BBjStaticText:not(.GroupTitle)
+.BBjStaticText.StaticRepresentation
+ {
+  font: 14px normal "SourceSansPro", Arial, Helvetica, Geneva, sans-serif !important;
+}
+
+
+.BBjStaticText:not(.GroupTitle):not(.StaticRepresentation)
  {
   font: 14px normal "SourceSansPro-Light", Arial, Helvetica, Geneva, sans-serif !important;
 }
+
+
+
 
 
 .NewButton,
