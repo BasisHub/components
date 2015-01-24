@@ -29,6 +29,10 @@ class public ForeignKeyPicker extends UIComponent
     rem fields for version with combobox
     field private java.util.HashMap KeyMap!
     field private BBjVector         IndexToKeyMap!
+    
+    rem this is to avoid endless loop while repopulating the combobox contents
+    field private BBjNumber UpdateRunning = 0
+    
 
     rem /**
     rem * Constructor ForeignKeyPicker
@@ -53,37 +57,14 @@ class public ForeignKeyPicker extends UIComponent
         #super!(wnd!,id,x,y,w,h)
 
         #BoundCtrl! = ctrl!
+        #Fk$        = fk$
+        #setBC(bc!)
 
         if #BoundCtrl!.getControlType() =-2 or #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE OR #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
-            bc!.setControllerFilterUnlock(fk$,1)
-
-            #KeyMap!        = new java.util.HashMap()
-            #IndexToKeyMap! = new BBjVector()
-            x=0
-            s=bc!.size()
-            bc!.prepareResultSet(0,s)
-
-            ctrl1! = #BoundCtrl!
-            ctrl1!.removeAllItems()
-            v! = new BBjVector()
-            v!.addItem("")
-            #IndexToKeyMap!.addItem("")
-
-            while x<s
-                r! = bc!.getResultSet().getItem(x)
-                fkdisp$ = bc!.getRecordAsString(x)
-
-                fkval$     = r!.getFieldAsString(fk$)
-                fkval!     = r!.getField(fk$)
-                v!.addItem(cvs(FkDisp$,3))
-
-                x=x+1
-                #KeyMap!.put(fkval!,x)
-                #IndexToKeyMap!.addItem(fkval!)
-            wend
-            ctrl1!.insertItems(0, v!)
-            
-            bc!.setControllerFilterUnlock(fk$,0)
+REM             #updateFkList()
+REM     do nothing yet; the combo box will be re-filled with every update, as the 
+REM     contents may depend on the record itself
+REM     TODO: maybe find out if it does _not_ depend and avoid the reloading  
         else
             x=ctrl!.getX()
             y=ctrl!.getY()
@@ -130,12 +111,51 @@ class public ForeignKeyPicker extends UIComponent
             rem TODO: allow direct entry of key values
         fi
 
-        #Fk$        = fk$
 
-        #super!.setBC(bc!)
+
+        
 
     methodend
 
+    method private void updateFkList()
+
+            bc! = #getBC()
+            fk$=#Fk$
+            
+            bc!.setControllerFilterUnlock(fk$,1)
+
+            #KeyMap!        = new java.util.HashMap()
+            #IndexToKeyMap! = new BBjVector()
+            x=0
+            s=bc!.size()
+            bc!.prepareResultSet(0,555)
+            
+
+            ctrl1! = #BoundCtrl!
+            ctrl1!.removeAllItems()
+            
+            v! = new BBjVector()
+            v!.addItem("")
+            #IndexToKeyMap!.addItem("")
+
+            while x<s
+                r! = bc!.getResultSet().getItem(x)
+                fkdisp$ = bc!.getRecordAsString(x)
+
+                fkval$     = r!.getFieldAsString(fk$)
+                fkval!     = r!.getField(fk$)
+                v!.addItem(cvs(FkDisp$,3))
+
+                x=x+1
+                #KeyMap!.put(fkval!,x)
+                #IndexToKeyMap!.addItem(fkval!)
+            wend
+            
+            ctrl1!.insertItems(0, v!)
+            
+            bc!.setControllerFilterUnlock(fk$,0)
+    
+    methodend
 
     method public void setShowLinkedRecord(BBjNumber fShow)
         if #StDisp! <>null() then
@@ -185,18 +205,29 @@ class public ForeignKeyPicker extends UIComponent
     rem */
     method public void displayData()
 
+
+    rem this is to avoid endless loop while repopulating the combobox contents
+
+        if #UpdateRunning then
+            methodret
+        fi
+        #UpdateRunning=1
+
+
         if #BoundCtrl!.getControlType() =-2 or #BoundCtrl!.getControlType() = BBjControl.LISTBUTTON_TYPE or #BoundCtrl!.getControlType() = BBjControl.LISTBOX_TYPE then
-            #getBC().prepareResultSet(0,0)
+
+            #updateFkList()
+            #getBC().prepareResultSet(0,1)
 
             ctrl! = #BoundCtrl!
 
             if #getBC().size()=1 then
                 declare DataRow r!
                 r! = cast(DataRow,#getBC().getResultSet().getItem(0))
+                
                 fk!     = r!.getField(#Fk$)
                 fkdisp$ = cvs(#getBC().getRecordAsString(0),3)
                 i!= #KeyMap!.get(fk!)
-
                 if i!=null() then
                     ctrl!.selectIndex(-1)
                 else
@@ -207,7 +238,7 @@ class public ForeignKeyPicker extends UIComponent
                 ctrl!.selectIndex(-1)
             fi
         else
-            #getBC().prepareResultSet(0,0)
+            #getBC().prepareResultSet(0,1)
 
             if #getBC().size()=1 then
                 declare DataRow r!
@@ -228,7 +259,7 @@ class public ForeignKeyPicker extends UIComponent
             fi
         fi
         
-
+        #UpdateRunning=0
 
     methodend
 

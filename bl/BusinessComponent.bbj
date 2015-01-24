@@ -537,13 +537,12 @@ class public BusinessComponent
 
         #setEditedRec(null())
 
-        if #UIList!.size() then
-            for i=0 to #UIList!.size()-1
-                ui! = CAST(UIComponent,#UIList!.getItem(i))
-                ui!.onSelectionChange()
-            next
-        fi
-
+        it! = #UIList!.iterator()
+        while it!.hasNext()
+            ui! = it!.next()
+            ui!.onSelectionChange()
+        wend
+        
         ks!=#Controller!.keySet()
         it! = ks!.iterator()
 
@@ -579,6 +578,7 @@ class public BusinessComponent
 
         
         #setEditedRecord(-1)
+
 
 
         #broadcastEnableControls()
