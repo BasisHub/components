@@ -11,11 +11,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Collections;
 
+import com.basiscomponents.db.*;
 import com.basis.bbj.client.datatypes.BBjVector;
 
 public class PropertyReader {
 
 	private HashMap<String, LinkedHashMap<BBjVector, BBjVector>> finalMap = new HashMap<String, LinkedHashMap<BBjVector, BBjVector>>() ;
+	private HashMap<String, BBjVector> finalResultSet = new HashMap<String, BBjVector>();
 	private String filename;
 	private String lang;
 	
@@ -83,14 +85,24 @@ public class PropertyReader {
 	            }
 	        } );
 	       
+	        BBjVector rs = new BBjVector(); 
 	        for (Map.Entry<String, String> entry : list){
 	        	keyVector.add(entry.getKey());
 				valueVector.add(entry.getValue());
+				DataRow r = new DataRow();
+				try {
+					r.setFieldValue("KEY", entry.getKey());
+					r.setFieldValue("VALUE", entry.getValue());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				rs.addItem(r);
 	        }
 			
 			tmpVectorMap = new LinkedHashMap<BBjVector, BBjVector>();
 			tmpVectorMap.put(keyVector, valueVector);
 			finalMap.put(keyname,tmpVectorMap);
+			finalResultSet.put(keyname, rs);
 		}
 	}
 	
@@ -154,6 +166,27 @@ public class PropertyReader {
 		}
 		return null; 
 	}
+
+	
+	/**
+	 * Returns the value for the given attribute name and the key.
+	 * 
+	 * @param attrname - The attribute's name 
+	 * @param id - The position of the key 
+	 * @return key or null if nothing was found
+	 * @throws IndexOutOfBoundException
+	 */
+	public String getAttribute(String attrname, String key){
+		LinkedHashMap<BBjVector, BBjVector> map = finalMap.get(attrname);
+		if(finalMap.containsKey(attrname)){
+			for(Map.Entry<BBjVector, BBjVector> entrySet : map.entrySet()){
+				int id = entrySet.getKey().indexOf(key); 
+				if (id>-1)
+					return (String)entrySet.getValue().get(id);
+			}
+		}
+		return null; 
+	}	
 	
 	/**
 	 * Returns the key for the given attribute name and the specified position.
@@ -218,6 +251,25 @@ public class PropertyReader {
 			}
 		}
 		createFinalMap(desiredLangMap);
+	}
+
+	public BBjVector getResultSet(String attrname)
+	{
+		BBjVector rs = finalResultSet.get(attrname);
+		if (rs!=null)
+		{
+			return (BBjVector)rs.clone();
+		}
+		return null;		
+	}
+	
+	public static void main(String[] args)  
+	{
+		PropertyReader r = new PropertyReader("/GitHub/Concordia/webfleet/app/i18n/attributeListProperties","fr");
+		System.out.println(r.getAttributes("AUTREINT"));
+		System.out.println(r.getResultSet("AUTREINT"));
+		System.out.println(r.getAttribute("AUTREINT","04"));
+		System.out.println(r.getAttribute("AUTREINT",4));
 	}
 	
 }

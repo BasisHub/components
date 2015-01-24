@@ -12,15 +12,7 @@ rem */
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
 use com.basiscomponents.db.DataField
-use ::bbtranslator.bbj::BBTranslator
-
-use java.util.Locale
-use java.lang.String
-use java.util.TreeMap
-use java.util.Iterator
-use java.util.Arrays
-use java.util.Collection
-
+use com.basiscomponents.bl.PropertyReader 
 
 class public PropertiesBasedBusinessComponent extends BusinessComponent
 
@@ -29,13 +21,11 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     field protected BBjString AtbListPropertiesFolder$ = "properties"
     field protected BBjString Separator$ = "_"    
     field protected BBjString NoAtbListFoundErrorMessage$ = "No attribute List was found for the given attribute"
-    field protected static BBjNamespace Namespace! = BBjAPI().getGlobalNamespace()
     field protected BBjString Attribute$
     
     field private BBjNumber NeedRebuild=0
-    field private BBTranslator Translator!
-    field private TreeMap GlobalMap!
-    field private TreeMap CurrentMap!
+    field protected PropertyReader Reader!
+    
     method protected PropertiesBasedBusinessComponent(BBjString atbListProperties$, BBjString atbListPropertiesFolder$, BBjString attribute$, BBjString locale$)
     
         #setAllowFilter(1)
@@ -44,17 +34,11 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         #setAtbListPropertiesFolder(atbListPropertiesFolder$)
         #setLocale(locale$)
         #setAttribute(attribute$) 
+
+        #Reader!= new PropertyReader(dir("")+atbListPropertiesFolder$+"/"+atbListProperties$,locale$)
+
         
-        #Translator! = BBTranslator.getInstance(#AtbListProperties$, locale$ , "" , #AtbListPropertiesFolder$)
-        #GlobalMap! = cast(TreeMap, #Namespace!.getValue(#AtbListMap$,err=*next))
-        if #GlobalMap! = null() then
-                #GlobalMap! = new TreeMap()
-                locale! = #getLocale()
-                mapName$ = #Attribute$ + #Separator$ + locale!
-                #Namespace!.setValue(#AtbListMap$, #GlobalMap!)
-        fi
-        
-        #CurrentMap! = #getAttributeList()
+
         
     methodend
 
@@ -234,82 +218,84 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
             methodret 
         fi
         
-        al! = #CurrentMap! 
-        tm! = new TreeMap()
-        ks! = al!.keySet()
-        it! = ks!.iterator()
+REM         al! = #CurrentMap! 
+REM         tm! = new TreeMap()
+REM         ks! = al!.keySet()
+REM         it! = ks!.iterator()
+REM         
+REM         v! = new BBjVector()
+REM         
+REM         if #getSortAscending() = 1 then
+REM             if #getSortField()="KEY" or #getSortField()="" then
+REM                 while it!.hasNext()
+REM                     K$=it!.next()
+REM                     v$ = al!.get(k$)
+REM                     tm!.put(#invert(k$),k$)
+REM                 wend
+REM             fi
+REM     
+REM             if #getSortField()="VALUE"  then
+REM                 while it!.hasNext()
+REM                     K$=it!.next()
+REM                     v$ = al!.get(k$)
+REM                     tm!.put(#invert(v$+k$),k$)
+REM                 wend
+REM             fi        
+REM         else
+REM             if #getSortField()="KEY" or #getSortField()="" then
+REM                 while it!.hasNext()
+REM                     K$=it!.next()
+REM                     v$ = al!.get(k$)
+REM                     tm!.put(k$,k$)
+REM                 wend
+REM             fi
+REM     
+REM             if #getSortField()="VALUE"  then
+REM                 while it!.hasNext()
+REM                     K$=it!.next()
+REM                     v$ = al!.get(k$)
+REM                     tm!.put(v$+k$,k$)
+REM                 wend
+REM             fi
+REM         fi
+REM         
+REM         ks! = tm!.keySet()
+REM         it! = ks!.iterator()
+REM         
+REM         v! = new BBjVector()
+REM 
+REM         qf! = #getQueryFilter()
+REM         if qf! <> null() then 
+REM           keyf!     = qf!.get("KEY")
+REM           valuef!   = qf!.get("VALUE")
+REM         fi
+REM 
+REM         
+REM         cf! = #getControllerFilter()
+REM         
+REM         
+REM         if cf! <> null() and #getControllerFilterUnlock().size()=0 then 
+REM           keycf!     = cf!.get("KEY")
+REM         fi
+REM 
+REM         
+REM         while it!.hasNext()
+REM             K$=it!.next()
+REM             k1$ = tm!.get(k$)
+REM             v$=al!.get(k1$)
+REM             
+REM             if valuef!<> null() and valuef!.contains(v$)=0 then continue
+REM             if keycf!<> null() and keycf!.contains(k$)=0 then continue
+REM             if keyf!<> null() and keyf!.contains(k$)=0 then continue
+REM                         
+REM             r! = new DataRow()
+REM             r!.setFieldValue("KEY",k1$)
+REM             r!.setFieldValue("VALUE",v$)
+REM             v!.addItem(r!)
+REM         wend        
         
-        v! = new BBjVector()
-        
-        if #getSortAscending() = 1 then
-            if #getSortField()="KEY" or #getSortField()="" then
-                while it!.hasNext()
-                    K$=it!.next()
-                    v$ = al!.get(k$)
-                    tm!.put(#invert(k$),k$)
-                wend
-            fi
-    
-            if #getSortField()="VALUE"  then
-                while it!.hasNext()
-                    K$=it!.next()
-                    v$ = al!.get(k$)
-                    tm!.put(#invert(v$+k$),k$)
-                wend
-            fi        
-        else
-            if #getSortField()="KEY" or #getSortField()="" then
-                while it!.hasNext()
-                    K$=it!.next()
-                    v$ = al!.get(k$)
-                    tm!.put(k$,k$)
-                wend
-            fi
-    
-            if #getSortField()="VALUE"  then
-                while it!.hasNext()
-                    K$=it!.next()
-                    v$ = al!.get(k$)
-                    tm!.put(v$+k$,k$)
-                wend
-            fi
-        fi
-        
-        ks! = tm!.keySet()
-        it! = ks!.iterator()
-        
-        v! = new BBjVector()
+        v! = #Reader!.getResultSet(#Attribute$)
 
-        qf! = #getQueryFilter()
-        if qf! <> null() then 
-          keyf!     = qf!.get("KEY")
-          valuef!   = qf!.get("VALUE")
-        fi
-
-        
-        cf! = #getControllerFilter()
-        
-        
-        if cf! <> null() and #getControllerFilterUnlock().size()=0 then 
-          keycf!     = cf!.get("KEY")
-        fi
-
-        
-        while it!.hasNext()
-            K$=it!.next()
-            k1$ = tm!.get(k$)
-            v$=al!.get(k1$)
-            
-            if valuef!<> null() and valuef!.contains(v$)=0 then continue
-            if keycf!<> null() and keycf!.contains(k$)=0 then continue
-            if keyf!<> null() and keyf!.contains(k$)=0 then continue
-                        
-            r! = new DataRow()
-            r!.setFieldValue("KEY",k1$)
-            r!.setFieldValue("VALUE",v$)
-            v!.addItem(r!)
-        wend        
-        
         #NeedRebuild=0
         #super!.setResultSet(v!)
         
@@ -345,18 +331,18 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     method public java.util.TreeMap getDistinctValues(BBjString fieldName$)
 
           tm! = new TreeMap()
-          al! = #CurrentMap!
-          ks! = al!.keySet()
-          it! = ks!.iterator()
-          while it!.hasNext()
-            k$=it!.next()
-            if fieldName$="KEY" then
-                tm!.put(k$,0)
-            else
-                v$=al!.get(k$)
-                tm!.put(v$,0) 
-            fi
-          wend
+REM           al! = #CurrentMap!
+REM           ks! = al!.keySet()
+REM           it! = ks!.iterator()
+REM           while it!.hasNext()
+REM             k$=it!.next()
+REM             if fieldName$="KEY" then
+REM                 tm!.put(k$,0)
+REM             else
+REM                 v$=al!.get(k$)
+REM                 tm!.put(v$,0) 
+REM             fi
+REM           wend
           
           methodret tm!
           
@@ -500,147 +486,8 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         methodret "PROPERTIESTABLE"
     methodend
     
-     
-    rem /**
-    rem  *  Checks in the property File of the given locale for Keys matching to the given attribute. If some keys were found,
-    rem  *  then a map will be created in the GlobalNamespace, if it is not already created, 
-    rem  *  and the map with the keys matching to the given attribute will be added to it. If no Keys were found then an Exception is thrown.
-    rem  * 
-    rem  * @param attribute! - The attribute which is searched in the property file for the given locale of the 
-    rem  * default locale if it was not found in the given one
-    rem  * @param locale -  The locale to identify in which property file the attribute list is going to be searched
-    rem  * 
-    rem  * @return TreeMap - The map which contains the attribute list matching the given attribute
-    rem  * 
-    rem  * @throws Error 11 - This Error is thrown if no key was found either in the property file for the given 
-    rem  * locale as in the property file for the default locale
-    rem  */
-    method public TreeMap getAttributeList()
-
-        Declare TreeMap currentMap!
-        
-        locale! = #getLocale() 
-        rem Check if the demanded Map is already cached
-        currentMap! = #getMapFromNamespace(#Attribute$ + #Separator$ + locale!)
-        if(currentMap! <> null() AND !currentMap!.isEmpty()) then 
-            methodret currentMap!
-        fi
-
-        rem Get a TreeMap containing all keys matching with the given attribute
-        currentMap! = #addToMap(locale!)
-      
-        rem Check if matching keys were found
-        if(currentMap! <> null()) then
-            #GlobalMap!.put(mapName$,currentMap!) 
-            methodret currentMap!
-        fi
-        rem Check if the given locale is the default locale
-        if(locale! <> "") then
-            rem If not then Check if the property file for the default locale contains any matching Keys
-        
-            rem Check if the demanded Map is already cached
-            currentMap! = #getMapFromNamespace(#Attribute$ + #Separator$ + "")
-            if(currentMap! <> null() AND !currentMap!.isEmpty()) then 
-                methodret currentMap!
-            fi
-            rem Get a TreeMap containing all keys matching with the given attribute
-            currentMap! = #addToMap("" )
-            
-            
-            rem Check if matching keys were found
-            if(currentMap! <> null()) then
-                rem check if the global map is already inserted to the GlobalNamespace
-                #GlobalMap!.put(mapName$, currentMap!) 
-                methodret currentMap!
-            
-            fi        
-        fi
-        rem Throw an Error when no key was found either in the property file for the given locale as for the default locale 
-        throw #NoAtbListFoundErrorMessage$ , 11
-    methodend
-    
-    rem /**
-    rem  * Checks if the GlobalNamespace contains the global Map. If so, 
-    rem  * then the method checks if the global map contains the required map.
-    rem  * If so then the required map will be returned else null()
-    rem  * 
-    rem  * @param str$ - The Name of the map which contains the required list of attributes
-    rem  */
-    method private TreeMap getMapFromNamespace(BBjString mapName$)
-        
-        methodret cast(TreeMap,#GlobalMap!.get(mapName$,err=noop))
-
-        noop:   
-        methodret null()
-    methodend
-    
 
     
-    rem /**
-    rem  * Returns the value of the given attribute and the given locale
-    rem  * 
-    rem  * @param attribute! - The attribute which is going to be searched
-    rem  * @param locale! - he locale to identify in which property file the attribute list is going to be searched
-    rem  * @param attributeKey! - The key to identify which value should be returned
-    rem  * 
-    rem  * @return value -  The value for the given attribute
-    rem  */
-    method public BBjString getAttributeValue(BBjString attributeKey!)
-        
-            obj!  = #CurrentMap!.get(attributeKey!,err=*next)
-            if obj!=null() then
-               methodret ""
-            endif
-            
-            methodret obj!.toString()
-            throw "No attribute was found for the given Key", 11 
-        
-    methodend
-    
-    rem /**
-    rem  * Checks if any key from the property File which is registered in translator object matches the searched Key. 
-    rem  * If so, then this key and the corresponding value is added to the created map.
-    rem  * 
-    rem  * @param attribute! - The attribute which is searched in the property file registered in the translator object
-    rem  * @param locale -  The locale to identify in which property file the attribute list is going to be searched
-    rem  * @param translator! - The translator to get the translation of the matching keys
-    rem  * 
-    rem  * @return map! - The TreeMap which contains every Key and value matching to the searched attribute or null() if none was found  
-    rem  */
-    method private TreeMap addToMap( BBjString locale!)
-        Declare TreeMap map!
-        Declare Iterator it!
-        
-        rem Get all keys from the property file for the given locale
-        
-        collection! = #Translator!.getTranslationBundle().getTranslations(new Locale(locale!)).getKeys()
-        rem Get the Iterator for the collection containg all Keys of the property file registered in the translator
-        ? collection!
-        
-        
-        it! = cast(Iterator, collection!.iterator())
-        while it!.hasNext()
-            rem Get the Key
-            key! = cast(String, it!.next())
-            rem check if the Key matches the searched attribute
-            if(key!.matches(#Attribute$ + "_.*")) then
-                rem check if the map is already created
-                ? key!
-                if(map! = null()) then
-                     map! = new TreeMap()
-                fi
-                keyValue$ =  key!.substring(pos(#Separator$ = key!,-1))
-                
-                rem let elements![] = key!.split(#Separator$)
-                rem Add the key and value pair to the map
-                rem map!.put(elements![1],translator!.getTranslation(key!))
-                rem Add the key and value pair to the map
-                map!.put(keyValue$,#Translator!.getTranslation(key!))
-            fi
-        wend
-        methodret map!
-    methodend
-
     rem /**
     rem * Method getRecordAsString:
     rem * return the toString for a record
@@ -653,19 +500,12 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         methodret r!.getFieldAsString("VALUE")
 
     methodend
-        
-    rem /**
-    rem  * Removes the global map from the GlobalNamespace if it exists.
-    rem  */
-    method public void clearCache()
-          #Namespace!.removeValue(#AtbListMap$,err=*next)
-    methodend
     
-    method private BBjString invert(BBjString in$)
-        for i=1 to len(in$)
-            out$=out$+chr(255-asc(in$(i,1)))
-        next
-        methodret out$
+    method public BBjString getAttributeValue(BBjString key$)
+    
+        methodret str(#Reader!.getAttribute(#Attribute$,key$))
+    
     methodend
+  
 
 classend
