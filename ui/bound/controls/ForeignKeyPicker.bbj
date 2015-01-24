@@ -121,16 +121,15 @@ REM     TODO: maybe find out if it does _not_ depend and avoid the reloading
 
             bc! = #getBC()
             fk$=#Fk$
-            
+            rem todo: this sometimes gets called unnecessarily
+            rem avoid these additional calls (like e.g. when there's no selection / record??)
             bc!.setControllerFilterUnlock(fk$,1)
 
             #KeyMap!        = new java.util.HashMap()
             #IndexToKeyMap! = new BBjVector()
             x=0
             s=bc!.size()
-            bc!.prepareResultSet(0,555)
-            
-
+            bc!.prepareResultSet(0,s)
             ctrl1! = #BoundCtrl!
             ctrl1!.removeAllItems()
             
