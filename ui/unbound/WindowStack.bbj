@@ -289,6 +289,7 @@ REM         fi
         wend
         declare auto BBjButton button!
         Button!=tb!.addButton(id,50*(id-2000+1),5,45,45,caption$)
+        Button!.setToolTipText(caption$)
         Button!.setOpaque(0)
         Button!.setClientEdge(0)
         if cvs(name$,3)>"" then
