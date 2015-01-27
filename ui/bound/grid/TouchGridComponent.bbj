@@ -121,6 +121,7 @@ class public TouchGridComponent extends UIComponent implements BBjControl
 
     method public void refresh( BBjNumber resetFilter)
 
+        #ResultInfo!.setVisible(0)
         #ResultInfo!.removeStyle("TouchGridResultinfo")
         s=#getBC().size()
 
@@ -132,8 +133,8 @@ REM         s=min(s,1000)
             #ResultInfo!.setVisible(0)
             #TouchGrid!.setVisible(1)
         else
-            wait 0.001
             #ResultInfo!.addStyle("TouchGridResultinfo")
+            wait 0.001
             #ResultInfo!.setVisible(1)
             #TouchGrid!.setVisible(0)
         fi
