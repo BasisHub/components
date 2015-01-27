@@ -96,7 +96,13 @@ class public ClassGeneratorWorker
 
         col! = tab!.getColumn(col$)
 
-        r$ = col!.getString(prop$,err=*next)
+        r! = col!.getString(prop$,err=*next)
+        
+        if r!<>null() then
+            r$=str(r!)
+        else
+            r$=""
+        fi
 
         noDB:
         methodret r$
@@ -123,7 +129,7 @@ class public ClassGeneratorWorker
         methodret r$
 
     methodend
-    
+
     rem /**
     rem * Method generateProperties:
     rem * generate the label's (fieldname label's) for the GUI (.arc) files.
@@ -149,7 +155,7 @@ class public ClassGeneratorWorker
 
             JDBCResultSet! = md!.getColumns(null(),#Schema$,t$,"%")
 
-            while JDBCResultSet!.next() 
+            while JDBCResultSet!.next()
                 col_type=JDBCResultSet!.getInt("DATA_TYPE")
                 col_name$=JDBCResultSet!.getString("COLUMN_NAME")
 
@@ -197,11 +203,11 @@ class public ClassGeneratorWorker
 
             rem TODO: check if this now works in MS SQL Server
             JDBCResultSet! = md!.getPrimaryKeys(null(),#Schema$,t$)
-            
-            
+
+
             rem JDBCResultSet! = md!.getIndexInfo(null(),#Schema$,t$,1,1)
 
-            while JDBCResultSet!.next() 
+            while JDBCResultSet!.next()
                 v!.addItem(JDBCResultSet!.getString("COLUMN_NAME"))
             wend
         endif
@@ -243,11 +249,11 @@ class public ClassGeneratorWorker
 
             rem JDBCResultSet! = md!.getImportedKeys(base_db$,s$,t$)
             rem Fix for Ms SQL
-            
+
             rem TODO check MS SQL Server again
             JDBCResultSet! = md!.getImportedKeys(null(),#Schema$,t$)
 
-            while JDBCResultSet!.next() 
+            while JDBCResultSet!.next()
                 declare BBjTemplatedString t!
                 t! = BBjAPI().makeTemplatedString("FKCOLUMN_NAME:C(1*),PKTABLE_NAME:C(1*),PKCOLUMN_NAME:C(1*)")
 
@@ -287,7 +293,7 @@ class public ClassGeneratorWorker
 
             JDBCResultSet! = md!.getColumns(null(),#Schema$,t$,"%")
 
-            while JDBCResultSet!.next() 
+            while JDBCResultSet!.next()
                 declare BBjTemplatedString t!
                 t! = BBjAPI().makeTemplatedString("DATA_TYPE:C(1*),COLUMN_NAME:C(1*)")
 
@@ -299,7 +305,7 @@ class public ClassGeneratorWorker
                 if tmp$="true" then
                     continue
                 fi
-                
+
                 t!.setFieldValue("DATA_TYPE",data_type$)
                 t!.setFieldValue("COLUMN_NAME",col_name$)
                 v!.addItem(t!)
@@ -383,12 +389,12 @@ class public ClassGeneratorWorker
         db_nice$=iff(#Prepend,#nice(#DB$),"")
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
-        
+
         classname$= cvs(#getBBjDDProperty( t$, "CLASSNAME"),128)
         if classname$>"" then
             tbl_nice$=classname$
         fi
-                
+
         ch=unt
 
         ftpl$ = tpl$
@@ -419,14 +425,14 @@ class public ClassGeneratorWorker
         if #Schema$>"" then
             s$=#Schema$+"."
         fi
-        
+
         sql$="SELECT * FROM "+s$+t$
 
         if #Connection! <> null() then
             stmt! = #Connection!.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
             JDBCResultSet! = cast(ResultSet,stmt!.executeQuery(sql$),err=method_end)
 
-            JDBCResultSet!.next() 
+            JDBCResultSet!.next()
 
             print (ch)"<form>"
             print (ch)"<group>"
@@ -439,11 +445,11 @@ class public ClassGeneratorWorker
                 col_name$ = rsmd!.getColumnName(i)
 
                 tmp$ = #getBBjDDProperty(t$, col_name$,"OBSOLETE",err=*next)
-                
+
                 if tmp$="true" then
                     continue
                 fi
-                
+
                 col_label$ = #getBBjDDProperty( t$, col_name$,BBjAdminColumn.DESCRIPTION)
                 if  col_label$ = "" then
                     col_label$ = rsmd!.getColumnLabel(i)
@@ -467,7 +473,7 @@ class public ClassGeneratorWorker
                     case java.sql.Types.NUMERIC
                     case java.sql.Types.REAL
                         ctrl$="InputNWidget"
-                        
+
                     break
 
                     case java.sql.Types.DATE
@@ -478,17 +484,17 @@ class public ClassGeneratorWorker
                     case java.sql.Types.BOOLEAN
                     case java.sql.Types.BIT
                         ctrl$="CheckboxWidget"
-                        
+
                     break
 
                     case java.sql.Types.TIMESTAMP
                         ctrl$="InputEWidget"
-                        
+
                     break
 
                     case default
                         ctrl$="InputEWidget"
-                        
+
                     break
                 swend
 REM 
@@ -512,7 +518,7 @@ REM                 fi
                     PRINT (ch)"<element>"
                     PRINT (ch)"    <type>components/ui/bound/controls/"+ctrl$+"</type> "
                     PRINT (ch)"    <name>"+col_name$+"</name> "
-                    PRINT (ch)"    <length>"+str(tmp_colsiz)+"</length>" 
+                    PRINT (ch)"    <length>"+str(tmp_colsiz)+"</length>"
                     PRINT (ch)"    <bindClass>"+tbl_nice$+"BusinessComponent</bindClass>"
                     PRINT (ch)"    <bindField>"+col_name$+"</bindField>"
                     PRINT (ch)"    <cellconstraints>w "+str(tmp_colsiz*5)+":"+str(tmp_colsiz*10)+":"+str(tmp_colsiz*15)+"</cellconstraints> "
@@ -561,12 +567,12 @@ REM                 fi
         db_nice$=iff(#Prepend,#nice(#DB$),"")
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
-        
+
         classname$= cvs(#getBBjDDProperty( t$, "CLASSNAME"),128)
         if classname$>"" then
             tbl_nice$=classname$
         fi
-                
+
         ch=unt
 
         ftpl$ = tpl$
@@ -598,14 +604,14 @@ REM                 fi
         if #Schema$>"" then
             s$=#Schema$+"."
         fi
-        
+
         sql$="SELECT * FROM "+s$+t$
 
         if #Connection! <> null() then
             stmt! = #Connection!.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
             JDBCResultSet! = cast(ResultSet,stmt!.executeQuery(sql$),err=method_end_arc)
 
-            JDBCResultSet!.next() 
+            JDBCResultSet!.next()
 
             print (ch)"//#charset: windows-1252"
             print (ch)""
@@ -627,11 +633,11 @@ REM                 fi
                 col_name$ = rsmd!.getColumnName(i)
 
                 tmp$ = #getBBjDDProperty(t$, col_name$,"OBSOLETE",err=*next)
-                
+
                 if tmp$="true" then
                     continue
                 fi
-                
+
                 col_label$ = #getBBjDDProperty( t$, col_name$,BBjAdminColumn.DESCRIPTION)
                 if  col_label$ = "" then
                     col_label$ = rsmd!.getColumnLabel(i)
@@ -762,21 +768,21 @@ REM                 endif
 
         x$=#replace(x$,"(DB)",#DB$)
         x$=#replace(x$,"(SCHEMA)",#Schema$)
-        
+
         if #Schema$>"" then
             s$=#Schema$+"."
         else
             s$=""
         fi
-        
-        x$=#replace(x$,"(SCHEMAPFX)",s$) 
+
+        x$=#replace(x$,"(SCHEMAPFX)",s$)
 
         x$=#replace(x$,"(TBL)",t$)
 
         db_nice$=iff(#Prepend,#nice(#DB$),"")
         db_nicename$=#nice(#DB$)
         tbl_nice$=#nice(t$)
-        
+
         classname$= cvs(#getBBjDDProperty( t$, "CLASSNAME"),128)
         if classname$>"" then
             tbl_nice$=classname$
@@ -791,12 +797,12 @@ REM                 endif
             y0$=y0$(1,pos(")"=y0$))
             y1$=y0$(pos(":"=y0$)+1)
             y1$=y1$(1,len(y1$)-1)
-            
+
             y2$= #getBBjDDProperty( t$, y1$)
             x$=#replace(x$,y0$,y2$)
 
         wend
-                    
+
 
         if pos("<keyseg>"=x$) then
             x1$=x$(1,pos("<keyseg>"=x$)-1)
@@ -828,12 +834,12 @@ REM                 endif
                     t! = ks!.getItem(i)
 
                     x$=x3$
-                    
+
                     PKTABLE_NAME_NICE$=#nice(t!.getFieldAsString("PKTABLE_NAME"))
                     pk_classname$= cvs(#getBBjDDProperty(t!.getFieldAsString("PKTABLE_NAME"), "CLASSNAME"),128)
                     if pk_classname$>"" then
                         PKTABLE_NAME_NICE$=pk_classname$
-                    fi                    
+                    fi
                     x$=#replace(x$,"(PKTABLE_NAME_NICE)",PKTABLE_NAME_NICE$)
                     x$=#replace(x$,"(PKTABLE_NAME)",t!.getFieldAsString("PKTABLE_NAME"))
                     x$=#replace(x$,"(PKCOLUMN_NAME)",t!.getFieldAsString("PKCOLUMN_NAME"))
@@ -846,7 +852,7 @@ REM                 endif
             x$=x1$+x2$
         endif
 
-        while pos("<field>"=x$) 
+        while pos("<field>"=x$)
             x1$=x$(1,pos("<field>"=x$)-1)
             x2$=x$(pos("</field>"=x$)+8)
             x3$=x$(pos("<field>"=x$)+7)
@@ -868,7 +874,7 @@ REM                 endif
                         y0$=y0$(1,pos(")"=y0$))
                         y1$=y0$(pos(":"=y0$)+1)
                         y1$=y1$(1,len(y1$)-1)
-                        
+
                         y2$= #getBBjDDProperty(t$, col_name$,y1$)
                         x$=#replace(x$,y0$,y2$)
 
@@ -877,7 +883,7 @@ REM                 endif
                         x$=x$(1,len(x$)-1)
                     fi
                     x1$=x1$+x$
-                next 
+                next
             endif
 
             x$=x1$+x2$
@@ -943,7 +949,7 @@ REM                 endif
                 f$=targetdir$+db_nice$+tbl_nice$+tpl$
             fi
         fi
-      
+
         if !#Overwrite then
             if pos("T.bbj"=tpl$)=0 then
                  ch1=unt
@@ -987,7 +993,7 @@ REM                 endif
                 if t$(1,1)="[" and pos("]"=t$)>0 then
                     S$=t$(2,pos("]"=t$)-2)
                     t$=t$(pos("]"=t$)+1)
-                else 
+                else
                     S$=""
                 endif
 
@@ -1047,7 +1053,7 @@ REM                 endif
                 if len(f$)>3 and cvs(f$(len(f$)-3,4),8)=".xml" then
                     #generateXmlForm(dir$+f$,  t$, #TargetDir$+reldir$)
                 fi
-                
+
             fi
         wend
         close (ch)
