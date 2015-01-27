@@ -4,6 +4,7 @@ REM fi
 
 
 use ::components/util/Util.bbj::Util
+use ::components/i18n/i18n.bbj::i18n
 
 class public WindowStackHelper
 
@@ -99,6 +100,8 @@ REM         fi
         tb!.addStyle("ToolBar")
         cw!     = wnd!.addChildWindow(100,0,yoffs,w,wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
 
+        Translator! = i18n.getTranslator()
+
         if yoffs or #ContainerWnd!<>null() then
 
             backButton!=tb!.addButton(101,5,5,45,45,"Back")
@@ -109,7 +112,7 @@ REM         fi
             backButton!.setOpaque(0)
             backButton!.setClientEdge(0)
             backButton!.setImageFile("ico/back.png")
-            
+            backButton!.setToolTipText(Translator!.getTranslation("TOOLTIP_PREV"))
             st! = tb!.addStaticText(102,150,10,w-200,30,name$)
             st!.addStyle("GroupTitle")
             st!.setVisible(1)
@@ -123,6 +126,7 @@ REM         fi
         exitButton!.setClientEdge(0)
         exitButton!.setName("exitButton")
         exitButton!.setImageFile("ico/exit.png")
+        exitButton!.setToolTipText(Translator!.getTranslation("TOOLTIP_EXIT"))
         exitButton!.addStyle("ExitButton")
         exitButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,wh!,"onExitButton")
 
