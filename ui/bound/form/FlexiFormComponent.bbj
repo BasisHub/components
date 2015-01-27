@@ -839,7 +839,7 @@ REM TODO: lazy loading!
     rem */
     method public BBjNumber saveRecord()
 
-
+    
         DataRows!     = new HashMap()
         ks! = #BCList!.keySet()
         it! = ks!.iterator()
@@ -850,9 +850,9 @@ REM TODO: lazy loading!
             DataRows!.put(bclass$,r!)
             
             widgets! = #ControlsByBcClass!.get(bclass$)
-            it! = widgets!.iterator()
-            while it!.hasNext()
-                widget! = it!.next()
+            it2! = widgets!.iterator()
+            while it2!.hasNext()
+                widget! = it2!.next()
                 if !widget!.willDoOwnSave() then
                     r! = widget!.prepareSave(r!)
                 fi
@@ -906,9 +906,9 @@ REM TODO: lazy loading!
             DataRows!.put(bclass$,r!)
             
             widgets! = #ControlsByBcClass!.get(bclass$)
-            it! = widgets!.iterator()
-            while it!.hasNext()
-                widget! = it!.next()
+            it2! = widgets!.iterator()
+            while it2!.hasNext()
+                widget! = it2!.next()
                 if !widget!.willDoOwnSave() then
                     r! = widget!.prepareSave(r!)
                 fi
