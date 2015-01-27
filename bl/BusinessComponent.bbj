@@ -1176,10 +1176,23 @@ class public BusinessComponent
     rem /**
     rem * Method saveRecord
     rem * saves a record within the result set
+    rem * @deprecated
     rem * @param BBjNumber recno: the record number in the resultset; -1 = new record
     rem * @param java.util.HashMap fields!: the fields
     rem */
     method public void saveRecord(BBjNumber recno, java.util.HashMap fields!)
+            
+            row! = #getNewEntity()
+            ks! = fields!.keySet()
+            it!=ks!.iterator()
+
+            while it!.hasNext()
+                f$=it!.next()
+                v!=fields!.get(f$)
+                row!.setFieldValue(f$,v!)
+            wend
+            
+            #saveRecord(recno,row!)
 
     methodend
     
