@@ -116,21 +116,24 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         wend
         close (ch)
 
-        #setRowTemplate(t$)     
+        #setRowTemplate(t$)
     methodend
 
     method public void refresh( BBjNumber resetFilter)
 
-            s=#getBC().size()
-            
-REM             s=min(s,1000)
-            rem fixme limited max count!!!
-            #getBC().prepareResultSet(0,s)
-            #TouchGrid!.setItems(#getBC().getResultSet())
+        #ResultInfo!.removeStyle("TouchGridResultinfo")
+        s=#getBC().size()
+
+REM         s=min(s,1000)
+        rem fixme limited max count!!!
+        #getBC().prepareResultSet(0,s)
+        #TouchGrid!.setItems(#getBC().getResultSet())
         if (s>0) then
             #ResultInfo!.setVisible(0)
             #TouchGrid!.setVisible(1)
         else
+            wait 0.001
+            #ResultInfo!.addStyle("TouchGridResultinfo")
             #ResultInfo!.setVisible(1)
             #TouchGrid!.setVisible(0)
         fi
