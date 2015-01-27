@@ -320,6 +320,13 @@ REM         fi
             ctrl!.setImageFile(img$) 
         fi
     methodend 
+    
+   method public static void setButtonToolTip(BBjNumber id, BBjString tooltip$)
+        ctrl! = #getButton(id)
+        if ctrl!<>null() and tooltip$ > "" then
+            ctrl!.setToolTipText(tooltip$)
+        fi
+    methodend 
 
     rem deprecated - remove asap
     method public static void setImageFile(BBjNumber id, BBjString img$)
