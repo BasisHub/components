@@ -537,11 +537,7 @@ class public BusinessComponent
 
         #setEditedRec(null())
 
-        it! = #UIList!.iterator()
-        while it!.hasNext()
-            ui! = it!.next()
-            ui!.onSelectionChange()
-        wend
+
         
         ks!=#Controller!.keySet()
         it! = ks!.iterator()
@@ -576,6 +572,11 @@ class public BusinessComponent
             fi
         wend
 
+        it! = #UIList!.iterator()
+        while it!.hasNext()
+            ui! = it!.next()
+            ui!.onSelectionChange()
+        wend
         
         #setEditedRecord(-1)
 
