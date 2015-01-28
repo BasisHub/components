@@ -320,7 +320,14 @@ public class DataField
     
 	public void setValue(java.sql.Date value)
 	{
+        if (this.Type =='X' )
+        {
+        	this.TimestampValue = new java.sql.Timestamp(value.getTime());
+        }
+        else
+        {
 			this.DateValue = value;
+        }
 	}
 
 	public void setValue(java.sql.Timestamp value)

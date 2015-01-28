@@ -17,16 +17,19 @@ public class TestMyStuff {
 		// TODO Auto-generated method stub
 
 		
-		HashMap hm = new HashMap();
-		hm.put("A","AA");
-		hm.put("BB", "BBB");
-		DataRow rh = new DataRow(hm);
-		System.out.println(rh);
+//		HashMap hm = new HashMap();
+//		hm.put("A","AA");
+//		hm.put("BB", "BBB");
+//		DataRow rh = new DataRow(hm);
+//		System.out.println(rh);
 		
 		
 		
 		
 		DataRow r = new DataRow();
+		
+		
+		
 //		r.setFieldValue("VISTADRZIP", "112     ");
 //		String k = r.replaceFields("        </tr>   pan=3 class=\"infoSubTitle\">$F{VISTADRZIP} $F{VISTADRCITY}</td>");
 //		System.out.println(k);
@@ -35,57 +38,68 @@ public class TestMyStuff {
 		java.util.Date now = calendar.getTime();
 		java.sql.Timestamp t = new java.sql.Timestamp(now.getTime());
 		System.out.println(t);
-		r.setFieldValue("TS",t);
+		
+		r.setFieldValue("MYTIMESTAMP",t);
 		System.out.println(r);
-		System.out.println(r.getFieldAsNumber("TS"));
-		r.setFieldValue("TS", "");
-
-		System.out.println("-------------------------");
-		r.setFieldValue("DT",new java.sql.Date(now.getTime()));
+		
+		Date d = java.sql.Date.valueOf(com.basis.util.BasisDate.date(2457049,0.0,"%Yl-%Mz-%Dz"));
+		System.out.println(d);
+		
+		r.setFieldValue("MYTIMESTAMP",d);
 		System.out.println(r);
-		System.out.println(r.getFieldAsNumber("DT"));
-		r.setFieldValue("DT", "");
 		
-		r.setFieldValue("DT",-1);
-		System.out.println(r);
-		System.out.println(r.getFieldAsNumber("DT"));
-		System.out.println("-------------------------");
-		
-		r.setFieldValue("TIM",new java.sql.Time(now.getTime()));
-		System.out.println(r);
-		System.out.println(r.getFieldAsNumber("TIM"));
-		System.out.println(r.getFieldAsString("TIM"));
-		
-		r.setFieldValue("INTE",new java.sql.Date( com.basis.util.BasisDate.date(2457019).getTime() ));
-		r.setFieldValue("INTE","");
-		System.out.println(r.getFieldAsString("INTE"));
-		
-		System.out.println(r.getFieldNames());
-		System.out.println(r.clone().getFieldNames());
-		
-		java.sql.Date d;
-		d=null;
-//		r.setFieldValue("testdate",d);
-		BBjNumber n ;
-		n= BasisNumber.createBasisNumber(-1);
-		
-		r.setFieldValue("testdate",new java.sql.Date(0));
-		System.out.println(r.getFieldAsNumber("testdate"));
-		System.out.println(r.getField("testdate"));
-		r.setFieldValue("testdate",n);
-		System.out.println(r.getFieldAsNumber("testdate"));
-		System.out.println(r.getField("testdate"));
-
-		r.setFieldValue("STR1","string1"); 
-		
-		DataRow r1 = new DataRow();
-		r1.setFieldValue("STR1","string1a");
-		r1.setFieldValue("STR2","string2a");
-		
-		System.out.println(r);
-		System.out.println(r1);
-		r.mergeRecord(r1);
-		System.out.println(r);
+		System.out.println("----------------------------");
+//		r.setFieldValue("TS",t);
+//		System.out.println(r);
+//		System.out.println(r.getFieldAsNumber("TS"));
+//		r.setFieldValue("TS", "");
+//
+//		System.out.println("-------------------------");
+//		r.setFieldValue("DT",new java.sql.Date(now.getTime()));
+//		System.out.println(r);
+//		System.out.println(r.getFieldAsNumber("DT"));
+//		r.setFieldValue("DT", "");
+//		
+//		r.setFieldValue("DT",-1);
+//		System.out.println(r);
+//		System.out.println(r.getFieldAsNumber("DT"));
+//		System.out.println("-------------------------");
+//		
+//		r.setFieldValue("TIM",new java.sql.Time(now.getTime()));
+//		System.out.println(r);
+//		System.out.println(r.getFieldAsNumber("TIM"));
+//		System.out.println(r.getFieldAsString("TIM"));
+//		
+//		r.setFieldValue("INTE",new java.sql.Date( com.basis.util.BasisDate.date(2457019).getTime() ));
+//		r.setFieldValue("INTE","");
+//		System.out.println(r.getFieldAsString("INTE"));
+//		
+//		System.out.println(r.getFieldNames());
+//		System.out.println(r.clone().getFieldNames());
+//		
+//		java.sql.Date d;
+//		d=null;
+////		r.setFieldValue("testdate",d);
+//		BBjNumber n ;
+//		n= BasisNumber.createBasisNumber(-1);
+//		
+//		r.setFieldValue("testdate",new java.sql.Date(0));
+//		System.out.println(r.getFieldAsNumber("testdate"));
+//		System.out.println(r.getField("testdate"));
+//		r.setFieldValue("testdate",n);
+//		System.out.println(r.getFieldAsNumber("testdate"));
+//		System.out.println(r.getField("testdate"));
+//
+//		r.setFieldValue("STR1","string1"); 
+//		
+//		DataRow r1 = new DataRow();
+//		r1.setFieldValue("STR1","string1a");
+//		r1.setFieldValue("STR2","string2a");
+//		
+//		System.out.println(r);
+//		System.out.println(r1);
+//		r.mergeRecord(r1);
+//		System.out.println(r);
 //		
 //
 //		Class.forName("com.basis.jdbc.BasisDriver");
