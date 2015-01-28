@@ -68,7 +68,7 @@ class public UIComponent implements BBjControl
     rem /**
     rem * Constructor UIComponent - disabled
     rem */
-    method private UIComponent()
+    method public UIComponent()
 
     methodend
 

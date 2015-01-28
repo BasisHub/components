@@ -102,6 +102,7 @@ class public  InputDWidget extends ControlWidget
     rem */
     method public DataRow prepareSave(DataRow r!)
         n$=#getName()
+        
         if #getFocus() then
             edrow! = #getBC().getEditedRecord()
             
@@ -128,6 +129,7 @@ class public  InputDWidget extends ControlWidget
                 d! = java.sql.Date.valueOf(com.basis.util.BasisDate.date(d,0.0,"%Yl-%Mz-%Dz"))
                 r!.setFieldValue(n$,d!)
             fi
+            
         fi
 
         methodret r!
@@ -151,6 +153,7 @@ class public  InputDWidget extends ControlWidget
             
             validate = #getBC().validateField(n$,v$,#getBC().getEditedOriginalRecord(), edrow!)
             #markValidationErrors()
+            #setEdited(1) 
 
     methodend    
     

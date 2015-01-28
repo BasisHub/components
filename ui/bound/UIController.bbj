@@ -246,8 +246,9 @@ class public UIController
                         if bc!.getResultSet().size()>0 then
                             bc!.setSelection(0)
                         fi
+                    else
+                        bc!.setSelection(new BBjVector())
                     fi
-                    
                 next i
             fi
         fi

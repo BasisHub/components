@@ -153,6 +153,10 @@ REM     TODO: maybe find out if it does _not_ depend and avoid the reloading
             ctrl1!.insertItems(0, v!)
             
             bc!.setControllerFilterUnlock(fk$,0)
+            if bc!.size()=1 then
+                bc!.prepareResultSet(0,1)
+                bc!.setSelection(0)
+            fi
     
     methodend
 

@@ -379,7 +379,7 @@ REM                             cwCanvas!.setFont(font!)
                                         
                                         
                                         rem events?
-                                        eventLst! = paneNode!.getElementsByTagName("event")
+                                        eventLst! = elNode!.getElementsByTagName("event")
                             
                                         if eventLst!.getLength() then
                                             for event = 0  to  eventLst!.getLength()-1
@@ -387,9 +387,12 @@ REM                             cwCanvas!.setFont(font!)
                                                 eventNode! = eventLst!.item(event)
                                 
                                                     if eventNode!.getNodeType() = Node.ELEMENT_NODE then
-                                                        type$= #getNodeValue(elNode!,"type")
-                                                        method$= #getNodeValue(elNode!,"method")
-                                                        el!.setCallback(2,#this!,method$)
+                                                        type$= #getNodeValue(eventNode!,"type")
+                                                        X$="type = "+type$
+                                                        
+                                                        execute x$
+                                                        method$= #getNodeValue(eventNode!,"method")
+                                                        el!.setCallback(type,#this!,method$)
                                                     fi
                                              next
                                         fi
