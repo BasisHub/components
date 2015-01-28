@@ -183,6 +183,10 @@ REM             #prepareResultSet(0,0)
 
         #refresh(0)
 
+REM todo: save selection and restore it after refresh 
+REM         #prepareResultSet(0,1)
+REM         #setSelection(0)
+
     methodend
 
 
@@ -349,6 +353,7 @@ REM             #prepareResultSet(0,0)
             if rec>-1 then
                 rec!=#getResultSet().getItem(rec)
                 #getResultSet().setItem(rec,#processRecord(rec!)) 
+                #refresh(0)
                 #setSelection(rec)
                 #setEditedRecord(-1)
             fi
@@ -366,11 +371,12 @@ REM             #prepareResultSet(0,0)
                   #onAfterUpdate(row!, orig_row!)
                   
                   #setEditedRecord(-1)
-REM                   #refresh(0)
+REM                   
 REM                   #setSelection(recno)
                     v!=#getSelection()
                   if v!.size() then
                       recno=num(v!.getItem(0),err=*next)
+                      #refresh(0)
                       #setSelection(recno)
 
                   fi
