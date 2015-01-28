@@ -1590,7 +1590,7 @@ REM         wend
                 type$=prow!.getFieldType(k$)
                 
                 dbg$=dbg$+"Field "+str(i)+":"+k$+" Type:"+type$+" Contents:"+str(obj!)+$0a$
-                
+
                 if type$="C" then
                     stmt!.setString(i,obj!)
                 fi
@@ -1698,13 +1698,26 @@ REM         wend
 
 
             sql$="DELETE FROM "+#PrimaryTable$+" WHERE "+wh$
-            rem print sql$
 
+
+            
             #openDatabase()
             stmt! = #Connection!.createStatement()
             rem TODO: catch error
-            ret=stmt!.executeUpdate(sql$,err=*next)
-            ? "(",ret,")"
+            ret=stmt!.executeUpdate(sql$,err=*next) 
+
+
+            sqldebug$=stbl("SQLDEBUG",err=*next)
+            if sqldebug$>"" then
+                ch=unt
+                open (ch,mode="O_CREATE,O_APPEND")"sqldebug.txt"
+                print (ch)date(0:"%Dz.%Mz.%Yl %Hz:%mz:%sz")
+                print (ch)sql$
+                if ret=0 then   
+                    print (ch)"Execute failed!"
+                fi
+                close (ch)
+            fi
 
 
             if ret=0 then
