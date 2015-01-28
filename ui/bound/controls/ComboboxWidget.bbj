@@ -55,7 +55,6 @@ class public  ComboboxWidget extends ControlWidget
     method public void setEditing(BBjNumber isEditing)
     
         if isEditing=0  then
-            #Cb!.selectIndex(-1)
             #setEdited(0)
         fi
         
