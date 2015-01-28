@@ -475,9 +475,14 @@ box-shadow: 0 0 0px rgba(0, 0, 0, 0);
 border: 0px;
 }
 
-.GroupTitle, .BBjGroupBox legend {
+.WindowStackTitle, .BBjGroupBox legend {
 color: white;
 text-shadow: 0 1px 0 midnightblue;
+font: normal 22px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+
+.GroupTitle {
+color: #802A50;
 font: normal 22px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
 
@@ -564,7 +569,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.26);
 }
 
 
-.BBjStaticText:not(.GroupTitle):not(.StaticRepresentation)
+.BBjStaticText:not(.GroupTitle):not(.StaticRepresentation):not(.WindowStackTitle)
  {
   font: 14px normal "SourceSansPro-Light", Arial, Helvetica, Geneva, sans-serif !important;
 }

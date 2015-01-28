@@ -113,8 +113,8 @@ REM         fi
             backButton!.setClientEdge(0)
             backButton!.setImageFile("ico/back.png")
             backButton!.setToolTipText(Translator!.getTranslation("TOOLTIP_PREV"))
-            st! = tb!.addStaticText(102,150,10,w-200,30,name$)
-            st!.addStyle("GroupTitle")
+            st! = tb!.addStaticText(102,150,14,w-200,30,name$)
+            st!.addStyle("WindowStackTitle")
             st!.setVisible(1)
             rem todo: find a better place for that piece
 
@@ -306,7 +306,7 @@ REM         fi
         
         st! = tb!.getControl(102)
         x=int(50*(id-2000+3))
-        st!.setLocation(x,10)
+        st!.setLocation(x,14)
         st!.setSize(wnd!.getWidth()-x-50,st!.getHeight())
         methodret id    
     methodend 
