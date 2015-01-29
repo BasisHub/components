@@ -17,8 +17,8 @@ class public ControlWidget extends UIComponent
     
     field protected BBjControl    Ctrl!
     field protected BBjNumber     Length
-    field public BBjNumber     Edited = 0 
-    field public BBjNumber     Focus = 0     
+    field protected BBjNumber     Edited = 0 
+    field protected BBjNumber     Focus = 0     
     
     field private BBjChildWindow WndCache!   
     
@@ -44,6 +44,14 @@ class public ControlWidget extends UIComponent
         fi
         
     methodend
+    
+    method public void setEdited(BBjNumber val)
+    
+            #Edited=val
+    
+    methodend
+    
+    
     
 
     method protected void setCtrl (BBjControl ctrl!)
