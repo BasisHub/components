@@ -134,6 +134,7 @@ REM         w=int(#Frame!.getWidth()/max(1,count))
         if item! = null() or (c! <> null() and c!.size()) then
             #Level! = item!
             #updateUI()
+            BBjAPI().getGroupNamespace().setValue("MENUSYSTEM_NEW_PROGRAM_STARTED","")
         else
             item!.doScall()
         fi
