@@ -353,7 +353,12 @@ REM         #setSelection(0)
             if rec>-1 then
                 rec!=#getResultSet().getItem(rec)
                 #getResultSet().setItem(rec,#processRecord(rec!)) 
-                #refresh(0)
+
+REM                 #refresh(0)
+REM         FIXME This refresh is evil
+REM         as it makes the resultset empty
+REM         but something will be needed to notify the UI of the change 
+
                 #setSelection(rec)
                 #setEditedRecord(-1)
             fi
@@ -376,7 +381,10 @@ REM                   #setSelection(recno)
                     v!=#getSelection()
                   if v!.size() then
                       recno=num(v!.getItem(0),err=*next)
-                      #refresh(0)
+REM                       #refresh(0)
+REM         FIXME This refresh is evil
+REM         as it makes the resultset empty
+REM         but something will be needed to notify the UI of the change 
                       #setSelection(recno)
 
                   fi
