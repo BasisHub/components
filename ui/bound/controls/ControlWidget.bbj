@@ -51,6 +51,12 @@ class public ControlWidget extends UIComponent
     
     methodend
     
+     method public void setFocus(BBjNumber val)
+    
+            #Focus=val
+    
+    methodend
+    
     
     
 
