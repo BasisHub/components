@@ -217,6 +217,8 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         if #NeedRebuild = 0 then
             methodret 
         fi
+
+        v1! = #Reader!.getResultSet(#Attribute$)
         
 REM         al! = #CurrentMap! 
 REM         tm! = new TreeMap()
@@ -262,39 +264,33 @@ REM
 REM         ks! = tm!.keySet()
 REM         it! = ks!.iterator()
 REM         
-REM         v! = new BBjVector()
-REM 
-REM         qf! = #getQueryFilter()
-REM         if qf! <> null() then 
-REM           keyf!     = qf!.get("KEY")
-REM           valuef!   = qf!.get("VALUE")
-REM         fi
-REM 
-REM         
-REM         cf! = #getControllerFilter()
-REM         
-REM         
-REM         if cf! <> null() and #getControllerFilterUnlock().size()=0 then 
-REM           keycf!     = cf!.get("KEY")
-REM         fi
-REM 
-REM         
-REM         while it!.hasNext()
-REM             K$=it!.next()
-REM             k1$ = tm!.get(k$)
-REM             v$=al!.get(k1$)
-REM             
-REM             if valuef!<> null() and valuef!.contains(v$)=0 then continue
-REM             if keycf!<> null() and keycf!.contains(k$)=0 then continue
-REM             if keyf!<> null() and keyf!.contains(k$)=0 then continue
-REM                         
-REM             r! = new DataRow()
-REM             r!.setFieldValue("KEY",k1$)
-REM             r!.setFieldValue("VALUE",v$)
-REM             v!.addItem(r!)
-REM         wend        
+        v! = new BBjVector()
+
+        qf! = #getQueryFilter()
+        if qf! <> null() then 
+          keyf!     = qf!.get("KEY")
+          valuef!   = qf!.get("VALUE")
+        fi
+
         
-        v! = #Reader!.getResultSet(#Attribute$)
+        cf! = #getControllerFilter()
+        
+        
+        if cf! <> null() and #getControllerFilterUnlock().size()=0 then 
+          keycf!     = cf!.get("KEY")
+        fi
+
+        it! = v1!.iterator()
+        while it!.hasNext()
+            r! = it!.next()
+            k$=r!.getFieldAsString("KEY")
+            v$=r!.getFieldAsString("VALUE")
+            
+            if valuef!<> null() and valuef!.contains(v$)=0 then continue
+            if keycf!<> null() and keycf!.contains(k$)=0 then continue
+            if keyf!<> null() and keyf!.contains(k$)=0 then continue
+            v!.addItem(r!)
+        wend        
 
         #NeedRebuild=0
         #super!.setResultSet(v!)
