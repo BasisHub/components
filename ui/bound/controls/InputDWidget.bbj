@@ -53,7 +53,7 @@ class public  InputDWidget extends ControlWidget
                   #Static!.setText(#Ipd!.getText())
               fi
           fi
-         #setEdited(1)
+         #setEdited(0)
              
     methodend   
     
