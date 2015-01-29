@@ -502,8 +502,11 @@ REM           wend
     methodend
     
     method public BBjString getAttributeValue(BBjString key$)
-    
-        methodret str(#Reader!.getAttribute(#Attribute$,key$))
+        result$ = str(#Reader!.getAttribute(#Attribute$,key$))
+        if(result$ = "null") then
+            methodret ""
+        fi
+        methodret result$
     
     methodend
   
