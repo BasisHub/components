@@ -578,8 +578,12 @@ REM                             cwCanvas!.setFont(font!)
     
 
         BBjAPI().removeTimer("delayedSetSize",err=*next)
-          
 
+        w! = #getWnd()
+        if w! = nulL() or w!.isDestroyed() then
+          methodret
+        fi
+        
         if #ToolbarWnd! <> null() AND #this!.getShowToolBar() then
             #ToolbarWnd!.setSize(#NewW,UIComponent.getToolbarHeight())
             #FormWnd!.setSize(#NewW, #NewH-UIComponent.getToolbarHeight())
