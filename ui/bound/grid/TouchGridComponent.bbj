@@ -54,7 +54,7 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         #ResultInfo!.addStyle("TouchGridResultinfo")
 
         
-        #NewButton! = cast(BBjButton, cw!.addButton (102,cw!.getWidth()-50,cw!.getHeight()-50,40,40,"",$0010$ ) )
+        #NewButton! = cast(BBjButton, cw!.addButton (102,cw!.getWidth()-80,cw!.getHeight()-80,40,40,"",$0010$ ) )
         #NewButton!.addStyle("NewButton") 
         #NewButton!.setFocusable(0)
         #NewButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onBtnNew")
@@ -65,7 +65,7 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         #super!.setSize(w!,h!)
         #TouchGrid!.setSize(w!,h!)
         #ResultInfo!.setSize(w!-20,40)
-        #NewButton!.setLocation(w!-50,h!-50)
+        #NewButton!.setLocation(w!-80,h!-80)
     methodend
 
 
