@@ -64,7 +64,7 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
     
     rem new flexiform variables
     
-    field private HashMap ElementList!= new HashMap()
+    field protected HashMap ElementList!= new HashMap()
     field private HashMap BCList!     = new HashMap()
     field private BBjNumber NewW
     field private BBjNumber NewH

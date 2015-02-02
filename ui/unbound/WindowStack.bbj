@@ -172,6 +172,10 @@ REM         fi
         #BackActionPayloadList!.addItem(payload!)
     methodend
 
+    method public static void clearBackButtonAction()
+        WindowStack.setBackButtonAction(null(),"",null())
+    methodend
+    
     method public static void setExitButtonAction(Object target!, BBjString callback$, Object payload!)
         #ExitActionList!.removeItem(#ExitActionList!.size()-1)
         #ExitActionList!.addItem(callback$)
@@ -195,6 +199,9 @@ REM         fi
                     else
                         Util.invoke(obj!,action$,payl!)
                     fi
+                    rem there was a back button action set
+                    rem so only do that one and nothing else
+                    methodret
                 fi
 
                 wnd! = #WindowList!.getItem(#WindowList!.size()-1)
