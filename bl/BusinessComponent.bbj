@@ -586,7 +586,6 @@ class public BusinessComponent
 
     methodend
 
-
     rem /**
     rem * Method registerController:
     rem * register a UIController that wants to get notified on changes of the selection

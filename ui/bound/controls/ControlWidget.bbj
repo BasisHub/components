@@ -229,14 +229,20 @@ REM     methodend
 
     method public void onCtrlLostFocus(BBjLostFocusEvent ev!)
 
+        #Focus = 0
+        #asyncUpdate(ev!.getText())
+
+    methodend
+    
+    method protected void asyncUpdate(BBjString v!)
+
         if #getBC()<>null() then
-            #Focus = 0
+           
             edrow! = #getBC().getEditedRecord()
             n$=#getName()
-            v!=ev!.getText()
             if #getFkPicker() <> null() then
                 
-                v!=#getFkPicker().getSelectedForeignKeyValue()
+                v!=str(#getFkPicker().getSelectedForeignKeyValue())
                 if v!=null() then
                     v!=""
                 fi
@@ -245,8 +251,9 @@ REM     methodend
             edrow!.setFieldValue(n$,v!)
             validate = #getBC().validateField(n$,v!,#getBC().getEditedOriginalRecord(), edrow!)
             #markValidationErrors()
-        fi
-
+            
+        fi    
+        
     methodend
     
     method protected void clearValidationErrors()

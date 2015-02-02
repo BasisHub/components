@@ -18,15 +18,29 @@ class public  ComboboxWidget extends ControlWidget
         #Cb!.setEditable(1) 
         #setCtrl(#Cb!)
         
+        #Cb!.setCallback(BBjAPI.ON_LIST_CHANGE,#this!,"onListChange")
+        
         #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
         #Static!.setVisible(1)
         #Static!.addStyle("StaticRepresentation")   
        
     methodend
     
-    method public void OnListChange(BBjListChangeEvent ev!)
-        #Static!.setText(ev!.getSelectedItem())
-    methodend
+    method public void onListChange(BBjListChangeEvent ev!)
+    
+        x$=ev!.getSelectedItem()
+        #Static!.setText(x$)
+        #asyncUpdate(x$)
+        if #getName() = "TYPE" Then 
+            bc! = #getBC()
+            uic! = bc!.getTTuic()
+            edrow! = #getBC().getEditedRecord()
+            x$=edrow!.getFieldAsString("TYPE")
+            v! = new BBjVector()
+            v!.addItem(x$)
+            uic!.drive("TYPE",v!)
+        fi
+    methodend 
     
     method public void displayData()
           #setEdited(0)
