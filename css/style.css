@@ -426,7 +426,7 @@ td .infoMiscValue {
   scrollbar-shadow-color: #eff0f0 !important;
 }
 
-.NoScrollBar 
+.NoScrollBar::-webkit-scrollbar 
 {
   width: 0 !important;
 }
