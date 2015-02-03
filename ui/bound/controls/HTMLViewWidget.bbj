@@ -11,7 +11,8 @@ class public  HTMLViewWidget extends ControlWidget
         
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         #setWnd(cwWidget!)
-        #setCtrl(#getWnd().addHtmlView(100,0,0,1,1,""))
+        #setCtrl(cwWidget!.addHtmlView(100,0,0,1,1,""))
+        
     
     methodend
     
@@ -75,6 +76,12 @@ class public  HTMLViewWidget extends ControlWidget
                             Url$ = BaseUrl$+"files/deliver/"+t$+"/"+java.net.URLEncoder.encode(f$,"UTF-8").replace("+", "%20")
                         fi    
                         html! = #getCtrl()
+                        
+                        rem workaround for embedded display on iPad 
+                        html!.setText("<html>...</html>")
+                        wait .01
+                        rem ----------schnipp----------------------
+                        
                         html!.setUrl(Url$)
                         html!.setEnabled(1)                        
                      fi
