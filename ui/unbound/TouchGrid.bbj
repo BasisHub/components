@@ -34,6 +34,11 @@ class public TouchGrid implements BBjControl
         
         #LbList! = #CwCanvas!.addListBox(200,10,10,w-20,h-20,"")
         #LbList!.addStyle("TouchGrid")
+        
+        if BBjAPI().getBuiManager().isTouchSupported() then
+            #LbList!.addStyle("NoScrollBar")
+        fi
+        
         #LbList!.setFocusable(0)
         #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
     methodend
@@ -172,7 +177,7 @@ BBjAPI().getConfig().setOptionSetting("FAST_TOUCH_CLICK", 1)
 wnd! = BBjAPI().openSysGui("X0").addWindow(10,10,800,700,"TEST")
 wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
 
-c! = new TouchGrid(wnd!,100,10,10,300,600)
+c! = new TouchGrid(wnd!,100,10,10,300,100)
 c!.setRowTemplate("
 :<html>
 :    <table border=0 cellpadding=0 cellspacing=0 width=""100%"" height=""100%"">
@@ -201,7 +206,27 @@ c!.setRowTemplate("
 :</html>
 :")
 
+
+
+
 r! = new DataRow()
+r!.setFieldValue("NAME","Mouse")
+r!.setFieldValue("FIRSTNAME","Mickey")
+r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/shwz/disney/48/mickey-mouse-icon.png")
+c!.addItem(r!)
+
+r! = new DataRow()
+r!.setFieldValue("NAME","Duck")
+r!.setFieldValue("FIRSTNAME","Donald")
+r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Donald-Duck-2-icon.png")
+c!.addItem(r!)
+
+r! = new DataRow()
+r!.setFieldValue("NAME","Pluto")
+r!.setFieldValue("FIRSTNAME","")
+r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Pluto-2-icon.png")
+c!.addItem(r!)
+
 r!.setFieldValue("NAME","Mouse")
 r!.setFieldValue("FIRSTNAME","Mickey")
 r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/shwz/disney/48/mickey-mouse-icon.png")

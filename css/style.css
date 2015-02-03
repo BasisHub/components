@@ -425,9 +425,12 @@ td .infoMiscValue {
   scrollbar-face-color: #eff0f0 !important;
   scrollbar-shadow-color: #eff0f0 !important;
 }
-.BBjListBox::-webkit-scrollbar {
+
+.NoScrollBar 
+{
   width: 0 !important;
 }
+
 
 .BBjGroupBox {
 -webkit-box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
