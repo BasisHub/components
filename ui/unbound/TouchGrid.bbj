@@ -35,7 +35,7 @@ class public TouchGrid implements BBjControl
         #LbList! = #CwCanvas!.addListBox(200,10,10,w-20,h-20,"")
         #LbList!.addStyle("TouchGrid")
         
-        if BBjAPI().getBuiManager().isTouchSupported() then
+        if INFO(3,6)="5" AND BBjAPI().getBuiManager().isTouchSupported() then
             #LbList!.addStyle("NoScrollBar")
         fi
         
