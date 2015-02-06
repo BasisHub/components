@@ -1,5 +1,6 @@
 
-use ::components/ui/layout/BBMigPane.bbj::BBMigPane
+rem use ::components/ui/layout/BBMigPane.bbj::BBMigPane
+use com.basiscomponents.ui.layout.BBMigPane
 use net.miginfocom.layout.PlatformDefaults
 
 use java.util.HashMap
@@ -303,9 +304,9 @@ class public bbmigtest
         #cLayout!.add( bHelp2!, "sg,tag help2" )
 
         #cLayout!.layoutChildren()
-                
         #Layout!.add( #cWindow!, "south")
+
         #Layout!.layoutChildren()
     methodend
-    
+
 classend

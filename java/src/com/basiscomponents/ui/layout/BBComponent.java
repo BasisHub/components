@@ -84,7 +84,7 @@ public class BBComponent {
 	public void setOrigMaximumSize(Dimension origMaximumSize) {
 		this.origMaximumSize = origMaximumSize;
 	}
-	
+
 	/**
 	 * @return the minimumSize
 	 */
