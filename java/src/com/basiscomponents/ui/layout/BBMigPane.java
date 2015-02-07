@@ -15,8 +15,10 @@ import com.basis.bbj.client.sysgui.datatypes.BBjColor;
 import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.CustomObject;
 import com.basis.bbj.proxies.sysgui.BBjControl;
+import com.basis.bbj.proxies.sysgui.BBjFont;
 import com.basis.bbj.proxies.sysgui.BBjPopupMenu;
 import com.basis.bbj.proxies.sysgui.BBjWindow;
+import com.basis.util.common.BBjNumber;
 import com.basis.util.common.BasisNumber;
 
 /**
