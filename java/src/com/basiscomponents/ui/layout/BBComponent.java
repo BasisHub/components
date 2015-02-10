@@ -6,6 +6,7 @@ package com.basiscomponents.ui.layout;
 import java.awt.Dimension;
 
 import com.basis.bbj.proxies.sysgui.BBjControl;
+import com.basis.bbj.proxies.sysgui.BBjFont;
 
 /**
  * @author rlance
@@ -20,6 +21,7 @@ public class BBComponent {
 	private Dimension minimumSize;
 	private Dimension preferredSize;
 	private Dimension maximumSize;
+	private BBjFont preferredFont;
 
 	public BBComponent(BBjControl control) {
 		setControl(control);
@@ -128,6 +130,21 @@ public class BBComponent {
 	 */
 	public void setMaximumSize(Dimension maximumSize) {
 		this.maximumSize = maximumSize;
+	}
+
+	/**
+	 * @return the preferred BBjFont
+	 */
+	public BBjFont getPreferredFont() {
+		return preferredFont;
+	}
+
+	/**
+	 * @param preferredFont
+	 *            the preferred BBjFont to set
+	 */
+	public void setPreferredFont(BBjFont preferredFont) {
+		this.preferredFont = preferredFont;
 	}
 
 }

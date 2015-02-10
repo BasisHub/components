@@ -1,10 +1,6 @@
 package net.miginfocom.layout;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.ObjectStreamException;
+import java.io.*;
 
 /*
  * License (BSD):
@@ -45,7 +41,7 @@ import java.io.ObjectStreamException;
  * component) can shrink or grow compared to other entities.
  */
 final class ResizeConstraint implements Externalizable {
-	static final Float WEIGHT_100 = new Float(100);
+	static final Float WEIGHT_100 = 100f;
 
 	/**
 	 * How flexilble the entity should be, relative to other entities, when it

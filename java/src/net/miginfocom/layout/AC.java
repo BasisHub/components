@@ -1,10 +1,6 @@
 package net.miginfocom.layout;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.ObjectStreamException;
+import java.io.*;
 import java.util.ArrayList;
 
 /*
@@ -58,7 +54,7 @@ import java.util.ArrayList;
  */
 public final class AC implements Externalizable {
 	private final ArrayList<DimConstraint> cList = new ArrayList<DimConstraint>(
-			8);
+			1);
 
 	private transient int curIx = 0;
 

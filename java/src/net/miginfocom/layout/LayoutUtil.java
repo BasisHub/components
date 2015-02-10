@@ -1,18 +1,7 @@
 package net.miginfocom.layout;
 
-import java.beans.Beans;
-import java.beans.ExceptionListener;
-import java.beans.Introspector;
-import java.beans.PersistenceDelegate;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.OutputStream;
+import java.beans.*;
+import java.io.*;
 import java.util.IdentityHashMap;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
@@ -454,6 +443,34 @@ public final class LayoutUtil {
 
 	static int sum(int[] terms) {
 		return sum(terms, 0, terms.length);
+	}
+
+	/**
+	 * Keeps f within min and max. Min is of higher priority if min is larger
+	 * than max.
+	 * 
+	 * @param f
+	 *            The value to clamp
+	 * @param min
+	 * @param max
+	 * @return The clamped value, between min and max.
+	 */
+	static float clamp(float f, float min, float max) {
+		return Math.max(min, Math.min(f, max));
+	}
+
+	/**
+	 * Keeps i within min and max. Min is of higher priority if min is larger
+	 * than max.
+	 * 
+	 * @param i
+	 *            The value to clamp
+	 * @param min
+	 * @param max
+	 * @return The clamped value, between min and max.
+	 */
+	static int clamp(int i, int min, int max) {
+		return Math.max(min, Math.min(i, max));
 	}
 
 	public static int getSizeSafe(int[] sizes, int sizeType) {
