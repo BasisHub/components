@@ -23,24 +23,13 @@ wnd!        = sg!.addWindow(0,0,screenSize!.width,screenSize!.height,"",$0108101
 wnd!.setCallback(BBjAPI.ON_SCREEN_RESIZE,"resize")
 wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
 
-frame!      = wnd!.addChildWindow(100,0,40,screenSize!.width,screenSize!.height-80,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+frame!      = wnd!.addChildWindow(100,0,0,screenSize!.width,screenSize!.height,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
 
 WindowStack.setContainerWnd(frame!)
 bc!         = new (DB_NICE)(TBL_NICE)BusinessComponent()
 cw!         = WindowStack.openWindow(bc!.getTitle())
 ctc!        = new (DB_NICE)(TBL_NICE)TouchScreenCombo(cw!, bc!)
 WindowStack.setWidget(ctc!)
-
-myTopBar!   = wnd!.addStaticText(110, 0, 0, w, 40, "")
-myTopBar!.setName("topGradientBar")
-wnd!.addImage(111,0,0,2500,40,"components/css/banner.png")
-
-myStatusBar! = wnd!.addStaticText(112, 0, h-20, w, 20, "") 
-myStatusBar!.setName("topGradientBar")
-
-myExit!     = wnd!.addButton(200, screenSize!.width-24-8, 8, 30, 30, "")
-myExit!.setName("exitButton")
-myExit!.setCallback(BBjAPI.ON_BUTTON_PUSH, "byebye")
 
 wnd!.setVisible(1)
 
@@ -53,11 +42,8 @@ resize:
     ev! = BBjAPI().getLastEvent()
     w = ev!.getWidth()
     h = ev!.getHeight()
-    myTopBar!.setSize(w,40)
-    myStatusBar!.setSize(w,20)
-    myStatusBar!.setLocation(0, h-20)
-    myExit!.setLocation(w-24-8,8)
-    frame!.setSize(w,h-80)
-    WindowStack.resize(w,h-80)
+   
+    frame!.setSize(w,h)
+    WindowStack.resize(w,h)
 return
 
