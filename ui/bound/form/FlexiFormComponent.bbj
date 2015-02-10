@@ -11,10 +11,10 @@ use java.util.HashMap
 
 use com.basiscomponents.db.DataRow
 use com.basiscomponents.db.DataField
+use com.basiscomponents.ui.layout.BBMigPane
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/bl/ValidationError.bbj::ValidationError
-
 
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/UIController.bbj::UIController
@@ -22,7 +22,6 @@ use ::components/ui/bound/toolbar/NavigationToolbarComponent.bbj::NavigationTool
 use ::components/ui/bound/toolbar/FormEditToolbarComponent.bbj::FormEditToolbarComponent
 use ::components/ui/bound/controls/ForeignKeyPicker.bbj::ForeignKeyPicker
 use ::components/ui/unbound/ResponsiveFormFrame.bbj::ResponsiveFormFrame
-use ::components/ui/layout/BBMigPane.bbj::BBMigPane
 
 use ::translations/bbtranslator.bbj::BBTranslator
 
