@@ -418,17 +418,13 @@ td .infoMiscValue {
 .fadeOut {
   opacity: 0;
 }
-/* Browser-specific stuff */
-.BBjListBox {
+.NoScrollBar::-webkit-scrollbar 
+{
+  width: 0 !important;
   scrollbar-track-color: #eff0f0 !important;
   scrollbar-arrow-color: #eff0f0 !important;
   scrollbar-face-color: #eff0f0 !important;
   scrollbar-shadow-color: #eff0f0 !important;
-}
-
-.NoScrollBar::-webkit-scrollbar 
-{
-  width: 0 !important;
 }
 
 
