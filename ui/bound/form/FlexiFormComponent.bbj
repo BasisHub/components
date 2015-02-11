@@ -867,7 +867,8 @@ REM TODO: lazy loading!
             
 
             bc!.clearValidationErrors()
-            val = bc!.validateRecord(bc!.getEditedRecord(),bc!.getEditedOriginalRecord())
+            
+            val = bc!.validateRecord(r!,bc!.getEditedOriginalRecord())
             val = max(val,bc!.getFieldValidationErrorLevel())
 
             if val>0 then

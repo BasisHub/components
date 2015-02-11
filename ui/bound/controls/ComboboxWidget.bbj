@@ -9,6 +9,7 @@ class public  ComboboxWidget extends ControlWidget
  
     field private BBjComboBox Cb!
     field private BBjStaticText Static!
+    field private BBjNumber IDX
  
     method public ComboboxWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
@@ -27,7 +28,7 @@ class public  ComboboxWidget extends ControlWidget
     methodend
     
     method public void onListChange(BBjListChangeEvent ev!)
-    
+        #IDX = ev!.getSelectedIndex()
         x$=ev!.getSelectedItem()
         #Static!.setText(x$)
         #asyncUpdate(x$)
@@ -45,9 +46,8 @@ class public  ComboboxWidget extends ControlWidget
     method public void displayData()
           #setEdited(0)
           if !#getEnabled() then
-              id=#Cb!.getSelectedIndex()
-              if id>-1 then
-                  #Static!.setText(#Cb!.getItemAt(id))
+              if #IDX>-1 then
+                  #Static!.setText(#Cb!.getItemAt(#IDX))
               else
                     #Static!.setText("-")
               fi
@@ -109,6 +109,7 @@ class public  ComboboxWidget extends ControlWidget
     
     method public void selectIndex(BBjNumber x!)
         #Cb!.selectIndex(x!)
+        #IDX = x!
         t$=""
         if x!>-1 then
             t$=#Cb!.getItemAt(x!)
@@ -117,7 +118,7 @@ class public  ComboboxWidget extends ControlWidget
    methodend
    
    method public BBjNumber getSelectedIndex()
-        methodret #Cb!.getSelectedIndex()
+        methodret #IDX 
    methodend
    
 classend

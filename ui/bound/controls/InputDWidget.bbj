@@ -50,7 +50,7 @@ class public  InputDWidget extends ControlWidget
                   r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                   d     = r!.getFieldAsNumber(#getBindField(),err=*next)
                   #Ipd!.setValue(d)
-                  #Static!.setText(#Ipd!.getText())
+                  #Static!.setText(date(d:#Ipd!.getMask())) 
               fi
           fi
          #setEdited(0)
