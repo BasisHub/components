@@ -478,6 +478,10 @@ box-shadow: 0 0 0px rgba(0, 0, 0, 0);
 border: 0px;
 }
 
+.BBjListButton-buttonText, .BBjListButton-item{
+font: normal 11px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+
 .WindowStackTitle, .BBjGroupBox legend {
 color: white;
 text-shadow: 0 1px 0 midnightblue;
