@@ -1,6 +1,7 @@
 package net.miginfocom.layout;
 
-import java.io.Externalizable;
+import java.io.*;
+
 /*
  * License (BSD):
  * ==============
@@ -34,10 +35,6 @@ import java.io.Externalizable;
  * @author Mikael Grev, MiG InfoCom AB
  *         Date: 2006-sep-08
  */
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.ObjectStreamException;
 
 /**
  * Contains the constraints for an instance of the {@link LC} layout manager.

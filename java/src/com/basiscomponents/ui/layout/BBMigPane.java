@@ -13,6 +13,7 @@ import net.miginfocom.layout.LayoutUtil;
 import com.basis.bbj.client.datatypes.BBjVector;
 import com.basis.bbj.client.sysgui.datatypes.BBjColor;
 import com.basis.bbj.client.util.BBjException;
+import com.basis.bbj.proxies.BBjSysGui;
 import com.basis.bbj.proxies.CustomObject;
 import com.basis.bbj.proxies.sysgui.BBjControl;
 import com.basis.bbj.proxies.sysgui.BBjFont;
@@ -169,6 +170,7 @@ public class BBMigPane implements BBjControl {
 		this.container.setPreferredSize(d);
 		this.container.setMaximumSize(new Dimension(d.width * 100,
 				d.height * 100));
+		this.container.setPreferredFont(this.container.getControl().getFont());
 
 		// the container wrapper
 		this.containerWrapper = new BBContainerWrapper(this.container, this);
@@ -272,6 +274,7 @@ public class BBMigPane implements BBjControl {
 				(int) (d.height / 2)));
 		component.setPreferredSize(d);
 		component.setMaximumSize(new Dimension(d.width * 50, d.height * 50));
+		component.setPreferredFont(control.getFont());
 
 		this.containerWrapper.add(component, cc);
 	}
@@ -384,7 +387,7 @@ public class BBMigPane implements BBjControl {
 			List<BBComponentWrapper> componentWrapperList = this.containerWrapper
 					.getComponentWrapperList();
 			if (componentWrapperList != null && componentWrapperList.size() > 0) {
-				for (int i = 0; i < componentWrapperList.size() - 1; i++) {
+				for (int i = 0; i < componentWrapperList.size(); i++) {
 					BBComponentWrapper componentWrapper = componentWrapperList
 							.get(i);
 					BBComponent component = (BBComponent) componentWrapper
@@ -441,13 +444,13 @@ public class BBMigPane implements BBjControl {
 	 * @throws BBjException
 	 * @throws NumberFormatException
 	 */
-	public void scaleLayout(BBjNumber scale) throws NumberFormatException,
-			BBjException {
+	public void scaleLayout(BBjNumber scale, BBjSysGui sysgui)
+			throws NumberFormatException, BBjException {
 		double s = scale.doubleValue();
 		List<BBComponentWrapper> componentWrapperList = this.containerWrapper
 				.getComponentWrapperList();
 		if (componentWrapperList != null && componentWrapperList.size() > 0) {
-			for (int i = 0; i < componentWrapperList.size() - 1; i++) {
+			for (int i = 0; i < componentWrapperList.size(); i++) {
 				BBComponentWrapper componentWrapper = componentWrapperList
 						.get(i);
 				BBComponent component = (BBComponent) componentWrapper
@@ -466,6 +469,15 @@ public class BBMigPane implements BBjControl {
 					component.setMaximumSize(new Dimension(
 							(int) ((d.width * s) * 50),
 							(int) ((d.height * s) * 50)));
+
+					int sz = component.getPreferredFont().getSize();
+					if (sz > 0 && s > 0.2d) {
+						sz = (int) (sz * (s - 0.2d));
+						BBjFont f = component.getPreferredFont();
+						component.getControl().setFont(
+								sysgui.makeFont(f.getName(), sz, f.getStyle()));
+					}
+
 					this.containerWrapper.getComponentToHashcodeMap().put(
 							component, componentWrapper.getLayoutHashCode());
 					invalidateMigLayoutGrid();
@@ -482,7 +494,7 @@ public class BBMigPane implements BBjControl {
 	// DEBUG - TODO (see Swing and/or JavaFX implementations)
 
 	// ======================================================
-	// methods of BBjControl interface
+	// Methods of BBjControl interface
 
 	@Override
 	public BBjPopupMenu addPopupMenu() throws BBjException {

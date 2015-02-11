@@ -11,7 +11,7 @@ class public bbmigtest
     field private BBjAPI    API! = BBjAPI()
     field private BBjNumber TRUE = BBjAPI().TRUE
     field private BBjNumber FALSE = BBjAPI().FALSE
-    field private BBjSysGui SysGui! = #API!.openSysGui("X0")
+    field private BBjSysGui SysGui! = BBjAPI().openSysGui("X0")
 
     field private BBjTopLevelWindow Window!
     field private BBMigPane Layout!
@@ -19,8 +19,17 @@ class public bbmigtest
     field private BBMigPane cLayout!
 
     field private BBjStaticText lFirstName!
+    field private BBjInputE iFirstName!
+    field private BBjStaticText lSurname!
+    field private BBjInputE iSurname!
+    field private BBjStaticText lAddress!
+    field private BBjInputE iAddress!
 
-    field public BBjNumber ActiveResize
+    field private BBjMenuButton bOk!
+    field private BBjMenuButton bCancel!
+    field private BBjMenuButton bHelp!
+
+    field public BBjNumber ActiveResize = BBjAPI().FALSE
 
     method public bbmigtest()
 
@@ -67,20 +76,22 @@ class public bbmigtest
     method public void windowResize(BBjResizeEvent p_event!)
         if !(#ActiveResize)
             #ActiveResize = #TRUE
-            #API!.createTimer("ResizeEventTimer", .2, #this!, "resizeTimerEvent")
+            #API!.createTimer("ResizeEventTimer", .25, #this!, "resizeTimerEvent")
         endif
     methodend
 
     method public void screenResize(BBjScreenResizeEvent p_event!)
         if !(#ActiveResize)
             #ActiveResize = #TRUE
-            #API!.createTimer("ResizeEventTimer", .2, #this!, "resizeTimerEvent")
+            #API!.createTimer("ResizeEventTimer", .25, #this!, "resizeTimerEvent")
         endif
     methodend
 
     method public void resizeTimerEvent(BBjTimerEvent p_event!)
+        rem #SysGui!.setRepaintEnabled(#FALSE)
         #Layout!.layoutChildren()
         #cLayout!.layoutChildren()
+        rem #SysGui!.setRepaintEnabled(#TRUE)
         #API!.removeTimer("ResizeEventTimer",err=*next)
         #ActiveResize = #FALSE
     methodend
@@ -93,48 +104,12 @@ class public bbmigtest
             else
                 scale = scale - (p_event!.getWheelRotation() / 10)
             endif
-            if scale >= 0.5 and scale <= 3.0 then
-                #SysGui!.setRepaintEnabled(0)
-                #Layout!.scaleLayout(scale)
-                #scaleFonts(#Window!,scale)
-                #resizeTimerEvent(null())
-                #SysGui!.setRepaintEnabled(1)
+            if scale >= 0.5 and scale <= 4.0 then
+                #Layout!.scaleLayout(scale, #SysGui!)
+                #cLayout!.scaleLayout(scale, #SysGui!)
                 cast(HashMap, #Window!.getUserData()).put("scale", scale)
             endif
         endif
-    methodend
-
-    method public void scaleFonts(BBjWindow window!, BBjNumber scale)
-        declare BBjFont f!
-        declare BBjVector v!
-        declare Iterator iter!
-        declare BBjControl c!
-
-        rem first the window itself
-        sz = 0
-        sz = num(cast(HashMap, window!.getUserData(),err=*next).get("prefFontSize",err=*next))
-        if sz > 0 then
-            sz = int(sz * scale)
-            f! = window!.getFont()
-            window!.setFont( #SysGui!.makeFont(f!.getName(), sz, f!.getStyle()) )
-        endif
-        rem then its controls
-        v! = window!.getAllControls()
-        iter! = v!.iterator()
-        while iter!.hasNext()
-            c! = cast(BBjControl, iter!.next())
-            if c!.getControlType() = #SysGui!.CHILD_TYPE then
-                #this!.scaleFonts(cast(BBjWindow, c!), scale)
-                continue
-            endif
-            sz = 0
-            sz = num(cast(HashMap, c!.getUserData(),err=*continue).get("prefFontSize",err=*continue))
-            if sz > 0 then
-                sz = int(sz * scale)
-                f! = c!.getFont()
-                c!.setFont( #SysGui!.makeFont(f!.getName(), sz, f!.getStyle()) )
-            endif
-        wend
     methodend
 
     method public void constructForm()
@@ -171,71 +146,59 @@ class public bbmigtest
         font! = #SysGui!.makeFont("Dialog",font_size,#SysGui!.PLAIN)
         font_height=iff(font!.getStyle()=#SysGui!.BOLD,int(font_size*1.1),font_size)
 
-        #Window!.setFont(font!); cast(HashMap, #Window!.getUserData()).put("prefFontSize",font!.getSize())
+        #Window!.setFont(font!)
 
         #Layout! = new BBMigPane(#Window!, "insets dialog,fillx", "[align label]rel[grow,fill]unrel[align label]rel[grow,fill]", "")
 
         declare BBjVector tx!
         declare BBjVector tm!
-
         tx! = #API!.makeVector()
-        tidFirstName = 0; tx!.add(tidFirstName, "First Name")
-        tidSurname = 1; tx!.add(tidSurname, "Surname")
-        tidAddress = 2; tx!.add(tidAddress, "Address")
+        tidFirstName = 0; tx!.add(tidFirstName, "First Name:")
+        tidSurname = 1; tx!.add(tidSurname, "Surname:")
+        tidAddress = 2; tx!.add(tidAddress, "Address:")
         tidOk = 3; tx!.add(tidOk, "OK")
         tidCancel = 4; tx!.add(tidCancel, "Cancel")
         tidHelp = 5; tx!.add(tidHelp, "Help")
-        tidHelp2 = 6; tx!.add(tidHelp2, "Second Help")
         tm! = #SysGui!.getMeasures(tx!)
 
-        declare BBjColor bcolor!
-        bcolor! = #API!.makeColor(#SysGui!.LTGRAY)
+        declare BBjColor lbl_bkcolor!
+        lbl_bkcolor! = #API!.makeColor(#SysGui!.LTGRAY)
+        setlblbkcolor! = #TRUE
 
-        lwpad=0,lhpad=12,iwpad=12,ihpad=12; rem label width/height padding, input control width/height padding
+        lwpad=0,lhpad=8,iwpad=8,ihpad=8; rem label width/height padding, input control width/height padding
 
         #lFirstName! =  #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidFirstName))+lwpad,font_height+lhpad,str(tx!.get(tidFirstName)))
         #lFirstName!.setName("lFirstName")
-        #lFirstName!.setUserData(new HashMap())
-        #lFirstName!.setFont(font!); cast(HashMap, #lFirstName!.getUserData()).put("prefFontSize",font!.getSize())
-        #lFirstName!.setBackColor(bcolor!)
+        #lFirstName!.setFont(font!)
+        if setlblbkcolor then #lFirstName!.setBackColor(lbl_bkcolor!)
         #Layout!.add( #lFirstName!, "" )
 
-        declare BBjInputE iFirstName!
-        iFirstName! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
-        iFirstName!.setName("iFirstName")
-        iFirstName!.setUserData(new HashMap())
-        iFirstName!.setFont(font!); cast(HashMap, iFirstName!.getUserData()).put("prefFontSize",font!.getSize())
-        #Layout!.add( iFirstName!, "" )
+        #iFirstName! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
+        #iFirstName!.setName("iFirstName")
+        #iFirstName!.setFont(font!)
+        #Layout!.add( #iFirstName!, "" )
 
-        declare BBjStaticText lSurname!
-        lSurname! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidSurName))+lwpad,font_height+lhpad,str(tx!.get(tidSurName)))
-        lSurname!.setName("lSurname")
-        lSurname!.setUserData(new HashMap())
-        lSurname!.setFont(font!); cast(HashMap, lSurname!.getUserData()).put("prefFontSize",font!.getSize())
-        lSurname!.setBackColor(bcolor!)
-        #Layout!.add( lSurname!, "" )
+        #lSurname! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidSurName))+lwpad,font_height+lhpad,str(tx!.get(tidSurName)))
+        #lSurname!.setName("lSurname")
+        #lSurname!.setFont(font!)
+        if setlblbkcolor then #lSurname!.setBackColor(lbl_bkcolor!)
+        #Layout!.add( #lSurname!, "" )
 
-        declare BBjInputE iSurname!
-        iSurname! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
-        iSurname!.setName("iSurname")
-        iSurname!.setUserData(new HashMap())
-        iSurname!.setFont(font!); cast(HashMap, iSurname!.getUserData()).put("prefFontSize",font!.getSize())
-        #Layout!.add( iSurname!, "wrap" )
+        #iSurname! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
+        #iSurname!.setName("iSurname")
+        #iSurname!.setFont(font!)
+        #Layout!.add( #iSurname!, "wrap" )
 
-        declare BBjStaticText lAddress!
-        lAddress! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidAddress))+lwpad,font_height+lhpad,str(tx!.get(tidAddress)))
-        lAddress!.setName("lAddress")
-        lAddress!.setUserData(new HashMap())
-        lAddress!.setFont(font!); cast(HashMap, lAddress!.getUserData()).put("prefFontSize",font!.getSize())
-        lAddress!.setBackColor(bcolor!)
-        #Layout!.add( lAddress!, "" )
+        #lAddress! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidAddress))+lwpad,font_height+lhpad,str(tx!.get(tidAddress)))
+        #lAddress!.setName("lAddress")
+        #lAddress!.setFont(font!)
+        if setlblbkcolor then #lAddress!.setBackColor(lbl_bkcolor!)
+        #Layout!.add( #lAddress!, "" )
 
-        declare BBjInputE iAddress!
-        iAddress! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,200,font_height+ihpad,"")
-        iAddress!.setName("iAddress")
-        iAddress!.setUserData(new HashMap())
-        iAddress!.setFont(font!); cast(HashMap, iAddress!.getUserData()).put("prefFontSize",font!.getSize())
-        #Layout!.add( iAddress!, "spanx, wrap unrel:push" )
+        #iAddress! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,200,font_height+ihpad,"")
+        #iAddress!.setName("iAddress")
+        #iAddress!.setFont(font!)
+        #Layout!.add( #iAddress!, "spanx, wrap unrel:push" )
 
         rem child window (pane) for the buttons to test button tags
         cWinFlags$=$00000000$
@@ -258,41 +221,33 @@ class public bbmigtest
         rem cWinFlags$=IOR(cWinFlags$,$02000000$); rem Draws a raised edge around the child window.
         #cWindow! = #Window!.addChildWindow(#Window!.getAvailableControlID(),0,70,#Window!.getWidth(),25,"",cWinFlags$,#SysGui!.getAvailableContext())
         #cWindow!.setName("cWindow")
-        #cWindow!.setUserData(new HashMap())
-        #cWindow!.setFont(font!); cast(HashMap, #cWindow!.getUserData()).put("prefFontSize",font!.getSize())
-        #cWindow!.setBackColor(bcolor!)
+        #cWindow!.setFont(font!)
 
-        #cLayout! = new BBMigPane(#cWindow!, "nogrid,fill")
+        declare BBjColor btn_bkcolor!
+        btn_bkcolor! = #API!.makeColor(#SysGui!.CYAN)
+        setbtnbkcolor! = #TRUE
+
+        #cLayout! = new BBMigPane(#cWindow!, "nogrid, fill")
 
         bwpad=16,bhpad=16; rem button width/height padding
 
-        declare BBjMenuButton bOk!
-        bOk! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidOk))+bwpad,font_height+bhpad,str(tx!.get(tidOk)))
-        bOk!.setName("bOk")
-        bOk!.setUserData(new HashMap())
-        bOk!.setFont(font!); cast(HashMap, bOk!.getUserData()).put("prefFontSize",font!.getSize())
-        #cLayout!.add( bOk!, "tag ok,wmin button,sg btn" )
+        #bHelp! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidHelp))+bwpad,font_height+bhpad,str(tx!.get(tidHelp)))
+        #bHelp!.setName("bHelp")
+        #bHelp!.setFont(font!)
+        if setbtnbkcolor! then #bHelp!.setBackColor(btn_bkcolor!)
+        #cLayout!.add( #bHelp!,"sg,tag help" );rem there is also a "tag help2"
 
-        declare BBjMenuButton bCancel!
-        bCancel! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidCancel))+bwpad,font_height+bhpad,str(tx!.get(tidCancel)))
-        bCancel!.setName("bCancel")
-        bCancel!.setUserData(new HashMap())
-        bCancel!.setFont(font!); cast(HashMap, bCancel!.getUserData()).put("prefFontSize",font!.getSize())
-        #cLayout!.add( bCancel!, "tag cancel,wmin button,sg btn" )
+        #bOk! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidOk))+bwpad,font_height+bhpad,str(tx!.get(tidOk)))
+        #bOk!.setName("bOk")
+        #bOk!.setFont(font!)
+        if setbtnbkcolor! then #bOk!.setBackColor(btn_bkcolor!)
+        #cLayout!.add( #bOk!,"sg,tag ok" )
 
-        declare BBjMenuButton bHelp!
-        bHelp! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidHelp))+bwpad,font_height+bhpad,str(tx!.get(tidHelp)))
-        bHelp!.setName("bHelp")
-        bHelp!.setUserData(new HashMap())
-        bHelp!.setFont(font!); cast(HashMap, bHelp!.getUserData()).put("prefFontSize",font!.getSize())
-        #cLayout!.add( bHelp!, "tag help,wmin button,sg btn" )
-
-        declare BBjMenuButton bHelp2!
-        bHelp2! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidHelp2))+bwpad,font_height+bhpad,str(tx!.get(tidHelp2)))
-        bHelp2!.setName("bHelp2")
-        bHelp2!.setUserData(new HashMap())
-        bHelp2!.setFont(font!); cast(HashMap, bHelp2!.getUserData()).put("prefFontSize",font!.getSize())
-        #cLayout!.add( bHelp2!, "tag help2,wmin button,sg btn" )
+        #bCancel! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidCancel))+bwpad,font_height+bhpad,str(tx!.get(tidCancel)))
+        #bCancel!.setName("bCancel")
+        #bCancel!.setFont(font!)
+        if setbtnbkcolor! then #bCancel!.setBackColor(btn_bkcolor!)
+        #cLayout!.add( #bCancel!,"sg,tag cancel" )
 
         #cLayout!.layoutChildren()
         #Layout!.add( #cWindow!, "south")

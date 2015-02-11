@@ -1,17 +1,17 @@
 rem package components.ui.bound
 
-use ::components/bl/BusinessComponent.bbj::BusinessComponent
-use ::components/ui/bound/UIComponent.bbj::UIComponent
 use com.basiscomponents.db.DataRow
 use com.basiscomponents.db.DataField
+
+use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
-
-use ::translations/bbtranslator.bbj::BBTranslator
 use ::components/i18n/i18n.bbj::i18n
-use ::components/util/Util.bbj::Util
-
 use ::components/ui/laf/laffactory.bbj::laffactory
 use ::components/ui/laf/laffactory.bbj::laf
+use ::components/util/Util.bbj::Util
+
+use ::translations/bbtranslator.bbj::BBTranslator
+
 
 rem /**
 rem * UIComponent
@@ -836,11 +836,11 @@ class public UIComponent implements BBjControl
         methodret 0
     methodend
     
-     method public void setUserData(Object ud!)
+    method public void setUserData(Object ud!)
         #Wnd!.setUserData(ud!)
     methodend  
     
-     method public Object getUserData()
+    method public Object getUserData()
         methodret #Wnd!.getUserData()
     methodend    
 
@@ -871,7 +871,6 @@ class public UIComponent implements BBjControl
         methodret #getWnd().getHeight()
     methodend
     
-    
     method public String getName()
         methodret #this!.toString()
     methodend
@@ -901,9 +900,9 @@ class public UIComponent implements BBjControl
         methodret #Wnd!.getContextID()
     methodend
     
-    method public void setVisible (BBjNumber v!)
+    method public void setVisible(BBjNumber v!)
         #getWnd().setVisible(v!)
-    methodend    
+    methodend
 
     method public void setName(BBjString name!)
         #getWnd().setName(name!)
@@ -912,5 +911,14 @@ class public UIComponent implements BBjControl
     method public void setEnabled(BBjNumber enabled!)
         #getWnd().setEnabled(enabled!)
     methodend 
-        
+
+    method public BBjFont getFont()
+        methodret #Wnd!.getFont()
+    methodend
+
+    method public void setFont(BBjFont arg0!)
+        methodret #Wnd!.setFont(arg0!)
+    methodend
+
+
 classend

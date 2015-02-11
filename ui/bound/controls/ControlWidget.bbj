@@ -1,16 +1,16 @@
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/controls/ForeignKeyPicker.bbj::ForeignKeyPicker
 
-use ::components/ui/layout/BBMigPane.bbj::BBMigPane
+rem use com.basiscomponents.ui.layout.BBMigPane
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+rem use com.basiscomponents.db.DataField
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
 use ::i18n/CustomTranslator.bbj::CustomTranslator
 use ::translations/bbtranslator.bbj::BBTranslator
 
 use java.util.HashMap
-use net.miginfocom.layout.PlatformDefaults
+rem use net.miginfocom.layout.PlatformDefaults
 
 class public ControlWidget extends UIComponent 
  

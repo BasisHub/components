@@ -1,12 +1,8 @@
 package net.miginfocom.layout;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.*;
+
 /*
  * License (BSD):
  * ==============
@@ -40,9 +36,6 @@ import java.util.LinkedHashMap;
  * @author Mikael Grev, MiG InfoCom AB
  *         Date: 2006-sep-08
  */
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.WeakHashMap;
 
 /**
  * Holds components in a grid. Does most of the logic behind the layout manager.
@@ -202,7 +195,6 @@ public final class Grid {
 	public Grid(ContainerWrapper container, LC lc, AC rowConstr, AC colConstr,
 			Map<? extends ComponentWrapper, CC> ccMap,
 			ArrayList<LayoutCallback> callbackList) {
-		// System.out.println("new grid!");
 		this.lc = lc;
 		this.rowConstr = rowConstr;
 		this.colConstr = colConstr;
@@ -653,8 +645,7 @@ public final class Grid {
 				do {
 					doAgain = false;
 					for (Cell cell : grid.values()) {
-						ArrayList<CompWrap> compWraps = cell.compWraps;
-						for (CompWrap cw : compWraps) {
+						for (CompWrap cw : cell.compWraps) {
 							if (j == 0) {
 								doAgain |= doAbsoluteCorrections(cw, bounds);
 								if (!doAgain) { // If we are going to do this
@@ -710,7 +701,7 @@ public final class Grid {
 					clearGroupLinkBounds();
 					if (++count > ((compCount << 3) + 10)) {
 						System.err
-								.println("Unstable cyclic dependency in absolute linked values!");
+								.println("Unstable cyclic dependency in absolute linked values.");
 						break;
 					}
 
