@@ -94,15 +94,20 @@ class public GoogleMapsComponent extends UIComponent implements BBjControl
 
     methodend
 
-    method public void setVisible(BBjNumber v)
+    method public void setVisible(BBjNumber v!)
 
-        #super!.setVisible(v)
+        #super!.setVisible(v!)
 
         if #RefreshPostponed then
             #onSelectionChange()
         fi
 
     methodend
+    
+    method public void setEnabled(BBjNumber v!)
+        rem noop
+    methodend
+    
 
     method public void setBC(BusinessComponent bc!)
 
@@ -242,6 +247,11 @@ class public GoogleMapsComponent extends UIComponent implements BBjControl
 
     method public void displayData()
 
+        if #getBC().getSelection().size() = 0 then
+            #BrowserWidget!.refresh("")
+            methodret
+        fi
+         
         if #super!.isVisible() then
 
             #ProgressBar!.setValue(0)
