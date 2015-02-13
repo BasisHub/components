@@ -12,12 +12,13 @@ class public TouchGridComponent extends UIComponent implements BBjControl
     field private BBjStaticText ResultInfo!
     field private BBjButton NewButton! 
 
-    field private Object            SelChangeObject!
-    field private BBjString         SelChangeMethod$
+    field private java.util.HashMap EventObjectList! = new java.util.HashMap()
+    field private java.util.HashMap EventMethodList! = new java.util.HashMap()
     
     field private static BBjNumber ON_SELCHANGE=100
-    
-
+    field private static BBjNumber ON_DOUBLECLICK=101
+    field private static BBjNumber ON_RIGHTCLICK=102
+    field private static BBjNumber ON_DETAILCLICK=103
 
     method public TouchGridComponent (BBjChildWindow cw!)
 
@@ -36,12 +37,14 @@ class public TouchGridComponent extends UIComponent implements BBjControl
     method public BBjNumber ON_SELCHANGE()
         methodret #ON_SELCHANGE
     methodend 
+
+    method public BBjNumber ON_DETAILCLICK()
+        methodret #ON_DETAILCLICK
+    methodend 
     
     method public void setCallback(BBjNumber event!, CustomObject o!, BBjString method!)
-    
-        #SelChangeObject! = o!
-        #SelChangeMethod$ = method!
-    
+        #EventMethodList!.put(event!,method!)
+        #EventObjectList!.put(event!,o!)
     methodend    
     
     method private void initialize()
@@ -49,6 +52,7 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         cw! = #super!.getWnd()
         #TouchGrid! = new TouchGrid(cw!,100,0,0,cw!.getWidth(),cw!.getHeight())
         #TouchGrid!.setCallback(#TouchGrid!.ON_SELCHANGE(),#this!,"onGridSelChange")
+        #TouchGrid!.setCallback(#TouchGrid!.ON_DETAILCLICK(),#this!,"onDetailClick")
         
         #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,#getTranslator().getTranslation("NO_RESULT"),$0010$ ))
         #ResultInfo!.addStyle("TouchGridResultinfo")
@@ -107,6 +111,11 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         #TouchGrid!.setRowTemplate(html$)
     methodend
 
+     method public void setDetailTemplate(BBjString html$)
+        html$=#replaceLabels(html$)
+        #TouchGrid!.setDetailTemplate(html$)
+    methodend
+
     method public void loadRowTemplate(BBjString file$)
         ch=unt
         open (ch)file$
@@ -117,6 +126,18 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         close (ch)
 
         #setRowTemplate(t$)
+    methodend
+
+    method public void loadDetailTemplate(BBjString file$)
+        ch=unt
+        open (ch)file$
+        while 1
+            read record (ch,siz=1000,end=*break)l$
+            t$=t$+l$
+        wend
+        close (ch)
+
+        #setDetailTemplate(t$)
     methodend
 
     method public void refresh( BBjNumber resetFilter)
@@ -148,10 +169,25 @@ REM         s=min(s,1000)
     
     method public void onGridSelChange(BBjNumber sel)
     
+        
         #getBC().setSelection(sel)
 
-        if sel>-1 and #SelChangeObject!<>null() and #SelChangeMethod$<>"" then
-            Util.invoke(#SelChangeObject!, #SelChangeMethod$, sel)
+        SelChangeObject! = #EventObjectList!.get(#ON_SELCHANGE)
+        SelChangeMethod! = #EventMethodList!.get(#ON_SELCHANGE)
+        if sel>-1 and SelChangeObject!<>null() and SelChangeMethod!<>null() then
+            Util.invoke(SelChangeObject!, SelChangeMethod!, sel)
+        fi
+    
+    methodend
+
+    method public void onDetailClick(BBjNumber sel)
+    
+        
+        #getBC().setSelection(sel)
+        SelChangeObject! = #EventObjectList!.get(#ON_DETAILCLICK)
+        SelChangeMethod! = #EventMethodList!.get(#ON_DETAILCLICK)
+        if sel>-1 and SelChangeObject!<>null() and SelChangeMethod!<>null() then
+            Util.invoke(SelChangeObject!, SelChangeMethod!, sel)
         fi
     
     methodend

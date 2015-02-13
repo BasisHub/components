@@ -9,11 +9,18 @@ class public TouchGrid implements BBjControl
     field private BBjListBox        LbList!
     field private BBjVector         DataSet!
     field private BBjString         RowTemplate$
+    field private BBjString         DetailTemplate$
     
-    field private Object            SelChangeObject!
-    field private BBjString         SelChangeMethod$
+    field private BBjNumber         DetailOpen = -1
     
     field private static BBjNumber ON_SELCHANGE=100
+    field private static BBjNumber ON_DOUBLECLICK=101
+    field private static BBjNumber ON_RIGHTCLICK=102
+    field private static BBjNumber ON_DETAILCLICK=103
+    
+    field private java.util.HashMap EventObjectList! = new java.util.HashMap()
+    field private java.util.HashMap EventMethodList! = new java.util.HashMap()
+    
     
     field private BBjNumber CurrentSel = -1 
     
@@ -25,6 +32,19 @@ class public TouchGrid implements BBjControl
     method public BBjNumber ON_SELCHANGE()
         methodret #ON_SELCHANGE
     methodend 
+
+REM     method public BBjNumber ON_DOUBLECLICK()
+REM         methodret #ON_DOUBLECLICK
+REM     methodend 
+REM     
+REM     method public BBjNumber ON_RIGHTCLICK()
+REM         methodret #ON_RIGHTCLICK
+REM     methodend 
+    
+    method public BBjNumber ON_DETAILCLICK()
+        methodret #ON_DETAILCLICK
+    methodend 
+
 
     method public TouchGrid(BBjWindow wnd!, BBjNumber id, BBjNumber x, BBjNumber y, BBjNumber w, BBjNumber h)
 
@@ -40,7 +60,7 @@ class public TouchGrid implements BBjControl
         fi
         
         #LbList!.setFocusable(0)
-        #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
+        #registerCallbacks()
     methodend
 
 
@@ -48,7 +68,13 @@ class public TouchGrid implements BBjControl
 
         #CwCanvas! = wnd!
         #LbList! = #CwCanvas!.addListBox(200,0,0,w,h,"")
-        #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")
+        #registerCallbacks()
+    methodend
+
+    method private void registerCallbacks()
+        #LbList!.setCallback(BBjAPI.ON_LIST_CLICK,#this!,"onListSelChange")    
+        #LbList!.setCallback(BBjAPI.ON_LIST_DOUBLE_CLICK,#this!,"onListDoubleClick")
+        
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
@@ -110,6 +136,10 @@ class public TouchGrid implements BBjControl
     method public void setRowTemplate(BBjString html$)
         #RowTemplate$ = html$
     methodend
+
+    method public void setDetailTemplate(BBjString html$)
+        #DetailTemplate$ = html$
+    methodend
     
     method public void loadRowTemplate(BBjString file$)
     
@@ -128,23 +158,91 @@ class public TouchGrid implements BBjControl
     
     method public void setCallback(BBjNumber event!, CustomObject o!, BBjString method!)
     
-        #SelChangeObject! = o!
-        #SelChangeMethod$ = method!
+        #EventMethodList!.put(event!,method!)
+        #EventObjectList!.put(event!,o!)
     
     methodend
+
+    method public void onListDoubleClick(BBjListDoubleClickEvent ev!)
+
+        sel = ev!.getSelectedIndex()
+        if #DetailOpen>-1 and sel>#DetailOpen then
+            sel=sel-1
+        fi
+
+        Object! = #EventObjectList!.get(#ON_DOUBLECLICK)
+        Method! = #EventMethodList!.get(#ON_DOUBLECLICK)
+        if Object!<>null() and Method!<>null() then
+            Util.invoke(Object!, Method!, sel-1)
+        fi         
+
+   methodend
+   
+    method public void onListRightClick( BBjListClickEvent ev!)
+
+        sel = ev!.getSelectedIndex()
+        if #DetailOpen>-1 and sel>#DetailOpen then
+            sel=sel-1
+        fi
+
+        Object! = #EventObjectList!.get(#ON_RIGHTCLICK)
+        Method! = #EventMethodList!.get(#ON_RIGHTCLICK)
+        if Object!<>null() and Method!<>null() then
+            Util.invoke(Object!, Method!, sel-1)
+        fi         
+
+   methodend   
     
     method public void onListSelChange(BBjListClickEvent ev!)
-    
-        sel = ev!.getSelectedIndex()
-        rem a=msgbox(str(sel),0,"Touch!")
-        if sel>-1 and #SelChangeObject!<>null() and #SelChangeMethod$<>"" and sel <>#CurrentSel then
-            #CurrentSel = sel
-            Util.invoke(#SelChangeObject!, #SelChangeMethod$, sel)
+
+     sel=ev!.getSelectedIndex()
+        if #DetailTemplate$>"" then
+
+            if sel=#DetailOpen+1 and #DetailOpen>-1 then
+                Object! = #EventObjectList!.get(#ON_DETAILCLICK)
+                Method! = #EventMethodList!.get(#ON_DETAILCLICK)
+                if Object!<>null() and Method!<>null() then
+                    Util.invoke(Object!, Method!, sel-1)
+                fi 
+                goto ready                     
+            else
+            
+                if #CurrentSel = -1 and #DetailOpen=-1 then
+                    r! = #DataSet!.getItem(sel)
+                    #LbList!.insertItemAt(sel+1,r!.replaceFields(#DetailTemplate$))
+                    #CurrentSel = sel
+                    #DetailOpen = sel
+                else
+                    #LbList!.removeItemAt(#DetailOpen+1)
+                    tmp=#DetailOpen
+                    if #DetailOpen>-1 and #DetailOpen<sel then 
+                        sel=sel-1
+                    fi
+                    #DetailOpen = -1
+                    if sel <> tmp and sel>-1 then
+                        r! = #DataSet!.getItem(sel)
+                        #LbList!.insertItemAt(sel+1,r!.replaceFields(#DetailTemplate$))
+                        #CurrentSel = sel
+                        #DetailOpen = sel
+                    fi
+                fi
+            fi
+             
         fi
+    
+        if sel>-1 then
+                SelChangeObject! = #EventObjectList!.get(#ON_SELCHANGE)
+                SelChangeMethod! = #EventMethodList!.get(#ON_SELCHANGE)
+                if SelChangeObject!<>null() and SelChangeMethod!<>null() then
+                    Util.invoke(SelChangeObject!, SelChangeMethod!, sel)
+                fi
+        fi           
+
+        ready:
          #LbList!.deselectAll()
 REM        #LbList!.focus()
-        if sel>-1 then
-            #LbList!.selectIndex(sel)
+        if #CurrentSel>-1 then
+            #LbList!.selectIndex(#CurrentSel)
         fi
     methodend
     
@@ -177,7 +275,7 @@ BBjAPI().getConfig().setOptionSetting("FAST_TOUCH_CLICK", 1)
 wnd! = BBjAPI().openSysGui("X0").addWindow(10,10,800,700,"TEST")
 wnd!.setCallback(wnd!.ON_CLOSE,"byebye")
 
-c! = new TouchGrid(wnd!,100,10,10,300,100)
+c! = new TouchGrid(wnd!,100,10,10,600,600)
 c!.setRowTemplate("
 :<html>
 :    <table border=0 cellpadding=0 cellspacing=0 width=""100%"" height=""100%"">
@@ -189,16 +287,6 @@ c!.setRowTemplate("
 :                    <td colspan=3 class=""infoTitle"">$F{FIRSTNAME} $F{NAME}</td>
 :                    <td rowspan=3 class=""disclosureImage""></td>
 :                  </tr>
-:                  <!--
-:                  <tr>
-:                    <td colspan=3 class=""infoSubTitle"">%%title%%</td>
-:                  </tr>
-:                  <tr>
-:                    <td class=""infoMisc"">CD:    <span class=""infoMiscValue"">%%cdnumber%%</span></td>        
-:                    <td class=""infoMisc"">Rec:   <span class=""infoMiscValue"">%%recordingtype%%</span></td>   
-:                    <td class=""infoMisc"">Label: <span class=""infoMiscValue"">%%label%%</span></td>   
-:                  </tr>
-:                  -->
 :                </table>
 :            </td>
 :        </tr>
@@ -207,45 +295,52 @@ c!.setRowTemplate("
 :")
 
 
-
+c!.setDetailTemplate("<html>Details: $F{DETAIL}</html>")
 
 r! = new DataRow()
 r!.setFieldValue("NAME","Mouse")
 r!.setFieldValue("FIRSTNAME","Mickey")
 r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/shwz/disney/48/mickey-mouse-icon.png")
+r!.setFieldValue("DETAIL","one")
 c!.addItem(r!)
 
 r! = new DataRow()
 r!.setFieldValue("NAME","Duck")
 r!.setFieldValue("FIRSTNAME","Donald")
 r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Donald-Duck-2-icon.png")
+r!.setFieldValue("DETAIL","two")
 c!.addItem(r!)
 
 r! = new DataRow()
 r!.setFieldValue("NAME","Pluto")
 r!.setFieldValue("FIRSTNAME","")
 r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Pluto-2-icon.png")
+r!.setFieldValue("DETAIL","three")
 c!.addItem(r!)
 
-r!.setFieldValue("NAME","Mouse")
-r!.setFieldValue("FIRSTNAME","Mickey")
-r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/shwz/disney/48/mickey-mouse-icon.png")
-c!.addItem(r!)
-
-r! = new DataRow()
-r!.setFieldValue("NAME","Duck")
-r!.setFieldValue("FIRSTNAME","Donald")
-r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Donald-Duck-2-icon.png")
-c!.addItem(r!)
-
-r! = new DataRow()
-r!.setFieldValue("NAME","Pluto")
-r!.setFieldValue("FIRSTNAME","")
-r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Pluto-2-icon.png")
-c!.addItem(r!)
+REM r!.setFieldValue("NAME","Mouse")
+REM r!.setFieldValue("FIRSTNAME","Mickey")
+REM r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/shwz/disney/48/mickey-mouse-icon.png")
+REM c!.addItem(r!)
+REM 
+REM r! = new DataRow()
+REM r!.setFieldValue("NAME","Duck")
+REM r!.setFieldValue("FIRSTNAME","Donald")
+REM r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Donald-Duck-2-icon.png")
+REM c!.addItem(r!)
+REM 
+REM r! = new DataRow()
+REM r!.setFieldValue("NAME","Pluto")
+REM r!.setFieldValue("FIRSTNAME","")
+REM r!.setFieldValue("ICONURL","http://icons.iconarchive.com/icons/pino/disney/32/Pluto-2-icon.png")
+REM c!.addItem(r!)
 
 l! = new listener()
 c!.setCallback(c!.ON_SELCHANGE(),l!,"onClick")
+
+c!.setCallback(c!.ON_DETAILCLICK(),l!,"onDetailClick")
+
+REM c!.setCallback(c!.ON_DOUBLECLICK(),l!,"onDoubleClick")
 
 ? 'HIDE'
 wnd!.focus()
@@ -257,7 +352,16 @@ byebye:bye
 class public listener
 
     method public void onClick(Object o!)
-        a=msgbox(o!.toString())
+        a=msgbox(o!.toString(),0,"Selchange")
+    methodend
+
+
+    method public void onDetailClick(Object o!)
+        a=msgbox(o!.toString(),0,"Detail Click")
+    methodend
+
+    method public void onDoubleClick(Object o!)
+        a=msgbox(o!.toString(),0,"Double Click")
     methodend
 
 classend 
