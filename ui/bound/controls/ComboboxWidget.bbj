@@ -81,8 +81,7 @@ class public  ComboboxWidget extends ControlWidget
             #Cb!.setVisible(fEnabled!)
             #Static!.setVisible(!fEnabled!)
             if !fEnabled! then
-                id=#Cb!.getSelectedIndex()
-                if id>-1 then
+                if #IDX>-1 then
                     #Static!.setText(#Cb!.getItemAt(id))
                 fi
             fi
