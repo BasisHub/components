@@ -263,7 +263,7 @@ REM         ks! = tm!.keySet()
 REM         it! = ks!.iterator()
 
   
-REM         v! = new BBjVector()
+        v! = new BBjVector()
 
         qf! = #getQueryFilter()
         if qf! <> null() then 
@@ -279,17 +279,17 @@ REM         v! = new BBjVector()
           keycf!     = cf!.get("KEY")
         fi
 
-REM         it! = v1!.iterator()
-REM         while it!.hasNext()
-REM             r! = it!.next()
-REM             k$=r!.getFieldAsString("KEY")
-REM             v$=r!.getFieldAsString("VALUE")
-REM             if valuef!<> null() and valuef!.contains(v$)=0 then continue
-REM             if keycf!<> null() and keycf!.contains(k$)=0 then continue
-REM             if keyf!<> null() and keyf!.contains(k$)=0 then continue
-REM             v!.addItem(r!)
-REM         wend        
-        v! = v1!.clone()
+        it! = v1!.iterator()
+        while it!.hasNext()
+            r! = it!.next()
+            k$=r!.getFieldAsString("KEY")
+            v$=r!.getFieldAsString("VALUE")
+            if valuef!<> null() and valuef!.contains(v$)=0 then continue
+            if keycf!<> null() and keycf!.contains(k$)=0 then continue
+            if keyf!<> null() and keyf!.contains(k$)=0 then continue
+            v!.addItem(r!)
+        wend        
+REM         v! = v1!.clone()
         #NeedRebuild=0
         #super!.setResultSet(v!)  
               
