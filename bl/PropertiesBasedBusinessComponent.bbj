@@ -213,11 +213,9 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
     rem * @param BBjNumber last: read to the "last" row from the record set
     rem */
     method public void prepareResultSet(BBjNumber first, BBjNumber last)
-        
         if #NeedRebuild = 0 then
             methodret 
         fi
-
         v1! = #Reader!.getResultSet(#Attribute$)
         
 REM         al! = #CurrentMap! 
@@ -263,8 +261,9 @@ REM         fi
 REM         
 REM         ks! = tm!.keySet()
 REM         it! = ks!.iterator()
-REM         
-        v! = new BBjVector()
+
+  
+REM         v! = new BBjVector()
 
         qf! = #getQueryFilter()
         if qf! <> null() then 
@@ -280,21 +279,20 @@ REM
           keycf!     = cf!.get("KEY")
         fi
 
-        it! = v1!.iterator()
-        while it!.hasNext()
-            r! = it!.next()
-            k$=r!.getFieldAsString("KEY")
-            v$=r!.getFieldAsString("VALUE")
-            
-            if valuef!<> null() and valuef!.contains(v$)=0 then continue
-            if keycf!<> null() and keycf!.contains(k$)=0 then continue
-            if keyf!<> null() and keyf!.contains(k$)=0 then continue
-            v!.addItem(r!)
-        wend        
-
+REM         it! = v1!.iterator()
+REM         while it!.hasNext()
+REM             r! = it!.next()
+REM             k$=r!.getFieldAsString("KEY")
+REM             v$=r!.getFieldAsString("VALUE")
+REM             if valuef!<> null() and valuef!.contains(v$)=0 then continue
+REM             if keycf!<> null() and keycf!.contains(k$)=0 then continue
+REM             if keyf!<> null() and keyf!.contains(k$)=0 then continue
+REM             v!.addItem(r!)
+REM         wend        
+        v! = v1!.clone()
         #NeedRebuild=0
-        #super!.setResultSet(v!)
-        
+        #super!.setResultSet(v!)  
+              
     methodend
 
 
