@@ -57,9 +57,12 @@ REM     methodend
         
         if INFO(3,6)="5" AND BBjAPI().getBuiManager().isTouchSupported() then
             #LbList!.addStyle("NoScrollBar")
+        else
+            #LbList!.setFocusable(0)
+           rem when touch is supported allow this control to keep the focus
+           rem else the focus may flip back to an input field and the keyboard pops up again
         fi
-        
-        #LbList!.setFocusable(0)
+
         #registerCallbacks()
     methodend
 
