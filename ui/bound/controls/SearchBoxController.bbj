@@ -50,8 +50,10 @@ REM         fi
         t$=ev!.getControl().getText()
         if len(t$)<2 then methodret
         #this!.prepareQueryFilter(t$)
-    
-        ev!.getControl().focus()
+        if INFO(3,6)<>"5" OR !BBjAPI().getBuiManager().isTouchSupported() then
+            ev!.getControl().focus()
+            rem only set focus back on non-touch
+        fi
     
     methodend
 
