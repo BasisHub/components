@@ -115,6 +115,7 @@ REM     methodend
         #DataSet! = v!
         #updateUI()
         #CurrentSel=-1
+        #DetailOpen=-1
         
     methodend
     
