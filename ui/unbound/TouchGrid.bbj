@@ -199,6 +199,11 @@ REM     methodend
     method public void onListSelChange(BBjListClickEvent ev!)
 
      sel=ev!.getSelectedIndex()
+     
+     if sel=-1 then
+        methodret
+     fi
+     
         if #DetailTemplate$>"" then
 
             if sel=#DetailOpen+1 and #DetailOpen>-1 then
