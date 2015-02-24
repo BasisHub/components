@@ -553,7 +553,8 @@ class public BusinessComponent
                 for i=0 to #Selection!.size()-1
                     k = #Selection!.getItem(i)
                     rec! = #ResultSet!.getItem(k,err=*continue)
-                    f$=rec!.getFieldAsString(k$)
+                    f$="null"
+                    f$=rec!.getFieldAsString(k$,err=*next)
                     if f$="null" then
                         v!.addItem(null())
                     else
