@@ -12,8 +12,16 @@ class public Util
     method public static void invoke(Object obj!, BBjString methodName$, Object payload!)
 
         if obj!<>null() and methodName$>"" and payload! <> null() then
+            dummy$=stbl("!OPTIONS","EXECUTE_CALLED_PROGRAM=TRUE")
+            o! = obj!
+            p! = payload! 
+            x$="o!."+methodname$+"(p!)"
 
-            x$="obj!."+methodname$+"(payload!)"
+REM see https://bugzilla.basis.com/show_bug.cgi?id=28270
+REM Bug 28270 - program drops to console after EXECUTE when called from a method that had been invoked using another EXECUTE 
+REM             execute x$
+REM do the old (slower) way until there's a fix for this edge condition:
+
             temp$ = str(java.io.File.createTempFile("blabla", ".call"))
             ch=unt
             open (ch)temp$
