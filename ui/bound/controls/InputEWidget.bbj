@@ -1,56 +1,61 @@
 use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
 
 class public  InputEWidget extends ControlWidget
- 
+
     field private BBjStaticText Static!
- 
+    field private BBjInputE Ipe!
+    field private BBjString Mask$
+
     method public InputEWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
         #setWnd(cwWidget!)
-        
-        ipe! = cwWidget!.addInputE(100,0,0,10,10,"...")
-        ipe!.setEditable(1) 
 
-        #setCtrl(ipe!)
-        
+        #Ipe! = cast(BBjInputE,cwWidget!.addInputE(100,0,0,10,10))
+        #Ipe!.setEditable(1)
+
+        #setCtrl(#Ipe!)
+
         #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
         #Static!.addStyle("StaticRepresentation")
         #performSetEnabled(0)
-        
-        
+
+
     methodend
-    
+
     method public void setLength(BBjNumber length!)
         #super!.setLength(length!)
-        ipe! = #getCtrl()
-        ipe!.setLength(length!) 
-    methodend 
-    
+        
+        if #Mask$="" then
+            #Ipe!.setLength(length!)
+        fi
+        
+    methodend
+
     method public void setText(BBjString text!)
 
         x!= #getWnd().getControl(100)
         x!.setText(text!)
-        
+
         x!= #getWnd().getControl(101)
-        x!.setText(text!)        
-        
+        x!.setText(text!)
+
     methodend
-    
+
     method public void performSetEnabled(BBjNumber fEnabled!)
-    
-        
+
+
           #super!.performSetEnabled(fEnabled!)
-            
+
             x!= #getWnd().getControl(100)
             x!.setVisible(fEnabled!)
-            
+
             x!= #getWnd().getControl(101)
             x!.setVisible(!fEnabled!)
-            
 
 
-        
+
+
     methodend
 
     method public void setSize(BBjNumber w!, BBjNumber h!)
@@ -58,14 +63,19 @@ class public  InputEWidget extends ControlWidget
         x!= #getWnd().getControl(101)
         x!.setSize(w!,h!)
     methodend
-    
+
     method public void setCssClass(BBjString class$)
         #super!.setCssClass(class$)
         #getWnd().getControl(101).addStyle(class$)
     methodend
-    
+
     method public BBjNumber getControlType()
         methodret -1
     methodend
-        
+
+    method public void setMask(BBjString m!)
+        #Ipe!.setMask(m!)
+        #Mask$=m!
+    methodend
+
 classend
