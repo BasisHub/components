@@ -89,7 +89,7 @@ REM         a!.setFocusable(0,err=*next)
     
     method public void setMask(BBjString mask!)
         c! = #getCtrl()
-        c!.setMask(mask$)
+        c!.setMask(mask!)
     methodend
 
     method public void setTextKey(BBjString textkey$)
