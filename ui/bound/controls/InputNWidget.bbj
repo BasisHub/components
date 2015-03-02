@@ -98,8 +98,8 @@ class public  InputNWidget extends ControlWidget
         #getWnd().getControl(101).addStyle(class$)
     methodend    
 
-    method public void setMask(BBjString m$) 
-        #Ipn!.setMask(m$) 
+    method public void setMask(BBjString m!) 
+        #Ipn!.setMask(m!) 
     methodend   
     
 classend
