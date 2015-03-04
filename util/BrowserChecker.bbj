@@ -1,0 +1,84 @@
+class public BrowserChecker
+
+    field private static BBjNumber minIEVersion = 10
+    field private static BBjNumber minChromeVersion = -1
+    field private static BBjNumber minFireFoxVersion = -1
+    
+    method public static void checkBrowser(java.lang.Boolean allowContinue!)
+        if(#isBrowserToOld()) then
+            if(allowContinue!) then 
+                a = msgbox("We're using new technology, but you're using an old browser. Do you wish to continue?",64+1,"Information") 
+                if(a = 1) then
+                    methodret
+                else
+                    release
+                fi
+            else
+                a = msgbox("We're using new technology, but you're using an old browser.",64+0,"Information") 
+                release
+            fi
+        fi
+    methodend
+
+    method public static java.lang.Boolean isBrowserToOld()
+        userAgent! = cast(String,cvs(info(3,8),8))
+        if(userAgent! = null()) then
+            methodret java.lang.Boolean.FALSE
+        fi
+        
+        userAgent! = userAgent!.toUpperCase()
+        
+        if(userAgent!.contains("MSIE")) then
+            browser! = "MSIE"
+        fi
+        
+        if(userAgent!.contains("CHROME")) then
+            browser! = "CHROME"
+        fi
+        
+        if(userAgent!.contains("FIREFOX")) then
+            browser! = "FIREFOX"
+        fi
+        
+        methodret #checkMinVersion(userAgent!,browser!)
+    methodend
+    
+    method private static java.lang.Boolean checkMinVersion(String userAgent!, String browser!)
+        userAgent! = userAgent!.toUpperCase()
+        switch 1
+            case browser! = "MSIE"
+                position = userAgent!.indexOf("MSIE")
+                userAgent! = userAgent!.substring(position, userAgent!.indexOf(";",position))
+                version = num(cvs(userAgent!.substring(userAgent!.indexOf(" ")),3))
+                minVersion = #minIEVersion
+                break
+                
+            case browser! = "CHROME"
+                position = userAgent!.indexOf("CHROME")
+                userAgent! = userAgent!.substring(position, userAgent!.indexOf(" ", position))
+                version = num(cvs(userAgent!.substring(userAgent!.indexOf("/")+1, userAgent!.indexOf("." , userAgent!.indexOf("/"))),3))
+                minVersion = #minChromeVersion
+                break
+            
+            case browser! = "FIREFOX"
+                position = userAgent!.indexOf("FIREFOX")
+                userAgent! = userAgent!.substring(position)
+                version = num(cvs(userAgent!.substring(userAgent!.indexOf("/")+1),3))
+                minVersion = #minFireFoxVersion
+                break
+        swend 
+        
+        if(minVersion = -1) then
+            methodret java.lang.Boolean.FALSE
+        else
+            if(version < minVersion) then
+                methodret java.lang.Boolean.TRUE
+            else
+                methodret java.lang.Boolean.FALSE
+            fi
+        fi        
+    methodend
+    
+    
+
+classend
