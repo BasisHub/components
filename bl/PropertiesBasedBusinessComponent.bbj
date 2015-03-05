@@ -35,7 +35,7 @@ class public PropertiesBasedBusinessComponent extends BusinessComponent
         #setLocale(locale$)
         #setAttribute(attribute$) 
 
-        #Reader!= new PropertyReader(dir("")+atbListPropertiesFolder$+"/"+atbListProperties$,locale$)
+        #Reader!= new PropertyReader(dsk("") + dir("")+atbListPropertiesFolder$+"/"+atbListProperties$,locale$)
 
         
 

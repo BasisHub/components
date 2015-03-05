@@ -1,3 +1,5 @@
+use ::BBTranslator.bbj::BBTranslator
+
 class public BrowserChecker
 
     field private static BBjNumber minIEVersion = 10
@@ -5,16 +7,18 @@ class public BrowserChecker
     field private static BBjNumber minFireFoxVersion = -1
     
     method public static void checkBrowser(java.lang.Boolean allowContinue!)
+        locale$ = BBjAPI().getThinClient().getClientLocale()        
+        t! = BBTranslator.getInstance("i18n",locale$, "en" , "components/i18n/" )
         if(#isBrowserToOld()) then
             if(allowContinue!) then 
-                a = msgbox("We're using new technology, but you're using an old browser. Do you wish to continue?",64+1,"Information") 
+                a = msgbox(t!.getTranslation("OLD_BROWSER") + t!.getTranslation("DO_YOU_WISH_TO_CONTINUE"),64+1,t!.getTranslation("INFORMATION")) 
                 if(a = 1) then
                     methodret
                 else
                     release
                 fi
             else
-                a = msgbox("We're using new technology, but you're using an old browser.",64+0,"Information") 
+                a = msgbox(t!.getTranslation("OLD_BROWSER"),64+0, t!.getTranslation("INFORMATION")) 
                 release
             fi
         fi
