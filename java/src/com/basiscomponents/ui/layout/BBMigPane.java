@@ -835,4 +835,16 @@ public class BBMigPane implements BBjControl {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public String getAttribute(String arg0) throws BBjException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setAttribute(String arg0, String arg1) throws BBjException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

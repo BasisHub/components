@@ -129,6 +129,10 @@ public class TestMyStuff {
 //		stmt.close();
 //		con.close();
 //		
+
+		ResultSet rs = new ResultSet();
+		rs.addItem("blabla"); 
+		System.out.println(rs);
 		
 		System.out.print("***finish***");
 
