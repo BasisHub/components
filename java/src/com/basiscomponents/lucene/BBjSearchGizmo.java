@@ -1,23 +1,15 @@
 package com.basiscomponents.lucene;
 
-
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
-
 import org.apache.lucene.analysis.Analyzer;
-//import org.apache.lucene.analysis.compound.hyphenation.TernaryTree.Iterator;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.facet.DrillDownQuery;
-import org.apache.lucene.facet.DrillSideways;
-import org.apache.lucene.facet.DrillSideways.DrillSidewaysResult;
-import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.facet.Facets;
 import org.apache.lucene.facet.FacetsCollector;
@@ -40,7 +32,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
+
 
 
 public class BBjSearchGizmo 
@@ -81,7 +73,7 @@ public class BBjSearchGizmo
 	public BBjSearchGizmo(String directory) throws IOException
 	{
 		this.directoryName = directory;
-		analyzer = new WhitespaceAnalyzer(Version.LUCENE_48);
+		analyzer = new WhitespaceAnalyzer(); 
 	}
 	
 
@@ -93,8 +85,8 @@ public class BBjSearchGizmo
 		this.removeDocument(doc.getId());
 		//List<CategoryPath> paths= new ArrayList<CategoryPath>();
 		
-		indexdirectory=FSDirectory.open(new File(directoryName));	
-		this.iwc=new IndexWriterConfig(Version.LUCENE_48,analyzer);
+		indexdirectory=FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
+		this.iwc=new IndexWriterConfig(analyzer); 
 		writer= new IndexWriter(indexdirectory,iwc);
 		
 		
@@ -157,12 +149,12 @@ public class BBjSearchGizmo
 
 	public void removeDocument(String id) throws IOException, ParseException
 	{
-		indexdirectory=FSDirectory.open(new File(directoryName));	
-		this.iwc=new IndexWriterConfig(Version.LUCENE_48,analyzer);
+		indexdirectory=FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
+		this.iwc=new IndexWriterConfig(analyzer);
 		writer= new IndexWriter(indexdirectory,iwc);
 		String [] fields={"id"};
 		// here we can apply the same solution as in do search or just define that a user can only remove by the id of the document
-		MultiFieldQueryParser queryparser=new MultiFieldQueryParser(Version.LUCENE_48,fields, analyzer);
+		MultiFieldQueryParser queryparser=new MultiFieldQueryParser(fields, analyzer);
 		Query query=queryparser.parse(id);
 		writer.deleteDocuments(query);
 		writer.close();
@@ -171,12 +163,12 @@ public class BBjSearchGizmo
 	public ArrayList<String> doSearch(String searchTerm, String [] fields) throws IOException, ParseException
 	{
 
-		indexdirectory=FSDirectory.open(new File(directoryName));
+		indexdirectory=FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
 		IndexReader reader=DirectoryReader.open(indexdirectory);
 		IndexSearcher searcher = new IndexSearcher(reader);		
-		TopScoreDocCollector collector= TopScoreDocCollector.create(1000, true);
+		TopScoreDocCollector collector= TopScoreDocCollector.create(1000);
 		
-		DirectoryReader dr = DirectoryReader.open(indexdirectory);
+
 		
 //		note: this is how to get to the atomic reader field in case we need it...		
 //		System.out.println(dr.leaves().get(0).reader().getFieldInfos().fieldInfo(0).name);
@@ -186,7 +178,7 @@ public class BBjSearchGizmo
 		
 
 			
-		MultiFieldQueryParser queryparser=new MultiFieldQueryParser(Version.LUCENE_48,fields, analyzer);
+		MultiFieldQueryParser queryparser=new MultiFieldQueryParser(fields, analyzer);
 		queryparser.setAllowLeadingWildcard(true);
 		Query query=queryparser.parse(searchTerm.toLowerCase());
 		searcher.search(query,collector);
@@ -211,10 +203,10 @@ public class BBjSearchGizmo
 	}
 
 	public ArrayList <String> doFuzzySearch(String searchTerm, String field) throws IOException{
-		indexdirectory=FSDirectory.open(new File(directoryName));
+		indexdirectory=FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
 		IndexReader reader=DirectoryReader.open(indexdirectory);
 		IndexSearcher searcher = new IndexSearcher(reader);		
-		TopScoreDocCollector collector= TopScoreDocCollector.create(1000, true);
+		TopScoreDocCollector collector= TopScoreDocCollector.create(1000);
 
 		searchTerm=searchTerm+"~";
 		Term fuzzyclientsearch=new Term(field,searchTerm);
@@ -242,14 +234,14 @@ public class BBjSearchGizmo
 	}
 	
 	public List<FacetResult> facetsWithSearch(String searchTerm, String [] fields) throws IOException, ParseException{
-		indexdirectory=FSDirectory.open(new File(directoryName));
-		indextaxodirectory=FSDirectory.open(new File(taxoDirectoryName));
+		indexdirectory=FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
+		indextaxodirectory=FSDirectory.open(FileSystems.getDefault().getPath(taxoDirectoryName));
 		reader=DirectoryReader.open(indexdirectory);
 		taxoreader= new DirectoryTaxonomyReader(indextaxodirectory);
 		searcher = new IndexSearcher(reader);	
-		MultiFieldQueryParser queryparser=new MultiFieldQueryParser(Version.LUCENE_48,fields, analyzer);
+		MultiFieldQueryParser queryparser=new MultiFieldQueryParser(fields, analyzer);
 		queryparser.setAllowLeadingWildcard(true);
-		Query query=queryparser.parse(searchTerm.toLowerCase());
+
 		FacetsCollector fc= new FacetsCollector();
 		FacetsCollector.search(searcher, new MatchAllDocsQuery(), 10, fc);
 		

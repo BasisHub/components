@@ -84,7 +84,7 @@ public class DataRow
 				try {
 					s=rs.getString(ColName);
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
+					 
 					e.printStackTrace();
 				}
                      setFieldValue(ColName,s);
