@@ -9,10 +9,12 @@ class public  InputEWidget extends ControlWidget
     method public InputEWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        cwWidget!.setBackColor(BBjAPI().makeColor("WHITE")) 
         #setWnd(cwWidget!)
 
         #Ipe! = cast(BBjInputE,cwWidget!.addInputE(100,0,0,10,10))
         #Ipe!.setEditable(1)
+
 
         #setCtrl(#Ipe!)
 
@@ -20,6 +22,8 @@ class public  InputEWidget extends ControlWidget
         #Static!.addStyle("StaticRepresentation")
         #performSetEnabled(0)
 
+        #Ipe!.setOpaque(0)
+        #Static!.setOpaque(0)
 
     methodend
 
@@ -52,9 +56,6 @@ class public  InputEWidget extends ControlWidget
 
             x!= #getWnd().getControl(101)
             x!.setVisible(!fEnabled!)
-
-
-
 
     methodend
 

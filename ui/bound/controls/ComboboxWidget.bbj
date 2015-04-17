@@ -3,7 +3,7 @@ use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
 
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 
 class public  ComboboxWidget extends ControlWidget
  
@@ -14,6 +14,7 @@ class public  ComboboxWidget extends ControlWidget
     method public ComboboxWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        cwWidget!.setBackColor(BBjAPI().makeColor("WHITE"))
         #setWnd(cwWidget!)
         #Cb! = cast(BBjListButton,cwWidget!.addListButton(100,0,0,10,10,"..."))
         #Cb!.setEditable(1) 
@@ -24,6 +25,11 @@ class public  ComboboxWidget extends ControlWidget
         #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
         #Static!.setVisible(1)
         #Static!.addStyle("StaticRepresentation")   
+       
+        #Cb!.setOpaque(0)
+        #Cb!.setBackColor(BBjAPI().makeColor("WHITE"))
+        #Static!.setOpaque(0)
+       
        
     methodend
     
@@ -80,11 +86,12 @@ class public  ComboboxWidget extends ControlWidget
             #super!.setEnabled(fEnabled!)
             #Cb!.setVisible(fEnabled!)
             #Static!.setVisible(!fEnabled!)
-            if !fEnabled! then
-                if #IDX>-1 then
-                    #Static!.setText(#Cb!.getItemAt(id))
-                fi
-            fi
+            
+REM             if !fEnabled! then
+REM                 if #IDX>-1 then
+REM                     #Static!.setText(#Cb!.getItemAt(#IDX))
+REM                 fi
+REM             fi
         fi
         
     methodend        
@@ -118,6 +125,10 @@ class public  ComboboxWidget extends ControlWidget
    
    method public BBjNumber getSelectedIndex()
         methodret #IDX 
+   methodend
+   
+   method public void setText(BBjString t!)
+        rem this is a noop on the combo box
    methodend
    
 classend

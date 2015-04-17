@@ -1,7 +1,7 @@
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 use ::components/ui/unbound/TouchGrid.bbj::TouchGrid
 use ::components/util/Util.bbj::Util
 use ::i18n/CustomTranslator.bbj::CustomTranslator
@@ -56,10 +56,20 @@ class public TouchGridComponent extends UIComponent implements BBjControl
         
         #ResultInfo!=cast(BBjStaticText,cw!.addStaticText(101,10,10,cw!.getWidth()-20,40,#getTranslator().getTranslation("NO_RESULT"),$0010$ ))
         #ResultInfo!.addStyle("TouchGridResultinfo")
+        if info(3,6)<>"5" then
+            
+            #ResultInfo!.setBackColor(BBjAPI().makeColor("WHITE"))
+            #ResultInfo!.setForeColor(BBjAPI().makeColor(100,100,100))
+        fi
 
         
         #NewButton! = cast(BBjButton, cw!.addButton (102,cw!.getWidth()-80,cw!.getHeight()-80,40,40,"",$0010$ ) )
-        #NewButton!.addStyle("NewButton") 
+        if info(3,6)="5" then
+            #NewButton!.addStyle("NewButton")
+        else
+            #NewButton!.setOpaque(0)
+            #NewButton!.setImageFile("btn_new.png")
+        fi
         #NewButton!.setFocusable(0)
         #NewButton!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onBtnNew")
     methodend
@@ -73,9 +83,9 @@ class public TouchGridComponent extends UIComponent implements BBjControl
     methodend
 
 
-    method public void setVisible(BBjNumber v)
+    method public void setVisible(BBjNumber v!)
 
-        #super!.setVisible(v)
+        #super!.setVisible(v!)
 
     methodend
 
@@ -200,10 +210,13 @@ REM         s=min(s,1000)
     rem */
     method public void setEditing(BBjNumber isEditing)
 
-        #getWnd().setEnabled(!isEditing)
+        #TouchGrid!.setEnabled(!isEditing)
         
     methodend
-    
+
+    method public void setEnabled(BBjNumber enabled!)
+        #TouchGrid!.setEnabled(enabled!)  
+    methodend     
     
     method public void setShowNewButton(BBjNumber show)
     

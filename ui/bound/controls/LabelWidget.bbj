@@ -6,9 +6,12 @@ class public  LabelWidget extends ControlWidget
         #super!(cwCanvas!)
         
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        cwWidget!.setBackColor(BBjAPI().makeColor("WHITE")) 
         #setWnd(cwWidget!)
-        #setCtrl(#getWnd().addStaticText(100,0,0,1,1,""))
-    
+        st! = #getWnd().addStaticText(100,0,0,1,1,"")
+        st!.setOpaque(0)
+        #setCtrl(st!)
+        
     methodend
     
     method public void setEnabled(BBjNumber fEnabled!)

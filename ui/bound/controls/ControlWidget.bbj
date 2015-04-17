@@ -3,7 +3,7 @@ use ::components/ui/bound/controls/ForeignKeyPicker.bbj::ForeignKeyPicker
 
 rem use com.basiscomponents.ui.layout.BBMigPane
 use com.basiscomponents.db.DataRow
-rem use com.basiscomponents.db.DataField
+rem 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
 use ::i18n/CustomTranslator.bbj::CustomTranslator
@@ -73,7 +73,8 @@ REM                     fi
         a! = #Ctrl!
 REM         a!.setEditable(0,err=*next) 
 REM         a!.setFocusable(0,err=*next)
-
+        #Ctrl!.setOpaque(0,err=*next)
+        
         
     methodend
     
@@ -301,6 +302,22 @@ REM     methodend
     methodend
     
 
+    rem /**
+    rem * Method onBroadcastEdit:
+    rem * called by BC to notify the UI about an ongoing edit from a different side
+    rem * @param BBjNumber recNo: the record number that was edited
+    rem * @param BBjString fieldName$: the field name that just was edited
+    rem * @param BBjSting newContent$: the new Contents of the field
+    rem */
+    method public void onBroadcastEdit(BBjNumber recNo, BBjString fieldName$, BBjString newContent$)
+
+        if #getName() = fieldName$ then
+            #setText(newContent$)
+        fi
+    
+    methodend
+    
+
     method public void onCtrlEditModify(BBjEditModifyEvent ev!)
 
         text$=ev!.getText()
@@ -330,6 +347,7 @@ REM     methodend
     method public void newRecord()
         #Edited=0 
         #clearValidationErrors()
+        #setText("") 
     methodend
     
     rem /**
@@ -550,7 +568,6 @@ rem ------------medthods for fill BC
             #performSetEnabled(enabled)
     
     methodend
-
 
 
 classend

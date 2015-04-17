@@ -21,6 +21,7 @@ class public UIController
     field private java.util.HashMap TargetFieldNames!
     field private java.util.HashMap TargetAutoSelectFirstRecord!
 
+    field private BBjNumber Destroyed
 
     rem /**
     rem * Constructor UIController
@@ -203,6 +204,8 @@ class public UIController
     rem */
     method public BBjNumber canDrive (BBjString var$, BBjVector selection!, BBjNumber force)
 
+        if #Destroyed then methodret 1
+        
         canDrive=1
 
         bclist! = #Targets!.get(var$)
@@ -231,6 +234,8 @@ class public UIController
     rem */
     method public void drive (BBjString var$, BBjVector selection!)
 
+        if #Destroyed then methodret 
+        
         bclist! = #Targets!.get(var$)
         vlist!  = #TargetFieldNames!.get(var$)
 
@@ -254,5 +259,12 @@ class public UIController
         fi
 
     methodend
+    
+    method public void destroy()
+        #Destroyed=1
+        rem this is a pretty naive, brute and clumsy implementation
+        rem the UIController should rather unregister with all driver BCs and 
+        rem clean everything up so it can get GCed
+    methodend 
 
 classend

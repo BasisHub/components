@@ -1,7 +1,7 @@
 rem package components.ui.bound
 
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
@@ -183,6 +183,7 @@ class public UIComponent implements BBjControl
         fi
 
         #Wnd!=#ParentWnd!.addChildWindow(id,#X,#Y,#W,#H,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        #Wnd!.setBackColor(BBjAPI().makeColor("WHITE"))
         #Laf!.prepareWindow(#Wnd!)
         #Wnd!.setClientEdge(0)
         #Wnd!.setOpaque(0)

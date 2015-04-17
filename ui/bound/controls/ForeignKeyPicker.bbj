@@ -2,7 +2,7 @@ rem package components.ui.bound.controls
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use ::components/ui/bound/grid/NavigationGridComponent.bbj::NavigationGridComponent
 use ::components/util/Util.bbj::Util

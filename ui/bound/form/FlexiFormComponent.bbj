@@ -10,7 +10,7 @@ use org.w3c.dom.NodeList
 use java.util.HashMap
 
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 use com.basiscomponents.ui.layout.BBMigPane
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
@@ -160,6 +160,10 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
     method public void loadLayout(BBjString resFile$)
 
 
+        dummy$=stbl("EXECUTE_KLUDGE",err=*next); goto execklu
+        dummy$=stbl("EXECUTE_KLUDGE","")
+        execklu:
+        
         use java.io.FileInputStream
   
         ch=unt
@@ -189,6 +193,7 @@ REM         is! = new InputSource(new String(xml$))
         declare BBjWindow wnd!
         wnd! = #getWnd()
         #FormWnd! = wnd!.addChildWindow( wnd!.getAvailableControlID(),0,0,100,100,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        #FormWnd!.setBackColor(BBjAPI().makeColor("WHITE"))
                 
         #FormFrame! = new ResponsiveFormFrame(#FormWnd!,100,0,0,#FormWnd!.getWidth(),#FormWnd!.getHeight())
         #FormFrame!.getWnd().addStyle("FormWnd")
@@ -250,6 +255,7 @@ REM         is! = new InputSource(new String(xml$))
 
                             rem create pane
                             cwCanvas! = f2wnd!.addChildWindow(f2wnd!.getAvailableControlID(),0,0,width,height,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+                            cwCanvas!.setBackColor(BBjAPI().makeColor("WHITE"))
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
                             if cssClass$<>"" then
                                 cwCanvas!.addStyle(cssClass$) 
@@ -321,7 +327,30 @@ REM                             cwCanvas!.setFont(font!)
                                         wend
 
                                           x$="el! = new ::"+type$+".bbj::"+typet$+"(cwCanvas!)"
-                                          execute x$
+
+
+                                          if stbl("EXECUTE_KLUDGE")="" then
+                                                dummy$=stbl("EXECUTE_KLUDGE","IN_EXECUTE")
+                                                execute x$
+                                                dummy$=stbl("EXECUTE_KLUDGE","")
+                                          else
+
+REM see https://bugzilla.basis.com/show_bug.cgi?id=28270
+REM Bug 28270 - program drops to console after EXECUTE when called from a method that had been invoked using another EXECUTE 
+REM             execute x$
+REM do the old (slower) way until there's a fix for this edge condition:
+
+            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
+            ch=unt
+            open (ch)temp$
+            write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
+            close (ch)
+            call temp$
+            erase temp$
+                                          fi
+                                          
+                                          
+                                          
                                           
                                           el!.setSize((length+1)*25,font_height+ihpad)
                                           if text$>"" then
@@ -604,9 +633,9 @@ REM                             cwCanvas!.setFont(font!)
     rem * set the visibility of the form component
     rem * @param BBjNumber visible: 1 = visible, 0 = invisible
     rem */
-    method public void setVisible(BBjNumber v)
+    method public void setVisible(BBjNumber v!)
 
-        #super!.setVisible(v)
+        #super!.setVisible(v!)
 
     methodend
 
@@ -991,7 +1020,7 @@ REM TODO: lazy loading!
             bc!.unregisterUI(#this!)
         wend
 
-        
+        #UIController!.destroy() 
         #super!.destroy()
          
     

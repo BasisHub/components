@@ -2,7 +2,7 @@ rem package components.ui.bound.controls
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 
 class public SearchBoxController 
 

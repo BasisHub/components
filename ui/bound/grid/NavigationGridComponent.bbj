@@ -3,7 +3,7 @@ rem package components.ui.bound.grid
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/ui/bound/UIComponent.bbj::UIComponent
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 use ::components/ui/bound/grid/NavigationGridComponentConfigDialog.bbj::NavigationGridComponentConfigDialog
 use ::components/bl/config/ConfigBucket.bbj::ConfigBucket
 use ::components/ui/unbound/GoogleMapsAreaChooserDialog.bbj::GoogleMapsAreaChooserDialog

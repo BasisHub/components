@@ -1,6 +1,6 @@
 use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget 
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 
 class public  InputDWidget extends ControlWidget
  
@@ -11,6 +11,7 @@ class public  InputDWidget extends ControlWidget
     method public InputDWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         cwWidget! = cwCanvas!.addChildWindow(cwCanvas!.getAvailableControlID(),0,0,1,1,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+        cwWidget!.setBackColor(BBjAPI().makeColor("WHITE")) 
         #setWnd(cwWidget!)
         #Ipd! = cast(BBjInputD,cwWidget!.addInputD(100,0,0,10,10,""))
         #Ipd!.setEditable(1) 
@@ -31,8 +32,12 @@ class public  InputDWidget extends ControlWidget
         
         #Static! = cast(BBjStaticText,cwWidget!.addStaticText(102,0,0,10,10,""))
         #Static!.setVisible(1)
-        #Static!.addStyle("StaticRepresentation")        
-
+        #Static!.addStyle("StaticRepresentation")
+                
+        #Ipd!.setOpaque(0)
+        #Static!.setOpaque(0)
+        #TbPick!.setOpaque(0) 
+        
     methodend
     
     method public void setDateJulValue(BBjNumber val)

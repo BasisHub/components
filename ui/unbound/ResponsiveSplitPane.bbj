@@ -44,8 +44,11 @@ REM     field private BBjCheckBox    CbPin!
         
         #CwRight!    = #CwCanvas!.addChildWindow(101,10,10,30,30,"",$00000810$,BBjAPI().getSysGui().getAvailableContext())
         #CwRight!.addStyle("FormWnd")
-        #CwRight!.setName("CwRight") 
+        #CwRight!.setName("CwRight")
+        #CwRight!.setBackColor(BBjAPI().makeColor("WHITE")) 
         #CwLeft!     = #CwCanvas!.addChildWindow(100,0,0,30,30,"",$00000800$,BBjAPI().getSysGui().getAvailableContext())
+        #CwLeft!.setBackColor(BBjAPI().makeColor("WHITE"))
+        
 REM         #BtnBack! = #CwCanvas!.addButton(200,10,10,30,30,"",$0010$)
 REM         #BtnBack!.setCallback(BBjAPI.ON_BUTTON_PUSH,#this!,"onButtonBack")
 REM         #BtnBack!.setName("BackButton")

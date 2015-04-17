@@ -78,7 +78,9 @@ class public WindowStack
             fi
 
             wnd!     = #ContainerWnd!.addChildWindow(#ContainerWnd!.getAvailableControlID(),0,0,#ContainerWnd!.getWidth(),#ContainerWnd!.getHeight(),"",$00000800$,sg!.getAvailableContext())
+            wnd!.setBackColor(BBjAPI().makeColor("WHITE"))
             wnd!.setVisible(1)
+            
         fi
         #WindowList!.addItem(wnd!)
         #WidgetList!.addItem(null())
@@ -96,8 +98,17 @@ REM         if INFO(3,6)="5"  or #ContainerWnd!<>null() then
 REM         fi
         
         w=wnd!.getWidth()
+        if info(3,6)<>"5" then
+            tb_shadow! = wnd!.addChildWindow(1101,0,0,w,yoffs-2,"",$00000800$,sg!.getAvailableContext())
+            tb_shadow!.setBackColor(BBjAPI().makeColor(200,200,200))
+        fi
         tb!     = wnd!.addChildWindow(101,0,0,w,yoffs-4,"",$00000800$,sg!.getAvailableContext())
-        tb!.addStyle("ToolBar")
+        if info(3,6)="5" then
+            tb!.addStyle("ToolBar")
+        else
+            tb!.setBackColor(BBjAPI().makeColor(asc($80$) ,asc($2A$), asc($50$)))
+        fi
+        
         cw!     = wnd!.addChildWindow(100,0,yoffs,w,wnd!.getHeight()-yoffs,"",$00000800$,sg!.getAvailableContext())
 
         Translator! = i18n.getTranslator()
@@ -114,7 +125,13 @@ REM         fi
             backButton!.setImageFile("ico/back.png")
             backButton!.setToolTipText(Translator!.getTranslation("TOOLTIP_PREV"))
             st! = tb!.addStaticText(102,150,14,w-200,30,name$)
-            st!.addStyle("WindowStackTitle")
+            st!.setOpaque(0)
+            if info(3,6)="5" then
+                st!.addStyle("WindowStackTitle")
+            else
+                st!.setFont(BBjAPI().getSysGui().makeFont("SourceSansPro-Light",14,0))
+                st!.setForeColor(BBjAPI().makeColor(255,255,255))
+            fi
             st!.setVisible(1)
             rem todo: find a better place for that piece
 

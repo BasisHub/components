@@ -2,7 +2,7 @@ rem package components.bl
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 use ::components/bl/SoftLockController.bbj::SoftLockController
 use ::components/bl/SoftLockController.bbj::SoftLockRemoteEditEvent
 

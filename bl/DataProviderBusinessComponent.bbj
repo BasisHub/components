@@ -11,7 +11,7 @@ rem */
 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 
 use ::components/db/DataProvider.bbj::DataProvider
 

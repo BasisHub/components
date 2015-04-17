@@ -1,6 +1,6 @@
 use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
 use com.basiscomponents.db.DataRow
-use com.basiscomponents.db.DataField
+
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 use ::components/util/Util.bbj::Util
 
