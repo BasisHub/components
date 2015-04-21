@@ -194,7 +194,7 @@ class public WebBrowserComponent implements BBjControl
 
         if  #HtmlView!<>null() then
             rem BUI and "dumb" GUI
-            #HtmlView!.setUrl(url$)
+            #HtmlView!.setUrl(url$,err=*next)
         else
 
             if #Browser! <> null() then
@@ -241,15 +241,3 @@ class public WebBrowserComponent implements BBjControl
 
 
 classend
-
-
-
-
-
-
-
-
-
-
-
-
