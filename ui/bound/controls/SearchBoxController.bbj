@@ -69,6 +69,9 @@ REM         fi
         
         #BC!.setFulltextFilter(search$)
         #BC!.refresh()
+        if #BC!.size() = 1 then
+            #BC!.setSelection(0)
+        fi
         if INFO(3,6)="5" and b! <> null() then
             b!.setVisible(0)
         fi
