@@ -42,8 +42,11 @@ class public  InputNWidget extends ControlWidget
         x!= #getWnd().getControl(101)
         text$=text!
         
-        text$=str(num(text!):#Mask$) 
-        x!.setText(text$)        
+        if #Mask$>"" then
+            text!=str(num(text!):#Mask$)
+        fi
+            
+        x!.setText(text!)        
     methodend
     
     method public void setValue(BBjNumber val)
@@ -51,7 +54,7 @@ class public  InputNWidget extends ControlWidget
         c!= #getWnd().getControl(101)
         
         m1$=str(val)
-        if m$>"" then
+        if #Mask$>"" then
             m1$=str(val:#Mask$,err=*next)
         fi
         c!.setText(m1$)

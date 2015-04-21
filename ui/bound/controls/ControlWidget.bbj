@@ -311,7 +311,7 @@ REM     methodend
     rem */
     method public void onBroadcastEdit(BBjNumber recNo, BBjString fieldName$, BBjString newContent$)
 
-        if #getName() = fieldName$ then
+        if #getName() = fieldName$ and !#Focus then
             #setText(newContent$)
         fi
     

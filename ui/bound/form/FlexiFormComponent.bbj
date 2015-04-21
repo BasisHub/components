@@ -169,17 +169,19 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
         ch=unt
         open (ch)resFile$
         resFileName$=fid(ch)(9)
-        close (ch)
-        declare InputSource is!
-        is! = new InputSource(new FileInputStream(resFileName$))
-
-REM FIXME: the solution in place does not mangle utf-8 chars but is not 3 tier aware
-REM         ch=unt
-REM         open (ch)resFile$
-REM         read record (ch,siz=1000000)xml$
-REM         close (ch)
-REM         is! = new InputSource(new String(xml$))
-
+        if pos("<"=resFileName$)=0 then
+            close (ch)
+            declare InputSource is!
+            is! = new InputSource(new FileInputStream(resFileName$))
+        else
+REM FIXME: the solution with OPEN is 3 tier aware but does mangle utf-8 chars 
+            ch=unt
+            open (ch)resFile$
+            read record (ch,siz=1000000)xml$
+            close (ch)
+            is! = new InputSource(new String(xml$))
+        fi
+        
         #ControlsByBcClass! = new HashMap()
     
         dbf! = DocumentBuilderFactory.newInstance()
