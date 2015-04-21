@@ -177,6 +177,7 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
             read record (ch,siz=10000000)x$
             write (ch1)x$
             close (ch1)
+            resFileName$ = tmpfile!.getAbsolutePath()
         fi
 
         close (ch)
