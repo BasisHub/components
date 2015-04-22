@@ -281,7 +281,7 @@ REM        #LbList!.focus()
     methodend 
     
     method public void destroy()
-        
+        #CwCanvas!.destroy()   
     methodend
 
 classend
