@@ -171,7 +171,7 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
         open (ch)resFile$
         resFileName$=fid(ch)(9)
 
-        if pos("<"=resFileName$)>0 or 1 then 
+        if pos("<"=resFileName$)>0  then 
             rem dataserver
             tmpfile!=java.io.File.createTempFile("tmpform", ".xml")
             ch1=unt
