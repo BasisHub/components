@@ -166,10 +166,12 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
         
         use java.io.FileInputStream
   
+        
         ch=unt
         open (ch)resFile$
         resFileName$=fid(ch)(9)
-        if pos("<"=resFileName$)>0 then 
+
+        if pos("<"=resFileName$)>0 or 1 then 
             rem dataserver
             tmpfile!=java.io.File.createTempFile("tmpform", ".xml")
             ch1=unt
@@ -178,11 +180,13 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
             write (ch1)x$
             close (ch1)
             resFileName$ = tmpfile!.getAbsolutePath()
+            a=msgbox(resFileName$,0,"Using tmpfile instead of Dataserver")    
         fi
 
         close (ch)
         
         declare InputSource is!
+        
         is! = new InputSource(new FileInputStream(resFileName$))
         
         #ControlsByBcClass! = new HashMap()
