@@ -180,7 +180,7 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
             write (ch1)x$
             close (ch1)
             resFileName$ = tmpfile!.getAbsolutePath()
-            a=msgbox(resFileName$,0,"Using tmpfile instead of Dataserver")    
+   
         fi
 
         close (ch)
