@@ -1284,8 +1284,7 @@ class public BusinessComponent
     rem * Method broadcastEnableControls:
     rem * notify UIs about an ongoing edit so they can update all control enablements 
     rem */
-    method private void broadcastEnableControls()
-
+    method protected void broadcastEnableControls()
                 
         r! = #getResultingEditedRecord()
         if r!<>null() then

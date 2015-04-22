@@ -148,6 +148,18 @@ REM     methodend
         #RowTemplate$ = html$
     methodend
 
+    method public void loadRowTemplate(BBjString file$)
+        ch=unt
+        open (ch)file$
+        while 1
+            read record (ch,siz=1000,end=*break)l$
+            t$=t$+l$
+        wend
+        close (ch)
+
+        #setRowTemplate(t$)
+    methodend
+
     method public void setDetailTemplate(BBjString html$)
         #DetailTemplate$ = html$
     methodend
@@ -255,11 +267,13 @@ REM     methodend
         fi           
 
         ready:
-         #LbList!.deselectAll()
-REM        #LbList!.focus()
-        if #CurrentSel>-1 then
-            #LbList!.selectIndex(#CurrentSel)
-        fi
+         if !#LbList!.isDestroyed() then
+               #LbList!.deselectAll()
+
+              if #CurrentSel>-1 then
+                  #LbList!.selectIndex(#CurrentSel)
+              fi
+          fi
     methodend
     
     method public void deselect()
