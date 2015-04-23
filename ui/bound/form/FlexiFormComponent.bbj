@@ -287,7 +287,6 @@ REM                             cwCanvas!.setFont(font!)
                             
                             rem determine elements (aka ontrols or widgets)
                             elElmntLst! = paneNode!.getElementsByTagName("element")
-                            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
                             if elElmntLst!.getLength() then
                                 for element = 0  to  elElmntLst!.getLength()-1
                               
@@ -349,13 +348,13 @@ REM Bug 28270 - program drops to console after EXECUTE when called from a method
 REM             execute x$
 REM do the old (slower) way until there's a fix for this edge condition:
 
-            temp$ = str(java.io.File.createTempFile("blabla", ".call"))
-            ch=unt
-            open (ch)temp$
-            write (ch)"ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$
-            close (ch)
-            call temp$
-            erase temp$
+                                                tempfile! = java.io.File.createTempFile("blabla", ".call")
+                                                
+                                                output! = new java.io.BufferedWriter(new java.io.FileWriter(tempfile!))
+                                                output!.write("ENTER"+$0a$+x$+$0a$+"EXIT"+$0a$)
+                                                output!.close()
+                                                call tempfile!.getAbsolutePath()
+                                                tempfile!.delete()
                                           fi
                                           
                                           
