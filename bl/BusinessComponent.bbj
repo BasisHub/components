@@ -535,8 +535,6 @@ class public BusinessComponent
     method public void onSelectionChange()
 
         #setEditedRec(null())
-
-
         
         ks!=#Controller!.keySet()
         it! = ks!.iterator()
@@ -579,8 +577,6 @@ class public BusinessComponent
         wend
         
         #setEditedRecord(-1)
-
-
 
         #broadcastEnableControls()
 
@@ -1658,7 +1654,7 @@ class public BusinessComponent
             else
                 if #Selection!.size()=1 then
                     sel=#Selection!.get(0)
-                    r! = #getResultSet().getItem(sel)
+                    r! = #getResultSet().getItem(sel,err=*next)
                 fi
             fi
         fi
