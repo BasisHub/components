@@ -293,8 +293,9 @@ td .infoTitle {
   font: normal 16px "SourceSansPro", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
   color: #802A50;
 }
+/*
 td.disclosureImage:after {
-  content: '>';
+  content: '';
   font: normal 30px "AdventPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
   line-height: 28px !important;
   color: #e3e5e8;
@@ -303,6 +304,7 @@ td.disclosureImage:after {
 td:hover .disclosureImage:after {
   color: #abb1ba;
 }
+*/
 td .infoSubTitle {
   font: normal 14px "SourceSansPro", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
@@ -390,7 +392,7 @@ td .infoMiscValue {
   -ms-border-radius: 15px;
   -o-border-radius: 15px;
   border-radius: 15px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
   padding: 3px 1px 3px 1px;
 }
 .detailSpacer {
@@ -449,29 +451,32 @@ background: none !important;
 }
 
 .BBjEditBox, .bbj-password, .BBjInputE, .BBjInputN, .BBjInputD, .BBjCEdit, .BBjCEdit.bbj-bordered, .BBjListBox, .BBjListEdit, .BBjTree, .BBjHtmlView, .BBjUserAuthentication-user, .BBjUserAuthentication-password, .BBjFileChooser-fileGridPanel, .BBjFileChooser-fileName {
+
+opacity: 1.0;
+cursor: default;
+box-shadow: 0 0 0px rgba(0, 0, 0, 0.25);
+font: normal 15px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+}
+
+.BBjEditBox, .bbj-password, .BBjInputE, .BBjInputN, .BBjInputD, .BBjCEdit, .BBjCEdit.bbj-bordered{
+border: 1px solid #8c8c8c !important;
 /* -webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.25); */
 -moz-box-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
 /* box-shadow: 0 0 2px rgba(0, 0, 0, 0.25); */
-/* border: 1px solid #8c8c8c; */
-/* -webkit-border-radius: 2px; */
+
+-webkit-border-radius: 2px;
 -moz-border-radius: 2px;
 -ms-border-radius: 2px;
 -o-border-radius: 2px;
 /* border-radius: 2px; */
 /* background-color: #fcfcfd; */
 /* color: #262626; */
-opacity: 1.0;
-cursor: default;
-box-shadow: 0 0 0px rgba(0, 0, 0, 0);
-border: 0px;
-font: normal 15px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
 
 .BBjInputE.bbj-disabled, .BBjListButton-buttonText{
 opacity: 1.0 !important;
 cursor: default;
 box-shadow: 0 0 0px rgba(0, 0, 0, 0);
-border: 0px;
 }
 
 .BBjListButton-buttonText, .BBjListButton-item{
