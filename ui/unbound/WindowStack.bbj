@@ -41,7 +41,9 @@ class public WindowStack
     field private static BBjVector ExitActionList! = new BBjVector()
     field private static BBjVector ExitActionObjectList! = new BBjVector()
     field private static BBjVector ExitActionPayloadList! = new BBjVector()
-        
+    field private static BBjVector ButtonIDList! = new BBjVector()
+    
+     
         
     rem this is for BUI only, when embedded in another child window
     field private static BBjWindow ContainerWnd!
@@ -90,6 +92,7 @@ class public WindowStack
         #ExitActionList!.addItem("")
         #ExitActionObjectList!.addItem("")
         #ExitActionPayloadList!.addItem("")
+        #ButtonIDList!.addItem(new BBjVector())
 
         yoffs=0
 
@@ -231,7 +234,7 @@ REM         fi
                 #ExitActionList!.removeItem(#ExitActionList!.size()-1)
                 #ExitActionObjectList!.removeItem(#ExitActionObjectList!.size()-1)
                 #ExitActionPayloadList!.removeItem(#ExitActionPayloadList!.size()-1)
-                
+                #ButtonIDList!.removeItem(#ButtonIDList!.size()-1)
 
             fi
             if uiw! <> null() then
@@ -309,6 +312,7 @@ REM         fi
     method public static BBjNumber addButton(BBjString name$, BBjString caption$, BBjString cssclass$, CustomObject CallbackObj!, BBjString CallbackMethod$)
         id=2000
         wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+        buttons! =  #ButtonIDList!.getItem(#ButtonIDList!.size()-1)
         tb! = wnd!.getControl(101)
         
         while 1
@@ -332,6 +336,8 @@ REM         fi
         x=int(50*(id-2000+3))
         st!.setLocation(x,14)
         st!.setSize(wnd!.getWidth()-x-50,st!.getHeight())
+        buttons!.addItem(Button!)
+        id=(#ButtonIDList!.size()-1)*10000 + id
         methodret id    
     methodend 
     
@@ -376,9 +382,14 @@ REM         fi
     methodend 
     
     method private static BBjButton getButton(BBjNumber id)
-        wnd! = #WindowList!.getItem(#WindowList!.size()-1)
-        tb! = wnd!.getControl(101)
-        methodret tb!.getControl(id,err=*next)
+    
+        offs = int(id/10000)
+        if offs = #ButtonIDList!.size()-1 then
+            id = id - offs * 10000
+            wnd! = #WindowList!.getItem(#WindowList!.size()-1)
+            tb! = wnd!.getControl(101)
+            methodret tb!.getControl(id,err=*next)
+        fi
         methodret null()
     methodend
 
