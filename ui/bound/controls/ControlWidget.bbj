@@ -381,11 +381,11 @@ REM     methodend
     rem * @return DataRow: the row with the changes being added
     rem */
     method public DataRow prepareSave(DataRow r!)
-    
+
         if #Focus then
             edrow! = #getBC().getEditedRecord()
             n$=#getName()
-            v!=#getCtrl().getText()
+            v!=#getText()
             if #getFkPicker() <> null() then
                 v!=#getFkPicker().getSelectedForeignKeyValue()
                 if v!=null() then
@@ -407,7 +407,7 @@ REM     methodend
                     r!.setFieldValue(#getBindField(),"")
                 fi
             else
-                r!.setFieldValue(#getBindField(),#Ctrl!.getText())
+                r!.setFieldValue(#getBindField(),#getText())
             fi
         fi
         

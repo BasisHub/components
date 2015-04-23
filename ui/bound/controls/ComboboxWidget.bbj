@@ -1,15 +1,12 @@
 use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
-
-
 use com.basiscomponents.db.DataRow
-
 
 class public  ComboboxWidget extends ControlWidget
  
-    field private BBjComboBox Cb!
-    field private BBjStaticText Static!
-    field private BBjNumber IDX
+    field protected BBjComboBox Cb!
+    field protected BBjStaticText Static!
+    field protected BBjNumber IDX
  
     method public ComboboxWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
