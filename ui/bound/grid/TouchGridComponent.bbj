@@ -4,7 +4,7 @@ use com.basiscomponents.db.DataRow
 
 use ::components/ui/unbound/TouchGrid.bbj::TouchGrid
 use ::components/util/Util.bbj::Util
-use ::i18n/CustomTranslator.bbj::CustomTranslator
+
 
 class public TouchGridComponent extends UIComponent implements BBjControl
 
@@ -97,8 +97,6 @@ class public TouchGridComponent extends UIComponent implements BBjControl
 
     method private BBjString replaceLabels(BBjString t$)
      
-        t! = new CustomTranslator()   
- 
         while pos("$T{"=T$)>0 
             o=pos("$T{"=T$)
             lbl$=t$(o+3)
@@ -107,7 +105,7 @@ class public TouchGridComponent extends UIComponent implements BBjControl
             else
                 lbl$=lbl$(1,pos("}"=lbl$)-1)
             fi
-            trl$ = t!.getTranslation(lbl$)
+            trl$ = #getTranslator().getTranslation(lbl$)
             t$=t$(1,o-1)+trl$+t$(o+len(lbl$)+4)
         wend
           

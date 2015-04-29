@@ -6,9 +6,6 @@ use com.basiscomponents.db.DataRow
 rem 
 use ::components/bl/BusinessComponent.bbj::BusinessComponent
 
-use ::i18n/CustomTranslator.bbj::CustomTranslator
-use ::translations/bbtranslator.bbj::BBTranslator
-
 use java.util.HashMap
 rem use net.miginfocom.layout.PlatformDefaults
 
@@ -23,9 +20,6 @@ class public ControlWidget extends UIComponent
     field private BBjChildWindow WndCache!   
     
     field protected static BBjNumber charw = BBjAPI().getSysGui().getMeasure("W") +2
-    
-    field public static BBTranslator CustomTranslator!
-
 
     field protected BusinessComponent   FillBC!
     
@@ -39,9 +33,6 @@ class public ControlWidget extends UIComponent
     method protected ControlWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         
-        if #CustomTranslator! = null() then
-             #CustomTranslator! = new CustomTranslator()
-        fi
         
     methodend
     
@@ -94,7 +85,7 @@ REM         a!.setFocusable(0,err=*next)
     methodend
 
     method public void setTextKey(BBjString textkey$)
-        #setText( #CustomTranslator!.getTranslation(textkey$)  )
+        #setText( #getTranslator().getTranslation(textkey$)  )
     methodend
     
     

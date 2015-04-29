@@ -10,7 +10,8 @@ use ::components/ui/laf/laffactory.bbj::laffactory
 use ::components/ui/laf/laffactory.bbj::laf
 use ::components/util/Util.bbj::Util
 
-use ::translations/bbtranslator.bbj::BBTranslator
+
+use ::i18n/CustomTranslator.bbj::CustomTranslator
 
 
 rem /**
@@ -55,7 +56,7 @@ class public UIComponent implements BBjControl
     field protected BBjStatusBar        StatusBar!
     field protected BBjMenuBar          MenuBar!
 
-    field protected static BBTranslator  Translator! = i18n.getTranslator()
+    field protected static CustomTranslator  Translator! =  new CustomTranslator()
 
     field private java.util.HashMap  ForeignKeyFormLinkList! = new java.util.HashMap()
     field private java.util.HashMap  ForeignKeyFormClassList! = new java.util.HashMap()
