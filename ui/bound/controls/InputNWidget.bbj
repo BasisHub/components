@@ -24,6 +24,7 @@ class public  InputNWidget extends ControlWidget
         #Static! = cast(BBjStaticText,cwWidget!.addStaticText(101,0,0,10,10,""))
         #Static!.setVisible(1)
         #Static!.addStyle("StaticRepresentation")
+        #Static!.setAlignment(#Static!.ALIGN_RIGHT)
 
         #Ipn!.setOpaque(0)
         #Static!.setOpaque(0)
