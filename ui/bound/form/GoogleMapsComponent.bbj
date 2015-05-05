@@ -66,7 +66,7 @@ class public GoogleMapsComponent extends UIComponent implements BBjControl
 
         mkdir d$+"htdocs/deliver",err=*next
 
-        #FileName$=str(dec(info(3,0)))+"_"+date(0:"%Dz.%Mz.%Yl.%Hz%mz%Sz")+"_maps.html"
+        #FileName$=str(dec(info(3,0)))+"_"+date(0:"%Dz.%Mz.%Yl.%Hz%mz%sz")+"_maps.html"
         baseurl$=Util.getJettyBaseUrl()
         #Url$ = baseurl$+"files/deliver/"+#FileName$
         #FileName$=d$+"htdocs/deliver/"+#FileName$
