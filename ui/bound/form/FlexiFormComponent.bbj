@@ -225,8 +225,18 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
                     maxCols$= #getNodeValue(fstNode!,"maxcols")
                     horizontalAlign=0
                     horizontalAlign = num(#getNodeValue(fstNode!,"horizontalalign"),err=*next)
+
+
         
                     f2! = new ResponsiveFormFrame(#FormFrame!.getWnd(),#FormFrame!.getWnd().getAvailableControlID(),0,301,1024,0)
+ 
+                    spacing=-1
+                    spacing = num(#getNodeValue(fstNode!,"spacing"),err=*next)
+                    if spacing>-1 then
+                        f2!.setSpacing(spacing)
+                    fi
+                    
+                    
                     f2!.setNumCols(num(maxCols$,err=*next))
                     f2!.setHorizontalAlign(horizontalAlign)
                     f2wnd! = f2!.getWnd()
@@ -249,6 +259,11 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
                             height$ = #getNodeValue(paneNode!,"height")
                             cssClass$= #getNodeValue(paneNode!,"cssClass")
                             
+ 
+
+                            
+                            
+                            
                             if width$="" then
                                 width=100
                             else
@@ -264,6 +279,7 @@ class public FlexiFormComponent extends UIComponent implements BBjControl
 
                             rem create pane
                             cwCanvas! = f2wnd!.addChildWindow(f2wnd!.getAvailableControlID(),0,0,width,height,"",$00010800$,BBjAPI().getSysGui().getAvailableContext())
+                            
                             cwCanvas!.setBackColor(BBjAPI().makeColor("WHITE"))
                             Layout! = new BBMigPane(cwCanvas!,layc$,colc$,rowc$)
                             if cssClass$<>"" then

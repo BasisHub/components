@@ -24,13 +24,14 @@ class public ResponsiveFormFrame implements BBjControl, ISizeChangeNotifyTarget
     field private BBjNumber Cols=1
     field private BBjNumber CurCols
 
-    field private BBjNumber Spacing=15 
+    field private BBjNumber Spacing
     field private BBjNumber fHorizontalAlign=0
 
     method private ResponsiveFormFrame()
     methodend
     
     method public ResponsiveFormFrame(BBjWindow wnd!, BBjNumber id,BBjNumber x, BBjNumber y,BBjNumber w, BBjNumber h)
+         
         #X=x
         #Y=Y        
         #W=w
@@ -42,12 +43,19 @@ class public ResponsiveFormFrame implements BBjControl, ISizeChangeNotifyTarget
         #CwCanvas! = wnd!.addChildWindow(id,#X,#Y,#W,#H,"",$0000080C$,BBjAPI().getSysGui().getAvailableContext())
         #CwCanvas!.setBackColor(BBjAPI().makeColor("WHITE"))
         
+        
     methodend
     
     method public void setLocation(BBjNumber x!, BBjNumber y!)
         #X=x!
         #Y=Y!
         #CwCanvas!.setLocation(x!,y!)
+    methodend
+    
+    method public void setSpacing(BBjNumber x!)
+        
+        #Spacing = x!
+
     methodend
     
     method public void setSize(BBjNumber w!, BBjNumber h!)
