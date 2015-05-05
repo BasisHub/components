@@ -167,6 +167,10 @@ REM         s=min(s,1000)
             #ResultInfo!.setVisible(1)
             #TouchGrid!.setVisible(0)
         fi
+        
+        if s=1 then
+            #getBC().setSelection(0)
+        fi
 
     methodend
 
