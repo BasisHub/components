@@ -614,4 +614,10 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.26);
       margin: 8px;	
 }
 
+iframe {
+    padding: 0;
+    margin: 0;
+	border: 0px !important;
+}
+
 // TODO see for material design samples and transitions  http://codepen.io/iraycd/pen/dHrxv
