@@ -630,9 +630,9 @@ color: #802A50;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
     border-radius: 50%;
-    width: 30px;
+    width: 20px;
     padding: 8px;
-	font: normal 16px "SourceSansPro-Bold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+	font: normal 14px "SourceSansPro-Bold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
     background: #999;
     color: #FFF;
     position: relative;
@@ -648,7 +648,7 @@ color: #802A50;
     height: 100%;
     width: 100%;
     text-align: center;
-    margin-top: -10px; /* Note, this must be half the font size */
+    margin-top: -11px; /* Note, this must be half the font size */
 }
 
 
