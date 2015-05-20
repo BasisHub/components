@@ -624,4 +624,57 @@ a:link, a:hover, a:visited, a:active {
 color: #802A50;
 }
 
+
+
+.numberCircle {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    width: 30px;
+    padding: 8px;
+	font: normal 16px "SourceSansPro-Bold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+    background: #999;
+    color: #FFF;
+    position: relative;
+
+}
+.numberCircle .height_fix {
+    margin-top: 100%;
+}
+.numberCircle .content {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    margin-top: -10px; /* Note, this must be half the font size */
+}
+
+
+.oneCharCycle {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    width: 30px;
+    padding: 8px;
+	font: normal 30px "SourceSansPro-Bold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+    background: #802A50;
+    color: #FFF;
+    position: relative;
+
+}
+.oneCharCycle .height_fix {
+    margin-top: 100%;
+}
+.oneCharCycle .content {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    margin-top: -19px; /* Note, this must be half the font size */
+}
+
 // TODO see for material design samples and transitions  http://codepen.io/iraycd/pen/dHrxv
