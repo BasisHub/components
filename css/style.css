@@ -620,4 +620,8 @@ iframe {
 	border: 0px !important;
 }
 
+a:link, a:hover, a:visited, a:active {
+color: #802A50;
+}
+
 // TODO see for material design samples and transitions  http://codepen.io/iraycd/pen/dHrxv
