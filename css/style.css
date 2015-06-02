@@ -2,7 +2,7 @@
   -webkit-border-radius: 15;
   -moz-border-radius: 15;
   border-radius: 7px;
-  font: normal 15px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+  font: normal 14px "SourceSansPro-Light", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
   color: #ffffff;
   box-shadow: 0px 0px 10px #000000;
   font-size: 14px !important;
@@ -480,7 +480,7 @@ box-shadow: 0 0 0px rgba(0, 0, 0, 0);
 }
 
 .BBjListButton-buttonText, .BBjListButton-item{
-font: normal 11px "SourceSansPro-Regular", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+font: normal 15px "SourceSansPro-Semibold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
 }
 
 .BBjListButton-listBox {
@@ -612,6 +612,69 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.26);
       background-color: #fff;
       box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2);
       margin: 8px;	
+}
+
+iframe {
+    padding: 0;
+    margin: 0;
+	border: 0px !important;
+}
+
+a:link, a:hover, a:visited, a:active {
+color: #802A50;
+}
+
+
+
+.numberCircle {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    width: 20px;
+    padding: 8px;
+	font: normal 14px "SourceSansPro-Bold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+    background: #999;
+    color: #FFF;
+    position: relative;
+
+}
+.numberCircle .height_fix {
+    margin-top: 100%;
+}
+.numberCircle .content {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    margin-top: -11px; /* Note, this must be half the font size */
+}
+
+
+.oneCharCycle {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    width: 30px;
+    padding: 8px;
+	font: normal 30px "SourceSansPro-Bold", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+    background: #802A50;
+    color: #FFF;
+    position: relative;
+
+}
+.oneCharCycle .height_fix {
+    margin-top: 100%;
+}
+.oneCharCycle .content {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    margin-top: -19px; /* Note, this must be half the font size */
 }
 
 // TODO see for material design samples and transitions  http://codepen.io/iraycd/pen/dHrxv
