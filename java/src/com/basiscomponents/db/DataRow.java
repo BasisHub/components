@@ -1,13 +1,21 @@
 package com.basiscomponents.db;
 
+import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import com.basis.bbj.client.datatypes.BBjVector;
 import com.basis.util.common.BBjNumber;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 public class DataRow 
 {
@@ -770,6 +778,44 @@ public class DataRow
 		}
 		
 	}
+
+	public String toJson() {
+		// TODO Auto-generated method stub
+		Gson gson = new Gson();
+		String json="";
+		Iterator<String> it = FieldList.keySet().iterator(); 
+		while (it.hasNext())
+		{
+			String k = it.next();
+			if (!json.isEmpty()){
+				json +=',';
+			}
+			json += FieldList.get(k).toJson();
+			
+			
+		}
+		
+		json = "{\"datarow\":["+json+"]}";
+		return json;
+	}	
 	
+
+	public static DataRow fromJson(String json){
+
+		Gson gson = new Gson();
+		JsonElement jelement = new JsonParser().parse(json);
+	    JsonObject  jobject = jelement.getAsJsonObject();
+	    JsonArray jarray = jobject.getAsJsonArray("datarow");		
+	    Type type = new TypeToken<List<DataField>>() {}.getType();
+	    List<DataField> records = gson.fromJson(jarray, type);		    
+		DataRow r=new DataRow();
+			Iterator<DataField> it = records.iterator();
+			while (it.hasNext()){
+				DataField df = it.next();
+				r.addDataField(df.getName(), df);
+			}
+			
+		return r;
+	}
 	
 }

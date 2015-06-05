@@ -3,28 +3,30 @@ package com.basiscomponents.db;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
 import com.basis.util.common.BBjNumber;
 import com.basis.util.common.BasisNumber;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
  
 
 public class DataField 
 {
 
-	String Name;
-	String StringValue;
-	java.sql.Date DateValue;
-    java.sql.Timestamp TimestampValue;
-    java.sql.Time TimeValue;
-    java.math.BigDecimal BigDecimalValue;
-    java.lang.Double DoubleValue;
-    java.lang.Integer IntegerValue;
-    java.lang.Boolean BooleanValue;
+	@Expose String Name;
+	@Expose String StringValue;
+	@Expose java.sql.Date DateValue;
+	@Expose java.sql.Timestamp TimestampValue;
+	@Expose java.sql.Time TimeValue;
+	@Expose java.math.BigDecimal BigDecimalValue;
+	@Expose java.lang.Double DoubleValue;
+	@Expose java.lang.Integer IntegerValue;
+	@Expose java.lang.Boolean BooleanValue;
     int Length;
-    char Type;
+    @Expose char Type;
     int SQLType;
     java.util.HashMap<String,String> Attributes=new java.util.HashMap<String, String>();
 
@@ -734,5 +736,29 @@ public class DataField
 		}
 		
 		return f;
-	}	
+	}
+
+	public String toJson() {
+		// TODO Auto-generated method stub
+		
+		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+		String json = gson.toJson(this);
+		return json;
+	}
+	
+	public String toString()
+	{
+		return toJson();
+	}
+	
+	public static DataField fromJson(String json){
+		Gson gson = new Gson();
+		DataField f = gson.fromJson(json,DataField.class);
+		return f;
+	}
+
+	public String getName() {
+		return this.Name;
+	}
+	
 }
