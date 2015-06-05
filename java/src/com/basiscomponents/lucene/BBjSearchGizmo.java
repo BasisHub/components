@@ -44,7 +44,6 @@ public class BBjSearchGizmo
     private String taxoDirectoryName;
 
     private Analyzer analyzer;
-    private IndexWriterConfig iwc;
 
 
 
@@ -52,7 +51,6 @@ public class BBjSearchGizmo
     {
         this.directoryName = directory;
         analyzer = new WhitespaceAnalyzer();
-        this.iwc=new IndexWriterConfig(analyzer);
     }
 
 
@@ -60,6 +58,7 @@ public class BBjSearchGizmo
     public void addDocument(BBjSearchGizmoDoc doc) throws IOException, LockObtainFailedException
     {
         FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
+        IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
         IndexWriter writer = new IndexWriter(indexdirectory,iwc);
 
         //remove it first
@@ -124,6 +123,7 @@ public class BBjSearchGizmo
     public void removeDocument(String id) throws IOException, LockObtainFailedException, ParseException
     {
         FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
+        IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
         IndexWriter writer = new IndexWriter(indexdirectory,iwc);
         MultiFieldQueryParser queryparser = new MultiFieldQueryParser(new String[]{id}, analyzer);
         Query query = queryparser.parse(id);
