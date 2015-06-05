@@ -61,6 +61,22 @@ class public  CheckboxWidget extends ControlWidget
         methodret r!
 
     methodend
+    
+    rem /**
+    rem  * Returns the state of the BBjCheckbox held by this Widget as string. 
+    rem  * If the checkbox is checked then 1 is returned, 0 otherwise.
+    rem  * 
+    rem  * @return state - The state of the checkbox
+    rem  */
+    method public String getText()
+        ctrl! = #super!.getCtrl()
+        if(ctrl! <> null()) then
+            if(ctrl!.isSelected()) then
+                methodret "1"
+            fi
+        fi
+        methodret "0"
+    methodend
 
 classend
 
