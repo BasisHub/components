@@ -765,6 +765,7 @@ public class DataRow
 		
 	}	
 	
+	@SuppressWarnings("rawtypes")
 	public void mergeRecord(DataRow r) throws Exception
 	{
 		BBjVector v = r.getFieldNames();
@@ -780,8 +781,7 @@ public class DataRow
 	}
 
 	public String toJson() {
-		// TODO Auto-generated method stub
-		Gson gson = new Gson();
+
 		String json="";
 		Iterator<String> it = FieldList.keySet().iterator(); 
 		while (it.hasNext())
@@ -799,6 +799,29 @@ public class DataRow
 		return json;
 	}	
 	
+	public JsonElement toJsonElement() {
+		
+		JsonArray jsonarray = new JsonArray();
+		
+
+		Iterator<String> it = FieldList.keySet().iterator(); 
+		while (it.hasNext())
+		{
+			String k = it.next();
+			jsonarray.add(FieldList.get(k).toJsonElement());
+		}
+		
+		return jsonarray;
+	}		
+
+//	public JsonElement toJsonElementOld() {
+//
+//		String json=toJson();
+//		JsonElement jelement = new JsonParser().parse(json);
+//	    JsonObject  jobject = jelement.getAsJsonObject();
+//		return jobject.get("datarow");
+//	}		
+
 
 	public static DataRow fromJson(String json){
 

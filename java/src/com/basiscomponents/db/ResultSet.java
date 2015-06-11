@@ -31,7 +31,7 @@ public class ResultSet extends BBjVector {
 				json +=',';
 			}
 			json += r.toJson();
-			System.out.println(r.toJson());
+
 			
 		}
 		
@@ -40,6 +40,33 @@ public class ResultSet extends BBjVector {
 		
 	}
 
+	@SuppressWarnings("unchecked")
+	public JsonElement toJsonElement() {
+
+		JsonArray jsonarray = new JsonArray();
+		
+
+		Iterator<DataRow> it = iterator();
+		while (it.hasNext())
+		{
+			DataRow r = (DataRow)it.next();
+			JsonElement el = r.toJsonElement();
+			JsonObject o = new JsonObject();
+			o.add("datarow", el);
+			jsonarray.add(o);
+		}
+		
+		return jsonarray;		
+	}		
+
+	public JsonElement toJsonElementOld() {
+		// TODO Auto-generated method stub
+		String json=toJson();
+		JsonElement jelement = new JsonParser().parse(json);
+	    JsonObject  jobject = jelement.getAsJsonObject();
+		return jobject.get("resultset");
+	}		
+	
 	public static ResultSet fromJson(String json){
 
 		ResultSet rs = new ResultSet();

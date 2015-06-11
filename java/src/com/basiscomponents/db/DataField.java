@@ -10,6 +10,7 @@ import com.basis.util.common.BBjNumber;
 import com.basis.util.common.BasisNumber;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
  
 
@@ -739,11 +740,14 @@ public class DataField
 	}
 
 	public String toJson() {
-		// TODO Auto-generated method stub
-		
 		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 		String json = gson.toJson(this);
 		return json;
+	}
+
+	public JsonElement toJsonElement() {
+		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+		return gson.toJsonTree(this);
 	}
 	
 	public String toString()
