@@ -1,0 +1,242 @@
+package com.basiscomponents.bridge;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.lucene.util.packed.PackedLongValues.Iterator;
+
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+
+public  class Session {
+	
+	private  ArrayList<SessionExecuteEntity> Ex;
+	private  ArrayList<String> Ret;
+	private  ArrayList<SessionVarEntity> Vars;
+	private HashMap<String,Object> Result;
+	private  String SessionID;
+	private String BaseUrl;
+	
+	public Session(String url){
+		BaseUrl = url;
+		Ex = new ArrayList<SessionExecuteEntity>();
+		Ret = new ArrayList<String>();
+		Vars = new ArrayList<SessionVarEntity>();
+		SessionID = new String();
+		Result = new HashMap<>();
+	}
+	
+	public  String getSessionID(){
+		return SessionID;
+	}
+	
+	public  void pushVar(String name, String val){
+		SessionVarEntity v = new SessionVarEntity(name,val);
+		Vars.add(v);
+	}
+	public  void pushVar(String name, Number val){
+		SessionVarEntity v = new SessionVarEntity(name,val);
+		Vars.add(v);
+	}
+	public  void pushVar(String name, DataRow val){
+		SessionVarEntity v = new SessionVarEntity(name,val);
+		Vars.add(v);
+	}
+	
+	public void pushRet(String name){
+		this.Ret.add(name);
+	}
+	
+	public void create(String var, String classname){
+		SessionCreateClassEntity ex = new SessionCreateClassEntity(var,classname);
+		this.Ex.add(ex);
+	}
+
+	public void invoke(String var, String retvar, String method,String... args){
+		SessionInvokeEntity in = new SessionInvokeEntity(var,retvar,method, args);
+		this.Ex.add(in);
+	}	
+
+	public void reset(){
+		Ex = new ArrayList<SessionExecuteEntity>();
+		Ret = new ArrayList<String>();
+		Vars = new ArrayList<SessionVarEntity>();		
+	}
+	
+	private String getJson(){
+		String json="{";
+		
+		if (!this.SessionID.isEmpty())
+			json += "\"ses\":\""+this.getSessionID()+"\"";
+		
+		if (this.Vars.size()>0){
+			if (json.length()>1)
+				json+=',';
+			json += "\"vars\":[";
+			java.util.Iterator<SessionVarEntity> it = Vars.iterator();
+			Boolean first = true;
+			while (it.hasNext()){
+				if (!first)
+					json += ',';
+				else
+					first=false;
+				json +=it.next().toJson(); 
+			}
+			json += "]";
+			
+		}
+
+		
+		if (this.Ex.size()>0){
+			if (json.length()>1)
+				json+=',';
+			json += "\"ex\":[";
+			java.util.Iterator<SessionExecuteEntity> it = Ex.iterator();
+			Boolean first = true;
+			while (it.hasNext()){
+				if (!first)
+					json += ',';
+				else
+					first=false;
+				json +=it.next().toJson(); 
+			}
+			json += "]";
+			
+		}		
+		
+		if (this.Ret.size()>0){
+			if (json.length()>1)
+				json+=',';
+			json += "\"ret\":[";
+			java.util.Iterator<String> it = Ret.iterator();
+			Boolean first = true;
+			while (it.hasNext()){
+				if (!first)
+					json += ',';
+				else
+					first=false;
+				json +="\""+it.next()+"\""; 
+			}
+			json += "]";
+			
+		}
+		
+		json += "}";
+		return json;
+	}
+	
+	private String postRequest(String req){
+		  
+		  {
+		    URL url;
+		    HttpURLConnection connection = null;  
+		    req="ex="+req;
+		    try {
+		      //Create connection
+		      url = new URL(BaseUrl);
+		      connection = (HttpURLConnection)url.openConnection();
+		      connection.setRequestMethod("POST");
+		      connection.setRequestProperty("Content-Type", 
+		           "application/x-www-form-urlencoded");
+					
+		      connection.setRequestProperty("Content-Length", "" + Integer.toString(req.getBytes().length));
+		      connection.setRequestProperty("Content-Language", "en-US");  
+					
+		      connection.setUseCaches (false);
+		      connection.setDoInput(true);
+		      connection.setDoOutput(true);
+
+		      //Send request
+		      DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
+		      wr.writeBytes (req);
+		      wr.flush ();
+		      wr.close ();
+
+		      //Get Response	
+		      InputStream is = connection.getInputStream();
+		      BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		      String line;
+		      StringBuffer response = new StringBuffer(); 
+		      while((line = rd.readLine()) != null) {
+		        response.append(line);
+		        response.append('\r');
+		      }
+		      rd.close();
+		      return response.toString();
+
+		    } catch (Exception e) {
+
+		      e.printStackTrace();
+		      return null;
+
+		    } finally {
+
+		      if(connection != null) {
+		        connection.disconnect(); 
+		      }
+		    }
+		}
+		  
+		  
+	}
+	
+	
+	public void exec(){
+		
+		String req = getJson();
+		
+//		System.out.println(req);
+		String ret = this.postRequest(req);
+//		System.out.println(ret);
+		
+		JsonElement jelement = new JsonParser().parse(ret);
+	    JsonObject  jobject = jelement.getAsJsonObject();
+	    if (this.SessionID.isEmpty())
+	    	SessionID = jobject.get("ses").getAsString();
+	    Set<Entry<String, JsonElement>> es = jobject.entrySet();
+	    java.util.Iterator<Entry<String, JsonElement>> it = es.iterator();
+	    while (it.hasNext())
+	    {	
+	    	String key = it.next().getKey();
+	    	JsonElement el = jobject.get(key);
+	    	
+	    	if (el.isJsonArray()){
+	    		ResultSet rs = new ResultSet();
+	    		JsonArray ar = el.getAsJsonArray();
+	    		java.util.Iterator<JsonElement> ia = ar.iterator();
+	    		
+	    		while (ia.hasNext()){
+	    			String s= ia.next().toString();
+	    			DataRow dr = DataRow.fromJson(s);
+	    			rs.add(dr);
+	    			//TODO: add a true from json object method to DataRow
+	    			//TODO: even better move this section to ResultSet
+	    			
+	    		}
+	    		this.Result.put(key, rs);
+	    	}
+	    }
+	    
+	}
+
+	public Object getResult(String name) {
+		
+		return Result.get(name);
+	}
+	
+}
