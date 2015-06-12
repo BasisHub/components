@@ -1,0 +1,323 @@
+
+use com.google.gson.Gson
+use com.google.gson.JsonArray
+use com.google.gson.JsonElement
+use com.google.gson.JsonObject
+use com.google.gson.JsonParser
+use com.google.gson.reflect.TypeToken
+
+if argc = 2 then
+    goto RemoteSession
+fi
+
+rem -------------default: run as a servlet
+
+data! = BBjAPI().getServletData(err=publish)
+Bridge! = new Bridge()
+data!.setCallback(data!.ON_WEB_CONNECTION, Bridge!, "servletRequest")
+PROCESS_EVENTS
+STOP
+
+rem -------------publish the servlet
+
+publish:
+
+admin! = BBjAPI().getAdmin("admin", "admin123")
+registry! = admin!.getServletRegistry()
+config! = BBjAPI().getConfig()
+appServer! = admin!.getWebAppServer()
+
+application! = appServer!.makeEmptyAppConfig()
+application!.setProgramName(pgm(-1))
+application!.setWorkingDirectory(dsk("")+dir(""))
+application!.setConfigFile( BBjAPI().getConfig().getCurrentCommandLineObject().getConfigFile())
+
+registry!.unpublish("/bridge", err=*next)
+registry!.publish("/bridge", application!)
+release
+
+
+rem -------------the remote session itself that's holding all stuff and handles the requests
+
+RemoteSession:
+
+ses$ = argv(1)
+
+rem "individual prep"
+call "PrepSession.bbj",err=*next
+
+requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
+responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
+
+while 1
+
+    seterr execerr
+
+    rem requestSemaphore!.acquire()
+    if !requestSemaphore!.tryAcquire(1,3600,java.util.concurrent.TimeUnit.SECONDS) then
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")
+        release
+    fi
+        
+    req$=BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST")
+
+    if cvs(req$,4)="BYE" then
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE","Goodbye!")
+        responseSemaphore!.release()
+        release
+    fi
+
+
+      jelement! = new JsonParser().parse(req$)
+      jobject! = jelement!.getAsJsonObject(err=execerr)
+
+      rem parse incoming variables and set them to interpreter
+      jarray! = jobject!.getAsJsonArray("vars")
+      if jarray! <> null() then
+          it! = jarray!.iterator()
+          while it!.hasNext()
+              j!=it!.next()
+              name$=j!.get("n").getAsString()
+              type$=j!.get("t").getAsString()
+
+              if type$="str" then
+                  value$=j!.get("v").getAsString()
+                  ex$=name$+"! = """+value$+""""
+
+                  execute ex$
+              else
+                  if type$="num" then
+                      value$=j!.get("v").getAsString()
+                      ex$=name$+"! = "+value$
+                      execute ex$
+                  else
+                      if type$="dr" then
+                          value!=j!.get("v")
+                          dr! = new JsonObject()
+                          dr!.add("datarow",value!)
+                          dr1! = DataRow.fromJson(str(dr!))
+                          ex$ = name$+"! = dr1!"
+                          execute ex$
+                          dr1! = null()
+                          dr! = null()
+                      fi
+                  fi
+              fi
+          wend
+      fi
+
+
+      rem execute the code
+      jarray! = jobject!.getAsJsonArray("ex")
+      ret! = new JsonObject()
+
+      if jarray! <> null() then
+          it! = jarray!.iterator()
+          while it!.hasNext()
+              j!=it!.next()
+              op$=j!.get("op").getAsString()
+              if op$="create" then
+                 cl$=j!.get("class").getAsString()
+                 var$=j!.get("var").getAsString()
+                 ex$=var$+"! = new "+cl$+"()"
+                 execute ex$
+              fi
+
+              if op$="destroy" then
+                 var$=j!.get("var").getAsString()
+                 ex$=var$+"! = null()"
+                 execute ex$
+              fi
+
+
+              if op$="invoke" then
+
+                 method$=j!.get("method").getAsString()
+                 var$=j!.get("var").getAsString()
+                 ex$=var$+"!."+method$+"("
+                 args! = j!.get("args")
+                 if args!<>null() then
+                    ita! = args!.iterator()
+                    i=0
+                    while ita!.hasNext()
+                       arg! = ita!.next()
+                       if i>0 then
+                          ex$=ex$+","
+                       fi
+                       ex$=ex$+arg!.getAsString()+"!"
+                       i=i+1
+                    wend
+                 fi
+                 ex$=ex$+")"
+                 retvar! = j!.get("retvar")
+                 if retvar!<>null() then
+                    retvar$=retvar!.getAsString()
+                    ex$=retvar$+"!="+ex$
+                 fi
+                 execute ex$
+
+
+              fi
+
+
+          wend
+      fi
+
+      rem build return package 
+
+      jarray! = jobject!.getAsJsonArray("ret")
+      ret! = new JsonObject()
+
+      if jarray! <> null() then
+
+          it! = jarray!.iterator()
+          while it!.hasNext()
+              j!=it!.next()
+              v$= j!.getAsString()
+              ex$="var!="+v$+"!"
+              execute ex$
+              if var! <> null() then
+                  class$=var!.getClass().toString()
+                  if pos("BBjString"=class$)>0 then
+                      ret!.addProperty(v$,str(var!))
+                  else
+                      if pos("BBjNumber"=class$)>0 then
+                          ret!.addProperty(v$,java.lang.Double.parseDouble(var!.toString()))
+                      else
+                          if pos("DataRow"=class$)>0 then
+                              ret!.add(v$,var!.toJsonElement())
+                          else
+                              if pos("ResultSet"=class$)>0 then
+                                  el! = var!.toJsonElement()
+                                  ret!.add(v$,el!)
+                              fi
+                              
+                          fi
+
+                      fi
+                  fi
+              fi
+          wend
+      fi
+      ret!.addProperty("ses",ses$)
+    response$=str(ret!)
+    BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response$)
+    responseSemaphore!.release()
+    
+    continue
+
+    execerr:
+        response$="!ERROR "+str(err)+" "+errmes(-1)
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response$)
+        responseSemaphore!.release()
+
+wend
+
+
+
+class public Bridge
+
+
+   method public void servletRequest(BBjServletEvent p_event!)
+   
+       declare BBjHttpResponse resp!
+       declare BBjHttpRequest req!
+       req! = p_event!.getHttpRequest()
+       resp! = p_event!.getHttpResponse()
+       
+       req$ = req!.getParameter("ex")
+       if req$>"" then
+
+           ses$=req!.getParameter("ses")
+           if ses$="" then
+                jelement! = new JsonParser().parse(req$)
+                jobject! = jelement!.getAsJsonObject(err=*endif)
+                ses!=jobject!.get("ses")
+                if ses!<>null() then
+                    ses$=ses!.getAsString()
+                fi
+           endif
+           if ses$="" then
+                newSes=1
+                ses$=Bridge.newSession()
+           fi
+
+           resp$=Bridge.invoke(ses$,req$)
+       
+       
+           if resp$(1,1)<>"{" then
+            resp$="{""err"":"""+resp$+"""}"
+           fi
+       else 
+            resp$="{""err"":""no request received""}"
+       fi
+       cb$ = req!.getParameter("callback") 
+       
+       ch=unt
+       open(ch)"JSERVLET"
+       if cb$>"" then
+        print(ch)cb$+"("
+       fi       
+       print (ch)resp$
+       if cb$>"" then
+        print(ch)");"
+       fi       
+       close(ch)
+   methodend
+
+    method public static BBjString newSession()
+
+        rem create a new session
+        while 1
+            ses$=str(java.util.UUID.randomUUID())
+            print "trying to create session "+ses$
+            BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST",err=*next); continue
+            break
+        wend
+        
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST","")
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE","")
+        
+        requestSemaphore! = new java.util.concurrent.Semaphore(0)
+        responseSemaphore! = new java.util.concurrent.Semaphore(0)
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST_SEM",requestSemaphore!)
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE_SEM",responseSemaphore!)
+        
+        a=scall("bbj -q d:/transportlayer/RemoteSession.bbj - "+ses$+" &")
+        
+        methodret ses$
+    
+    methodend
+    
+    method public static BBjString invoke (BBjString ses$, BBjString instructions$)
+
+        requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM",err=noSes)
+        responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
+
+          BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST",instructions$)
+          requestSemaphore!.release()
+                rem here's the remote session active
+          responseSemaphore!.acquire()
+          resp$ = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE")
+           if cvs(instructions$,4)="BYE" then
+              BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
+              BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
+              BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
+              BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")            
+              resp$="Goodbye."
+          fi
+          
+          methodret resp$
+          
+          noSes:
+            methodret "!ERROR 11 Session invalid" 
+          
+    methodend
+
+classend
+
+
+
