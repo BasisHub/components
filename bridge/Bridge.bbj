@@ -1,4 +1,4 @@
-
+use com.basiscomponents.db.DataRow 
 use com.google.gson.Gson
 use com.google.gson.JsonArray
 use com.google.gson.JsonElement
@@ -286,7 +286,7 @@ class public Bridge
         BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST_SEM",requestSemaphore!)
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE_SEM",responseSemaphore!)
         
-        a=scall("bbj -q d:/transportlayer/RemoteSession.bbj - "+ses$+" &")
+        a=scall("bbj -q "+pgm(-1)+" -WD"+dsk("")+dir("")+ " - "+ses$+" &")
         
         methodret ses$
     
