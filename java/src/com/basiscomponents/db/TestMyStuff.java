@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.sql.*;
 import java.sql.Types.*;
 
+import sun.reflect.LangReflectAccess;
+
 import com.basis.util.common.BBjNumber;
 import com.basis.util.common.BasisNumber;
 
@@ -14,7 +16,7 @@ public class TestMyStuff {
 	
 	public static void main(String[] args) throws Exception 
 	{
-		// TODO Auto-generated method stub
+		
 
 		
 //		HashMap hm = new HashMap();
@@ -37,17 +39,55 @@ public class TestMyStuff {
 		java.util.Calendar calendar = Calendar.getInstance();
 		java.util.Date now = calendar.getTime();
 		java.sql.Timestamp t = new java.sql.Timestamp(now.getTime());
-		System.out.println(t);
+		
 		
 		r.setFieldValue("MYTIMESTAMP",t);
-		System.out.println(r);
+		
 		
 		Date d = java.sql.Date.valueOf(com.basis.util.BasisDate.date(2457049,0.0,"%Yl-%Mz-%Dz"));
-		System.out.println(d);
+		
 		
 		r.setFieldValue("MYTIMESTAMP",d);
-		System.out.println(r);
+		r.setFieldValue("String","blabla");
+		r.setFieldValue("Age",35);
 		
+		long t1,t2,i;
+
+		
+	
+		DataRow r2 ;
+		r2 = DataRow.fromJson(r.toJson());
+		String tj = r.toJson();
+		r2 = DataRow.fromJson(tj);
+		
+		ResultSet rs = new ResultSet();
+		rs.addItem(r);
+		rs.addItem(r2);
+
+		rs.toJsonElementOld();
+		rs.toJsonElement();
+		
+		t1= System.currentTimeMillis();
+		for (i=0; i<1000; i++) rs.toJsonElementOld();
+		System.out.println(rs.toJsonElementOld());
+		t1 = System.currentTimeMillis()-t1;
+		System.out.println(t1);
+		
+		t2 = System.currentTimeMillis();
+		for (i=0; i<1000; i++) rs.toJsonElement();
+		System.out.println(rs.toJsonElement());		
+		
+		t2 = System.currentTimeMillis()-t2;
+		System.out.println(t2);
+/*				
+		
+		String rsst = rs.toJson();
+		System.out.println(rsst);
+		
+		ResultSet rs2 = ResultSet.fromJson(rsst);
+		System.out.println(rs2);
+		
+/*	
 		System.out.println("----------------------------");
 //		r.setFieldValue("TS",t);
 //		System.out.println(r);
@@ -135,7 +175,7 @@ public class TestMyStuff {
 		System.out.println(rs);
 		
 		System.out.print("***finish***");
-
+*/
 		
 	}
 
