@@ -1,6 +1,7 @@
 package com.basiscomponents.bridge;
 
 import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
 
 class SessionVarEntity {
 	private String name,type;
@@ -28,8 +29,13 @@ class SessionVarEntity {
 		this.val=val;
 	}
 
+	public SessionVarEntity(String name, ResultSet val) {
+		this.name=name;
+		this.type="rs";
+		this.val=val;
+	}
+
 	public String toJson() {
-		// TODO Auto-generated method stub
 		String json = "{\"n\":\""+name+"\",\"t\":\""+type+"\",\"v\":";
 		switch (type)
 		{
@@ -41,7 +47,10 @@ class SessionVarEntity {
 				break;
 			case "dr":
 				json += ((DataRow)val).toJsonElement();
-				break;					
+				break;	
+			case "rs":
+				json += ((ResultSet)val).toJsonElement();
+				break;	
 		}
 				json +="}";
 		return json;

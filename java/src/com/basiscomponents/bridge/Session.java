@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,7 +58,10 @@ public  class Session {
 		SessionVarEntity v = new SessionVarEntity(name,val);
 		Vars.add(v);
 	}
-	
+	public  void pushVar(String name, ResultSet val) {
+		SessionVarEntity v = new SessionVarEntity(name,val);
+		Vars.add(v);
+	}	
 	public void pushRet(String name){
 		this.Ret.add(name);
 	}
@@ -137,6 +141,18 @@ public  class Session {
 		}
 		
 		json += "}";
+		
+		//replace the special chars
+		try {
+			//the url encoder is a bit overdoing stuff, resulting in request strings longer than necessary...
+			//TODO ponder if we should only pick a few chars like %,& etc to encode
+			json=java.net.URLEncoder.encode(json,"UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 		return json;
 	}
 	
@@ -200,12 +216,20 @@ public  class Session {
 		
 		String req = getJson();
 		
-//		System.out.println(req);
+		System.out.println("Request: "+req);
 		String ret = this.postRequest(req);
-//		System.out.println(ret);
+		System.out.println("Answer:  "+ret);
 		
 		JsonElement jelement = new JsonParser().parse(ret);
 	    JsonObject  jobject = jelement.getAsJsonObject();
+	    
+	    
+	    if (jobject.get("err") != null){
+	    	String Error  = jobject.get("err").getAsString();
+	    	System.err.println("received remote error: "+Error);
+	    	return;
+	    }
+	    
 	    if (this.SessionID.isEmpty())
 	    	SessionID = jobject.get("ses").getAsString();
 	    Set<Entry<String, JsonElement>> es = jobject.entrySet();
