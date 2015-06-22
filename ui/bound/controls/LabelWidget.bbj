@@ -2,6 +2,8 @@ use ::components/ui/bound/controls/ControlWidget.bbj::ControlWidget
 
 class public  LabelWidget extends ControlWidget
  
+   field protected BBjString Mask$ 
+ 
     method public LabelWidget(BBjChildWindow cwCanvas!)
         #super!(cwCanvas!)
         
@@ -19,5 +21,21 @@ class public  LabelWidget extends ControlWidget
             #super!.setEnabled(1)
         
     methodend     
+    
+    method public void setMask(BBjString mask!)
+        #Mask$ = mask!
+    methodend
+    
+    method public void setText(BBjString text!)
+        
+        x!= #getCtrl()
+        if #Mask$>"" and text! > "" then
+            text! = str(text!:#Mask$,err=*next)
+            text! = str(num(text!,err=*next):#Mask$,err=*next)
+        fi
+        x!.setText(text!)
+        
+    methodend    
+    
 
 classend
