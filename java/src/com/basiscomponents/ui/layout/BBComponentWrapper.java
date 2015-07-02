@@ -11,7 +11,6 @@ import net.miginfocom.layout.PlatformDefaults;
 
 import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.BBjSysGui;
-import com.basis.util.common.BasisNumber;
 
 /**
  * @author rlance
@@ -33,45 +32,22 @@ public class BBComponentWrapper implements ComponentWrapper {
 
 	@Override
 	public int getX() {
-		try {
-			return this.component.getControl().getX().intValue();
-		} catch (BBjException e) {
-			e.printStackTrace();
-			return 0;
-		}
+		return this.component.getX();
 	}
 
 	@Override
 	public int getY() {
-		try {
-			return this.component.getControl().getY().intValue();
-		} catch (BBjException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return 0;
-		}
+		return this.component.getY();
 	}
 
 	@Override
 	public int getWidth() {
-		try {
-			return this.component.getControl().getWidth().intValue();
-		} catch (BBjException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return 0;
-		}
+		return this.component.getWidth();
 	}
 
 	@Override
 	public int getHeight() {
-		try {
-			return this.component.getControl().getHeight().intValue();
-		} catch (BBjException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return 0;
-		}
+		return this.component.getHeight();
 	}
 
 	@Override
@@ -128,22 +104,8 @@ public class BBComponentWrapper implements ComponentWrapper {
 
 	@Override
 	public void setBounds(int x, int y, int width, int height) {
-		BasisNumber bx = BasisNumber.createBasisNumber(x);
-		BasisNumber by = BasisNumber.createBasisNumber(y);
-		BasisNumber bw = BasisNumber.createBasisNumber(width);
-		BasisNumber bh = BasisNumber.createBasisNumber(height);
-		try {
-			this.component.getControl().setLocation(bx, by);
-		} catch (BBjException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			this.component.getControl().setSize(bw, bh);
-		} catch (BBjException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.component.setLocation(x, y);
+		this.component.setSize(width, height);
 	}
 
 	@Override
