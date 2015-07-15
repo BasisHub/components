@@ -1,6 +1,7 @@
 package com.basiscomponents.ui.layout;
 
 import java.awt.Dimension;
+
 import java.util.List;
 
 import net.miginfocom.layout.AC;
@@ -179,18 +180,6 @@ public class BBMigPane implements BBjControl {
 		createMigLayoutGrid();
 	}
 
-	public BBjWindow getWnd() {
-		return this.container.getWindow();
-	}
-
-	public int getPreferredWidth() {
-		return this.preferredSize.width;
-	}
-
-	public int getPreferredHeight() {
-		return this.preferredSize.height;
-	}
-
 	// ======================================================
 	// CONSTRAINTS
 
@@ -254,6 +243,38 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
+	 * 
+	 * @returns containerWrapper BBContainerWrapper object
+	 */
+	public BBContainerWrapper getContainerWrapper() {
+		return this.containerWrapper;
+	}
+
+	/**
+	 * 
+	 * @returns BBjWindow BBj window object
+	 */
+	public BBjWindow getWnd() {
+		return this.container.getWindow();
+	}
+
+	/**
+	 * 
+	 * @returns int Preferred width of container
+	 */
+	public int getPreferredWidth() {
+		return this.preferredSize.width;
+	}
+
+	/**
+	 * 
+	 * @returns int Preferred height of container
+	 */
+	public int getPreferredHeight() {
+		return this.preferredSize.height;
+	}
+
+	/**
 	 * @param control
 	 *            BBj control object
 	 * @param cc
@@ -302,6 +323,17 @@ public class BBMigPane implements BBjControl {
 		add(control, lCC);
 	}
 
+	/**
+	 * 
+	 * @param control
+	 *            BBj control object
+	 * @returns componentWrapper BBComponentWrapper object
+	 */
+	public BBComponentWrapper getComponentWrapper(BBjControl control) {
+		return (BBComponentWrapper) this.containerWrapper
+				.getControlToComponentWrapperMap().get(control);
+	}
+
 	// ======================================================
 	// LAYOUT
 
@@ -320,8 +352,10 @@ public class BBMigPane implements BBjControl {
 		// only contact with the UI
 		this.container.setX(this.container.getWindow().getX().intValue());
 		this.container.setY(this.container.getWindow().getY().intValue());
-		this.container.setWidth(this.container.getWindow().getWidth().intValue());
-		this.container.setHeight(this.container.getWindow().getHeight().intValue());
+		this.container.setWidth(this.container.getWindow().getWidth()
+				.intValue());
+		this.container.setHeight(this.container.getWindow().getHeight()
+				.intValue());
 
 		// this will exercise BBComponentWrapper.setBounds to actually place the
 		// components
