@@ -57,20 +57,19 @@ public class BBjSearchGizmo
 
     public void addDocument(BBjSearchGizmoDoc doc) throws IOException, LockObtainFailedException
     {
-        FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
-        IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-        IndexWriter writer = new IndexWriter(indexdirectory,iwc);
 
-        //remove it first
-        try
-        {
-            MultiFieldQueryParser queryparser = new MultiFieldQueryParser(new String[]{"id"},analyzer);
-            Query query = queryparser.parse(doc.getId());
-            writer.deleteDocuments(query);
-        }
-        catch (ParseException ex) { }
-        catch (IOException ex) {}
+    	
+        
+       try {
+		removeDocument(doc.getId());
+	} catch (ParseException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 
+       FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
+       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+       IndexWriter writer = new IndexWriter(indexdirectory,iwc);       
         /*
         Document lucene_doc_taxo2= new Document();
         lucene_doc_taxo2.add(new FacetField("id","2"));
@@ -79,8 +78,10 @@ public class BBjSearchGizmo
         */
 
         Document lucene_doc = new Document();
-        lucene_doc.add(new StringField("id",doc.getId(),Field.Store.YES));
+        lucene_doc.add(new StringField("id",doc.getInternalId(),Field.Store.YES));
 
+        System.out.println("Adding "+doc.getInternalId());
+        
         Iterator<BBjSearchGizmoDocField>it = doc.getFields().iterator();
         while (it.hasNext())
         {
@@ -90,8 +91,7 @@ public class BBjSearchGizmo
             lucene_doc.add(lucene_field);
 
             if (f.isFacet()){
-                //paths.add(new CategoryPath(f.getName(),f.getContent()));
-                //FacetField lucene_field_taxo=new FacetField(f.getName(), paths);
+
                 System.out.println(f.getName());
                 System.out.println(f.getContent());
             }
@@ -102,6 +102,7 @@ public class BBjSearchGizmo
         //System.out.println(paths);
         try
         {
+        	System.out.println(lucene_doc.toString());
             writer.addDocument(lucene_doc);
         }
         catch (Exception ex) {
@@ -122,12 +123,21 @@ public class BBjSearchGizmo
 
     public void removeDocument(String id) throws IOException, LockObtainFailedException, ParseException
     {
+    	
+    	
+    	
+    	String id2 = new sun.misc.BASE64Encoder().encode(id.getBytes());
+    	System.out.println("Removing "+id2);
+    	
         FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
+        
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
         IndexWriter writer = new IndexWriter(indexdirectory,iwc);
-        MultiFieldQueryParser queryparser = new MultiFieldQueryParser(new String[]{id}, analyzer);
-        Query query = queryparser.parse(id);
-        writer.deleteDocuments(query);
+        
+        
+        writer.deleteDocuments(new org.apache.lucene.index.Term("id",id2));
+        
+        
         writer.close();
         indexdirectory.close();
     }
@@ -138,6 +148,12 @@ public class BBjSearchGizmo
         FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
         IndexReader reader = DirectoryReader.open(indexdirectory);
         IndexSearcher searcher = new IndexSearcher(reader);
+        
+        if (reader.numDocs()<1) {
+        	System.err.println("no hits!");
+        	return new ArrayList<String>();
+        }
+        
         TopScoreDocCollector collector = TopScoreDocCollector.create(reader.numDocs());
 
 
@@ -159,7 +175,9 @@ public class BBjSearchGizmo
         {
             int docId = hits[i].doc;
             Document d = searcher.doc(docId);
-            result.add(d.get("id"));
+            String s=d.get("id");
+            s=new String(new sun.misc.BASE64Decoder().decodeBuffer(s));
+            result.add(s);
         }
         reader.close();
         indexdirectory.close();

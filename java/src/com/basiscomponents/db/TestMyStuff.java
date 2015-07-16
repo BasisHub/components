@@ -48,8 +48,10 @@ public class TestMyStuff {
 		
 		
 		r.setFieldValue("MYTIMESTAMP",d);
-		r.setFieldValue("String","blabla");
+		r.setFieldValue("Name","Müller");
 		r.setFieldValue("Age",35);
+		
+		System.out.println(r.toJson());
 		
 		long t1,t2,i;
 

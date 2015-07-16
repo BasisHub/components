@@ -83,7 +83,7 @@ public class Parser {
 		
 		
 		
-		ArrayList<MethodParameter> params = new ArrayList<MethodParameter>(); 
+		ArrayList<MethodParameter> params = new ArrayList<MethodParameter>();
 		String args = line.substring(line.indexOf('(')+1);
 		line = line.substring(0,line.indexOf('('));
 		

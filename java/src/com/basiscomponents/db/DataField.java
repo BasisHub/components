@@ -740,8 +740,13 @@ public class DataField
 	}
 
 	public String toJson() {
+		
+		String tmp =this.StringValue; 
+		this.StringValue = org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(this.StringValue);
 		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 		String json = gson.toJson(this);
+		json = json.replace("\\\\u", "\\u");
+		this.StringValue = tmp;
 		return json;
 	}
 

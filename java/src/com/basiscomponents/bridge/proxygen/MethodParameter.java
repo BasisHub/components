@@ -28,6 +28,10 @@ public class MethodParameter {
 	public void setName(String name) {
 		if (name.endsWith("!"))
 			name=name.substring(0, name.length()-1);
+		if (name.endsWith("$"))
+			name=name.substring(0, name.length()-1);
+		if (name.endsWith("%"))
+			name=name.substring(0, name.length()-1);
 		this.name = name;
 	}
 }
