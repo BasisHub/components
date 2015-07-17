@@ -11,49 +11,103 @@
  
 	<version>1.0-SNAPSHOT</version>
 	<name>components</name>
+
+     <profiles>
+
+        <!-- BASIS build profile-->
+        <profile>
+            <id>basisbuild</id>
+            <activation>
+                <property>
+                    <name>basisbuild</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <properties>
+                <jar-directory>/mnt/jenkins/workspace/BasisComponents/components/jars</jar-directory>
+            </properties>
+        </profile>
+
+        <!-- default build profile, active by default -->
+        <profile>
+            <id>winbbjlib</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
+            <properties>
+                <jar-directory>C:/bbj/lib</jar-directory>
+            </properties>
+        </profile>
+
+    </profiles>
+
 	
 	<dependencies>
 	
 		<dependency>
 			<groupId>com.basis.lib</groupId>
 			<artifactId>BBj.jar</artifactId>
-			<version>1.0</version>
+			<scope>system</scope>
+     		<version>1.0</version>
+     		<systemPath>${jar-directory}/BBj.jar</systemPath>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.basis.lib</groupId>
 			<artifactId>BBjAdminAPI.jar</artifactId>
+			<scope>system</scope>
 			<version>1.0</version>
+			<systemPath>${jar-directory}/BBjAdminAPI.jar</systemPath>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.basis.lib</groupId>
 			<artifactId>BBjThinClient.jar</artifactId>
+			<scope>system</scope>
 			<version>1.0</version>
+			<systemPath>${jar-directory}/BBjThinClient.jar</systemPath>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.basis.lib</groupId>
-			<artifactId>lucene-core-5.0.0.jar</artifactId>
+			<artifactId>lucene-core.jar</artifactId>
+			<scope>system</scope>
 			<version>1.0</version>
+			<systemPath>${jar-directory}/lucene-core-5.0.0.jar</systemPath>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.basis.lib</groupId>
-			<artifactId>lucene-queryparser-5.0.0.jar</artifactId>
+			<artifactId>lucene-queryparser.jar</artifactId>
+			<scope>system</scope>
 			<version>1.0</version>
+			<systemPath>${jar-directory}/lucene-queryparser-5.0.0.jar</systemPath>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.basis.lib</groupId>
-			<artifactId>lucene-facet-5.0.0.jar</artifactId>
+			<artifactId>lucene-facet.jar</artifactId>
+			<scope>system</scope>
 			<version>1.0</version>
+			<systemPath>${jar-directory}/lucene-facet-5.0.0.jar</systemPath>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.basis.lib</groupId>
-			<artifactId>lucene-analyzers-common-5.0.0.jar</artifactId>
+			<artifactId>lucene-analyzers-common.jar</artifactId>
+			<scope>system</scope>
 			<version>1.0</version>
+			<systemPath>${jar-directory}/lucene-analyzers-common-5.0.0.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>com.basis.lib</groupId>
+			<artifactId>gson.jar</artifactId>
+			<scope>system</scope>
+			<version>1.0</version>
+			<systemPath>${jar-directory}/gson-2.3.1.jar</systemPath>
 		</dependency>
 		
 	</dependencies>
