@@ -12,6 +12,8 @@ import net.miginfocom.layout.CC;
 import net.miginfocom.layout.ComponentWrapper;
 import net.miginfocom.layout.ContainerWrapper;
 
+import com.basis.bbj.proxies.sysgui.BBjControl;
+
 /**
  * @author rlance
  * 
@@ -24,6 +26,7 @@ public class BBContainerWrapper extends BBComponentWrapper implements
 
 	private List<BBComponentWrapper> componentWrapperList = new ArrayList<BBComponentWrapper>();
 	private Map<BBComponent, BBComponentWrapper> componentToComponentWrapperMap = new WeakHashMap<BBComponent, BBComponentWrapper>();
+	private Map<BBjControl, BBComponentWrapper> controlToComponentWrapperMap = new WeakHashMap<BBjControl, BBComponentWrapper>();
 	private Map<ComponentWrapper, CC> componentWrapperToCCMap = new WeakHashMap<ComponentWrapper, CC>();
 	private Map<BBComponent, Integer> componentToHashcodeMap = new WeakHashMap<BBComponent, Integer>();
 
@@ -144,6 +147,22 @@ public class BBContainerWrapper extends BBComponentWrapper implements
 	}
 
 	/**
+	 * @return the controlToComponentWrapperMap
+	 */
+	public Map<BBjControl, BBComponentWrapper> getControlToComponentWrapperMap() {
+		return controlToComponentWrapperMap;
+	}
+
+	/**
+	 * @param controlToComponentWrapperMap
+	 *            the controlToComponentWrapperMap to set
+	 */
+	public void setControlToComponentWrapperMap(
+			Map<BBjControl, BBComponentWrapper> controlToComponentWrapperMap) {
+		this.controlToComponentWrapperMap = controlToComponentWrapperMap;
+	}
+
+	/**
 	 * @return the componentWrapperToCCMap
 	 */
 	public Map<ComponentWrapper, CC> getComponentWrapperToCCMap() {
@@ -181,6 +200,7 @@ public class BBContainerWrapper extends BBComponentWrapper implements
 		componentWrapper.setContainerWrapper(this);
 		this.componentWrapperList.add(componentWrapper);
 		this.componentToComponentWrapperMap.put(component, componentWrapper);
+		this.controlToComponentWrapperMap.put(component.getControl(), componentWrapper);
 		if (cc == null)
 			cc = new CC();
 		this.componentWrapperToCCMap.put(componentWrapper, cc);

@@ -1,6 +1,7 @@
 package com.basiscomponents.ui.layout;
 
 import java.awt.Dimension;
+
 import java.util.List;
 
 import net.miginfocom.layout.AC;
@@ -158,8 +159,8 @@ public class BBMigPane implements BBjControl {
 			setColumnConstraints(new AC());
 
 		// default sizes for the container itself
-		Dimension d = new Dimension(this.container.getControl().getWidth()
-				.intValue(), this.container.getControl().getHeight().intValue());
+		Dimension d = new Dimension(this.container.getWidth(),
+				this.container.getHeight());
 		this.container.setOrigMinimumSize(new Dimension((int) (d.width / 4),
 				(int) (d.height / 4)));
 		this.container.setOrigPreferredSize(d);
@@ -177,18 +178,6 @@ public class BBMigPane implements BBjControl {
 
 		// create the initial grid so it won't be null
 		createMigLayoutGrid();
-	}
-
-	public BBjWindow getWnd() {
-		return this.container.getWindow();
-	}
-
-	public int getPreferredWidth() {
-		return this.preferredSize.width;
-	}
-
-	public int getPreferredHeight() {
-		return this.preferredSize.height;
 	}
 
 	// ======================================================
@@ -254,6 +243,38 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
+	 * 
+	 * @returns containerWrapper BBContainerWrapper object
+	 */
+	public BBContainerWrapper getContainerWrapper() {
+		return this.containerWrapper;
+	}
+
+	/**
+	 * 
+	 * @returns BBjWindow BBj window object
+	 */
+	public BBjWindow getWnd() {
+		return this.container.getWindow();
+	}
+
+	/**
+	 * 
+	 * @returns int Preferred width of container
+	 */
+	public int getPreferredWidth() {
+		return this.preferredSize.width;
+	}
+
+	/**
+	 * 
+	 * @returns int Preferred height of container
+	 */
+	public int getPreferredHeight() {
+		return this.preferredSize.height;
+	}
+
+	/**
 	 * @param control
 	 *            BBj control object
 	 * @param cc
@@ -261,10 +282,9 @@ public class BBMigPane implements BBjControl {
 	 * @throws BBjException
 	 */
 	public void add(BBjControl control, CC cc) throws BBjException {
-		Dimension d = new Dimension(control.getWidth().intValue(), control
-				.getHeight().intValue());
-
 		BBComponent component = new BBComponent(control);
+
+		Dimension d = new Dimension(component.getWidth(), component.getHeight());
 		component.setOrigMinimumSize(new Dimension((int) (d.width / 2),
 				(int) (d.height / 2)));
 		component.setOrigPreferredSize(d);
@@ -303,6 +323,17 @@ public class BBMigPane implements BBjControl {
 		add(control, lCC);
 	}
 
+	/**
+	 * 
+	 * @param control
+	 *            BBj control object
+	 * @returns componentWrapper BBComponentWrapper object
+	 */
+	public BBComponentWrapper getComponentWrapper(BBjControl control) {
+		return (BBComponentWrapper) this.containerWrapper
+				.getControlToComponentWrapperMap().get(control);
+	}
+
 	// ======================================================
 	// LAYOUT
 
@@ -318,19 +349,24 @@ public class BBMigPane implements BBjControl {
 		// validate if the grid should be recreated
 		validateMigLayoutGrid();
 
-		// this will import BBComponentWrapper.setBounds to actually place the
+		// only contact with the UI
+		this.container.setX(this.container.getWindow().getX().intValue());
+		this.container.setY(this.container.getWindow().getY().intValue());
+		this.container.setWidth(this.container.getWindow().getWidth()
+				.intValue());
+		this.container.setHeight(this.container.getWindow().getHeight()
+				.intValue());
+
+		// this will exercise BBComponentWrapper.setBounds to actually place the
 		// components
 		int[] lBounds = new int[] { new Integer(0), new Integer(0),
-				new Integer(this.container.getControl().getWidth().intValue()),
-				new Integer(this.container.getControl().getHeight().intValue()) };
+				this.container.getWidth(), this.container.getHeight() };
 		this.migGrid.layout(lBounds, getLayoutConstraints().getAlignX(),
 				getLayoutConstraints().getAlignY(), this.iDebug);
 
 		if (this.preferredSize.width == 0 && this.preferredSize.height == 0) {
-			this.preferredSize.width = this.container.getWindow().getWidth()
-					.intValue();
-			this.preferredSize.height = this.container.getWindow().getHeight()
-					.intValue();
+			this.preferredSize.width = this.container.getWidth();
+			this.preferredSize.height = this.container.getHeight();
 		}
 	}
 
@@ -339,7 +375,7 @@ public class BBMigPane implements BBjControl {
 	 * @throws NumberFormatException
 	 * 
 	 */
-	private void createMigLayoutGrid() throws NumberFormatException,
+	public void createMigLayoutGrid() throws NumberFormatException,
 			BBjException {
 		this.migGrid = new Grid(this.containerWrapper, getLayoutConstraints(),
 				getRowConstraints(), getColumnConstraints(),
@@ -369,9 +405,7 @@ public class BBMigPane implements BBjControl {
 				this.migGrid.getHeight(), LayoutUtil.PREF));
 		this.container.setPreferredSize(d);
 		// resize container itself with preferred sizes
-		this.container.getControl().setSize(
-				BasisNumber.createBasisNumber(d.width),
-				BasisNumber.createBasisNumber(d.height));
+		this.container.setSize(d.width, d.height);
 	}
 
 	/**
@@ -576,7 +610,7 @@ public class BBMigPane implements BBjControl {
 
 	@Override
 	public BBjNumber getHeight() throws BBjException {
-		return this.container.getWindow().getHeight();
+		return BasisNumber.createBasisNumber(this.container.getHeight());
 	}
 
 	@Override
@@ -659,17 +693,17 @@ public class BBMigPane implements BBjControl {
 
 	@Override
 	public BBjNumber getWidth() throws BBjException {
-		return this.container.getWindow().getWidth();
+		return BasisNumber.createBasisNumber(this.container.getWidth());
 	}
 
 	@Override
 	public BBjNumber getX() throws BBjException {
-		return this.container.getWindow().getX();
+		return BasisNumber.createBasisNumber(this.container.getX());
 	}
 
 	@Override
 	public BBjNumber getY() throws BBjException {
-		return this.container.getWindow().getY();
+		return BasisNumber.createBasisNumber(this.container.getY());
 	}
 
 	@Override
@@ -755,7 +789,7 @@ public class BBMigPane implements BBjControl {
 
 	@Override
 	public void setLocation(BBjNumber x, BBjNumber y) throws BBjException {
-		this.container.getWindow().setLocation(x, y);
+		this.container.setLocation(x.intValue(), y.intValue());
 	}
 
 	@Override
@@ -795,13 +829,9 @@ public class BBMigPane implements BBjControl {
 
 	@Override
 	public void setSize(BBjNumber w, BBjNumber h) throws BBjException {
-		int lw = w.intValue();
-		int lh = h.intValue();
-		this.container.getWindow().setSize(
-				BasisNumber.createBasisNumber(Math.min(
-						this.preferredSize.width, lw)),
-				BasisNumber.createBasisNumber(Math.min(
-						this.preferredSize.height, lh)));
+		this.container.setSize(
+				Math.min(this.preferredSize.width, w.intValue()),
+				Math.min(this.preferredSize.height, h.intValue()));
 		layoutChildren();
 	}
 
@@ -844,7 +874,7 @@ public class BBMigPane implements BBjControl {
 	@Override
 	public void setAttribute(String arg0, String arg1) throws BBjException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
