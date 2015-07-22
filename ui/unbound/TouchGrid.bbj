@@ -136,7 +136,7 @@ REM     methodend
                     
                 r! = it!.next()
                 if r! <> null() then
-                    v!.addItem(r!.replaceFields(#RowTemplate$))
+                    v!.addItem(r!.replaceFields(#RowTemplate$,1)) 
                 fi
             wend
             
