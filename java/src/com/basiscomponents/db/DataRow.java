@@ -609,6 +609,11 @@ public class DataRow
 	public String replaceFields(String Formula) throws Exception
 	{
 		
+		return replaceFields(Formula,false);
+
+	}
+	
+	public String replaceFields(String Formula, Boolean fCleanRemainingPlaceholders) throws Exception{
 
         Set<String> ks = this.FieldList.keySet();
         Iterator<String> it = ks.iterator();
@@ -621,7 +626,12 @@ public class DataRow
             Formula = Formula.replace(k1, this.getFieldAsString(k));
         }
 
+        if (fCleanRemainingPlaceholders){
+        	Formula = Formula.replaceAll("\\$F\\{\\S*\\}", "");
+        }
+        
 		return Formula;
+		
 	}
 
 	public Boolean equals(DataRow r) throws Exception
