@@ -51,11 +51,13 @@ class public  InputDWidget extends ControlWidget
               if #getBC().getSelection().size()=1 then
                   rem #getBC().prepareResultSet(0,0)
                   sel=#getBC().getSelection().getItem(i)
-                  declare DataRow r! 
-                  r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
-                  d     = r!.getFieldAsNumber(#getBindField(),err=*next)
-                  #Ipd!.setValue(d)
-                  #Static!.setText(date(d:#Ipd!.getMask())) 
+                  if #getBC().getResultSet().size() > sel then
+                      declare DataRow r! 
+                      r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
+                      d     = r!.getFieldAsNumber(#getBindField(),err=*next)
+                      #Ipd!.setValue(d)
+                      #Static!.setText(date(d:#Ipd!.getMask()))
+                  fi 
               fi
           fi
          #setEdited(0)

@@ -167,7 +167,7 @@ REM         a!.setFocusable(0,err=*next)
                     if #getBC().getSelection().size()=1 then
                         sel=#getBC().getSelection().getItem(i)
                         #getBC().prepareResultSet(sel,sel)
-                        if sel>-1 then
+                        if sel>-1 and #getBC().getResultSet().size()>sel then
                             r! = cast(DataRow,#getBC().getResultSet().getItem(sel))
                             text$     = r!.getFieldAsString(#getBindField(),err=*next)
                         fi
