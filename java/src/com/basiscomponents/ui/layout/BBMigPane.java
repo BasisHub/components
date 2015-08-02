@@ -1,7 +1,6 @@
 package com.basiscomponents.ui.layout;
 
 import java.awt.Dimension;
-
 import java.util.List;
 
 import net.miginfocom.layout.AC;
@@ -32,7 +31,7 @@ public class BBMigPane implements BBjControl {
 
 	private BBContainer container;
 	private BBContainerWrapper containerWrapper;
-	private boolean iDebug = false;
+	private boolean debug = false;
 	private Grid migGrid;
 	private boolean valid = false;
 	private LC layoutConstraints;
@@ -158,19 +157,6 @@ public class BBMigPane implements BBjControl {
 		if (getColumnConstraints() == null)
 			setColumnConstraints(new AC());
 
-		// default sizes for the container itself
-		Dimension d = new Dimension(this.container.getWidth(),
-				this.container.getHeight());
-		this.container.setOrigMinimumSize(new Dimension((int) (d.width / 4),
-				(int) (d.height / 4)));
-		this.container.setOrigPreferredSize(d);
-		this.container.setOrigMaximumSize(new Dimension(d.width * 100,
-				d.height * 100));
-		this.container.setMinimumSize(new Dimension((int) (d.width / 4),
-				(int) (d.height / 4)));
-		this.container.setPreferredSize(d);
-		this.container.setMaximumSize(new Dimension(d.width * 100,
-				d.height * 100));
 		this.container.setPreferredFont(this.container.getControl().getFont());
 
 		// the container wrapper
@@ -197,6 +183,7 @@ public class BBMigPane implements BBjControl {
 	 */
 	public void setLayoutConstraints(LC constraints) {
 		this.layoutConstraints = constraints;
+		debug = constraints != null && constraints.getDebugMillis() > 0;
 	}
 
 	/**
@@ -283,19 +270,7 @@ public class BBMigPane implements BBjControl {
 	 */
 	public void add(BBjControl control, CC cc) throws BBjException {
 		BBComponent component = new BBComponent(control);
-
-		Dimension d = new Dimension(component.getWidth(), component.getHeight());
-		component.setOrigMinimumSize(new Dimension((int) (d.width / 2),
-				(int) (d.height / 2)));
-		component.setOrigPreferredSize(d);
-		component
-				.setOrigMaximumSize(new Dimension(d.width * 50, d.height * 50));
-		component.setMinimumSize(new Dimension((int) (d.width / 2),
-				(int) (d.height / 2)));
-		component.setPreferredSize(d);
-		component.setMaximumSize(new Dimension(d.width * 50, d.height * 50));
 		component.setPreferredFont(control.getFont());
-
 		this.containerWrapper.add(component, cc);
 	}
 
@@ -362,7 +337,12 @@ public class BBMigPane implements BBjControl {
 		int[] lBounds = new int[] { new Integer(0), new Integer(0),
 				this.container.getWidth(), this.container.getHeight() };
 		this.migGrid.layout(lBounds, getLayoutConstraints().getAlignX(),
-				getLayoutConstraints().getAlignY(), this.iDebug);
+				getLayoutConstraints().getAlignY(), this.debug);
+		
+		if (this.debug) {
+			getWnd().getDrawPanel().clearDrawing();
+			this.migGrid.paintDebug();
+		}
 
 		if (this.preferredSize.width == 0 && this.preferredSize.height == 0) {
 			this.preferredSize.width = this.container.getWidth();
@@ -501,8 +481,8 @@ public class BBMigPane implements BBjControl {
 							(int) (d.width * s), (int) (d.height * s)));
 					d = component.getOrigMaximumSize();
 					component.setMaximumSize(new Dimension(
-							(int) ((d.width * s) * 50),
-							(int) ((d.height * s) * 50)));
+							(int) ((d.width * s) * 5),
+							(int) ((d.height * s) * 5)));
 
 					int sz = component.getPreferredFont().getSize();
 					if (sz > 0 && s > 0.2d) {
@@ -526,7 +506,8 @@ public class BBMigPane implements BBjControl {
 
 	// ======================================================
 	// DEBUG - TODO (see Swing and/or JavaFX implementations)
-
+	//
+	//
 	// ======================================================
 	// Methods of BBjControl interface
 

@@ -18,7 +18,7 @@ public class BBContainer extends BBComponent {
 	 */
 	public BBContainer(BBjWindow window) {
 		super(window);
-		setWindow(window);
+		this.window = window;
 	}
 
 	/**
@@ -26,14 +26,6 @@ public class BBContainer extends BBComponent {
 	 */
 	public BBjWindow getWindow() {
 		return window;
-	}
-
-	/**
-	 * @param window
-	 *            the window to set
-	 */
-	private void setWindow(BBjWindow window) {
-		this.window = window;
 	}
 
 }

@@ -30,7 +30,7 @@ public class BBComponent {
 	private int height;
 
 	public BBComponent(BBjControl control) {
-		setControl(control);
+		this.control = control;
 		try {
 			this.x = control.getX().intValue();
 			this.y = control.getY().intValue();
@@ -40,6 +40,12 @@ public class BBComponent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.origMinimumSize = new Dimension((int) (this.width / 2), (int) (this.height / 2));
+		this.origPreferredSize = new Dimension(this.width, this.height);
+		this.origMaximumSize = new Dimension(this.width * 5, this.height * 5);
+		this.minimumSize = new Dimension((int) (this.width / 2), (int) (this.height / 2));
+		this.preferredSize = new Dimension(this.width, this.height);
+		this.maximumSize = new Dimension(this.width * 5, this.height * 5);
 	}
 
 	/**
@@ -47,14 +53,6 @@ public class BBComponent {
 	 */
 	public BBjControl getControl() {
 		return control;
-	}
-
-	/**
-	 * @param control
-	 *            the control to set
-	 */
-	private void setControl(BBjControl control) {
-		this.control = control;
 	}
 
 	/**

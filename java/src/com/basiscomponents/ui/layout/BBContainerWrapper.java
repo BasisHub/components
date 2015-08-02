@@ -12,7 +12,12 @@ import net.miginfocom.layout.CC;
 import net.miginfocom.layout.ComponentWrapper;
 import net.miginfocom.layout.ContainerWrapper;
 
+import com.basis.bbj.client.sysgui.datatypes.BBjColor;
+import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.sysgui.BBjControl;
+import com.basis.bbj.proxies.sysgui.BBjDrawPanel;
+import com.basis.bbj.proxies.sysgui.BBjWindow;
+import com.basis.util.common.BasisNumber;
 
 /**
  * @author rlance
@@ -21,8 +26,11 @@ import com.basis.bbj.proxies.sysgui.BBjControl;
 public class BBContainerWrapper extends BBComponentWrapper implements
 		ContainerWrapper {
 
+	private BBContainer container;
 	private Object layout = null;
 	private boolean leftToRight = true;
+
+	private static final BBjColor DB_CELL_OUTLINE = new BBjColor(255, 0, 0);
 
 	private List<BBComponentWrapper> componentWrapperList = new ArrayList<BBComponentWrapper>();
 	private Map<BBComponent, BBComponentWrapper> componentToComponentWrapperMap = new WeakHashMap<BBComponent, BBComponentWrapper>();
@@ -35,6 +43,7 @@ public class BBContainerWrapper extends BBComponentWrapper implements
 	 */
 	public BBContainerWrapper(BBContainer container) {
 		super(container);
+		this.container = container;
 	}
 
 	/**
@@ -42,7 +51,15 @@ public class BBContainerWrapper extends BBComponentWrapper implements
 	 */
 	public BBContainerWrapper(BBContainer container, Object layout) {
 		super(container);
+		this.container = container;
 		this.layout = layout;
+	}
+
+	/**
+	 * @return the container
+	 */
+	public BBContainer getContainer() {
+		return container;
 	}
 
 	/*
@@ -105,8 +122,18 @@ public class BBContainerWrapper extends BBComponentWrapper implements
 	 */
 	@Override
 	public void paintDebugCell(int x, int y, int width, int height) {
-		// TODO Auto-generated method stub
-
+		BBjWindow window = this.container.getWindow();
+		if (window != null) {
+			try {
+				BBjDrawPanel drawpanel = window.getDrawPanel();
+				drawpanel.setPenWidth(BasisNumber.createBasisNumber(1));
+				drawpanel.setPenColor(DB_CELL_OUTLINE);
+				drawpanel.setPattern(BBjDrawPanel.DASHED_LINE);
+				drawpanel.drawRect(x, y, width, height);
+			} catch (BBjException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
@@ -200,7 +227,8 @@ public class BBContainerWrapper extends BBComponentWrapper implements
 		componentWrapper.setContainerWrapper(this);
 		this.componentWrapperList.add(componentWrapper);
 		this.componentToComponentWrapperMap.put(component, componentWrapper);
-		this.controlToComponentWrapperMap.put(component.getControl(), componentWrapper);
+		this.controlToComponentWrapperMap.put(component.getControl(),
+				componentWrapper);
 		if (cc == null)
 			cc = new CC();
 		this.componentWrapperToCCMap.put(componentWrapper, cc);

@@ -9,8 +9,12 @@ import net.miginfocom.layout.ComponentWrapper;
 import net.miginfocom.layout.ContainerWrapper;
 import net.miginfocom.layout.PlatformDefaults;
 
+import com.basis.bbj.client.sysgui.datatypes.BBjColor;
 import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.BBjSysGui;
+import com.basis.bbj.proxies.sysgui.BBjDrawPanel;
+import com.basis.bbj.proxies.sysgui.BBjWindow;
+import com.basis.util.common.BasisNumber;
 
 /**
  * @author rlance
@@ -20,6 +24,8 @@ public class BBComponentWrapper implements ComponentWrapper {
 
 	private BBComponent component;
 	private BBContainerWrapper containerWrapper;
+
+	private static final BBjColor DB_COMP_OUTLINE = new BBjColor(0, 0, 200);
 
 	public BBComponentWrapper(BBComponent component) {
 		this.component = component;
@@ -266,7 +272,7 @@ public class BBComponentWrapper implements ComponentWrapper {
 	 * @return the containerWrapper
 	 */
 	public BBContainerWrapper getContainerWrapper() {
-		return containerWrapper;
+		return this.containerWrapper;
 	}
 
 	/**
@@ -295,8 +301,18 @@ public class BBComponentWrapper implements ComponentWrapper {
 
 	@Override
 	public void paintDebugOutline(boolean showVisualPadding) {
-		// TODO Auto-generated method stub
-
+		if (this.containerWrapper != null) {
+			BBjWindow window = this.containerWrapper.getContainer().getWindow();
+			try {
+				BBjDrawPanel drawpanel = window.getDrawPanel();
+				drawpanel.setPenWidth(BasisNumber.createBasisNumber(1));
+				drawpanel.setPenColor(DB_COMP_OUTLINE);
+				drawpanel.setPattern(BBjDrawPanel.DASHED_LINE);
+				drawpanel.drawRect(getX(), getY(), getWidth(), getHeight());
+			} catch (BBjException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override

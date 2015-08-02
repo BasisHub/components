@@ -1,10 +1,14 @@
 use com.basiscomponents.ui.layout.BBMigPane
+use com.basiscomponents.ui.layout.BBDrawPanel
+
 use net.miginfocom.layout.PlatformDefaults
 
 use java.util.HashMap
 use java.util.Iterator
 
-new bbmigtest()
+rem test code when run
+rem debug = BBjAPI().TRUE
+new bbmigtest(debug)
 release
 
 class public bbmigtest
@@ -12,6 +16,8 @@ class public bbmigtest
     field private BBjNumber TRUE = BBjAPI().TRUE
     field private BBjNumber FALSE = BBjAPI().FALSE
     field private BBjSysGui SysGui! = BBjAPI().openSysGui("X0")
+
+    field private BBjNumber debug = BBjAPI().FALSE
 
     field private BBjTopLevelWindow Window!
     field private BBMigPane Layout!
@@ -32,27 +38,37 @@ class public bbmigtest
     field public BBjNumber ActiveResize = BBjAPI().FALSE
 
     method public bbmigtest()
+        #bbmigtest(BBjAPI().FALSE())
+    methodend
 
-        rem test platforms (NOTE: setting this sticks til reset or JVM re-started)
-        rem PlatformDefaults.setPlatform(PlatformDefaults.WINDOWS_XP)
-        rem PlatformDefaults.setPlatform(PlatformDefaults.MAC_OSX)
-        rem PlatformDefaults.setPlatform(PlatformDefaults.GNOME)
-        print "Platform=",
-        switch PlatformDefaults.getPlatform()
-            case PlatformDefaults.WINDOWS_XP
-                print "Windows",
-                break
-            case PlatformDefaults.MAC_OSX
-                print "Mac OS X",
-                break
-            case PlatformDefaults.GNOME
-                print "Gnome",
-                break
-            case default
-                print "Unknown",
-        swend
-        print " (real os=",System.getProperty("os.name"),")"
-       
+    method public bbmigtest(BBjNumber debug)
+        #debug = debug
+        if #debug then
+            print 'show',
+            rem test platforms (NOTE: setting this sticks til reset or JVM re-started)
+            rem PlatformDefaults.setPlatform(PlatformDefaults.WINDOWS_XP)
+            rem PlatformDefaults.setPlatform(PlatformDefaults.MAC_OSX)
+            rem PlatformDefaults.setPlatform(PlatformDefaults.GNOME)
+            print "Platform=",
+            switch PlatformDefaults.getPlatform()
+                case PlatformDefaults.WINDOWS_XP
+                    print "Windows",
+                    break
+                case PlatformDefaults.MAC_OSX
+                    print "Mac OS X",
+                    break
+                case PlatformDefaults.GNOME
+                    print "Gnome",
+                    break
+                case default
+                    print "Unknown",
+                    break
+            swend
+            print " (real os=",System.getProperty("os.name"),"), Default DPI=",PlatformDefaults.getDefaultDPI()
+        else
+            print 'hide',
+        endif
+        
         #constructForm()
         #show()
     methodend
@@ -63,9 +79,12 @@ class public bbmigtest
         #Window!.setCallback(#Window!.ON_SCREEN_RESIZE, #this!, "screenResize")
         #Window!.setCallback(#Window!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
         #cWindow!.setCallback(#cWindow!.ON_MOUSE_SCROLL, #this!, "mouseScroll")
+        
         #resizeTimerEvent(null())
+        
         #Window!.setVisible(#TRUE)
         #Window!.focus()
+        
         process_events
     methodend
 
@@ -76,22 +95,22 @@ class public bbmigtest
     method public void windowResize(BBjResizeEvent p_event!)
         if !(#ActiveResize)
             #ActiveResize = #TRUE
-            #API!.createTimer("ResizeEventTimer", .25, #this!, "resizeTimerEvent")
+            #API!.createTimer("ResizeEventTimer", .2, #this!, "resizeTimerEvent")
         endif
     methodend
 
     method public void screenResize(BBjScreenResizeEvent p_event!)
         if !(#ActiveResize)
             #ActiveResize = #TRUE
-            #API!.createTimer("ResizeEventTimer", .25, #this!, "resizeTimerEvent")
+            #API!.createTimer("ResizeEventTimer", .2, #this!, "resizeTimerEvent")
         endif
     methodend
 
     method public void resizeTimerEvent(BBjTimerEvent p_event!)
-        rem #SysGui!.setRepaintEnabled(#FALSE)
+        #SysGui!.setRepaintEnabled(#FALSE)
         #Layout!.layoutChildren()
         #cLayout!.layoutChildren()
-        rem #SysGui!.setRepaintEnabled(#TRUE)
+        #SysGui!.setRepaintEnabled(#TRUE)
         #API!.removeTimer("ResizeEventTimer",err=*next)
         #ActiveResize = #FALSE
     methodend
@@ -136,7 +155,7 @@ class public bbmigtest
         WinFlags$=IOR(WinFlags$,$04000000$); rem Sets the window to automatically manage SYSCOLOR events.
         rem WinFlags$=IOR(WinFlags$,$20000000$); rem Causes Visual PRO/5 to report the mouse's right button down event.
         rem WinFlags$=IOR(WinFlags$,$40000000$); rem Sets the window to be group-modal within an MDI group.
-        #Window! = #SysGui!.addWindow(500,500,500,500,"BBMigPane Layout Test",WinFlags$)
+        #Window! = #SysGui!.addWindow(#SysGui!.getAvailableContext(),400,400,400,400,"BBMigPane Layout Test",WinFlags$)
         #Window!.setName("window")
         #Window!.setUserData(new HashMap())
         cast(HashMap, #Window!.getUserData()).put("scale",1.0)
@@ -145,10 +164,11 @@ class public bbmigtest
         font_size=12
         font! = #SysGui!.makeFont("Dialog",font_size,#SysGui!.PLAIN)
         font_height=iff(font!.getStyle()=#SysGui!.BOLD,int(font_size*1.1),font_size)
-
+        
         #Window!.setFont(font!)
 
-        #Layout! = new BBMigPane(#Window!, "insets dialog,fillx", "[align label]rel[grow,fill]unrel[align label]rel[grow,fill]", "")
+        if #debug then #Window!.setTrack(BBjAPI().FALSE);rem important for debug rectangles to be drawn correctly
+        #Layout! = new BBMigPane(#Window!, "insets dialog"+iff(#debug,", debug",""), "[align label]rel[grow,fill]unrel[align label]rel[grow,fill]", "")
 
         declare BBjVector tx!
         declare BBjVector tm!
@@ -162,95 +182,102 @@ class public bbmigtest
         tm! = #SysGui!.getMeasures(tx!)
 
         declare BBjColor lbl_bkcolor!
-        lbl_bkcolor! = #API!.makeColor(#SysGui!.LTGRAY)
-        setlblbkcolor! = #TRUE
+        lbl_bkcolor! = #API!.makeColor(#SysGui!.YELLOW)
+        setlblbkcolor = #debug
 
         lwpad=0,lhpad=8,iwpad=8,ihpad=8; rem label width/height padding, input control width/height padding
 
         #lFirstName! =  #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidFirstName))+lwpad,font_height+lhpad,str(tx!.get(tidFirstName)))
         #lFirstName!.setName("lFirstName")
+        #lFirstName!.setOpaque(#FALSE)
         #lFirstName!.setFont(font!)
         if setlblbkcolor then #lFirstName!.setBackColor(lbl_bkcolor!)
-        #Layout!.add( #lFirstName!, "" )
+        #Layout!.add(#lFirstName!)
 
         #iFirstName! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
         #iFirstName!.setName("iFirstName")
         #iFirstName!.setFont(font!)
-        #Layout!.add( #iFirstName!, "" )
+        #Layout!.add(#iFirstName!)
 
         #lSurname! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidSurName))+lwpad,font_height+lhpad,str(tx!.get(tidSurName)))
         #lSurname!.setName("lSurname")
+        #lSurname!.setOpaque(#FALSE)
         #lSurname!.setFont(font!)
         if setlblbkcolor then #lSurname!.setBackColor(lbl_bkcolor!)
-        #Layout!.add( #lSurname!, "" )
+        #Layout!.add(#lSurname!)
 
         #iSurname! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,100,font_height+ihpad,"")
         #iSurname!.setName("iSurname")
         #iSurname!.setFont(font!)
-        #Layout!.add( #iSurname!, "wrap" )
+        #Layout!.add(#iSurname!, "wrap")
 
         #lAddress! = #Window!.addStaticText(#Window!.getAvailableControlID(),0,0,num(tm!.get(tidAddress))+lwpad,font_height+lhpad,str(tx!.get(tidAddress)))
         #lAddress!.setName("lAddress")
+        #lAddress!.setOpaque(#FALSE)
         #lAddress!.setFont(font!)
         if setlblbkcolor then #lAddress!.setBackColor(lbl_bkcolor!)
-        #Layout!.add( #lAddress!, "" )
+        #Layout!.add(#lAddress!)
 
         #iAddress! = #Window!.addInputE(#Window!.getAvailableControlID(),0,0,200,font_height+ihpad,"")
         #iAddress!.setName("iAddress")
         #iAddress!.setFont(font!)
-        #Layout!.add( #iAddress!, "spanx, wrap unrel:push" )
-
+        #Layout!.add(#iAddress!, "spanx, wrap unrel:push")
+               
         rem child window (pane) for the buttons to test button tags
         cWinFlags$=$00000000$
-        rem cWinFlags$=IOR(cWinFlags$,$00000004$); rem Includes a horizontal scroll bar with the child window. The scroll bar is only visible if this flag is set, 
+        rem cWinFlags$=IOR(cWinFlags$,$00000004$); rem Includes a horizontal scroll bar with the child window. The scroll bar is only visible if this flag is set,
         rem            the 'TRACK'(0) mnemonic is used to prevent image scaling, and either the child window or the virtual drawing surface is resized.
-        rem cWinFlags$=IOR(cWinFlags$,$00000008$); rem Includes a vertical scroll bar with the child window. The scroll bar is only visible if this flag is set, 
+        rem cWinFlags$=IOR(cWinFlags$,$00000008$); rem Includes a vertical scroll bar with the child window. The scroll bar is only visible if this flag is set,
         rem            the 'TRACK'(0) mnemonic is used to prevent image scaling, and either the child window or the virtual drawing surface is resized.
         rem cWinFlags$=IOR(cWinFlags$,$00000010$); rem Sets the child window to be initially invisible.
         rem cWinFlags$=IOR(cWinFlags$,$00000020$); rem Sets the child window to be initially disabled.
         cWinFlags$=IOR(cWinFlags$,$00000800$); rem Creates a child window without a border.
-        cWinFlags$=IOR(cWinFlags$,$00010000$); rem Activates keyboard navigation in the child window. 
+        cWinFlags$=IOR(cWinFlags$,$00010000$); rem Activates keyboard navigation in the child window.
         rem            If this flag is specified, key pressed ("t") events for arrow keys and the tab key will not be reported.
         rem cWinFlags$=IOR(cWinFlags$,$00100000$); rem Automatically arranges all controls to fit within the child window.
-        rem cWinFlags$=IOR(cWinFlags$,$00200000$); rem Attaches the child window to one side of the parent frame, by default to the top frame. 
-        rem            It will always occupy the full extent of the parent window's edge (even if the parent is resized later), 
-        rem            but the other dimension is determined by the width or height specified when the child was created. 
+        rem cWinFlags$=IOR(cWinFlags$,$00200000$); rem Attaches the child window to one side of the parent frame, by default to the top frame.
+        rem            It will always occupy the full extent of the parent window's edge (even if the parent is resized later),
+        rem            but the other dimension is determined by the width or height specified when the child was created.
         rem            By default, docked child windows are attached to the top of their parent. This can be changed with the 'DOCK' mnemonic.
-        rem cWinFlags$=IOR(cWinFlags$,$00800000$); rem Sets the <Enter> key to behave as a <Tab> key.
+        cWinFlags$=IOR(cWinFlags$,$00800000$); rem Sets the <Enter> key to behave as a <Tab> key.
         rem cWinFlags$=IOR(cWinFlags$,$01000000$); rem Draws a recessed client edge around the child window.
         rem cWinFlags$=IOR(cWinFlags$,$02000000$); rem Draws a raised edge around the child window.
-        #cWindow! = #Window!.addChildWindow(#Window!.getAvailableControlID(),0,70,#Window!.getWidth(),25,"",cWinFlags$,#SysGui!.getAvailableContext())
+        #cWindow! = #Window!.addChildWindow(#Window!.getAvailableControlID(),0,0,#Window!.getWidth(),25,"",cWinFlags$,#SysGui!.getAvailableContext())
         #cWindow!.setName("cWindow")
         #cWindow!.setFont(font!)
 
         declare BBjColor btn_bkcolor!
         btn_bkcolor! = #API!.makeColor(#SysGui!.CYAN)
-        setbtnbkcolor! = #TRUE
+        setbtnbkcolor = #debug
 
-        #cLayout! = new BBMigPane(#cWindow!, "nogrid, fill")
+        if #debug then #cWindow!.setTrack(BBjAPI().FALSE);rem important for debug rectangles to be drawn correctly
+        #cLayout! = new BBMigPane(#cWindow!, "nogrid, fill"+iff(#debug,", debug",""))
 
         bwpad=16,bhpad=16; rem button width/height padding
 
         #bHelp! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidHelp))+bwpad,font_height+bhpad,str(tx!.get(tidHelp)))
         #bHelp!.setName("bHelp")
+        #bHelp!.setBorderPainted(#TRUE)
         #bHelp!.setFont(font!)
-        if setbtnbkcolor! then #bHelp!.setBackColor(btn_bkcolor!)
-        #cLayout!.add( #bHelp!,"sg,tag help" );rem there is also a "tag help2"
+        if setbtnbkcolor then #bHelp!.setBackColor(btn_bkcolor!)
+        #cLayout!.add(#bHelp!,"sg,tag help");rem there is also a "tag help2"
 
         #bOk! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidOk))+bwpad,font_height+bhpad,str(tx!.get(tidOk)))
         #bOk!.setName("bOk")
+        #bOk!.setBorderPainted(#TRUE)
         #bOk!.setFont(font!)
-        if setbtnbkcolor! then #bOk!.setBackColor(btn_bkcolor!)
-        #cLayout!.add( #bOk!,"sg,tag ok" )
+        if setbtnbkcolor then #bOk!.setBackColor(btn_bkcolor!)
+        #cLayout!.add(#bOk!,"sg,tag ok")
 
         #bCancel! = #cWindow!.addMenuButton(#cWindow!.getAvailableControlID(),0,0,num(tm!.get(tidCancel))+bwpad,font_height+bhpad,str(tx!.get(tidCancel)))
         #bCancel!.setName("bCancel")
+        #bCancel!.setBorderPainted(#TRUE)
         #bCancel!.setFont(font!)
-        if setbtnbkcolor! then #bCancel!.setBackColor(btn_bkcolor!)
-        #cLayout!.add( #bCancel!,"sg,tag cancel" )
+        if setbtnbkcolor then #bCancel!.setBackColor(btn_bkcolor!)
+        #cLayout!.add(#bCancel!,"sg,tag cancel")
 
         #cLayout!.layoutChildren()
-        #Layout!.add( #cWindow!, "south")
+        #Layout!.add(#cWindow!, "south")
     methodend
 
 classend
