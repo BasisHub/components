@@ -48,7 +48,7 @@ public class TestMyStuff {
 		
 		
 		r.setFieldValue("MYTIMESTAMP",d);
-		r.setFieldValue("Name","Müller");
+		r.setFieldValue("Name","M\u00FCller");
 		r.setFieldValue("Age",35);
 		
 		System.out.println(r.toJson());
