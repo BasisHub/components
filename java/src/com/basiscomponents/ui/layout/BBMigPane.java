@@ -338,7 +338,7 @@ public class BBMigPane implements BBjControl {
 				this.container.getWidth(), this.container.getHeight() };
 		this.migGrid.layout(lBounds, getLayoutConstraints().getAlignX(),
 				getLayoutConstraints().getAlignY(), this.debug);
-		
+
 		if (this.debug) {
 			getWnd().getDrawPanel().clearDrawing();
 			this.migGrid.paintDebug();

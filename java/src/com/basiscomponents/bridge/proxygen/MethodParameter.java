@@ -1,17 +1,18 @@
 package com.basiscomponents.bridge.proxygen;
 
 public class MethodParameter {
-	
-	private String type,name;
-	
-	public MethodParameter(String type, String name){
+
+	private String type, name;
+
+	public MethodParameter(String type, String name) {
 		this.setType(type);
 		this.setName(name);
 	}
-	
+
 	public String getType() {
 		return type;
 	}
+
 	public void setType(String type) {
 		if (type.trim().equals("BBjVector"))
 			type = "ResultSet";
@@ -19,19 +20,21 @@ public class MethodParameter {
 			type = "String";
 		if (type.trim().equals("BBjNumber"))
 			type = "Number";
-		
+
 		this.type = type;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		if (name.endsWith("!"))
-			name=name.substring(0, name.length()-1);
+			name = name.substring(0, name.length() - 1);
 		if (name.endsWith("$"))
-			name=name.substring(0, name.length()-1);
+			name = name.substring(0, name.length() - 1);
 		if (name.endsWith("%"))
-			name=name.substring(0, name.length()-1);
+			name = name.substring(0, name.length() - 1);
 		this.name = name;
 	}
 }

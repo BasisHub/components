@@ -40,10 +40,12 @@ public class BBComponent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.origMinimumSize = new Dimension((int) (this.width / 2), (int) (this.height / 2));
+		this.origMinimumSize = new Dimension((int) (this.width / 2),
+				(int) (this.height / 2));
 		this.origPreferredSize = new Dimension(this.width, this.height);
 		this.origMaximumSize = new Dimension(this.width * 5, this.height * 5);
-		this.minimumSize = new Dimension((int) (this.width / 2), (int) (this.height / 2));
+		this.minimumSize = new Dimension((int) (this.width / 2),
+				(int) (this.height / 2));
 		this.preferredSize = new Dimension(this.width, this.height);
 		this.maximumSize = new Dimension(this.width * 5, this.height * 5);
 	}

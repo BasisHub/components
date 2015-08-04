@@ -1,35 +1,30 @@
 package com.basiscomponents.lucene;
 
-class BBjSearchGizmoDocField
-{
+class BBjSearchGizmoDocField {
 	private String name;
 	private String content;
 	private float boost;
-	private boolean facet=false;
-	
-	private BBjSearchGizmoDocField()
-	{}
+	private boolean facet = false;
 
-	public BBjSearchGizmoDocField(String name, String content, float boost, boolean faceting)
-	{
-		//this(name,content,boost);
+	private BBjSearchGizmoDocField() {
+	}
+
+	public BBjSearchGizmoDocField(String name, String content, float boost,
+			boolean faceting) {
+		// this(name,content,boost);
 		this.setName(name);
 		this.setContent(content);
 		this.setBoost(boost);
 		this.setFacet(faceting);
-		
+
 	}
-	
-	public BBjSearchGizmoDocField(String name, String content, float boost)
-	{
+
+	public BBjSearchGizmoDocField(String name, String content, float boost) {
 		this.setName(name);
 		this.setContent(content);
 		this.setBoost(boost);
-		
-		
+
 	}
-	
-	
 
 	public String getName() {
 		return name;
