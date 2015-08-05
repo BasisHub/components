@@ -112,7 +112,7 @@
 
 		<dependency>
 			<groupId>com.basis.lib</groupId>
-			<artifactId>commons-lang</artifactId>
+			<artifactId>commons-lang.jar</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
 			<systemPath>${jar-directory}/commons-lang-2.5</systemPath>
