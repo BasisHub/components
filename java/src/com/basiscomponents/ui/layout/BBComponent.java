@@ -8,6 +8,8 @@ import java.awt.Dimension;
 import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.sysgui.BBjControl;
 import com.basis.bbj.proxies.sysgui.BBjFont;
+import com.basis.bbj.proxies.sysgui.BBjListButton;
+import com.basis.bbj.proxies.sysgui.BBjListEdit;
 import com.basis.util.common.BasisNumber;
 
 /**
@@ -35,7 +37,15 @@ public class BBComponent {
 			this.x = control.getX().intValue();
 			this.y = control.getY().intValue();
 			this.width = control.getWidth().intValue();
-			this.height = control.getHeight().intValue();
+			if (control.getControlType() == BBjControl.LISTBUTTON_TYPE) {
+				this.height = ((BBjListButton) control).getFieldHeight()
+						.intValue();
+			} else if (control.getControlType() == BBjControl.LISTEDIT_TYPE) {
+				this.height = ((BBjListEdit) control).getFieldHeight()
+						.intValue();
+			} else {
+				this.height = control.getHeight().intValue();
+			}
 		} catch (BBjException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
