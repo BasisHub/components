@@ -93,7 +93,7 @@ REM             fi
         
     methodend        
 
-    method public BBjNumber getControlType()
+    method public java.lang.Integer getControlType()
         methodret -2
     methodend
     

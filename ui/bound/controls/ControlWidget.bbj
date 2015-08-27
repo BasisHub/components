@@ -507,7 +507,7 @@ rem ------------medthods for fill BC
           fi
     methodend
     
-    method public BBjNumber getControlType()
+    method public java.lang.Integer getControlType()
         methodret -1
     methodend
 

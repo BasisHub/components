@@ -70,7 +70,7 @@ class public  InputEWidget extends ControlWidget
         #getWnd().getControl(101).addStyle(class$)
     methodend
 
-    method public BBjNumber getControlType()
+    method public java.lang.Integer getControlType()
         methodret -1
     methodend
 
