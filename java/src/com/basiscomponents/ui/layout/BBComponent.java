@@ -261,7 +261,15 @@ public class BBComponent {
 		BasisNumber bw = BasisNumber.createBasisNumber(width);
 		BasisNumber bh = BasisNumber.createBasisNumber(height);
 		try {
-			this.control.setSize(bw, bh);
+			if (control.getControlType() == BBjControl.LISTBUTTON_TYPE) {
+				this.control.setSize(bw, this.control.getHeight());
+				((BBjListButton) control).setFieldHeight(bh);
+			} else if (control.getControlType() == BBjControl.LISTEDIT_TYPE) {
+				this.control.setSize(bw, this.control.getHeight());
+				((BBjListEdit) control).setFieldHeight(bh);
+			} else {
+				this.control.setSize(bw, bh);
+			}
 		} catch (BBjException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
