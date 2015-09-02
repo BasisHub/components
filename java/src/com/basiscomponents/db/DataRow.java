@@ -500,6 +500,7 @@ public class DataRow {
 
 	public void removeField(String name) {
 		this.FieldList.remove(name);
+		this.FieldNames.remove(name);
 	}
 
 	public BBjVector getAttributeForFields(String attrname) {
@@ -758,10 +759,13 @@ public class DataRow {
 		}.getType();
 		List<DataField> records = gson.fromJson(jarray, type);
 		DataRow r = new DataRow();
-		Iterator<DataField> it = records.iterator();
-		while (it.hasNext()) {
-			DataField df = it.next();
-			r.addDataField(df.getName(), df);
+
+		if (records != null){
+			Iterator<DataField> it = records.iterator();
+			while (it.hasNext()) {
+				DataField df = it.next();
+				r.addDataField(df.getName(), df);
+			}
 		}
 
 		return r;
