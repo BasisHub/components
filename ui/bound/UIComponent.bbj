@@ -922,5 +922,8 @@ class public UIComponent implements BBjControl
         methodret #Wnd!.setFont(arg0!)
     methodend
 
+    method public java.lang.Integer getControlType()
+        methodret -1
+    methodend
 
 classend
