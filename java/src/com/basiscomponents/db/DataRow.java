@@ -42,13 +42,34 @@ public class DataRow {
 		Iterator it = ks.iterator();
 		while (it.hasNext()) {
 			String k = (String) it.next();
-			String o = (String) map.get(k);
-
-			setFieldValue(k, o);
+			Object o = map.get(k);
+			
+			System.out.println(o.getClass().getCanonicalName());
+			switch (o.getClass().getCanonicalName())
+			{
+				case "java.lang.String":
+					setFieldValue(k, (String)o);
+					break;
+				case "java.lang.Double":
+					setFieldValue(k, (Double)o);
+					break;					
+				case "java.lang.Integer":
+					setFieldValue(k, (Integer)o);
+					break;					
+				case "java.lang.Boolean":
+					setFieldValue(k, (Boolean)o);
+					break;					
+				default:
+					System.err.println("Constructor Datarow from Map - can't convert "+o.getClass().getCanonicalName());
+					break;
+			
+			}
+			
 
 		}
 
 	}
+	
 
 	public DataRow(java.sql.ResultSet rs) throws Exception {
 
