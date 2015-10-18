@@ -158,16 +158,16 @@ public class GeneratorJavaScript {
 						Iterator<MethodParameter> it2 = m.getParams().iterator();
 						while (it2.hasNext()) {
 							MethodParameter mp = it2.next();
-								writer.print("typeof(arguments["+i.toString()+"])=='");
+								writer.print("ses.getTypeof(arguments["+i.toString()+"])=='");
 								switch (mp.getType()){
 									case "String":
-										writer.print("string");
+										writer.print("str");
 										break;
 									case "Number":
-										writer.print("number");
+										writer.print("num");
 										break;
 									default:
-										writer.print("object");
+										writer.print("dr");
 										break;										
 								}
 								writer.print("' && ");
@@ -175,12 +175,11 @@ public class GeneratorJavaScript {
 						}						
 						
 						writer.println("typeof(arguments["+i.toString()+"])=='undefined'){");
-						writer.println("        "+methodname+getMethodSignatureString(m)+".apply(this,arguments);");
+						writer.println("        this."+methodname+getMethodSignatureString(m)+".apply(this,arguments);");
 						writer.println("     };");
 					}
 				}
-				writer.println("    }");
-				writer.println();
+
 			}
 			
 			writer.println("");
