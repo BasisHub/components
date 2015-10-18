@@ -42,12 +42,14 @@ public class Parser {
 
 
 			if (lline.contains("class public")) {
+				//FIXME this is bogus - what if no extends but only implements?
+				line = line.substring(lline.indexOf("public") + 7);
+				lline = lline.substring(lline.indexOf("public") + 7);				
 				if (lline.contains("extends")) {
 					String lineend = line
 							.substring(lline.indexOf("extends") + 7);
 					String llineend = lline
 							.substring(lline.indexOf("extends") + 7);
-
 					if (llineend.contains("implements")) {
 						lineend = lineend.substring(0,
 								llineend.indexOf("implements"));
@@ -57,18 +59,17 @@ public class Parser {
 
 					}
 
-					line = line.substring(lline.indexOf("public") + 7);
-					lline = lline.substring(lline.indexOf("public") + 7);
+
 
 					if (lline.contains("extends")) {
 						line = line.substring(0, lline.indexOf("extends"));
 
 					}
 
-					classname = line.trim();
+					
 
 				}
-
+				classname = line.trim();
 			}
 
 		}
