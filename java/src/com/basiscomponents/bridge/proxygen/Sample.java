@@ -14,7 +14,7 @@ public class Sample {
 		HashMap<String,ParseEntity> classes = new HashMap<>();
 		classes.put("MyClass",pe);
 		
-		GeneratorJavaScript.createJavaScriptProxyClasses(classes, "D:/JsOverloading/", "api/", ".bbj");
+		GeneratorJavaScript.createJavaScriptProxyClasses(classes, "D:/JsOverloading/", "./", ".bbj");
 
 	}
 

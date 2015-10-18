@@ -3,7 +3,9 @@ package com.basiscomponents.bridge.proxygen;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -16,17 +18,18 @@ public class GeneratorJavaScript {
 			String outputfolder, String classfileprefix, String classfilesuffix)
 			throws FileNotFoundException, UnsupportedEncodingException {
 
+		HashSet<String> overloadedMethods = new HashSet<>();
+
 		Set<String> ks = classes.keySet();
 		Iterator<String> it = ks.iterator();
 		while (it.hasNext()) {
 			String classname = it.next();
-			System.out.println("------------------------\n" + classname);
 
 			ParseEntity pe = classes.get(classname);
 			String filename = outputfolder + classname + ".js";
 			PrintWriter writer = new PrintWriter(filename, "UTF-8");
 
-			writer.println("function RelationsBC(){"); 
+			writer.println("function "+classname+"(){"); 
 			writer.println("	this.id = guid(); ");
 			writer.println("	ses.create(this.id,\"::" + classfileprefix
 					+ pe.getClassname() + classfilesuffix + "::"
@@ -43,6 +46,8 @@ public class GeneratorJavaScript {
 				Method m = it1.next();
 				if (m.getIsConstructor())
 					continue;
+				
+				
 
 				// first check if all concerned data types are valid
 				Boolean OK = true;
@@ -61,10 +66,18 @@ public class GeneratorJavaScript {
 				if (!OK)
 					continue;
 				
-	
-				writer.print(classname+".prototype."+ m.getName()
-						+ " = function("); 
-
+				if (m.getIsOverloaded()){
+					overloadedMethods.add(m.getName());
+					writer.println("//overloaded method of "+m.getName());
+					writer.print(classname+".prototype."+ m.getName()
+							+ getMethodSignatureString(m)
+							+ " = function("); 
+				}
+				else
+				{
+					writer.print(classname+".prototype."+ m.getName()
+							+ " = function("); 
+				}
 
 				it2 = m.getParams().iterator();
 				Boolean second = false;
@@ -74,7 +87,10 @@ public class GeneratorJavaScript {
 						writer.print(",");
 					else
 						second = true;
-					writer.print(mp.getName());
+					if (!m.getIsOverloaded())
+						writer.print(mp.getName());
+					else
+						writer.print(mp.getType()+"_"+mp.getName());
 				}
 
 				writer.println(") { ");
@@ -88,7 +104,10 @@ public class GeneratorJavaScript {
 					it2 = m.getParams().iterator();
 					while (it2.hasNext()) {
 						MethodParameter mp = it2.next();
-						writer.println("	     args.push("+mp.getName()+");");
+						if (!m.getIsOverloaded())
+							writer.println("	     args.push("+mp.getName()+");");
+						else
+							writer.println("	     args.push("+mp.getType()+"_"+mp.getName()+");");							
 					}
 				
 //				// create return variable name
@@ -120,6 +139,50 @@ public class GeneratorJavaScript {
 				writer.println("");
 			}
 
+			//now generate the parent function to dispatch all the overloaded versions
+			it = overloadedMethods.iterator();
+			while (it.hasNext())
+			{
+				String methodname = it.next();
+				writer.println("//parent for overloaded function "+methodname);
+				writer.println(classname+".prototype."+ methodname+ " = function(){"); 
+
+				Iterator<Method> itm = pe.getMethods().iterator();
+				while (itm.hasNext()){
+					Method m = itm.next();
+
+					if (m.getName().equals(methodname)){
+						Integer i=0;
+						writer.print  ("     if(");
+						
+						Iterator<MethodParameter> it2 = m.getParams().iterator();
+						while (it2.hasNext()) {
+							MethodParameter mp = it2.next();
+								writer.print("typeof(arguments["+i.toString()+"])=='");
+								switch (mp.getType()){
+									case "String":
+										writer.print("string");
+										break;
+									case "Number":
+										writer.print("number");
+										break;
+									default:
+										writer.print("object");
+										break;										
+								}
+								writer.print("' && ");
+								i++;
+						}						
+						
+						writer.println("typeof(arguments["+i.toString()+"])=='undefined'){");
+						writer.println("        "+methodname+getMethodSignatureString(m)+".apply(this,arguments);");
+						writer.println("     };");
+					}
+				}
+				writer.println("    }");
+				writer.println();
+			}
+			
 			writer.println("");
 			writer.println("}		 ");
 			writer.println();
@@ -127,6 +190,29 @@ public class GeneratorJavaScript {
 			writer.close();
 		}
 
+	}
+
+	private static String getMethodSignatureString(Method m) {
+		String sig = "";
+		Iterator<MethodParameter> it2 = m.getParams().iterator();
+		while (it2.hasNext()) {
+			String t = it2.next().getType();
+			switch (t){
+				case "String":
+					sig += 'S';
+					break;
+				case "Number":
+					sig += 'N';
+					break;
+				default:
+					sig += 'O';
+				
+				}//switch
+		}//while
+	
+		if (sig.isEmpty())
+			sig="VOID";
+		return sig;
 	}
 
 }

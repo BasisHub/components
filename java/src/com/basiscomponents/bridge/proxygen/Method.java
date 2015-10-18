@@ -5,7 +5,10 @@ import java.util.Iterator;
 
 public class Method {
 	private String name, returntype;
-	private Boolean isStatic = false, isConstructor = false;
+	private Boolean isStatic = false, 
+					isConstructor = false,
+					isOverloaded = false;
+
 	private ArrayList<MethodParameter> params;
 
 	public String getReturnType() {
@@ -52,6 +55,14 @@ public class Method {
 		this.isConstructor = isConstructor;
 	}
 
+	public Boolean getIsOverloaded() {
+		return isOverloaded;
+	}
+
+	public void setIsOverloaded(Boolean isOverloaded) {
+		this.isOverloaded = isOverloaded;
+	}	
+	
 	public String toString() {
 		String ret = (isStatic ? "static " : "");
 

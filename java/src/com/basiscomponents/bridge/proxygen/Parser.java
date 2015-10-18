@@ -1,6 +1,8 @@
 package com.basiscomponents.bridge.proxygen;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Scanner;
 
 public class Parser {
@@ -8,6 +10,8 @@ public class Parser {
 	public static ParseEntity parse(String content) {
 
 		ArrayList<Method> methods = new ArrayList<>();
+		HashMap<String,Integer> methodlist = new HashMap<>();
+		
 		String baseclass = null, classname = null;
 
 		Scanner scanner = new Scanner(content);
@@ -23,9 +27,19 @@ public class Parser {
 
 			if (lline.contains("method public") && !(lline.startsWith("rem"))) {
 				Method m = parseMethodSignature(line.trim());
-				if (m != null)
+				if (m != null) {
 					methods.add(m);
+					if (methodlist.containsKey(m.getName())){
+						methodlist.put(m.getName(), 	
+										(methodlist.get(m.getName()))+1);
+					}
+					else 
+					{
+						methodlist.put(m.getName(), 1);
+					}
+				}
 			}
+
 
 			if (lline.contains("class public")) {
 				if (lline.contains("extends")) {
@@ -60,6 +74,17 @@ public class Parser {
 		}
 		scanner.close();
 
+		
+		//check for overloaded methods
+		Iterator<Method> it = methods.iterator();
+		
+		while (it.hasNext()){
+			Method m = it.next();
+			if (methodlist.get(m.getName())>1){
+				m.setIsOverloaded(true);
+			}
+		}
+		
 		ParseEntity et = new ParseEntity(classname, baseclass, methods);
 
 		return et;
