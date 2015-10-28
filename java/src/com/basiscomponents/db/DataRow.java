@@ -11,6 +11,7 @@ import java.util.Set;
 import com.basis.bbj.client.datatypes.BBjVector;
 import com.basis.util.common.BBjNumber;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -772,7 +773,8 @@ public class DataRow {
 
 	public static DataRow fromJson(String json) {
 
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
+		
 		JsonElement jelement = new JsonParser().parse(json);
 		JsonObject jobject = jelement.getAsJsonObject();
 		JsonArray jarray = jobject.getAsJsonArray("datarow");

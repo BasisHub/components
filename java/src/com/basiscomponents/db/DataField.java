@@ -3,6 +3,8 @@ package com.basiscomponents.db;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -11,6 +13,8 @@ import com.basis.util.common.BasisNumber;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 
 public class DataField {
@@ -650,18 +654,42 @@ public class DataField {
 	public String toJson() {
 
 		String tmp = this.StringValue;
-		this.StringValue = org.apache.commons.lang.StringEscapeUtils
-				.escapeJavaScript(this.StringValue);
-		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-				.create();
-		String json = gson.toJson(this);
-		json = json.replace("\\\\u", "\\u");
+		String json="";
+		if (this.Type=='D')
+		{
+			DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+			DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+			String fd = df1.format(this.DateValue)+"T"+df2.format(DateValue)+".000Z";
+			json="{\"Name\":\""+this.getName()+"\",\"DateValue\":\""+fd+"\",\"Type\":\"D\"}";
+		}
+		else
+		{
+			if (this.Type=='X')
+			{
+				DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+				DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+				String fd = df1.format(TimestampValue)+"T"+df2.format(TimestampValue)+".000Z";
+				json="{\"Name\":\""+this.getName()+"\",\"TimestampValue\":\""+fd+"\",\"Type\":\"X\"}";				
+			}
+			else
+			{
+			this.StringValue = org.apache.commons.lang.StringEscapeUtils
+					.escapeJavaScript(this.StringValue);
+			Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
+					.create();
+			json = gson.toJson(this);
+			json = json.replace("\\\\u", "\\u");
+			}
+		}
+		
 		this.StringValue = tmp;
 		return json;
 	}
 
 	public JsonElement toJsonElement() {
-		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
+		Gson gson = new GsonBuilder()
+				.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'.000Z'")
+				.excludeFieldsWithoutExposeAnnotation()
 				.create();
 		return gson.toJsonTree(this);
 	}

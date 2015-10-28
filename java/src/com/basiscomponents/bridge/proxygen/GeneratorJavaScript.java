@@ -18,13 +18,13 @@ public class GeneratorJavaScript {
 			String outputfolder, String classfileprefix, String classfilesuffix)
 			throws FileNotFoundException, UnsupportedEncodingException {
 
-		HashSet<String> overloadedMethods = new HashSet<>();
+		
 
 		Set<String> ks = classes.keySet();
-		Iterator<String> it = ks.iterator();
-		while (it.hasNext()) {
-			String classname = it.next();
-
+		Iterator<String> itfiles = ks.iterator();
+		while (itfiles.hasNext()) {
+			String classname = itfiles.next();
+			HashSet<String> overloadedMethods = new HashSet<>();
 			ParseEntity pe = classes.get(classname);
 			String filename = outputfolder + classname + ".js";
 			PrintWriter writer = new PrintWriter(filename, "UTF-8");
@@ -115,9 +115,7 @@ public class GeneratorJavaScript {
 				if (m.getReturnType().equals("void"))
 					rv_name="'void'";
 				else {
-					
 					rv_name="'r_"+classname+"_"+m.getName()+"_retvar'";
-					rv_name="'r_"+m.getName()+"_retvar'";
 				}
 
 
@@ -140,7 +138,7 @@ public class GeneratorJavaScript {
 			}
 
 			//now generate the parent function to dispatch all the overloaded versions
-			it = overloadedMethods.iterator();
+			Iterator<String> it = overloadedMethods.iterator();
 			while (it.hasNext())
 			{
 				String methodname = it.next();
@@ -179,12 +177,11 @@ public class GeneratorJavaScript {
 						writer.println("     };");
 					}
 				}
-
+				writer.println("}");
 			}
 			
 			writer.println("");
-			writer.println("}		 ");
-			writer.println();
+
 
 			writer.close();
 		}
