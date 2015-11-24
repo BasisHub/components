@@ -3,7 +3,6 @@ package com.basiscomponents.bridge.proxygen;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,7 +10,7 @@ import java.util.Set;
 
 public class GeneratorJavaScript {
 
-	private static final String AllowedTypes = "DataRow ResultSet BBjNumber BBjString void";
+	private static final String AllowedTypes = "DataRow ResultSet BBjNumber BBjString Boolean void";
 
 	public static void createJavaScriptProxyClasses(
 			HashMap<String, ParseEntity> classes, 
@@ -164,6 +163,9 @@ public class GeneratorJavaScript {
 									case "Number":
 										writer.print("num");
 										break;
+									case "Boolean":
+										writer.print("bool");
+										break;										
 									default:
 										writer.print("dr");
 										break;										
@@ -200,6 +202,9 @@ public class GeneratorJavaScript {
 				case "Number":
 					sig += 'N';
 					break;
+				case "Boolean":
+					sig += 'B';
+					break;					
 				default:
 					sig += 'O';
 				
