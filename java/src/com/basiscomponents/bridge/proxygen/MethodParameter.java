@@ -20,6 +20,8 @@ public class MethodParameter {
 			type = "String";
 		if (type.trim().equals("BBjNumber"))
 			type = "Number";
+		if (type.trim().equals("Boolean"))
+			type = "Boolean";		
 
 		this.type = type;
 	}
