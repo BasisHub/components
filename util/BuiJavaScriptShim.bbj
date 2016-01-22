@@ -87,6 +87,7 @@ process_events
 byebye:bye
 
 button:
-        js$="console.log('This is a test message'); "  
+REM         js$="console.log('This is a test message'); "
+        js$="parent.myFunction('xyz'); "     
         BuiJavaScriptShim.insertJavascript(js$)
 return

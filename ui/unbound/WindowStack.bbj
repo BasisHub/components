@@ -19,6 +19,10 @@ class public WindowStackHelper
     method public void onBackButton(BBjButtonPushEvent ev!)
         WindowStack.closeWindow()
     methodend    
+    
+    method public void onBrowserBackButton(BBjEvent ev!)
+        WindowStack.closeWindow()
+    methodend      
 
     method public void onResize( BBjResizeEvent ev!)
         WindowStack.resize(ev!.getWidth(),ev!.getHeight())
@@ -137,6 +141,10 @@ REM         fi
             fi
             st!.setVisible(1)
             rem todo: find a better place for that piece
+            
+            if num(rev(4))>=15.2 then 
+REM             BBjAPI().getBuiManager().setCallback(BBjAPI.ON_BROWSER_BACK,wh!,"onBrowserBackButton") 
+            fi
 
         fi
 
