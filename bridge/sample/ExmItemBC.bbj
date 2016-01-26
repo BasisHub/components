@@ -1,0 +1,119 @@
+rem /**
+rem  * ExmItemBC.bbj
+rem  */
+
+use com.basiscomponents.db.DataRow
+use com.basiscomponents.db.ResultSet
+
+use java.util.ArrayList
+use java.util.Iterator
+
+class public ExmItemBC
+
+    field private   ResultSet           ResultSet!
+    field private   DataRow             Filter!
+    field protected java.sql.Connection Connection!
+    field protected java.sql.ResultSet  JDBCResultSet!
+    
+    rem /**
+    rem  * Method openDatabase:
+    rem  * Open the connection to the database
+    rem  */
+    method protected void openDatabase()
+    
+        if #Connection! = null() then
+            #Connection! = BBjAPI().getJDBCConnection("Barista","",err=connectError)
+        endif
+        
+        if #Connection! = null() then goto connectError
+        
+        methodret
+
+        connectError:
+            throw "Could not connect to data source: Barista", 12
+            methodret
+
+    methodend
+
+
+    rem /**
+    rem  * Method closeDatabase:
+    rem  * Close the connection to the database
+    rem  */
+    method protected void closeDatabase()
+
+        if #Connection! <> null() then
+            #Connection!.close()
+            #Connection! = null()
+        endif
+
+    methodend
+
+
+    rem /**
+    rem  * Method retrieve:
+    rem  * Get query result set
+    rem  * @return com.basiscomponents.db.ResultSet
+    rem  */
+    method public ResultSet retrieve()
+        declare ArrayList flist!
+        declare Iterator it!
+        declare java.sql.Statement stmt!
+        declare DataRow row!
+        
+        if #ResultSet! = null()
+            #ResultSet! = new ResultSet()
+
+            sql$ = "select * from EXM_ITEM"
+
+            if #Filter! <> null() then
+                flist! = #Filter!.getFieldNames()
+                it! = flist!.iterator()
+                while it!.hasNext()                
+                    if wh$ > "" then
+                        wh$ = wh$ + " AND "
+                    endif
+                    f$ = it!.next()
+                    rem naive - need to build based on field types!!
+                    c$ = #Filter!.getFieldAsString(f$)
+                    if pos("%"=c$) > 0 then
+                        wh$ = wh$ + f$ + " LIKE '" + c$ + "'"
+                    else
+                        wh$ = wh$ + f$ + " = '" + c$ + "'"
+                    endif
+                    sql$ = sql$ + " WHERE " + wh$
+                wend
+            endif
+
+            #openDatabase()
+            
+            stmt! = #Connection!.createStatement(java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE,java.sql.ResultSet.CONCUR_READ_ONLY)
+            #JDBCResultSet! = cast(java.sql.ResultSet,stmt!.executeQuery(sql$))
+            
+            while #JDBCResultSet!.next()
+                row! = new DataRow(#JDBCResultSet!)
+                #ResultSet!.addItem(row!)
+            wend
+            
+            #closeDatabase()
+        endif
+         
+        methodret #ResultSet!
+    
+    methodend
+
+
+    rem /**
+    rem  * Method setFilter:
+    rem  * Set query filter
+    rem  * @param DataRow
+    rem  */
+    method public void setFilter(DataRow filter!)
+    
+        #Filter! = filter!
+        #JDBCResultSet! = null()
+        #ResultSet! = null()
+    
+    methodend
+
+classend
