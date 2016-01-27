@@ -125,8 +125,8 @@ public class DataRowTest {
 	@Test
 	public void testUmlauteJson() throws Exception {
 		DataRow r=new DataRow();
-		r.setFieldValue("MYSTRING","M‰rz Ä");
-		r.setFieldValue("UMLAUTE","ƒ÷‹‰ˆ¸ﬂ");
+		r.setFieldValue("MYSTRING","M\u00E4rz \u20AC");
+		r.setFieldValue("UMLAUTE","\u00C4\u00D6\u00DC\u00E4\u00F6\u00FC\u00DF");
 		
 		String e = "{\"datarow\":[{\"Name\":\"MYSTRING\",\"StringValue\":\"M\\u00E4rz \\u20AC\",\"Type\":\"C\"},{\"Name\":\"UMLAUTE\",\"StringValue\":\"\\u00C4\\u00D6\\u00DC\\u00E4\\u00F6\\u00FC\\u00DF\",\"Type\":\"C\"}]}";
 		String x=r.toJson();
