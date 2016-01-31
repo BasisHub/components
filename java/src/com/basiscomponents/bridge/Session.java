@@ -214,7 +214,7 @@ public class Session {
 
 	}
 
-	public void exec() {
+	public void exec() throws Exception {
 
 		String req = getJson();
 

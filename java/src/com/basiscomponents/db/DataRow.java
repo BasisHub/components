@@ -1,290 +1,89 @@
 package com.basiscomponents.db;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
-import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.basis.bbj.client.datatypes.BBjVector;
-import com.basis.util.common.BBjNumber;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang.StringEscapeUtils;
 
-public class DataRow {
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-	private HashMap<String, DataField> FieldList = new HashMap<>();
-	private ArrayList<String> FieldNames = new ArrayList<>();
-	private String Tpl;
 
-	public DataRow(String tpl) {
-		this.Tpl = tpl;
-	}
+public class DataRow implements java.io.Serializable {
 
-	public DataRow(String tpl, String rec) throws Exception {
-		this(tpl);
-		setString(rec);
-	}
+	private static final long serialVersionUID = 1L;
+
+	private HashMap<String, DataField> DataFields = new HashMap<String, DataField>();
+
+	private HashMap<String, String> Attributes = new HashMap<String, String>();
+
+	private com.basiscomponents.db.ResultSet ResultSet; // 0-based
 
 	public DataRow() {
-		// TODO Auto-generated constructor stub
+		this.ResultSet = new com.basiscomponents.db.ResultSet();
 	}
 
-	@SuppressWarnings("rawtypes")
-	public DataRow(java.util.Map map) throws Exception {
-		Set ks = map.keySet();
-		Iterator it = ks.iterator();
-		while (it.hasNext()) {
-			String k = (String) it.next();
-			Object o = map.get(k);
-			
-			System.out.println(o.getClass().getCanonicalName());
-			switch (o.getClass().getCanonicalName())
-			{
-				case "java.lang.String":
-					setFieldValue(k, (String)o);
-					break;
-				case "java.lang.Double":
-					setFieldValue(k, (Double)o);
-					break;					
-				case "java.lang.Integer":
-					setFieldValue(k, (Integer)o);
-					break;					
-				case "java.lang.Boolean":
-					setFieldValue(k, (Boolean)o);
-					break;					
-				default:
-					System.err.println("Constructor Datarow from Map - can't convert "+o.getClass().getCanonicalName());
-					break;
-			
-			}
-			
-
-		}
-
-	}
-	
-
-	public DataRow(java.sql.ResultSet rs) throws Exception {
-
-		long t = System.currentTimeMillis();
-		int cc = rs.getMetaData().getColumnCount();
-		int i = 0;
-		while (i < cc) {
-			i++;
-			String ColName = rs.getMetaData().getColumnName(i);
-			String ColLabel = rs.getMetaData().getColumnName(i);
-			Integer ColType = rs.getMetaData().getColumnType(i);
-
-			String s = null;
-
-			switch (ColType) {
-			case java.sql.Types.VARCHAR:
-			case java.sql.Types.CHAR:
-			case java.sql.Types.LONGVARCHAR:
-			case java.sql.Types.LONGNVARCHAR:
-			case java.sql.Types.NCHAR:
-				try {
-					s = rs.getString(ColName);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				setFieldValue(ColName, s);
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-				break;
-
-			case java.sql.Types.NVARCHAR:
-				try {
-					s = rs.getString(ColName);
-				} catch (SQLException e) {
-
-					e.printStackTrace();
-				}
-				setFieldValue(ColName, s);
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-				break;
-
-			case java.sql.Types.NUMERIC:
-			case java.sql.Types.DECIMAL:
-				java.math.BigDecimal d = rs.getBigDecimal(ColName);
-				try {
-					setFieldValue(ColName, d);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-				break;
-
-			case java.sql.Types.REAL:
-			case java.sql.Types.DOUBLE:
-			case java.sql.Types.FLOAT:
-				java.lang.Double dbl = rs.getDouble(ColName);
-				setFieldValue(ColName, dbl);
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-				break;
-
-			case java.sql.Types.INTEGER:
-			case java.sql.Types.SMALLINT:
-			case java.sql.Types.TINYINT:
-				java.lang.Integer inte = null;
-				try {
-					inte = rs.getInt(ColName);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				setFieldValue(ColName, inte);
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-				break;
-
-			case java.sql.Types.DATE:
-
-				java.sql.Date dt = null;
-
-				try {
-					dt = rs.getDate(ColName);
-				} catch (SQLException e) {
-					// e.printStackTrace();
-					// System.out.println("object: "+rs.getObject(ColName));
-				}
-
-				setFieldValue(ColName, dt);
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-
-				break;
-
-			case java.sql.Types.TIMESTAMP:
-				java.sql.Timestamp ts = null;
-				try {
-					ts = rs.getTimestamp(ColName);
-				} catch (SQLException e3) {
-					// TODO Auto-generated catch block
-					e3.printStackTrace();
-					System.out.println("object: " + rs.getObject(ColName));
-				}
-				setFieldValue(ColName, ts);
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-				break;
-
-			case java.sql.Types.TIME:
-				java.sql.Time tm = null;
-				try {
-					tm = rs.getTime(ColName);
-				} catch (SQLException e2) {
-					// TODO Auto-generated catch block
-					e2.printStackTrace();
-					System.out.println("object: " + rs.getObject(ColName));
-				}
-				setFieldValue(ColName, tm);
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-				break;
-
-			case java.sql.Types.BIT:
-			case java.sql.Types.BOOLEAN:
-				java.lang.Boolean bl = null;
-				try {
-					bl = rs.getBoolean(ColName);
-				} catch (SQLException e1) {
-					System.out.println("object: " + rs.getObject(ColName));
-					e1.printStackTrace();
-				}
-				setFieldValue(ColName, bl);
-				setFieldAttribute(ColName, "LABEL", ColLabel);
-				break;
-
-			case java.sql.Types.BINARY:
-			case java.sql.Types.VARBINARY:
-			case java.sql.Types.BLOB:
-			case java.sql.Types.CLOB:
-			case java.sql.Types.LONGVARBINARY:
-				// rem these types tend to be blobs
-				// rem dunno what to do with these TODO
-				// rem simply skip...
-				continue;
-				// break;
-
-			default:
-				try {
-					setFieldValue(ColName, rs.getString(ColName));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				setFieldAttribute(ColName, "LABEL", "<unkown type>" + ColLabel);
-				break;
-			}
-
-			setSQLType(ColName, ColType);
-
-		}
-		t = System.currentTimeMillis() - t;
-		// System.out.println("finished new for "+cc+" columns: "+t+" ms ");
+	public DataRow(com.basiscomponents.db.ResultSet resultset) {
+		this.ResultSet = resultset;
 	}
 
 	public static DataRow newInstance() {
 		return new DataRow();
 	}
 
-	public Boolean contains(String field) {
-		return this.FieldList.containsKey(field);
+	public static DataRow newInstance(com.basiscomponents.db.ResultSet resultset) {
+		return new DataRow(resultset);
 	}
 
-	public void setString(String rec) throws Exception {
-		throw new Exception("Not yet implemented");
-		// BBjTemplatedString x;
-		// x=BBjAPI.makeTemplatedString(this.Tpl.getBytes());
-		// x.setString(rec)
-		// dim x1:this.Tpl
-		// fields=fattr(x1,"")
-		//
-		// while fields>""
-		// p=pos(0a=fields)
-		// f=fields(1,p-1)
-		// fields=fields(p+1)
-		//
-		// fieldtype=asc(fattr(x1,f)(1,1))
-		//
-		// if fieldtype=1 or fieldtype=11 then
-		// this.setFieldValue(f,x.getFieldAsString(f))
-		// else
-		// this.setFieldValue(f,x.getFieldAsNumber(f))
-		// fi
-		//
-		//
-		// x=this.Tpl(pos(f+":"=this.Tpl)+len(f)+2)
-		// x=x(pos("("=x)+1)
-		// x=x(1,pos(")"=x)-1)
-		//
-		// if pos("*"=x)>0 then
-		// x=x(1,pos("*"=x)-1)
-		// fi
-		//
-		// if pos("+"=x)>0 then
-		// x=x(1,pos("+"=x)-1)
-		// fi
-		//
-		// cast(DataField,this.FieldList.get(f)).setLength(num(x))
-		// wend
-		//
+	public DataRow(java.util.Map<String, Object> map) throws Exception {
+		this.ResultSet = new com.basiscomponents.db.ResultSet();
+		Set<String> ks = map.keySet();
+		Iterator<String> it = ks.iterator();
+		while (it.hasNext()) {
+			String k = it.next();
+			Object o = map.get(k);
+			setFieldValue(k, o);
+		}
+	}
+
+	public ArrayList<String> getFieldNames() {
+		return this.ResultSet.getColumnNames();
+	}
+
+	public Boolean contains(String name) {
+		return this.ResultSet.getColumnNames().contains(name);
+	}
+
+	public void setAttribute(String name, String value) {
+		this.Attributes.put(name, value);
+	}
+
+	public String getAttribute(String name) {
+		return this.Attributes.get(name);
+	}
+
+	@SuppressWarnings("unchecked")
+	public java.util.HashMap<String, String> getAttributes() {
+		java.util.HashMap<String, String> clone = (java.util.HashMap<String, String>) this.Attributes
+				.clone();
+		return clone;
+	}
+
+	public void removeAttribute(String name) {
+		this.Attributes.remove(name);
 	}
 
 	public String toString() {
-
 		String x = "";
-
-		Iterator<String> it = FieldNames.iterator();
+		Iterator<String> it = this.ResultSet.getColumnNames().iterator();
 		while (it.hasNext()) {
 			String k = it.next();
 			String f = "";
@@ -296,320 +95,343 @@ public class DataRow {
 			}
 			x = x + "," + k + "=" + f;
 		}
-
 		if (x.length() > 0)
 			x = "[" + x.substring(1) + "]";
 		else
 			x = "(empty)";
-
 		return x;
 	}
 
-	public void setFieldValue(String name, String value) throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'C', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
+	// Note: automatically adds field, if not found in DataFields
+	public void setFieldValue(String name, Object value) throws Exception {
+		DataField field = null;
+		try {
+			field = getField(name);
+		} catch (Exception e) {
+			// do nothing
+		}
+		if (field != null)
 			field.setValue(value);
+		else {
+			field = new DataField(value);
+			addDataField(name, field);
 		}
 	}
 
-	public void setFieldValue(String name, BBjNumber value) throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'N', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
-			field.setValue(value);
-		}
-	}
-
-	public void setFieldValue(String name, java.sql.Date value)
+	// Note: automatically adds field, if not found in DataFields
+	public void setFieldValue(String name, int type, Object value)
 			throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'D', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
+		DataField field = null;
+		try {
+			field = this.getField(name);
+		} catch (Exception e) {
+			// do nothing
+		}
+		if (field != null)
 			field.setValue(value);
+		else {
+			field = new DataField(value);
+			addDataField(name, type, field);
 		}
 	}
 
-	public void setFieldValue(String name, java.sql.Timestamp value)
-			throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'X', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
-			field.setValue(value);
-		}
+	public DataField getField(String name) throws Exception {
+		return getField(name, false);
 	}
 
-	public void setFieldValue(String name, java.lang.Double value)
-			throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'N', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
-			field.setValue(value);
-		}
-	}
-
-	public void setFieldValue(String name, java.lang.Integer value)
-			throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'I', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
-			field.setValue(value);
-		}
-	}
-
-	public void setFieldValue(String name, java.lang.Boolean value)
-			throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'B', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
-			field.setValue(value);
-		}
-	}
-
-	public void setFieldValue(String name, java.math.BigDecimal value)
-			throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'Y', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
-			field.setValue(value);
-		}
-	}
-
-	public void setFieldValue(String name, java.sql.Time value)
-			throws Exception {
-		DataField field = this.FieldList.get(name);
-		if (field == null) {
-			field = new DataField(name, 'T', value);
-			this.FieldList.put(name, field);
-			this.FieldNames.add(name);
-		} else {
-			field.setValue(value);
-		}
-	}
-
-	public Object getField(String name) throws Exception {
-
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
+	public DataField getField(String name, Boolean silent) throws Exception {
+		DataField field = this.DataFields.get(name);
+		if (field == null && !(silent))
 			throw new Exception("Field " + name + " does not exist");
+		return field;
+	}
 
-		return field.getObject();
+	public Object getFieldValue(String name) throws Exception {
+		DataField field = getField(name);
+		return field.getValue();
 	}
 
 	public String getFieldAsString(String name) throws Exception {
-
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
-			throw new Exception("Field " + name + " does not exist");
-
-		return field.getValueAsString();
+		DataField field = getField(name);
+		return field.getString();
 	}
 
+	public Boolean isFieldNull(String name) throws Exception {
+		DataField field = getField(name);
+		return (field.getValue() == null);
+	}
+
+	public String getFieldForSQL(String name) throws Exception {
+		DataField field = getField(name);
+		String ret = "";
+		if (field.getValue() == null)
+			ret = "NULL";
+		else
+			ret = "'" + field.getString() + "'";
+		return ret;
+	}
+
+	@SuppressWarnings("deprecation")
 	public Double getFieldAsNumber(String name) throws Exception {
+		DataField field = getField(name);
+		if (ResultSet == null)
+			throw new Exception("ResultSet does not exist");
+		if (field.getValue() == null)
+			return null;
 
-		DataField field = this.FieldList.get(name);
+		Double ret = 0.0;
 
-		if (field == null)
-			throw new Exception("Field " + name + " does not exist");
+		int column = this.ResultSet.getColumnIndex(name);
+		int type = this.ResultSet.getColumnType(column);
 
-		return field.getValueAsNumber();
-	}
-
-	public BBjVector getFieldNames() {
-		BBjVector v = new BBjVector();
-
-		Iterator<String> it = this.FieldNames.iterator();
-		while (it.hasNext()) {
-			v.addItem(it.next());
+		switch (type) {
+		case java.sql.Types.CHAR:
+		case java.sql.Types.VARCHAR:
+		case java.sql.Types.LONGVARCHAR:
+		case java.sql.Types.NCHAR:
+		case java.sql.Types.NVARCHAR:
+		case java.sql.Types.LONGNVARCHAR:
+			ret = Double.valueOf(field.getString());
+			break;
+		case java.sql.Types.INTEGER:
+			ret = field.getInt().doubleValue();
+			break;
+		case java.sql.Types.BIGINT:
+			ret = field.getLong().doubleValue();
+			break;
+		case java.sql.Types.SMALLINT:
+			ret = field.getShort().doubleValue();
+			break;
+		case java.sql.Types.DECIMAL:
+		case java.sql.Types.NUMERIC:
+			ret = field.getBigDecimal().doubleValue();
+			break;
+		case java.sql.Types.DOUBLE:
+		case java.sql.Types.FLOAT:
+			ret = field.getDouble();
+			break;
+		case java.sql.Types.REAL:
+			ret = field.getFloat().doubleValue();
+			break;
+		case java.sql.Types.DATE:
+			ret = (double) field.getDate().getTime();
+			break;
+		case java.sql.Types.TIMESTAMP:
+		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
+			// ret = (double) com.basis.util.BasisDate.jul(new
+			// java.util.Date(field.getTimestamp().getTime()));
+			ret = (double) field.getTimestamp().getTime();
+			break;
+		case java.sql.Types.TIME:
+		case java.sql.Types.TIME_WITH_TIMEZONE:
+			Time t = field.getTime();
+			Double d = (double) t.getHours();
+			Double d1 = (double) t.getMinutes();
+			d1 = d1 / 60;
+			d += d1;
+			d1 = (double) t.getSeconds();
+			d1 = d1 / 3600;
+			d += d1;
+			ret = d;
+			break;
+		case java.sql.Types.BIT:
+		case java.sql.Types.BOOLEAN:
+			if (field.getBoolean())
+				ret = 1.0;
+			else
+				ret = 0.0;
+			break;
+		case java.sql.Types.TINYINT:
+			ret = ((Integer) Byte.toUnsignedInt(field.getByte())).doubleValue();
+			break;
+		default:
+			ret = null;
+			break;
 		}
-
-		return v;
+		return ret;
 	}
 
-	public String getFieldType(String name) throws Exception {
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
-			throw new Exception("Field " + name + " does not exist");
-
-		return Character.toString(field.getType());
-
+	public int getColumnIndex(String name) throws Exception {
+		return getColumnIndex(name, false);
 	}
 
-	public int getFieldLength(String name) throws Exception {
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
+	public int getColumnIndex(String name, Boolean silent) throws Exception {
+		int column = this.ResultSet.getColumnIndex(name);
+		if (column == -1 && !(silent))
 			throw new Exception("Field " + name + " does not exist");
+		return column;
+	}
 
-		return field.getLength();
+	public String getColumnName(int column) throws Exception {
+		return getColumnName(column, false);
+	}
 
+	public String getColumnName(int column, Boolean silent) throws Exception {
+		if ((this.ResultSet.getColumnNames().isEmpty() || column < 0 || column >= this.ResultSet
+				.getColumnNames().size()) && !(silent))
+			throw new Exception("Column " + String.valueOf(column)
+					+ " does not exist");
+		return this.ResultSet.getColumnNames().get(column);
+	}
+
+	public int getFieldType(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getColumnType(column);
+	}
+
+	public String getFieldTypeName(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getColumnTypeName(column);
+	}
+
+	public int getFieldDisplaySize(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getColumnDisplaySize(column);
+	}
+
+	public String getFieldCatalogName(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getCatalogName(column);
+	}
+
+	public String getFieldClassName(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getColumnClassName(column);
+	}
+
+	public int getColumnCount() throws Exception {
+		return this.ResultSet.getColumnCount();
+	}
+
+	public String getFieldLabel(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getColumnLabel(column);
+	}
+
+	public int getFieldPrecision(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getPrecision(column);
+	}
+
+	public String getFieldSchemaName(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getSchemaName(column);
+	}
+
+	public String getFieldTableName(String name) throws Exception {
+		int column = getColumnIndex(name);
+		return this.ResultSet.getTableName(column);
 	}
 
 	public void setFieldAttribute(String name, String attrname, String value)
 			throws Exception {
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
-			throw new Exception("Field " + name + " does not exist");
-
+		DataField field = getField(name);
 		field.setAttribute(attrname, value);
-
 	}
 
 	public String getFieldAttribute(String name, String attrname)
 			throws Exception {
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
-			throw new Exception("Field " + name + " does not exist");
-
+		DataField field = getField(name);
 		String attr = field.getAttribute(attrname);
 		if (attr == null)
 			attr = "";
-
 		return attr;
-
 	}
 
 	public HashMap<String, String> getFieldAttributes(String name)
 			throws Exception {
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
-			throw new Exception("Field " + name + " does not exist");
-
+		DataField field = getField(name);
 		return field.getAttributes();
-
 	}
 
 	public void removeFieldAttribute(String name, String attrname)
 			throws Exception {
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
-			throw new Exception("Field " + name + " does not exist");
-
+		DataField field = getField(name);
 		field.removeAttribute(attrname);
-
 	}
 
-	public void removeField(String name) {
-		this.FieldList.remove(name);
-		this.FieldNames.remove(name);
+	public void removeField(String name) throws Exception {
+		int column = getColumnIndex(name);
+		this.ResultSet.removeColumn(column);
+		this.DataFields.remove(name);
 	}
 
-	public BBjVector getAttributeForFields(String attrname) {
+	public ArrayList<String> getAttributeForFields(String attrname) {
 		return this.getAttributeForFields(attrname, false);
 	}
 
-	// rem /**
-	// rem * Method getAttributeForFields:
-	// rem * get all attributes, with a specific attribute name, as a BBjVector
-	// rem * @param String attrame: the name of the attribute
-	// rem * @param BBjNumber defaultToFieldname: if 1 return the field name if
-	// attribute value is empty
-	// rem * @return BBjVector vec: a BBjVector with the attributes with the
-	// given attribute name
-	// rem */
-	public BBjVector getAttributeForFields(String attrname,
+	/**
+	 * Method getAttributeForFields: Get all attributes for a specific attribute
+	 * name
+	 * 
+	 * @param String
+	 *            attrname: the name of the attribute
+	 * @param Boolean
+	 *            defaultToFieldname: if 1, return the field name if attribute
+	 *            value is empty
+	 * @return ArrayList list: a list of field attributes for the given
+	 *         attribute name
+	 */
+	public ArrayList<String> getAttributeForFields(String attrname,
 			Boolean defaultToFieldname) {
 		DataField field;
-		BBjVector ret = new BBjVector();
-
-		if (this.FieldNames.size() > 0) {
-			Iterator<String> it = this.FieldNames.iterator();
+		ArrayList<String> ret = new ArrayList<String>();
+		if (this.ResultSet.getColumnNames().size() > 0) {
+			Iterator<String> it = this.ResultSet.getColumnNames().iterator();
 			while (it.hasNext()) {
 				String n = it.next();
-				field = this.FieldList.get(n);
+				field = this.DataFields.get(n);
 				String r = field.getAttribute(attrname);
-
 				if (r == "" && defaultToFieldname)
 					r = n;
-				ret.addItem(r);
+				ret.add(r);
 			}
 		}
 		return ret;
 	}
 
-	//
-	//
-	// rem /**
-	// rem * Method replaceFields:
-	// rem * search and replace all the field names in a given string (formula)
-	// with the field value.
-	// rem * The field name should be escaped as "F{name}".
-	// rem * @param String formula: the string with the escaped field names
-	// rem * @return String formula: the replaced string
-	// rem */
-	public String replaceFields(String Formula) throws Exception {
-
-		return replaceFields(Formula, false);
-
+	/**
+	 * Method replaceFields: Search and replace all the field names in a given
+	 * string (formula) with the field value. The field name should be escaped
+	 * as "F{name}".
+	 * 
+	 * @param String
+	 *            formula: the string with the escaped field names
+	 * @return String formula: the replaced string
+	 */
+	public String replaceFields(String formula) throws Exception {
+		return replaceFields(formula, false);
 	}
 
-	public String replaceFields(String Formula,
+	public String replaceFields(String formula,
 			Boolean fCleanRemainingPlaceholders) throws Exception {
-
-		Set<String> ks = this.FieldList.keySet();
+		Set<String> ks = this.DataFields.keySet();
 		Iterator<String> it = ks.iterator();
-
 		while (it.hasNext()) {
 			String k = it.next();
 			String k1 = "$F{" + k + "}";
 
-			Formula = Formula.replace(k1, this.getFieldAsString(k));
+			formula = formula.replace(k1, this.getFieldAsString(k));
 		}
-
 		if (fCleanRemainingPlaceholders) {
-			Formula = Formula.replaceAll("\\$F\\{\\S*\\}", "");
+			formula = formula.replaceAll("\\$F\\{\\S*\\}", "");
 		}
-
-		return Formula;
-
+		return formula;
 	}
 
-	public Boolean equals(DataRow r) throws Exception {
+	public Boolean equals(DataRow dr) throws Exception {
 		Boolean eq = true;
-		BBjVector fields = r.getFieldNames();
-
-		if (fields.size() != this.FieldList.size())
+		ArrayList<String> fields = dr.getFieldNames();
+		if (fields.size() != this.DataFields.size())
 			eq = false;
 		else {
-			@SuppressWarnings("unchecked")
 			Iterator<String> it = fields.iterator();
 			while (it.hasNext()) {
-				String fieldname = it.next();
-				DataField f = this.FieldList.get(fieldname);
+				String name = it.next();
+				DataField f = this.DataFields.get(name);
 				if (f == null
-						|| !r.getFieldAsString(fieldname).equals(
-								this.getFieldAsString(fieldname))) {
+						|| !dr.getFieldAsString(name).equals(
+								this.getFieldAsString(name))) {
 					eq = false;
 					break;
 				}
@@ -618,180 +440,365 @@ public class DataRow {
 		return eq;
 	}
 
-	public void addDataField(String name, DataField field) {
-		if (FieldList.containsKey(name)) {
-			FieldList.remove(name);
-			FieldNames.remove(name);
+	public void addDataField(String name, DataField field) throws Exception {
+		Object o = field.getObject(); // default
+		int type;
+		String typeName = o.getClass().getCanonicalName();
+		if (typeName != null && typeName.startsWith("[")) {
+			if (typeName.contains("byte"))
+				type = java.sql.Types.ARRAY;
+			else
+				type = java.sql.Types.VARBINARY;
+		} else {
+			switch (typeName) {
+			case "java.lang.String":
+				type = java.sql.Types.VARCHAR;
+				break;
+			case "byte":
+			case "java.lang.Byte":
+				type = java.sql.Types.TINYINT;
+				break;
+			case "long":
+			case "java.lang.Long":
+			case "java.math.BigInteger":
+				type = java.sql.Types.BIGINT;
+				break;
+			case "short":
+			case "java.lang.Short":
+				type = java.sql.Types.SMALLINT;
+				break;
+			case "boolean":
+			case "java.lang.Boolean":
+				type = java.sql.Types.BOOLEAN;
+				break;
+			case "char":
+			case "java.lang.Character":
+				type = java.sql.Types.CHAR;
+				break;
+			case "double":
+			case "java.lang.Double":
+				type = java.sql.Types.DOUBLE;
+				break;
+			case "float":
+			case "java.lang.Float":
+				type = java.sql.Types.REAL;
+				break;
+			case "int":
+			case "java.lang.Integer":
+				type = java.sql.Types.INTEGER;
+				break;
+			case "java.math.BigDecimal":
+				type = java.sql.Types.NUMERIC;
+				break;
+			case "java.sql.Date":
+				type = java.sql.Types.DATE;
+				break;
+			case "java.sql.Time":
+				type = java.sql.Types.TIME;
+				break;
+			case "java.sql.Timestamp":
+				type = java.sql.Types.TIMESTAMP;
+				break;
+			case "java.sql.Blob":
+				type = java.sql.Types.BLOB;
+				break;
+			case "java.sql.Clob":
+				type = java.sql.Types.CLOB;
+				break;
+			case "java.sql.Array":
+				type = java.sql.Types.ARRAY;
+				break;
+			case "java.sql.Struct":
+				type = java.sql.Types.STRUCT;
+				break;
+			case "java.sql.Ref":
+				type = java.sql.Types.REF;
+				break;
+			default:
+				type = java.sql.Types.OTHER;
+				break;
+			}
 		}
-		this.FieldList.put(name, field);
-		this.FieldNames.add(name);
+		addDataField(name, type, field);
+	}
+
+	public void addDataField(String name, int type, DataField field)
+			throws Exception {
+		
+		if (this.ResultSet.getColumnIndex(name) == -1) {
+			int column = this.ResultSet.addColumn(name);
+			this.ResultSet.setColumnType(column, type);
+		}
+		this.DataFields.put(name, field);
 	}
 
 	public DataField getDataField(String name) {
-		return this.FieldList.get(name);
+		return this.DataFields.get(name);
 	}
 
 	public DataRow clone() {
-
-		DataRow dRow = new DataRow();
-
-		Iterator<String> it = this.FieldNames.iterator();
+		DataRow dr = new DataRow();
+		Iterator<String> it = this.ResultSet.getColumnNames().iterator();
 		while (it.hasNext()) {
 			String k = it.next();
-			DataField f = this.FieldList.get(k);
+			DataField f = this.DataFields.get(k);
 			DataField f1 = f.clone();
-			dRow.addDataField(k, f1);
+			try {
+				dr.addDataField(k, this.getFieldType(k), f1);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-
-		return dRow;
+		return dr;
 	}
 
 	public String getInsertStatement() {
-
-		Set<String> ks = this.FieldList.keySet();
+		Set<String> ks = this.DataFields.keySet();
 		Iterator<String> it = ks.iterator();
 		String f1 = "";
 		String v = "";
 		String sql;
 		while (it.hasNext()) {
 			String k = it.next();
-			DataField f = this.FieldList.get(k);
-			if (f.isNull())
-				continue;
+			try {
+				if (isFieldNull(k))
+					continue;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			f1 = f1 + "," + k;
-			v = v + "," + f.getValueForSQL();
+			try {
+				v = v + "," + getFieldForSQL(k);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-
 		sql = "(" + f1.substring(1) + ") VALUES (" + v.substring(1) + ")";
-
 		return sql;
-
 	}
 
 	public String getUpdateStatement() {
-
-		Set<String> ks = this.FieldList.keySet();
+		Set<String> ks = this.DataFields.keySet();
 		Iterator<String> it = ks.iterator();
-
 		String sql = "";
 		while (it.hasNext()) {
 			String k = it.next();
-			DataField f = this.FieldList.get(k);
-			if (f.isNull())
-				continue;
-
-			sql = sql + ", " + k + "=" + f.getValueForSQL();
+			try {
+				if (isFieldNull(k))
+					continue;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				sql = sql + ", " + k + "=" + getFieldForSQL(k);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-
 		if (sql.length() > 0)
 			sql = sql.substring(1);
-
 		return sql;
 	}
 
 	public java.util.HashMap<String, Object> getObjects() {
-
 		HashMap<String, Object> hm = new HashMap<String, Object>();
-
-		Set<String> ks = this.FieldList.keySet();
+		Set<String> ks = this.DataFields.keySet();
 		Iterator<String> it = ks.iterator();
-
 		while (it.hasNext()) {
 			String k = it.next();
-			DataField f = this.FieldList.get(k);
-
-			if (f.isNull())
-				continue;
-
-			hm.put(k, f.getObject());
+			try {
+				if (isFieldNull(k))
+					continue;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				hm.put(k, getField(k));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-
 		return hm;
-
 	}
 
-	public void setSQLType(String name, int SQLType) throws Exception {
-		DataField field = this.FieldList.get(name);
-
-		if (field == null)
-			throw new Exception("Field " + name + " does not exist");
-
-		field.setSQLType(SQLType);
-
-	}
-
-	@SuppressWarnings("rawtypes")
-	public void mergeRecord(DataRow r) throws Exception {
-		BBjVector v = r.getFieldNames();
-		Iterator it = v.iterator();
+	public void mergeRecord(DataRow dr) {
+		ArrayList<String> names = dr.getFieldNames();
+		Iterator<String> it = names.iterator();
 		while (it.hasNext()) {
-
-			String f = (String) it.next();
-			this.addDataField(f, r.getDataField(f));
-
-		}
-
-	}
-
-	public String toJson() {
-
-		String json = "";
-		Iterator<String> it = FieldList.keySet().iterator();
-		while (it.hasNext()) {
-			String k = it.next();
-			if (!json.isEmpty()) {
-				json += ',';
-			}
-			json += FieldList.get(k).toJson();
-
-		}
-
-		json = "{\"datarow\":[" + json + "]}";
-		return json;
-	}
-
-	public JsonElement toJsonElement() {
-
-		JsonArray jsonarray = new JsonArray();
-
-		Iterator<String> it = FieldList.keySet().iterator();
-		while (it.hasNext()) {
-			String k = it.next();
-			jsonarray.add(FieldList.get(k).toJsonElement());
-		}
-
-		return jsonarray;
-	}
-
-	// public JsonElement toJsonElementOld() {
-	//
-	// String json=toJson();
-	// JsonElement jelement = new JsonParser().parse(json);
-	// JsonObject jobject = jelement.getAsJsonObject();
-	// return jobject.get("datarow");
-	// }
-
-	public static DataRow fromJson(String json) {
-
-		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-		
-		JsonElement jelement = new JsonParser().parse(json);
-		JsonObject jobject = jelement.getAsJsonObject();
-		JsonArray jarray = jobject.getAsJsonArray("datarow");
-		Type type = new TypeToken<List<DataField>>() {
-		}.getType();
-		List<DataField> records = gson.fromJson(jarray, type);
-		DataRow r = new DataRow();
-
-		if (records != null){
-			Iterator<DataField> it = records.iterator();
-			while (it.hasNext()) {
-				DataField df = it.next();
-				r.addDataField(df.getName(), df);
+			String f = it.next();
+			try {
+				this.addDataField(f, dr.getFieldType(f), dr.getDataField(f));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
+	}
 
-		return r;
+	public String toJson() throws Exception {
+		ResultSet rs = new ResultSet();
+		rs.add(this);
+		return rs.toJson();
+
+	}
+
+	public static DataRow fromJson(String in) throws Exception {
+		JsonFactory f = new JsonFactory();
+		@SuppressWarnings("deprecation")
+		JsonParser jp = f.createJsonParser(in);
+		jp.nextToken();
+		ObjectMapper objectMapper = new ObjectMapper();
+		 @SuppressWarnings("rawtypes")
+		List navigation = objectMapper.readValue(jp,
+		            objectMapper.getTypeFactory().constructCollectionType(
+		                    List.class, Object.class));
+
+		 HashMap<?, ?> hm = (HashMap<?, ?>) navigation.get(0);
+		 
+		 DataRow dr = new DataRow();
+		 
+		 if (hm.containsKey("meta")){
+			 //new format
+
+			  @SuppressWarnings("rawtypes")
+			HashMap meta = (HashMap) hm.get("meta");
+			  @SuppressWarnings("rawtypes")
+			Iterator it = meta.keySet().iterator();
+			  
+			  while (it.hasNext()){
+				  String fieldName = (String) it.next();
+				  @SuppressWarnings({ "rawtypes", "unchecked" })
+				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
+				  Object fieldObj = hm.get(fieldName);
+				  int fieldType=Integer.parseInt((String) fieldMeta.get("ColumnType"));
+					switch (fieldType){
+					case java.sql.Types.CHAR                    : 
+					case java.sql.Types.VARCHAR                 : 
+					case java.sql.Types.NVARCHAR                : 
+					case java.sql.Types.NCHAR                   :
+					case java.sql.Types.LONGVARCHAR             : 
+					case java.sql.Types.LONGNVARCHAR            : 
+						dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
+						break;
+
+					case java.sql.Types.BIGINT                  :
+					case java.sql.Types.TINYINT                 : 
+					case java.sql.Types.INTEGER                 : 
+					case java.sql.Types.SMALLINT                :
+						dr.addDataField(fieldName, fieldType, new DataField(Integer.parseInt(fieldObj.toString())));
+						break;
+						
+						
+					case java.sql.Types.NUMERIC                 : 
+					case java.sql.Types.DOUBLE                  : 
+					case java.sql.Types.FLOAT                   : 
+					case java.sql.Types.DECIMAL                 : 
+					case java.sql.Types.REAL                    :
+						dr.addDataField(fieldName, fieldType, new DataField(Double.parseDouble(fieldObj.toString())));
+						break;
+						
+					case java.sql.Types.BOOLEAN                 : 
+					case java.sql.Types.BIT                     : 
+						dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
+						break;
+						
+					case java.sql.Types.TIMESTAMP               : 
+					case java.sql.Types.TIMESTAMP_WITH_TIMEZONE : 
+					case (int) 11                               :
+						String tss = fieldObj.toString();
+						java.sql.Timestamp ts = java.sql.Timestamp.valueOf(tss.substring(0,10)+" "+tss.substring(11, 19));
+						dr.addDataField(fieldName, fieldType, new DataField(ts));
+						break;						
+						
+					case java.sql.Types.DATE                    : 
+					case (int) 9                                :
+						tss = fieldObj.toString();
+						java.sql.Date ds = java.sql.Date.valueOf(tss.substring(0,10));
+						dr.addDataField(fieldName, fieldType, new DataField(ds));
+						break;						
+						
+					case java.sql.Types.ARRAY                   : 
+					case java.sql.Types.BINARY                  : 
+					case java.sql.Types.BLOB                    : 
+					case java.sql.Types.CLOB                    : 
+					case java.sql.Types.DATALINK                : 
+					case java.sql.Types.DISTINCT                : 
+					case java.sql.Types.JAVA_OBJECT             : 
+					case java.sql.Types.LONGVARBINARY           : 
+					case java.sql.Types.NCLOB                   : 
+					case java.sql.Types.NULL                    : 
+					case java.sql.Types.OTHER                   : 
+					case java.sql.Types.REF                     : 
+					case java.sql.Types.REF_CURSOR              : 
+					case java.sql.Types.ROWID                   : 
+					case java.sql.Types.SQLXML                  : 
+					case java.sql.Types.STRUCT                  : 
+					case java.sql.Types.TIME                    : 
+					case java.sql.Types.TIME_WITH_TIMEZONE      : 
+					case java.sql.Types.VARBINARY               : 
+					default:
+						break;
+			
+			}//switch
+				  
+
+				Set<String> ks=fieldMeta.keySet();
+				if (ks.size()>1)
+				{
+					Iterator<String> itm = ks.iterator();
+					while (itm.hasNext()){
+						String k=(String) itm.next();
+						if (k.equals("ColumnType"))
+							continue;
+						
+						dr.setFieldAttribute(fieldName, k, (String) fieldMeta.get(k));
+					}
+				}
+
+
+			  }
+			  
+			  
+		 }
+		 else
+		 {
+			 //old format - deprecated
+			@SuppressWarnings("rawtypes")
+			Iterator it = navigation.iterator();
+			 while (it.hasNext()){
+				 @SuppressWarnings("unchecked")
+				HashMap<String,?>field = (HashMap<String, ?>) it.next();
+				 String name = (String) field.get("Name");
+				 String type = (String) field.get("Type");
+				 switch (type){
+				 case "C":
+					 String strval = (String) field.get("StringValue");
+					 dr.setFieldValue(name, strval);
+					 break;
+				 case "N":
+					 Double numval = (Double) field.get("NumericValue");
+					 dr.setFieldValue(name, numval);
+					 break;
+				 default:
+					 break;
+				 }
+				 
+			 }
+			 
+		 }
+		return dr;
+	}
+
+	public Object toJsonElement() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

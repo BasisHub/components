@@ -1,587 +1,134 @@
 package com.basiscomponents.db;
 
 import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.basis.util.common.BBjNumber;
-import com.basis.util.common.BasisNumber;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 
-public class DataField {
+public class DataField implements java.io.Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Expose
-	String Name;
-	@Expose
-	String StringValue;
-	@Expose
-	java.sql.Date DateValue;
-	@Expose
-	java.sql.Timestamp TimestampValue;
-	@Expose
-	java.sql.Time TimeValue;
-	@Expose
-	java.math.BigDecimal BigDecimalValue;
-	@Expose
-	java.lang.Double DoubleValue;
-	@Expose
-	java.lang.Integer IntegerValue;
-	@Expose
-	java.lang.Boolean BooleanValue;
-	int Length;
-	@Expose
-	char Type;
-	int SQLType;
-	java.util.HashMap<String, String> Attributes = new java.util.HashMap<String, String>();
+	private Object Value;
 
-	public DataField(String name, char type) throws Exception {
-		this.Name = name;
-		setType(type);
-	}
+	private HashMap<String, String> Attributes = new HashMap<String, String>();
 
-	public DataField(String name, char type, String value) throws Exception {
-		this(name, type);
+	public DataField(Object value) {
 		setValue(value);
 	}
 
-	public DataField(String name, char type, Double doubleValue2)
-			throws Exception {
-		this(name, type);
-		setValue(doubleValue2);
+	public Object getValue() {
+		return this.Value;
 	}
 
-	public DataField(String name, char type, Boolean booleanValue2)
-			throws Exception {
-		this(name, type);
-		setValue(booleanValue2);
+	public void setValue(Object value) {
+		this.Value = value;
 	}
 
-	public DataField(String name, char type, Integer integerValue2)
-			throws Exception {
-		this(name, type);
-		setValue(integerValue2);
-	}
-
-	public DataField(String name, char type, java.sql.Date dateValue2)
-			throws Exception {
-		this(name, type);
-		setValue(dateValue2);
-	}
-
-	public DataField(String name, char type, Timestamp timestampValue2)
-			throws Exception {
-		this(name, type);
-		setValue(timestampValue2);
-	}
-
-	public DataField(String name, char type, BigDecimal bigDecimalValue2)
-			throws Exception {
-		this(name, type);
-		setValue(bigDecimalValue2);
-	}
-
-	public DataField(String name, char type, Time timeValue2) throws Exception {
-		this(name, type);
-		setValue(timeValue2);
-	}
-
-	public DataField(String name, char type, BBjNumber value) throws Exception {
-		this(name, type);
-		setValue(value);
-	}
-
-	public void setType(char type) throws Exception {
-		if ("CNDTXIBY".indexOf(type) > -1) {
-			this.Type = type;
-		} else {
-			throw new Exception("Type unknown");
-		}
-
-	}
-
-	public int getLength() {
-		return this.Length;
-	}
-
-	public void setLength(int len) {
-		this.Length = len;
-	}
-
-	public char getType() {
-		return this.Type;
-	}
-
-	public void setSQLType(int i) {
-		this.SQLType = i;
-	}
-
-	public int getSQLType() {
-		return this.SQLType;
-	}
-
-	public void setValue(String value) {
-
-		if (this.Type == 'C') {
-			this.StringValue = value;
-		}
-
-		if (this.Type == 'N') {
-			if (value == null) {
-				this.DoubleValue = null;
-			} else {
-				if (value.isEmpty())
-					this.DoubleValue = 0.0;
-				else
-					this.DoubleValue = java.lang.Double.valueOf(value);
-			}
-		}
-
-		if (this.Type == 'I') {
-			if (value == null) {
-				this.IntegerValue = null;
-			} else {
-				if (value.isEmpty())
-					this.IntegerValue = 0;
-				else
-					this.IntegerValue = java.lang.Integer.valueOf(value);
-			}
-
-		}
-
-		if (this.Type == 'B') {
-			if (value == null) {
-				this.BooleanValue = null;
-			} else {
-				if (".T. 1 true TRUE True".contains(value)) {
-					this.BooleanValue = true;
-				} else {
-					this.BooleanValue = false;
-				}
-			}
-
-		}
-
-		if (this.Type == 'D') {
-			if (value == null) {
-				this.DateValue = null;
-			} else {
-
-				if (value.isEmpty())
-					this.DateValue = null;
-				else {
-					int i = -1;
-					try {
-						i = Integer.valueOf(value);
-					} catch (Exception e) {
-						System.err.println(e.toString());
-					}
-
-					if (i > -1)
-						this.DateValue = new java.sql.Date(
-								com.basis.util.BasisDate.date(i).getTime());
-					else
-						this.DateValue = null;
-				}
-
-			}
-
-		}
-
-		if (this.Type == 'I') {
-
-			if (value == "")
-				this.IntegerValue = null;
-			else {
-				this.IntegerValue = Integer.valueOf(value);
-			}
-
-		}
-
-		if (this.Type == 'X') {
-
-			if (value == "")
-				this.TimestampValue = null;
-
-		}
-
-		if (this.Type == 'Y') {
-			if (value == null) {
-				this.BigDecimalValue = null;
-			} else {
-				if (value.isEmpty()) {
-					this.BigDecimalValue = new java.math.BigDecimal(0);
-				} else {
-					try {
-						this.BigDecimalValue = new java.math.BigDecimal(value);
-					} catch (Exception e) {
-						System.err.println(e.toString());
-					}
-
-				}
-				// rem TODO DTB
-
-			}
-
-		}
-
-	}
-
-	public void setValue(BBjNumber value) throws Exception {
-
-		if (this.Type == 'C')
-			this.StringValue = value.toString();
-
-		if (this.Type == 'N')
-			this.DoubleValue = value.doubleValue();
-
-		if (this.Type == 'I')
-			this.IntegerValue = value.intValue();
-
-		if (this.Type == 'B')
-			this.BooleanValue = (value.compareTo(0) != 0);
-
-		if (this.Type == 'D') {
-			int f = value.compareTo(BasisNumber.createBasisNumber(0));
-			if (f == 0)
-				this.DateValue = new java.sql.Date(
-						new java.util.Date().getTime());
-
-			if (f < 0)
-				this.DateValue = null;
-
-			if (f > 0)
-				this.DateValue = java.sql.Date.valueOf(com.basis.util.BasisDate
-						.date(value.intValue(), 0.0, "%Yl-%Mz-%Dz"));
-		}
-
-		if (this.Type == 'X') {
-			if (value.equals(0))
-				this.TimestampValue = new java.sql.Timestamp(
-						new java.util.Date().getTime());
-
-			if (value.compareTo(0) < 0)
-				this.TimestampValue = null;
-
-			if (value.compareTo(0) > 0)
-				this.TimestampValue = java.sql.Timestamp
-						.valueOf(com.basis.util.BasisDate.date(
-								value.intValue(), 0.0, "%Yl-%Mz-%Dz"));
-
-		}
-
-		if (this.Type == 'Y')
-			this.BigDecimalValue = new java.math.BigDecimal(value.doubleValue());
-
-		if (this.Type == 'T')
-			this.TimeValue = new java.sql.Time(value.intValue());
-
-	}
-
-	public void setValue(java.sql.Date value) {
-		if (this.Type == 'X') {
-			this.TimestampValue = new java.sql.Timestamp(value.getTime());
-		} else {
-			this.DateValue = value;
-		}
-	}
-
-	public void setValue(java.sql.Timestamp value) {
-		this.TimestampValue = value;
-	}
-
-	public void setValue(java.lang.Double value) {
-		this.DoubleValue = value;
-	}
-
-	public void setValue(java.lang.Integer value) throws Exception {
-
-		if (this.Type == 'D') {
-			if (value.compareTo(0) == 0)
-				this.DateValue = new java.sql.Date(
-						new java.util.Date().getTime());
-
-			if (value.compareTo(0) < 0)
-				this.DateValue = null;
-
-			if (value.compareTo(0) > 0)
-				this.DateValue = java.sql.Date.valueOf(com.basis.util.BasisDate
-						.date(value.intValue(), 0.0, "%Yl-%Mz-%Dz"));
-		} else
-			this.IntegerValue = value;
-	}
-
-	public void setValue(java.lang.Boolean value) {
-		this.BooleanValue = value;
-	}
-
-	public void setValue(java.math.BigDecimal value) {
-		this.BigDecimalValue = value;
-	}
-
-	public void setValue(java.sql.Time value) {
-		TimeValue = value;
-	}
-
-	public String getValueAsString() {
-		String ret = "";
-
-		if (this.Type == 'C') {
-			if (this.StringValue == null) {
-				ret = "";
-			} else {
-				ret = this.StringValue;
-			}
-		}
-
-		if (this.Type == 'N')
-			if (this.DoubleValue == null) {
-				ret = "";
-			} else {
-				ret = this.DoubleValue.toString();
-			}
-
-		if (this.Type == 'I')
-			if (this.IntegerValue == null) {
-				ret = "";
-			} else {
-				ret = this.IntegerValue.toString();
-			}
-
-		if (this.Type == 'B')
-			if (this.BooleanValue == null) {
-				ret = "";
-			} else {
-				if (this.BooleanValue)
-					ret = "1";
-				else
-					ret = "0";
-			}
-
-		if (this.Type == 'D') {
-			// TODO: nice formatting honoring locale
-			if (this.DateValue == null) {
-				ret = "";
-			} else {
-				ret = this.DateValue.toString();
-			}
-		}
-		if (this.Type == 'X') {
-			// TODO: nice formatting honoring locale
-			if (this.TimestampValue == null) {
-				ret = "";
-			} else {
-				ret = this.TimestampValue.toString();
-			}
-		}
-		if (this.Type == 'Y') {
-			// TODO: nice formatting honoring locale
-			if (this.BigDecimalValue == null) {
-				ret = "";
-			} else {
-				ret = this.BigDecimalValue.toString();
-			}
-		}
-		if (this.Type == 'T') {
-			// TODO: nice formatting honoring locale
-			if (this.TimeValue == null) {
-				ret = "";
-			} else {
-				ret = this.TimeValue.toString();
-			}
-		}
-
-		return ret;
-	}
-
-	public Boolean isNull() {
-
-		if (this.Type == 'C' && this.StringValue != null)
-			return false;
-
-		if (this.Type == 'N' && this.DoubleValue != null)
-			return false;
-
-		if (this.Type == 'I' && this.IntegerValue != null)
-			return false;
-
-		if (this.Type == 'B' && this.BooleanValue != null)
-			return false;
-
-		if (this.Type == 'D' && this.DateValue != null)
-			return false;
-
-		if (this.Type == 'X' && this.TimestampValue != null)
-			return false;
-
-		if (this.Type == 'Y' && this.BigDecimalValue != null)
-			return false;
-
-		if (this.Type == 'T' && this.TimeValue != null)
-			return false;
-
-		return true;
-	}
-
-	public String getValueForSQL() {
-		String ret = "";
-
-		if (this.Type == 'C')
-			if (this.StringValue == null)
-				ret = "NULL";
-			else
-				ret = "'" + this.StringValue + "'";
-
-		if (this.Type == 'N')
-			if (this.DoubleValue == null)
-				ret = "NULL";
-			else
-				ret = this.DoubleValue.toString();
-
-		if (this.Type == 'I')
-			if (this.IntegerValue == null)
-				ret = "NULL";
-			else
-				ret = this.IntegerValue.toString();
-
-		if (this.Type == 'B')
-			if (this.BooleanValue == null)
-				ret = "NULL";
-			else
-				ret = this.BooleanValue.toString();
-
-		if (this.Type == 'D')
-			if (this.DateValue == null)
-				ret = "NULL";
-			else
-				ret = this.DateValue.toString();
-
-		if (this.Type == 'X')
-			if (this.TimestampValue == null)
-				ret = "NULL";
-			else
-				ret = "'" + this.TimestampValue.toString() + "'";
-
-		if (this.Type == 'Y')
-			if (this.BigDecimalValue == null)
-				ret = "NULL";
-			else
-				ret = this.BigDecimalValue.toString();
-
-		if (this.Type == 'T')
-			if (this.TimeValue == null)
-				ret = "NULL";
-			else
-				ret = this.TimeValue.toString();
-
-		return ret;
+	public String getClassName() {
+		return this.Value.getClass().getCanonicalName();
 	}
 
 	public Object getObject() {
-		Object obj = null;
-
-		if (this.Type == 'C')
-			obj = this.StringValue;
-
-		if (this.Type == 'N')
-			obj = this.DoubleValue;
-
-		if (this.Type == 'I')
-			obj = this.IntegerValue;
-
-		if (this.Type == 'B')
-			obj = this.BooleanValue;
-
-		if (this.Type == 'D')
-			obj = this.DateValue;
-
-		if (this.Type == 'X')
-			obj = this.TimestampValue;
-
-		if (this.Type == 'Y')
-			obj = this.BigDecimalValue;
-
-		if (this.Type == 'T')
-			obj = this.TimeValue;
-
-		return obj;
+		return this.Value;
 	}
 
-	@SuppressWarnings("deprecation")
-	public Double getValueAsNumber() throws Exception {
-		Double ret = 0.0;
+	public String getString() {
+		return (String) this.Value.toString();
+	}
 
-		if (this.Type == 'C')
-			if (this.StringValue != null)
-				ret = Double.valueOf(this.StringValue);
-			else
-				ret = 0.0;
+	public Integer getInt() {
+		return (Integer) this.Value;
+	}
 
-		if (this.Type == 'N')
-			ret = this.DoubleValue;
+	public Byte getByte() {
+		return (Byte) this.Value;
+	}
 
-		if (this.Type == 'D')
-			if (this.DateValue == null)
-				ret = -1.0;
-			else {
-				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(
-						this.DateValue.getTime()));
-				ret = ret2.doubleValue();
-			}
+	public Short getShort() {
+		return (Short) this.Value;
+	}
 
-		if (this.Type == 'X')
-			if (this.TimestampValue == null)
-				ret = -1.0;
-			else {
+	public Long getLong() {
+		return (Long) this.Value;
+	}
 
-				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(
-						this.TimestampValue.getTime()));
-				ret = ret2.doubleValue();
-			}
+	public BigDecimal getBigDecimal() {
+		return (BigDecimal) this.Value;
+	}
 
-		if (this.Type == 'B')
-			if (this.BooleanValue)
-				ret = 1.0;
-			else
-				ret = 0.0;
+	public Double getDouble() {
+		return (Double) this.Value;
+	}
 
-		if (this.Type == 'I')
-			if (this.IntegerValue == null)
-				ret = -1.0;
-			else
-				ret = this.IntegerValue.doubleValue();
+	public Float getFloat() {
+		return (Float) this.Value;
+	}
 
-		if (this.Type == 'Y')
-			if (this.BigDecimalValue == null)
-				ret = -1.0;
-			else
-				ret = this.BigDecimalValue.doubleValue();
+	public Date getDate() {
+		return (Date) this.Value;
+	}
 
-		if (this.Type == 'T')
-			if (this.TimeValue == null)
-				ret = -1.0;
-			else {
+	public Time getTime() {
+		return (Time) this.Value;
+	}
 
-				Double d = (double) this.TimeValue.getHours();
-				Double d1 = (double) (this.TimeValue.getMinutes());
-				d1 = d1 / 60;
-				d += d1;
-				d1 = (double) (this.TimeValue.getSeconds());
-				d1 = d1 / 3600;
-				d += d1;
+	public Timestamp getTimestamp() {
+		return (Timestamp) this.Value;
+	}
 
-				ret = d;
-			}
+	public byte[] getBytes() {
+		return (byte[]) this.Value;
+	}
 
-		return ret;
+	public Array getArray() {
+		return (Array) this.Value;
+	}
+
+	public Blob getBlob() {
+		return (Blob) this.Value;
+	}
+
+	public Clob getClob() {
+		return (Clob) this.Value;
+	}
+
+	public NClob getNClob() {
+		return (NClob) this.Value;
+	}
+
+	public Boolean getBoolean() {
+		return (Boolean) this.Value;
+	}
+
+	public Ref getRef() {
+		return (Ref) this.Value;
+	}
+
+	public URL getURL() {
+		return (URL) this.Value;
+	}
+
+	public SQLXML getSQLXML() {
+		return (SQLXML) this.Value;
 	}
 
 	public void setAttribute(String name, String value) {
@@ -593,10 +140,8 @@ public class DataField {
 	}
 
 	@SuppressWarnings("unchecked")
-	public java.util.HashMap<String, String> getAttributes() {
-		java.util.HashMap<String, String> clone = (java.util.HashMap<String, String>) this.Attributes
-				.clone();
-		return clone;
+	public HashMap<String, String> getAttributes() {
+		return (HashMap<String, String>) this.Attributes.clone();
 	}
 
 	public void removeAttribute(String name) {
@@ -606,106 +151,27 @@ public class DataField {
 	public DataField clone() {
 		DataField f = null;
 		try {
-
-			if (this.Type == 'N')
-				f = new DataField(this.Name, this.Type, this.DoubleValue);
-			else
-				f = new DataField(this.Name, this.Type, this.StringValue);
-
-			if (this.Type == 'B')
-				f = new DataField(this.Name, this.Type, this.BooleanValue);
-
-			if (this.Type == 'I')
-				f = new DataField(this.Name, this.Type, this.IntegerValue);
-
-			if (this.Type == 'D')
-				f = new DataField(this.Name, this.Type, this.DateValue);
-
-			if (this.Type == 'X')
-				f = new DataField(this.Name, this.Type, this.TimestampValue);
-
-			if (this.Type == 'Y')
-				f = new DataField(this.Name, this.Type, this.BigDecimalValue);
-
-			if (this.Type == 'T')
-				f = new DataField(this.Name, this.Type, this.TimeValue);
-
+			f = new DataField(this.Value);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		// TODO types TDB
-
 		if (f != null) {
 			Set<String> ks = this.Attributes.keySet();
 			Iterator<String> it = ks.iterator();
-
 			while (it.hasNext()) {
 				String k = it.next();
 				String v = this.Attributes.get(k);
 				f.setAttribute(k, v);
 			}
 		}
-
 		return f;
-	}
-
-	public String toJson() {
-
-		String tmp = this.StringValue;
-		String json="";
-		if (this.Type=='D')
-		{
-			DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-			DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-			String fd = df1.format(this.DateValue)+"T"+df2.format(DateValue)+".000Z";
-			json="{\"Name\":\""+this.getName()+"\",\"DateValue\":\""+fd+"\",\"Type\":\"D\"}";
-		}
-		else
-		{
-			if (this.Type=='X')
-			{
-				DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-				DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-				String fd = df1.format(TimestampValue)+"T"+df2.format(TimestampValue)+".000Z";
-				json="{\"Name\":\""+this.getName()+"\",\"TimestampValue\":\""+fd+"\",\"Type\":\"X\"}";				
-			}
-			else
-			{
-			this.StringValue = org.apache.commons.lang.StringEscapeUtils
-					.escapeJavaScript(this.StringValue);
-			Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-					.create();
-			json = gson.toJson(this);
-			json = json.replace("\\\\u", "\\u");
-			}
-		}
-		
-		this.StringValue = tmp;
-		return json;
-	}
-
-	public JsonElement toJsonElement() {
-		Gson gson = new GsonBuilder()
-				.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'.000Z'")
-				.excludeFieldsWithoutExposeAnnotation()
-				.create();
-		return gson.toJsonTree(this);
 	}
 
 	public String toString() {
-		return toJson();
+		return this.Value.toString();
 	}
 
-	public static DataField fromJson(String json) {
-		Gson gson = new Gson();
-		DataField f = gson.fromJson(json, DataField.class);
-		return f;
-	}
-
-	public String getName() {
-		return this.Name;
-	}
 
 }
