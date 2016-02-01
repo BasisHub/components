@@ -27,7 +27,6 @@ public class ComponentsCharacterEscapes extends CharacterEscapes
         esc['>'] = CharacterEscapes.ESCAPE_STANDARD;
         esc['&'] = CharacterEscapes.ESCAPE_STANDARD;
         esc['\''] = CharacterEscapes.ESCAPE_STANDARD;
-        esc['ä'] = CharacterEscapes.ESCAPE_STANDARD;
         asciiEscapes = esc;
         
     }
