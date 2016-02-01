@@ -6,6 +6,7 @@ class BBjSearchGizmoDocField {
 	private float boost;
 	private boolean facet = false;
 
+	@SuppressWarnings("unused")
 	private BBjSearchGizmoDocField() {
 	}
 

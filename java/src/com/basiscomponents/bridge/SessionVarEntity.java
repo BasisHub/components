@@ -8,6 +8,7 @@ class SessionVarEntity {
 
 	private Object val;
 
+	@SuppressWarnings("unused")
 	private SessionVarEntity() {
 	};
 
