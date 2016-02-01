@@ -1,9 +1,15 @@
 package com.basiscomponents.db;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.StringWriter;
-import java.lang.reflect.Type;
+
 import java.math.BigDecimal;
+
 import java.net.URL;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -11,28 +17,21 @@ import java.sql.Date;
 import java.sql.Ref;
 import java.sql.Time;
 import java.sql.Timestamp;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
-import com.google.gson.reflect.TypeToken;
 
-import org.apache.commons.lang.StringEscapeUtils;
+//import org.apache.commons.lang.StringEscapeUtils;
 
 public class ResultSet implements java.io.Serializable {
 
@@ -44,6 +43,8 @@ public class ResultSet implements java.io.Serializable {
 	private ArrayList<String> ColumnNames = new ArrayList<String>();
 	@Expose
 	private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
+	//@Expose
+	private ArrayList<String> KeyColumns = new ArrayList<String>();
 
 	private int currentRow = -1;
 	private DataRow currentDataRow;
@@ -131,10 +132,10 @@ public class ResultSet implements java.io.Serializable {
 	}
 
 	private void mergeDataRowFields(DataRow dr) {
-		
+
 		ArrayList<String> fn = dr.getFieldNames();
-		
-		
+
+
 		Iterator<String> it = fn.iterator();
 		while (it.hasNext()){
 			String f=it.next();
@@ -146,7 +147,7 @@ public class ResultSet implements java.io.Serializable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 				try {
 					HashMap<String, String> hm = dr.getFieldAttributes(f);
 					Iterator<String> it2 = hm.keySet().iterator();
@@ -154,18 +155,18 @@ public class ResultSet implements java.io.Serializable {
 						String key = it2.next();
 						this.setAttribute(c, key, (String) hm.get(key));
 					}
-					
+
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 		}
-				
-		
+
+
 	}
-	
+
 	public void add(DataRow dr) {
 		this.DataRows.add(dr);
 		this.mergeDataRowFields(dr);
@@ -221,6 +222,88 @@ public class ResultSet implements java.io.Serializable {
 
 	public ArrayList<String> getColumnNames() {
 		return this.ColumnNames;
+	}
+
+	/**
+	 * @return the keyColumns
+	 */
+	public ArrayList<String> getKeyColumns() {
+		return this.KeyColumns;
+	}
+
+	/**
+	 * @param keyColumns
+	 *            the keyColumns to set
+	 */
+	public void setKeyColumns(ArrayList<String> keyColumns) {
+		this.KeyColumns = keyColumns;
+	}
+
+	/**
+	 * @param name
+	 *            the column name
+	 */
+	public void addKeyColumn(String name) {
+		this.KeyColumns.add(name);
+	}
+
+	/**
+	 * @return key data as a string for the current row
+	 */
+	public String getRowKey() {
+		return getRowKey(this.currentRow);
+	}
+
+	/**
+	 * @return key data as a string for a specific row
+	 */
+	public String getRowKey(int row) {
+		byte[] result = new byte[0];
+		DataRow dr = get(row);
+		ArrayList<String> collist = getKeyColumns();
+		Iterator<String> it = collist.iterator();
+		while (it.hasNext()) {
+			String name = (String) it.next();
+			DataField field;
+			try {
+				field = dr.getField(name);
+				try {
+					byte[] b = convertToBytes(field.getValue());
+					result = concat(result, b);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		return new String(result);
+	}
+
+	private byte[] concat(byte[]... arrays) {
+		int tLen = 0;
+		for (int i = 0; i < arrays.length; i++) {
+			tLen += arrays[i].length;
+		}
+		byte[] result = new byte[tLen];
+		int currIndex = 0;
+		for (int i = 0; i < arrays.length; i++) {
+			System.arraycopy(arrays[i], 0, result, currIndex, arrays[i].length);
+			currIndex += arrays[i].length;
+		}
+		return result;
+	}
+
+	private byte[] convertToBytes(Object object) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutput out = new ObjectOutputStream(bos);
+		out.writeObject(object);
+		out.flush();
+		// out.close(); theoretically not necessary because this is all
+		// in-memory stuff
+		return bos.toByteArray();
 	}
 
 	public void clear() {
@@ -700,6 +783,7 @@ public class ResultSet implements java.io.Serializable {
 	// getNCharacterStream(int column)
 	// getUnicodeStream(int column)
 
+	@SuppressWarnings("deprecation")
 	public String toJson() throws Exception {
 
 		JsonFactory jf = new JsonFactory();
@@ -709,105 +793,105 @@ public class ResultSet implements java.io.Serializable {
 //		g.useDefaultPrettyPrinter();
 
 		g.writeStartArray();
-		
+
 		Boolean meta_done = false;
 		Iterator<DataRow> it = this.DataRows.iterator();
 		while (it.hasNext()){
 			DataRow dr = it.next();
 			ArrayList<String> f = dr.getFieldNames();
 			Iterator<String> itf = f.iterator();
-			
+
 			g.writeStartObject();
-			
+
 			while (itf.hasNext()){
 				String fn = itf.next();
 				int t=dr.getFieldType(fn);
 				switch (t){
-						case java.sql.Types.CHAR                    : 
-						case java.sql.Types.VARCHAR                 : 
-						case java.sql.Types.NVARCHAR                : 
+						case java.sql.Types.CHAR                    :
+						case java.sql.Types.VARCHAR                 :
+						case java.sql.Types.NVARCHAR                :
 						case java.sql.Types.NCHAR                   :
-						case java.sql.Types.LONGVARCHAR             : 
-						case java.sql.Types.LONGNVARCHAR            : 
+						case java.sql.Types.LONGVARCHAR             :
+						case java.sql.Types.LONGNVARCHAR            :
 							String s =  dr.getField(fn).getString();
 //							s=StringEscapeUtils.escapeJavaScript(s);
 							g.writeStringField(fn,s);
 							break;
-						case java.sql.Types.BIGINT                  : 
-						case java.sql.Types.TINYINT                 : 
-						case java.sql.Types.INTEGER                 : 
+						case java.sql.Types.BIGINT                  :
+						case java.sql.Types.TINYINT                 :
+						case java.sql.Types.INTEGER                 :
 						case java.sql.Types.SMALLINT                :
 							g.writeNumberField(fn, dr.getField(fn).getInt());
-							break;							
-							
-						case java.sql.Types.NUMERIC                 : 
-						case java.sql.Types.DOUBLE                  : 
-						case java.sql.Types.FLOAT                   : 
-						case java.sql.Types.DECIMAL                 : 
+							break;
+
+						case java.sql.Types.NUMERIC                 :
+						case java.sql.Types.DOUBLE                  :
+						case java.sql.Types.FLOAT                   :
+						case java.sql.Types.DECIMAL                 :
 						case java.sql.Types.REAL                    :
 							g.writeNumberField(fn, dr.getField(fn).getDouble());
-							break;							
-							
-						case java.sql.Types.BOOLEAN                 : 
-						case java.sql.Types.BIT                     : 
-							g.writeBooleanField(fn, dr.getField(fn).getBoolean());
-							break;							
+							break;
 
-						case java.sql.Types.TIMESTAMP               : 
-						case java.sql.Types.TIMESTAMP_WITH_TIMEZONE : 
+						case java.sql.Types.BOOLEAN                 :
+						case java.sql.Types.BIT                     :
+							g.writeBooleanField(fn, dr.getField(fn).getBoolean());
+							break;
+
+						case java.sql.Types.TIMESTAMP               :
+						case java.sql.Types.TIMESTAMP_WITH_TIMEZONE :
 						case (int) 11                               :
-							
+
 							DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
 							DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-							String fd = df1.format(dr.getField(fn).getTimestamp())+"T"+df2.format(dr.getField(fn).getTimestamp())+".000Z";							
+							String fd = df1.format(dr.getField(fn).getTimestamp())+"T"+df2.format(dr.getField(fn).getTimestamp())+".000Z";
 							g.writeStringField(fn, fd);
 							break;
-						case java.sql.Types.DATE                    : 
+						case java.sql.Types.DATE                    :
 						case (int) 9                                :
 							 df1 = new SimpleDateFormat("yyyy-MM-dd");
 							 df2 = new SimpleDateFormat("HH:mm:ss");
-							 fd = df1.format(dr.getField(fn).getDate())+"T"+df2.format(dr.getField(fn).getDate())+".000Z";							
+							 fd = df1.format(dr.getField(fn).getDate())+"T"+df2.format(dr.getField(fn).getDate())+".000Z";
 							g.writeStringField(fn, fd);
 							break;
-							
-						case java.sql.Types.ARRAY                   : 
-						case java.sql.Types.BINARY                  : 
-						case java.sql.Types.BLOB                    : 
-						case java.sql.Types.CLOB                    : 
-						case java.sql.Types.DATALINK                : 
 
-						case java.sql.Types.DISTINCT                : 
-						case java.sql.Types.JAVA_OBJECT             : 
-						case java.sql.Types.LONGVARBINARY           : 
-						case java.sql.Types.NCLOB                   : 
-						case java.sql.Types.NULL                    : 
-						case java.sql.Types.OTHER                   : 
-						case java.sql.Types.REF                     : 
-						case java.sql.Types.REF_CURSOR              : 
-						case java.sql.Types.ROWID                   : 
-						case java.sql.Types.SQLXML                  : 
-						case java.sql.Types.STRUCT                  : 
-						case java.sql.Types.TIME                    : 
-						case java.sql.Types.TIME_WITH_TIMEZONE      : 
-						case java.sql.Types.VARBINARY               : 
+						case java.sql.Types.ARRAY                   :
+						case java.sql.Types.BINARY                  :
+						case java.sql.Types.BLOB                    :
+						case java.sql.Types.CLOB                    :
+						case java.sql.Types.DATALINK                :
+
+						case java.sql.Types.DISTINCT                :
+						case java.sql.Types.JAVA_OBJECT             :
+						case java.sql.Types.LONGVARBINARY           :
+						case java.sql.Types.NCLOB                   :
+						case java.sql.Types.NULL                    :
+						case java.sql.Types.OTHER                   :
+						case java.sql.Types.REF                     :
+						case java.sql.Types.REF_CURSOR              :
+						case java.sql.Types.ROWID                   :
+						case java.sql.Types.SQLXML                  :
+						case java.sql.Types.STRUCT                  :
+						case java.sql.Types.TIME                    :
+						case java.sql.Types.TIME_WITH_TIMEZONE      :
+						case java.sql.Types.VARBINARY               :
 
 
 						default:
 							//this is a noop - TODO
 							break;
-				
+
 				}//switch
-				
+
 			}//while on fields
-			
+
 			if (!meta_done){
-				
+
 				g.writeFieldName("meta");
-				
-				
-				
+
+
+
 				g.writeStartObject();
-				
+
 				Iterator<HashMap<String, Object>> i = this.MetaData.iterator();
 				while (i.hasNext())  {
 					HashMap<String, Object> hm = i.next();
@@ -815,9 +899,9 @@ public class ResultSet implements java.io.Serializable {
 					if (c!=null){
 						g.writeFieldName(c);
 						g.writeStartObject();
-						
+
 						Set<String> ks = hm.keySet();
-						Iterator<String> its = ks.iterator(); 
+						Iterator<String> its = ks.iterator();
 						while (its.hasNext()){
 							String key = its.next();
 							if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
@@ -828,22 +912,22 @@ public class ResultSet implements java.io.Serializable {
 						g.writeEndObject();
 					}
 				}
-				
+
 				g.writeEndObject();
-				
-				
-				
+
+
+
 				meta_done=true;
 			}
-			
+
 			g.writeEndObject();
-			
+
 		}//while on rows
-		
+
 		g.writeEndArray();
-		g.close(); 
-		
-		return(w.toString()); 
+		g.close();
+
+		return(w.toString());
 	}
 
 

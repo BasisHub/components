@@ -2,16 +2,20 @@ package com.basiscomponents.db;
 
 import java.sql.Date;
 import java.util.Calendar;
+// import java.util.HashMap;
 
 public class TestMyStuff {
 
 	public static void main(String[] args) throws Exception {
 
 		// HashMap hm = new HashMap();
-		// hm.put("A","AA");
-		// hm.put("BB", "BBB");
-		// DataRow rh = new DataRow(hm);
-		// System.out.println(rh);
+		// hm.put("A", "AA");
+		// hm.put("BB", 12);
+		// hm.put("CC", 12.3);
+		// hm.put("DD", Boolean.TRUE);
+		// DataRow rh;
+		// rh = new DataRow(hm);
+		// System.out.println(rh.toString());
 
 		DataRow r = new DataRow();
 
@@ -46,15 +50,15 @@ public class TestMyStuff {
 		rs.addItem(r);
 		rs.addItem(r2);
 
-		rs.toJsonElementOld();
+//		rs.toJsonElementOld();
 		rs.toJsonElement();
 
-		t1 = System.currentTimeMillis();
-		for (i = 0; i < 1000; i++)
-			rs.toJsonElementOld();
-		System.out.println(rs.toJsonElementOld());
-		t1 = System.currentTimeMillis() - t1;
-		System.out.println(t1);
+//		t1 = System.currentTimeMillis();
+//		for (i = 0; i < 1000; i++)
+//			rs.toJsonElementOld();
+//		System.out.println(rs.toJsonElementOld());
+//		t1 = System.currentTimeMillis() - t1;
+//		System.out.println(t1);
 
 		t2 = System.currentTimeMillis();
 		for (i = 0; i < 1000; i++)
@@ -64,11 +68,11 @@ public class TestMyStuff {
 		t2 = System.currentTimeMillis() - t2;
 		System.out.println(t2);
 		/*
-		 * 
+		 *
 		 * String rsst = rs.toJson(); System.out.println(rsst);
-		 * 
+		 *
 		 * ResultSet rs2 = ResultSet.fromJson(rsst); System.out.println(rs2);
-		 * 
+		 *
 		 * /* System.out.println("----------------------------"); //
 		 * r.setFieldValue("TS",t); // System.out.println(r); //
 		 * System.out.println(r.getFieldAsNumber("TS")); //
@@ -117,10 +121,10 @@ public class TestMyStuff {
 		 * // start = System.currentTimeMillis()-start; //
 		 * System.out.print("duration: "); // System.out.println(start); //
 		 * rs.close(); // stmt.close(); // con.close(); //
-		 * 
+		 *
 		 * ResultSet rs = new ResultSet(); rs.addItem("blabla");
 		 * System.out.println(rs);
-		 * 
+		 *
 		 * System.out.print("***finish***");
 		 */
 

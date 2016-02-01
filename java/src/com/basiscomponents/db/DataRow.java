@@ -1,21 +1,16 @@
 package com.basiscomponents.db;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.sql.Time;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 public class DataRow implements java.io.Serializable {
 
@@ -363,7 +358,7 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Method getAttributeForFields: Get all attributes for a specific attribute
 	 * name
-	 * 
+	 *
 	 * @param String
 	 *            attrname: the name of the attribute
 	 * @param Boolean
@@ -394,7 +389,7 @@ public class DataRow implements java.io.Serializable {
 	 * Method replaceFields: Search and replace all the field names in a given
 	 * string (formula) with the field value. The field name should be escaped
 	 * as "F{name}".
-	 * 
+	 *
 	 * @param String
 	 *            formula: the string with the escaped field names
 	 * @return String formula: the replaced string
@@ -524,7 +519,7 @@ public class DataRow implements java.io.Serializable {
 
 	public void addDataField(String name, int type, DataField field)
 			throws Exception {
-		
+
 		if (this.ResultSet.getColumnIndex(name) == -1) {
 			int column = this.ResultSet.addColumn(name);
 			this.ResultSet.setColumnType(column, type);
@@ -655,144 +650,151 @@ public class DataRow implements java.io.Serializable {
 		JsonParser jp = f.createJsonParser(in);
 		jp.nextToken();
 		ObjectMapper objectMapper = new ObjectMapper();
-		 @SuppressWarnings("rawtypes")
-		List navigation = objectMapper.readValue(jp,
-		            objectMapper.getTypeFactory().constructCollectionType(
-		                    List.class, Object.class));
+		@SuppressWarnings("rawtypes")
+		List navigation = objectMapper.readValue(
+				jp,
+				objectMapper.getTypeFactory().constructCollectionType(
+						List.class, Object.class));
 
-		 HashMap<?, ?> hm = (HashMap<?, ?>) navigation.get(0);
-		 
-		 DataRow dr = new DataRow();
-		 
-		 if (hm.containsKey("meta")){
-			 //new format
+		HashMap<?, ?> hm = (HashMap<?, ?>) navigation.get(0);
 
-			  @SuppressWarnings("rawtypes")
+		DataRow dr = new DataRow();
+
+		if (hm.containsKey("meta")) {
+			// new format
+
+			@SuppressWarnings("rawtypes")
 			HashMap meta = (HashMap) hm.get("meta");
-			  @SuppressWarnings("rawtypes")
+			@SuppressWarnings("rawtypes")
 			Iterator it = meta.keySet().iterator();
-			  
-			  while (it.hasNext()){
-				  String fieldName = (String) it.next();
-				  @SuppressWarnings({ "rawtypes", "unchecked" })
+
+			while (it.hasNext()) {
+				String fieldName = (String) it.next();
+				@SuppressWarnings({ "rawtypes", "unchecked" })
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
-				  Object fieldObj = hm.get(fieldName);
-				  int fieldType=Integer.parseInt((String) fieldMeta.get("ColumnType"));
-					switch (fieldType){
-					case java.sql.Types.CHAR                    : 
-					case java.sql.Types.VARCHAR                 : 
-					case java.sql.Types.NVARCHAR                : 
-					case java.sql.Types.NCHAR                   :
-					case java.sql.Types.LONGVARCHAR             : 
-					case java.sql.Types.LONGNVARCHAR            : 
-						dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
-						break;
+				Object fieldObj = hm.get(fieldName);
+				int fieldType = Integer.parseInt((String) fieldMeta
+						.get("ColumnType"));
+				switch (fieldType) {
+				case java.sql.Types.CHAR:
+				case java.sql.Types.VARCHAR:
+				case java.sql.Types.NVARCHAR:
+				case java.sql.Types.NCHAR:
+				case java.sql.Types.LONGVARCHAR:
+				case java.sql.Types.LONGNVARCHAR:
+					dr.addDataField(fieldName, fieldType, new DataField(
+							fieldObj));
+					break;
 
-					case java.sql.Types.BIGINT                  :
-					case java.sql.Types.TINYINT                 : 
-					case java.sql.Types.INTEGER                 : 
-					case java.sql.Types.SMALLINT                :
-						dr.addDataField(fieldName, fieldType, new DataField(Integer.parseInt(fieldObj.toString())));
-						break;
-						
-						
-					case java.sql.Types.NUMERIC                 : 
-					case java.sql.Types.DOUBLE                  : 
-					case java.sql.Types.FLOAT                   : 
-					case java.sql.Types.DECIMAL                 : 
-					case java.sql.Types.REAL                    :
-						dr.addDataField(fieldName, fieldType, new DataField(Double.parseDouble(fieldObj.toString())));
-						break;
-						
-					case java.sql.Types.BOOLEAN                 : 
-					case java.sql.Types.BIT                     : 
-						dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
-						break;
-						
-					case java.sql.Types.TIMESTAMP               : 
-					case java.sql.Types.TIMESTAMP_WITH_TIMEZONE : 
-					case (int) 11                               :
-						String tss = fieldObj.toString();
-						java.sql.Timestamp ts = java.sql.Timestamp.valueOf(tss.substring(0,10)+" "+tss.substring(11, 19));
-						dr.addDataField(fieldName, fieldType, new DataField(ts));
-						break;						
-						
-					case java.sql.Types.DATE                    : 
-					case (int) 9                                :
-						tss = fieldObj.toString();
-						java.sql.Date ds = java.sql.Date.valueOf(tss.substring(0,10));
-						dr.addDataField(fieldName, fieldType, new DataField(ds));
-						break;						
-						
-					case java.sql.Types.ARRAY                   : 
-					case java.sql.Types.BINARY                  : 
-					case java.sql.Types.BLOB                    : 
-					case java.sql.Types.CLOB                    : 
-					case java.sql.Types.DATALINK                : 
-					case java.sql.Types.DISTINCT                : 
-					case java.sql.Types.JAVA_OBJECT             : 
-					case java.sql.Types.LONGVARBINARY           : 
-					case java.sql.Types.NCLOB                   : 
-					case java.sql.Types.NULL                    : 
-					case java.sql.Types.OTHER                   : 
-					case java.sql.Types.REF                     : 
-					case java.sql.Types.REF_CURSOR              : 
-					case java.sql.Types.ROWID                   : 
-					case java.sql.Types.SQLXML                  : 
-					case java.sql.Types.STRUCT                  : 
-					case java.sql.Types.TIME                    : 
-					case java.sql.Types.TIME_WITH_TIMEZONE      : 
-					case java.sql.Types.VARBINARY               : 
-					default:
-						break;
-			
-			}//switch
-				  
+				case java.sql.Types.BIGINT:
+				case java.sql.Types.TINYINT:
+				case java.sql.Types.INTEGER:
+				case java.sql.Types.SMALLINT:
+					dr.addDataField(
+							fieldName,
+							fieldType,
+							new DataField(Integer.parseInt(fieldObj.toString())));
+					break;
 
-				Set<String> ks=fieldMeta.keySet();
-				if (ks.size()>1)
-				{
+				case java.sql.Types.NUMERIC:
+				case java.sql.Types.DOUBLE:
+				case java.sql.Types.FLOAT:
+				case java.sql.Types.DECIMAL:
+				case java.sql.Types.REAL:
+					dr.addDataField(
+							fieldName,
+							fieldType,
+							new DataField(Double.parseDouble(fieldObj
+									.toString())));
+					break;
+
+				case java.sql.Types.BOOLEAN:
+				case java.sql.Types.BIT:
+					dr.addDataField(fieldName, fieldType, new DataField(
+							fieldObj));
+					break;
+
+				case java.sql.Types.TIMESTAMP:
+				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
+				case (int) 11:
+					String tss = fieldObj.toString();
+					java.sql.Timestamp ts = java.sql.Timestamp.valueOf(tss
+							.substring(0, 10) + " " + tss.substring(11, 19));
+					dr.addDataField(fieldName, fieldType, new DataField(ts));
+					break;
+
+				case java.sql.Types.DATE:
+				case (int) 9:
+					tss = fieldObj.toString();
+					java.sql.Date ds = java.sql.Date.valueOf(tss.substring(0,
+							10));
+					dr.addDataField(fieldName, fieldType, new DataField(ds));
+					break;
+
+				case java.sql.Types.ARRAY:
+				case java.sql.Types.BINARY:
+				case java.sql.Types.BLOB:
+				case java.sql.Types.CLOB:
+				case java.sql.Types.DATALINK:
+				case java.sql.Types.DISTINCT:
+				case java.sql.Types.JAVA_OBJECT:
+				case java.sql.Types.LONGVARBINARY:
+				case java.sql.Types.NCLOB:
+				case java.sql.Types.NULL:
+				case java.sql.Types.OTHER:
+				case java.sql.Types.REF:
+				case java.sql.Types.REF_CURSOR:
+				case java.sql.Types.ROWID:
+				case java.sql.Types.SQLXML:
+				case java.sql.Types.STRUCT:
+				case java.sql.Types.TIME:
+				case java.sql.Types.TIME_WITH_TIMEZONE:
+				case java.sql.Types.VARBINARY:
+				default:
+					break;
+
+				}// switch
+
+				Set<String> ks = fieldMeta.keySet();
+				if (ks.size() > 1) {
 					Iterator<String> itm = ks.iterator();
-					while (itm.hasNext()){
-						String k=(String) itm.next();
+					while (itm.hasNext()) {
+						String k = (String) itm.next();
 						if (k.equals("ColumnType"))
 							continue;
-						
-						dr.setFieldAttribute(fieldName, k, (String) fieldMeta.get(k));
+
+						dr.setFieldAttribute(fieldName, k,
+								(String) fieldMeta.get(k));
 					}
 				}
 
+			}
 
-			  }
-			  
-			  
-		 }
-		 else
-		 {
-			 //old format - deprecated
+		} else {
+			// old format - deprecated
 			@SuppressWarnings("rawtypes")
 			Iterator it = navigation.iterator();
-			 while (it.hasNext()){
-				 @SuppressWarnings("unchecked")
-				HashMap<String,?>field = (HashMap<String, ?>) it.next();
-				 String name = (String) field.get("Name");
-				 String type = (String) field.get("Type");
-				 switch (type){
-				 case "C":
-					 String strval = (String) field.get("StringValue");
-					 dr.setFieldValue(name, strval);
-					 break;
-				 case "N":
-					 Double numval = (Double) field.get("NumericValue");
-					 dr.setFieldValue(name, numval);
-					 break;
-				 default:
-					 break;
-				 }
-				 
-			 }
-			 
-		 }
+			while (it.hasNext()) {
+				@SuppressWarnings("unchecked")
+				HashMap<String, ?> field = (HashMap<String, ?>) it.next();
+				String name = (String) field.get("Name");
+				String type = (String) field.get("Type");
+				switch (type) {
+				case "C":
+					String strval = (String) field.get("StringValue");
+					dr.setFieldValue(name, strval);
+					break;
+				case "N":
+					Double numval = (Double) field.get("NumericValue");
+					dr.setFieldValue(name, numval);
+					break;
+				default:
+					break;
+				}
+
+			}
+
+		}
 		return dr;
 	}
 
