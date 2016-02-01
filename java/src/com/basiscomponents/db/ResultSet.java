@@ -994,10 +994,10 @@ public class ResultSet implements java.io.Serializable {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			
+
 		}
 		return null;
-	
+
 	}
 
 	/*
