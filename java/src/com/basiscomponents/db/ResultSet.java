@@ -43,7 +43,7 @@ public class ResultSet implements java.io.Serializable {
 	private ArrayList<String> ColumnNames = new ArrayList<String>();
 	@Expose
 	private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
-	//@Expose
+	// @Expose
 	private ArrayList<String> KeyColumns = new ArrayList<String>();
 
 	private int currentRow = -1;
@@ -132,39 +132,34 @@ public class ResultSet implements java.io.Serializable {
 	}
 
 	private void mergeDataRowFields(DataRow dr) {
-
-		ArrayList<String> fn = dr.getFieldNames();
-
-
-		Iterator<String> it = fn.iterator();
-		while (it.hasNext()){
-			String f=it.next();
-			if (!this.ColumnNames.contains(f)){
-				int c = this.addColumn(f);
+		BBArrayList names = dr.getFieldNames();
+		@SuppressWarnings("unchecked")
+		Iterator<String> it = names.iterator();
+		while (it.hasNext()) {
+			String name = it.next();
+			if (!this.ColumnNames.contains(name)) {
+				int column = this.addColumn(name);
 				try {
-					this.setColumnType(c, dr.getFieldType(f));
+					this.setColumnType(column, dr.getFieldType(name));
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 				try {
-					HashMap<String, String> hm = dr.getFieldAttributes(f);
-					Iterator<String> it2 = hm.keySet().iterator();
-					while (it2.hasNext()){
-						String key = it2.next();
-						this.setAttribute(c, key, (String) hm.get(key));
+					HashMap<String, String> attrMap = dr
+							.getFieldAttributes(name);
+					Iterator<String> it2 = attrMap.keySet().iterator();
+					while (it2.hasNext()) {
+						String attrKey = it2.next();
+						this.setAttribute(column, attrKey,
+								(String) attrMap.get(attrKey));
 					}
-
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 			}
 		}
-
-
 	}
 
 	public void add(DataRow dr) {
@@ -790,121 +785,123 @@ public class ResultSet implements java.io.Serializable {
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
 		StringWriter w = new StringWriter();
 		JsonGenerator g = jf.createJsonGenerator(w);
-//		g.useDefaultPrettyPrinter();
+		// g.useDefaultPrettyPrinter();
 
 		g.writeStartArray();
 
 		Boolean meta_done = false;
 		Iterator<DataRow> it = this.DataRows.iterator();
-		while (it.hasNext()){
+		while (it.hasNext()) {
 			DataRow dr = it.next();
-			ArrayList<String> f = dr.getFieldNames();
+			BBArrayList f = dr.getFieldNames();
+			@SuppressWarnings("unchecked")
 			Iterator<String> itf = f.iterator();
 
 			g.writeStartObject();
 
-			while (itf.hasNext()){
+			while (itf.hasNext()) {
 				String fn = itf.next();
-				int t=dr.getFieldType(fn);
-				switch (t){
-						case java.sql.Types.CHAR                    :
-						case java.sql.Types.VARCHAR                 :
-						case java.sql.Types.NVARCHAR                :
-						case java.sql.Types.NCHAR                   :
-						case java.sql.Types.LONGVARCHAR             :
-						case java.sql.Types.LONGNVARCHAR            :
-							String s =  dr.getField(fn).getString();
-//							s=StringEscapeUtils.escapeJavaScript(s);
-							g.writeStringField(fn,s);
-							break;
-						case java.sql.Types.BIGINT                  :
-						case java.sql.Types.TINYINT                 :
-						case java.sql.Types.INTEGER                 :
-						case java.sql.Types.SMALLINT                :
-							g.writeNumberField(fn, dr.getField(fn).getInt());
-							break;
+				int t = dr.getFieldType(fn);
+				switch (t) {
+				case java.sql.Types.CHAR:
+				case java.sql.Types.VARCHAR:
+				case java.sql.Types.NVARCHAR:
+				case java.sql.Types.NCHAR:
+				case java.sql.Types.LONGVARCHAR:
+				case java.sql.Types.LONGNVARCHAR:
+					String s = dr.getField(fn).getString();
+					// s=StringEscapeUtils.escapeJavaScript(s);
+					g.writeStringField(fn, s);
+					break;
+				case java.sql.Types.BIGINT:
+				case java.sql.Types.TINYINT:
+				case java.sql.Types.INTEGER:
+				case java.sql.Types.SMALLINT:
+					g.writeNumberField(fn, dr.getField(fn).getInt());
+					break;
 
-						case java.sql.Types.NUMERIC                 :
-						case java.sql.Types.DOUBLE                  :
-						case java.sql.Types.FLOAT                   :
-						case java.sql.Types.DECIMAL                 :
-						case java.sql.Types.REAL                    :
-							g.writeNumberField(fn, dr.getField(fn).getDouble());
-							break;
+				case java.sql.Types.NUMERIC:
+				case java.sql.Types.DOUBLE:
+				case java.sql.Types.FLOAT:
+				case java.sql.Types.DECIMAL:
+				case java.sql.Types.REAL:
+					g.writeNumberField(fn, dr.getField(fn).getDouble());
+					break;
 
-						case java.sql.Types.BOOLEAN                 :
-						case java.sql.Types.BIT                     :
-							g.writeBooleanField(fn, dr.getField(fn).getBoolean());
-							break;
+				case java.sql.Types.BOOLEAN:
+				case java.sql.Types.BIT:
+					g.writeBooleanField(fn, dr.getField(fn).getBoolean());
+					break;
 
-						case java.sql.Types.TIMESTAMP               :
-						case java.sql.Types.TIMESTAMP_WITH_TIMEZONE :
-						case (int) 11                               :
+				case java.sql.Types.TIMESTAMP:
+				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
+				case (int) 11:
 
-							DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-							DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-							String fd = df1.format(dr.getField(fn).getTimestamp())+"T"+df2.format(dr.getField(fn).getTimestamp())+".000Z";
-							g.writeStringField(fn, fd);
-							break;
-						case java.sql.Types.DATE                    :
-						case (int) 9                                :
-							 df1 = new SimpleDateFormat("yyyy-MM-dd");
-							 df2 = new SimpleDateFormat("HH:mm:ss");
-							 fd = df1.format(dr.getField(fn).getDate())+"T"+df2.format(dr.getField(fn).getDate())+".000Z";
-							g.writeStringField(fn, fd);
-							break;
+					DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+					DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+					String fd = df1.format(dr.getField(fn).getTimestamp())
+							+ "T" + df2.format(dr.getField(fn).getTimestamp())
+							+ ".000Z";
+					g.writeStringField(fn, fd);
+					break;
+				case java.sql.Types.DATE:
+				case (int) 9:
+					df1 = new SimpleDateFormat("yyyy-MM-dd");
+					df2 = new SimpleDateFormat("HH:mm:ss");
+					fd = df1.format(dr.getField(fn).getDate()) + "T"
+							+ df2.format(dr.getField(fn).getDate()) + ".000Z";
+					g.writeStringField(fn, fd);
+					break;
 
-						case java.sql.Types.ARRAY                   :
-						case java.sql.Types.BINARY                  :
-						case java.sql.Types.BLOB                    :
-						case java.sql.Types.CLOB                    :
-						case java.sql.Types.DATALINK                :
+				case java.sql.Types.ARRAY:
+				case java.sql.Types.BINARY:
+				case java.sql.Types.BLOB:
+				case java.sql.Types.CLOB:
+				case java.sql.Types.DATALINK:
 
-						case java.sql.Types.DISTINCT                :
-						case java.sql.Types.JAVA_OBJECT             :
-						case java.sql.Types.LONGVARBINARY           :
-						case java.sql.Types.NCLOB                   :
-						case java.sql.Types.NULL                    :
-						case java.sql.Types.OTHER                   :
-						case java.sql.Types.REF                     :
-						case java.sql.Types.REF_CURSOR              :
-						case java.sql.Types.ROWID                   :
-						case java.sql.Types.SQLXML                  :
-						case java.sql.Types.STRUCT                  :
-						case java.sql.Types.TIME                    :
-						case java.sql.Types.TIME_WITH_TIMEZONE      :
-						case java.sql.Types.VARBINARY               :
+				case java.sql.Types.DISTINCT:
+				case java.sql.Types.JAVA_OBJECT:
+				case java.sql.Types.LONGVARBINARY:
+				case java.sql.Types.NCLOB:
+				case java.sql.Types.NULL:
+				case java.sql.Types.OTHER:
+				case java.sql.Types.REF:
+				case java.sql.Types.REF_CURSOR:
+				case java.sql.Types.ROWID:
+				case java.sql.Types.SQLXML:
+				case java.sql.Types.STRUCT:
+				case java.sql.Types.TIME:
+				case java.sql.Types.TIME_WITH_TIMEZONE:
+				case java.sql.Types.VARBINARY:
 
+				default:
+					// this is a noop - TODO
+					break;
 
-						default:
-							//this is a noop - TODO
-							break;
+				}// switch
 
-				}//switch
+			}// while on fields
 
-			}//while on fields
-
-			if (!meta_done){
+			if (!meta_done) {
 
 				g.writeFieldName("meta");
-
-
 
 				g.writeStartObject();
 
 				Iterator<HashMap<String, Object>> i = this.MetaData.iterator();
-				while (i.hasNext())  {
+				while (i.hasNext()) {
 					HashMap<String, Object> hm = i.next();
 					String c = (String) hm.get("ColumnName");
-					if (c!=null){
+					if (c != null) {
 						g.writeFieldName(c);
 						g.writeStartObject();
 
 						Set<String> ks = hm.keySet();
 						Iterator<String> its = ks.iterator();
-						while (its.hasNext()){
+						while (its.hasNext()) {
 							String key = its.next();
-							if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
+							if (key.equals("ColumnTypeName")
+									|| key.equals("ColumnName"))
 								continue;
 							String value = hm.get(key).toString();
 							g.writeStringField(key, value);
@@ -915,21 +912,18 @@ public class ResultSet implements java.io.Serializable {
 
 				g.writeEndObject();
 
-
-
-				meta_done=true;
+				meta_done = true;
 			}
 
 			g.writeEndObject();
 
-		}//while on rows
+		}// while on rows
 
 		g.writeEndArray();
 		g.close();
 
-		return(w.toString());
+		return (w.toString());
 	}
-
 
 	private static void setSQLTypeNameMap() {
 		SQLTypeNameMap.put(java.sql.Types.ARRAY, "ARRAY");
@@ -989,15 +983,16 @@ public class ResultSet implements java.io.Serializable {
 	public Object toJsonElement() {
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		try {
-			com.google.gson.JsonArray o = parser.parse(this.toJson()).getAsJsonArray();
+			com.google.gson.JsonArray o = parser.parse(this.toJson())
+					.getAsJsonArray();
 			return o;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			
+
 		}
 		return null;
-	
+
 	}
 
 	/*
@@ -1023,23 +1018,22 @@ public class ResultSet implements java.io.Serializable {
 	 * java.sql.Ref REF Java class JAVA_OBJECT
 	 */
 
-
-public String toString() {
-	String s = "[";
-		s+="Metadata:";
-		s+= this.MetaData.toString();
-		s+=";";
-		s+="Columns:";
-		s+= this.ColumnNames.toString();
-		s+=";";
-		s+="Records:[";
+	public String toString() {
+		String s = "[";
+		s += "Metadata:";
+		s += this.MetaData.toString();
+		s += ";";
+		s += "Columns:";
+		s += this.ColumnNames.toString();
+		s += ";";
+		s += "Records:[";
 		Iterator<DataRow> it = this.DataRows.iterator();
-		while (it.hasNext()){
-			s+=it.next().toString();
-			s+=";";
+		while (it.hasNext()) {
+			s += it.next().toString();
+			s += ";";
 		}
-		s+="]]";
+		s += "]]";
 		return s;
-}
+	}
 
 }
