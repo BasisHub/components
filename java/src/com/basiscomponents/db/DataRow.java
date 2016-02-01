@@ -790,7 +790,8 @@ public class DataRow implements java.io.Serializable {
 					 dr.setFieldValue(name, strval);
 					 break;
 				 case "N":
-					 Double numval = (Double) field.get("NumericValue");
+					 Object o = field.get("NumericValue");
+					 Double numval = Double.parseDouble(o.toString());
 					 dr.setFieldValue(name, numval);
 					 break;
 				 default:
