@@ -1,7 +1,6 @@
 package com.basiscomponents.db;
 
 import java.sql.Time;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -100,6 +99,12 @@ public class DataRow implements java.io.Serializable {
 
 	// Note: automatically adds field, if not found in DataFields
 	public void setFieldValue(String name, Object value) throws Exception {
+
+		String c=value.getClass().getCanonicalName();
+		if (c.contains("BBjNumber") | c.contains("BBjInt")){
+			value = Double.parseDouble(value.toString());
+		}
+		
 		DataField field = null;
 		try {
 			field = getField(name);
@@ -118,6 +123,12 @@ public class DataRow implements java.io.Serializable {
 	public void setFieldValue(String name, int type, Object value)
 			throws Exception {
 		DataField field = null;
+
+		String c=value.getClass().getCanonicalName();
+		if (c.contains("BBjNumber") | c.contains("BBjInt")){
+			value = Double.parseDouble(value.toString());
+		}
+		
 		try {
 			field = this.getField(name);
 		} catch (Exception e) {
@@ -179,7 +190,6 @@ public class DataRow implements java.io.Serializable {
 
 		int column = this.ResultSet.getColumnIndex(name);
 		int type = this.ResultSet.getColumnType(column);
-
 		switch (type) {
 		case java.sql.Types.CHAR:
 		case java.sql.Types.VARCHAR:
