@@ -902,9 +902,18 @@ public class ResultSet implements java.io.Serializable {
 		return null;
 	}
 
-	public String toJsonElement() {
-		// TODO Auto-generated method stub
+	public Object toJsonElement() {
+		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
+		try {
+			com.google.gson.JsonArray o = parser.parse(this.toJson()).getAsJsonArray();
+			return o;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
 		return null;
+	
 	}
 
 	/*

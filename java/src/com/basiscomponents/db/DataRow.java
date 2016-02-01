@@ -11,10 +11,12 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import com.basis.bbj.client.datatypes.BBjVector;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonSyntaxException;
 
 
 public class DataRow implements java.io.Serializable {
@@ -54,8 +56,8 @@ public class DataRow implements java.io.Serializable {
 		}
 	}
 
-	public ArrayList<String> getFieldNames() {
-		return this.ResultSet.getColumnNames();
+	public BBjVector getFieldNames() {
+		return new BBjVector(this.ResultSet.getColumnNames());
 	}
 
 	public Boolean contains(String name) {
@@ -650,6 +652,11 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public static DataRow fromJson(String in) throws Exception {
+
+		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}") ){
+			in=in.substring(11,in.length()-1);
+		}
+		
 		JsonFactory f = new JsonFactory();
 		@SuppressWarnings("deprecation")
 		JsonParser jp = f.createJsonParser(in);
@@ -796,8 +803,16 @@ public class DataRow implements java.io.Serializable {
 		return dr;
 	}
 
-	public Object toJsonElement() {
-		// TODO Auto-generated method stub
+	public Object toJsonElement()  {
+		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
+		try {
+			com.google.gson.JsonArray o = parser.parse(this.toJson()).getAsJsonArray();
+			return o;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
 		return null;
 	}
 
