@@ -663,7 +663,8 @@ public class DataRow implements java.io.Serializable {
 		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
 			in = in.substring(11, in.length() - 1);
 		}
-
+		if (in.startsWith("{") && in.endsWith("}")) 
+				in = "["+in+"]";
 		JsonFactory f = new JsonFactory();
 		@SuppressWarnings("deprecation")
 		JsonParser jp = f.createJsonParser(in);
@@ -692,6 +693,8 @@ public class DataRow implements java.io.Serializable {
 				@SuppressWarnings({ "rawtypes", "unchecked" })
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
 				Object fieldObj = hm.get(fieldName);
+				if (fieldObj==null)
+					continue;
 				int fieldType = Integer.parseInt((String) fieldMeta
 						.get("ColumnType"));
 				switch (fieldType) {
