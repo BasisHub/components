@@ -34,6 +34,7 @@ import com.google.gson.annotations.Expose;
 public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	private static final long serialVersionUID = 1L;
+	private static final int MAX_BLOB_SIZE = 32767;
 
 	@Expose
 	private ArrayList<HashMap<String, Object>> MetaData = new ArrayList<HashMap<String, Object>>();
@@ -807,7 +808,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.NCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					String s =  dr.getField(fn).getString().trim();
+					String s = dr.getField(fn).getString().trim();
 					g.writeStringField(fn, s);
 					break;
 				case java.sql.Types.BIGINT:
@@ -986,10 +987,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-
 		}
 		return null;
-
 	}
 
 	/*
@@ -1033,49 +1032,374 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return s;
 	}
 
+	/**
+	 * @return the BB template string for the result set
+	 */
+	public String getBBTemplate() {
+
+		StringBuffer s;
+		s = new StringBuffer();
+
+		int cols = getColumnCount();
+		if (cols == 0)
+			return "";
+
+		for (int col = 0; col < cols; col++) {
+
+			String colName = getColumnName(col);
+			if (col > 1)
+				s.append(",");
+			s.append(colName).append(":");
+			Integer column_size = getPrecision(col);
+			Integer decimal_digits = Math.max(0, getScale(col));
+			Boolean isNum = false;
+			Integer colType = getColumnType(col);
+			switch (colType) {
+			case java.sql.Types.NULL:
+				s.append("C(1)");
+				s.append(":sqltype=NULL");
+				break;
+			case java.sql.Types.CHAR:
+				if (column_size <= 0)
+					s.append("C(1*)");
+				else if (column_size <= 32767)
+					s.append("C(").append(column_size.toString()).append(")");
+				else
+					s.append("C(32767+=10)");
+				s.append(":sqltype=CHAR");
+				break;
+			case java.sql.Types.VARCHAR:
+				if (column_size <= 0)
+					s.append("C(1*)");
+				else if (column_size <= 32767)
+					s.append("C(").append(column_size.toString())
+							.append("+=10)");
+				else
+					s.append("C(32767+=10)");
+				s.append(":sqltype=VARCHAR");
+				break;
+			case java.sql.Types.LONGVARCHAR:
+				if (column_size <= 0)
+					s.append("C(1*)");
+				else if (column_size <= 32767)
+					s.append("C(").append(column_size.toString())
+							.append("+=10)");
+				else
+					s.append("C(32767+=10)");
+				s.append(":sqltype=LONGVARCHAR");
+				break;
+			case java.sql.Types.NCHAR:
+				if (column_size <= 0)
+					s.append("C(1*)");
+				else if (column_size <= 32767)
+					s.append("C(").append(column_size.toString()).append(")");
+				else
+					s.append("C(32767+=10)");
+				s.append(":sqltype=NCHAR");
+				break;
+			case java.sql.Types.NVARCHAR:
+				if (column_size <= 0)
+					s.append("C(1*)");
+				else if (column_size <= 32767)
+					s.append("C(").append(column_size.toString())
+							.append("+=10)");
+				else
+					s.append("C(32767+=10)");
+				s.append(":sqltype=NVARCHAR");
+				break;
+			case java.sql.Types.LONGNVARCHAR:
+				if (column_size <= 0)
+					s.append("C(1*)");
+				else if (column_size <= 32767)
+					s.append("C(").append(column_size.toString())
+							.append("+=10)");
+				else
+					s.append("C(32767+=10)");
+				s.append(":sqltype=LONGNVARCHAR");
+				break;
+			case java.sql.Types.INTEGER:
+				if (isSigned(col))
+					s.append("I(4)");
+				else
+					s.append("U(4)");
+				s.append(":sqltype=INTEGER");
+				break;
+			case java.sql.Types.TINYINT:
+				if (isSigned(col))
+					s.append("I(1)");
+				else
+					s.append("U(1)");
+				s.append(":sqltype=TINYINT");
+				break;
+			case java.sql.Types.SMALLINT:
+				if (isSigned(col))
+					s.append("I(2)");
+				else
+					s.append("U(2)");
+				s.append(":sqltype=SMALLINT");
+				break;
+			case java.sql.Types.BIGINT:
+				if (isSigned(col))
+					s.append("I(8)");
+				else
+					s.append("U(8)");
+				s.append(":sqltype=BIGINT");
+				break;
+			case java.sql.Types.BIT:
+				s.append("U(1)");
+				s.append(":sqltype=BIT");
+				break;
+			case java.sql.Types.BOOLEAN:
+				s.append("U(1)");
+				s.append(":sqltype=BOOLEAN");
+				break;
+			case java.sql.Types.DECIMAL:
+				s.append("B");
+				s.append(":sqltype=DECIMAL size=")
+						.append(column_size.toString())
+						.append(" scale=" + decimal_digits.toString());
+				isNum = true;
+				break;
+			case java.sql.Types.NUMERIC:
+				s.append("B");
+				s.append(":sqltype=NUMERIC size=")
+						.append(column_size.toString())
+						.append(" scale=" + decimal_digits.toString());
+				isNum = true;
+				break;
+			case java.sql.Types.DOUBLE:
+				s.append("Y");
+				s.append(":sqltype=DOUBLE size=")
+						.append(column_size.toString())
+						.append(" scale=" + decimal_digits.toString());
+				isNum = true;
+				break;
+			case java.sql.Types.FLOAT:
+				s.append("F");
+				s.append(":sqltype=FLOAT size=").append(column_size.toString())
+						.append(" scale=" + decimal_digits.toString());
+				isNum = true;
+				break;
+			case java.sql.Types.REAL:
+				s.append("X");
+				s.append(":sqltype=REAL size=").append(column_size.toString())
+						.append(" scale=" + decimal_digits.toString());
+				isNum = true;
+				break;
+			case java.sql.Types.DATE:
+				s.append("C(10)");
+				s.append(":sqltype=DATE");
+				break;
+			case java.sql.Types.TIME:
+				s.append("C(8)");
+				s.append(":sqltype=TIME");
+				break;
+			case java.sql.Types.TIMESTAMP:
+				s.append("C(29)");
+				s.append(":sqltype=TIMESTAMP");
+				break;
+			case java.sql.Types.BINARY:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=BINARY");
+				break;
+			case java.sql.Types.VARBINARY:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=VARBINARY");
+				break;
+			case java.sql.Types.LONGVARBINARY:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=LONGVARBINARY");
+				break;
+			case java.sql.Types.BLOB:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=BLOB");
+				break;
+			case java.sql.Types.CLOB:
+				if (column_size <= 0)
+					s.append("C(1*)");
+				else if (column_size <= 32767)
+					s.append("C(").append(column_size.toString())
+							.append("+=10)");
+				else
+					s.append("C(32767+=10)");
+				s.append(":sqltype=CLOB");
+				break;
+			case java.sql.Types.NCLOB:
+				if (column_size <= 0)
+					s.append("C(1*)");
+				else if (column_size <= 32767)
+					s.append("C(").append(column_size.toString())
+							.append("+=10)");
+				else
+					s.append("C(32767+=10)");
+				s.append(":sqltype=NCLOB");
+				break;
+			case 9: // ODBC Date
+				s.append("C(10)");
+				s.append(":sqltype=ODBC_DATE");
+				break;
+			case 11: // ODBC Timestamp
+				s.append("C(19)");
+				s.append(":sqltype=ODBC_TIMESTAMP");
+				break;
+			case java.sql.Types.ARRAY:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=ARRAY");
+				break;
+			case java.sql.Types.JAVA_OBJECT:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=JAVA_OBJECT");
+				break;
+			case java.sql.Types.OTHER:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=OTHER");
+				break;
+			case java.sql.Types.REF:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=REF");
+				break;
+			case java.sql.Types.DATALINK:
+				s.append("C(").append(column_size.toString()).append(")");
+				s.append(":sqltype=DATALINK");
+				break;
+			case java.sql.Types.DISTINCT:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=DISTINCT");
+				break;
+			case java.sql.Types.STRUCT:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=STRUCT");
+				break;
+			case java.sql.Types.ROWID:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=ROWID");
+				break;
+			case java.sql.Types.SQLXML:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=SQLXML");
+				break;
+			default:
+				if (column_size > 0)
+					column_size = Math.min(column_size, MAX_BLOB_SIZE);
+				else
+					column_size = MAX_BLOB_SIZE;
+				s.append("O(").append(column_size.toString()).append(")");
+				s.append(":sqltype=UNKNOWN");
+				break;
+			} // switch
+			if (isAutoIncrement(col)) {
+				s.append(" auto_increment=1");
+			}
+			if (isReadOnly(col)) {
+				s.append(" read_only=1");
+			}
+			if (isCaseSensitive(col)) {
+				s.append(" case_sensitive=1");
+			}
+			if (isSigned(col) && isNum) {
+				s.append(" signed=1");
+			}
+			if (isNullable(col) == java.sql.ResultSetMetaData.columnNoNulls) {
+				s.append(" required=1");
+			}
+			s.append(":");
+		} // for
+		return s.toString();
+	}
+
 	@Override
 	public Iterator<DataRow> iterator() {
 		// TODO Auto-generated method stub
 		return new ResultSetIterator(this.DataRows);
 	}
-	
+
 	public static class ResultSetIterator implements Iterator<DataRow> {
 
 		private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
-        private int current;
+		private int current;
 
-        ResultSetIterator(ArrayList<DataRow> DataRows) {
-            this.DataRows = DataRows;
-            this.current = 0;
-        }
+		ResultSetIterator(ArrayList<DataRow> DataRows) {
+			this.DataRows = DataRows;
+			this.current = 0;
+		}
 
-        @Override
-        public boolean hasNext() {
-            return current < DataRows.size();
-        }
+		@Override
+		public boolean hasNext() {
+			return current < DataRows.size();
+		}
 
-        @Override
-        public DataRow next() {
-            if (! hasNext())   throw new NoSuchElementException();
-            return DataRows.get(current++);
-        }
+		@Override
+		public DataRow next() {
+			if (!hasNext())
+				throw new NoSuchElementException();
+			return DataRows.get(current++);
+		}
 
-        @Override
-        public void remove() {
-            // Choose exception or implementation: 
-            try {
+		@Override
+		public void remove() {
+			// Choose exception or implementation:
+			try {
 				throw new OperationNotSupportedException();
 			} catch (OperationNotSupportedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            // or
-            //// if (! hasNext())   throw new NoSuchElementException();
-            //// if (currrent + 1 < myArray.end) {
-            ////     System.arraycopy(myArray.arr, current+1, myArray.arr, current, myArray.end - current-1);
-            //// }
-            //// myArray.end--;
-        }
-
+			// or
+			// // if (! hasNext()) throw new NoSuchElementException();
+			// // if (currrent + 1 < myArray.end) {
+			// // System.arraycopy(myArray.arr, current+1, myArray.arr, current,
+			// myArray.end - current-1);
+			// // }
+			// // myArray.end--;
+		}
 	}
+
 }
