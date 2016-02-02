@@ -813,7 +813,7 @@ public class ResultSet implements java.io.Serializable {
 						case java.sql.Types.NCHAR                   :
 						case java.sql.Types.LONGVARCHAR             :
 						case java.sql.Types.LONGNVARCHAR            :
-							String s =  dr.getField(fn).getString().trim();
+							String s =  dr.getField(fn).getString();
 //							s=StringEscapeUtils.escapeJavaScript(s);
 							g.writeStringField(fn,s);
 							break;
