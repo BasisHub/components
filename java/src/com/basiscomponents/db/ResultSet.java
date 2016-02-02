@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.StringWriter;
-
 import java.math.BigDecimal;
-
 import java.net.URL;
-
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -17,14 +14,15 @@ import java.sql.Date;
 import java.sql.Ref;
 import java.sql.Time;
 import java.sql.Timestamp;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
+
+import javax.naming.OperationNotSupportedException;
 
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -33,7 +31,7 @@ import com.google.gson.annotations.Expose;
 
 //import org.apache.commons.lang.StringEscapeUtils;
 
-public class ResultSet implements java.io.Serializable {
+public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -1035,4 +1033,49 @@ public class ResultSet implements java.io.Serializable {
 		return s;
 	}
 
+	@Override
+	public Iterator<DataRow> iterator() {
+		// TODO Auto-generated method stub
+		return new ResultSetIterator(this.DataRows);
+	}
+	
+	public static class ResultSetIterator implements Iterator<DataRow> {
+
+		private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
+        private int current;
+
+        ResultSetIterator(ArrayList<DataRow> DataRows) {
+            this.DataRows = DataRows;
+            this.current = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return current < DataRows.size();
+        }
+
+        @Override
+        public DataRow next() {
+            if (! hasNext())   throw new NoSuchElementException();
+            return DataRows.get(current++);
+        }
+
+        @Override
+        public void remove() {
+            // Choose exception or implementation: 
+            try {
+				throw new OperationNotSupportedException();
+			} catch (OperationNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            // or
+            //// if (! hasNext())   throw new NoSuchElementException();
+            //// if (currrent + 1 < myArray.end) {
+            ////     System.arraycopy(myArray.arr, current+1, myArray.arr, current, myArray.end - current-1);
+            //// }
+            //// myArray.end--;
+        }
+
+	}
 }
