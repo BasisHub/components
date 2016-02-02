@@ -1,13 +1,13 @@
 package com.basiscomponents.db;
 
 import java.sql.Time;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.basis.bbj.client.datatypes.BBjVector;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,8 +49,8 @@ public class DataRow implements java.io.Serializable {
 		}
 	}
 
-	public BBjVector getFieldNames() {
-		return new BBjVector(this.ResultSet.getColumnNames());
+	public BBArrayList getFieldNames() {
+		return new BBArrayList(this.ResultSet.getColumnNames());
 	}
 
 	public Boolean contains(String name) {
@@ -190,6 +190,7 @@ public class DataRow implements java.io.Serializable {
 
 		int column = this.ResultSet.getColumnIndex(name);
 		int type = this.ResultSet.getColumnType(column);
+
 		switch (type) {
 		case java.sql.Types.CHAR:
 		case java.sql.Types.VARCHAR:
@@ -427,10 +428,11 @@ public class DataRow implements java.io.Serializable {
 
 	public Boolean equals(DataRow dr) throws Exception {
 		Boolean eq = true;
-		ArrayList<String> fields = dr.getFieldNames();
+		BBArrayList fields = dr.getFieldNames();
 		if (fields.size() != this.DataFields.size())
 			eq = false;
 		else {
+			@SuppressWarnings("unchecked")
 			Iterator<String> it = fields.iterator();
 			while (it.hasNext()) {
 				String name = it.next();
@@ -635,7 +637,8 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public void mergeRecord(DataRow dr) {
-		ArrayList<String> names = dr.getFieldNames();
+		BBArrayList names = dr.getFieldNames();
+		@SuppressWarnings("unchecked")
 		Iterator<String> it = names.iterator();
 		while (it.hasNext()) {
 			String f = it.next();
@@ -657,8 +660,8 @@ public class DataRow implements java.io.Serializable {
 
 	public static DataRow fromJson(String in) throws Exception {
 
-		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}") ){
-			in=in.substring(11,in.length()-1);
+		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
+			in = in.substring(11, in.length() - 1);
 		}
 
 		JsonFactory f = new JsonFactory();
@@ -815,10 +818,11 @@ public class DataRow implements java.io.Serializable {
 		return dr;
 	}
 
-	public Object toJsonElement()  {
+	public Object toJsonElement() {
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		try {
-			com.google.gson.JsonArray o = parser.parse(this.toJson()).getAsJsonArray();
+			com.google.gson.JsonArray o = parser.parse(this.toJson())
+					.getAsJsonArray();
 			return o;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

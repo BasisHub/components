@@ -3,6 +3,7 @@ package com.basiscomponents.bridge;
 class SessionCreateClassEntity extends SessionExecuteEntity {
 	private String var, classname;
 
+	@SuppressWarnings("unused")
 	private SessionCreateClassEntity() {
 	};
 

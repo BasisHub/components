@@ -8,8 +8,9 @@ import com.fasterxml.jackson.core.io.SerializedString;
 
 public class ComponentsCharacterEscapes extends CharacterEscapes
 {
+    private static final long serialVersionUID = 1L;
     private final int[] asciiEscapes;
-    
+
     public ComponentsCharacterEscapes()
     {
         // start with set of characters known to require escaping (double-quote, backslash etc)
@@ -26,7 +27,7 @@ public class ComponentsCharacterEscapes extends CharacterEscapes
         esc['&'] = CharacterEscapes.ESCAPE_STANDARD;
         esc['\''] = CharacterEscapes.ESCAPE_STANDARD;
         asciiEscapes = esc;
-        
+
     }
     // this method gets called for character codes 0 - 127
     @Override public int[] getEscapeCodesForAscii() {
