@@ -183,7 +183,7 @@ public class GeneratorJavaScript {
 			}
 			
 			writer.println("");
-
+			writer.println("BCFactory[\""+classname+"\"]=function(){return new "+classname+"();};");
 
 			writer.close();
 		}
