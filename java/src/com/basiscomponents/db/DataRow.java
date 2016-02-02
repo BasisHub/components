@@ -801,11 +801,17 @@ public class DataRow implements java.io.Serializable {
 				switch (type) {
 				case "C":
 					String strval = (String) field.get("StringValue");
+					if (strval == null)
+						strval = "";
 					dr.setFieldValue(name, strval);
 					break;
 				case "N":
 					Object o = field.get("NumericValue");
-					Double numval = Double.parseDouble(o.toString());
+					Double numval; 
+					if (o == null)
+						numval=0.0;
+					else
+						numval = Double.parseDouble(o.toString());
 					dr.setFieldValue(name, numval);
 					break;
 				default:
