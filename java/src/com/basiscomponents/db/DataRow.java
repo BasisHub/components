@@ -190,7 +190,7 @@ public class DataRow implements java.io.Serializable {
 
 		int column = this.ResultSet.getColumnIndex(name);
 		int type = this.ResultSet.getColumnType(column);
-
+		//TODO maybe: make this use reflection and skip the field for the column type, to honor dynamic type changes??
 		switch (type) {
 		case java.sql.Types.CHAR:
 		case java.sql.Types.VARCHAR:
