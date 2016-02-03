@@ -88,6 +88,10 @@ public class DataField implements java.io.Serializable {
 	}
 
 	public Date getDate() {
+		if (getClassName()=="java.sql.Timestamp"){
+			long ms = ((java.sql.Timestamp)this.Value).getTime();
+			return new java.sql.Date ( ms ); 
+		}
 		return (Date) this.Value;
 	}
 
@@ -96,6 +100,10 @@ public class DataField implements java.io.Serializable {
 	}
 
 	public Timestamp getTimestamp() {
+		if (getClassName()=="java.sql.Date"){
+			long ms = ((java.sql.Date)this.Value).getTime();
+			return new java.sql.Timestamp ( ms ); 
+		}
 		return (Timestamp) this.Value;
 	}
 
