@@ -1401,5 +1401,66 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			// // myArray.end--;
 		}
 	}
+	
+	
+	
+	
+	
+	public DataRow countByGroup(String fieldname) throws Exception{
+		Iterator<DataRow> it = this.iterator();
+		DataRow dr=new DataRow();
+		DataRow d;
+		Integer tmp;
+		String field;
+		while (it.hasNext()){
+			d = it.next();
+			field="(-)";
+			try{
+				field=d.getFieldAsString(fieldname);
+			}
+			catch (Exception e){}
+			finally {}
+			tmp=0;
+			try{
+			tmp=dr.getField(field).getInt();
+			}
+			catch (Exception e){}
+			finally {}
+			dr.setFieldValue(field, (Integer)tmp+1);
+		}
+		return dr;
+	}
+
+	public DataRow sumByGroup(String fieldname, String sumfieldname) throws Exception{
+		Iterator<DataRow> it = this.iterator();
+		DataRow dr=new DataRow();
+		DataRow d;
+		Double tmp,tmp1;
+		String field;
+		while (it.hasNext()){
+			d = it.next();
+			field="(-)";
+			try{
+				field=d.getFieldAsString(fieldname);
+			}
+			catch (Exception e){}
+			finally {}
+			tmp=0.0;
+			tmp1=0.0;
+			try{
+				tmp=d.getFieldAsNumber(sumfieldname);
+			}
+			catch (Exception e){}
+			finally {}
+
+			try{
+				tmp1=dr.getFieldAsNumber(field);
+			}
+			catch (Exception e){}
+			finally {}
+			dr.setFieldValue(field, tmp+tmp1);
+		}
+		return dr;
+	}	
 
 }
