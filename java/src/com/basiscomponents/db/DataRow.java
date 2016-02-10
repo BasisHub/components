@@ -20,7 +20,9 @@ public class DataRow implements java.io.Serializable {
 
 	private HashMap<String, String> Attributes = new HashMap<String, String>();
 
-	private com.basiscomponents.db.ResultSet ResultSet; // 0-based
+	private com.basiscomponents.db.ResultSet ResultSet; // containing this row
+
+	private byte[] RowKey = new byte[0];
 
 	public DataRow() {
 		this.ResultSet = new com.basiscomponents.db.ResultSet();
@@ -100,11 +102,11 @@ public class DataRow implements java.io.Serializable {
 	// Note: automatically adds field, if not found in DataFields
 	public void setFieldValue(String name, Object value) throws Exception {
 
-		String c=value.getClass().getCanonicalName();
-		if (c.contains("BBjNumber") | c.contains("BBjInt")){
+		String c = value.getClass().getCanonicalName();
+		if (c.contains("BBjNumber") | c.contains("BBjInt")) {
 			value = Double.parseDouble(value.toString());
 		}
-		
+
 		DataField field = null;
 		try {
 			field = getField(name);
@@ -124,11 +126,11 @@ public class DataRow implements java.io.Serializable {
 			throws Exception {
 		DataField field = null;
 
-		String c=value.getClass().getCanonicalName();
-		if (c.contains("BBjNumber") | c.contains("BBjInt")){
+		String c = value.getClass().getCanonicalName();
+		if (c.contains("BBjNumber") | c.contains("BBjInt")) {
 			value = Double.parseDouble(value.toString());
 		}
-		
+
 		try {
 			field = this.getField(name);
 		} catch (Exception e) {
@@ -663,8 +665,8 @@ public class DataRow implements java.io.Serializable {
 		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
 			in = in.substring(11, in.length() - 1);
 		}
-		if (in.startsWith("{") && in.endsWith("}")) 
-				in = "["+in+"]";
+		if (in.startsWith("{") && in.endsWith("}"))
+			in = "[" + in + "]";
 		JsonFactory f = new JsonFactory();
 		@SuppressWarnings("deprecation")
 		JsonParser jp = f.createJsonParser(in);
@@ -693,7 +695,7 @@ public class DataRow implements java.io.Serializable {
 				@SuppressWarnings({ "rawtypes", "unchecked" })
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
 				Object fieldObj = hm.get(fieldName);
-				if (fieldObj==null)
+				if (fieldObj == null)
 					continue;
 				int fieldType = Integer.parseInt((String) fieldMeta
 						.get("ColumnType"));
@@ -810,9 +812,9 @@ public class DataRow implements java.io.Serializable {
 					break;
 				case "N":
 					Object o = field.get("NumericValue");
-					Double numval; 
+					Double numval;
 					if (o == null)
-						numval=0.0;
+						numval = 0.0;
 					else
 						numval = Double.parseDouble(o.toString());
 					dr.setFieldValue(name, numval);
@@ -839,6 +841,41 @@ public class DataRow implements java.io.Serializable {
 
 		}
 		return null;
+	}
+
+	/**
+	 * @param keydata
+	 *            the key segment data as byte array to append to the row key
+	 */
+	public void addBytesToRowKey(byte[] keydata) {
+		byte[] b = new byte[this.RowKey.length + keydata.length];
+		System.arraycopy(this.RowKey, 0, b, 0, this.RowKey.length);
+		System.arraycopy(keydata, 0, b, this.RowKey.length, keydata.length);
+		this.RowKey = b;
+	}
+
+	/**
+	 * @param keydata
+	 *            the key segment data as string of bytes to append to the row
+	 *            key
+	 */
+	public void addToRowKey(String keydata) {
+		addBytesToRowKey(keydata.getBytes());
+	}
+
+	/**
+	 * @return the row key as string of bytes
+	 */
+	public String getRowKey() {
+		return new String(this.RowKey);
+	}
+
+	/**
+	 * @param rowKey
+	 *            the key value as string of bytes to set
+	 */
+	public void setRowKey(String rowKey) {
+		this.RowKey = rowKey.getBytes();
 	}
 
 }
