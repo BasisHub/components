@@ -1,9 +1,5 @@
 package com.basiscomponents.db;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -34,7 +30,6 @@ import com.google.gson.annotations.Expose;
 public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	private static final long serialVersionUID = 1L;
-	private static final int MAX_BLOB_SIZE = 32767;
 
 	@Expose
 	private ArrayList<HashMap<String, Object>> MetaData = new ArrayList<HashMap<String, Object>>();
@@ -42,7 +37,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private ArrayList<String> ColumnNames = new ArrayList<String>();
 	@Expose
 	private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
-	// @Expose
+
 	private ArrayList<String> KeyColumns = new ArrayList<String>();
 
 	private int currentRow = -1;
@@ -120,11 +115,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			while (column < cc) {
 				column++;
 				DataField field = new DataField(rs.getObject(column));
+				name = this.ColumnNames.get(column - 1);
+				if (KeyColumns != null && KeyColumns.contains(name)) {
+					dr.addBytesToRowKey(rs.getBytes(column)); // raw value as
+																// byte[]
+				}
 				if (defaultMetaData == true)
 					type = types.get(column - 1);
 				else
 					type = getColumnType(column - 1);
-				dr.addDataField(this.ColumnNames.get(column - 1), type, field);
+				dr.addDataField(name, type, field);
 			}
 			this.DataRows.add(dr);
 		}
@@ -252,52 +252,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return key data as a string for a specific row
 	 */
 	public String getRowKey(int row) {
-		byte[] result = new byte[0];
 		DataRow dr = get(row);
-		ArrayList<String> collist = getKeyColumns();
-		Iterator<String> it = collist.iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
-			DataField field;
-			try {
-				field = dr.getField(name);
-				try {
-					byte[] b = convertToBytes(field.getValue());
-					result = concat(result, b);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		return new String(result);
-	}
-
-	private byte[] concat(byte[]... arrays) {
-		int tLen = 0;
-		for (int i = 0; i < arrays.length; i++) {
-			tLen += arrays[i].length;
-		}
-		byte[] result = new byte[tLen];
-		int currIndex = 0;
-		for (int i = 0; i < arrays.length; i++) {
-			System.arraycopy(arrays[i], 0, result, currIndex, arrays[i].length);
-			currIndex += arrays[i].length;
-		}
-		return result;
-	}
-
-	private byte[] convertToBytes(Object object) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutput out = new ObjectOutputStream(bos);
-		out.writeObject(object);
-		out.flush();
-		// out.close(); theoretically not necessary because this is all
-		// in-memory stuff
-		return bos.toByteArray();
+		return dr.getRowKey();
 	}
 
 	public void clear() {
@@ -1032,329 +988,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return s;
 	}
 
-	/**
-	 * @return the BB template string for the result set
-	 */
-	public String getBBTemplate() {
-
-		StringBuffer s;
-		s = new StringBuffer();
-
-		int cols = getColumnCount();
-		if (cols == 0)
-			return "";
-
-		for (int col = 0; col < cols; col++) {
-
-			String colName = getColumnName(col);
-			if (col > 1)
-				s.append(",");
-			s.append(colName).append(":");
-			Integer column_size = getPrecision(col);
-			Integer decimal_digits = Math.max(0, getScale(col));
-			Boolean isNum = false;
-			Integer colType = getColumnType(col);
-			switch (colType) {
-			case java.sql.Types.NULL:
-				s.append("C(1)");
-				s.append(":sqltype=NULL");
-				break;
-			case java.sql.Types.CHAR:
-				if (column_size <= 0)
-					s.append("C(1*)");
-				else if (column_size <= 32767)
-					s.append("C(").append(column_size.toString()).append(")");
-				else
-					s.append("C(32767+=10)");
-				s.append(":sqltype=CHAR");
-				break;
-			case java.sql.Types.VARCHAR:
-				if (column_size <= 0)
-					s.append("C(1*)");
-				else if (column_size <= 32767)
-					s.append("C(").append(column_size.toString())
-							.append("+=10)");
-				else
-					s.append("C(32767+=10)");
-				s.append(":sqltype=VARCHAR");
-				break;
-			case java.sql.Types.LONGVARCHAR:
-				if (column_size <= 0)
-					s.append("C(1*)");
-				else if (column_size <= 32767)
-					s.append("C(").append(column_size.toString())
-							.append("+=10)");
-				else
-					s.append("C(32767+=10)");
-				s.append(":sqltype=LONGVARCHAR");
-				break;
-			case java.sql.Types.NCHAR:
-				if (column_size <= 0)
-					s.append("C(1*)");
-				else if (column_size <= 32767)
-					s.append("C(").append(column_size.toString()).append(")");
-				else
-					s.append("C(32767+=10)");
-				s.append(":sqltype=NCHAR");
-				break;
-			case java.sql.Types.NVARCHAR:
-				if (column_size <= 0)
-					s.append("C(1*)");
-				else if (column_size <= 32767)
-					s.append("C(").append(column_size.toString())
-							.append("+=10)");
-				else
-					s.append("C(32767+=10)");
-				s.append(":sqltype=NVARCHAR");
-				break;
-			case java.sql.Types.LONGNVARCHAR:
-				if (column_size <= 0)
-					s.append("C(1*)");
-				else if (column_size <= 32767)
-					s.append("C(").append(column_size.toString())
-							.append("+=10)");
-				else
-					s.append("C(32767+=10)");
-				s.append(":sqltype=LONGNVARCHAR");
-				break;
-			case java.sql.Types.INTEGER:
-				if (isSigned(col))
-					s.append("I(4)");
-				else
-					s.append("U(4)");
-				s.append(":sqltype=INTEGER");
-				break;
-			case java.sql.Types.TINYINT:
-				if (isSigned(col))
-					s.append("I(1)");
-				else
-					s.append("U(1)");
-				s.append(":sqltype=TINYINT");
-				break;
-			case java.sql.Types.SMALLINT:
-				if (isSigned(col))
-					s.append("I(2)");
-				else
-					s.append("U(2)");
-				s.append(":sqltype=SMALLINT");
-				break;
-			case java.sql.Types.BIGINT:
-				if (isSigned(col))
-					s.append("I(8)");
-				else
-					s.append("U(8)");
-				s.append(":sqltype=BIGINT");
-				break;
-			case java.sql.Types.BIT:
-				s.append("U(1)");
-				s.append(":sqltype=BIT");
-				break;
-			case java.sql.Types.BOOLEAN:
-				s.append("U(1)");
-				s.append(":sqltype=BOOLEAN");
-				break;
-			case java.sql.Types.DECIMAL:
-				s.append("B");
-				s.append(":sqltype=DECIMAL size=")
-						.append(column_size.toString())
-						.append(" scale=" + decimal_digits.toString());
-				isNum = true;
-				break;
-			case java.sql.Types.NUMERIC:
-				s.append("B");
-				s.append(":sqltype=NUMERIC size=")
-						.append(column_size.toString())
-						.append(" scale=" + decimal_digits.toString());
-				isNum = true;
-				break;
-			case java.sql.Types.DOUBLE:
-				s.append("Y");
-				s.append(":sqltype=DOUBLE size=")
-						.append(column_size.toString())
-						.append(" scale=" + decimal_digits.toString());
-				isNum = true;
-				break;
-			case java.sql.Types.FLOAT:
-				s.append("F");
-				s.append(":sqltype=FLOAT size=").append(column_size.toString())
-						.append(" scale=" + decimal_digits.toString());
-				isNum = true;
-				break;
-			case java.sql.Types.REAL:
-				s.append("X");
-				s.append(":sqltype=REAL size=").append(column_size.toString())
-						.append(" scale=" + decimal_digits.toString());
-				isNum = true;
-				break;
-			case java.sql.Types.DATE:
-				s.append("C(10)");
-				s.append(":sqltype=DATE");
-				break;
-			case java.sql.Types.TIME:
-				s.append("C(8)");
-				s.append(":sqltype=TIME");
-				break;
-			case java.sql.Types.TIMESTAMP:
-				s.append("C(29)");
-				s.append(":sqltype=TIMESTAMP");
-				break;
-			case java.sql.Types.BINARY:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=BINARY");
-				break;
-			case java.sql.Types.VARBINARY:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=VARBINARY");
-				break;
-			case java.sql.Types.LONGVARBINARY:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=LONGVARBINARY");
-				break;
-			case java.sql.Types.BLOB:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=BLOB");
-				break;
-			case java.sql.Types.CLOB:
-				if (column_size <= 0)
-					s.append("C(1*)");
-				else if (column_size <= 32767)
-					s.append("C(").append(column_size.toString())
-							.append("+=10)");
-				else
-					s.append("C(32767+=10)");
-				s.append(":sqltype=CLOB");
-				break;
-			case java.sql.Types.NCLOB:
-				if (column_size <= 0)
-					s.append("C(1*)");
-				else if (column_size <= 32767)
-					s.append("C(").append(column_size.toString())
-							.append("+=10)");
-				else
-					s.append("C(32767+=10)");
-				s.append(":sqltype=NCLOB");
-				break;
-			case 9: // ODBC Date
-				s.append("C(10)");
-				s.append(":sqltype=ODBC_DATE");
-				break;
-			case 11: // ODBC Timestamp
-				s.append("C(19)");
-				s.append(":sqltype=ODBC_TIMESTAMP");
-				break;
-			case java.sql.Types.ARRAY:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=ARRAY");
-				break;
-			case java.sql.Types.JAVA_OBJECT:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=JAVA_OBJECT");
-				break;
-			case java.sql.Types.OTHER:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=OTHER");
-				break;
-			case java.sql.Types.REF:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=REF");
-				break;
-			case java.sql.Types.DATALINK:
-				s.append("C(").append(column_size.toString()).append(")");
-				s.append(":sqltype=DATALINK");
-				break;
-			case java.sql.Types.DISTINCT:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=DISTINCT");
-				break;
-			case java.sql.Types.STRUCT:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=STRUCT");
-				break;
-			case java.sql.Types.ROWID:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=ROWID");
-				break;
-			case java.sql.Types.SQLXML:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=SQLXML");
-				break;
-			default:
-				if (column_size > 0)
-					column_size = Math.min(column_size, MAX_BLOB_SIZE);
-				else
-					column_size = MAX_BLOB_SIZE;
-				s.append("O(").append(column_size.toString()).append(")");
-				s.append(":sqltype=UNKNOWN");
-				break;
-			} // switch
-			if (isAutoIncrement(col)) {
-				s.append(" auto_increment=1");
-			}
-			if (isReadOnly(col)) {
-				s.append(" read_only=1");
-			}
-			if (isCaseSensitive(col)) {
-				s.append(" case_sensitive=1");
-			}
-			if (isSigned(col) && isNum) {
-				s.append(" signed=1");
-			}
-			if (isNullable(col) == java.sql.ResultSetMetaData.columnNoNulls) {
-				s.append(" required=1");
-			}
-			s.append(":");
-		} // for
-		return s.toString();
-	}
-
 	@Override
 	public Iterator<DataRow> iterator() {
 		// TODO Auto-generated method stub
@@ -1401,7 +1034,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			// // myArray.end--;
 		}
 	}
-	
 	
 	
 	public DataRow countByGroup(String fieldname) throws Exception{
