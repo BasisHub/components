@@ -1404,19 +1404,23 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	
 	
 	
-	
-	
 	public DataRow countByGroup(String fieldname) throws Exception{
+		return this.countByGroup(fieldname, fieldname);
+	}
+	
+	public DataRow countByGroup(String fieldname, String labelname) throws Exception{
 		Iterator<DataRow> it = this.iterator();
 		DataRow dr=new DataRow();
 		DataRow d;
 		Integer tmp;
-		String field;
+		String field, label;
 		while (it.hasNext()){
 			d = it.next();
 			field="(-)";
+			label="(-)";
 			try{
 				field=d.getFieldAsString(fieldname);
+				label=d.getFieldAsString(labelname);
 			}
 			catch (Exception e){}
 			finally {}
@@ -1427,21 +1431,28 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			catch (Exception e){}
 			finally {}
 			dr.setFieldValue(field, (Integer)tmp+1);
+			dr.setFieldAttribute(field, "label", label);
 		}
 		return dr;
 	}
 
 	public DataRow sumByGroup(String fieldname, String sumfieldname) throws Exception{
+		return this.sumByGroup(fieldname,fieldname,sumfieldname);
+	}
+	
+	public DataRow sumByGroup(String fieldname, String labelname, String sumfieldname) throws Exception{
 		Iterator<DataRow> it = this.iterator();
 		DataRow dr=new DataRow();
 		DataRow d;
 		Double tmp,tmp1;
-		String field;
+		String field,label;
 		while (it.hasNext()){
 			d = it.next();
 			field="(-)";
+			label="(-)";
 			try{
 				field=d.getFieldAsString(fieldname);
+				label=d.getFieldAsString(labelname);
 			}
 			catch (Exception e){}
 			finally {}
@@ -1459,6 +1470,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			catch (Exception e){}
 			finally {}
 			dr.setFieldValue(field, tmp+tmp1);
+			dr.setFieldAttribute(field, "label",label);
+			
 		}
 		return dr;
 	}	
