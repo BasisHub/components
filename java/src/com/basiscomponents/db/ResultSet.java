@@ -775,9 +775,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					break;
 
 				case java.sql.Types.NUMERIC:
+					g.writeNumberField(fn, dr.getField(fn).getBigDecimal());
+					break;
+					
+				case java.sql.Types.DECIMAL:
 				case java.sql.Types.DOUBLE:
 				case java.sql.Types.FLOAT:
-				case java.sql.Types.DECIMAL:
 				case java.sql.Types.REAL:
 					g.writeNumberField(fn, dr.getField(fn).getDouble());
 					break;
