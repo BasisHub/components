@@ -70,8 +70,6 @@ public class BBjSearchGizmo {
 		lucene_doc.add(new StringField("id", doc.getInternalId(),
 				Field.Store.YES));
 
-		System.out.println("Adding " + doc.getInternalId());
-
 		Iterator<BBjSearchGizmoDocField> it = doc.getFields().iterator();
 		while (it.hasNext()) {
 			BBjSearchGizmoDocField f = it.next();
@@ -80,18 +78,9 @@ public class BBjSearchGizmo {
 			lucene_field.setBoost(f.getBoost());
 			lucene_doc.add(lucene_field);
 
-			if (f.isFacet()) {
-
-				System.out.println(f.getName());
-				System.out.println(f.getContent());
-			}
-
-			System.out.println(lucene_field.toString());
 		}
 
-		// System.out.println(paths);
 		try {
-			System.out.println(lucene_doc.toString());
 			writer.addDocument(lucene_doc);
 		} catch (Exception ex) {
 			writer.close();
@@ -112,7 +101,6 @@ public class BBjSearchGizmo {
 			LockObtainFailedException, ParseException {
 
 		String id2 = new sun.misc.BASE64Encoder().encode(id.getBytes());
-		System.out.println("Removing " + id2);
 
 		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault()
 				.getPath(directoryName));
@@ -134,18 +122,11 @@ public class BBjSearchGizmo {
 		IndexSearcher searcher = new IndexSearcher(reader);
 
 		if (reader.numDocs() < 1) {
-			System.err.println("no hits!");
 			return new ArrayList<String>();
 		}
 
 		TopScoreDocCollector collector = TopScoreDocCollector.create(reader
 				.numDocs());
-
-		// note: this is how to get to the atomic reader field in case we need
-		// it...
-		// System.out.println(dr.leaves().get(0).reader().getFieldInfos().fieldInfo(0).name);
-		// System.out.println(dr.leaves().get(0).reader().getFieldInfos().fieldInfo(1).name);
-		// System.out.println(dr.leaves().get(0).reader().getFieldInfos().fieldInfo(2).name);
 
 		MultiFieldQueryParser queryparser = new MultiFieldQueryParser(fields,
 				analyzer);
