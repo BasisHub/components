@@ -1,7 +1,6 @@
 package com.basiscomponents.db;
 
 import java.sql.Time;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -223,7 +222,13 @@ public class DataRow implements java.io.Serializable {
 			ret = field.getFloat().doubleValue();
 			break;
 		case java.sql.Types.DATE:
-			ret = (double) field.getDate().getTime();
+			if (field.getDate() == null)
+				ret = -1.0;
+			else {
+				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(
+						field.getDate().getTime()));
+				ret = ret2.doubleValue();
+			}
 			break;
 		case java.sql.Types.TIMESTAMP:
 		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
