@@ -36,6 +36,10 @@ public class DataField implements java.io.Serializable {
 	public Object getValue() {
 		return this.Value;
 	}
+	
+	public Boolean equals(DataField f){
+		return this.getString().equals(f.getString());
+	}
 
 	public void setValue(Object value) {
 		this.Value = value;
