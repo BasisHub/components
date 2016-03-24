@@ -13,10 +13,12 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -49,7 +51,96 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (SQLTypeNameMap.isEmpty())
 			setSQLTypeNameMap();
 	}
+	
+	@SuppressWarnings("unchecked")
+	private ResultSet(
+			ArrayList<HashMap<String, Object>> MetaData, 
+			ArrayList<String> ColumnNames, 
+			ArrayList<DataRow> DataRows, 
+			ArrayList<String> KeyColumns ){
+		this.MetaData = (ArrayList<HashMap<String, Object>>)MetaData.clone();
+		this.ColumnNames = (ArrayList<String>)ColumnNames.clone();
+		this.DataRows = (ArrayList<DataRow>)DataRows.clone();
+		this.KeyColumns = (ArrayList<String>)KeyColumns.clone();
+	}
 
+	@SuppressWarnings("unchecked")
+	private ResultSet(
+			ArrayList<HashMap<String, Object>> MetaData, 
+			ArrayList<String> ColumnNames, 
+			ArrayList<String> KeyColumns ){
+		this.MetaData = (ArrayList<HashMap<String, Object>>)MetaData.clone();
+		this.ColumnNames = (ArrayList<String>)ColumnNames.clone();
+		this.KeyColumns = (ArrayList<String>)KeyColumns.clone();
+	}	
+	
+	public ResultSet clone(){
+		return new ResultSet(MetaData, ColumnNames, DataRows, KeyColumns);
+	}
+	
+	public ResultSet orderBy(String orderByClause) throws Exception{
+		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
+		
+		String[] fields = orderByClause.split(",");
+		for (int i=0; i<fields.length; i++){
+			fields[i] = fields[i].trim();
+			if (fields[i].contains(" ")){
+				fields[i] = fields[i].substring(0, fields[i].indexOf(' '));
+				//TODO implement DESCending and ASCending predicates, maybe UCASE() etc., like in an SQL ORDER BY clause
+			}
+		}
+
+		Iterator<DataRow> it = this.iterator();
+		TreeMap<String,DataRow> tm = new TreeMap<>();
+		while (it.hasNext()){
+			DataRow dr = it.next();
+			String idx="";
+			for (int i=0; i<fields.length; i++){
+				idx+=dr.getFieldAsString(fields[i]);
+			}
+			tm.put(idx,dr);
+		}
+		
+		Iterator<String> it2 = tm.keySet().iterator();
+		while (it2.hasNext()){
+			String k = it2.next();
+			DataRow dr = tm.get(k);
+			r.add(dr);
+		}
+		
+		return r;
+	}
+	
+
+	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
+		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
+		
+		BBArrayList filterFields = simpleFilterCondition.getFieldNames();
+
+		Iterator<DataRow> it = this.iterator();
+		while (it.hasNext()){
+			DataRow dr = it.next();
+			@SuppressWarnings("rawtypes")
+			Iterator it2 = filterFields.iterator();
+			Boolean match = true;
+			while (it2.hasNext()){
+				String k = (String)it2.next();
+				match=true;
+				DataField cond = simpleFilterCondition.getField(k);
+				DataField comp = dr.getField(k);
+				if (!cond.equals(comp)){
+						match=false;
+
+						break;
+				}
+			}
+			if (match){
+				r.add(dr);
+			}
+		}
+		return r;
+	}	
+	
 	public ResultSet(java.sql.ResultSet rs) {
 		this();
 		try {
@@ -1037,13 +1128,97 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			// // myArray.end--;
 		}
 	}
+
 	
+	//----------------------------------------scalar functions on one field in the resultset----------------------------
 	
-	public DataRow countByGroup(String fieldname) throws Exception{
-		return this.countByGroup(fieldname, fieldname);
+	public int count(){
+		return this.DataRows.size();
 	}
 	
-	public DataRow countByGroup(String fieldname, String labelname) throws Exception{
+	public Double sum(String fieldname) throws Exception{
+		Iterator<DataRow> it = iterator();
+		Double s = 0.0;
+		while (it.hasNext()){
+			DataRow dr = it.next();
+			s += dr.getFieldAsNumber(fieldname);
+		}
+		return s;
+	};
+
+	public Double min(String fieldname) throws Exception{
+		Iterator<DataRow> it = iterator();
+		Double s = 0.0;
+		Boolean first=true;
+		while (it.hasNext()){
+			DataRow dr = it.next();
+			Double d = dr.getFieldAsNumber(fieldname);
+			if (first || d<s){
+				s=d;
+				first=false;
+			}
+			
+		}
+		return s;
+	};	
+
+	public Double max(String fieldname) throws Exception{
+		Iterator<DataRow> it = iterator();
+		Double s = 0.0;
+		Boolean first=true;
+		while (it.hasNext()){
+			DataRow dr = it.next();
+			Double d = dr.getFieldAsNumber(fieldname);
+			if (first || d>s){
+				s=d;
+				first=false;
+			}
+			
+		}
+		return s;
+	};		
+	
+	public Double avg(String fieldname) throws Exception{
+		return sum(fieldname)/count(); 
+	};
+	
+	public Double median(String fieldname) throws Exception {
+		double[] m = new double[count()];
+		Iterator<DataRow> it = iterator();
+		int i=0;
+		while (it.hasNext()){
+			DataRow dr = it.next();
+			m[i++]=dr.getFieldAsNumber(fieldname);
+			
+		}		
+		
+		Arrays.sort(m);
+		
+	    int middle = m.length/2;
+	    if (m.length%2 == 1) {
+	        return m[middle];
+	    } else {
+	        return (m[middle-1] + m[middle]) / 2.0;
+	    }
+	}	
+	
+	public DataRow countByGroup(String fieldname) throws Exception{
+		return this.countByGroup(fieldname, fieldname,NO_SORT,0);
+	}
+	
+	public static final int NO_SORT 			= 0;
+	public static final int SORT_ON_GROUPFIELD 	= 1;
+	public static final int SORT_ON_GROUPLABEL 	= 2;
+	public static final int SORT_ON_RESULT 		= 3;	
+	public static final int SORT_ON_GROUPFIELD_DESC 	= 11;
+	public static final int SORT_ON_GROUPLABEL_DESC 	= 12;
+	public static final int SORT_ON_RESULT_DESC 		= 13;	
+	
+	public DataRow countByGroup(String fieldname, String labelname, int sort, int top) throws Exception{
+		
+		//note: fieldname and labelname are separate as you may have different values in the row to group by (like different IDs),
+		//but the human readable values might still be the same (like same name for different IDs)
+		
 		Iterator<DataRow> it = this.iterator();
 		DataRow dr=new DataRow();
 		DataRow d;
@@ -1068,14 +1243,90 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			dr.setFieldValue(field, (Integer)tmp+1);
 			dr.setFieldAttribute(field, "label", label);
 		}
+		
+		if (sort > 0){
+			dr = sortDataRow(dr,sort);
+		}
+		
+		if (top>0){
+			BBArrayList map = dr.getFieldNames();
+			while (map.size()>top){
+				int i = map.size()-1;
+				String f = (String) map.get(i);
+				dr.removeField(f);
+				map.remove(i);
+			}
+		}
+		
 		return dr;
+	}
+	
+	private DataRow sortDataRow(DataRow dr, int sort) throws Exception{
+		// TODO make a generic implementation of this in the DataRow itself, that can sort on the value, the name or any attribute
+		
+		DataRow drn = new DataRow();
+		BBArrayList f = dr.getFieldNames();
+		@SuppressWarnings("rawtypes")
+		Iterator it = f.iterator();
+		TreeMap<String,String> tm = new TreeMap<>();
+		while (it.hasNext()){
+			String k = (String) it.next();
+			String tmp="";
+			switch (sort){
+				case SORT_ON_GROUPFIELD:
+					tm.put(k,k);
+					break;
+				case SORT_ON_GROUPLABEL:
+					tm.put(dr.getFieldAttribute(k,"label") +k,k);
+					break;
+				case SORT_ON_RESULT:
+					tmp = dr.getFieldAsNumber(k).toString();
+					while (tmp.length()<30)
+						tmp='0'+tmp;
+					tm.put(tmp+k,k);
+					//FIXME this is clumsy. Mind the decimals when filling up!
+					break;
+				case SORT_ON_GROUPFIELD_DESC:
+					tm.put(invert(k),k);
+					break;
+				case SORT_ON_GROUPLABEL_DESC:
+					tm.put(invert(dr.getFieldAttribute(k,"label") +k),k);
+					break;
+				case SORT_ON_RESULT_DESC:
+					tmp = dr.getFieldAsNumber(k).toString();					
+					while (tmp.length()<30)
+						tmp='0'+tmp;
+					tm.put(invert(tmp+k),k);
+					break;					
+			}						
+			
+		}
+		Iterator<String> it2 = tm.keySet().iterator();
+		while (it2.hasNext()){
+			String k = tm.get(it2.next());
+		
+			drn.setFieldValue(k,dr.getFieldType(k),dr.getFieldValue(k));
+			drn.setFieldAttribute(k,"label",dr.getFieldAttribute(k,"label"));
+		}
+		
+		return drn;
+		
+	}
+	
+	private String invert(String in){
+		String out="";
+		byte[] b = in.getBytes();
+		for (int i=0; i<b.length; i++){
+			out += 255-b[i];
+		}
+		return out;
 	}
 
 	public DataRow sumByGroup(String fieldname, String sumfieldname) throws Exception{
-		return this.sumByGroup(fieldname,fieldname,sumfieldname);
+		return this.sumByGroup(fieldname,fieldname,sumfieldname, NO_SORT, 0);
 	}
 	
-	public DataRow sumByGroup(String fieldname, String labelname, String sumfieldname) throws Exception{
+	public DataRow sumByGroup(String fieldname, String labelname, String sumfieldname, int sort, int top) throws Exception{
 		Iterator<DataRow> it = this.iterator();
 		DataRow dr=new DataRow();
 		DataRow d;
@@ -1108,7 +1359,31 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			dr.setFieldAttribute(field, "label",label);
 			
 		}
+		
+		if (sort > 0){
+			dr = sortDataRow(dr,sort);
+		}
+		
+		if (top>0){
+			BBArrayList map = dr.getFieldNames();
+			while (map.size()>top){
+				int i = map.size()-1;
+				String f = (String) map.get(i);
+				dr.removeField(f);
+				map.remove(i);
+			}
+		}
+		
 		return dr;
 	}	
-
+	
+	public void list() {
+		   System.out.println("-----------------------------------");
+		   Iterator<DataRow> it = iterator();
+		   while (it.hasNext())
+		   {
+			   System.out.println(it.next());
+		   }
+		   System.out.println("-----------------------------------");
+	}
 }
