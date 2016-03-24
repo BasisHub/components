@@ -202,14 +202,13 @@ public class DataRow implements java.io.Serializable {
 			ret = Double.valueOf(field.getString());
 			break;
 		case java.sql.Types.INTEGER:
+		case java.sql.Types.SMALLINT:			
 			ret = field.getInt().doubleValue();
 			break;
 		case java.sql.Types.BIGINT:
 			ret = field.getLong().doubleValue();
 			break;
-		case java.sql.Types.SMALLINT:
-			ret = field.getShort().doubleValue();
-			break;
+
 		case java.sql.Types.DECIMAL:
 		case java.sql.Types.NUMERIC:
 			ret = field.getBigDecimal().doubleValue();
