@@ -68,8 +68,7 @@ public class DataRow implements java.io.Serializable {
 
 	@SuppressWarnings("unchecked")
 	public java.util.HashMap<String, String> getAttributes() {
-		java.util.HashMap<String, String> clone = (java.util.HashMap<String, String>) this.Attributes
-				.clone();
+		java.util.HashMap<String, String> clone = (java.util.HashMap<String, String>) this.Attributes.clone();
 		return clone;
 	}
 
@@ -121,8 +120,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	// Note: automatically adds field, if not found in DataFields
-	public void setFieldValue(String name, int type, Object value)
-			throws Exception {
+	public void setFieldValue(String name, int type, Object value) throws Exception {
 		DataField field = null;
 
 		String c = value.getClass().getCanonicalName();
@@ -191,7 +189,8 @@ public class DataRow implements java.io.Serializable {
 
 		int column = this.ResultSet.getColumnIndex(name);
 		int type = this.ResultSet.getColumnType(column);
-		//TODO maybe: make this use reflection and skip the field for the column type, to honor dynamic type changes??
+		// TODO maybe: make this use reflection and skip the field for the
+		// column type, to honor dynamic type changes??
 		switch (type) {
 		case java.sql.Types.CHAR:
 		case java.sql.Types.VARCHAR:
@@ -202,13 +201,12 @@ public class DataRow implements java.io.Serializable {
 			ret = Double.valueOf(field.getString());
 			break;
 		case java.sql.Types.INTEGER:
-		case java.sql.Types.SMALLINT:			
+		case java.sql.Types.SMALLINT:
 			ret = field.getInt().doubleValue();
 			break;
 		case java.sql.Types.BIGINT:
 			ret = field.getLong().doubleValue();
 			break;
-
 		case java.sql.Types.DECIMAL:
 		case java.sql.Types.NUMERIC:
 			ret = field.getBigDecimal().doubleValue();
@@ -224,8 +222,7 @@ public class DataRow implements java.io.Serializable {
 			if (field.getDate() == null)
 				ret = -1.0;
 			else {
-				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(
-						field.getDate().getTime()));
+				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(field.getDate().getTime()));
 				ret = ret2.doubleValue();
 			}
 			break;
@@ -280,10 +277,9 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public String getColumnName(int column, Boolean silent) throws Exception {
-		if ((this.ResultSet.getColumnNames().isEmpty() || column < 0 || column >= this.ResultSet
-				.getColumnNames().size()) && !(silent))
-			throw new Exception("Column " + String.valueOf(column)
-					+ " does not exist");
+		if ((this.ResultSet.getColumnNames().isEmpty() || column < 0
+				|| column >= this.ResultSet.getColumnNames().size()) && !(silent))
+			throw new Exception("Column " + String.valueOf(column) + " does not exist");
 		return this.ResultSet.getColumnNames().get(column);
 	}
 
@@ -336,14 +332,12 @@ public class DataRow implements java.io.Serializable {
 		return this.ResultSet.getTableName(column);
 	}
 
-	public void setFieldAttribute(String name, String attrname, String value)
-			throws Exception {
+	public void setFieldAttribute(String name, String attrname, String value) throws Exception {
 		DataField field = getField(name);
 		field.setAttribute(attrname, value);
 	}
 
-	public String getFieldAttribute(String name, String attrname)
-			throws Exception {
+	public String getFieldAttribute(String name, String attrname) throws Exception {
 		DataField field = getField(name);
 		String attr = field.getAttribute(attrname);
 		if (attr == null)
@@ -351,14 +345,12 @@ public class DataRow implements java.io.Serializable {
 		return attr;
 	}
 
-	public HashMap<String, String> getFieldAttributes(String name)
-			throws Exception {
+	public HashMap<String, String> getFieldAttributes(String name) throws Exception {
 		DataField field = getField(name);
 		return field.getAttributes();
 	}
 
-	public void removeFieldAttribute(String name, String attrname)
-			throws Exception {
+	public void removeFieldAttribute(String name, String attrname) throws Exception {
 		DataField field = getField(name);
 		field.removeAttribute(attrname);
 	}
@@ -385,8 +377,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return ArrayList list: a list of field attributes for the given
 	 *         attribute name
 	 */
-	public ArrayList<String> getAttributeForFields(String attrname,
-			Boolean defaultToFieldname) {
+	public ArrayList<String> getAttributeForFields(String attrname, Boolean defaultToFieldname) {
 		DataField field;
 		ArrayList<String> ret = new ArrayList<String>();
 		if (this.ResultSet.getColumnNames().size() > 0) {
@@ -416,8 +407,7 @@ public class DataRow implements java.io.Serializable {
 		return replaceFields(formula, false);
 	}
 
-	public String replaceFields(String formula,
-			Boolean fCleanRemainingPlaceholders) throws Exception {
+	public String replaceFields(String formula, Boolean fCleanRemainingPlaceholders) throws Exception {
 		Set<String> ks = this.DataFields.keySet();
 		Iterator<String> it = ks.iterator();
 		while (it.hasNext()) {
@@ -443,9 +433,7 @@ public class DataRow implements java.io.Serializable {
 			while (it.hasNext()) {
 				String name = it.next();
 				DataField f = this.DataFields.get(name);
-				if (f == null
-						|| !dr.getFieldAsString(name).equals(
-								this.getFieldAsString(name))) {
+				if (f == null || !dr.getFieldAsString(name).equals(this.getFieldAsString(name))) {
 					eq = false;
 					break;
 				}
@@ -536,8 +524,7 @@ public class DataRow implements java.io.Serializable {
 		addDataField(name, type, field);
 	}
 
-	public void addDataField(String name, int type, DataField field)
-			throws Exception {
+	public void addDataField(String name, int type, DataField field) throws Exception {
 
 		if (this.ResultSet.getColumnIndex(name) == -1) {
 			int column = this.ResultSet.addColumn(name);
@@ -677,10 +664,8 @@ public class DataRow implements java.io.Serializable {
 		jp.nextToken();
 		ObjectMapper objectMapper = new ObjectMapper();
 		@SuppressWarnings("rawtypes")
-		List navigation = objectMapper.readValue(
-				jp,
-				objectMapper.getTypeFactory().constructCollectionType(
-						List.class, Object.class));
+		List navigation = objectMapper.readValue(jp,
+				objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
 
 		HashMap<?, ?> hm = (HashMap<?, ?>) navigation.get(0);
 
@@ -701,8 +686,7 @@ public class DataRow implements java.io.Serializable {
 				Object fieldObj = hm.get(fieldName);
 				if (fieldObj == null)
 					continue;
-				int fieldType = Integer.parseInt((String) fieldMeta
-						.get("ColumnType"));
+				int fieldType = Integer.parseInt((String) fieldMeta.get("ColumnType"));
 				switch (fieldType) {
 				case java.sql.Types.CHAR:
 				case java.sql.Types.VARCHAR:
@@ -710,18 +694,14 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.NCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					dr.addDataField(fieldName, fieldType, new DataField(
-							fieldObj));
+					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
 					break;
 
 				case java.sql.Types.BIGINT:
 				case java.sql.Types.TINYINT:
 				case java.sql.Types.INTEGER:
 				case java.sql.Types.SMALLINT:
-					dr.addDataField(
-							fieldName,
-							fieldType,
-							new DataField(Integer.parseInt(fieldObj.toString())));
+					dr.addDataField(fieldName, fieldType, new DataField(Integer.parseInt(fieldObj.toString())));
 					break;
 
 				case java.sql.Types.NUMERIC:
@@ -729,33 +709,27 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.FLOAT:
 				case java.sql.Types.DECIMAL:
 				case java.sql.Types.REAL:
-					dr.addDataField(
-							fieldName,
-							fieldType,
-							new DataField(Double.parseDouble(fieldObj
-									.toString())));
+					dr.addDataField(fieldName, fieldType, new DataField(Double.parseDouble(fieldObj.toString())));
 					break;
 
 				case java.sql.Types.BOOLEAN:
 				case java.sql.Types.BIT:
-					dr.addDataField(fieldName, fieldType, new DataField(
-							fieldObj));
+					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
 					break;
 
 				case java.sql.Types.TIMESTAMP:
 				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
 				case (int) 11:
 					String tss = fieldObj.toString();
-					java.sql.Timestamp ts = java.sql.Timestamp.valueOf(tss
-							.substring(0, 10) + " " + tss.substring(11, 19));
+					java.sql.Timestamp ts = java.sql.Timestamp
+							.valueOf(tss.substring(0, 10) + " " + tss.substring(11, 19));
 					dr.addDataField(fieldName, fieldType, new DataField(ts));
 					break;
 
 				case java.sql.Types.DATE:
 				case (int) 9:
 					tss = fieldObj.toString();
-					java.sql.Date ds = java.sql.Date.valueOf(tss.substring(0,
-							10));
+					java.sql.Date ds = java.sql.Date.valueOf(tss.substring(0, 10));
 					dr.addDataField(fieldName, fieldType, new DataField(ds));
 					break;
 
@@ -791,8 +765,7 @@ public class DataRow implements java.io.Serializable {
 						if (k.equals("ColumnType"))
 							continue;
 
-						dr.setFieldAttribute(fieldName, k,
-								(String) fieldMeta.get(k));
+						dr.setFieldAttribute(fieldName, k, (String) fieldMeta.get(k));
 					}
 				}
 
@@ -836,8 +809,7 @@ public class DataRow implements java.io.Serializable {
 	public Object toJsonElement() {
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		try {
-			com.google.gson.JsonArray o = parser.parse(this.toJson())
-					.getAsJsonArray();
+			com.google.gson.JsonArray o = parser.parse(this.toJson()).getAsJsonArray();
 			return o;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
