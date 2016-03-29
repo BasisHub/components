@@ -855,8 +855,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.NCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					String s = dr.getField(fn).getString().trim();
-					g.writeStringField(fn, s);
+					String tmp = dr.getField(fn).getAttribute("StringFormat");
+					if (tmp != null && tmp.equals("JSON")){
+						g.writeFieldName(fn);
+						g.writeRawValue(dr.getField(fn).getString().trim());
+					}
+					else{
+						String s = dr.getField(fn).getString().trim();
+						g.writeStringField(fn, s);
+					}
 					break;
 				case java.sql.Types.BIGINT:
 				case java.sql.Types.TINYINT:
@@ -1201,6 +1208,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	        return (m[middle-1] + m[middle]) / 2.0;
 	    }
 	}	
+
+	public DataRow countByGroup(String fieldname, String grpname) throws Exception{
+		return this.countByGroup(fieldname, grpname,NO_SORT,0);
+	}
 	
 	public DataRow countByGroup(String fieldname) throws Exception{
 		return this.countByGroup(fieldname, fieldname,NO_SORT,0);
@@ -1321,7 +1332,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 		return out;
 	}
-
+	
 	public DataRow sumByGroup(String fieldname, String sumfieldname) throws Exception{
 		return this.sumByGroup(fieldname,fieldname,sumfieldname, NO_SORT, 0);
 	}
