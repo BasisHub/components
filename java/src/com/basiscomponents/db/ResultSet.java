@@ -51,96 +51,90 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (SQLTypeNameMap.isEmpty())
 			setSQLTypeNameMap();
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	private ResultSet(
-			ArrayList<HashMap<String, Object>> MetaData, 
-			ArrayList<String> ColumnNames, 
-			ArrayList<DataRow> DataRows, 
-			ArrayList<String> KeyColumns ){
-		this.MetaData = (ArrayList<HashMap<String, Object>>)MetaData.clone();
-		this.ColumnNames = (ArrayList<String>)ColumnNames.clone();
-		this.DataRows = (ArrayList<DataRow>)DataRows.clone();
-		this.KeyColumns = (ArrayList<String>)KeyColumns.clone();
+	private ResultSet(ArrayList<HashMap<String, Object>> MetaData, ArrayList<String> ColumnNames,
+			ArrayList<DataRow> DataRows, ArrayList<String> KeyColumns) {
+		this.MetaData = (ArrayList<HashMap<String, Object>>) MetaData.clone();
+		this.ColumnNames = (ArrayList<String>) ColumnNames.clone();
+		this.DataRows = (ArrayList<DataRow>) DataRows.clone();
+		this.KeyColumns = (ArrayList<String>) KeyColumns.clone();
 	}
 
 	@SuppressWarnings("unchecked")
-	private ResultSet(
-			ArrayList<HashMap<String, Object>> MetaData, 
-			ArrayList<String> ColumnNames, 
-			ArrayList<String> KeyColumns ){
-		this.MetaData = (ArrayList<HashMap<String, Object>>)MetaData.clone();
-		this.ColumnNames = (ArrayList<String>)ColumnNames.clone();
-		this.KeyColumns = (ArrayList<String>)KeyColumns.clone();
-	}	
-	
-	public ResultSet clone(){
+	private ResultSet(ArrayList<HashMap<String, Object>> MetaData, ArrayList<String> ColumnNames,
+			ArrayList<String> KeyColumns) {
+		this.MetaData = (ArrayList<HashMap<String, Object>>) MetaData.clone();
+		this.ColumnNames = (ArrayList<String>) ColumnNames.clone();
+		this.KeyColumns = (ArrayList<String>) KeyColumns.clone();
+	}
+
+	public ResultSet clone() {
 		return new ResultSet(MetaData, ColumnNames, DataRows, KeyColumns);
 	}
-	
-	public ResultSet orderBy(String orderByClause) throws Exception{
+
+	public ResultSet orderBy(String orderByClause) throws Exception {
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
-		
+
 		String[] fields = orderByClause.split(",");
-		for (int i=0; i<fields.length; i++){
+		for (int i = 0; i < fields.length; i++) {
 			fields[i] = fields[i].trim();
-			if (fields[i].contains(" ")){
+			if (fields[i].contains(" ")) {
 				fields[i] = fields[i].substring(0, fields[i].indexOf(' '));
-				//TODO implement DESCending and ASCending predicates, maybe UCASE() etc., like in an SQL ORDER BY clause
+				// TODO implement DESCending and ASCending predicates, maybe
+				// UCASE() etc., like in an SQL ORDER BY clause
 			}
 		}
 
 		Iterator<DataRow> it = this.iterator();
-		TreeMap<String,DataRow> tm = new TreeMap<>();
-		while (it.hasNext()){
+		TreeMap<String, DataRow> tm = new TreeMap<>();
+		while (it.hasNext()) {
 			DataRow dr = it.next();
-			String idx="";
-			for (int i=0; i<fields.length; i++){
-				idx+=dr.getFieldAsString(fields[i]);
+			String idx = "";
+			for (int i = 0; i < fields.length; i++) {
+				idx += dr.getFieldAsString(fields[i]);
 			}
-			tm.put(idx,dr);
+			tm.put(idx, dr);
 		}
-		
+
 		Iterator<String> it2 = tm.keySet().iterator();
-		while (it2.hasNext()){
+		while (it2.hasNext()) {
 			String k = it2.next();
 			DataRow dr = tm.get(k);
 			r.add(dr);
 		}
-		
+
 		return r;
 	}
-	
 
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
-		
+
 		BBArrayList filterFields = simpleFilterCondition.getFieldNames();
 
 		Iterator<DataRow> it = this.iterator();
-		while (it.hasNext()){
+		while (it.hasNext()) {
 			DataRow dr = it.next();
 			@SuppressWarnings("rawtypes")
 			Iterator it2 = filterFields.iterator();
 			Boolean match = true;
-			while (it2.hasNext()){
-				String k = (String)it2.next();
-				match=true;
+			while (it2.hasNext()) {
+				String k = (String) it2.next();
+				match = true;
 				DataField cond = simpleFilterCondition.getField(k);
 				DataField comp = dr.getField(k);
-				if (!cond.equals(comp)){
-						match=false;
-
-						break;
+				if (!cond.equals(comp)) {
+					match = false;
+					break;
 				}
 			}
-			if (match){
+			if (match) {
 				r.add(dr);
 			}
 		}
 		return r;
-	}	
-	
+	}
+
 	public ResultSet(java.sql.ResultSet rs) {
 		this();
 		try {
@@ -152,8 +146,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	// NOTE: java.sql.ResultSet is 1-based, ours is 0-based
-	public void populate(java.sql.ResultSet rs, Boolean defaultMetaData)
-			throws Exception {
+	public void populate(java.sql.ResultSet rs, Boolean defaultMetaData) throws Exception {
 		java.sql.ResultSetMetaData rsmd = rs.getMetaData();
 		int cc = rsmd.getColumnCount();
 		String name;
@@ -166,8 +159,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				HashMap<String, Object> colMap = new HashMap<String, Object>();
 				colMap.put("CatalogName", rsmd.getCatalogName(column));
 				colMap.put("ColumnClassName", rsmd.getColumnClassName(column));
-				colMap.put("ColumnDisplaySize",
-						rsmd.getColumnDisplaySize(column));
+				colMap.put("ColumnDisplaySize", rsmd.getColumnDisplaySize(column));
 				colMap.put("ColumnLabel", rsmd.getColumnLabel(column));
 				name = rsmd.getColumnName(column);
 				colMap.put("ColumnName", name);
@@ -183,8 +175,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				colMap.put("AutoIncrement", rsmd.isAutoIncrement(column));
 				colMap.put("CaseSensitive", rsmd.isCaseSensitive(column));
 				colMap.put("Currency", rsmd.isCurrency(column));
-				colMap.put("DefinitelyWritable",
-						rsmd.isDefinitelyWritable(column));
+				colMap.put("DefinitelyWritable", rsmd.isDefinitelyWritable(column));
 				colMap.put("Nullable", rsmd.isNullable(column));
 				colMap.put("ReadOnly", rsmd.isReadOnly(column));
 				colMap.put("Searchable", rsmd.isSearchable(column));
@@ -236,13 +227,11 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					e.printStackTrace();
 				}
 				try {
-					HashMap<String, String> attrMap = dr
-							.getFieldAttributes(name);
+					HashMap<String, String> attrMap = dr.getFieldAttributes(name);
 					Iterator<String> it2 = attrMap.keySet().iterator();
 					while (it2.hasNext()) {
 						String attrKey = it2.next();
-						this.setAttribute(column, attrKey,
-								(String) attrMap.get(attrKey));
+						this.setAttribute(column, attrKey, (String) attrMap.get(attrKey));
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -376,6 +365,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	public DataRow remove(int row) {
+		if (this.currentRow == row) {
+			this.currentRow -= 1;
+			this.currentDataRow = null;
+		}
 		return this.DataRows.remove(row);
 	}
 
@@ -424,8 +417,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	public Boolean absolute(int row) {
-		if (this.DataRows.isEmpty() || row < 0
-				|| row > this.DataRows.size() - 1)
+		if (this.DataRows.isEmpty() || row < 0 || row > this.DataRows.size() - 1)
 			return false;
 		else {
 			this.currentRow = row;
@@ -435,11 +427,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	public Boolean next() {
-		if (this.DataRows.isEmpty()
-				|| this.currentRow > this.DataRows.size() - 2)
+		if (this.DataRows.isEmpty() || this.currentRow > this.DataRows.size() - 2)
 			return false;
 		else {
-			this.currentRow = this.currentRow + 1;
+			this.currentRow += 1;
 			this.currentDataRow = this.DataRows.get(this.currentRow);
 			return true;
 		}
@@ -465,8 +456,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	public int getColumnDisplaySize(int column) {
-		Integer size = (Integer) this.MetaData.get(column).get(
-				"ColumnDisplaySize");
+		Integer size = (Integer) this.MetaData.get(column).get("ColumnDisplaySize");
 		if (size == null)
 			size = 0;
 		return size.intValue();
@@ -550,8 +540,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	public Boolean isDefinitelyWritable(int column) {
-		Boolean flag = (Boolean) this.MetaData.get(column).get(
-				"DefinitelyWritable");
+		Boolean flag = (Boolean) this.MetaData.get(column).get("DefinitelyWritable");
 		if (flag == null)
 			flag = false;
 		return flag;
@@ -675,8 +664,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (nullable != java.sql.ResultSetMetaData.columnNoNulls
 				&& nullable != java.sql.ResultSetMetaData.columnNullable
 				&& nullable != java.sql.ResultSetMetaData.columnNullableUnknown)
-			throw new Exception("Invalid nullable value"
-					+ String.valueOf(nullable));
+			throw new Exception("Invalid nullable value" + String.valueOf(nullable));
 		this.MetaData.get(column).put("Nullable", nullable);
 	}
 
@@ -855,15 +843,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.NCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					String tmp = dr.getField(fn).getAttribute("StringFormat");
-					if (tmp != null && tmp.equals("JSON")){
-						g.writeFieldName(fn);
-						g.writeRawValue(dr.getField(fn).getString().trim());
-					}
-					else{
-						String s = dr.getField(fn).getString().trim();
-						g.writeStringField(fn, s);
-					}
+					String s = dr.getField(fn).getString().trim();
+					g.writeStringField(fn, s);
 					break;
 				case java.sql.Types.BIGINT:
 				case java.sql.Types.TINYINT:
@@ -875,7 +856,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.NUMERIC:
 					g.writeNumberField(fn, dr.getField(fn).getBigDecimal());
 					break;
-					
+
 				case java.sql.Types.DECIMAL:
 				case java.sql.Types.DOUBLE:
 				case java.sql.Types.FLOAT:
@@ -894,17 +875,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 					DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
 					DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-					String fd = df1.format(dr.getField(fn).getTimestamp())
-							+ "T" + df2.format(dr.getField(fn).getTimestamp())
-							+ ".000Z";
+					String fd = df1.format(dr.getField(fn).getTimestamp()) + "T"
+							+ df2.format(dr.getField(fn).getTimestamp()) + ".000Z";
 					g.writeStringField(fn, fd);
 					break;
 				case java.sql.Types.DATE:
 				case (int) 9:
 					df1 = new SimpleDateFormat("yyyy-MM-dd");
 					df2 = new SimpleDateFormat("HH:mm:ss");
-					fd = df1.format(dr.getField(fn).getDate()) + "T"
-							+ df2.format(dr.getField(fn).getDate()) + ".000Z";
+					fd = df1.format(dr.getField(fn).getDate()) + "T" + df2.format(dr.getField(fn).getDate()) + ".000Z";
 					g.writeStringField(fn, fd);
 					break;
 
@@ -935,7 +914,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 				}// switch
 
-			}// while on fields
+			} // while on fields
 
 			if (!meta_done) {
 
@@ -955,8 +934,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						Iterator<String> its = ks.iterator();
 						while (its.hasNext()) {
 							String key = its.next();
-							if (key.equals("ColumnTypeName")
-									|| key.equals("ColumnName"))
+							if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
 								continue;
 							String value = hm.get(key).toString();
 							g.writeStringField(key, value);
@@ -972,7 +950,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 			g.writeEndObject();
 
-		}// while on rows
+		} // while on rows
 
 		g.writeEndArray();
 		g.close();
@@ -1014,11 +992,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		SQLTypeNameMap.put(java.sql.Types.SQLXML, "SQLXML");
 		SQLTypeNameMap.put(java.sql.Types.STRUCT, "STRUCT");
 		SQLTypeNameMap.put(java.sql.Types.TIME, "TIME");
-		SQLTypeNameMap.put(java.sql.Types.TIME_WITH_TIMEZONE,
-				"TIME_WITH_TIMEZONE");
+		SQLTypeNameMap.put(java.sql.Types.TIME_WITH_TIMEZONE, "TIME_WITH_TIMEZONE");
 		SQLTypeNameMap.put(java.sql.Types.TIMESTAMP, "TIMESTAMP");
-		SQLTypeNameMap.put(java.sql.Types.TIMESTAMP_WITH_TIMEZONE,
-				"TIMESTAMP_WITH_TIMEZONE");
+		SQLTypeNameMap.put(java.sql.Types.TIMESTAMP_WITH_TIMEZONE, "TIMESTAMP_WITH_TIMEZONE");
 		SQLTypeNameMap.put(java.sql.Types.TINYINT, "TINYINT");
 		SQLTypeNameMap.put(java.sql.Types.VARBINARY, "VARBINARY");
 		SQLTypeNameMap.put(java.sql.Types.VARCHAR, "VARCHAR");
@@ -1038,8 +1014,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public Object toJsonElement() {
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		try {
-			com.google.gson.JsonArray o = parser.parse(this.toJson())
-					.getAsJsonArray();
+			com.google.gson.JsonArray o = parser.parse(this.toJson()).getAsJsonArray();
 			return o;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -1136,265 +1111,612 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 	}
 
-	
-	//----------------------------------------scalar functions on one field in the resultset----------------------------
-	
-	public int count(){
+	// ---------- scalar functions on one field in the resultset ----------
+
+	public int count() {
 		return this.DataRows.size();
 	}
-	
-	public Double sum(String fieldname) throws Exception{
+
+	public Double sum(String fieldname) throws Exception {
 		Iterator<DataRow> it = iterator();
 		Double s = 0.0;
-		while (it.hasNext()){
+		while (it.hasNext()) {
 			DataRow dr = it.next();
 			s += dr.getFieldAsNumber(fieldname);
 		}
 		return s;
 	};
 
-	public Double min(String fieldname) throws Exception{
+	public Double min(String fieldname) throws Exception {
 		Iterator<DataRow> it = iterator();
 		Double s = 0.0;
-		Boolean first=true;
-		while (it.hasNext()){
+		Boolean first = true;
+		while (it.hasNext()) {
 			DataRow dr = it.next();
 			Double d = dr.getFieldAsNumber(fieldname);
-			if (first || d<s){
-				s=d;
-				first=false;
+			if (first || d < s) {
+				s = d;
+				first = false;
 			}
-			
 		}
 		return s;
-	};	
-
-	public Double max(String fieldname) throws Exception{
-		Iterator<DataRow> it = iterator();
-		Double s = 0.0;
-		Boolean first=true;
-		while (it.hasNext()){
-			DataRow dr = it.next();
-			Double d = dr.getFieldAsNumber(fieldname);
-			if (first || d>s){
-				s=d;
-				first=false;
-			}
-			
-		}
-		return s;
-	};		
-	
-	public Double avg(String fieldname) throws Exception{
-		return sum(fieldname)/count(); 
 	};
-	
+
+	public Double max(String fieldname) throws Exception {
+		Iterator<DataRow> it = iterator();
+		Double s = 0.0;
+		Boolean first = true;
+		while (it.hasNext()) {
+			DataRow dr = it.next();
+			Double d = dr.getFieldAsNumber(fieldname);
+			if (first || d > s) {
+				s = d;
+				first = false;
+			}
+		}
+		return s;
+	};
+
+	public Double avg(String fieldname) throws Exception {
+		return sum(fieldname) / count();
+	};
+
 	public Double median(String fieldname) throws Exception {
 		double[] m = new double[count()];
 		Iterator<DataRow> it = iterator();
-		int i=0;
-		while (it.hasNext()){
+		int i = 0;
+		while (it.hasNext()) {
 			DataRow dr = it.next();
-			m[i++]=dr.getFieldAsNumber(fieldname);
-			
-		}		
-		
-		Arrays.sort(m);
-		
-	    int middle = m.length/2;
-	    if (m.length%2 == 1) {
-	        return m[middle];
-	    } else {
-	        return (m[middle-1] + m[middle]) / 2.0;
-	    }
-	}	
+			m[i++] = dr.getFieldAsNumber(fieldname);
+		}
 
-	public DataRow countByGroup(String fieldname, String grpname) throws Exception{
-		return this.countByGroup(fieldname, grpname,NO_SORT,0);
+		Arrays.sort(m);
+
+		int middle = m.length / 2;
+		if (m.length % 2 == 1) {
+			return m[middle];
+		} else {
+			return (m[middle - 1] + m[middle]) / 2.0;
+		}
 	}
-	
-	public DataRow countByGroup(String fieldname) throws Exception{
-		return this.countByGroup(fieldname, fieldname,NO_SORT,0);
+
+	public DataRow countByGroup(String fieldname) throws Exception {
+		return this.countByGroup(fieldname, fieldname, NO_SORT, 0);
 	}
-	
-	public static final int NO_SORT 			= 0;
-	public static final int SORT_ON_GROUPFIELD 	= 1;
-	public static final int SORT_ON_GROUPLABEL 	= 2;
-	public static final int SORT_ON_RESULT 		= 3;	
-	public static final int SORT_ON_GROUPFIELD_DESC 	= 11;
-	public static final int SORT_ON_GROUPLABEL_DESC 	= 12;
-	public static final int SORT_ON_RESULT_DESC 		= 13;	
-	
-	public DataRow countByGroup(String fieldname, String labelname, int sort, int top) throws Exception{
-		
-		//note: fieldname and labelname are separate as you may have different values in the row to group by (like different IDs),
-		//but the human readable values might still be the same (like same name for different IDs)
-		
+
+	public static final int NO_SORT = 0;
+	public static final int SORT_ON_GROUPFIELD = 1;
+	public static final int SORT_ON_GROUPLABEL = 2;
+	public static final int SORT_ON_RESULT = 3;
+	public static final int SORT_ON_GROUPFIELD_DESC = 11;
+	public static final int SORT_ON_GROUPLABEL_DESC = 12;
+	public static final int SORT_ON_RESULT_DESC = 13;
+
+	public DataRow countByGroup(String fieldname, String labelname, int sort, int top) throws Exception {
+
+		// note: fieldname and labelname are separate as you may have different
+		// values in the row to group by (like different IDs),
+		// but the human readable values might still be the same (like same name
+		// for different IDs).
+
 		Iterator<DataRow> it = this.iterator();
-		DataRow dr=new DataRow();
+		DataRow dr = new DataRow();
 		DataRow d;
 		Integer tmp;
 		String field, label;
-		while (it.hasNext()){
+		while (it.hasNext()) {
 			d = it.next();
-			field="(-)";
-			label="(-)";
-			try{
-				field=d.getFieldAsString(fieldname);
-				label=d.getFieldAsString(labelname);
+			field = "(-)";
+			label = "(-)";
+			try {
+				field = d.getFieldAsString(fieldname);
+				label = d.getFieldAsString(labelname);
+			} catch (Exception e) {
+			} finally {
 			}
-			catch (Exception e){}
-			finally {}
-			tmp=0;
-			try{
-			tmp=dr.getField(field).getInt();
+			tmp = 0;
+			try {
+				tmp = dr.getField(field).getInt();
+			} catch (Exception e) {
+			} finally {
 			}
-			catch (Exception e){}
-			finally {}
-			dr.setFieldValue(field, (Integer)tmp+1);
+			dr.setFieldValue(field, (Integer) tmp + 1);
 			dr.setFieldAttribute(field, "label", label);
 		}
-		
-		if (sort > 0){
-			dr = sortDataRow(dr,sort);
+
+		if (sort > 0) {
+			dr = sortDataRow(dr, sort);
 		}
-		
-		if (top>0){
+
+		if (top > 0) {
 			BBArrayList map = dr.getFieldNames();
-			while (map.size()>top){
-				int i = map.size()-1;
+			while (map.size() > top) {
+				int i = map.size() - 1;
 				String f = (String) map.get(i);
 				dr.removeField(f);
 				map.remove(i);
 			}
 		}
-		
+
 		return dr;
 	}
-	
-	private DataRow sortDataRow(DataRow dr, int sort) throws Exception{
-		// TODO make a generic implementation of this in the DataRow itself, that can sort on the value, the name or any attribute
-		
+
+	private DataRow sortDataRow(DataRow dr, int sort) throws Exception {
+		// TODO make a generic implementation of this in the DataRow itself,
+		// that can sort on the value, the name or any attribute
+
 		DataRow drn = new DataRow();
 		BBArrayList f = dr.getFieldNames();
 		@SuppressWarnings("rawtypes")
 		Iterator it = f.iterator();
-		TreeMap<String,String> tm = new TreeMap<>();
-		while (it.hasNext()){
+		TreeMap<String, String> tm = new TreeMap<>();
+		while (it.hasNext()) {
 			String k = (String) it.next();
-			String tmp="";
-			switch (sort){
-				case SORT_ON_GROUPFIELD:
-					tm.put(k,k);
-					break;
-				case SORT_ON_GROUPLABEL:
-					tm.put(dr.getFieldAttribute(k,"label") +k,k);
-					break;
-				case SORT_ON_RESULT:
-					tmp = dr.getFieldAsNumber(k).toString();
-					while (tmp.length()<30)
-						tmp='0'+tmp;
-					tm.put(tmp+k,k);
-					//FIXME this is clumsy. Mind the decimals when filling up!
-					break;
-				case SORT_ON_GROUPFIELD_DESC:
-					tm.put(invert(k),k);
-					break;
-				case SORT_ON_GROUPLABEL_DESC:
-					tm.put(invert(dr.getFieldAttribute(k,"label") +k),k);
-					break;
-				case SORT_ON_RESULT_DESC:
-					tmp = dr.getFieldAsNumber(k).toString();					
-					while (tmp.length()<30)
-						tmp='0'+tmp;
-					tm.put(invert(tmp+k),k);
-					break;					
-			}						
-			
+			String tmp = "";
+			switch (sort) {
+			case SORT_ON_GROUPFIELD:
+				tm.put(k, k);
+				break;
+			case SORT_ON_GROUPLABEL:
+				tm.put(dr.getFieldAttribute(k, "label") + k, k);
+				break;
+			case SORT_ON_RESULT:
+				tmp = dr.getFieldAsNumber(k).toString();
+				while (tmp.length() < 30)
+					tmp = '0' + tmp;
+				tm.put(tmp + k, k);
+				// FIXME this is clumsy. Mind the decimals when filling up!
+				break;
+			case SORT_ON_GROUPFIELD_DESC:
+				tm.put(invert(k), k);
+				break;
+			case SORT_ON_GROUPLABEL_DESC:
+				tm.put(invert(dr.getFieldAttribute(k, "label") + k), k);
+				break;
+			case SORT_ON_RESULT_DESC:
+				tmp = dr.getFieldAsNumber(k).toString();
+				while (tmp.length() < 30)
+					tmp = '0' + tmp;
+				tm.put(invert(tmp + k), k);
+				break;
+			}
 		}
 		Iterator<String> it2 = tm.keySet().iterator();
-		while (it2.hasNext()){
+		while (it2.hasNext()) {
 			String k = tm.get(it2.next());
-		
-			drn.setFieldValue(k,dr.getFieldType(k),dr.getFieldValue(k));
-			drn.setFieldAttribute(k,"label",dr.getFieldAttribute(k,"label"));
+			drn.setFieldValue(k, dr.getFieldType(k), dr.getFieldValue(k));
+			drn.setFieldAttribute(k, "label", dr.getFieldAttribute(k, "label"));
 		}
-		
+
 		return drn;
-		
+
 	}
-	
-	private String invert(String in){
-		String out="";
+
+	private String invert(String in) {
+		String out = "";
 		byte[] b = in.getBytes();
-		for (int i=0; i<b.length; i++){
-			out += 255-b[i];
+		for (int i = 0; i < b.length; i++) {
+			out += 255 - b[i];
 		}
 		return out;
 	}
-	
-	public DataRow sumByGroup(String fieldname, String sumfieldname) throws Exception{
-		return this.sumByGroup(fieldname,fieldname,sumfieldname, NO_SORT, 0);
-	}
-	
-	public DataRow sumByGroup(String fieldname, String labelname, String sumfieldname, int sort, int top) throws Exception{
-		Iterator<DataRow> it = this.iterator();
-		DataRow dr=new DataRow();
-		DataRow d;
-		Double tmp,tmp1;
-		String field,label;
-		while (it.hasNext()){
-			d = it.next();
-			field="(-)";
-			label="(-)";
-			try{
-				field=d.getFieldAsString(fieldname);
-				label=d.getFieldAsString(labelname);
-			}
-			catch (Exception e){}
-			finally {}
-			tmp=0.0;
-			tmp1=0.0;
-			try{
-				tmp=d.getFieldAsNumber(sumfieldname);
-			}
-			catch (Exception e){}
-			finally {}
 
-			try{
-				tmp1=dr.getFieldAsNumber(field);
+	public DataRow sumByGroup(String fieldname, String sumfieldname) throws Exception {
+		return this.sumByGroup(fieldname, fieldname, sumfieldname, NO_SORT, 0);
+	}
+
+	public DataRow sumByGroup(String fieldname, String labelname, String sumfieldname, int sort, int top)
+			throws Exception {
+		Iterator<DataRow> it = this.iterator();
+		DataRow dr = new DataRow();
+		DataRow d;
+		Double tmp, tmp1;
+		String field, label;
+		while (it.hasNext()) {
+			d = it.next();
+			field = "(-)";
+			label = "(-)";
+			try {
+				field = d.getFieldAsString(fieldname);
+				label = d.getFieldAsString(labelname);
+			} catch (Exception e) {
+			} finally {
 			}
-			catch (Exception e){}
-			finally {}
-			dr.setFieldValue(field, tmp+tmp1);
-			dr.setFieldAttribute(field, "label",label);
-			
+			tmp = 0.0;
+			tmp1 = 0.0;
+			try {
+				tmp = d.getFieldAsNumber(sumfieldname);
+			} catch (Exception e) {
+			} finally {
+			}
+
+			try {
+				tmp1 = dr.getFieldAsNumber(field);
+			} catch (Exception e) {
+			} finally {
+			}
+			dr.setFieldValue(field, tmp + tmp1);
+			dr.setFieldAttribute(field, "label", label);
 		}
-		
-		if (sort > 0){
-			dr = sortDataRow(dr,sort);
+
+		if (sort > 0) {
+			dr = sortDataRow(dr, sort);
 		}
-		
-		if (top>0){
+
+		if (top > 0) {
 			BBArrayList map = dr.getFieldNames();
-			while (map.size()>top){
-				int i = map.size()-1;
+			while (map.size() > top) {
+				int i = map.size() - 1;
 				String f = (String) map.get(i);
 				dr.removeField(f);
 				map.remove(i);
 			}
 		}
-		
+
 		return dr;
-	}	
-	
-	public void list() {
-		   System.out.println("-----------------------------------");
-		   Iterator<DataRow> it = iterator();
-		   while (it.hasNext())
-		   {
-			   System.out.println(it.next());
-		   }
-		   System.out.println("-----------------------------------");
 	}
+
+	public void list() {
+		System.out.println("-----------------------------------");
+		Iterator<DataRow> it = iterator();
+		while (it.hasNext()) {
+			System.out.println(it.next());
+		}
+		System.out.println("-----------------------------------");
+	}
+
+	/**
+	 * Method getBBTemplate: Creates and returns BB template definition based on
+	 * result set metadata
+	 * 
+	 * @return String template
+	 */
+	public String getBBTemplate() {
+		StringBuffer s = new StringBuffer();
+		int cols = getColumnCount();
+		if (cols > 0) {
+			for (int col = 0; col < cols; col++) {
+				String colName = getColumnName(col);
+				if (col > 0)
+					s.append(",");
+				s.append(colName).append(":");
+				Integer prec = getPrecision(col);
+				Integer scale = java.lang.Math.max(0, getScale(col));
+				Boolean isNum = false;
+				Integer colType = getColumnType(col);
+				String colTypeName = getColumnTypeName(col);
+				if (colTypeName == null)
+					colTypeName = "";
+				switch (colType) {
+				case java.sql.Types.NULL:
+					s.append("C(1)");
+					s.append(":sqltype=NULL");
+					break;
+				case java.sql.Types.CHAR:
+					if (prec <= 0) {
+						s.append("C(1*)");
+					} else {
+						if (prec <= 32767) {
+							s.append("C(").append(prec.toString()).append(")");
+						} else {
+							s.append("C(32767+=10)");
+						}
+					}
+					s.append(":sqltype=CHAR");
+					break;
+				case java.sql.Types.VARCHAR:
+					if (prec <= 0) {
+						s.append("C(1*)");
+					} else {
+						if (prec <= 32767) {
+							s.append("C(").append(prec.toString()).append("*)");
+						} else {
+							s.append("C(32767+=10)");
+						}
+					}
+					s.append(":sqltype=VARCHAR");
+					break;
+				case java.sql.Types.LONGVARCHAR:
+					if (prec <= 0) {
+						s.append("C(1*)");
+					} else {
+						if (prec <= 32767) {
+							s.append("C(").append(prec.toString()).append("*)");
+						} else {
+							s.append("C(32767+=10)");
+						}
+					}
+					s.append(":sqltype=LONGVARCHAR");
+					break;
+				case java.sql.Types.NCHAR:
+					if (prec <= 0) {
+						s.append("C(1*)");
+					} else {
+						if (prec <= 32767) {
+							s.append("C(").append(prec.toString()).append(")");
+						} else {
+							s.append("C(32767+=10)");
+						}
+					}
+					s.append(":sqltype=NCHAR");
+					break;
+				case java.sql.Types.NVARCHAR:
+					if (prec <= 0) {
+						s.append("C(1*)");
+					} else {
+						if (prec <= 32767) {
+							s.append("C(").append(prec.toString()).append("+=10)");
+						} else {
+							s.append("C(32767+=10)");
+						}
+					}
+					s.append(":sqltype=NVARCHAR");
+					break;
+				case java.sql.Types.LONGNVARCHAR:
+					if (prec <= 0) {
+						s.append("C(1*)");
+					} else {
+						if (prec <= 32767) {
+							s.append("C(").append(prec.toString()).append("+=10)");
+						} else {
+							s.append("C(32767+=10)");
+						}
+					}
+					s.append(":sqltype=LONGNVARCHAR");
+					break;
+				case java.sql.Types.INTEGER:
+					if (isSigned(col)) {
+						s.append("I(4)");
+					} else {
+						s.append("U(4)");
+					}
+					s.append(":sqltype=INTEGER");
+					break;
+				case java.sql.Types.TINYINT:
+					if (isSigned(col)) {
+						s.append("I(1)");
+					} else {
+						s.append("U(1)");
+					}
+					s.append(":sqltype=TINYINT");
+					break;
+				case java.sql.Types.SMALLINT:
+					if (isSigned(col)) {
+						s.append("I(2)");
+					} else {
+						s.append("U(2)");
+					}
+					s.append(":sqltype=SMALLINT");
+					break;
+				case java.sql.Types.BIGINT:
+					if (isSigned(col)) {
+						s.append("I(8)");
+					} else {
+						s.append("U(8)");
+					}
+					s.append(":sqltype=BIGINT");
+					break;
+				case java.sql.Types.BIT:
+					s.append("U(1)");
+					s.append(":sqltype=BIT");
+					break;
+				case java.sql.Types.BOOLEAN:
+					s.append("U(1)");
+					s.append(":sqltype=BOOLEAN");
+					break;
+				case java.sql.Types.DECIMAL:
+					s.append("B");
+					s.append(":sqltype=DECIMAL size=").append(prec.toString()).append(" scale=" + scale.toString());
+					isNum = true;
+					break;
+				case java.sql.Types.NUMERIC:
+					s.append("B");
+					s.append(":sqltype=NUMERIC size=").append(prec.toString()).append(" scale=" + scale.toString());
+					isNum = true;
+					break;
+				case java.sql.Types.DOUBLE:
+					s.append("Y");
+					s.append(":sqltype=DOUBLE size=").append(prec.toString()).append(" scale=" + scale.toString());
+					isNum = true;
+					break;
+				case java.sql.Types.FLOAT:
+					s.append("F");
+					s.append(":sqltype=FLOAT size=").append(prec.toString()).append(" scale=" + scale.toString());
+					isNum = true;
+					break;
+				case java.sql.Types.REAL:
+					s.append("X");
+					s.append(":sqltype=REAL size=").append(prec.toString()).append(" scale=" + scale.toString());
+					isNum = true;
+					break;
+				case java.sql.Types.DATE:
+					s.append("C(10)");
+					s.append(":sqltype=DATE");
+					break;
+				case java.sql.Types.TIME:
+					s.append("C(8)");
+					s.append(":sqltype=TIME");
+					break;
+				case java.sql.Types.TIMESTAMP:
+					s.append("C(29)");
+					s.append(":sqltype=TIMESTAMP");
+					break;
+				case java.sql.Types.BINARY:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=BINARY");
+					break;
+				case java.sql.Types.VARBINARY:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=VARBINARY");
+					break;
+				case java.sql.Types.LONGVARBINARY:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=LONGVARBINARY");
+					break;
+				case java.sql.Types.BLOB:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=BLOB");
+					break;
+				case java.sql.Types.CLOB:
+					if (prec <= 0) {
+						s.append("C(1*)");
+					} else {
+						if (prec <= 32767) {
+							s.append("C(").append(prec.toString()).append("+=10)");
+						} else {
+							s.append("C(32767+=10)");
+						}
+					}
+					s.append(":sqltype=CLOB");
+					break;
+				case java.sql.Types.NCLOB:
+					if (prec <= 0) {
+						s.append("C(1*)");
+					} else {
+						if (prec <= 32767) {
+							s.append("C(").append(prec.toString()).append("+=10)");
+						} else {
+							s.append("C(32767+=10)");
+						}
+					}
+					s.append(":sqltype=NCLOB");
+					break;
+				case 9: // ODBC Date
+					s.append("C(10)");
+					s.append(":sqltype=ODBC_DATE");
+					break;
+				case 11: // ODBC Timestamp
+					s.append("C(19)");
+					s.append(":sqltype=ODBC_TIMESTAMP");
+					break;
+				case java.sql.Types.ARRAY:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=ARRAY");
+					break;
+				case java.sql.Types.JAVA_OBJECT:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=JAVA_OBJECT");
+					break;
+				case java.sql.Types.OTHER:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=OTHER");
+					break;
+				case java.sql.Types.REF:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=REF");
+					break;
+				case java.sql.Types.DATALINK:
+					s.append("C(").append(prec.toString()).append("*)");
+					s.append(":sqltype=DATALINK");
+					break;
+				case java.sql.Types.DISTINCT:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=DISTINCT");
+					break;
+				case java.sql.Types.STRUCT:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=STRUCT");
+					break;
+				case java.sql.Types.ROWID:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=ROWID");
+					break;
+				case java.sql.Types.SQLXML:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=SQLXML");
+					break;
+				default:
+					if (prec > 0) {
+						prec = java.lang.Math.min(prec, 32767);
+					} else {
+						prec = 32767;
+					}
+					s.append("O(").append(prec.toString()).append(")");
+					s.append(":sqltype=UNKNOWN");
+					break;
+				}
+				if (colTypeName != "") {
+					s.append(" dbtype=").append(colTypeName);
+				}
+				if (isAutoIncrement(col)) {
+					s.append(" auto_increment=1");
+				}
+				if (isReadOnly(col)) {
+					s.append(" read_only=1");
+				}
+				if (isCaseSensitive(col)) {
+					s.append(" case_sensitive=1");
+				}
+				if (isSigned(col) && isNum) {
+					s.append(" signed=1");
+				}
+				if (isNullable(col) == java.sql.ResultSetMetaData.columnNoNulls) {
+					s.append(" required=1");
+				}
+				s.append(":");
+			}
+		}
+		return s.toString();
+	}
+
 }

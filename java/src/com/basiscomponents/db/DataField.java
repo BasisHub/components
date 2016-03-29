@@ -36,8 +36,8 @@ public class DataField implements java.io.Serializable {
 	public Object getValue() {
 		return this.Value;
 	}
-	
-	public Boolean equals(DataField f){
+
+	public Boolean equals(DataField f) {
 		return this.getString().equals(f.getString());
 	}
 
@@ -54,10 +54,10 @@ public class DataField implements java.io.Serializable {
 	}
 
 	public String getString() {
-		if (this.getClassName()=="java.lang.Boolean"){
-			//make this work the same as str(Boolean.TRUE) in BBj
-			//for compatibility reasons
-			//if it's a problem, we might introduce a compat flag later
+		if (this.getClassName() == "java.lang.Boolean") {
+			// make this work the same as str(Boolean.TRUE) in BBj
+			// for compatibility reasons
+			// if it's a problem, we might introduce a compat flag later
 			return (boolean) this.Value ? "1" : "0";
 		}
 		return (String) this.Value.toString();
@@ -94,7 +94,7 @@ public class DataField implements java.io.Serializable {
 	public Date getDate() {
 		if (this.Value != null && getClassName() == "java.sql.Timestamp") {
 			long ms = ((java.sql.Timestamp) this.Value).getTime();
-			return new java.sql.Date( ms );
+			return new java.sql.Date(ms);
 		}
 		return (Date) this.Value;
 	}
@@ -106,7 +106,7 @@ public class DataField implements java.io.Serializable {
 	public Timestamp getTimestamp() {
 		if (this.Value != null && getClassName() == "java.sql.Date") {
 			long ms = ((java.sql.Date) this.Value).getTime();
-			return new java.sql.Timestamp( ms );
+			return new java.sql.Timestamp(ms);
 		}
 		return (Timestamp) this.Value;
 	}
