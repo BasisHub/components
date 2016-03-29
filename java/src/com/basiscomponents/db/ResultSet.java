@@ -162,6 +162,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				colMap.put("ColumnDisplaySize", rsmd.getColumnDisplaySize(column));
 				colMap.put("ColumnLabel", rsmd.getColumnLabel(column));
 				name = rsmd.getColumnName(column);
+				if (this.ColumnNames.contains(name))
+					name = name + "_" + String.valueOf(column); // handle duplicates
 				colMap.put("ColumnName", name);
 				this.ColumnNames.add(name);
 				type = rsmd.getColumnType(column);
