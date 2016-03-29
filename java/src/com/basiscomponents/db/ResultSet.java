@@ -843,9 +843,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.NCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					String s = dr.getField(fn).getString().trim();
-					g.writeStringField(fn, s);
-					break;
+					String tmp = dr.getField(fn).getAttribute("StringFormat");
+					if (tmp != null && tmp.equals("JSON")){
+						g.writeFieldName(fn);
+						g.writeRawValue(dr.getField(fn).getString().trim());
+					}
+					else{
+						String s = dr.getField(fn).getString().trim();
+						g.writeStringField(fn, s);
+					}
+					break;					
 				case java.sql.Types.BIGINT:
 				case java.sql.Types.TINYINT:
 				case java.sql.Types.INTEGER:
