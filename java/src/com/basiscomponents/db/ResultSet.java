@@ -1189,6 +1189,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 	}
 
+	public DataRow countByGroup(String fieldname, String labelname) throws Exception {
+		return this.countByGroup(fieldname, labelname, NO_SORT, 0);
+	}	
+	
 	public DataRow countByGroup(String fieldname) throws Exception {
 		return this.countByGroup(fieldname, fieldname, NO_SORT, 0);
 	}
