@@ -214,13 +214,13 @@ public class Session {
 
 	}
 
-	public void exec() throws Exception {
+	public void exec()  {
 
 		String req = getJson();
 
-		System.out.println("Request: " + req);
+//		System.out.println("Request: " + java.net.URLDecoder.decode(req));
 		String ret = this.postRequest(req);
-		System.out.println("Answer:  " + ret);
+//		System.out.println("Answer:  " + ret);
 
 		JsonElement jelement = new JsonParser().parse(ret);
 		JsonObject jobject = jelement.getAsJsonObject();
@@ -232,34 +232,69 @@ public class Session {
 		}
 
 		if (this.SessionID.isEmpty())
+		{
 			SessionID = jobject.get("ses").getAsString();
+//			System.out.println("got session "+this.SessionID);
+		}
+		
 		Set<Entry<String, JsonElement>> es = jobject.entrySet();
 		java.util.Iterator<Entry<String, JsonElement>> it = es.iterator();
 		while (it.hasNext()) {
 			String key = it.next().getKey();
 			JsonElement el = jobject.get(key);
-
 			if (el.isJsonArray()) {
+				// todo implement this inside the ResultSet implementation!!! 
+//				ResultSet rs = ResultSet.fromJson(el.getAsJsonArray().toString());
+//				System.err.println(rs.toString());
 				ResultSet rs = new ResultSet();
+				
+				
 				JsonArray ar = el.getAsJsonArray();
 				java.util.Iterator<JsonElement> ia = ar.iterator();
-
+				String metapart = null;
+				JsonElement metaelement = null;
 				while (ia.hasNext()) {
-					String s = ia.next().toString();
-					DataRow dr = DataRow.fromJson(s);
-					rs.add(dr);
+					JsonElement nextelement = ia.next();
+					JsonElement meta = nextelement.getAsJsonObject().get("meta");
+					if (metapart == null && meta != null){
+						metapart = meta.toString();
+						metaelement = meta;
+					}
+					
+					DataRow dr;
+					try {
+						if (meta != null && metaelement != null){
+							dr = DataRow.fromJson(nextelement.toString());
+							rs.add(dr);
+						}
+						else
+						{	
+							nextelement.getAsJsonObject().add("meta", metaelement);
+							dr = DataRow.fromJson(nextelement.toString());
+							rs.add(dr);
+						}
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					// TODO: add a true from json object method to DataRow
 					// TODO: even better move this section to ResultSet
 
 				}
 				this.Result.put(key, rs);
 			}
+			else{
+				this.Result.put(key,el.getAsString());
+			}
 		}
+		this.Vars.clear();
+		this.Ex.clear();
+		this.Ret.clear();
 
 	}
 
 	public Object getResult(String name) {
-
+		//System.out.println(Result);
 		return Result.get(name);
 	}
 
