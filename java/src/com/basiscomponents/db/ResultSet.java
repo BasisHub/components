@@ -848,7 +848,11 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					String tmp = dr.getField(fn).getAttribute("StringFormat");
 					if (tmp != null && tmp.equals("JSON")){
 						g.writeFieldName(fn);
-						g.writeRawValue(dr.getField(fn).getString().trim());
+						String s = dr.getField(fn).getString().trim();
+						if (s.isEmpty()){
+							s="{}";
+						}
+						g.writeRawValue(s);
 					}
 					else{
 						String s = dr.getField(fn).getString().trim();
