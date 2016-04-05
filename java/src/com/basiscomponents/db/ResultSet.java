@@ -846,7 +846,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
 					String tmp = dr.getField(fn).getAttribute("StringFormat");
-					if (tmp != null && tmp.equals("JSON")){
+					if (tmp != null && tmp.toUpperCase().equals("JSON")){
 						g.writeFieldName(fn);
 						String s = dr.getField(fn).getString().trim();
 						if (s.isEmpty()){
