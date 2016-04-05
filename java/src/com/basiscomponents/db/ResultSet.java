@@ -949,7 +949,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							String key = its.next();
 							if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
 								continue;
-							String value = hm.get(key).toString();
+							String value;
+							if (hm.get(key) != null)
+                                value = hm.get(key).toString();
 							g.writeStringField(key, value);
 						}
 						g.writeEndObject();
