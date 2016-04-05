@@ -54,13 +54,17 @@ public class DataField implements java.io.Serializable {
 	}
 
 	public String getString() {
-		if (this.getClassName() == "java.lang.Boolean") {
-			// make this work the same as str(Boolean.TRUE) in BBj
-			// for compatibility reasons
-			// if it's a problem, we might introduce a compat flag later
+		if (this.Value != null && getClassName() == "java.lang.Boolean") {
+			// make this work the same as STR(Boolean.TRUE) in BBj
+			// for compatibility reasons.
+			// If it's a problem, we might introduce a COMPAT flag later.
 			return (boolean) this.Value ? "1" : "0";
 		}
-		return (String) this.Value.toString();
+		try {
+			return this.Value.toString();
+		} catch (Exception e) {
+			return "";
+		}
 	}
 
 	public Integer getInt() {
