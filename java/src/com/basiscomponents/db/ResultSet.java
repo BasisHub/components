@@ -1516,20 +1516,24 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					s.append(":sqltype=BIGINT");
 					break;
 				case java.sql.Types.BIT:
-					s.append("U(1)");
+					s.append("N(1)"); // changed to match SQLTMPL(); was s.append("U(1)");
 					s.append(":sqltype=BIT");
 					break;
 				case java.sql.Types.BOOLEAN:
-					s.append("U(1)");
+					s.append("N(1)"); // changed to match SQLTMPL(); was s.append("U(1)");
 					s.append(":sqltype=BOOLEAN");
 					break;
 				case java.sql.Types.DECIMAL:
-					s.append("B");
+					s.append("N("
+					    + String.valueOf(getColumnDisplaySize(col))
+                        + ((col==cols-1) ? "*=)" : "*)")); // changed to match SQLTMPL(); was s.append("B");
 					s.append(":sqltype=DECIMAL size=").append(prec.toString()).append(" scale=" + scale.toString());
 					isNum = true;
 					break;
 				case java.sql.Types.NUMERIC:
-					s.append("B");
+					s.append("N("
+						    + String.valueOf(getColumnDisplaySize(col))
+	                        + ((col==cols-1) ? "*=)" : "*)")); // changed to match SQLTMPL(); was s.append("B");
 					s.append(":sqltype=NUMERIC size=").append(prec.toString()).append(" scale=" + scale.toString());
 					isNum = true;
 					break;
@@ -1544,20 +1548,20 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					isNum = true;
 					break;
 				case java.sql.Types.REAL:
-					s.append("X");
+					s.append("B"); // changed to match SQLTMPL(); was s.append("X");
 					s.append(":sqltype=REAL size=").append(prec.toString()).append(" scale=" + scale.toString());
 					isNum = true;
 					break;
 				case java.sql.Types.DATE:
-					s.append("C(10)");
+					s.append("I(4)"); // changed to match SQLTMPL(); was s.append("C(10)");
 					s.append(":sqltype=DATE");
 					break;
 				case java.sql.Types.TIME:
-					s.append("C(8)");
+					s.append("C(23)"); // changed to match SQLTMPL(); was s.append("C(8)");
 					s.append(":sqltype=TIME");
 					break;
 				case java.sql.Types.TIMESTAMP:
-					s.append("C(29)");
+					s.append("C(23)"); // changed to match SQLTMPL(); was s.append("C(29)");
 					s.append(":sqltype=TIMESTAMP");
 					break;
 				case java.sql.Types.BINARY:
