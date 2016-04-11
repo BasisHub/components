@@ -100,9 +100,11 @@ public class DataRow implements java.io.Serializable {
 	// Note: automatically adds field, if not found in DataFields
 	public void setFieldValue(String name, Object value) throws Exception {
 
-		String c = value.getClass().getCanonicalName();
-		if (c.contains("BBjNumber") | c.contains("BBjInt")) {
-			value = Double.parseDouble(value.toString());
+		if (value != null){
+			String c = value.getClass().getCanonicalName();
+			if (c.contains("BBjNumber") | c.contains("BBjInt")) {
+				value = Double.parseDouble(value.toString());
+			}
 		}
 
 		DataField field = null;
@@ -114,8 +116,16 @@ public class DataRow implements java.io.Serializable {
 		if (field != null)
 			field.setValue(value);
 		else {
-			field = new DataField(value);
-			addDataField(name, field);
+			if (value == null){
+				field = new DataField("");
+				addDataField(name, field);
+				field.setValue(null);
+			}
+			else {
+				field = new DataField(value);
+				addDataField(name, field);
+			}
+			
 		}
 	}
 
@@ -158,6 +168,8 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public String getFieldAsString(String name) throws Exception {
+		if (isFieldNull(name))
+			return "";
 		DataField field = getField(name);
 		return field.getString();
 	}
@@ -183,7 +195,7 @@ public class DataRow implements java.io.Serializable {
 		if (ResultSet == null)
 			throw new Exception("ResultSet does not exist");
 		if (field.getValue() == null)
-			return null;
+			return 0.0;
 
 		Double ret = 0.0;
 
@@ -198,7 +210,10 @@ public class DataRow implements java.io.Serializable {
 		case java.sql.Types.NCHAR:
 		case java.sql.Types.NVARCHAR:
 		case java.sql.Types.LONGNVARCHAR:
-			ret = Double.valueOf(field.getString());
+			String tmp = field.getString();
+			if (tmp.isEmpty())
+				tmp="0.0";
+			ret = Double.valueOf(tmp);
 			break;
 		case java.sql.Types.INTEGER:
 		case java.sql.Types.SMALLINT:
@@ -219,18 +234,14 @@ public class DataRow implements java.io.Serializable {
 			ret = field.getFloat().doubleValue();
 			break;
 		case java.sql.Types.DATE:
+		case java.sql.Types.TIMESTAMP:
+		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:			
 			if (field.getDate() == null)
 				ret = -1.0;
 			else {
 				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(field.getDate().getTime()));
 				ret = ret2.doubleValue();
 			}
-			break;
-		case java.sql.Types.TIMESTAMP:
-		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
-			// ret = (double) com.basis.util.BasisDate.jul(new
-			// java.util.Date(field.getTimestamp().getTime()));
-			ret = (double) field.getTimestamp().getTime();
 			break;
 		case java.sql.Types.TIME:
 		case java.sql.Types.TIME_WITH_TIMEZONE:

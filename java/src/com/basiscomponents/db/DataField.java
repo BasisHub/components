@@ -190,6 +190,8 @@ public class DataField implements java.io.Serializable {
 	}
 
 	public String toString() {
+		if (this.Value == null)
+			return null;
 		return this.Value.toString();
 	}
 
