@@ -163,7 +163,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				colMap.put("ColumnLabel", rsmd.getColumnLabel(column));
 				name = rsmd.getColumnName(column);
 				if (this.ColumnNames.contains(name))
-					name = name + "_" + String.valueOf(column); // handle duplicates
+					name = name + "_" + String.valueOf(column); // handle dups
 				colMap.put("ColumnName", name);
 				this.ColumnNames.add(name);
 				type = rsmd.getColumnType(column);
@@ -201,8 +201,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				DataField field = new DataField(rs.getObject(column));
 				name = this.ColumnNames.get(column - 1);
 				if (KeyColumns != null && KeyColumns.contains(name)) {
-					dr.addBytesToRowKey(rs.getBytes(column)); // raw value as
-																// byte[]
+					dr.addBytesToRowKey(rs.getBytes(column)); // raw value as byte[]
 				}
 				if (defaultMetaData == true)
 					type = types.get(column - 1);
@@ -846,19 +845,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
 					String tmp = dr.getField(fn).getAttribute("StringFormat");
-					if (tmp != null && tmp.toUpperCase().equals("JSON")){
+					if (tmp != null && tmp.toUpperCase().equals("JSON")) {
 						g.writeFieldName(fn);
 						String s = dr.getField(fn).getString().trim();
-						if (s.isEmpty()){
-							s="{}";
+						if (s.isEmpty()) {
+							s = "{}";
 						}
 						g.writeRawValue(s);
-					}
-					else{
+					} else {
 						String s = dr.getField(fn).getString().trim();
 						g.writeStringField(fn, s);
 					}
-					break;					
+					break;
 				case java.sql.Types.BIGINT:
 				case java.sql.Types.TINYINT:
 				case java.sql.Types.INTEGER:
@@ -951,7 +949,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 								continue;
 							String value = null;
 							if (hm.get(key) != null)
-                                value = hm.get(key).toString();
+								value = hm.get(key).toString();
 							g.writeStringField(key, value);
 						}
 						g.writeEndObject();
@@ -1197,8 +1195,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	public DataRow countByGroup(String fieldname, String labelname) throws Exception {
 		return this.countByGroup(fieldname, labelname, NO_SORT, 0);
-	}	
-	
+	}
+
 	public DataRow countByGroup(String fieldname) throws Exception {
 		return this.countByGroup(fieldname, fieldname, NO_SORT, 0);
 	}
@@ -1385,12 +1383,24 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
-	 * Method getBBTemplate: Creates and returns BB template definition based on
-	 * result set metadata
-	 * 
-	 * @return String template
+	 * Method getBBTemplate: Creates and returns simplified BB template definition
+	 * based on result set metadata, analog SQLTMPL().
+	 *
+	 * @return String Template definition
 	 */
 	public String getBBTemplate() {
+		return getBBTemplate(false);
+	}
+
+	/**
+	 * Method getBBTemplate: Creates and returns BB template definition based on
+	 * result set metadata, analog SQLTMPL().
+	 *
+	 * @param extendedInfo
+	 *            Adds more information to template if true
+	 * @return String Template definition
+	 */
+	public String getBBTemplate(Boolean extendedInfo) {
 		StringBuffer s = new StringBuffer();
 		int cols = getColumnCount();
 		if (cols > 0) {
@@ -1409,7 +1419,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				switch (colType) {
 				case java.sql.Types.NULL:
 					s.append("C(1)");
-					s.append(":sqltype=NULL");
+					if (extendedInfo)
+						s.append(":sqltype=NULL");
 					break;
 				case java.sql.Types.CHAR:
 					if (prec <= 0) {
@@ -1421,7 +1432,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							s.append("C(32767+=10)");
 						}
 					}
-					s.append(":sqltype=CHAR");
+					if (extendedInfo)
+						s.append(":sqltype=CHAR");
 					break;
 				case java.sql.Types.VARCHAR:
 					if (prec <= 0) {
@@ -1433,7 +1445,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							s.append("C(32767+=10)");
 						}
 					}
-					s.append(":sqltype=VARCHAR");
+					if (extendedInfo)
+						s.append(":sqltype=VARCHAR");
 					break;
 				case java.sql.Types.LONGVARCHAR:
 					if (prec <= 0) {
@@ -1445,7 +1458,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							s.append("C(32767+=10)");
 						}
 					}
-					s.append(":sqltype=LONGVARCHAR");
+					if (extendedInfo)
+						s.append(":sqltype=LONGVARCHAR");
 					break;
 				case java.sql.Types.NCHAR:
 					if (prec <= 0) {
@@ -1457,7 +1471,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							s.append("C(32767+=10)");
 						}
 					}
-					s.append(":sqltype=NCHAR");
+					if (extendedInfo)
+						s.append(":sqltype=NCHAR");
 					break;
 				case java.sql.Types.NVARCHAR:
 					if (prec <= 0) {
@@ -1469,7 +1484,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							s.append("C(32767+=10)");
 						}
 					}
-					s.append(":sqltype=NVARCHAR");
+					if (extendedInfo)
+						s.append(":sqltype=NVARCHAR");
 					break;
 				case java.sql.Types.LONGNVARCHAR:
 					if (prec <= 0) {
@@ -1481,7 +1497,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							s.append("C(32767+=10)");
 						}
 					}
-					s.append(":sqltype=LONGNVARCHAR");
+					if (extendedInfo)
+						s.append(":sqltype=LONGNVARCHAR");
 					break;
 				case java.sql.Types.INTEGER:
 					if (isSigned(col)) {
@@ -1489,7 +1506,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					} else {
 						s.append("U(4)");
 					}
-					s.append(":sqltype=INTEGER");
+					if (extendedInfo)
+						s.append(":sqltype=INTEGER");
 					break;
 				case java.sql.Types.TINYINT:
 					if (isSigned(col)) {
@@ -1497,7 +1515,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					} else {
 						s.append("U(1)");
 					}
-					s.append(":sqltype=TINYINT");
+					if (extendedInfo)
+						s.append(":sqltype=TINYINT");
 					break;
 				case java.sql.Types.SMALLINT:
 					if (isSigned(col)) {
@@ -1505,7 +1524,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					} else {
 						s.append("U(2)");
 					}
-					s.append(":sqltype=SMALLINT");
+					if (extendedInfo)
+						s.append(":sqltype=SMALLINT");
 					break;
 				case java.sql.Types.BIGINT:
 					if (isSigned(col)) {
@@ -1513,56 +1533,63 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					} else {
 						s.append("U(8)");
 					}
-					s.append(":sqltype=BIGINT");
+					if (extendedInfo)
+						s.append(":sqltype=BIGINT");
 					break;
 				case java.sql.Types.BIT:
-					s.append("N(1)"); // changed to match SQLTMPL(); was s.append("U(1)");
-					s.append(":sqltype=BIT");
+					s.append("N(1)");
+					if (extendedInfo)
+						s.append(":sqltype=BIT");
 					break;
 				case java.sql.Types.BOOLEAN:
-					s.append("N(1)"); // changed to match SQLTMPL(); was s.append("U(1)");
-					s.append(":sqltype=BOOLEAN");
+					s.append("N(1)");
+					if (extendedInfo)
+						s.append(":sqltype=BOOLEAN");
 					break;
 				case java.sql.Types.DECIMAL:
-					s.append("N("
-					    + String.valueOf(getColumnDisplaySize(col))
-                        + ((col==cols-1) ? "*=)" : "*)")); // changed to match SQLTMPL(); was s.append("B");
-					s.append(":sqltype=DECIMAL size=").append(prec.toString()).append(" scale=" + scale.toString());
+					s.append("N(" + String.valueOf(getColumnDisplaySize(col)) + ((col == cols - 1) ? "*=)" : "*)"));
+					if (extendedInfo)
+						s.append(":sqltype=DECIMAL size=").append(prec.toString()).append(" scale=" + scale.toString());
 					isNum = true;
 					break;
 				case java.sql.Types.NUMERIC:
-					s.append("N("
-						    + String.valueOf(getColumnDisplaySize(col))
-	                        + ((col==cols-1) ? "*=)" : "*)")); // changed to match SQLTMPL(); was s.append("B");
-					s.append(":sqltype=NUMERIC size=").append(prec.toString()).append(" scale=" + scale.toString());
+					s.append("N(" + String.valueOf(getColumnDisplaySize(col)) + ((col == cols - 1) ? "*=)" : "*)"));
+					if (extendedInfo)
+						s.append(":sqltype=NUMERIC size=").append(prec.toString()).append(" scale=" + scale.toString());
 					isNum = true;
 					break;
 				case java.sql.Types.DOUBLE:
 					s.append("Y");
-					s.append(":sqltype=DOUBLE size=").append(prec.toString()).append(" scale=" + scale.toString());
+					if (extendedInfo)
+						s.append(":sqltype=DOUBLE size=").append(prec.toString()).append(" scale=" + scale.toString());
 					isNum = true;
 					break;
 				case java.sql.Types.FLOAT:
 					s.append("F");
-					s.append(":sqltype=FLOAT size=").append(prec.toString()).append(" scale=" + scale.toString());
+					if (extendedInfo)
+						s.append(":sqltype=FLOAT size=").append(prec.toString()).append(" scale=" + scale.toString());
 					isNum = true;
 					break;
 				case java.sql.Types.REAL:
-					s.append("B"); // changed to match SQLTMPL(); was s.append("X");
-					s.append(":sqltype=REAL size=").append(prec.toString()).append(" scale=" + scale.toString());
+					s.append("B");
+					if (extendedInfo)
+						s.append(":sqltype=REAL size=").append(prec.toString()).append(" scale=" + scale.toString());
 					isNum = true;
 					break;
 				case java.sql.Types.DATE:
-					s.append("I(4)"); // changed to match SQLTMPL(); was s.append("C(10)");
-					s.append(":sqltype=DATE");
+					s.append("I(4)");
+					if (extendedInfo)
+						s.append(":sqltype=DATE");
 					break;
 				case java.sql.Types.TIME:
-					s.append("C(23)"); // changed to match SQLTMPL(); was s.append("C(8)");
-					s.append(":sqltype=TIME");
+					s.append("C(23)");
+					if (extendedInfo)
+						s.append(":sqltype=TIME");
 					break;
 				case java.sql.Types.TIMESTAMP:
-					s.append("C(23)"); // changed to match SQLTMPL(); was s.append("C(29)");
-					s.append(":sqltype=TIMESTAMP");
+					s.append("C(23)");
+					if (extendedInfo)
+						s.append(":sqltype=TIMESTAMP");
 					break;
 				case java.sql.Types.BINARY:
 					if (prec > 0) {
@@ -1571,7 +1598,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=BINARY");
+					if (extendedInfo)
+						s.append(":sqltype=BINARY");
 					break;
 				case java.sql.Types.VARBINARY:
 					if (prec > 0) {
@@ -1580,7 +1608,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=VARBINARY");
+					if (extendedInfo)
+						s.append(":sqltype=VARBINARY");
 					break;
 				case java.sql.Types.LONGVARBINARY:
 					if (prec > 0) {
@@ -1589,7 +1618,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=LONGVARBINARY");
+					if (extendedInfo)
+						s.append(":sqltype=LONGVARBINARY");
 					break;
 				case java.sql.Types.BLOB:
 					if (prec > 0) {
@@ -1598,7 +1628,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=BLOB");
+					if (extendedInfo)
+						s.append(":sqltype=BLOB");
 					break;
 				case java.sql.Types.CLOB:
 					if (prec <= 0) {
@@ -1610,7 +1641,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							s.append("C(32767+=10)");
 						}
 					}
-					s.append(":sqltype=CLOB");
+					if (extendedInfo)
+						s.append(":sqltype=CLOB");
 					break;
 				case java.sql.Types.NCLOB:
 					if (prec <= 0) {
@@ -1622,15 +1654,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							s.append("C(32767+=10)");
 						}
 					}
-					s.append(":sqltype=NCLOB");
+					if (extendedInfo)
+						s.append(":sqltype=NCLOB");
 					break;
 				case 9: // ODBC Date
 					s.append("C(10)");
-					s.append(":sqltype=ODBC_DATE");
+					if (extendedInfo)
+						s.append(":sqltype=ODBC_DATE");
 					break;
 				case 11: // ODBC Timestamp
 					s.append("C(19)");
-					s.append(":sqltype=ODBC_TIMESTAMP");
+					if (extendedInfo)
+						s.append(":sqltype=ODBC_TIMESTAMP");
 					break;
 				case java.sql.Types.ARRAY:
 					if (prec > 0) {
@@ -1639,7 +1674,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=ARRAY");
+					if (extendedInfo)
+						s.append(":sqltype=ARRAY");
 					break;
 				case java.sql.Types.JAVA_OBJECT:
 					if (prec > 0) {
@@ -1648,7 +1684,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=JAVA_OBJECT");
+					if (extendedInfo)
+						s.append(":sqltype=JAVA_OBJECT");
 					break;
 				case java.sql.Types.OTHER:
 					if (prec > 0) {
@@ -1657,7 +1694,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=OTHER");
+					if (extendedInfo)
+						s.append(":sqltype=OTHER");
 					break;
 				case java.sql.Types.REF:
 					if (prec > 0) {
@@ -1666,11 +1704,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=REF");
+					if (extendedInfo)
+						s.append(":sqltype=REF");
 					break;
 				case java.sql.Types.DATALINK:
 					s.append("C(").append(prec.toString()).append("*)");
-					s.append(":sqltype=DATALINK");
+					if (extendedInfo)
+						s.append(":sqltype=DATALINK");
 					break;
 				case java.sql.Types.DISTINCT:
 					if (prec > 0) {
@@ -1679,7 +1719,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=DISTINCT");
+					if (extendedInfo)
+						s.append(":sqltype=DISTINCT");
 					break;
 				case java.sql.Types.STRUCT:
 					if (prec > 0) {
@@ -1688,7 +1729,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=STRUCT");
+					if (extendedInfo)
+						s.append(":sqltype=STRUCT");
 					break;
 				case java.sql.Types.ROWID:
 					if (prec > 0) {
@@ -1697,7 +1739,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=ROWID");
+					if (extendedInfo)
+						s.append(":sqltype=ROWID");
 					break;
 				case java.sql.Types.SQLXML:
 					if (prec > 0) {
@@ -1706,7 +1749,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=SQLXML");
+					if (extendedInfo)
+						s.append(":sqltype=SQLXML");
 					break;
 				default:
 					if (prec > 0) {
@@ -1715,28 +1759,31 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						prec = 32767;
 					}
 					s.append("O(").append(prec.toString()).append(")");
-					s.append(":sqltype=UNKNOWN");
+					if (extendedInfo)
+						s.append(":sqltype=UNKNOWN");
 					break;
 				}
-				if (colTypeName != "") {
-					s.append(" dbtype=").append(colTypeName);
+				if (extendedInfo) {
+					if (colTypeName != "") {
+						s.append(" dbtype=").append(colTypeName);
+					}
+					if (isAutoIncrement(col)) {
+						s.append(" auto_increment=1");
+					}
+					if (isReadOnly(col)) {
+						s.append(" read_only=1");
+					}
+					if (isCaseSensitive(col)) {
+						s.append(" case_sensitive=1");
+					}
+					if (isSigned(col) && isNum) {
+						s.append(" signed=1");
+					}
+					if (isNullable(col) == java.sql.ResultSetMetaData.columnNoNulls) {
+						s.append(" required=1");
+					}
+					s.append(":");
 				}
-				if (isAutoIncrement(col)) {
-					s.append(" auto_increment=1");
-				}
-				if (isReadOnly(col)) {
-					s.append(" read_only=1");
-				}
-				if (isCaseSensitive(col)) {
-					s.append(" case_sensitive=1");
-				}
-				if (isSigned(col) && isNum) {
-					s.append(" signed=1");
-				}
-				if (isNullable(col) == java.sql.ResultSetMetaData.columnNoNulls) {
-					s.append(" required=1");
-				}
-				s.append(":");
 			}
 		}
 		return s.toString();
