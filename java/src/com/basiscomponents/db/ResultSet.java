@@ -200,14 +200,19 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				column++;
 				DataField field = new DataField(rs.getObject(column));
 				name = this.ColumnNames.get(column - 1);
-				if (KeyColumns != null && KeyColumns.contains(name)) {
-					dr.addBytesToRowKey(rs.getBytes(column)); // raw value as byte[]
-				}
 				if (defaultMetaData == true)
 					type = types.get(column - 1);
 				else
 					type = getColumnType(column - 1);
 				dr.addDataField(name, type, field);
+			}
+			// load key bytes in order of key columns
+			if (KeyColumns != null && KeyColumns.size() > 0) {
+				Iterator<String> it = KeyColumns.iterator();
+				while (it.hasNext()) {
+					String colName = it.next();
+					dr.addBytesToRowKey(rs.getBytes(colName)); // raw value as byte[]
+				}
 			}
 			this.DataRows.add(dr);
 		}
