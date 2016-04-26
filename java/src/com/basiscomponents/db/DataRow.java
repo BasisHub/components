@@ -100,7 +100,7 @@ public class DataRow implements java.io.Serializable {
 	// Note: automatically adds field, if not found in DataFields
 	public void setFieldValue(String name, Object value)  {
 
-		if (value != null){
+		if (value != null) {
 			String c = value.getClass().getCanonicalName();
 			if (c.contains("BBjNumber") | c.contains("BBjInt")) {
 				value = Double.parseDouble(value.toString());
@@ -116,7 +116,7 @@ public class DataRow implements java.io.Serializable {
 		if (field != null)
 			field.setValue(value);
 		else {
-			if (value == null){
+			if (value == null) {
 				field = new DataField("");
 				try {
 					addDataField(name, field);
@@ -125,8 +125,7 @@ public class DataRow implements java.io.Serializable {
 					e.printStackTrace();
 				}
 				field.setValue(null);
-			}
-			else {
+			} else {
 				field = new DataField(value);
 				try {
 					addDataField(name, field);
@@ -135,7 +134,7 @@ public class DataRow implements java.io.Serializable {
 					e.printStackTrace();
 				}
 			}
-			
+
 		}
 	}
 
@@ -222,7 +221,7 @@ public class DataRow implements java.io.Serializable {
 		case java.sql.Types.LONGNVARCHAR:
 			String tmp = field.getString();
 			if (tmp.isEmpty())
-				tmp="0.0";
+				tmp = "0.0";
 			ret = Double.valueOf(tmp);
 			break;
 		case java.sql.Types.INTEGER:
@@ -245,7 +244,7 @@ public class DataRow implements java.io.Serializable {
 			break;
 		case java.sql.Types.DATE:
 		case java.sql.Types.TIMESTAMP:
-		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:			
+		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
 			if (field.getDate() == null)
 				ret = -1.0;
 			else {

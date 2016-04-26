@@ -22,7 +22,7 @@ public class JDBCDataSource {
 		this.User = User;
 		this.Password = Password;
 
-		Class.forName(JDBCDriver);
+		Class.forName(this.JDBCDriver);
 	}
 
 	public ResultSet fetchResultSet(String sql) throws SQLException {
