@@ -98,7 +98,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	// Note: automatically adds field, if not found in DataFields
-	public void setFieldValue(String name, Object value) throws Exception {
+	public void setFieldValue(String name, Object value)  {
 
 		if (value != null){
 			String c = value.getClass().getCanonicalName();
@@ -118,12 +118,22 @@ public class DataRow implements java.io.Serializable {
 		else {
 			if (value == null){
 				field = new DataField("");
-				addDataField(name, field);
+				try {
+					addDataField(name, field);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				field.setValue(null);
 			}
 			else {
 				field = new DataField(value);
-				addDataField(name, field);
+				try {
+					addDataField(name, field);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 		}
@@ -664,6 +674,9 @@ public class DataRow implements java.io.Serializable {
 
 	public static DataRow fromJson(String in) throws Exception {
 
+		if (in.length() <2 )
+			return new DataRow();
+		
 		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
 			in = in.substring(11, in.length() - 1);
 		}
@@ -678,6 +691,8 @@ public class DataRow implements java.io.Serializable {
 		List navigation = objectMapper.readValue(jp,
 				objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
 
+		if (navigation.size()==0)
+			return new DataRow();
 		HashMap<?, ?> hm = (HashMap<?, ?>) navigation.get(0);
 
 		DataRow dr = new DataRow();
@@ -791,6 +806,8 @@ public class DataRow implements java.io.Serializable {
 				HashMap<String, ?> field = (HashMap<String, ?>) it.next();
 				String name = (String) field.get("Name");
 				String type = (String) field.get("Type");
+				if (type==null)
+					continue;
 				switch (type) {
 				case "C":
 					String strval = (String) field.get("StringValue");
