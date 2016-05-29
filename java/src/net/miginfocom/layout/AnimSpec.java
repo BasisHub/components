@@ -35,10 +35,13 @@ package net.miginfocom.layout;
 import java.io.Serializable;
 
 /**
- * @author Mikael Grev, MiG InfoCom AB Date: 14-09-24 Time: 17:05
+ * @author Mikael Grev, MiG InfoCom AB
+ *         Date: 14-09-24
+ *         Time: 17:05
  */
-public class AnimSpec implements Serializable {
-	// public static final AnimSpec OFF = new AnimSpec(-1, 0, 0);
+public class AnimSpec implements Serializable
+{
+//	public static final AnimSpec OFF = new AnimSpec(-1, 0, 0);
 	public static final AnimSpec DEF = new AnimSpec(0, 0, 0.2f, 0.2f);
 
 	private final int prio;
@@ -46,21 +49,14 @@ public class AnimSpec implements Serializable {
 	private final float easeIn, easeOut;
 
 	/**
-	 * @param prio
-	 *            The animation priority. When added with the general animation
-	 *            priority of the layout the animation will be done if the
-	 *            resulting value is &gt; 0.
-	 * @param durMillis
-	 *            Duration in milliseconds. <=0 means default value should be
-	 *            used and > 0 is the number of millis
-	 * @param easeIn
-	 *            0 is linear (no ease). 1 is max ease. Always clamped between
-	 *            these values.
-	 * @param easeOut
-	 *            0 is linear (no ease). 1 is max ease. Always clamped between
-	 *            these values.
+	 * @param prio The animation priority. When added with the general animation priority of the layout the animation will
+	 * be done if the resulting value is &gt; 0.
+	 * @param durMillis Duration in milliseconds. <=0 means default value should be used and > 0 is the number of millis
+	 * @param easeIn 0 is linear (no ease). 1 is max ease. Always clamped between these values.
+	 * @param easeOut 0 is linear (no ease). 1 is max ease. Always clamped between these values.
 	 */
-	public AnimSpec(int prio, int durMillis, float easeIn, float easeOut) {
+	public AnimSpec(int prio, int durMillis, float easeIn, float easeOut)
+	{
 		this.prio = prio;
 		this.durMillis = durMillis;
 		this.easeIn = LayoutUtil.clamp(easeIn, 0, 1);
@@ -68,45 +64,44 @@ public class AnimSpec implements Serializable {
 	}
 
 	/**
-	 * @return The animation priority. When added with the general animation
-	 *         priority of the layout the animation will be done if the
-	 *         resulting value is &gt; 0.
+	 * @return The animation priority. When added with the general animation priority of the layout the animation will
+	 * be done if the resulting value is &gt; 0.
 	 */
-	public int getPriority() {
+	public int getPriority()
+	{
 		return prio;
 	}
 
 	/**
-	 * @param defMillis
-	 *            Default used if the millis in the spec is set to "default".
-	 * @return Duration in milliseconds. <=0 means default value should be used
-	 *         and > 0 is the number of millis
+	 * @param defMillis Default used if the millis in the spec is set to "default".
+	 * @return Duration in milliseconds. <=0 means default value should be used and > 0 is the number of millis
 	 */
-	public int getDurationMillis(int defMillis) {
+	public int getDurationMillis(int defMillis)
+	{
 		return durMillis > 0 ? durMillis : defMillis;
 	}
 
 	/**
-	 * @return Duration in milliseconds. <= 0 means default value should be used
-	 *         and > 0 is the number of millis
+	 * @return Duration in milliseconds. <= 0 means default value should be used and > 0 is the number of millis
 	 */
-	public int getDurationMillis() {
+	public int getDurationMillis()
+	{
 		return durMillis;
 	}
 
 	/**
-	 * @return A value between 0 and 1 where 0 is no ease in and 1 is maximum
-	 *         ease in.
+	 * @return A value between 0 and 1 where 0 is no ease in and 1 is maximum ease in.
 	 */
-	public float getEaseIn() {
+	public float getEaseIn()
+	{
 		return easeIn;
 	}
 
 	/**
-	 * @return A value between 0 and 1 where 0 is no ease out and 1 is maximum
-	 *         ease out.
+	 * @return A value between 0 and 1 where 0 is no ease out and 1 is maximum ease out.
 	 */
-	public float getEaseOut() {
+	public float getEaseOut()
+	{
 		return easeOut;
 	}
 }
