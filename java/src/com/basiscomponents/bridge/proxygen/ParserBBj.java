@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Scanner;
 
-public class Parser {
+public class ParserBBj {
 
 	public static ParseEntity parse(String content) {
 
