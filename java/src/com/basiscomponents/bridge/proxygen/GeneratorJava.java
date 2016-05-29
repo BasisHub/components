@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
+
 public class GeneratorJava {
 
 	private static final String AllowedTypes = "DataRow ResultSet BBjNumber BBjString void";
@@ -131,8 +134,14 @@ public class GeneratorJava {
 				if (!tmp.equals("void")) {
 					writer.println("	     //the method is not void, so execute right away");
 					writer.println("	     ses.exec();");
+					if (m.getReturnType().equals("DataRow")){
+						//DataRow is always wrapped in a ResultSet
+						writer.println("	     return (DataRow)(((ResultSet) ses.getResult(rv)).getItem(0));");						
+					}
+					else{
 					writer.println("	     return (" + m.getReturnType()
 							+ ")ses.getResult(rv);");
+					}
 				} else {
 					writer.println("	     //the method void, so we do not execute right away but wait");
 				}

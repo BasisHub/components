@@ -30,9 +30,13 @@ public class GeneratorJavaScript {
 
 			writer.println("function "+classname+"(){"); 
 			writer.println("	this.id = guid(); ");
-			writer.println("	ses.create(this.id,\"::" + classfileprefix
-					+ pe.getClassname() + classfilesuffix + "::"
-					+ pe.getClassname() + "\"); ");
+			if (pe.getClassname().contains("."))
+				writer.println("	ses.create(this.id,\""
+						+ pe.getClassname() + "\"); ");
+			else
+				writer.println("	ses.create(this.id,\"::" + classfileprefix
+						+ pe.getClassname() + classfilesuffix + "::"
+						+ pe.getClassname() + "\"); ");
 			writer.println("} ");
 
 			

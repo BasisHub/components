@@ -866,7 +866,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.TINYINT:
 				case java.sql.Types.INTEGER:
 				case java.sql.Types.SMALLINT:
-					g.writeNumberField(fn, dr.getField(fn).getInt());
+					if (dr.getField(fn) == null || dr.getField(fn).getInt() == null )
+						g.writeNumberField(fn,0);
+					else
+						g.writeNumberField(fn, dr.getField(fn).getInt());
 					break;
 
 				case java.sql.Types.NUMERIC:
@@ -882,25 +885,36 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 				case java.sql.Types.BOOLEAN:
 				case java.sql.Types.BIT:
-					g.writeBooleanField(fn, dr.getField(fn).getBoolean());
+					if (dr.getField(fn)== null || dr.getField(fn).getBoolean()==null )
+						g.writeStringField(fn, "");
+					else 
+						g.writeBooleanField(fn, dr.getField(fn).getBoolean());
+						
 					break;
 
 				case java.sql.Types.TIMESTAMP:
 				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
 				case (int) 11:
-
-					DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-					DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-					String fd = df1.format(dr.getField(fn).getTimestamp()) + "T"
-							+ df2.format(dr.getField(fn).getTimestamp()) + ".000Z";
-					g.writeStringField(fn, fd);
+					if (dr.getField(fn)== null || dr.getField(fn).getTimestamp()==null )
+						g.writeStringField(fn, "");
+					else {
+						DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+						DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+						String fd = df1.format(dr.getField(fn).getTimestamp()) + "T"
+								+ df2.format(dr.getField(fn).getTimestamp()) + ".000Z";
+						g.writeStringField(fn, fd);
+					}
 					break;
 				case java.sql.Types.DATE:
 				case (int) 9:
-					df1 = new SimpleDateFormat("yyyy-MM-dd");
-					df2 = new SimpleDateFormat("HH:mm:ss");
-					fd = df1.format(dr.getField(fn).getDate()) + "T" + df2.format(dr.getField(fn).getDate()) + ".000Z";
-					g.writeStringField(fn, fd);
+					if (dr.getField(fn)== null || dr.getField(fn).getDate()==null )
+						g.writeStringField(fn, "");
+					else {					
+						DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+						DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+						String fd = df1.format(dr.getField(fn).getDate()) + "T" + df2.format(dr.getField(fn).getDate()) + ".000Z";
+						g.writeStringField(fn, fd);
+					}
 					break;
 
 				case java.sql.Types.ARRAY:
