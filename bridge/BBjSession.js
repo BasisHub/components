@@ -1,4 +1,3 @@
-
 BCFactory={};
 
 function BBjSession(baseurl){
@@ -6,6 +5,9 @@ function BBjSession(baseurl){
 	this.ex = new Array();
 	this.vars = new Array();
 	this.ret = new Array();
+	this.errorcallback = function(e){
+		alert(e);
+	};
 }
 
 
@@ -23,6 +25,9 @@ BBjSession.prototype.pushVar = function(name,value) {
 			case 'number':
 				o.t = 'num';
 				break;	
+			case 'boolean':
+				o.t = 'bool';
+				break;					
 			case 'object':
 				o.t = 'dr';
 				break;
@@ -52,6 +57,7 @@ BBjSession.prototype.invoke = function(v,rv,m,args) {
 	o.retvar = rv;
 	o.method = m;
 	o.args = args;
+	
 	this.pushEx(o);
 }
 
@@ -75,61 +81,25 @@ BBjSession.prototype.getTypeof = function(vn) {
 	return 'undefined';
 }
 
-BBjSession.prototype.exec = function(success) {
+
+
+BBjSession.prototype.exec = function(success, funcName, errorcallback) {
 	if (this.error){
 		//maybe add something more clever to direct the user to in case of an error
 		return;
-		}
-		
- var ud = '_' + +new Date,
-        script = document.createElement('script'),
-        head = document.getElementsByTagName('head')[0] 
-               || document.documentElement;
-    window[ud] = function(data) {
-	
-        head.removeChild(script);
-		this.ses.ses = data.ses;
-		this.ses.result = data;
-		var x=this;
-		e = data.err;
-		if (e){
-			alert(e);
-			this.ses.error=e;
-		}
-		else 
-		{
-			for (var k in data) {
-				if (data[k].constructor == Array) {
-					for (var rec in data[k]) {
-						if (data[k][rec].datarow) {
-							for (var field in data[k][rec].datarow) {
-							var name = data[k][rec].datarow[field].Name;
-							var type = data[k][rec].datarow[field].Type;
-							switch (type){
-								case "C":
-									value = data[k][rec].datarow[field].StringValue;
-									break;
-								//todo: move to separate "prep datarow method"; add other data types
-							}
-							data[k][rec][name]=value;
-							}
-						}
-					}
-				
-			};
-			};
-			success && success(this.ses);
-		};
-    };
-	
-	url=this.baseurl;
+	}
+
+	var ud = '_' + +new Date,
+		script = document.createElement('script'),
+		head = document.getElementsByTagName('head')[0] || document.documentElement;
 
 	var json='{';
+	json=json+'"tid":"'+ud+'"';
+	
 	if (this.ses) {	
-		json = json+'"ses":"'+this.ses+'"';
+		json = json+',"ses":"'+this.ses+'"';
 	};
-	
-	
+
 	if (this.vars.length >0){
 		if (json.length >1)
 			json = json + ',';
@@ -143,27 +113,46 @@ BBjSession.prototype.exec = function(success) {
 		json = json+'"ex":'+JSON.stringify(this.ex);
 		this.ex = new Array();		
 	}
-	
+
 	if (this.ret.length >0){
 		if (json.length >1)
 			json = json + ',';
 		json = json+'"ret":'+JSON.stringify(this.ret);
 		this.ret = new Array();
 	}
-	
+
 	json = json+'}';
-	url=url+"?ex="+json;
 	
-	if (url.indexOf ("?") >-1){
-		url=url+ '&callback=' + ud;
-	}
-	else{
-		url=url+ '?callback=' + ud;
-	}
-	console.log(url);
-    script.src = url;
-    head.appendChild(script);
+	var ax="ex="+encodeURIComponent(json);
+
+	var request = document.createElement("iron-request");
+	request.completes.then(
+		function(req){
+			var data = JSON.parse(req.response.replace(/\\'/g, "'"));
+			this.ses.ses = data.ses;
+			this.ses.result = data;
+			
+			e = data.err;
+			if (e) {
+				if (success && errorcallback)
+					success[errorcallback](data);
+				else if(errorcallback)
+					success(data);
+				else
+					ses.errorcallback(data);
+			}
+			else {
+				
+
+				if (funcName)
+					success && success[funcName](this.ses);
+				else
+					success && success(this.ses);
+			}
+		}
+	);
 	
+	request.send({"url":this.baseurl,"method":"POST","body":ax,"handleAs":"text"});
 }
 
 
@@ -175,4 +164,17 @@ function guid() {
       .substring(1);
   }
   return 'x_'+s4() + s4() + s4();
+}
+
+
+
+BBjSession.prototype.getFileUrl = function(fileName) {
+	url=this.baseurl;
+	var json='{';
+	if (this.ses) {	
+		json = json+'"ses":"'+this.ses+'"';
+	};
+	json = json+',"file":'+JSON.stringify(fileName);
+	var json=json+'}';
+	return url+"?ex="+json;
 }
