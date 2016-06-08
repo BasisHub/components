@@ -1,4 +1,6 @@
 
+BCFactory={};
+
 function BBjSession(baseurl){
 	this.baseurl = baseurl;
 	this.ex = new Array();
