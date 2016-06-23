@@ -22,6 +22,7 @@ import java.util.TreeMap;
 
 import javax.naming.OperationNotSupportedException;
 
+import com.basiscomponents.db.sql.SQLResultSet;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -46,6 +47,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private DataRow currentDataRow;
 
 	public static HashMap<Integer, String> SQLTypeNameMap = new HashMap<Integer, String>();
+	
+	private SQLResultSet sqlResultSet = null;
 
 	public ResultSet() {
 		if (SQLTypeNameMap.isEmpty())
@@ -1041,6 +1044,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public static ResultSet fromJson(String js) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public java.sql.ResultSet getSQLResultSet(){
+		if(sqlResultSet == null){
+			sqlResultSet = new SQLResultSet(this);
+		}
+		return sqlResultSet;
 	}
 
 	public Object toJsonElement() {
