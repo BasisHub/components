@@ -110,6 +110,21 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return r;
 	}
 
+	public void orderByColumn(String fieldName, String direction) {
+		if (!"ASC".equalsIgnoreCase(direction) && !"DESC".equalsIgnoreCase(direction))
+			direction = "ASC";
+
+		java.util.Comparator<DataRow> comparator = new DataRowComparator(fieldName);
+		if ("DESC".equalsIgnoreCase(direction))
+			comparator = comparator.reversed();
+
+		DataRows.sort(comparator);
+	}
+
+	public void orderByColumn(java.util.Comparator<DataRow> comparator) {
+		DataRows.sort(comparator);
+	}
+
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 
