@@ -48,6 +48,7 @@ public class SqlTableBC {
 			try {
 				
 			conn = DriverManager.getConnection(Url,User,Password);
+			
 			DatabaseMetaData dmd = conn.getMetaData();
 			java.sql.ResultSet rs = dmd.getPrimaryKeys(null, null, Table);
 
@@ -69,7 +70,8 @@ public class SqlTableBC {
 					}
 				}
 			}
-			
+
+	
 		}
 		
 		
@@ -133,21 +135,14 @@ public class SqlTableBC {
 							wh+=" AND ";
 						}
 						
-						switch (Filter.getFieldType(f)){
-							case 4:
-								wh += " "+f+"=? ";
-								ParamTypes.add(4);
-								Params.add(field);
-								break;								
-							case 12:
-								wh += " "+f+"=? ";
-								ParamTypes.add(12);
-								Params.add(field);
-								break;
-							default:
-								System.err.println("Field Type "+Filter.getFieldType(f)+" not implemented");
-								//TODO: implement other data types
-						}
+						
+						
+							
+						wh += " "+f+"=? ";
+						ParamTypes.add(Filter.getFieldType(f));
+						Params.add(field);
+												
+						
 
 			    		  
 			    		  
@@ -162,7 +157,7 @@ public class SqlTableBC {
 		      }
 		      
 		      PreparedStatement prep = conn.prepareStatement(sql);
-		      System.out.println(sql);
+		      //System.out.println(sql);
 		      
 		      Iterator<Integer> it = ParamTypes.iterator();
 		      Iterator<DataField> it1 = Params.iterator();
@@ -180,7 +175,12 @@ public class SqlTableBC {
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
 		    	  			break;
-		    	  		
+		    	  		case 93:
+		    	  			prep.setTimestamp(index, o.getTimestamp());
+		    	  			index++;
+		    	  			break;		
+		    	  		default:
+		    	  			System.out.println("todo: "+type);
 		    	  }
 		    	  
 		    	  
@@ -206,7 +206,7 @@ public class SqlTableBC {
 			return LastResultSet; 			 
 		}
 
-		public void write(DataRow r) throws Exception {
+		public DataRow write(DataRow r) throws Exception {
 			
 			Iterator<String> it = PrimaryKeys.iterator();
 			Boolean pk_present=true;
@@ -218,7 +218,7 @@ public class SqlTableBC {
 					break;
 				}
 			}
-			System.out.println("PK Present: "+pk_present);
+			//System.out.println("PK Present: "+pk_present);
 
 			ArrayList<Integer> ParamTypes = new ArrayList<>();
 		    ArrayList<DataField> Params = new ArrayList<>();
@@ -242,23 +242,12 @@ public class SqlTableBC {
 					
 		
 						
-						DataField f = r.getField(field);
+					DataField f = r.getField(field);
+					ParamTypes.add(r.getFieldType(field));
+					Params.add(f);
 						
-						switch (r.getFieldType(field)){
-							case 4:
-								ParamTypes.add(4);
-								Params.add(f);
-								break;								
-							case 12:
-								ParamTypes.add(12);
-								Params.add(f);
-								break;
-							default:
-								System.err.println("Field Type "+Filter.getFieldType(field)+" not implemented");
-								//TODO: implement other data types
-						}
-
 				}	
+				
 						
 				    	  String wh="";
 				    	  
@@ -271,22 +260,10 @@ public class SqlTableBC {
 								if (wh.length()>0){
 									wh+=" AND ";
 								}
-								
-								switch (r.getFieldType(pkfieldname)){
-									case 4:
-										wh += " "+pkfieldname+"=? ";
-										ParamTypes.add(4);
-										Params.add(pkfield);
-										break;								
-									case 12:
-										wh += " "+pkfieldname+"=? ";
-										ParamTypes.add(12);
-										Params.add(pkfield);
-										break;
-									default:
-										System.err.println("Field Type "+Filter.getFieldType(pkfieldname)+" not implemented");
-										//TODO: implement other data types
-								}
+
+								ParamTypes.add(r.getFieldType(pkfieldname));
+								Params.add(pkfield);
+								wh += " "+pkfieldname+"=? ";
 
 					    		  
 				    	  		}  
@@ -322,29 +299,19 @@ public class SqlTableBC {
 		
 						
 						DataField f = r.getField(field);
-						
-						switch (r.getFieldType(field)){
-							case 4:
-								ParamTypes.add(4);
-								Params.add(f);
-								break;								
-							case 12:
-								ParamTypes.add(12);
-								Params.add(f);
-								break;
-							default:
-								System.err.println("Field Type "+Filter.getFieldType(field)+" not implemented");
-								//TODO: implement other data types
-						}
+						ParamTypes.add(r.getFieldType(field));
+						Params.add(f);
+//						System.out.println(field+" "+f+" "+r.getFieldType(field));
 
 				}	
 						
 						
 			}
 			
-			System.out.println(sql);
+//			System.out.println(sql);
 			Connection conn = DriverManager.getConnection(Url,User,Password); 
-		      PreparedStatement prep = conn.prepareStatement(sql);				      
+		      PreparedStatement prep = conn.prepareStatement(sql,PreparedStatement.RETURN_GENERATED_KEYS);
+		      
 		      Iterator<Integer> itp = ParamTypes.iterator();
 		      Iterator<DataField> it1 = Params.iterator();
 		      int index = 1;
@@ -361,15 +328,38 @@ public class SqlTableBC {
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
 		    	  			break;
-		    	  		
+		    	  		case 93:
+		    	  			prep.setTimestamp(index, o.getTimestamp());
+		    	  			index++;
+		    	  			break;	
+		    	  		default:
+		    	  			System.out.println(type);
 		    	  }
 		      }
 		      prep.execute();
 		      			
-			
-		      this.LastResultSet=null;
-			
 		      
+		      this.LastResultSet=null;
+
+		    //return generated keys 
+		    //TODO re-read the full record and return it!!!
+		    com.basiscomponents.db.ResultSet gkeys = new com.basiscomponents.db.ResultSet(prep.getGeneratedKeys());
+		     
+  	        DataRow ret = r.clone();
+    	    it = PrimaryKeys.iterator();
+    	    int i=0;
+			fields = ret.getFieldNames();
+			while (it.hasNext()){
+				String pk = it.next();
+				if (!fields.contains(pk)){
+					ret.setFieldValue(pk,gkeys.getItem(i).getField("GENERATED_KEY"));
+					i++;
+				}
+			}
+		
+//			System.out.println(sql);
+//			System.out.println(ret);
+			return ret;
 		}
 		
 		public DataRow getAttributesRecord(){
