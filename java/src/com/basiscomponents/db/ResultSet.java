@@ -26,6 +26,7 @@ import com.basiscomponents.db.sql.SQLResultSet;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 
 //import org.apache.commons.lang.StringEscapeUtils;
@@ -1057,8 +1058,31 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	public static ResultSet fromJson(String js) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		ResultSet rs = new ResultSet();
+		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
+		com.google.gson.JsonArray o=new com.google.gson.JsonArray() ;
+		try {
+			o = parser.parse(js).getAsJsonArray();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Iterator<JsonElement> it = o.iterator();
+		while (it.hasNext()){
+			JsonElement el = it.next();
+			
+			DataRow r = null;
+			try {
+				r = DataRow.fromJson(el.toString());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			rs.add(r);
+		}
+		return rs;
 	}
 	
 	public java.sql.ResultSet getSQLResultSet(){
