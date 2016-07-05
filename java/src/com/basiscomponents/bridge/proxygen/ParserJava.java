@@ -19,14 +19,18 @@ public class ParserJava {
 		valid.add(void.class);
 		valid.add(com.basiscomponents.db.DataRow.class);
 		valid.add(com.basiscomponents.db.ResultSet.class);
+		valid.add(int.class);
+		valid.add(Integer.class);
 		
 		if (!valid.contains(m.getReturnType()))
 			return false;
 		
 		Parameter[] p = m.getParameters();
 		for (int i=0; i<p.length; i++){
-			if (!valid.contains(p[i].getType()))
+			if (!valid.contains(p[i].getType())){
+				System.out.println("Type "+p[i].getType()+" is not a candidate.");
 				return false;			
+			}
 		}
 		
 		
@@ -75,6 +79,13 @@ public class ParserJava {
 			return "DataRow";
 		case "com.basiscomponents.db.ResultSet":
 			return "ResultSet";
+		case "int":
+			return "Number";
+		case "void":
+			return "void";
+		default:
+			System.out.println("Can't find proxy type for "+type.getName());
+
 		}
 		return type.getName();
 		
