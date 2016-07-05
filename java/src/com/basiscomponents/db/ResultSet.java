@@ -141,10 +141,19 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				String k = (String) it2.next();
 				match = true;
 				DataField cond = simpleFilterCondition.getField(k);
-				DataField comp = dr.getField(k);
-				if (!cond.equals(comp)) {
-					match = false;
-					break;
+				
+				if (dr.getFieldType(k)==12 && cond.getString().startsWith("regex:")) {
+					if (!dr.getFieldAsString(k).matches(cond.getString().substring(6))){
+						match= false;
+						break;
+					}
+				}
+				else {
+					DataField comp = dr.getField(k);
+					if (!cond.equals(comp)) {
+						match = false;
+						break;
+					}
 				}
 			}
 			if (match) {

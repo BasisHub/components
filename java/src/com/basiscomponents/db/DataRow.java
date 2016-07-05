@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.basiscomponents.db.constants.ConstantsResolver;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -879,6 +880,29 @@ public class DataRow implements java.io.Serializable {
 	 */
 	public void setRowKey(String rowKey) {
 		this.RowKey = rowKey.getBytes();
+	}
+
+	
+	/**
+	 * Resolve any [[CONSTANT]] type of string inside all String fields
+	 * @param ConstantsResolver cr: an instance of the ConstantsResolver class that holds the constants 
+	 * @return: a new object with resolved String constants
+	 */
+	public DataRow resolveConstants(ConstantsResolver cr) {
+		DataRow n = this.clone();
+		@SuppressWarnings("rawtypes")
+		Iterator it = n.getFieldNames().iterator();
+		while (it.hasNext()){
+			String f = (String) it.next();
+				try {
+					if (n.getFieldType(f) ==12)					
+						n.setFieldValue(f, cr.resolveConstants(n.getField(f).getString()));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		return n;
 	}
 
 }
