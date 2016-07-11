@@ -14,7 +14,7 @@ import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataField;
 
-public class SqlTableBC {
+public class SqlTableBC implements BusinessComponent{
 	
 		private String Driver;  
 	    private String Url;
@@ -111,7 +111,7 @@ public class SqlTableBC {
 		    		  if (!first){
 		    			  sql +=",";
 		    		  }
-		    		  sql+=f;
+		    		  sql+="`"+f+"`";
 		    		  first=false;
 		    	  }
 		    	  sql+= " FROM "+this.Table;
@@ -138,7 +138,7 @@ public class SqlTableBC {
 						
 						
 							
-						wh += " "+f+"=? ";
+						wh += " `"+f+"`=? ";
 						ParamTypes.add(Filter.getFieldType(f));
 						Params.add(field);
 												
@@ -210,6 +210,7 @@ public class SqlTableBC {
 			
 			Iterator<String> it = PrimaryKeys.iterator();
 			Boolean pk_present=true;
+			Boolean write_pk=false;
 			BBArrayList fields = r.getFieldNames();
 			while (it.hasNext()){
 				String pk = it.next();
@@ -224,10 +225,83 @@ public class SqlTableBC {
 		    ArrayList<DataField> Params = new ArrayList<>();
 		    String sql="";
 		      
+		    if (pk_present){
+		    	//check if record exists already
+		    	sql="SELECT COUNT(*) FROM "+Table+" ";
+				@SuppressWarnings("unchecked")
+				Iterator<String> itf = fields.iterator();
+				Boolean first=true;
+			    	  String wh="";
+			    	  
+			    	  Iterator<String> it2 = PrimaryKeys.iterator();
+			    	  while (it2.hasNext()){
+			    		  String pkfieldname = it2.next();
+			    		  
+						
+							DataField pkfield = r.getField(pkfieldname);
+							if (wh.length()>0){
+								wh+=" AND ";
+							}
+	
+							ParamTypes.add(r.getFieldType(pkfieldname));
+							Params.add(pkfield);
+							wh += " `"+pkfieldname+"`=? ";
+	
+				    		  
+			    	  		}  
+			
+		    	  if (wh.length()>0)
+		    		  sql+=" WHERE "+wh;		
+		    	  
+		    	  System.out.println(sql);
+		    	  Connection conn = DriverManager.getConnection(Url,User,Password); 
+			      PreparedStatement prep = conn.prepareStatement(sql);
+			      
+			      Iterator<Integer> itp = ParamTypes.iterator();
+			      Iterator<DataField> it1 = Params.iterator();
+			      int index = 1;
+			      while (itp.hasNext()){
+			    	  Integer type = itp.next();
+			    	  DataField o = it1.next();
+			    	  
+			    	  switch (type){
+			    	  		case 4:
+			    	  			prep.setInt(index, o.getInt());
+			    	  			index++;
+			    	  			break;
+			    	  		case 12:
+			    	  			prep.setString(index, o.getString());
+			    	  			index++;
+			    	  			break;
+			    	  		case 93:
+			    	  			prep.setTimestamp(index, o.getTimestamp());
+			    	  			index++;
+			    	  			break;	
+			    	  		default:
+			    	  			System.out.println(type);
+			    	  }
+			      }
+			      java.sql.ResultSet rs = prep.executeQuery();
+			      rs.first();
+			      if (rs.getInt(1)==0)
+			      {
+			    	  pk_present=false;
+			    	  write_pk = true;
+			      }
+			      	
+			      
+		    }
+		    
+		    sql="";
+			Params.clear();
+			ParamTypes.clear();
+
+			
 			if (pk_present){
 			// update
 				sql="UPDATE "+Table+" SET ";
 				
+				@SuppressWarnings("unchecked")
 				Iterator<String> itf = fields.iterator();
 				Boolean first=true;
 				while (itf.hasNext()){
@@ -238,7 +312,7 @@ public class SqlTableBC {
 						sql+=",";
 					else
 						first=false;
-					sql=sql+field+"=? ";
+					sql=sql+"`"+field+"`=? ";
 					
 		
 						
@@ -263,38 +337,32 @@ public class SqlTableBC {
 
 								ParamTypes.add(r.getFieldType(pkfieldname));
 								Params.add(pkfield);
-								wh += " "+pkfieldname+"=? ";
+								wh += " `"+pkfieldname+"`=? ";
 
 					    		  
 				    	  		}  
-							
-
-				    	  
 				
 			    	  if (wh.length()>0)
 			    		  sql+=" WHERE "+wh;
-				      
-			
-						
-			    		  
-
 				
 			}
 			else{
 			// insert
+				
+				
 				sql="INSERT INTO "+Table+" SET ";
 				
 				Iterator<String> itf = fields.iterator();
 				Boolean first=true;
 				while (itf.hasNext()){
 					String field = itf.next();
-					if (PrimaryKeys.contains(field))
+					if (!write_pk && PrimaryKeys.contains(field))
 						continue;
 					if (!first)
 						sql+=",";
 					else
 						first=false;
-					sql=sql+field+"=? ";
+					sql=sql+"`"+field+"`=? ";
 					
 		
 						
@@ -308,7 +376,7 @@ public class SqlTableBC {
 						
 			}
 			
-//			System.out.println(sql);
+			System.out.println(sql);
 			Connection conn = DriverManager.getConnection(Url,User,Password); 
 		      PreparedStatement prep = conn.prepareStatement(sql,PreparedStatement.RETURN_GENERATED_KEYS);
 		      
@@ -318,7 +386,6 @@ public class SqlTableBC {
 		      while (itp.hasNext()){
 		    	  Integer type = itp.next();
 		    	  DataField o = it1.next();
-		    	  
 		    	  switch (type){
 		    	  		case 4:
 		    	  			prep.setInt(index, o.getInt());

@@ -176,6 +176,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	// NOTE: java.sql.ResultSet is 1-based, ours is 0-based
 	public void populate(java.sql.ResultSet rs, Boolean defaultMetaData) throws Exception {
 		java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+		rs.first();
 		int cc = rsmd.getColumnCount();
 		String name;
 		int type;
@@ -211,10 +212,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				colMap.put("Searchable", rsmd.isSearchable(column));
 				colMap.put("Signed", rsmd.isSigned(column));
 				colMap.put("Writable", rsmd.isWritable(column));
+				colMap.put("StringFormat", "");
 				this.MetaData.add(colMap);
 			}
-		}
 
+			
+		}
+		System.out.println(this.MetaData);
 		try {
 			rs.beforeFirst();
 		} catch (Exception e) {
@@ -233,6 +237,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				else
 					type = getColumnType(column - 1);
 				dr.addDataField(name, type, field);
+				if (this.MetaData.get(column-1).get("ColumnTypeName").equals("JSON"))
+					dr.setFieldAttribute(name, "StringFormat", "JSON");
 			}
 			// load key bytes in order of key columns
 			if (KeyColumns != null && KeyColumns.size() > 0) {
@@ -1864,6 +1870,20 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			}
 		}
 		return s.toString();
+	}
+
+	public void print() {
+		
+	 System.out.println("-------------------ResultSet-----------------------------");
+	 Iterator<DataRow> it = this.iterator();
+	 while (it.hasNext()){
+		 
+		 DataRow row = it.next();
+		 System.out.println(row);
+	 }
+	
+	 System.out.println("-------------------ResultSet End-------------------------");
+		
 	}
 
 }
