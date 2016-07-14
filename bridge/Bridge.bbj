@@ -33,14 +33,11 @@ application!.setWorkingDirectory(dsk("")+dir(""))
 application!.setConfigFile( BBjAPI().getConfig().getCurrentCommandLineObject().getConfigFile())
 application!.setClasspathName(BBjAPI().getConfig().getCurrentCommandLineObject().getOriginalClasspathName())
 
-bridgename$="bridge"
-if argc=2 then
-    bridgename$=argv(1)
-fi
-bridgename$="/"+bridgename$
+bridgeurl$="/bridge"
+bridgeurl$="/"+stbl("BRIDGEURL",err=*next)
+registry!.unpublish(bridgeurl$, err=*next)
+registry!.publish(bridgeurl$, application!)
 
-registry!.unpublish(bridgename$, err=*next)
-registry!.publish(bridgename$, application!)
 release
 
 
@@ -51,7 +48,13 @@ BBjAPI().getConfig().setOptionSetting("ERROR_UNWINDS", 1)
 ses$ = argv(1)
 dummy$=stbl("SESSIONID",ses$)
 
+REM System.out.println("New Session "+ses$)  
+REM open (998,mode="O_CREATE,O_TRUNC")"/usr2/tmp/"+ses$+".trace"
+REM settrace (998)
+
 rem "individual prep"
+rem System.out.println("--SW--"+PFX)
+rem System.out.println("--SW--"+dir(""))
 call "PrepSession.bbj",err=*next
 
 requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
@@ -59,7 +62,7 @@ responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM"
 
 main_loop:
 
-    seterr execerr
+    rem seterr execerr
 
     rem requestSemaphore!.acquire()
     if !requestSemaphore!.tryAcquire(1,3600,java.util.concurrent.TimeUnit.SECONDS) then
@@ -70,21 +73,21 @@ main_loop:
         release
     fi
         
-    req$=BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST")
+    request!=BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST")
 
-    if cvs(req$,4)="BYE" then
+    if cvs(request!,4)="BYE" then
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE","Goodbye!")
         responseSemaphore!.release()
         release
     fi
 
-      inp! = new String(req$,"UTF-8")
-      req$=str(inp!.getBytes("ISO-8859-15"))  
-REM       System.out.println("-------------request-------------------------------")
-REM       System.out.println(req$)
-REM       System.out.println("---------------------------------------------------")
+rem      inp! = new String(request!,"UTF-8")
+rem      request!=str(inp!.getBytes("ISO-8859-15"))  
+       System.out.println("-------------request-------------------------------")
+       System.out.println(request!)
+       System.out.println("---------------------------------------------------")
 
-      jelement! = new JsonParser().parse(req$)
+      jelement! = new JsonParser().parse(request!)
       jobject! = jelement!.getAsJsonObject(err=execerr)
       
         tid!=jobject!.get("tid")
@@ -115,6 +118,7 @@ REM       System.out.println("--------------------------------------------------
           it! = jarray!.iterator()
           while it!.hasNext()
               j!=it!.next()
+              rem System.out.println(j!.toString())
               name$=j!.get("n").getAsString()
               type$=j!.get("t").getAsString()
 
@@ -150,11 +154,13 @@ REM       System.out.println("--------------------------------------------------
                           fi
                       fi
               fi
+REM               System.out.println(ex$)
           wend
       fi
 
 
       rem execute the code
+      
       jarray! = jobject!.getAsJsonArray("ex")
       ret! = new JsonObject()
 
@@ -167,6 +173,7 @@ REM       System.out.println("--------------------------------------------------
                  cl$=j!.get("class").getAsString()
                  var$=j!.get("var").getAsString()
                  ex$=var$+"! = new "+cl$+"()"
+                 rem System.out.println(ex$)
                  execute ex$
               fi
 
@@ -174,6 +181,7 @@ REM       System.out.println("--------------------------------------------------
                  var$=j!.get("var").getAsString()
                  ex$=var$+"! = null()"
                  execute ex$
+                 rem System.out.println(ex$)
               fi
 
 
@@ -201,8 +209,9 @@ REM       System.out.println("--------------------------------------------------
                     retvar$=retvar!.getAsString()
                     ex$=retvar$+"!="+ex$
                  fi
+                 rem System.out.println(ex$)
                  execute ex$
-
+                 
 
               fi
 
@@ -239,7 +248,7 @@ g!.writeStartObject()
                     var! = new com.basiscomponents.db.DataRow(var!)
                     class$=var!.getClass().toString()
                   fi
-                  if pos("BBjString"=class$)>0 then
+                  if pos("String"=class$)>0 then
                       g!.writeStringField(v$,str(var!))
                   else
                       if pos("BBjNumber"=class$)>0 then
@@ -259,7 +268,6 @@ g!.writeStartObject()
                                      g!.writeRawValue(vw!.toJson())
                                 fi
                               fi
-                              
                           fi
 
                       fi
@@ -272,9 +280,10 @@ g!.writeStartObject()
       g!.writeStringField("tid",tid$)
       g!.writeEndObject()
       g!.close()
-      resp$= w!.toString() 
+      response!= w!.toString() 
+	  System.out.println(response!)
       
-    BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",resp$)
+    BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
     responseSemaphore!.release()
     
     goto main_loop
@@ -293,8 +302,11 @@ g!.writeStartObject()
         close (ch) 
         
         notrace:
-        
-        emsg$=org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(errmes(-1))
+        e$=errmes(-1)
+		if e$(1,4)="java" then let e$=e$(pos(":"=E$)+2)
+		
+		
+        emsg$=org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(e$)
         response$="{""err"":"""+"!ERROR "+str(err)+" "+emsg$+" "+str(tcb(5) )+""",""message"":"""+emsg$+""",""ses"":"""+ses$+"""}"
          
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response$)
@@ -306,20 +318,20 @@ goto main_loop
 
 class public Bridge
 
+   
 
    method public void servletRequest(BBjServletEvent p_event!)
-   
-       declare BBjHttpResponse resp!
-       declare BBjHttpRequest req!
-       req! = p_event!.getHttpRequest()
-       resp! = p_event!.getHttpResponse()
+       declare BBjHttpResponse http_resp!
+       declare BBjHttpRequest http_req!
+       http_req! = p_event!.getHttpRequest()
+       http_resp! = p_event!.getHttpResponse()
        
-       req$ = req!.getParameter("ex")
-       if req$>"" then
+       request! = http_req!.getParameter("ex")
+       if request!>"" then
 
-           ses$=req!.getParameter("ses")
+           ses$=http_req!.getParameter("ses")
            if ses$="" then
-                jelement! = new JsonParser().parse(req$)
+                jelement! = new JsonParser().parse(request!)
                 jobject! = jelement!.getAsJsonObject(err=*endif)
                 ses!=jobject!.get("ses")
                 if ses!<>null() then
@@ -331,48 +343,49 @@ class public Bridge
                 ses$=Bridge.newSession()
            fi
 
-           resp$=Bridge.invoke(ses$,req$) 
+           response!=Bridge.invoke(ses$,request!) 
            
-           if len(resp$)>5 and resp$(1,5)="file:" then
-                file$=resp$(6)
+           if len(response!)>5 and str(response!)(1,5)="file:" then
+                file$=str(response!)(6)
 
                 ch=unt
                 open (ch,err=filenotfund)file$ 
                 close (ch)
                 fullPath$ = BBjAPI().getFileSystem().resolvePath(file$)
-                resp$=" deliver file: "+fullPath$
+                response!=" deliver file: "+fullPath$
                 
-                resp!.setFile(fullPath$)   
-                resp!.setContentType("application/pdf")
-                resp!.setHeader("Content-Disposition","inline; filename=""myFileName.PDF""")
+                http_resp!.setFile(fullPath$)   
+                http_resp!.setContentType("application/pdf")
+                http_resp!.setHeader("Content-Disposition","inline; filename=""myFileName.PDF""")
                
                 goto done_file
                 filenotfund:
-                    resp$="[{""err"":"""+errmes(-1)+"""}]" 
+                    response!="[{""err"":"""+errmes(-1)+"""}]" 
                 done_file:
            else
-               if len(resp$)=0 or resp$(1,1)<>"{" then
-                resp$="{""err"":"""+resp$+"""}"
+               if len(response!)=0 or str(response!)(1,1)<>"{" then
+                response!="{""err"":"""+response!+"""}"
                fi
            fi
        else 
-            resp$="{""err"":""no request received""}"
+            response!="{""err"":""no request received""}"
        fi
-       cb$ = req!.getParameter("callback") 
+       cb$ = http_req!.getParameter("callback") 
        
        
-       resp!.setHeader("Access-Control-Allow-Origin","*")
+       http_resp!.setHeader("Access-Control-Allow-Origin","*")
        
        ch=unt
        open(ch)"JSERVLET"
        if cb$>"" then
         print(ch)cb$+"("
        fi       
-       print (ch)resp$
+       print (ch)response!
        if cb$>"" then
         print(ch)");"
        fi       
        close(ch)
+       
    methodend
 
     method public static BBjString newSession()
@@ -385,6 +398,8 @@ class public Bridge
             break
         wend
         
+       
+        
         BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST","")
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE","")
         
@@ -393,7 +408,7 @@ class public Bridge
         BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST_SEM",requestSemaphore!)
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE_SEM",responseSemaphore!)
 
-        scmd$="bbj -tT0 -q -c"+BBjAPI().getConfig().getCurrentCommandLineObject().getConfigFile()+" -CP"+BBjAPI().getConfig().getCurrentCommandLineObject().getOriginalClasspathName()+" -WD"+dsk("")+dir("")+" "+pgm(-1)+" - "+ses$+" &"
+        scmd$="bbj -q -c"+BBjAPI().getConfig().getCurrentCommandLineObject().getConfigFile()+" -CP"+BBjAPI().getConfig().getCurrentCommandLineObject().getOriginalClasspathName()+" -WD"+dsk("")+dir("")+" "+pgm(-1)+" - "+ses$+" &"
         rem System.out.println(scmd$)  
         a=scall(scmd$) 
         
@@ -401,35 +416,35 @@ class public Bridge
     
     methodend
     
-    method public static BBjString invoke (BBjString ses$, BBjString instructions$)
+    method public static String invoke (BBjString ses$, BBjString instructions!)
 
         requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM",err=noSes)
         responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
 
-	rem System.out.println("Received Request:"+instructions$)
+	System.out.println("Received Request:"+instructions!)
 
 	      BBjAPI().getGlobalNamespace().setLock(ses$+"_REQUEST",30000)
-          BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST",instructions$)
+          BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST",instructions!)
           requestSemaphore!.release()
                 rem here's the remote session active
 
           if !responseSemaphore!.tryAcquire(1,60,java.util.concurrent.TimeUnit.SECONDS) then
                 rem System.out.println("Bridge: Timeout waiting on "+ses$)
-                resp$="!Error - Timeout occurred"
+                response!="!Error - Timeout occurred"
           fi
           
-          resp$ = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE")
+          response! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE")
           BBjAPI().getGlobalNamespace().removeLock()
           
-           if cvs(instructions$,4)="BYE" then
+           if cvs(instructions!,4)="BYE" then
               BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
               BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
               BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
               BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")            
-              resp$="Goodbye."
+              response!="Goodbye."
           fi
-          
-          methodret resp$
+	rem System.out.println("Response:"+response!)
+          methodret response!
           
           noSes:
             methodret "!ERROR 11 Session invalid" 
@@ -437,6 +452,7 @@ class public Bridge
     methodend
 
 classend
+
 
 
 
