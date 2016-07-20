@@ -176,7 +176,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	// NOTE: java.sql.ResultSet is 1-based, ours is 0-based
 	public void populate(java.sql.ResultSet rs, Boolean defaultMetaData) throws Exception {
 		java.sql.ResultSetMetaData rsmd = rs.getMetaData();
-		rs.first();
 		int cc = rsmd.getColumnCount();
 		String name;
 		int type;
@@ -218,7 +217,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 			
 		}
-		System.out.println(this.MetaData);
 		try {
 			rs.beforeFirst();
 		} catch (Exception e) {
@@ -239,6 +237,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				dr.addDataField(name, type, field);
 				if (this.MetaData.get(column-1).get("ColumnTypeName").equals("JSON"))
 					dr.setFieldAttribute(name, "StringFormat", "JSON");
+				
+				if (this.isAutoIncrement(column-1)
+						||
+					!this.isWritable(column-1)
+						|| 
+					!this.isDefinitelyWritable(column-1))
+					dr.setFieldAttribute(name, "EDITABLE", "0");
+				else
+					dr.setFieldAttribute(name, "EDITABLE", "1");
+
 			}
 			// load key bytes in order of key columns
 			if (KeyColumns != null && KeyColumns.size() > 0) {
@@ -897,6 +905,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					}
 					break;
 				case java.sql.Types.BIGINT:
+					if (dr.getField(fn) == null || dr.getField(fn).getLong() == null )
+						g.writeNumberField(fn,0);
+					else
+						g.writeNumberField(fn, dr.getField(fn).getLong());
+					break;
+
 				case java.sql.Types.TINYINT:
 				case java.sql.Types.INTEGER:
 				case java.sql.Types.SMALLINT:
@@ -1456,14 +1470,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return dr;
 	}
 
-	public void list() {
-		System.out.println("-----------------------------------");
-		Iterator<DataRow> it = iterator();
-		while (it.hasNext()) {
-			System.out.println(it.next());
-		}
-		System.out.println("-----------------------------------");
-	}
+
 
 	/**
 	 * Method getBBTemplate: Creates and returns simplified BB template definition
