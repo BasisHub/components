@@ -178,9 +178,14 @@ public class SqlTableBC implements BusinessComponent{
 		    	  		case 93:
 		    	  			prep.setTimestamp(index, o.getTimestamp());
 		    	  			index++;
-		    	  			break;		
+		    	  			break;
+		    	  		case 1111:
+		    	  			///this is an auto-generated key. set as string and hope for the best
+		    	  			prep.setString(index, o.getString());
+		    	  			index++;
+		    	  			break;			    	  			
 		    	  		default:
-		    	  			System.out.println("todo: "+type);
+		    	  			System.err.println("todo: "+type);
 		    	  }
 		    	  
 		    	  
@@ -202,7 +207,23 @@ public class SqlTableBC implements BusinessComponent{
 				}
 			}
 		}
-		      
+		
+		
+		//now set the EDITABLE flag for primary key fields in all records to "2" 
+		    Iterator<DataRow> it = this.LastResultSet.iterator();
+		    while (it.hasNext()){
+		    	DataRow r = it.next();
+		    	Iterator<String> itk = this.PrimaryKeys.iterator();
+		    	while (itk.hasNext()){
+		    		String f = itk.next();
+		    		try {
+						r.setFieldAttribute(f, "EDITABLE", "2" );
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		    	}
+		    }
 			return LastResultSet; 			 
 		}
 
@@ -224,7 +245,9 @@ public class SqlTableBC implements BusinessComponent{
 			ArrayList<Integer> ParamTypes = new ArrayList<>();
 		    ArrayList<DataField> Params = new ArrayList<>();
 		    String sql="";
-		      
+
+	    	  Connection conn = DriverManager.getConnection(Url,User,Password); 		    
+		    
 		    if (pk_present){
 		    	//check if record exists already
 		    	sql="SELECT COUNT(*) FROM "+Table+" ";
@@ -253,8 +276,8 @@ public class SqlTableBC implements BusinessComponent{
 		    	  if (wh.length()>0)
 		    		  sql+=" WHERE "+wh;		
 		    	  
-		    	  System.out.println(sql);
-		    	  Connection conn = DriverManager.getConnection(Url,User,Password); 
+//		    	  System.out.println(sql);
+
 			      PreparedStatement prep = conn.prepareStatement(sql);
 			      
 			      Iterator<Integer> itp = ParamTypes.iterator();
@@ -278,7 +301,7 @@ public class SqlTableBC implements BusinessComponent{
 			    	  			index++;
 			    	  			break;	
 			    	  		default:
-			    	  			System.out.println(type);
+			    	  			System.err.println("todo: "+type);
 			    	  }
 			      }
 			      java.sql.ResultSet rs = prep.executeQuery();
@@ -376,8 +399,8 @@ public class SqlTableBC implements BusinessComponent{
 						
 			}
 			
-			System.out.println(sql);
-			Connection conn = DriverManager.getConnection(Url,User,Password); 
+//			System.out.println(sql);
+
 		      PreparedStatement prep = conn.prepareStatement(sql,PreparedStatement.RETURN_GENERATED_KEYS);
 		      
 		      Iterator<Integer> itp = ParamTypes.iterator();
@@ -400,7 +423,7 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			index++;
 		    	  			break;	
 		    	  		default:
-		    	  			System.out.println(type);
+		    	  			System.err.println("todo: "+type);
 		    	  }
 		      }
 		      prep.execute();
@@ -424,16 +447,104 @@ public class SqlTableBC implements BusinessComponent{
 				}
 			}
 		
+			
+			DataRow oldfilter = this.Filter;
+			DataRow filter = new DataRow();
+			it = PrimaryKeys.iterator();
+	    	while (it.hasNext()){
+	    		String f = it.next();
+	    		filter.setFieldValue(f, ret.getField(f));
+	    	}
+	    	this.setFilter(filter);
+	    	ResultSet retrs = this.retrieve();
+	    	if (retrs.size() == 1)
+	    		ret=retrs.getItem(0);
+	    	else 
+	    		System.err.println("could not read written record - got "+retrs.size()+" records back!");
+			
+			this.setFilter(oldfilter);
+			
+			
 //			System.out.println(sql);
-//			System.out.println(ret);
+			if (conn != null){
+				conn.close();
+			}
 			return ret;
 		}
 		
+		public void remove(DataRow r) throws Exception{
+
+		      ArrayList<Integer> ParamTypes = new ArrayList<>();
+		      ArrayList<DataField> Params = new ArrayList<>();
+
+			String sql = "DELETE FROM "+Table+" ";
+			@SuppressWarnings("unchecked")
+
+			String wh="";
+		    	  
+		    	  Iterator<String> it = PrimaryKeys.iterator();
+		    	  while (it.hasNext()){
+		    		  String pkfieldname = it.next();
+					  DataField pkfield = r.getField(pkfieldname);
+						if (wh.length()>0){
+							wh+=" AND ";
+						}//if
+
+						ParamTypes.add(r.getFieldType(pkfieldname));
+						Params.add(pkfield);
+						wh += " `"+pkfieldname+"`=? ";
+	    	  		}//while  
+		
+		      sql+=" WHERE "+wh;		
+	    	  
+//	    	  System.out.println(sql);
+	    	  Connection conn = DriverManager.getConnection(Url,User,Password); 
+		      PreparedStatement prep = conn.prepareStatement(sql);
+		      
+		      Iterator<Integer> itp = ParamTypes.iterator();
+		      Iterator<DataField> it1 = Params.iterator();
+		      int index = 1;
+		      while (itp.hasNext()){
+		    	  Integer type = itp.next();
+		    	  DataField o = it1.next();
+		    	  
+		    	  switch (type){
+		    	  		case 4:
+		    	  			prep.setInt(index, o.getInt());
+		    	  			index++;
+		    	  			break;
+		    	  		case 12:
+		    	  			prep.setString(index, o.getString());
+		    	  			index++;
+		    	  			break;
+		    	  		case 93:
+		    	  			prep.setTimestamp(index, o.getTimestamp());
+		    	  			index++;
+		    	  			break;	
+		    	  		default:
+		    	  			System.err.println("todo: "+type);
+		    	  }
+		      }
+		      boolean rs = prep.execute();		
+		      
+				if (conn != null){
+					conn.close();
+				}
+				
+		      this.LastResultSet = null;
+		}
+		
 		public DataRow getAttributesRecord(){
-			DataRow ar = retrieve().getItem(0);
+			DataRow ar = retrieve().getItem(0).clone();
+			ar.clear();
 			return ar;
 			//TODO: do a solid implementation based on the JDBC table metadata
 		}
-		
+
+		public DataRow getNewObjectTemplate(DataRow conditions){
+			DataRow ar = retrieve().getItem(0).clone();
+			ar.clear();
+			return ar;			
+		}
 
 }
