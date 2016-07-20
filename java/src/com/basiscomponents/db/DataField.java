@@ -195,4 +195,8 @@ public class DataField implements java.io.Serializable {
 		return this.Value.toString();
 	}
 
+	public void clear() {
+			setValue(null);
+	}
+
 }

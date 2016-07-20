@@ -727,7 +727,10 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.TINYINT:
 				case java.sql.Types.INTEGER:
 				case java.sql.Types.SMALLINT:
-					dr.addDataField(fieldName, fieldType, new DataField(Integer.parseInt(fieldObj.toString())));
+					String tmp = fieldObj.toString();
+					if (tmp.isEmpty())
+						tmp="0";
+					dr.addDataField(fieldName, fieldType, new DataField(Integer.parseInt(tmp)));
 					break;
 
 				case java.sql.Types.NUMERIC:
@@ -903,6 +906,21 @@ public class DataRow implements java.io.Serializable {
 				}
 		}
 		return n;
+	}
+
+	public void clear() {
+		
+		@SuppressWarnings("unchecked")
+		Iterator<String> it = this.getFieldNames().iterator();
+		while (it.hasNext()){
+			try {
+				this.getField(it.next()).clear();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 }
