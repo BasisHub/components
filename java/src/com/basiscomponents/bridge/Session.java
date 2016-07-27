@@ -27,6 +27,7 @@ public class Session {
 	private HashMap<String, Object> Result;
 	private String SessionID;
 	private String BaseUrl;
+	private String lastError;
 
 	public Session(String url) {
 		BaseUrl = url;
@@ -81,6 +82,7 @@ public class Session {
 		Ex = new ArrayList<SessionExecuteEntity>();
 		Ret = new ArrayList<String>();
 		Vars = new ArrayList<SessionVarEntity>();
+		lastError = null;
 	}
 
 	private String getJson() {
@@ -214,8 +216,9 @@ public class Session {
 
 	}
 
-	public void exec()  {
+	public void exec()   {
 
+		lastError = null;
 		String req = getJson();
 
 //		System.out.println("Request: " + java.net.URLDecoder.decode(req));
@@ -226,8 +229,8 @@ public class Session {
 		JsonObject jobject = jelement.getAsJsonObject();
 
 		if (jobject.get("err") != null) {
-			String Error = jobject.get("err").getAsString();
-			System.err.println("received remote error: " + Error);
+			lastError = jobject.get("err").getAsString();
+			System.err.println("received remote error: " + lastError);
 			return;
 		}
 
@@ -300,6 +303,10 @@ public class Session {
 
 	public String toString(){
 		return "Session "+this.SessionID+" to "+this.BaseUrl;
+	}
+	
+	public String getLastError(){
+		return lastError;
 	}
 	
 }
