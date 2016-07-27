@@ -858,4 +858,16 @@ public class BBMigPane implements BBjControl {
 
 	}
 
+	@Override
+	public Object getClientProperty(Object arg0) throws BBjException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void putClientProperty(Object arg0, Object arg1) throws BBjException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
