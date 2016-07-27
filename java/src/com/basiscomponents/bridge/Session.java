@@ -298,4 +298,8 @@ public class Session {
 		return Result.get(name);
 	}
 
+	public String toString(){
+		return "Session "+this.SessionID+" to "+this.BaseUrl;
+	}
+	
 }

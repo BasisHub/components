@@ -12,7 +12,7 @@ import com.basiscomponents.db.ResultSet;
 
 public class GeneratorJava {
 
-	private static final String AllowedTypes = "DataRow ResultSet BBjNumber BBjString void";
+	private static final String AllowedTypes = "DataRow ResultSet BBjNumber BBjString void Boolean";
 
 	public static void createJavaProxyClasses(
 			HashMap<String, ParseEntity> classes, String packagename,
