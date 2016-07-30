@@ -44,7 +44,6 @@ public class GeneratorJava {
 			writer.println("	public " + pe.getClassname() + "(Session ses){ ");
 			writer.println("		this.ses = ses; ");
 			writer.println("		this.classid = \"X_\"+UUID.randomUUID().toString().replaceAll(\"-\", \"\"); ");
-			writer.println("		this.classid =\"X1\"; ");
 			writer.println("		ses.create(classid,\"::" + classfileprefix
 					+ pe.getClassname() + classfilesuffix + "::"
 					+ pe.getClassname() + "\"); ");
