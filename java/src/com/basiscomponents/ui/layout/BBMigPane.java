@@ -870,4 +870,9 @@ public class BBMigPane implements BBjControl {
 		
 	}
 
+	@Override
+	public BBjWindow getParentWindow() throws BBjException {
+		return this.container.getWindow();
+	}
+
 }
