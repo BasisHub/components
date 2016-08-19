@@ -1672,7 +1672,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				String colName = it.next();
 				if (s.length() > 0)
 					s.append(",");
-				s.append(getBBTemplateColumn(colName, -1, extendedInfo));
+				String tmplCol = getBBTemplateColumn(colName, -1, extendedInfo);
+				// key template segments are always fixed length, so..
+				if (!tmplCol.isEmpty() && (tmplCol.contains("*") || tmplCol.contains("+"))) {
+					tmplCol = tmplCol.substring(0, java.lang.Math.max(tmplCol.indexOf("*"),tmplCol.indexOf("+")));
+					tmplCol = tmplCol.concat(")");
+				}
+				s.append(tmplCol);
 			}
 		}
 		return s.toString();
@@ -2038,7 +2044,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			if (extendedInfo)
 				s.append(":sqltype=REF");
 			break;
-		case java.sql.Types.DATALINK:
+		case java.sql.Types.DATALINK: // (think URL)
 			s.append("C(").append(prec.toString()).append("*)");
 			if (extendedInfo)
 				s.append(":sqltype=DATALINK");
