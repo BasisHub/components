@@ -61,7 +61,6 @@ public class DataRowComparator implements java.util.Comparator<DataRow> {
 			int int2 = f2.getInt();
 			returnVal = Integer.compare(int1, int2);
 			break;
-		case java.sql.Types.NUMERIC:
 		case java.sql.Types.DOUBLE:
 		case java.sql.Types.FLOAT:
 		case java.sql.Types.REAL:
@@ -69,6 +68,7 @@ public class DataRowComparator implements java.util.Comparator<DataRow> {
 			double dbl2 = f2.getDouble();
 			returnVal = Double.compare(dbl1, dbl2);
 			break;
+		case java.sql.Types.NUMERIC:
 		case java.sql.Types.DECIMAL:
 			java.math.BigDecimal bd1 = f1.getBigDecimal();
 			java.math.BigDecimal bd2 = f2.getBigDecimal();
