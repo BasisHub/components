@@ -47,18 +47,26 @@ RemoteSession:
 BBjAPI().getConfig().setOptionSetting("ERROR_UNWINDS", 1)
 ses$ = argv(1)
 dummy$=stbl("SESSIONID",ses$)
+debug=num(stbl("DEBUG",err=*next),err=*next)
 
-REM System.out.println("New Session "+ses$)
-REM open (998,mode="O_CREATE,O_TRUNC")"/usr2/tmp/"+ses$+".trace"
-REM settrace (998)
+if (debug) then
+	System.out.println("New Session "+ses$)
+fi
+if (debug >1) then
+	open (998,mode="O_CREATE,O_TRUNC")"/usr2/tmp/"+ses$+".trace"
+	settrace (998)
+fi
 
-rem "individual prep"
-rem System.out.println("--SW--"+PFX)
-rem System.out.println("--SW--"+dir(""))
+if (debug) then
+	System.out.println("Prefix: "+PFX)
+	System.out.println("WD: "+dir(""))
+fi
+
 call "PrepSession.bbj",err=*next
 
 requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
 responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
+c_resolver! = new com.basiscomponents.db.constants.BBjNamespaceConstantsResolver(BBjAPI().getNamespace("sessionconst","X"+ses$,1))
 
 main_loop:
 
@@ -83,9 +91,13 @@ main_loop:
 
 rem      inp! = new String(request!,"UTF-8")
 rem      request!=str(inp!.getBytes("ISO-8859-15"))
+
+if (debug) then
        System.out.println("-------------request-------------------------------")
        System.out.println(request!)
        System.out.println("---------------------------------------------------")
+fi
+
 
       jelement! = new JsonParser().parse(request!)
       jobject! = jelement!.getAsJsonObject(err=execerr)
@@ -103,7 +115,9 @@ rem      request!=str(inp!.getBytes("ISO-8859-15"))
         if file$(1,1)="""" then
             file$=file$(2,len(file$)-2)
         fi
-        rem System.out.println("Trying file: "+file$)
+if (debug) then		
+        System.out.println("Trying file: "+file$)
+fi
         response$="file:"+file$
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response$)
         responseSemaphore!.release()
@@ -147,17 +161,21 @@ rem      request!=str(inp!.getBytes("ISO-8859-15"))
                                   if value! = com.google.gson.JsonNull.INSTANCE then
                                       ex$ = name$+"! = null()"
 								  else
-									  dr1! = DataRow.fromJson(str(value!))
+									  dr1! = DataRow.fromJson(str(value!)).resolveConstants(c_resolver!)
 									  ex$ = name$+"! = dr1!"
 								  endif
                                   execute ex$
-                                  rem System.out.println(dr1!.toString())
+								  if (debug) then
+									System.out.println(dr1!.toString())
+								  fi
                                   dr1! = null()
                               fi
                           fi
                       fi
               fi
-REM               System.out.println(ex$)
+			  if (debug) then
+               System.out.println(ex$)
+			  fi
           wend
       fi
 
@@ -184,7 +202,9 @@ REM               System.out.println(ex$)
                  var$=j!.get("var").getAsString()
                  ex$=var$+"! = null()"
                  execute ex$
-                 rem System.out.println(ex$)
+				 if (debug) then
+					System.out.println(ex$)
+				 fi
               fi
 
 
@@ -212,7 +232,9 @@ REM               System.out.println(ex$)
                     retvar$=retvar!.getAsString()
                     ex$=retvar$+"!="+ex$
                  fi
-                 rem System.out.println(ex$)
+				 if (debug) then
+					System.out.println(ex$)
+				 fi
                  execute ex$
 
 
@@ -288,7 +310,9 @@ g!.writeStartObject()
       g!.writeEndObject()
       g!.close()
       response!= w!.toString()
-	  System.out.println(response!)
+	  if (debug) then
+		System.out.println("Response: response!)
+	  fi
 
     BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
     responseSemaphore!.release()
@@ -415,7 +439,7 @@ class public Bridge
         BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST_SEM",requestSemaphore!)
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE_SEM",responseSemaphore!)
 
-        scmd$="bbj -q -c"+BBjAPI().getConfig().getCurrentCommandLineObject().getConfigFile()+" -CP"+BBjAPI().getConfig().getCurrentCommandLineObject().getOriginalClasspathName()+" -WD"+dsk("")+dir("")+" "+pgm(-1)+" - "+ses$+" &"
+        scmd$="bbj -t"+BBjAPI().getConfig().getCurrentCommandLineObject().getTerminal()+" -q -c"+BBjAPI().getConfig().getCurrentCommandLineObject().getConfigFile()+" -CP"+BBjAPI().getConfig().getCurrentCommandLineObject().getOriginalClasspathName()+" -WD"+dsk("")+dir("")+" "+pgm(-1)+" - "+ses$+" &"
         rem System.out.println(scmd$)
         a=scall(scmd$)
 
@@ -427,8 +451,6 @@ class public Bridge
 
         requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM",err=noSes)
         responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
-
-	System.out.println("Received Request:"+instructions!)
 
 	      BBjAPI().getGlobalNamespace().setLock(ses$+"_REQUEST",30000)
           BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST",instructions!)
@@ -450,7 +472,7 @@ class public Bridge
               BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")
               response!="Goodbye."
           fi
-	rem System.out.println("Response:"+response!)
+
           methodret response!
 
           noSes:
