@@ -50,23 +50,23 @@ dummy$=stbl("SESSIONID",ses$)
 debug=num(stbl("DEBUG",err=*next),err=*next)
 
 if (debug) then
-	System.out.println("New Session "+ses$)
+    System.out.println("New Session "+ses$)
 fi
 if (debug >1) then
-	open (998,mode="O_CREATE,O_TRUNC")"/usr2/tmp/"+ses$+".trace"
-	settrace (998)
+    open (998,mode="O_CREATE,O_TRUNC")"/usr2/tmp/"+ses$+".trace"
+    settrace (998)
 fi
 
 if (debug) then
-	System.out.println("Prefix: "+PFX)
-	System.out.println("WD: "+dir(""))
+    System.out.println("Prefix: "+PFX)
+    System.out.println("WD: "+dir(""))
 fi
 
 call "PrepSession.bbj",err=*next
 
 requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
 responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
-c_resolver! = new com.basiscomponents.db.constants.BBjNamespaceConstantsResolver(BBjAPI().getNamespace("sessionconst","X"+ses$,1))
+c_resolver! = new com.basiscomponents.db.constants.BBjNamespaceConstantsResolver(BBjAPI().getNamespace("sessionconst","X"+ses$,1),err=*next)
 
 main_loop:
 
@@ -115,7 +115,7 @@ fi
         if file$(1,1)="""" then
             file$=file$(2,len(file$)-2)
         fi
-if (debug) then		
+if (debug) then
         System.out.println("Trying file: "+file$)
 fi
         response$="file:"+file$
@@ -143,39 +143,43 @@ fi
                   execute ex$
               else
                   if type$="bool" then
-                          value!=j!.get("v").getAsBoolean()
-                          if str(value!)="true" then
-                            ex$=name$+"! = Boolean.TRUE"
-                          else
-                            ex$=name$+"! = Boolean.FALSE"
-                          fi
+                      value!=j!.get("v").getAsBoolean()
+                      if str(value!)="true" then
+                        ex$=name$+"! = Boolean.TRUE"
+                      else
+                        ex$=name$+"! = Boolean.FALSE"
+                      fi
+                      execute ex$
+                  else
+                      if type$="num" then
+                          value$=j!.get("v").getAsString()
+                          ex$=name$+"! = "+value$
                           execute ex$
                       else
-                          if type$="num" then
-                              value$=j!.get("v").getAsString()
-                              ex$=name$+"! = "+value$
+                          if type$="dr" then
+                              value!=j!.get("v")
+                              if value! = com.google.gson.JsonNull.INSTANCE then
+                                  ex$ = name$+"! = null()"
+                              else
+                                  if c_resolver! = null() then
+                                      dr1! = DataRow.fromJson(str(value!))
+                                  else
+                                      dr1! = DataRow.fromJson(str(value!)).resolveConstants(c_resolver!)
+                                  endif
+                                  ex$ = name$+"! = dr1!"
+                              endif
                               execute ex$
-                          else
-                              if type$="dr" then
-                                  value!=j!.get("v")
-                                  if value! = com.google.gson.JsonNull.INSTANCE then
-                                      ex$ = name$+"! = null()"
-								  else
-									  dr1! = DataRow.fromJson(str(value!)).resolveConstants(c_resolver!)
-									  ex$ = name$+"! = dr1!"
-								  endif
-                                  execute ex$
-								  if (debug) then
-									System.out.println(dr1!.toString())
-								  fi
-                                  dr1! = null()
+                              if (debug) then
+                                System.out.println(dr1!.toString())
                               fi
+                              dr1! = null()
                           fi
                       fi
+                  fi
               fi
-			  if (debug) then
-               System.out.println(ex$)
-			  fi
+              if (debug) then
+                  System.out.println(ex$)
+              fi
           wend
       fi
 
@@ -191,40 +195,39 @@ fi
               j!=it!.next()
               op$=j!.get("op").getAsString()
               if op$="create" then
-                 cl$=j!.get("class").getAsString()
-                 var$=j!.get("var").getAsString()
-                 ex$=var$+"! = new "+cl$+"()"
-                 rem System.out.println(ex$)
-                 execute ex$
+                  cl$=j!.get("class").getAsString()
+                  var$=j!.get("var").getAsString()
+                  ex$=var$+"! = new "+cl$+"()"
+                  rem System.out.println(ex$)
+                  execute ex$
               fi
 
               if op$="destroy" then
-                 var$=j!.get("var").getAsString()
-                 ex$=var$+"! = null()"
-                 execute ex$
-				 if (debug) then
-					System.out.println(ex$)
-				 fi
+                  var$=j!.get("var").getAsString()
+                  ex$=var$+"! = null()"
+                  execute ex$
+                  if (debug) then
+                      System.out.println(ex$)
+                  fi
               fi
 
 
               if op$="invoke" then
-
-                 method$=j!.get("method").getAsString()
-                 var$=j!.get("var").getAsString()
-                 ex$=var$+"!."+method$+"("
-                 args! = j!.get("args")
-                 if args!<>null() then
-                    ita! = args!.iterator()
-                    i=0
-                    while ita!.hasNext()
-                       arg! = ita!.next()
-                       if i>0 then
-                          ex$=ex$+","
-                       fi
-                       ex$=ex$+arg!.getAsString()+"!"
-                       i=i+1
-                    wend
+                  method$=j!.get("method").getAsString()
+                  var$=j!.get("var").getAsString()
+                  ex$=var$+"!."+method$+"("
+                  args! = j!.get("args")
+                  if args!<>null() then
+                     ita! = args!.iterator()
+                     i=0
+                     while ita!.hasNext()
+                         arg! = ita!.next()
+                         if i>0 then
+                             ex$=ex$+","
+                         fi
+                         ex$=ex$+arg!.getAsString()+"!"
+                         i=i+1
+                     wend
                  fi
                  ex$=ex$+")"
                  retvar! = j!.get("retvar")
@@ -232,9 +235,9 @@ fi
                     retvar$=retvar!.getAsString()
                     ex$=retvar$+"!="+ex$
                  fi
-				 if (debug) then
-					System.out.println(ex$)
-				 fi
+                 if (debug) then
+                    System.out.println(ex$)
+                 fi
                  execute ex$
 
 
@@ -310,9 +313,9 @@ g!.writeStartObject()
       g!.writeEndObject()
       g!.close()
       response!= w!.toString()
-	  if (debug) then
-		System.out.println("Response: response!")
-	  fi
+      if (debug) then
+        System.out.println("Response: response!")
+      fi
 
     BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
     responseSemaphore!.release()
@@ -334,7 +337,7 @@ g!.writeStartObject()
 
         notrace:
         e$=errmes(-1)
-		if e$(1,4)="java" then let e$=e$(pos(":"=E$)+2)
+        if e$(1,4)="java" then let e$=e$(pos(":"=E$)+2)
 
 
         emsg$=org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(e$)
@@ -452,7 +455,7 @@ class public Bridge
         requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM",err=noSes)
         responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
 
-	      BBjAPI().getGlobalNamespace().setLock(ses$+"_REQUEST",30000)
+          BBjAPI().getGlobalNamespace().setLock(ses$+"_REQUEST",30000)
           BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST",instructions!)
           requestSemaphore!.release()
                 rem here's the remote session active
