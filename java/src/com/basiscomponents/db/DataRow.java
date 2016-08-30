@@ -24,6 +24,8 @@ public class DataRow implements java.io.Serializable {
 
 	private byte[] RowKey = new byte[0];
 
+	private int RowID;
+
 	public DataRow() {
 		this.ResultSet = new com.basiscomponents.db.ResultSet();
 	}
@@ -49,6 +51,14 @@ public class DataRow implements java.io.Serializable {
 			Object o = map.get(k);
 			setFieldValue(k, o);
 		}
+	}
+
+	public int getRowID() {
+		return RowID;
+	}
+
+	public void setRowID(int rowId) {
+		RowID = rowId;
 	}
 
 	public BBArrayList getFieldNames() {
