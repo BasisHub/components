@@ -132,6 +132,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		DataRows.sort(comparator);
 	}
 
+	public void orderByRowID() {
+		DataRows.sort(java.util.Comparator.comparing(DataRow::getRowID));
+	}
+
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 
@@ -230,6 +234,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		} catch (Exception e) {
 			// do nothing
 		}
+		int rowId = 0;
 		while (rs.next()) {
 			DataRow dr = DataRow.newInstance(this);
 			column = 0;
@@ -262,7 +267,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				}
 			}
 
+			dr.setRowID(rowId);
 			this.DataRows.add(dr);
+			rowId++;
 		}
 	}
 
