@@ -274,12 +274,30 @@ public class Polymer extends AbstractGenerator {
 
                 writer.printf("%spromise : function(){\n", getSpaces(4));
                 writer.printf(
-                        "%sreturn this.model.session.promise.apply(this.model.session,arguments);\n",
+                        "%sreturn this.model.session.promise.apply(this.model.session,arguments)"
+                                + ".finally(function(){\n",
                         getSpaces(6)
                 );
+                if (pe.getClassname().contains(".")) {
+                    writer.printf(
+                            "%sthis.session.create(this.model.id,'%s');\n",
+                            getSpaces(8),
+                            pe.getClassname()
+                    );
+                } else {
+                    writer.printf(
+                            "%sthis.session.create(this.model.id,'::%s%s%s::%s');\n",
+                            getSpaces(8),
+                            classfileprefix,
+                            pe.getClassname(),
+                            classfilesuffix,
+                            pe.getClassname()
+                    );
+                }
+                writer.printf("%s}.bind(this));\n", getSpaces(6));
                 writer.printf("%s},\n\n", getSpaces(4));
 
-                writer.printf("%sexec : function(){\n", getSpaces(4));
+                //writer.printf("%sexec : function(){\n", getSpaces(4));
                 writer.printf(
                         "%sreturn this.model.session.exec.apply(this.model.session,arguments);\n",
                         getSpaces(6)

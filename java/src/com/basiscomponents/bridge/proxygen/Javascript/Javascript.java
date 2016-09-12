@@ -168,7 +168,7 @@ public class Javascript extends AbstractGenerator{
                 writer.printf("%sthis.session.create(this.id,'%s');\n", getSpaces(4), pe.getClassname());
             } else {
                 writer.printf(
-                        "%sthis.create(this.id,'::%s%s%s::%s');\n",
+                        "%sthis.session.create(this.id,'::%s%s%s::%s');\n",
                         getSpaces(4),
                         classfileprefix,
                         pe.getClassname(),
