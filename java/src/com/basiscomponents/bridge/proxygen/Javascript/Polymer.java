@@ -50,13 +50,13 @@ public class Polymer extends AbstractGenerator {
             throws FileNotFoundException, UnsupportedEncodingException, IOException {
 
         Utilities.cleanDir(getOutput());
-        
+
         String jsOutput = getOutput() + "/js/";
         String elmentsOutput = getOutput() + "/polymer/";
-        
+
         File jsOutputFile = new File(jsOutput);
         File elmentsOutputFile = new File(elmentsOutput);
-        
+
         jsOutputFile.mkdirs();
         elmentsOutputFile.mkdirs();
 
@@ -73,22 +73,22 @@ public class Polymer extends AbstractGenerator {
          * remove bower.json in js output folder
          */
         new File(jsOutput + "/bower.json").delete();
-       
+
         /** move README.md file */
         Files.move(
-                new File(jsOutput + "/README.md").toPath(), 
+                new File(jsOutput + "/README.md").toPath(),
                 new File(getOutput() + "/README.md").toPath()
         );
-        
+
         generateElements(elmentsOutput)
                 .generateImportElement(
-                        elmentsOutput, 
+                        elmentsOutput,
                         "../js/" + getNamespace() + ".js"
                 )
                 .generateBowerJson("polymer/");
 
     }
-    
+
     /**
      * Generate bower json
      *
@@ -100,45 +100,45 @@ public class Polymer extends AbstractGenerator {
 
         String filename = getOutput() + "bower.json";
         PrintWriter writer = new PrintWriter(filename, "UTF-8");
-        
+
         String[] main = new String[]{
             elmentsOutput + getNamespace().toLowerCase() + ".html"
         };
-        
+
         Map<String, String> deps = new HashMap<String, String>();
         deps.put("bbj-polymer",getBBjSrc());
-        
+
         String file = new BowerJsonBuilder()
                 .setName(getNamespace())
                 .setMain(main)
                 .setDependencies(deps)
                 .setPrivate(true)
                 .generate();
-        
+
         writer.println(file);
         writer.close();
 
         return this;
     }
-    
+
     /**
      * Generate import element
-     * 
+     *
      * @param elmentsOutput
      * @param mainJs
-     * 
+     *
      * @return Polymer
      */
-    protected Polymer generateImportElement(String elmentsOutput,String mainJs) 
+    protected Polymer generateImportElement(String elmentsOutput,String mainJs)
             throws FileNotFoundException, UnsupportedEncodingException, IOException
     {
-        
+
         String modules = elmentsOutput + "modules.html";
         String script = "<script src='" + mainJs + "'></script>\n";
-        
+
         /** Generate modules file */
         joinify(elmentsOutput,modules , ".html");
-        
+
         /** prepend script call in the modules file */
         String modulesContent = String.join(
                 "\n",
@@ -148,30 +148,30 @@ public class Polymer extends AbstractGenerator {
         writer.print(script);
         writer.print(modulesContent);
         writer.close();
-        
+
         /** Generate import html to import the main js file */
         String importName = getNamespace().toLowerCase() + "-import.html";
-        
+
         writer = new PrintWriter(
                 elmentsOutput + getNamespace().toLowerCase() + "-import.html",
                 "UTF-8"
         );
         writer.print(script);
         writer.close();
-        
+
         /** Generate the main html file */
         File[] fileList = new File(elmentsOutput).listFiles();
         writer = new PrintWriter(
                 elmentsOutput + getNamespace().toLowerCase() + ".html", "UTF-8"
         );
-        
+
         writer.printf("<link rel='import' href='%s'>\n",importName);
         for (int i = 0; i < fileList.length; i++) {
             String name  = fileList[i].getName();
             if (
                     name.endsWith(".html") &&
                     !(name.contains("import") || name.contains("modules"))
-               ) 
+               )
             {
                 writer.printf("<link rel='import' href='%s'>\n",name);
             }
@@ -179,7 +179,7 @@ public class Polymer extends AbstractGenerator {
         writer.close();
         return this;
     }
-    
+
     /**
      * Generate elements
      *
@@ -211,7 +211,7 @@ public class Polymer extends AbstractGenerator {
             String id = (namespace + "-" + classname).toLowerCase();
             String filename = outputfolder + id + ".html";
             PrintWriter writer = new PrintWriter(filename, "UTF-8");
-            
+
             writer.println("<!--");
             writer.printf("This file is part of %s Package.\n", namespace);
             writer.println("(c) Basis Europe <eu@basis.com>");
@@ -224,11 +224,11 @@ public class Polymer extends AbstractGenerator {
             writer.println();
 
             writer.printf("<dom-module id='%s'>\n",id);
-            
+
             writer.printf("%s<script>\n\n",getSpaces(2));
             writer.printf("%s'use strict';\n\n",getSpaces(2));
             writer.printf("%sPolymer({\n",getSpaces(2));
-                
+
                 /** id */
                 writer.printf("%sis : '%s', \n",getSpaces(4),id);
                 /** behaviors */
@@ -239,52 +239,67 @@ public class Polymer extends AbstractGenerator {
                         writer.printf("%stype: Object, \n",getSpaces(8));
                         writer.printf("%snotify: true, \n",getSpaces(8));
                         writer.printf("%scomputed: '_computedModel(session)'\n",getSpaces(8));
+                    writer.printf("%s},\n",getSpaces(6));
+                    writer.printf("%s_model: {\n",getSpaces(6));
+                        writer.printf("%stype: Object, \n",getSpaces(8));
+                        writer.printf("%snotify: true \n",getSpaces(8));
                     writer.printf("%s}\n",getSpaces(6));
                 writer.printf("%s},\n\n",getSpaces(4));
-                
+
                 /** _computedModel */
                 writer.printf("%s_computedModel : function(session){\n",getSpaces(4));
                     writer.printf(
-                            "%sreturn new %s(session); \n",
+                            "%sthis._model = new %s(session); \n",
                             getSpaces(6),
                             namespace + "." + classname
                     );
+                    writer.printf(
+                            "%sreturn this._model; \n",
+                            getSpaces(6)
+                    );
                 writer.printf("%s},\n\n",getSpaces(4));
-                
+
+                writer.printf("%srecomputeModel : function(){\n", getSpaces(4));
+                writer.printf(
+                        "%sreturn this._computedModel(this.session);\n",
+                        getSpaces(6)
+                );
+                writer.printf("%s},\n\n", getSpaces(4));
+
                 /**
                  * Session wrap methods
                  */
                 writer.printf("%spushVar : function(){\n", getSpaces(4));
                 writer.printf(
-                        "%sthis.model.session.pushVar.apply(this.model.session,arguments);\n",
+                        "%sthis._model.session.pushVar.apply(this._model.session,arguments);\n",
                         getSpaces(6)
                 );
                 writer.printf("%s},\n\n", getSpaces(4));
 
                 writer.printf("%sgetResult : function(){\n", getSpaces(4));
-                writer.printf("%sreturn this.model.session.result;\n", getSpaces(6));
+                writer.printf("%sreturn this._model.session.result;\n", getSpaces(6));
                 writer.printf("%s},\n\n", getSpaces(4));
 
                 writer.printf("%slog : function(){\n", getSpaces(4));
                 writer.printf(
-                        "%sthis.model.session.log.apply(this.model.session,arguments);\n"
+                        "%sthis._model.session.log.apply(this._model.session,arguments);\n"
                         , getSpaces(6)
                 );
                 writer.printf("%s},\n\n", getSpaces(4));
 
                 writer.printf("%spromise : function(){\n", getSpaces(4));
                 writer.printf(
-                        "%sreturn this.model.session.promise.apply(this.model.session,arguments);\n",
+                        "%sreturn this._model.session.promise.apply(this._model.session,arguments);\n",
                         getSpaces(6)
                 );
                 writer.printf("%s},\n\n", getSpaces(4));
 
-                writer.printf("%sexec : function(){\n", getSpaces(4));
-                writer.printf(
-                        "%sreturn this.model.session.exec.apply(this.model.session,arguments);\n",
-                        getSpaces(6)
-                );
-                writer.printf("%s},\n\n", getSpaces(4));
+                //writer.printf("%sexec : function(){\n", getSpaces(4));
+                //writer.printf(
+                //        "%sreturn this._model.session.exec.apply(this._model.session,arguments);\n",
+                //        getSpaces(6)
+                //);
+                //writer.printf("%s},\n\n", getSpaces(4));
 
             /**
              * class methods
@@ -324,13 +339,13 @@ public class Polymer extends AbstractGenerator {
                             getSpaces(4),
                             m.getName()
                     ).printf(
-                            "%sreturn this.model.%s.apply(this.model,arguments);\n",
+                            "%sreturn this._model.%s.apply(this._model,arguments);\n",
                             getSpaces(6),
                             m.getName()
                     ).printf("%s},\n\n",getSpaces(4));
                 }
             }
-            
+
             writer.printf("%s});\n",getSpaces(2));
             writer.printf("%s</script>\n",getSpaces(2));
             writer.printf("</dom-module>\n",id);
