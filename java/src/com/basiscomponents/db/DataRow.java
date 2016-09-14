@@ -687,6 +687,18 @@ public class DataRow implements java.io.Serializable {
 		if (in.length() <2 )
 			return new DataRow();
 		
+		// convert characters below chr(32) to \\uxxxx notation
+		int i=0;
+		while (i<in.length()){
+			if (in.charAt(i) <31){
+				String hex = String.format("%04x", (int) in.charAt(i));
+				in=in.substring(0,i)+"\\u"+hex+in.substring(i+1);
+				System.out.println(i+ "-" +hex);
+			}
+			i++;
+		}
+		
+		
 		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
 			in = in.substring(11, in.length() - 1);
 		}
@@ -768,8 +780,12 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.DATE:
 				case (int) 9:
 					tss = fieldObj.toString();
-					java.sql.Date ds = java.sql.Date.valueOf(tss.substring(0, 10));
+				java.sql.Date ds=null;
+					if (tss.length()>9){
+						ds = java.sql.Date.valueOf(tss.substring(0, 10));
+					}
 					dr.addDataField(fieldName, fieldType, new DataField(ds));
+					
 					break;
 
 				case java.sql.Types.ARRAY:

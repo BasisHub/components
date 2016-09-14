@@ -418,6 +418,10 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
 		    	  			break;
+		    	  		case 16:
+		    	  			prep.setBoolean(index, o.getBoolean());
+		    	  			index++;
+		    	  			break;
 		    	  		case 93:
 		    	  			prep.setTimestamp(index, o.getTimestamp());
 		    	  			index++;

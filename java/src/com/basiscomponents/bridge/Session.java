@@ -221,9 +221,9 @@ public class Session {
 		lastError = null;
 		String req = getJson();
 
-//		System.out.println("Request: " + java.net.URLDecoder.decode(req));
+		System.out.println("Request: " + java.net.URLDecoder.decode(req));
 		String ret = this.postRequest(req);
-//		System.out.println("Answer:  " + ret);
+		System.out.println("Answer:  " + ret);
 
 		JsonElement jelement = new JsonParser().parse(ret);
 		JsonObject jobject = jelement.getAsJsonObject();
