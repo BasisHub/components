@@ -175,6 +175,11 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
 		    	  			break;
+		    			case java.sql.Types.BIT:
+		    			case java.sql.Types.BOOLEAN:
+		    	  			prep.setBoolean(index, o.getBoolean());
+		    	  			index++;
+		    	  			break;
 		    	  		case 93:
 		    	  			prep.setTimestamp(index, o.getTimestamp());
 		    	  			index++;
@@ -294,6 +299,11 @@ public class SqlTableBC implements BusinessComponent{
 			    	  			break;
 			    	  		case 12:
 			    	  			prep.setString(index, o.getString());
+			    	  			index++;
+			    	  			break;
+			    			case java.sql.Types.BIT:
+			    			case java.sql.Types.BOOLEAN:
+			    	  			prep.setBoolean(index, o.getBoolean());
 			    	  			index++;
 			    	  			break;
 			    	  		case 93:
@@ -418,7 +428,8 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
 		    	  			break;
-		    	  		case 16:
+		    			case java.sql.Types.BIT:
+		    			case java.sql.Types.BOOLEAN:
 		    	  			prep.setBoolean(index, o.getBoolean());
 		    	  			index++;
 		    	  			break;
@@ -501,7 +512,6 @@ public class SqlTableBC implements BusinessComponent{
 		
 		      sql+=" WHERE "+wh;		
 	    	  
-//	    	  System.out.println(sql);
 	    	  Connection conn = DriverManager.getConnection(Url,User,Password); 
 		      PreparedStatement prep = conn.prepareStatement(sql);
 		      
@@ -511,7 +521,6 @@ public class SqlTableBC implements BusinessComponent{
 		      while (itp.hasNext()){
 		    	  Integer type = itp.next();
 		    	  DataField o = it1.next();
-		    	  
 		    	  switch (type){
 		    	  		case 4:
 		    	  			prep.setInt(index, o.getInt());
@@ -519,6 +528,11 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			break;
 		    	  		case 12:
 		    	  			prep.setString(index, o.getString());
+		    	  			index++;
+		    	  			break;
+		    			case java.sql.Types.BIT:
+		    			case java.sql.Types.BOOLEAN:
+		    	  			prep.setBoolean(index, o.getBoolean());
 		    	  			index++;
 		    	  			break;
 		    	  		case 93:
@@ -529,7 +543,8 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			System.err.println("todo: "+type);
 		    	  }
 		      }
-		      boolean rs = prep.execute();		
+		      
+		      boolean rs = prep.execute();
 		      
 				if (conn != null){
 					conn.close();
