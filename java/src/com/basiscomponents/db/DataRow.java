@@ -772,9 +772,17 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
 				case (int) 11:
 					String tss = fieldObj.toString();
+					try{
 					java.sql.Timestamp ts = java.sql.Timestamp
 							.valueOf(tss.substring(0, 10) + " " + tss.substring(11, 19));
 					dr.addDataField(fieldName, fieldType, new DataField(ts));
+					}
+					catch (Exception e) {
+						dr.addDataField(fieldName, fieldType, new DataField(new java.sql.Timestamp(0)));
+					}
+					finally {
+						
+					}
 					break;
 
 				case java.sql.Types.DATE:

@@ -137,7 +137,7 @@ public class DataField implements java.io.Serializable {
 
 	public Boolean getBoolean() {
 		
-		if (this.Value.getClass().equals(java.lang.String.class)){
+		if (this.Value!=null && this.Value.getClass().equals(java.lang.String.class)){
 			return ("trueTRUE1".indexOf((String)this.Value) > 0);
 		};
 		return (Boolean) this.Value;
