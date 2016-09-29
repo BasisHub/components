@@ -70,7 +70,7 @@ c_resolver! = new com.basiscomponents.db.constants.BBjNamespaceConstantsResolver
 
 main_loop:
 
-    rem execerr
+    seterr execerr
 	dummy$=STBL("!SESSIONINFO",ses$+" - idle")
 
     rem requestSemaphore!.acquire()
