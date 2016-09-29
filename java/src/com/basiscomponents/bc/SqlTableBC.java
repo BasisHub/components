@@ -175,6 +175,8 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
 		    	  			break;
+		    	  		case java.sql.Types.DOUBLE:
+		    	  			prep.setDouble(index, o.getDouble());
 		    			case java.sql.Types.BIT:
 		    			case java.sql.Types.BOOLEAN:
 		    	  			prep.setBoolean(index, o.getBoolean());
@@ -301,6 +303,9 @@ public class SqlTableBC implements BusinessComponent{
 			    	  			prep.setString(index, o.getString());
 			    	  			index++;
 			    	  			break;
+			    	  		case java.sql.Types.DOUBLE:
+			    	  			prep.setDouble(index, o.getDouble());
+			    	  			
 			    			case java.sql.Types.BIT:
 			    			case java.sql.Types.BOOLEAN:
 			    	  			prep.setBoolean(index, o.getBoolean());
@@ -424,6 +429,9 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setInt(index, o.getInt());
 		    	  			index++;
 		    	  			break;
+		    	  		case java.sql.Types.DOUBLE:
+		    	  			prep.setDouble(index, o.getDouble());
+		    	  			
 		    	  		case 12:
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
@@ -526,6 +534,9 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setInt(index, o.getInt());
 		    	  			index++;
 		    	  			break;
+		    	  		case java.sql.Types.DOUBLE:
+		    	  			prep.setDouble(index, o.getDouble());
+
 		    	  		case 12:
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
