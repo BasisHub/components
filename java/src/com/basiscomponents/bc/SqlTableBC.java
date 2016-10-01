@@ -175,6 +175,16 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
 		    	  			break;
+
+		    	  		case java.sql.Types.DATE:
+		    	  			prep.setDate(index, o.getDate());
+		    	  			index++;
+		    	  			break;		    	  			
+		    			case java.sql.Types.TIMESTAMP:
+		    	  			prep.setTimestamp(index, o.getTimestamp());
+		    	  			index++;
+		    	  			break;
+
 		    	  		case java.sql.Types.DOUBLE:
 		    	  			prep.setDouble(index, o.getDouble());
 		    	  			index++;
@@ -184,10 +194,7 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setBoolean(index, o.getBoolean());
 		    	  			index++;
 		    	  			break;
-		    	  		case 93:
-		    	  			prep.setTimestamp(index, o.getTimestamp());
-		    	  			index++;
-		    	  			break;
+
 		    	  		case 1111:
 		    	  			///this is an auto-generated key. set as string and hope for the best
 		    	  			prep.setString(index, o.getString());
@@ -314,10 +321,14 @@ public class SqlTableBC implements BusinessComponent{
 			    	  			prep.setBoolean(index, o.getBoolean());
 			    	  			index++;
 			    	  			break;
-			    	  		case 93:
+			    	  		case java.sql.Types.DATE:
+			    	  			prep.setDate(index, o.getDate());
+			    	  			index++;
+			    	  			break;		    	  			
+			    			case java.sql.Types.TIMESTAMP:
 			    	  			prep.setTimestamp(index, o.getTimestamp());
 			    	  			index++;
-			    	  			break;	
+			    	  			break;
 			    	  		default:
 			    	  			System.err.println("todo: "+type);
 			    	  }
@@ -445,10 +456,14 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setBoolean(index, o.getBoolean());
 		    	  			index++;
 		    	  			break;
-		    	  		case 93:
+		    	  		case java.sql.Types.DATE:
+		    	  			prep.setDate(index, o.getDate());
+		    	  			index++;
+		    	  			break;		    	  			
+		    			case java.sql.Types.TIMESTAMP:
 		    	  			prep.setTimestamp(index, o.getTimestamp());
 		    	  			index++;
-		    	  			break;	
+		    	  			break;
 		    	  		default:
 		    	  			System.err.println("todo: "+type);
 		    	  }
@@ -551,10 +566,14 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setBoolean(index, o.getBoolean());
 		    	  			index++;
 		    	  			break;
-		    	  		case 93:
+		    	  		case java.sql.Types.DATE:
+		    	  			prep.setDate(index, o.getDate());
+		    	  			index++;
+		    	  			break;		    	  			
+		    			case java.sql.Types.TIMESTAMP:
 		    	  			prep.setTimestamp(index, o.getTimestamp());
 		    	  			index++;
-		    	  			break;	
+		    	  			break;
 		    	  		default:
 		    	  			System.err.println("todo: "+type);
 		    	  }
