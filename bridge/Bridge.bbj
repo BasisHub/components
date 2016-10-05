@@ -295,7 +295,7 @@ g!.writeStartObject()
                   if pos("String"=class$)>0 then
                       g!.writeStringField(v$,str(var!))
                   else
-                      if pos("BBjNumber"=class$)>0 then
+                      if pos("BBjNumber"=class$)>0 OR  pos("Integer"=class$)>0 OR pos("Double"=class$)>0 then
                           g!.writeNumberField(V$,num(str(var!)))
                       else
                           if pos("DataRow"=class$)>0 then
