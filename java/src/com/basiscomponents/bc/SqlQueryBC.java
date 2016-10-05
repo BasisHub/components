@@ -36,6 +36,7 @@ public class SqlQueryBC {
 		
 
 		
+		
 		public ResultSet retrieve(String sql) {
 			com.basiscomponents.db.ResultSet brs=null;
 			Connection conn=null;
@@ -69,6 +70,36 @@ public class SqlQueryBC {
 		      
 		
 			return brs; 			 
+		}
+
+		public Boolean execute(String sql) {
+
+			Connection conn=null;
+			Boolean b=false;
+			
+		try {
+			conn = DriverManager.getConnection(Url,User,Password);
+		      Statement stmt = conn.createStatement();
+		      PreparedStatement prep = conn.prepareStatement(sql);
+		      b = prep.execute();
+
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		finally{
+			if (conn != null){
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		      
+		
+			return b; 			 
 		}
 
 		

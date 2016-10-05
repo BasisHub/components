@@ -329,6 +329,11 @@ public class SqlTableBC implements BusinessComponent{
 			    	  			prep.setTimestamp(index, o.getTimestamp());
 			    	  			index++;
 			    	  			break;
+			    	  		case 1111:
+			    	  			///this is an auto-generated key. set as string and hope for the best
+			    	  			prep.setString(index, o.getString());
+			    	  			index++;
+			    	  			break;				    	  			
 			    	  		default:
 			    	  			System.err.println("todo: "+type);
 			    	  }
@@ -464,6 +469,11 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setTimestamp(index, o.getTimestamp());
 		    	  			index++;
 		    	  			break;
+		    	  		case 1111:
+		    	  			///this is an auto-generated key. set as string and hope for the best
+		    	  			prep.setString(index, o.getString());
+		    	  			index++;
+		    	  			break;			    	  			
 		    	  		default:
 		    	  			System.err.println("todo: "+type);
 		    	  }
@@ -574,6 +584,11 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setTimestamp(index, o.getTimestamp());
 		    	  			index++;
 		    	  			break;
+		    	  		case 1111:
+		    	  			///this is an auto-generated key. set as string and hope for the best
+		    	  			prep.setString(index, o.getString());
+		    	  			index++;
+		    	  			break;			    	  			
 		    	  		default:
 		    	  			System.err.println("todo: "+type);
 		    	  }
