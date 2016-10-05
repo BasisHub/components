@@ -23,7 +23,7 @@ import java.util.HashMap;
  */
 abstract public class AbstractGenerator {
 
-    public static final String AllowedTypes = "DataRow ResultSet BBjNumber BBjString Boolean void";
+    public static final String AllowedTypes = "DataRow ResultSet BBjNumber BBjString Boolean Integer Double void";
     private String namespace;
     private HashMap<String, ParseEntity> classes;
     private String output;

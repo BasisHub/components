@@ -80,6 +80,8 @@ public class ParserJava {
 		case "com.basiscomponents.db.ResultSet":
 			return "ResultSet";
 		case "int":
+		case "java.lang.Integer":
+		case "java.lang.Double":
 			return "Number";
 		case "void":
 			return "void";
