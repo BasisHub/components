@@ -107,7 +107,7 @@
 			<artifactId>jackson.jar</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${jar-directory}/jackson-all-2.4.5.jar</systemPath>
+			<systemPath>${jar-directory}/jackson-all-2.8.3.jar</systemPath>
 		</dependency>
 
 		<dependency>
