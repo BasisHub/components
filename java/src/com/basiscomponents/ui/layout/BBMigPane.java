@@ -23,9 +23,9 @@ import com.basis.util.common.BBjNumber;
 import com.basis.util.common.BasisNumber;
 
 /**
- * Manages components with MigLayout added via add(BBjControl control, CC cc)
- * 
- * @author rlance
+ * Manages BBj graphical components with MigLayout
+ *
+ * @author R.Lance, MigLayout author Mikael Grev
  */
 public class BBMigPane implements BBjControl {
 
@@ -44,8 +44,7 @@ public class BBMigPane implements BBjControl {
 	// CONSTRUCTOR
 
 	/**
-	 * Constructor
-	 * 
+	 *
 	 * @throws BBjException
 	 */
 	public BBMigPane(BBjWindow window) throws BBjException {
@@ -54,24 +53,20 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * Constructor import the class layout constraints
-	 * 
+	 *
 	 * @throws BBjException
 	 */
-	public BBMigPane(BBjWindow window, LC layoutConstraints)
-			throws BBjException {
+	public BBMigPane(BBjWindow window, LC layoutConstraints) throws BBjException {
 		this.container = new BBContainer(window);
 		setLayoutConstraints(layoutConstraints);
 		construct();
 	}
 
 	/**
-	 * Constructor import the class layout constraints
-	 * 
+	 *
 	 * @throws BBjException
 	 */
-	public BBMigPane(BBjWindow window, LC layoutConstraints, AC colConstraints)
-			throws BBjException {
+	public BBMigPane(BBjWindow window, LC layoutConstraints, AC colConstraints) throws BBjException {
 		this.container = new BBContainer(window);
 		setLayoutConstraints(layoutConstraints);
 		setColumnConstraints(colConstraints);
@@ -79,12 +74,10 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * Constructor import the class layout constraints
-	 * 
+	 *
 	 * @throws BBjException
 	 */
-	public BBMigPane(BBjWindow window, LC layoutConstraints, AC colConstraints,
-			AC rowConstraints) throws BBjException {
+	public BBMigPane(BBjWindow window, LC layoutConstraints, AC colConstraints, AC rowConstraints) throws BBjException {
 		this.container = new BBContainer(window);
 		setLayoutConstraints(layoutConstraints);
 		setColumnConstraints(colConstraints);
@@ -93,60 +86,42 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * Constructor import the string layout constraints
-	 * 
+	 *
 	 * @throws BBjException
 	 */
-	public BBMigPane(BBjWindow window, String layoutConstraints)
+	public BBMigPane(BBjWindow window, String layoutConstraints) throws BBjException {
+		this.container = new BBContainer(window);
+		setLayoutConstraints(ConstraintParser.parseLayoutConstraint(ConstraintParser.prepare(layoutConstraints)));
+		construct();
+	}
+
+	/**
+	 *
+	 * @throws BBjException
+	 */
+	public BBMigPane(BBjWindow window, String layoutConstraints, String colConstraints) throws BBjException {
+		this.container = new BBContainer(window);
+		setLayoutConstraints(ConstraintParser.parseLayoutConstraint(ConstraintParser.prepare(layoutConstraints)));
+		setColumnConstraints(ConstraintParser.parseColumnConstraints(ConstraintParser.prepare(colConstraints)));
+		construct();
+	}
+
+	/**
+	 *
+	 * @throws BBjException
+	 */
+	public BBMigPane(BBjWindow window, String layoutConstraints, String colConstraints, String rowConstraints)
 			throws BBjException {
 		this.container = new BBContainer(window);
-		setLayoutConstraints(ConstraintParser
-				.parseLayoutConstraint(ConstraintParser
-						.prepare(layoutConstraints)));
+		setLayoutConstraints(ConstraintParser.parseLayoutConstraint(ConstraintParser.prepare(layoutConstraints)));
+		setColumnConstraints(ConstraintParser.parseColumnConstraints(ConstraintParser.prepare(colConstraints)));
+		setRowConstraints(ConstraintParser.parseRowConstraints(ConstraintParser.prepare(rowConstraints)));
 		construct();
 	}
 
 	/**
-	 * Constructor import the string layout constraints
-	 * 
+	 *
 	 * @throws BBjException
-	 */
-	public BBMigPane(BBjWindow window, String layoutConstraints,
-			String colConstraints) throws BBjException {
-		this.container = new BBContainer(window);
-		setLayoutConstraints(ConstraintParser
-				.parseLayoutConstraint(ConstraintParser
-						.prepare(layoutConstraints)));
-		setColumnConstraints(ConstraintParser
-				.parseColumnConstraints(ConstraintParser
-						.prepare(colConstraints)));
-		construct();
-	}
-
-	/**
-	 * Constructor import the string layout constraints
-	 * 
-	 * @throws BBjException
-	 */
-	public BBMigPane(BBjWindow window, String layoutConstraints,
-			String colConstraints, String rowConstraints) throws BBjException {
-		this.container = new BBContainer(window);
-		setLayoutConstraints(ConstraintParser
-				.parseLayoutConstraint(ConstraintParser
-						.prepare(layoutConstraints)));
-		setColumnConstraints(ConstraintParser
-				.parseColumnConstraints(ConstraintParser
-						.prepare(colConstraints)));
-		setRowConstraints(ConstraintParser.parseRowConstraints(ConstraintParser
-				.prepare(rowConstraints)));
-		construct();
-	}
-
-	/**
-	 * Method construct
-	 * 
-	 * @throws BBjException
-	 * 
 	 */
 	private void construct() throws BBjException {
 		// defaults
@@ -170,16 +145,26 @@ public class BBMigPane implements BBjControl {
 	// CONSTRAINTS
 
 	/**
-	 * Method getLayoutConstraints
-	 * 
+	 *
+	 * @returns Layout constraints as LC object
 	 */
 	public LC getLayoutConstraints() {
 		return this.layoutConstraints;
 	}
 
 	/**
-	 * Method setLayoutConstraints
-	 * 
+	 *
+	 * @param constraints
+	 *            Layout constraints as String
+	 */
+	public void setLayoutConstraints(String constraints) {
+		setLayoutConstraints(ConstraintParser.parseLayoutConstraint(ConstraintParser.prepare(constraints)));
+	}
+
+	/**
+	 *
+	 * @param constraints
+	 *            Layout constraints as LC object
 	 */
 	public void setLayoutConstraints(LC constraints) {
 		this.layoutConstraints = constraints;
@@ -187,42 +172,123 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * Method getColumnConstraints
-	 * 
+	 *
+	 * @returns Column constraints as AC object
 	 */
 	public AC getColumnConstraints() {
 		return this.columnConstraints;
 	}
 
 	/**
-	 * Method setColumnConstraints
-	 * 
+	 *
+	 * @param constraints
+	 *            Column constraints as String
+	 */
+	public void setColumnConstraints(String constraints) {
+		setColumnConstraints(ConstraintParser.parseColumnConstraints(ConstraintParser.prepare(constraints)));
+	}
+
+	/**
+	 *
+	 * @param constraints
+	 *            Column constraints as AC object
 	 */
 	public void setColumnConstraints(AC constraints) {
 		this.columnConstraints = constraints;
 	}
 
 	/**
-	 * Method getRowConstraints
-	 * 
+	 *
+	 * @returns Row constraints as AC object
 	 */
 	public AC getRowConstraints() {
 		return this.rowConstraints;
 	}
 
 	/**
-	 * Method setRowConstraints
-	 * 
+	 *
+	 * @param constraints
+	 *            Row constraints as String
+	 */
+	public void setRowConstraints(String constraints) {
+		setRowConstraints(ConstraintParser.parseRowConstraints(ConstraintParser.prepare(constraints)));
+	}
+
+	/**
+	 *
+	 * @param constraints
+	 *            Row constraints as AC object
 	 */
 	public void setRowConstraints(AC constraints) {
 		this.rowConstraints = constraints;
+	}
+
+	/**
+	 *
+	 * @param control
+	 *            BBj control object
+	 * @returns Component constraints as CC object
+	 */
+	public CC getComponentConstraints(BBjControl control) {
+		BBComponentWrapper componentWrapper = getComponentWrapper(control);
+		return this.containerWrapper.getComponentWrapperToCCMap().get(componentWrapper);
+	}
+
+	/**
+	 *
+	 * @param control
+	 *            BBj control object
+	 * @param constraints
+	 *            Component constraints as String
+	 */
+	public void setComponentConstraints(BBjControl control, String constraints) {
+		if (isManagingComponent(control)) {
+			BBComponentWrapper componentWrapper = getComponentWrapper(control);
+			setComponentConstraintsImpl(componentWrapper, constraints);
+		}
+	}
+
+	/**
+	 *
+	 * @param control
+	 *            BBj control object
+	 * @param constraints
+	 *            Component constraints as CC object
+	 */
+	public void setComponentConstraints(BBjControl control, CC constraints) {
+		if (isManagingComponent(control)) {
+			BBComponentWrapper componentWrapper = getComponentWrapper(control);
+			setComponentConstraintsImpl(componentWrapper, constraints);
+		}
+	}
+
+	/**
+	 *
+	 * @param componentWrapper
+	 *            BBComponentWrapper object
+	 * @param constr
+	 *            Component constraints as either String or CC object
+	 * @throws IllegalArgumentException
+	 */
+	private void setComponentConstraintsImpl(BBComponentWrapper componentWrapper, Object constr) {
+		if (constr == null || constr instanceof String) {
+			String cStr = ConstraintParser.prepare((String) constr);
+			this.containerWrapper.getComponentWrapperToCCMap().put(componentWrapper,
+					ConstraintParser.parseComponentConstraint(cStr));
+		} else if (constr instanceof CC) {
+			this.containerWrapper.getComponentWrapperToCCMap().put(componentWrapper, (CC) constr);
+		} else {
+			throw new IllegalArgumentException(
+					"Constraint must be String or ComponentConstraint (CC): " + constr.getClass().toString());
+		}
+		invalidateMigLayoutGrid();
 	}
 
 	// ======================================================
 	// CONTROLS (COMPONENTS)
 
 	/**
-	 * 
+	 *
 	 * @returns container BBContainer object
 	 */
 	public BBContainer getContainer() {
@@ -230,7 +296,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns containerWrapper BBContainerWrapper object
 	 */
 	public BBContainerWrapper getContainerWrapper() {
@@ -238,7 +304,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns BBjWindow BBj window object
 	 */
 	public BBjWindow getWnd() {
@@ -246,7 +312,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns int Preferred width of container
 	 */
 	public int getPreferredWidth() {
@@ -254,7 +320,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns int Preferred height of container
 	 */
 	public int getPreferredHeight() {
@@ -262,6 +328,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
+	 *
 	 * @param control
 	 *            BBj control object
 	 * @param cc
@@ -275,7 +342,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param control
 	 *            BBj control object
 	 * @throws BBjException
@@ -285,7 +352,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param control
 	 *            BBj control object
 	 * @param cc
@@ -293,51 +360,73 @@ public class BBMigPane implements BBjControl {
 	 * @throws BBjException
 	 */
 	public void add(BBjControl control, String cc) throws BBjException {
-		CC lCC = ConstraintParser.parseComponentConstraint(ConstraintParser
-				.prepare(cc));
+		CC lCC = ConstraintParser.parseComponentConstraint(ConstraintParser.prepare(cc));
 		add(control, lCC);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param control
 	 *            BBj control object
 	 * @returns componentWrapper BBComponentWrapper object
 	 */
 	public BBComponentWrapper getComponentWrapper(BBjControl control) {
-		return (BBComponentWrapper) this.containerWrapper
-				.getControlToComponentWrapperMap().get(control);
+		return (BBComponentWrapper) this.containerWrapper.getControlToComponentWrapperMap().get(control);
+	}
+
+	/**
+	 *
+	 * @param control
+	 *            BBj control object
+	 * @return If this layout manager is currently managing this control.
+	 */
+	public boolean isManagingComponent(BBjControl control) {
+		return this.containerWrapper.getControlToComponentWrapperMap().containsKey(control);
+	}
+
+	/**
+	 *
+	 * @param control
+	 *            BBj control object
+	 */
+	public void removeLayoutComponent(BBjControl control) {
+		if (isManagingComponent(control)) {
+			BBComponentWrapper componentWrapper = getComponentWrapper(control);
+			BBComponent component = (BBComponent) componentWrapper.getComponent();
+			this.containerWrapper.getComponentWrapperList().remove(componentWrapper);
+			this.containerWrapper.getComponentToComponentWrapperMap().remove(component);
+			this.containerWrapper.getControlToComponentWrapperMap().remove(control);
+			this.containerWrapper.getComponentWrapperToCCMap().remove(componentWrapper);
+			invalidateMigLayoutGrid();
+		}
 	}
 
 	// ======================================================
 	// LAYOUT
 
 	/**
-	 * This is where the actual layout happens
-	 * 
+	 * This is where the actual layout happens.
+	 *
 	 * @throws BBjException
 	 * @throws IllegalArgumentException
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
-	public void layoutChildren() throws ArrayIndexOutOfBoundsException,
-			IllegalArgumentException, BBjException {
+	public void layoutChildren() throws ArrayIndexOutOfBoundsException, IllegalArgumentException, BBjException {
 		// validate if the grid should be recreated
 		validateMigLayoutGrid();
 
 		// only contact with the UI
 		this.container.setX(this.container.getWindow().getX().intValue());
 		this.container.setY(this.container.getWindow().getY().intValue());
-		this.container.setWidth(this.container.getWindow().getWidth()
-				.intValue());
-		this.container.setHeight(this.container.getWindow().getHeight()
-				.intValue());
+		this.container.setWidth(this.container.getWindow().getWidth().intValue());
+		this.container.setHeight(this.container.getWindow().getHeight().intValue());
 
 		// this will exercise BBComponentWrapper.setBounds to actually place the
 		// components
-		int[] lBounds = new int[] { new Integer(0), new Integer(0),
-				this.container.getWidth(), this.container.getHeight() };
-		this.migGrid.layout(lBounds, getLayoutConstraints().getAlignX(),
-				getLayoutConstraints().getAlignY(), this.debug);
+		int[] lBounds = new int[] { new Integer(0), new Integer(0), this.container.getWidth(),
+				this.container.getHeight() };
+		this.migGrid.layout(lBounds, getLayoutConstraints().getAlignX(), getLayoutConstraints().getAlignY(),
+				this.debug);
 
 		if (this.debug) {
 			getWnd().getDrawPanel().clearDrawing();
@@ -351,20 +440,20 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
+	 *
 	 * @throws BBjException
 	 * @throws NumberFormatException
-	 * 
+	 *
 	 */
-	public void createMigLayoutGrid() throws NumberFormatException,
-			BBjException {
-		this.migGrid = new Grid(this.containerWrapper, getLayoutConstraints(),
-				getRowConstraints(), getColumnConstraints(),
-				this.containerWrapper.getComponentWrapperToCCMap(), null);
+	public void createMigLayoutGrid() throws NumberFormatException, BBjException {
+		this.migGrid = new Grid(this.containerWrapper, getLayoutConstraints(), getRowConstraints(),
+				getColumnConstraints(), this.containerWrapper.getComponentWrapperToCCMap(), null);
 		this.setLayoutSizes();
 		this.valid = true;
 	}
 
 	/**
+	 *
 	 * @throws BBjException
 	 * @throws NumberFormatException
 	 * @see Swing MigLayout: maximumLayoutSize(); minimumLayoutSize();
@@ -372,61 +461,47 @@ public class BBMigPane implements BBjControl {
 	 */
 	private void setLayoutSizes() throws NumberFormatException, BBjException {
 		Dimension d;
-		d = new Dimension(LayoutUtil.getSizeSafe(this.migGrid.getWidth(),
-				LayoutUtil.MIN), LayoutUtil.getSizeSafe(
-				this.migGrid.getHeight(), LayoutUtil.MIN));
+		d = new Dimension(LayoutUtil.getSizeSafe(this.migGrid.getWidth(), LayoutUtil.MIN),
+				LayoutUtil.getSizeSafe(this.migGrid.getHeight(), LayoutUtil.MIN));
 		this.container.setMinimumSize(d);
-		d = new Dimension(LayoutUtil.getSizeSafe(this.migGrid.getWidth(),
-				LayoutUtil.MAX), LayoutUtil.getSizeSafe(
-				this.migGrid.getHeight(), LayoutUtil.MAX));
+		d = new Dimension(LayoutUtil.getSizeSafe(this.migGrid.getWidth(), LayoutUtil.MAX),
+				LayoutUtil.getSizeSafe(this.migGrid.getHeight(), LayoutUtil.MAX));
 		this.container.setMaximumSize(d);
-		d = new Dimension(LayoutUtil.getSizeSafe(this.migGrid.getWidth(),
-				LayoutUtil.PREF), LayoutUtil.getSizeSafe(
-				this.migGrid.getHeight(), LayoutUtil.PREF));
+		d = new Dimension(LayoutUtil.getSizeSafe(this.migGrid.getWidth(), LayoutUtil.PREF),
+				LayoutUtil.getSizeSafe(this.migGrid.getHeight(), LayoutUtil.PREF));
 		this.container.setPreferredSize(d);
 		// resize container itself with preferred sizes
 		this.container.setSize(d.width, d.height);
 	}
 
 	/**
-	 * the grid is valid if all component hashcodes are unchanged
-	 * 
+	 * The grid is valid if all component hashcodes are unchanged.
+	 *
 	 * @throws BBjException
 	 * @throws NumberFormatException
 	 */
-	private void validateMigLayoutGrid() throws NumberFormatException,
-			BBjException {
+	private void validateMigLayoutGrid() throws NumberFormatException, BBjException {
 		// only needed if the grid is valid
 		if (isMiglayoutGridValid()) {
-			List<BBComponentWrapper> componentWrapperList = this.containerWrapper
-					.getComponentWrapperList();
+			List<BBComponentWrapper> componentWrapperList = this.containerWrapper.getComponentWrapperList();
 			if (componentWrapperList != null && componentWrapperList.size() > 0) {
 				for (int i = 0; i < componentWrapperList.size(); i++) {
-					BBComponentWrapper componentWrapper = componentWrapperList
-							.get(i);
-					BBComponent component = (BBComponent) componentWrapper
-							.getComponent();
+					BBComponentWrapper componentWrapper = componentWrapperList.get(i);
+					BBComponent component = (BBComponent) componentWrapper.getComponent();
 					// if this component is managed by MigLayout
-					if (this.containerWrapper
-							.getComponentToComponentWrapperMap().containsKey(
-									component)) {
+					if (this.containerWrapper.getComponentToComponentWrapperMap().containsKey(component)) {
 						// get its previous hashcode
 						int lPreviousHashcode = 0;
-						if (this.containerWrapper.getComponentToHashcodeMap()
-								.get(component) != null)
-							lPreviousHashcode = this.containerWrapper
-									.getComponentToHashcodeMap().get(component);
+						if (this.containerWrapper.getComponentToHashcodeMap().get(component) != null)
+							lPreviousHashcode = this.containerWrapper.getComponentToHashcodeMap().get(component);
 						// calculate its current hashcode
-						int lCurrentHashcode = componentWrapper
-								.getLayoutHashCode();
+						int lCurrentHashcode = componentWrapper.getLayoutHashCode();
 						// if it is not the same
-						if (lPreviousHashcode == 0
-								|| lPreviousHashcode != lCurrentHashcode) {
+						if (lPreviousHashcode == 0 || lPreviousHashcode != lCurrentHashcode) {
 							// invalidate the grid
 							invalidateMigLayoutGrid();
 							// remember the new hashcode
-							this.containerWrapper.getComponentToHashcodeMap()
-									.put(component, lCurrentHashcode);
+							this.containerWrapper.getComponentToHashcodeMap().put(component, lCurrentHashcode);
 						}
 					}
 				}
@@ -439,66 +514,56 @@ public class BBMigPane implements BBjControl {
 	}
 
 	/**
-	 * mark the grid as invalid
+	 * Mark the grid as invalid
 	 */
 	private void invalidateMigLayoutGrid() {
 		this.valid = false;
 	}
 
 	/**
-	 * @returns true if the grid is valid.
+	 *
+	 * @returns If the grid is valid
 	 */
 	private boolean isMiglayoutGridValid() {
 		return this.valid;
 	}
 
 	/**
-	 * scale layout
-	 * 
+	 * Scale layout
+	 *
 	 * @throws BBjException
 	 * @throws NumberFormatException
 	 */
-	public void scaleLayout(BBjNumber scale, BBjSysGui sysgui)
-			throws NumberFormatException, BBjException {
+	public void scaleLayout(BBjNumber scale, BBjSysGui sysgui) throws NumberFormatException, BBjException {
 		double s = scale.doubleValue();
-		List<BBComponentWrapper> componentWrapperList = this.containerWrapper
-				.getComponentWrapperList();
+		List<BBComponentWrapper> componentWrapperList = this.containerWrapper.getComponentWrapperList();
 		if (componentWrapperList != null && componentWrapperList.size() > 0) {
 			for (int i = 0; i < componentWrapperList.size(); i++) {
-				BBComponentWrapper componentWrapper = componentWrapperList
-						.get(i);
-				BBComponent component = (BBComponent) componentWrapper
-						.getComponent();
-				if (this.containerWrapper.getComponentToComponentWrapperMap()
-						.containsKey(component)) {
+				BBComponentWrapper componentWrapper = componentWrapperList.get(i);
+				BBComponent component = (BBComponent) componentWrapper.getComponent();
+				if (this.containerWrapper.getComponentToComponentWrapperMap().containsKey(component)) {
 					Dimension d;
 					d = component.getOrigMinimumSize();
-					component.setMinimumSize(new Dimension(
-							(int) ((d.width * s) / 2),
-							(int) ((d.height * s) / 2)));
+					component.setMinimumSize(new Dimension((int) ((d.width * s) / 2), (int) ((d.height * s) / 2)));
 					d = component.getOrigPreferredSize();
-					component.setPreferredSize(new Dimension(
-							(int) (d.width * s), (int) (d.height * s)));
+					component.setPreferredSize(new Dimension((int) (d.width * s), (int) (d.height * s)));
 					d = component.getOrigMaximumSize();
-					component.setMaximumSize(new Dimension(
-							(int) ((d.width * s) * 5),
-							(int) ((d.height * s) * 5)));
+					component.setMaximumSize(new Dimension((int) ((d.width * s) * 5), (int) ((d.height * s) * 5)));
 
 					int sz = component.getPreferredFont().getSize();
 					if (sz > 0 && s > 0.2d) {
 						sz = (int) (sz * (s - 0.2d));
 						BBjFont f = component.getPreferredFont();
-						component.getControl().setFont(
-								sysgui.makeFont(f.getName(), sz, f.getStyle()));
+						component.getControl().setFont(sysgui.makeFont(f.getName(), sz, f.getStyle()));
 					}
 
-					this.containerWrapper.getComponentToHashcodeMap().put(
-							component, componentWrapper.getLayoutHashCode());
+					this.containerWrapper.getComponentToHashcodeMap().put(component,
+							componentWrapper.getLayoutHashCode());
 					invalidateMigLayoutGrid();
 				}
 			}
 		}
-		// if invalid, create
+		// if invalid, create anew
 		if (!isMiglayoutGridValid()) {
 			createMigLayoutGrid();
 		}
@@ -733,8 +798,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	@Override
-	public void setCallback(int arg0, CustomObject arg1, String arg2)
-			throws BBjException {
+	public void setCallback(int arg0, CustomObject arg1, String arg2) throws BBjException {
 		// TODO Auto-generated method stub
 	}
 
@@ -810,8 +874,7 @@ public class BBMigPane implements BBjControl {
 
 	@Override
 	public void setSize(BBjNumber w, BBjNumber h) throws BBjException {
-		this.container.setSize(
-				Math.min(this.preferredSize.width, w.intValue()),
+		this.container.setSize(Math.min(this.preferredSize.width, w.intValue()),
 				Math.min(this.preferredSize.height, h.intValue()));
 		layoutChildren();
 	}
@@ -841,8 +904,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	@Override
-	public void showToolTipText(BBjNumber arg0, BBjNumber arg1)
-			throws BBjException {
+	public void showToolTipText(BBjNumber arg0, BBjNumber arg1) throws BBjException {
 		// TODO Auto-generated method stub
 	}
 
@@ -867,7 +929,7 @@ public class BBMigPane implements BBjControl {
 	@Override
 	public void putClientProperty(Object arg0, Object arg1) throws BBjException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
