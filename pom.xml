@@ -70,6 +70,7 @@
 			<systemPath>${jar-directory}/BBjUtil.jar</systemPath>
 		</dependency>
 
+<!-- test ignoring other external jars
 		<dependency>
 			<groupId>com.basis.lib</groupId>
 			<artifactId>lucene-core.jar</artifactId>
@@ -125,6 +126,7 @@
 			<scope>system</scope>
 			<systemPath>${jar-directory}/commons-lang-2.5.jar</systemPath>
 		</dependency>
+end of test ignoring other external jars -->
 	</dependencies>
 
 	<build>
