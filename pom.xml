@@ -74,7 +74,7 @@
 			<artifactId>lucene-core.jar</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${jar-directory}/lucene-core-5.2.1.jar</systemPath>
+			<systemPath>${jar-directory}/lucene-core-5.0.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -82,7 +82,7 @@
 			<artifactId>lucene-queryparser.jar</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${jar-directory}/lucene-queryparser-5.2.1.jar</systemPath>
+			<systemPath>${jar-directory}/lucene-queryparser-5.0.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -90,7 +90,7 @@
 			<artifactId>lucene-facet.jar</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${jar-directory}/lucene-facet-5.2.1.jar</systemPath>
+			<systemPath>${jar-directory}/lucene-facet-5.0.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -98,7 +98,7 @@
 			<artifactId>lucene-analyzers-common.jar</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${jar-directory}/lucene-analyzers-common-5.2.1.jar</systemPath>
+			<systemPath>${jar-directory}/lucene-analyzers-common-5.0.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
