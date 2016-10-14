@@ -52,6 +52,10 @@ public class DataRowComparator implements java.util.Comparator<DataRow> {
 			returnVal = s1.compareToIgnoreCase(s2);
 			break;
 		case java.sql.Types.BIGINT:
+			long lng1 = f1.getLong();
+			long lng2 = f2.getLong();
+			returnVal = Long.compare(lng1, lng2);
+			break;
 		case java.sql.Types.TINYINT:
 		case java.sql.Types.INTEGER:
 		case java.sql.Types.SMALLINT:
