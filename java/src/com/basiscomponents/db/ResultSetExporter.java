@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,18 +15,28 @@ public class ResultSetExporter {
 		wr.write("<"+rootTagName+">\n");
 		
 		Iterator<DataRow> it = rs.iterator();
+		List fieldnames = rs.getColumnNames();
+		
 		while (it.hasNext()){
 			
 			wr.write("   <"+entityName+">\n");
 			
 			DataRow r = it.next();
-			Iterator<String> rit = r.getFieldNames().iterator();
+			Iterator<String> rit = fieldnames.iterator();
 			while (rit.hasNext()){
 				String f = rit.next();
-				String fv = r.getFieldAsString(f);
+				if (f.contains("%")) continue; //TODO filter out all field names that are invalid tag names 
+				String fv ="";
+				try {
+				fv = r.getFieldAsString(f).trim();
 				wr.write("      <"+f+">");
 				wr.write(fv);
 				wr.write("</"+f+">\n");
+				
+				}
+				catch (Exception e){
+				wr.write("      <"+f+" null=\"true\" />\n");
+				}
 				
 			}
 			
@@ -37,15 +48,29 @@ public class ResultSetExporter {
 	
 	}
 	
+
+	
 	public static void writeHTML(ResultSet rs, Writer wr) throws Exception{
+		ResultSetExporter.writeHTML(rs, wr, null);
+	}
+	/**
+	 * 
+	 * @param rs: the ResultSet to export
+	 * @param wr: a java.io.Writer Instance
+	 * @param links: a Hashmap with fieldname / url pattern pairs, like http://xyz/a/{key}/gy
+	 * @throws Exception
+	 */
+	public static void writeHTML(ResultSet rs, Writer wr, HashMap<String,String> links) throws Exception{
 		
 		wr.write("<table>\n");
 		
 		if (rs.size()>0){
 		
+		List fieldnames = rs.getColumnNames();
+		
 		Iterator<DataRow> it = rs.iterator();
 			DataRow r = rs.get(0);
-			List fieldnames = r.getFieldNames();
+			
 			
 			wr.write("<thead>");
 			
@@ -69,10 +94,27 @@ public class ResultSetExporter {
 				rit = fieldnames.iterator();
 				while (rit.hasNext()){
 					String f = rit.next();
-					String fv = r.getFieldAsString(f);
+					String fv = "";
+					try {
+					
+					String link=null;
+					if (links != null) link=links.get(f);
+					
+						
+					fv = r.getFieldAsString(f).trim();
 					wr.write("<td>");
+					if (link != null)
+						wr.write("<a href='"+link.replace("{key}", fv)+"'>");
 					wr.write(fv);
+					if (link != null)
+						wr.write("</a>");
 					wr.write("</td>");
+					}
+					catch (Exception e) {
+						wr.write("<td class='missing'>");
+						wr.write("");
+						wr.write("</td>");						
+					}
 					
 				}
 				
@@ -93,11 +135,11 @@ public class ResultSetExporter {
 		
 		
 		if (rs.size()>0){
-			
+
+		List fieldnames = rs.getColumnNames();
 		Iterator<DataRow> it = rs.iterator();
 		
 			DataRow r = rs.get(0);
-			List fieldnames = r.getFieldNames();
 			
 			Iterator<String> rit = fieldnames.iterator();
 			if (writeHeader){
@@ -119,7 +161,11 @@ public class ResultSetExporter {
 				rit = fieldnames.iterator();
 				while (rit.hasNext()){
 					String f = rit.next();
-					String fv = r.getFieldAsString(f);
+					String fv = "";
+					try {
+					fv = r.getFieldAsString(f).trim();
+					} catch (Exception e)
+					{}
 					wr.write(fv);
 					wr.write(delim);
 					
@@ -147,6 +193,13 @@ public class ResultSetExporter {
 //		dr.setFieldValue("feld1","TEST1");
 //		dr.setFieldValue("feld2","TEST2");
 //		rs.add(dr);
+//
+//		dr = new DataRow();
+//		dr.setFieldValue("feld1","TEST1");
+//		dr.setFieldValue("feld3","TEST3");
+//		rs.add(dr);
+//		
+//		
 //		ResultSetExporter.writeXML(rs, "articles","article", w);
 //	    w.flush();
 //	    w.close();			
@@ -158,8 +211,10 @@ public class ResultSetExporter {
 //	    fw.flush();
 //	    fw.close();	
 //	    
+//	    HashMap links = new HashMap();
+//	    links.put("feld1","/rest/test/{key}");
 //		fw = new FileWriter("D:/test.html");
-//		ResultSetExporter.writeHTML(rs, fw);
+//		ResultSetExporter.writeHTML(rs, fw, links);
 //	    fw.flush();
 //	    fw.close();		    
 //
