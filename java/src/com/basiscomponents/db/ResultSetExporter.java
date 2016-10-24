@@ -66,7 +66,7 @@ public class ResultSetExporter {
 		
 		if (rs.size()>0){
 		
-		List fieldnames = rs.getColumnNames();
+		List<String> fieldnames = rs.getColumnNames();
 		
 		Iterator<DataRow> it = rs.iterator();
 			DataRow r = rs.get(0);
@@ -103,8 +103,24 @@ public class ResultSetExporter {
 						
 					fv = r.getFieldAsString(f).trim();
 					wr.write("<td>");
-					if (link != null)
-						wr.write("<a href='"+link.replace("{key}", fv)+"'>");
+					if (link != null){
+						link=link.replace("{key}", fv);
+							
+
+						Iterator<String> inner_rit = fieldnames.iterator();
+						while (inner_rit.hasNext()){
+							String inner_f = (String) inner_rit.next();
+							String inner_fv = "";
+							try {
+								inner_fv = r.getFieldAsString(inner_f).trim();
+								
+							}
+							catch (Exception e) {}
+							link=link.replace("{"+inner_f+"}", inner_fv);
+						}
+						wr.write("<a href='"+link+"'>");
+						
+					}
 					wr.write(fv);
 					if (link != null)
 						wr.write("</a>");
@@ -136,7 +152,7 @@ public class ResultSetExporter {
 		
 		if (rs.size()>0){
 
-		List fieldnames = rs.getColumnNames();
+		List<String> fieldnames = rs.getColumnNames();
 		Iterator<DataRow> it = rs.iterator();
 		
 			DataRow r = rs.get(0);
@@ -185,7 +201,8 @@ public class ResultSetExporter {
 	}	
 	
 	
-//  sample code:	
+//  sample code:
+	
 //	public static void main(String[] args) throws Exception {
 //		StringWriter w = new StringWriter();
 //		ResultSet rs = new ResultSet();
@@ -198,7 +215,12 @@ public class ResultSetExporter {
 //		dr.setFieldValue("feld1","TEST1");
 //		dr.setFieldValue("feld3","TEST3");
 //		rs.add(dr);
-//		
+//
+//		dr = new DataRow();
+//		dr.setFieldValue("feld1","TEST1");
+//		dr.setFieldValue("feld2","TEST2");
+//		dr.setFieldValue("feld3","TEST3");
+//		rs.add(dr);
 //		
 //		ResultSetExporter.writeXML(rs, "articles","article", w);
 //	    w.flush();
@@ -211,8 +233,9 @@ public class ResultSetExporter {
 //	    fw.flush();
 //	    fw.close();	
 //	    
-//	    HashMap links = new HashMap();
-//	    links.put("feld1","/rest/test/{key}");
+//	    HashMap<String, String> links = new HashMap<>();
+//	    links.put("feld1","/rest/test/{feld1}");
+//	    links.put("feld2","/rest/test/{feld1}/{feld2}");
 //		fw = new FileWriter("D:/test.html");
 //		ResultSetExporter.writeHTML(rs, fw, links);
 //	    fw.flush();
