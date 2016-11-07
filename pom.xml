@@ -125,6 +125,31 @@
 			<systemPath>${jar-directory}/commons-lang-2.5.jar</systemPath>
 		</dependency>
 
+		<dependency>
+			<groupId>com.basis.lib</groupId>
+			<artifactId>protobuf-java.jar</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/BBjFilesystem.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>com.basis.lib</groupId>
+			<artifactId>poi.jar</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/poi-3.14-20160307.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>com.basis.lib</groupId>
+			<artifactId>poi-excelant.jar</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/poi-excelant-3.14-20160307.jar</systemPath>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
