@@ -1,12 +1,16 @@
 package com.basiscomponents.db;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ResultSetExporter {
 
@@ -53,6 +57,7 @@ public class ResultSetExporter {
 	public static void writeHTML(ResultSet rs, Writer wr) throws Exception{
 		ResultSetExporter.writeHTML(rs, wr, null);
 	}
+	
 	/**
 	 * 
 	 * @param rs: the ResultSet to export
@@ -200,6 +205,69 @@ public class ResultSetExporter {
 	
 	}	
 	
+    public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader) throws Exception{
+    	if(!rs.isEmpty()){
+    		if(outputFile != null && outputFile.canWrite()){
+    			String sheetName = "Sheet1";//name of sheet
+                
+                XSSFWorkbook wb = new XSSFWorkbook();
+                XSSFSheet sheet = wb.createSheet(sheetName) ;
+                
+                List<String> fieldnames = rs.getColumnNames();
+        		Iterator<DataRow> it = rs.iterator();
+        		Iterator<String> fieldNameIterator;
+                
+        		XSSFRow row;
+        		XSSFCell cell;
+        		int rowIndex = 0;
+        		int cellIndex = 0;
+        		
+                if(writeHeader){
+                	fieldNameIterator = fieldnames.iterator();
+                	row = sheet.createRow(rowIndex);
+                	rowIndex++;
+                	
+            		while(fieldNameIterator.hasNext()){
+            			cell = row.createCell(cellIndex);
+            			cell.setCellValue(fieldNameIterator.next());
+            			cellIndex++;
+            		}
+                }
+                
+                DataRow currentRow;
+                String currentFieldName;
+                while(it.hasNext()){
+                	fieldNameIterator = fieldnames.iterator();
+                	
+                	row = sheet.createRow(rowIndex);
+                	rowIndex++;
+                	
+                	cellIndex = 0;
+                	currentRow = it.next();
+                	int columnType;
+                	while(fieldNameIterator.hasNext()){
+                		currentFieldName = fieldNameIterator.next();
+                		cell = row.createCell(cellIndex);
+                		columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
+            			if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE){
+            				cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+            				cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
+            			}else{
+            				cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
+            			}
+            			cellIndex++;
+                	}
+                }
+                
+                FileOutputStream os = new FileOutputStream(outputFile);
+                wb.write(os);
+                wb.close();
+                
+                os.flush();
+                os.close();
+        	}
+    	}
+    }
 	
 //  sample code:
 	
