@@ -127,7 +127,7 @@
 
 		<dependency>
 			<groupId>com.basis.lib</groupId>
-			<artifactId>protobuf-java.jar</artifactId>
+			<artifactId>BBjFilesystem.jar</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
 			<systemPath>${jar-directory}/BBjFilesystem.jar</systemPath>
