@@ -31,15 +31,12 @@ public class JLibResultSetImporter {
 	
 	private String stringTemplate = null;
 	private TemplatedString templatedString = null;
-	private ConnectionMgr conectionManager;
 	private String fileName;
 	private DataRow filter;
 	
 	private HashMap<Integer, String> fieldNameMap;
 	
-	public JLibResultSetImporter() throws FilesystemException{
-		this.conectionManager = getConnectionMgr();
-	}
+	public JLibResultSetImporter(){}
 	
 	public void setFile(String filePath, String template) throws BBjException{
 		this.fileName = filePath;
@@ -104,8 +101,10 @@ public class JLibResultSetImporter {
     public ResultSet retrieve() throws IndexOutOfBoundsException, NoSuchFieldException, Exception {
     	if(fieldNameMap != null && !fieldNameMap.isEmpty()){
     		if(templatedString != null){
-    			FilePosition pos = conectionManager.open(fileName,true,true);
-        		
+    			
+    			ConnectionMgr connectionManager = getConnectionMgr();
+    			FilePosition pos = connectionManager.open(fileName,true,true);
+    			
             	FilePosition endPos = null;
             	
             	ResultSet rs = new ResultSet();
@@ -188,7 +187,7 @@ public class JLibResultSetImporter {
         					
         					byte[] endKey = filter.getFieldAsString(FILTER_RANGE_TO).getBytes();
         					if(endKey != null){
-        						endPos = conectionManager.open(fileName,true,false);
+        						endPos = connectionManager.open(fileName,true,false);
         						try{
         							endPos.readByKey(endRecord, 0, endRecord.length, endKey, 0, endKey.length, knum, 0, 0);
         						}catch(Exception e){
@@ -232,7 +231,7 @@ public class JLibResultSetImporter {
         	        // End of iteration...
         	    }
             	
-            	conectionManager.clear();
+            	connectionManager.clear();
             	return rs;
         	}
         	return null;
