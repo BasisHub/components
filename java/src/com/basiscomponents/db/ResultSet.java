@@ -938,7 +938,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					if (dr.getField(fn) == null || dr.getField(fn).getLong() == null)
 						g.writeNumberField(fn, 0);
 					else
-						g.writeNumberField(fn, dr.getField(fn).getLong());
+						g.writeNumberField(fn, dr.getField(fn).getLong().longValue());
 					break;
 
 				case java.sql.Types.TINYINT:
@@ -947,7 +947,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					if (dr.getField(fn) == null || dr.getField(fn).getInt() == null)
 						g.writeNumberField(fn, 0);
 					else
-						g.writeNumberField(fn, dr.getField(fn).getInt());
+						g.writeNumberField(fn, dr.getField(fn).getInt().intValue());
 					break;
 
 				case java.sql.Types.NUMERIC:
@@ -958,7 +958,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				case java.sql.Types.DOUBLE:
 				case java.sql.Types.FLOAT:
 				case java.sql.Types.REAL:
-					g.writeNumberField(fn, dr.getField(fn).getDouble());
+					if (dr.getField(fn) == null || dr.getField(fn).getDouble() == null)
+						g.writeNumberField(fn, 0.0);
+					else
+						g.writeNumberField(fn, dr.getField(fn).getDouble().doubleValue());
 					break;
 
 				case java.sql.Types.BOOLEAN:
