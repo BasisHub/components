@@ -955,6 +955,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					break;
 
 				case java.sql.Types.DECIMAL:
+					if (dr.getField(fn) == null || dr.getField(fn).getBigDecimal() == null)
+						g.writeNumberField(fn, 0);
+					else
+						g.writeNumberField(fn, dr.getField(fn).getBigDecimal());
+					break;
+
 				case java.sql.Types.DOUBLE:
 				case java.sql.Types.FLOAT:
 				case java.sql.Types.REAL:
