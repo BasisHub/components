@@ -44,6 +44,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private ArrayList<String> ColumnNames = new ArrayList<String>();
 	@Expose
 	private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
+	private ArrayList<String> FieldSelection;
 
 	private ArrayList<String> KeyColumns = new ArrayList<String>();
 	private String KeyTemplateString = "";
@@ -193,6 +194,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (defaultMetaData == true) {
 			while (column < cc) {
 				column++;
+				if (FieldSelection != null && !FieldSelection.contains(rsmd.getColumnName(column))) continue;
 				HashMap<String, Object> colMap = new HashMap<String, Object>();
 				colMap.put("CatalogName", rsmd.getCatalogName(column));
 				colMap.put("ColumnClassName", rsmd.getColumnClassName(column));
@@ -237,11 +239,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		int rowId = 0;
 		while (rs.next()) {
 			DataRow dr = DataRow.newInstance(this);
+			Iterator<String> it = ColumnNames.iterator();
 			column = 0;
-			while (column < cc) {
+			while (it.hasNext()) {
 				column++;
-				DataField field = new DataField(rs.getObject(column));
-				name = this.ColumnNames.get(column - 1);
+				name = it.next();
+				DataField field = new DataField(rs.getObject(name));
 				if (defaultMetaData == true)
 					type = types.get(column - 1);
 				else
@@ -255,7 +258,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					dr.setFieldAttribute(name, "EDITABLE", "0");
 				else
 					dr.setFieldAttribute(name, "EDITABLE", "1");
-
 			}
 
 			if (KeyColumns != null && KeyColumns.size() > 0) {
@@ -881,6 +883,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public URL getURL(int column) {
 		DataField field = getField(column);
 		return field.getURL();
+	}
+
+	public void setFieldSelection(ArrayList<String> fieldSelection) {
+		this.FieldSelection = fieldSelection;
 	}
 
 	// getRowId(int column)
