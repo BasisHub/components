@@ -1,0 +1,388 @@
+use java.util.HashMap
+use com.basiscomponents.db.ResultSet
+
+class public RestBridge
+
+    METHOD PUBLIC void service(BBjspWebRequest request!, BBjspWebResponse response!) 
+
+
+       System.out.println("REST request --------------------------")
+       System.out.println("REST request METHOD "+request!.getMethod())
+       System.out.println("REST request HEADER "+request!.getRequestURL())
+       h! = request!.getHeaderNames()
+       it! = h!.iterator()
+       while it!.hasNext()
+            h$=it!.next()
+            h1$=str(request!.getHeader(h$))
+            System.out.println("REST request HEADER "+h$+":"+h1$)
+       wend
+       
+       h! = request!.getParameterNames()
+       it! = h!.iterator()
+       while it!.hasNext()
+            h$=it!.next()
+            h1$=str(request!.getParameter(h$))
+            System.out.println("REST request PARAM "+h$+":"+h1$)
+       wend       
+
+       System.out.println("REST request end -----------------------")
+       
+      
+      response!.setHeader("Access-Control-Allow-Origin",request!.getHeader("Origin"))
+      response!.setHeader("Access-Control-Allow-Credentials","true")
+      response!.setHeader("Access-Control-Allow-Methods","GET, POST, OPTIONS")
+      response!.setHeader("Access-Control-Allow-Headers",request!.getHeader("Access-Control-Request-Headers"))
+      
+      if (request!.getMethod() = "OPTIONS") then
+             response!.setStatus(200)
+            
+             System.out.println("REST OPTIONS response --------------------------")
+
+             h! = response!.getHeaderNames()
+             it! = h!.iterator()
+             while it!.hasNext()
+                  h$=it!.next()
+                  h1$=str(response!.getHeader(h$))
+                  System.out.println("REST response HEADER "+h$+":"+h1$)
+             wend
+      
+             System.out.println("REST OPTIONS response end -----------------------")            
+            
+            methodret
+      fi
+
+
+      
+
+       test$=stbl("REST_WD",err=setup_err)
+       test$=stbl("REST_ADAPTERPGM",err=setup_err)
+ 
+       rem response!.setContentType("text/plain")
+       auth$=str(request!.getHeader("authorization",err=*next))
+       
+       
+       if auth$="null" or len(auth$)<8 OR auth$(1,5)<>"Basic" then
+            response!.setHeader("WWW-Authenticate","Basic realm=""REST Web Service""")
+            System.out.println("REST: error 401 Authentication required")
+            response!.sendError(401,"Authentication required")
+            methodret
+       else
+            auth$=auth$(7)
+            uid$ = hta(java.security.MessageDigest.getInstance("MD5").digest(auth$))
+       fi
+       
+        
+       ses_list! = BBjAPI().getGlobalNamespace().getValue(uid$+"_list",err=*next)
+       if ses_list! = null() then
+            BBjAPI().getGlobalNamespace().setValue(uid$+"_list",new java.util.Stack())
+            ses_list! = BBjAPI().getGlobalNamespace().getValue(uid$+"_list")
+       endif
+
+
+
+
+       while 1
+            if (ses_list!.empty())
+                ses$=#newSession(auth$)
+                break
+            else
+                ses$=ses_list!.pop()
+                if (#checkSession(ses$)) then
+                    break
+                endif
+            endif
+       wend
+       
+       params! = new HashMap()
+       it! = request!.getParameterNames().iterator()
+       while it!.hasNext()
+            p$=it!.next()
+            params!.put(p$,request!.getParameter(p$))
+       wend
+       
+       req! = new HashMap()
+       req!.put("uri",request!.getPathInfo())
+       req!.put("params",params!)
+       
+       answer!=#invoke(ses$,req!)
+       ses_list!.push(ses$)       
+       
+       
+       accept$=str(request!.getHeader("Accept"))
+       if accept$="null" then
+            accept$=str(request!.getHeader("Content-Type"))
+            if accept$="null" then
+                accept$="text/html"
+            fi
+       fi
+       
+       
+       statuscode! = answer!.get("statuscode",err=*next)
+       msg! = answer!.get("msg",err=*next)
+       if statuscode! <> null() then
+            response!.setHeader("Reason-Phrase",str(answer!))
+            System.out.println("REST: error "+str(statuscode!)+" - "+str(msg!))
+            response!.sendError(num(statuscode!),str(msg!))
+            methodret
+       fi
+       
+       
+       rs! = answer!.get("resultset",err=*next)
+       pk! = answer!.get("primarykey",err=*next)
+       if rs! = null()
+            s! = response!.getOutputStream()       
+            s!.write(str(answer!))  
+            response!.setHeader("Reason-Phrase",str(msg!))     
+            System.out.println("REST: error 500 "+str(msg!))
+            response!.sendError(500,str(msg!))
+            methodret
+       fi
+       
+       
+       
+       if pos("text/html"=accept$) >0 OR pos("*/*"=accept$) >0  then
+            response!.setContentType("text/html")
+            s! = response!.getOutputStream()
+            
+
+            
+            s!.write("<html><head><style>table, th, td {padding:5px;border: 1px solid black;}</style></head><body>")
+            
+            single = answer!.get("single",err=*next)
+            if single>0 AND rs!.size()=1 then
+                rem TODO move this pivoted display into the writer
+                rec! = rs!.get(0)
+                it! = rec!.getFieldNames().iterator()
+                s!.write("<table>")
+                while it!.hasNext()
+                    f$=it!.next()
+                    s!.write("<tr><td><b>"+f$+"</b></td><td>"+rec!.getFieldAsString(f$)+"</td></tr>")
+                wend
+                s!.write("</table>")
+            else
+                if (pk! <> null() ) then
+                    pk$=str(pk!)
+                    links! = new java.util.HashMap()
+                    link$=request!.getRequestURI()
+                    System.out.println("LINK URI: "+link$)
+                    if pos("/"=link$,1,0)>2 then
+                        link$=link$(1,pos("/"=link$,1,3)-1)
+                    fi
+                    while pk$>""
+                        if pos("/"=pk$)>0 then
+                            f$=pk$(1,pos("/"=pk$)-1)
+                            pk$=pk$(pos("/"=pk$)+1)
+                        else
+                            f$=pk$
+                            pk$=""
+                        fi
+                        link$=link$+"/{"+f$+"}"
+                        links!.put(f$,link$)
+                    wend
+                    
+                    System.out.println(str(links!)) 
+                    
+                else
+                    links! = null()
+                fi            
+                wr! = new java.io.StringWriter()
+                rem TODO: add hyperlinking into the writer
+                rem "linkfield" in the answer! holds the fieldname for the primary key
+   
+                com.basiscomponents.db.ResultSetExporter.writeHTML(rs!,wr!,links!)
+                wr!.flush()
+                wr!.close() 
+                s!.write(wr!.toString())
+            fi
+            s!.write("</body></html>")
+            
+            System.out.println("REST: 200 - sent answer text/html")
+            
+            response!.setStatus(200)
+            
+            methodret
+       else
+         if pos("text/xml"=accept$) >0 or pos("application/xml"=accept$) >0  then
+              if pos("application/xml"=accept$) >0  then
+                    response!.setContentType("application/xml")
+              else
+                    response!.setContentType("text/xml")
+              endif
+              wr! = new java.io.StringWriter()
+              com.basiscomponents.db.ResultSetExporter.writeXML(rs!,"root","entity",wr!)
+              s! = response!.getOutputStream()
+
+              wr!.flush()
+              wr!.close() 
+              s!.write(wr!.toString())
+
+              methodret
+         else   
+             if pos("application/json"=accept$) >0  then
+                  response!.setContentType("application/json")
+                  wr! = new java.io.StringWriter()
+                  com.basiscomponents.db.ResultSetExporter.writeJSON(rs!,wr!)
+                  s! = response!.getOutputStream()
+    
+                  wr!.flush()
+                  wr!.close() 
+                  s!.write(wr!.toString())
+    
+                  methodret
+             else    
+                 if pos("text/csv"=accept$) >0 OR pos("text/plain"=accept$) >0 then
+                      response!.setContentType("text/csv")
+                      wr! = new java.io.StringWriter()
+                      com.basiscomponents.db.ResultSetExporter.writeTXT(rs!,wr!)
+                      s! = response!.getOutputStream()
+        
+                      wr!.flush()
+                      wr!.close() 
+                      s!.write(wr!.toString())
+        
+                      methodret
+                 else    
+                    if pos("debug"=accept$)>0 then
+                        response!.setContentType("text/plain")
+                        s! = response!.getOutputStream()
+                        s!.write(str(req!))
+                        s!.write($0a$)
+                
+                        s!.write(str(answer!))
+                        s!.write($0a$)
+                        s!.write("Debug: ")
+                        s!.write($0a$)
+                        s!.write("getAttributeNames:"+str(request!.getAttributeNames()))
+                        s!.write($0a$)
+                        s!.write("getHeaderNames:"+str(request!.getHeaderNames()))
+                        s!.write($0a$)
+                        s!.write("getParameterNames:"+str(request!.getParameterNames()))
+                        s!.write($0a$)
+                        s!.write("getMethod:"+str(request!.getMethod()))
+                        s!.write($0a$)
+                        s!.write("getRequestURL:"+str(request!.getRequestURL()))
+                        s!.write($0a$)
+                        s!.write("getRequestURI:"+str(request!.getRequestURI()))
+                        s!.write($0a$)
+                        s!.write("Accept:"+str(request!.getHeader("Accept")))
+                        s!.write($0a$)
+                        
+                        methodret
+                    else
+                      System.out.println("REST: error 406 Unsupported content type requested in Accept header: "+accept$)
+                      response!.sendError(406, "Unsupported content type requested in Accept header: "+accept$)
+                      methodret                             
+                    fi
+                 fi                 
+             fi             
+         fi   
+       fi     
+       
+       methodret 
+       
+       setup_err:
+            response!.setContentType("text/plain")
+            s! = response!.getOutputStream()
+            s!.write("stbl not set up correctly!")
+            System.out.println("REST: error 500 STBLs not set up correctly! Need REST_WD and REST_ADAPTERPGM in config.bbx" )
+            response!.sendError(500,"STBLs not set up correctly! Need REST_WD and REST_ADAPTERPGM in config.bbx" )
+        
+        
+    METHODEND
+
+
+    method private Boolean checkSession(BBjString ses$)
+
+        requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM",err=noSes)
+        responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
+
+        
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST","PING")
+
+          requestSemaphore!.release()
+          if !responseSemaphore!.tryAcquire(1,1,java.util.concurrent.TimeUnit.SECONDS) then
+        
+                BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
+                BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
+                BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
+                BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")      
+                methodret Boolean.FALSE
+          fi
+
+        
+                methodret Boolean.TRUE
+        noSes:
+                methodret Boolean.FALSE
+    methodend
+
+    method public static BBjString newSession(BBjString auth$)
+
+        rem create a new session
+        while 1
+            ses$=str(java.util.UUID.randomUUID())
+            print "trying to create session "+ses$
+            BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST",err=*next); continue
+            break
+        wend
+        System.out.println("REST: create "+ses$)
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST","")
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE","")
+
+        requestSemaphore! = new java.util.concurrent.Semaphore(0)
+        responseSemaphore! = new java.util.concurrent.Semaphore(0)
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST_SEM",requestSemaphore!)
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE_SEM",responseSemaphore!)
+
+        cp$=BBjAPI().getConfig().getCurrentCommandLineObject().getOriginalClasspathName()
+        if cp$>"" cp$=" -CP"+cp$
+        wd$=" -WD"+stbl("REST_WD")
+        pgm$=" "+stbl("REST_ADAPTERPGM")
+        
+        
+        cfg$=" -c"+BBjAPI().getConfig().getCurrentCommandLineObject().getConfigFile()
+        t$=" -t"+BBjAPI().getConfig().getCurrentCommandLineObject().getTerminal()
+       
+        scmd$="bbj  -q "+t$+cfg$+cp$+wd$+pgm$+" - "+ses$+" "+auth$+" &"
+        System.out.println("REST: create "+scmd$)
+        a=scall(scmd$)
+
+        methodret ses$
+
+    methodend
+
+    method public static HashMap invoke (BBjString ses$, HashMap instructions!)
+
+        System.out.println("REST: invoke "+ses$)
+        requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM",err=noSes)
+        responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
+
+            
+
+          BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST",instructions!)
+          requestSemaphore!.release()
+                rem here's the remote session active
+
+          if !responseSemaphore!.tryAcquire(1,60,java.util.concurrent.TimeUnit.SECONDS) then
+                rem System.out.println("Bridge: Timeout waiting on "+ses$)
+                BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
+                BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
+                BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
+                BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")
+                System.out.println("REST: timeout on invoke "+ses$)                
+                throw "Timeout occurred",0
+                
+          fi
+
+          response! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE",err=*next)
+          
+          
+          System.out.println("REST: invoke done "+ses$)
+          methodret response!
+
+          noSes:
+            throw  "Session invalid",11
+
+    methodend
+
+    
+classend
