@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
@@ -190,6 +191,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		String name;
 		int type;
 		ArrayList<Integer> types = new ArrayList<Integer>();
+		LinkedHashMap<Integer, String> columns = new LinkedHashMap<Integer, String>();
 		int column = 0;
 		if (defaultMetaData == true) {
 			while (column < cc) {
@@ -204,6 +206,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				if (this.ColumnNames.contains(name))
 					name = name + "_" + String.valueOf(column); // handle dups
 				colMap.put("ColumnName", name);
+				columns.put(column, name);
 				this.ColumnNames.add(name);
 				type = rsmd.getColumnType(column);
 				colMap.put("ColumnType", type);
@@ -225,6 +228,11 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				colMap.put("StringFormat", "");
 				this.MetaData.add(colMap);
 			}
+		} else {
+			Iterator<String> it = ColumnNames.iterator();
+			while (it.hasNext()) {
+				columns.put(columns.size()+1, it.next());
+			}
 		}
 
 		if (KeyColumns != null && KeyColumns.size() > 0) {
@@ -239,12 +247,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		int rowId = 0;
 		while (rs.next()) {
 			DataRow dr = DataRow.newInstance(this);
-			Iterator<String> it = ColumnNames.iterator();
+			Iterator<HashMap.Entry<Integer, String>> it = columns.entrySet().iterator();
 			column = 0;
 			while (it.hasNext()) {
 				column++;
-				name = it.next();
-				DataField field = new DataField(rs.getObject(name));
+				HashMap.Entry<Integer, String> entry = it.next();
+				name = entry.getValue();
+				DataField field = new DataField(rs.getObject(entry.getKey()));
 				if (defaultMetaData == true)
 					type = types.get(column - 1);
 				else
