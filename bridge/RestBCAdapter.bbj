@@ -1,0 +1,277 @@
+use java.util.HashMap
+use com.basiscomponents.db.ResultSet
+
+seterr execerr
+
+System.out.println("REST: new reomte session ") 
+BBjAPI().getConfig().setOptionSetting("ERROR_UNWINDS", 1)
+
+ses$ = argv(1)
+auth$ = argv(2)
+System.out.println("DIR: ")
+System.out.println(stbl("REST_WD"))
+
+chdir stbl("REST_WD")
+System.out.println("DIR: "+stbl("REST_WD"))
+call "bridge/prepSession.bbj" 
+ses$=stbl("SESSIONID",ses$)
+
+
+auth$=java.util.Base64.getDecoder().decode(auth$)
+
+System.out.println(auth$)
+
+user$=auth$(1,pos(":"=auth$)-1)
+password$=auth$(pos(":"=auth$)+1)
+
+requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
+responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
+
+ses! = new ::api/SessionsBC::SessionsBC()
+
+if user$="_token" then 
+    
+    System.out.println("REST Login token "+password$)
+    ses!.loginSession(password$)
+    ses!.login(password$,"BWP",err=*next); goto done_login
+    ses!.login(password$,"CPO")
+else
+    System.out.println("REST Login user "+user$)
+    a! = ses!.loginSession(user$,password$,"en")
+    ses!.login(a!,"BWP",err=*next); goto done_login
+    ses!.login(a!,"CPO")
+fi
+
+done_login:
+
+
+authenticated=1
+
+timeout=60
+timeout=int(num(stbl("REST_TIMEOUT",err=*next),err=*next))
+
+main_loop:
+
+    CLEAR EXCEPT user$,password$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout
+    
+    dummy$=STBL("!SESSIONINFO",ses$+" - idle "+str(usecount))
+
+    rem requestSemaphore!.acquire()
+    if !requestSemaphore!.tryAcquire(1,timeout,java.util.concurrent.TimeUnit.SECONDS) then
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")
+        release
+    fi
+
+    request!=BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST")
+        if (str(request!) = "PING") then 
+            System.out.println("REST: reomte session PING "+ses$)
+            responseSemaphore!.release()
+            goto main_loop
+        fi
+
+    System.out.println("REST: remote session running "+ses$)
+    dummy$=STBL("!SESSIONINFO",ses$+" - working "+str(request!))
+    
+    uri$=request!.get("uri")
+    uri$=uri$(2)
+    if pos("/"=uri$)>0
+        bc$=uri$(1,pos("/"=uri$)-1)
+        uri$=uri$(pos("/"=uri$)+1)
+        sel$=uri$
+    else
+        bc$=uri$
+        sel$=""
+    fi
+    
+    
+    System.out.println("REST ADAPTER Selected: "+sel$)
+    
+    
+    
+    bc$=bc$+"BC"
+    bc! = eval("new ::api/"+bc$+"::"+bc$+"()")
+   
+    response! = new HashMap()
+    params! = new HashMap()
+    
+    params! = request!.get("params",err=*next)
+    filterf$=""
+    
+    ar! = bc!.getAttributesRecord()
+    
+    f! = ar!.getFieldNames()
+    it! = f!.iterator()
+    while it!.hasNext()
+        f$=it!.next()
+        if ar!.getFieldAttribute(f$,"EDITABLE")="2" then
+            if filterf$>"" then
+                filterf$=filterf$+"/"
+            fi
+            filterf$=filterf$+f$
+        fi
+    wend
+ 
+    
+     System.out.println("REST ADAPTER filter fields: "+filterf$)
+    
+    if (sel$>"") then
+        response!.put("single",1)
+       
+            if filterf$>"" then
+                filter! = new com.basiscomponents.db.DataRow()
+                
+                tmp$=filterf$
+                tmpsel$ = sel$
+                while tmp$>"" and tmpsel$>""
+                    if pos("/"=tmp$)>0 then
+                        f$=tmp$(1,pos("/"=tmp$)-1)
+                        tmp$=tmp$(pos("/"=tmp$)+1)
+                    else
+                        f$=tmp$
+                        tmp$=""
+                    fi
+                    if pos("/"=tmpsel$)>0 then
+                        tmpf$=tmpsel$(1,pos("/"=tmpsel$)-1)
+                        tmpsel$=tmpsel$(pos("/"=tmpsel$)+1)
+                    else
+                        tmpf$=tmpsel$
+                        tmpsel$=""
+                    fi                    
+                    filter!.setFieldValue(f$,tmpf$)
+                wend
+                
+                rem add all other filter fields
+                if params! <> null() and params!.size() >0 then
+                    it! = params!.keySet().iterator()
+                    while it!.hasNext()
+                        P$=it!.next()
+                        pv$=params!.get(p$)
+                        if (p$(1,1)<>"_") then
+                            filter!.setFieldValue(p$,pv$)
+                        fi
+                    wend
+                 fi   
+                                 
+                System.out.println("REST ADAPTER: filter "+str(filter!))
+                
+                response!.put("linkfield",filterf$)
+                bc!.setFilter(filter!)
+            else
+                statuscode=500
+                msg$="no filter?"
+                goto error_out
+            fi
+            
+            fieldsel$="BDCL"
+            fieldsel!=params!.get("_FIELDSEL",err=*next)
+            if (fieldsel! <> null())
+                fieldsel$=str(fieldsel!)
+            fi
+
+            bc!.setFieldSelection(fieldsel$)
+    else
+        
+        
+        if params! <> null() and params!.size() >0 then
+            filter! = new com.basiscomponents.db.DataRow()
+            it! = params!.keySet().iterator()
+            while it!.hasNext()
+                P$=it!.next()
+                pv$=params!.get(p$)
+                if (p$="_FULLTEXT")
+                    filter!.setFieldValue("%SEARCH",pv$)
+                else
+                    if (p$(1,1)<>"_") then
+                        filter!.setFieldValue(p$,pv$)
+                    fi
+                fi 
+            wend
+            bc!.setFilter(filter!)
+            System.out.println("filtering :"+str(filter!))
+        fi
+            fieldsel$="B"
+            fieldsel!=params!.get("_FIELDSEL",err=*next)
+            if (fieldsel! <> null())
+                fieldsel$=str(fieldsel!)
+            fi
+                
+        if (filter! <> null())
+            bc!.setFieldSelection(fieldsel$,filter!)
+        else
+            bc!.setFieldSelection(fieldsel$)
+        fi
+        response!.put("single",0)
+    fi
+    rs! = bc!.retrieve(err=execerr)
+    
+    
+    response!.put("resultset",rs!)  
+    response!.put("info",dummy$+" - " +str(usecount))
+    response!.put("request",str(request!))
+    response!.put("BC",bc$)
+    response!.put("sel",sel$)
+    response!.put("primarykey",filterf$)
+    usecount=usecount+1
+ 
+
+    BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
+    responseSemaphore!.release()
+    System.out.println("REST: reomte session done "+ses$)
+    goto main_loop
+
+    execerr:
+        sw! = new java.io.StringWriter()
+        pw! = new java.io.PrintWriter(sw!)
+        bbjapi().getLastBBjException().printStackTrace(pw!)
+        msg$ = sw!.toString()
+        
+        ch=unt
+        open (ch,mode="O_CREATE,O_APPEND",err=notrace)"bridgeerrlog.txt"
+        print (ch)date(0:"%Dz.%Mz.%Yl %Zz:%mz:%sz")
+        print (ch)"!ERROR "+str(err)+" "+emsg$+" "+str(tcb(5))
+        print (ch)errmes(-1)
+
+        print (ch)msg$
+        close (ch)
+
+        notrace:
+        
+        e$=errmes(-1)
+        if e$(1,4)="java" then let e$=e$(pos(":"=E$)+2)
+
+
+        emsg$=org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(e$)
+        
+        error_out:
+        if statuscode=0
+            statuscode=500
+        fi
+        
+        response! = new HashMap()
+        
+        if authenticated>0 then
+            response!.put("statuscode",statuscode)
+        else
+            response!.put("statuscode",401)
+        fi
+        response!.put("msg",e$)
+        
+        
+        response!.put("err","{""err"":"""+"!ERROR "+str(err)+" "+emsg$+" "+str(tcb(5) )+""",""message"":"""+msg$+""",""ses"":"""+ses$+"""}")
+
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
+        responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")        
+        responseSemaphore!.release()
+        
+        
+        wait 10; rem FIN_WAIT
+
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST",err=*next)
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE",err=*next)
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM",err=*next)
+        BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM",err=*next)
+release
+
