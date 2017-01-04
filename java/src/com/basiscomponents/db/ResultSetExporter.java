@@ -15,44 +15,80 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class ResultSetExporter {
 
 	public static void writeXML(ResultSet rs, String rootTagName, String entityName, Writer wr) throws Exception{
+		int indent = 0;
 		
 		wr.write("<"+rootTagName+">\n");
+		indent++;
 		
+		DataRow row;
+		Iterator<String> rit;
+		String fieldName, fieldValue;
+		
+		List<String> fieldnames = rs.getColumnNames();
 		Iterator<DataRow> it = rs.iterator();
-		List fieldnames = rs.getColumnNames();
-		
 		while (it.hasNext()){
-			
-			wr.write("   <"+entityName+">\n");
-			
-			DataRow r = it.next();
-			Iterator<String> rit = fieldnames.iterator();
+			wr.write(getIndent(indent) + "<" + entityName + ">\n");
+			indent++;
+
+			row = it.next();
+			rit = fieldnames.iterator();
 			while (rit.hasNext()){
-				String f = rit.next();
-				if (f.contains("%")) continue; //TODO filter out all field names that are invalid tag names 
-				String fv ="";
+				fieldName = rit.next();
+				
+				if (fieldName.contains("%")){
+					//TODO filter out all field names that are invalid tag names
+					continue; 
+				}
+				
+				fieldValue = "";
+				
 				try {
-				fv = r.getFieldAsString(f).trim();
-				wr.write("      <"+f+">");
-				wr.write(fv);
-				wr.write("</"+f+">\n");
-				
+					fieldValue = row.getFieldAsString(fieldName).trim();
+					wr.write(getIndent(indent) + "<"+fieldName+">");
+					wr.write(escapeHTML(fieldValue));
+					wr.write("</" + fieldName + ">\n");
+				}catch (Exception e){
+					wr.write(getIndent(indent) + "<" + fieldName + " null=\"true\" />\n");
 				}
-				catch (Exception e){
-				wr.write("      <"+f+" null=\"true\" />\n");
-				}
-				
 			}
+			indent--;
 			
-			wr.write("   </"+entityName+">\n");
+			wr.write(getIndent(indent) + "</" + entityName + ">\n");
 			
 		}
+		indent--;
 		
 		wr.write("</"+rootTagName+">\n");
-	
 	}
 	
-
+	public static String getIndent(int indent){
+		if(indent <= 0){
+			return "";
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for(int i=0; i<indent; i++){
+			sb.append("    ");
+		}
+		
+		return sb.toString();
+	}
+	
+	public static String escapeHTML(String s) {
+	    StringBuilder out = new StringBuilder(Math.max(16, s.length()));
+	    for (int i = 0; i < s.length(); i++) {
+	        char c = s.charAt(i);
+	        if (c > 127 || c == 34 || c == 38 || c == 39 || c == 60 || c == 62) {
+	            out.append("&#");
+	            out.append((int) c);
+	            out.append(';');
+	        } else {
+	            out.append(c);
+	        }
+	    }
+	    return out.toString();
+	}
 	
 	public static void writeHTML(ResultSet rs, Writer wr) throws Exception{
 		ResultSetExporter.writeHTML(rs, wr, null);
