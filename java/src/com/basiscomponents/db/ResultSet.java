@@ -33,6 +33,7 @@ import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 
 public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
@@ -1154,11 +1155,19 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			e.printStackTrace();
 		}
 		Iterator<JsonElement> it = o.iterator();
+		JsonObject meta=null;
 		while (it.hasNext()) {
 			JsonElement el = it.next();
-
+			if (meta == null)
+				meta = el.getAsJsonObject().getAsJsonObject("meta");
+			if (meta == null) 
+				System.err.println("error parsing - meta data missing");
+			
 			DataRow r = null;
 			try {
+				//System.out.println(el.toString());
+				if (el.getAsJsonObject().getAsJsonObject("meta") == null)
+					el.getAsJsonObject().add("meta", meta);
 				r = DataRow.fromJson(el.toString());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
