@@ -97,7 +97,7 @@ class public RestBridge
        it! = request!.getParameterNames().iterator()
        while it!.hasNext()
             p$=it!.next()
-            params!.put(p$,request!.getParameter(p$))
+            params!.put(cvs(p$,4),request!.getParameter(p$))
        wend
        
        req! = new HashMap()
@@ -107,16 +107,18 @@ class public RestBridge
        answer!=#invoke(ses$,req!)
        ses_list!.push(ses$)       
        
-       
-       accept$=str(request!.getHeader("Accept"))
+       accept$=str(params!.get("_ACCEPT"))
+       if accept$="null" then
+            accept$=str(request!.getHeader("Accept"))
+       endif
        if accept$="null" then
             accept$=str(request!.getHeader("Content-Type"))
             if accept$="null" then
                 accept$="text/html"
             fi
        fi
-       
-       
+
+
        statuscode! = answer!.get("statuscode",err=*next)
        msg! = answer!.get("msg",err=*next)
        if statuscode! <> null() then
