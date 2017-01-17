@@ -28,7 +28,7 @@ requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
 responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
 
 if user$<>"admin" then
-    throw "Wronf username and/or password",999
+    throw "Wrong username and/or password",999
 fi
 
 REM ses! = new ::api/SessionsBC::SessionsBC()
