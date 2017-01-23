@@ -24,10 +24,10 @@ import com.basiscomponents.db.ResultSet;
  */
 public class JLibResultSetImporter {
 	
-	public static final String FILTER_KNUM = "FILTER_KNUM";
+	public static final String FILTER_KNUM       = "FILTER_KNUM";
 	public static final String FILTER_RANGE_FROM = "FILTER_RANGE_FROM";
-	public static final String FILTER_RANGE_TO = "FILTER_RANGE_TO";
-	public static final String FILTER_VALUE = "FILTER_VALUE";
+	public static final String FILTER_RANGE_TO   = "FILTER_RANGE_TO";
+	public static final String FILTER_VALUE      = "FILTER_VALUE";
 	
 	private String stringTemplate = null;
 	private TemplatedString templatedString = null;
@@ -35,6 +35,9 @@ public class JLibResultSetImporter {
 	private DataRow filter;
 	
 	private HashMap<Integer, String> fieldNameMap;
+	
+	private int offsetStart = -1;
+	private int offsetCount = -1;
 	
 	public JLibResultSetImporter(){}
 	
@@ -59,6 +62,11 @@ public class JLibResultSetImporter {
 		return indexList;
 	}
 
+	public void setOffset(int record, int count){
+		this.offsetStart = record;
+		this.offsetCount = count;
+	}
+	
 	public void setFilter(DataRow filter){
 		this.filter = filter;
 	}
@@ -187,7 +195,7 @@ public class JLibResultSetImporter {
         					
         					byte[] endKey = filter.getFieldAsString(FILTER_RANGE_TO).getBytes();
         					if(endKey != null){
-        						endPos = connectionManager.open(fileName,true,false);
+        						endPos = connectionManager.open(fileName,true,true);
         						try{
         							endPos.readByKey(endRecord, 0, endRecord.length, endKey, 0, endKey.length, knum, 0, 0);
         						}catch(Exception e){
@@ -207,6 +215,18 @@ public class JLibResultSetImporter {
         			}
         			
         			boolean complete = false;
+        			boolean readPerOffset = false;
+        			
+        			if(offsetStart >= 0){
+        				readPerOffset = true;
+        				
+        				// move the file pointer to the offset position
+        				pos.read(record, record.length, offsetStart-1, 5, false);
+        			}
+        			
+        			boolean firstRecord = true; 
+        			// get the total number of records
+        			//pos.getRecordCount());
         			
         			while (!complete){	
         				
@@ -221,11 +241,26 @@ public class JLibResultSetImporter {
         					}
         				}
         				
+        				// read(byte[] p_buffer, int p_size, long p_move, int p_timeout, boolean p_field)
         				pos.read(record,record.length,1,5,false);
         				templatedStr.setValue(record);
         					
         				currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
-        				rs.add(currentDataRow);    				
+        				
+        				if(firstRecord){
+        					currentDataRow.setFieldValue("X-Total-Count", pos.getRecordCount());
+        					firstRecord = false;
+        				}
+        				
+        				rs.add(currentDataRow);
+        
+        				
+        				if(readPerOffset){
+        					// read the records while the offset count is not reached
+            				if(rs.size() >= offsetCount){
+            					break;
+            				}
+        				}
         			}
         	    }catch (FilesystemEOFException ex){
         	        // End of iteration...
@@ -424,11 +459,13 @@ public class JLibResultSetImporter {
     	selection.setFieldValue("LAST_NAME", "");
     	importer.setFieldSelection(selection);
     	
-    	DataRow filter = new DataRow();
+    	importer.setOffset(10, 10);
+    	
+    	//DataRow filter = new DataRow();
     	//filter.setFieldValue(JLibResultSetImporter.FILTER_KNUM, "0");
-    	filter.setFieldValue(JLibResultSetImporter.FILTER_RANGE_FROM, "000020");
-    	filter.setFieldValue(JLibResultSetImporter.FILTER_RANGE_TO, "000040");
-    	importer.setFilter(filter);
+    	//filter.setFieldValue(JLibResultSetImporter.FILTER_RANGE_FROM, "000020");
+    	//filter.setFieldValue(JLibResultSetImporter.FILTER_RANGE_TO, "000040");
+    	//importer.setFilter(filter);
     			
     	ResultSet set = importer.retrieve();
     	System.out.println(set.toJson());
