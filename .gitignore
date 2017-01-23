@@ -1,0 +1,6 @@
+.classpath
+java/bin
+java/lib
+.project
+java/build.info
+java/src/com/basiscomponents/VersionInfo.java
