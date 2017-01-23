@@ -149,10 +149,26 @@
 			<systemPath>${jar-directory}/poi-excelant-3.14-20160307.jar</systemPath>
 		</dependency>
 
+		<dependency>
+			<groupId>com.basis</groupId>
+			<artifactId>BuildVersionGenerator</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/java/build/BuildVersionGenerator.jar</systemPath>
+		</dependency>
 
 	</dependencies>
 
 	<build>
+
+		<resources>
+			<resource>
+				<directory>${basedir}/java/</directory>
+				<includes>
+					<include>*.info</include>
+				</includes>
+			</resource>
+		</resources>
 
 		<sourceDirectory>java/src/</sourceDirectory>
 
@@ -178,6 +194,31 @@
 				<configuration>
 					<outputDirectory>java/lib/</outputDirectory>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>org.codehaus.mojo</groupId>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+
+						<configuration>
+							<classpathScope>system</classpathScope>
+							<includeProjectDependencies>true</includeProjectDependencies>
+							<includePluginDependencies>true</includePluginDependencies>
+							<mainClass>com.basis.buildversiongenerator.BuildVersionGenerator</mainClass>
+							<arguments>
+								<argument>${jar-directory}/BBjUtil.jar</argument>
+								<argument>${basedir}</argument>
+								<argument>${basedir}/java/build/build.properties</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>
