@@ -1,7 +1,5 @@
 ### Welcome to BASIS Components
 
-This is a test
+## Javadoc
 
-## Another test
-
-Click [here](javadoc) to access the javadoc: http://basishub.github.io/components/javadoc/
+Click [here](javadoc) ([http://basishub.github.io/components/javadoc/](http://basishub.github.io/components/javadoc/)) to access the javadoc 
