@@ -4,4 +4,4 @@ This is a test
 
 ## Another test
 
-Click [here]("/javadoc") to access the javadoc: http://basishub.github.io/components/javadoc/
+Click [here](javadoc) to access the javadoc: http://basishub.github.io/components/javadoc/
