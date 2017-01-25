@@ -14,6 +14,7 @@
 
 	<properties>
 		<destDir>javadoc</destDir>
+		<doctitle>Components</doctitle>
 	</properties>
 
 	<profiles>
@@ -43,7 +44,6 @@
 
 			<properties>
 				<jar-directory>C:/bbj/lib</jar-directory>
-				<reportOutputDirectory>D:/tmp/components/gh-pages</reportOutputDirectory>
 			</properties>
 		</profile>
 
