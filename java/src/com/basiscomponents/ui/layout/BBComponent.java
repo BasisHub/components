@@ -75,7 +75,7 @@ public class BBComponent {
 	}
 
 	/**
-	 * @param minimumSize
+	 * @param origMinimumSize
 	 *            the minimumSize to set
 	 */
 	public void setOrigMinimumSize(Dimension origMinimumSize) {
@@ -90,7 +90,7 @@ public class BBComponent {
 	}
 
 	/**
-	 * @param preferredSize
+	 * @param origPreferredSize
 	 *            the preferredSize to set
 	 */
 	public void setOrigPreferredSize(Dimension origPreferredSize) {
@@ -105,7 +105,7 @@ public class BBComponent {
 	}
 
 	/**
-	 * @param maximumSize
+	 * @param origMaximumSize
 	 *            the maximumSize to set
 	 */
 	public void setOrigMaximumSize(Dimension origMaximumSize) {
@@ -180,8 +180,7 @@ public class BBComponent {
 	}
 
 	/**
-	 * @param the
-	 *            current x coordinate
+	 * @param x the current x coordinate
 	 */
 	public void setX(int x) {
 		this.x = x;
@@ -195,8 +194,7 @@ public class BBComponent {
 	}
 
 	/**
-	 * @param the
-	 *            current y coordinate
+	 * @param y the current y coordinate
 	 */
 	public void setY(int y) {
 		this.y = y;
@@ -229,8 +227,7 @@ public class BBComponent {
 	}
 
 	/**
-	 * @param the
-	 *            current width
+	 * @param width the current width
 	 */
 	public void setWidth(int width) {
 		this.width = width;
@@ -244,8 +241,7 @@ public class BBComponent {
 	}
 
 	/**
-	 * @param the
-	 *            current height
+	 * @param height the current height
 	 */
 	public void setHeight(int height) {
 		this.height = height;

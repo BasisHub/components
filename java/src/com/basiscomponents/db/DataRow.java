@@ -574,11 +574,11 @@ public class DataRow implements java.io.Serializable {
 	 * Method getAttributeForFields: Get all attributes for a specific attribute
 	 * name
 	 *
-	 * @param String
-	 *            attrname: the name of the attribute
-	 * @param Boolean
-	 *            defaultToFieldname: if 1, return the field name if attribute
-	 *            value is empty
+	 * @param attrname 
+	 * 				the name of the attribute
+	 * @param defaultToFieldname
+	 * 				if 1, return the field name if attribute
+	 *            	value is empty
 	 * @return ArrayList list: a list of field attributes for the given
 	 *         attribute name
 	 */
@@ -604,8 +604,7 @@ public class DataRow implements java.io.Serializable {
 	 * string (formula) with the field value. The field name should be escaped
 	 * as "F{name}".
 	 *
-	 * @param String
-	 *            formula: the string with the escaped field names
+	 * @param formula the string with the escaped field names
 	 * @return String formula: the replaced string
 	 */
 	public String replaceFields(String formula) throws Exception {
@@ -1096,7 +1095,7 @@ public class DataRow implements java.io.Serializable {
 	
 	/**
 	 * Resolve any [[CONSTANT]] type of string inside all String fields
-	 * @param ConstantsResolver cr: an instance of the ConstantsResolver class that holds the constants 
+	 * @param cr an instance of the ConstantsResolver class that holds the constants 
 	 * @return: a new object with resolved String constants
 	 */
 	public DataRow resolveConstants(ConstantsResolver cr) {

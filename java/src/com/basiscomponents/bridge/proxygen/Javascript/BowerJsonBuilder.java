@@ -16,7 +16,7 @@ import java.util.Map;
 
  Generator Bower Json File
  *
- * @author Hyyan Abo Fakher <habofakher@basis.com>
+ * @author Hyyan Abo Fakher &lt;habofakher@basis.com&gt;
  */
 public class BowerJsonBuilder {
 

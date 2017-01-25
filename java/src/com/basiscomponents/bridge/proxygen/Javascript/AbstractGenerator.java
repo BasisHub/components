@@ -19,7 +19,7 @@ import java.util.HashMap;
  * 
  * AbstractGenerator abstract class
  *
- * @author Hyyan Abo Fakher <habofakher@basis.com>
+ * @author Hyyan Abo Fakher &lt;habofakher@basis.com&gt;
  */
 abstract public class AbstractGenerator {
 
@@ -190,7 +190,6 @@ abstract public class AbstractGenerator {
     /**
      * Generate package
      *
-     * @return AbstractGenerator
      */
     public abstract void generate()
             throws FileNotFoundException, UnsupportedEncodingException, IOException;

@@ -146,7 +146,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns Layout constraints as LC object
+	 * @return Layout constraints as LC object
 	 */
 	public LC getLayoutConstraints() {
 		return this.layoutConstraints;
@@ -173,7 +173,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns Column constraints as AC object
+	 * @return Column constraints as AC object
 	 */
 	public AC getColumnConstraints() {
 		return this.columnConstraints;
@@ -199,7 +199,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns Row constraints as AC object
+	 * @return Row constraints as AC object
 	 */
 	public AC getRowConstraints() {
 		return this.rowConstraints;
@@ -227,7 +227,7 @@ public class BBMigPane implements BBjControl {
 	 *
 	 * @param control
 	 *            BBj control object
-	 * @returns Component constraints as CC object
+	 * @return Component constraints as CC object
 	 */
 	public CC getComponentConstraints(BBjControl control) {
 		BBComponentWrapper componentWrapper = getComponentWrapper(control);
@@ -289,7 +289,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns container BBContainer object
+	 * @return container BBContainer object
 	 */
 	public BBContainer getContainer() {
 		return this.container;
@@ -297,7 +297,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns containerWrapper BBContainerWrapper object
+	 * @return containerWrapper BBContainerWrapper object
 	 */
 	public BBContainerWrapper getContainerWrapper() {
 		return this.containerWrapper;
@@ -305,7 +305,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns BBjWindow BBj window object
+	 * @return BBjWindow BBj window object
 	 */
 	public BBjWindow getWnd() {
 		return this.container.getWindow();
@@ -313,7 +313,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns int Preferred width of container
+	 * @return int Preferred width of container
 	 */
 	public int getPreferredWidth() {
 		return this.preferredSize.width;
@@ -321,7 +321,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns int Preferred height of container
+	 * @return int Preferred height of container
 	 */
 	public int getPreferredHeight() {
 		return this.preferredSize.height;
@@ -368,7 +368,7 @@ public class BBMigPane implements BBjControl {
 	 *
 	 * @param control
 	 *            BBj control object
-	 * @returns componentWrapper BBComponentWrapper object
+	 * @return componentWrapper BBComponentWrapper object
 	 */
 	public BBComponentWrapper getComponentWrapper(BBjControl control) {
 		return (BBComponentWrapper) this.containerWrapper.getControlToComponentWrapperMap().get(control);
@@ -522,7 +522,7 @@ public class BBMigPane implements BBjControl {
 
 	/**
 	 *
-	 * @returns If the grid is valid
+	 * @return If the grid is valid
 	 */
 	private boolean isMiglayoutGridValid() {
 		return this.valid;

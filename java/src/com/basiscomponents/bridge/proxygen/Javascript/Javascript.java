@@ -33,7 +33,7 @@ import java.util.Map;
 
  Generate javascript files in bower bundle style
  *
- * @author Hyyan Abo Fakher <habofakher@basis.com>
+ * @author Hyyan Abo Fakher &lt;habofakher@basis.com&gt;
  */
 public class Javascript extends AbstractGenerator{
     

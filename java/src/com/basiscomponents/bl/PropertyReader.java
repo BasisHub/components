@@ -176,7 +176,6 @@ public class PropertyReader {
 	 * @param id
 	 *            - The position of the key
 	 * @return key or null if nothing was found
-	 * @throws IndexOutOfBoundException
 	 */
 	public String getAttribute(String attrname, int id) {
 		LinkedHashMap<BBjVector, BBjVector> map = finalMap.get(attrname);
@@ -193,10 +192,9 @@ public class PropertyReader {
 	 * 
 	 * @param attrname
 	 *            - The attribute's name
-	 * @param id
+	 * @param key
 	 *            - The position of the key
 	 * @return key or null if nothing was found
-	 * @throws IndexOutOfBoundException
 	 */
 	public String getAttribute(String attrname, String key) {
 		LinkedHashMap<BBjVector, BBjVector> map = finalMap.get(attrname);
@@ -218,7 +216,6 @@ public class PropertyReader {
 	 * @param id
 	 *            - The position of the key
 	 * @return key or null if nothing was found
-	 * @throws IndexOutOfBoundException
 	 */
 	public String getAttributeKey(String attrname, int id) {
 		LinkedHashMap<BBjVector, BBjVector> map = finalMap.get(attrname);

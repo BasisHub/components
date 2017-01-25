@@ -23,7 +23,7 @@ import java.util.Iterator;
  *
  * Generator utilities
  *
- * @author Hyyan Abo Fakher <habofakher@basis.com>
+ * @author Hyyan Abo Fakher &lt;habofakher@basis.com&gt;
  */
 public class Utilities {
 
