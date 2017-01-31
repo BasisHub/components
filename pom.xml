@@ -30,7 +30,7 @@
 			</activation>
 
 			<properties>
-				<jar-directory>/mnt/jenkins/workspace/BasisComponents/components/jars</jar-directory>
+				<jar-directory>components/jars</jar-directory>
 				<reportOutputDirectory>/mnt/jenkins/workspace/BasisComponentsDocs/docs</reportOutputDirectory>
 			</properties>
 		</profile>
