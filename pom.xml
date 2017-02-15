@@ -34,7 +34,7 @@
 
 			<properties>
 				<jar-directory>/mnt/jenkins/workspace/BasisComponents/components/jars</jar-directory>
-				<reportOutputDirectory></reportOutputDirectory>
+				<reportOutputDirectory>/mnt/jenkins/workspace/BasisComponents/components</reportOutputDirectory>
 			</properties>
 		</profile>
 
