@@ -2,6 +2,7 @@ package com.basiscomponents.db;
 
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -848,6 +849,67 @@ public class DataRow implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Creates a DataRow from a String in URL format
+	 * Sample: field1=value1&field2=value2 
+	 * will result in a DataRow with the two fields field1 and field2
+	 * holding the according values
+	 * 
+	 * @param in: the URL formatted code 
+	 * @return a new DataRow from the String
+	 * @throws Exception
+	 */
+	@SuppressWarnings("deprecation")
+	public static DataRow fromURL(String in) throws Exception {
+		DataRow r = new DataRow();
+		if (in.length() <3 )
+			return r;
+		
+		List<String> Params = Arrays.asList(in.split("&"));
+		Iterator<String> it = Params.iterator();
+		while (it.hasNext()){
+			String arg = it.next();
+			String[] pair = arg.split("=");
+			if (pair.length > 0){
+				String key	 = java.net.URLDecoder.decode(pair[0]);
+				String value = new String();
+				if (pair.length >1)
+					value= java.net.URLDecoder.decode(pair[1]);
+				r.setFieldValue(key, value);
+			}
+		}
+		
+		return r;
+		
+	}
+
+	/**
+	 * Creates a URL-encoded String out of the DataRow
+	 * 
+	 * @return the URL encoded String 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("deprecation")
+	public String toURL() throws Exception {
+		
+		StringBuilder ret = new StringBuilder();
+		ArrayList<String> fields = this.ResultSet.getColumnNames();
+		Iterator<String> it = fields.iterator();
+		while (it.hasNext()){
+			String f = it.next();
+			String v = getFieldAsString(f);
+			if (ret.length()>0)
+				ret.append("&");
+
+			ret.append(java.net.URLEncoder.encode(f));
+			ret.append("=");
+			ret.append(java.net.URLEncoder.encode(v));
+
+		}
+			
+		return ret.toString();
+	}
+	
 	public String toJson() throws Exception {
 		ResultSet rs = new ResultSet();
 		rs.add(this);
