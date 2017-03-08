@@ -285,12 +285,14 @@ public class ResultSetExporter {
                 		currentFieldName = fieldNameIterator.next();
                 		cell = row.createCell(cellIndex);
                 		columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
-            			if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE){
-            				cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
-            				cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
-            			}else{
-            				cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
-            			}
+                		if (currentRow.contains(currentFieldName)){
+	            			if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE){
+	            				cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+	            				cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
+	            			}else{
+	            				cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
+	            			}
+                		}
             			cellIndex++;
                 	}
                 }
