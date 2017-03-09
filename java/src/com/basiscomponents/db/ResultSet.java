@@ -1222,20 +1222,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	@Override
 	public String toString() {
-		String s = "[";
-		s += "Metadata:";
-		s += this.MetaData.toString();
-		s += ";";
-		s += "Columns:";
-		s += this.ColumnNames.toString();
-		s += ";";
-		s += "Records:[";
-		Iterator<DataRow> it = this.DataRows.iterator();
-		while (it.hasNext()) {
-			s += it.next().toString();
-			s += ";";
-		}
-		s += "]]";
+		String s=new String("ResultSet ");
+		s += this.DataRows.size();
+		s += " entries @";
+		s += System.identityHashCode(this);
 		return s;
 	}
 
