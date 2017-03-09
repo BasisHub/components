@@ -1157,6 +1157,8 @@ public class DataRow implements java.io.Serializable {
 	
 	/**
 	 * Resolve any [[CONSTANT]] type of string inside all String fields
+	 * note: if the CONSTANT contains "!CLEAR" the field will be removed from the 
+	 * DataRow (like an STBL gets cleared)
 	 * @param cr an instance of the ConstantsResolver class that holds the constants 
 	 * @return: a new object with resolved String constants
 	 */
@@ -1167,8 +1169,13 @@ public class DataRow implements java.io.Serializable {
 		while (it.hasNext()){
 			String f = (String) it.next();
 				try {
-					if (n.getFieldType(f) ==12)					
+					if (n.getFieldType(f) ==12){					
 						n.setFieldValue(f, cr.resolveConstants(n.getField(f).getString()));
+						if (n.getField(f).getString().equals("!CLEAR"))
+							n.removeField(f);
+					}
+					
+							
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
