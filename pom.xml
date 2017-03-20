@@ -25,7 +25,7 @@
 			</activation>
 
 			<properties>
-				<jar-directory>/mnt/jenkins/workspace/Basis_16.23_Components/components/jars</jar-directory>
+				<jar-directory>/mnt/jenkins/workspace/Basis_16.24_Components/components/jars</jar-directory>
 			</properties>
 		</profile>
 
