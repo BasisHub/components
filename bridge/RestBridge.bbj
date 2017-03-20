@@ -140,11 +140,17 @@ class public RestBridge
 
 
         if pos("text/html"=accept$) >0 OR pos("*/*"=accept$) >0  then
+            if rs!.size() then
+                custom_css! = rs!.get(0).getAttribute("CUSTOM_CSS")
+            endif
             response!.setContentType("text/html")
             s! = response!.getOutputStream()
 
-
-            s!.write("<html><head><style>table, th, td {padding:5px;border: 1px solid black;}</style></head><body>")
+            if custom_css! <> null() then
+                s!.write("<html><head><style>table, th, td {padding:5px;border: 1px solid black;} "+str(custom_css!)+"</style></head><body>")
+            else
+                s!.write("<html><head><style>table, th, td {padding:5px;border: 1px solid black;}</style></head><body>")
+            endif
 
             single = answer!.get("single",err=*next)
             if single>0 AND rs!.size()=1 then
