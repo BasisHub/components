@@ -538,8 +538,8 @@ public class SQLResultSet implements java.sql.ResultSet {
 
 	@Override
 	public SQLWarning getWarnings() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+//		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override
