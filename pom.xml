@@ -147,7 +147,7 @@
 			<artifactId>poi.jar</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/poi-3.14-20160307.jar</systemPath>
+			<systemPath>${jar-directory}/poi-3.15.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -155,7 +155,15 @@
 			<artifactId>poi-excelant.jar</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/poi-excelant-3.14-20160307.jar</systemPath>
+			<systemPath>${jar-directory}/poi-excelant-3.15.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>com.basis.lib</groupId>
+			<artifactId>poi-ooxml.jar</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/poi-ooxml-3.15.jar</systemPath>
 		</dependency>
 
 		<dependency>
