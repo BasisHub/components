@@ -316,8 +316,7 @@ public class SQLResultSet implements java.sql.ResultSet {
 
 	@Override
 	public void clearWarnings() throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		//throw new UnsupportedOperationException();
 	}
 
 	@Override
