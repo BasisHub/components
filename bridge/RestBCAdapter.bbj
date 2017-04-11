@@ -8,8 +8,6 @@ BBjAPI().getConfig().setOptionSetting("ERROR_UNWINDS", 1)
 
 ses$ = argv(1)
 auth$ = argv(2)
-System.out.println("DIR: ")
-System.out.println(stbl("REST_WD"))
 
 chdir stbl("REST_WD")
 System.out.println("DIR: "+stbl("REST_WD"))
@@ -18,18 +16,13 @@ ses$=stbl("SESSIONID",ses$)
 
 
 auth$=java.util.Base64.getDecoder().decode(auth$)
-
-System.out.println(auth$)
-
 user$=auth$(1,pos(":"=auth$)-1)
 password$=auth$(pos(":"=auth$)+1)
+authenticated=0
+call "authenticate.bbj"
 
 requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
 responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
-
-if user$<>"admin" then
-    throw "Wrong username and/or password",999
-fi
 
 REM ses! = new ::api/SessionsBC::SessionsBC()
 REM 
@@ -47,8 +40,6 @@ REM fi
 
 done_login:
 
-
-authenticated=1
 
 timeout=60
 timeout=int(num(stbl("REST_TIMEOUT",err=*next),err=*next))
@@ -94,12 +85,23 @@ main_loop:
 
     System.out.println("REST ADAPTER Selected: "+sel$)
 
+    ns! = BBjAPI().getGroupNamespace()
+    bcMap! = ns!.getValue("BCMAP",err=*next)
+    if bcMap! = null() then
+        bcMap! = new HashMap()
+        ns!.setValue("BCMAP",bcMap!)
+    endif
 
     prefix$ = stbl("REST_PGM_PREFIX",err=*next)
     suffix$ = stbl("REST_PGM_SUFFIX",err=*next)
 
     bc$=bc$+"BC"
-    bc! = eval("new ::"+prefix$+bc$+suffix$+"::"+bc$+"()")
+    if bcMap!.containsKey(bc$) then
+        bc! = bcMap!.get(bc$)
+    else
+        bc! = eval("new ::"+prefix$+bc$+suffix$+"::"+bc$+"()")
+        bcMap!.put(bc$,bc!)
+    endif
 
     response! = new HashMap()
     params! = new HashMap()
