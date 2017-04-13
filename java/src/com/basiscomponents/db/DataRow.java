@@ -1154,7 +1154,7 @@ public class DataRow implements java.io.Serializable {
 		this.RowKey = rowKey.getBytes();
 	}
 
-	
+
 	/**
 	 * Resolve any [[CONSTANT]] type of string inside all String fields
 	 * note: if the CONSTANT contains "!CLEAR" the field will be removed from the 
@@ -1163,19 +1163,30 @@ public class DataRow implements java.io.Serializable {
 	 * @return: a new object with resolved String constants
 	 */
 	public DataRow resolveConstants(ConstantsResolver cr) {
+		return resolveConstants(cr, false);
+	}
+
+
+	/**
+	 * Resolve any [[CONSTANT]] type of string inside all String fields
+	 * note: if the CONSTANT contains "!CLEAR" the field will be removed from the
+	 * DataRow (like an STBL gets cleared)
+	 * @param cr an instance of the ConstantsResolver class that holds the constants
+	 * @param removeUnsetFields if true all fields which could not be resolved will be removed
+	 * @return: a new object with resolved String constants
+	 */
+	public DataRow resolveConstants(ConstantsResolver cr, boolean removeUnsetFields) {
 		DataRow n = this.clone();
 		@SuppressWarnings("rawtypes")
 		Iterator it = n.getFieldNames().iterator();
 		while (it.hasNext()){
 			String f = (String) it.next();
 				try {
-					if (n.getFieldType(f) ==12){					
+					if (n.getFieldType(f) ==12){
 						n.setFieldValue(f, cr.resolveConstants(n.getField(f).getString()));
-						if (n.getField(f).getString().equals("!CLEAR"))
+						if ((removeUnsetFields && n.getField(f).getString().matches("^\\[\\[.*\\]\\]$")) || n.getField(f).getString().equals("!CLEAR"))
 							n.removeField(f);
 					}
-					
-							
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1184,8 +1195,9 @@ public class DataRow implements java.io.Serializable {
 		return n;
 	}
 
+
 	public void clear() {
-		
+
 		@SuppressWarnings("unchecked")
 		Iterator<String> it = this.getFieldNames().iterator();
 		while (it.hasNext()){
