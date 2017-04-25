@@ -136,9 +136,9 @@ main_loop:
             endif
             dr! = com.basiscomponents.db.DataRow.fromJson(request!.get("body"))
             k! = java.util.Arrays.asList(new String(filterf$).split("/"))
-            v! = java.util.Arrays.asList(new String(sel$).split("/"))
+            v! = java.util.Arrays.asList(new String(sel$).split("/",-1))
             if v!.size() < k!.size() then
-                throw "Not enough parameters for PUT",999
+                throw "Not enough parameters for "+method$,999
             endif
             for i=0 to k!.size()-1
                 if !dr!.contains(k!.get(i)) then
