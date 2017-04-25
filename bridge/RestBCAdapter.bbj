@@ -125,6 +125,62 @@ main_loop:
 
     System.out.println("REST ADAPTER filter fields: "+filterf$)
 
+    method$ = request!.get("method")
+    switch method$
+        case "GET"
+        break
+        case "DELETE"
+        case "PUT"
+            if sel$ = "" or filterf$ = "" then
+                throw "Missing resource ID",999
+            endif
+            dr! = com.basiscomponents.db.DataRow.fromJson(request!.get("body"))
+            k! = java.util.Arrays.asList(new String(filterf$).split("/"))
+            v! = java.util.Arrays.asList(new String(sel$).split("/"))
+            if v!.size() < k!.size() then
+                throw "Not enough parameters for PUT",999
+            endif
+            for i=0 to k!.size()-1
+                if !dr!.contains(k!.get(i)) then
+                    dr!.setFieldValue(k!.get(i),v!.get(i))
+                endif
+            next i
+
+            if method$ = "PUT" then
+                dr! = bc!.write(dr!,err=*next); ok=1
+                if !ok then
+                    response!.put("statuscode","409")
+                    response!.put("msg",errmes(-1))
+                else
+                    response!.put("statuscode","200")
+                    if dr!.getAttribute("INSERTED") <> null() then
+                        response!.put("statuscode","201")
+                    endif
+                    if dr!.getAttribute("UPDATED") <> null() then
+                        response!.put("statuscode","204")
+                    endif
+                endif
+            else
+                bc!.remove(dr!)
+                response!.put("statuscode","204")
+            endif
+
+
+            response!.put("resultset","")
+            response!.put("info",dummy$+" - " +str(usecount))
+            response!.put("request",str(request!))
+            response!.put("BC",bc$)
+            response!.put("sel",sel$)
+            response!.put("primarykey",filterf$)
+            usecount=usecount+1
+
+            BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
+            responseSemaphore!.release()
+
+            goto main_loop
+        break
+    swend
+
     if (sel$>"") then
         response!.put("single",1)
 
@@ -298,9 +354,9 @@ main_loop:
         response! = new HashMap()
 
         if authenticated>0 then
-            response!.put("statuscode",statuscode)
+            response!.put("statuscode",str(statuscode))
         else
-            response!.put("statuscode",401)
+            response!.put("statuscode","401")
         fi
         response!.put("msg",e$)
 

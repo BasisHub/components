@@ -8,22 +8,6 @@ class public RestBridge
         System.out.println("REST request --------------------------")
         System.out.println("REST request METHOD "+request!.getMethod())
         System.out.println("REST request HEADER "+request!.getRequestURL())
-        h! = request!.getHeaderNames()
-        it! = h!.iterator()
-        while it!.hasNext()
-            h$=it!.next()
-            h1$=str(request!.getHeader(h$))
-            System.out.println("REST request HEADER "+h$+":"+h1$)
-        wend
-
-        h! = request!.getParameterNames()
-        it! = h!.iterator()
-        while it!.hasNext()
-            h$=it!.next()
-            h1$=str(request!.getParameter(h$))
-            System.out.println("REST request PARAM "+h$+":"+h1$)
-        wend
-
         System.out.println("REST request end -----------------------")
 
 
@@ -32,23 +16,29 @@ class public RestBridge
         response!.setHeader("Access-Control-Allow-Methods","GET, POST, OPTIONS")
         response!.setHeader("Access-Control-Allow-Headers",request!.getHeader("Access-Control-Request-Headers"))
 
-        if (request!.getMethod() = "OPTIONS") then
-            response!.setStatus(200)
-
-            System.out.println("REST OPTIONS response --------------------------")
-
-            h! = response!.getHeaderNames()
-            it! = h!.iterator()
-            while it!.hasNext()
-                h$=it!.next()
-                h1$=str(response!.getHeader(h$))
-                System.out.println("REST response HEADER "+h$+":"+h1$)
-            wend
-
-            System.out.println("REST OPTIONS response end -----------------------")
-
-            methodret
-        fi
+        switch request!.getMethod()
+            case "GET"
+                method$ = "GET"
+            break
+            case "OPTIONS"
+                response!.setStatus(200)
+                methodret
+            break
+            case "DELETE"
+            case "PUT"
+                method$ = request!.getMethod()
+                rem Only JSON is supported for now
+                if cvs(request!.getContentType(),8) <> "application/json" then
+                    s! = response!.getOutputStream()
+                    response!.sendError(415,"Unsupported media type """+request!.getContentType()+"""")
+                endif
+            break
+            case default
+                response!.setContentType("text/plain")
+                s! = response!.getOutputStream()
+                response!.sendError(501,"Unsupported HTTP method """+request!.getMethod()+"""")
+            break
+        swend
 
 
 
@@ -98,8 +88,10 @@ class public RestBridge
         wend
 
         req! = new HashMap()
+        req!.put("method",method$)
         req!.put("uri",request!.getPathInfo())
         req!.put("params",params!)
+        req!.put("body",request!.getBody())
 
         answer!=#invoke(ses$,req!)
         ses_list!.push(ses$)
@@ -118,7 +110,7 @@ class public RestBridge
 
         statuscode! = answer!.get("statuscode",err=*next)
         msg! = answer!.get("msg",err=*next)
-        if statuscode! <> null() then
+        if statuscode! <> null() and !mask(statuscode!,"20\d") then
             response!.setHeader("Reason-Phrase",str(answer!))
             System.out.println("REST: error "+str(statuscode!)+" - "+str(msg!))
             response!.sendError(num(statuscode!),str(msg!))
@@ -137,9 +129,13 @@ class public RestBridge
             methodret
         fi
 
+        if method$ = "PUT" or method$ = "DELETE" then
+            response!.setStatus(num(statuscode!))
+            methodret
+        endif
 
 
-        if pos("text/html"=accept$) >0 OR pos("*/*"=accept$) >0  then
+        if pos("text/html"=accept$) > 0 OR pos("*/*"=accept$) > 0  then
             if rs!.size() then
                 custom_css! = rs!.get(0).getAttribute("CUSTOM_CSS")
             endif
@@ -168,7 +164,7 @@ class public RestBridge
                     pk$=str(pk!)
                     links! = new java.util.HashMap()
                     link$=request!.getRequestURI()
-                    System.out.println("LINK URI: "+link$)
+
                     if pos("/"=link$,1,0)>2 then
                         link$=link$(1,pos("/"=link$,1,3)-1)
                     fi
@@ -183,14 +179,10 @@ class public RestBridge
                         link$=link$+"/{"+f$+"}"
                         links!.put(f$,link$)
                     wend
-
-                    System.out.println(str(links!))
                 else
                     links! = null()
                 fi
                 wr! = new java.io.StringWriter()
-                rem TODO: add hyperlinking into the writer
-                rem "linkfield" in the answer! holds the fieldname for the primary key
 
                 com.basiscomponents.db.ResultSetExporter.writeHTML(rs!,wr!,links!)
                 wr!.flush()
