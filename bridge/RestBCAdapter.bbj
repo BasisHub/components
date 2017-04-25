@@ -183,6 +183,7 @@ main_loop:
 
     if (sel$>"") then
         response!.put("single",1)
+        filter! = null()
 
         if filterf$>"" then
             filter! = new com.basiscomponents.db.DataRow()
@@ -219,8 +220,6 @@ main_loop:
                 wend
              fi
 
-            System.out.println("REST ADAPTER: filter "+str(filter!))
-
             response!.put("linkfield",filterf$)
             bc!.setFilter(filter!)
         else
@@ -229,6 +228,7 @@ main_loop:
             goto error_out
         fi
     else
+        filter! = null()
         if params! <> null() and params!.size() >0 then
             filter! = new com.basiscomponents.db.DataRow()
             it! = params!.keySet().iterator()
@@ -243,11 +243,9 @@ main_loop:
                     fi
                 fi
             wend
-            if filter!.getColumnCount() then
-                bc!.setFilter(filter!)
-                System.out.println("filtering :"+str(filter!))
-            endif
         fi
+
+        bc!.setFilter(filter!)
 
         response!.put("single",0)
     fi
