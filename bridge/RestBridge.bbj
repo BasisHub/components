@@ -3,7 +3,13 @@ use com.basiscomponents.db.ResultSet
 
 class public RestBridge
 
-    METHOD PUBLIC void service(BBjspWebRequest request!, BBjspWebResponse response!)
+    METHOD PUBLIC void service(BBjspServletContext context!)
+
+        declare BBjspWebRequest request!
+        declare BBjspWebResponse response!
+
+        request! = context!.getRequest()
+        response! = context!.getResponse()
 
         System.out.println("REST request --------------------------")
         System.out.println("REST request METHOD "+request!.getMethod())
@@ -13,7 +19,7 @@ class public RestBridge
 
         response!.setHeader("Access-Control-Allow-Origin",request!.getHeader("Origin"))
         response!.setHeader("Access-Control-Allow-Credentials","true")
-        response!.setHeader("Access-Control-Allow-Methods","GET, POST, OPTIONS")
+        response!.setHeader("Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS")
         response!.setHeader("Access-Control-Allow-Headers",request!.getHeader("Access-Control-Request-Headers"))
 
         switch request!.getMethod()

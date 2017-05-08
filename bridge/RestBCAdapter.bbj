@@ -82,6 +82,14 @@ main_loop:
         sel$=""
     fi
 
+    if cvs(bc$,3) = "" then
+        response! = new HashMap()
+        response!.put("statuscode","404")
+        response!.put("msg","No such BC")
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
+        responseSemaphore!.release()
+        goto main_loop
+    endif
 
     System.out.println("REST ADAPTER Selected: "+sel$)
 
@@ -143,6 +151,10 @@ main_loop:
             for i=0 to k!.size()-1
                 if !dr!.contains(k!.get(i)) then
                     dr!.setFieldValue(k!.get(i),v!.get(i))
+                else
+                    if dr!.getFieldAsString() <> v!.get(i) then
+                        throw "Different resource ID in URL path and request body!",999
+                    endif
                 endif
             next i
 
