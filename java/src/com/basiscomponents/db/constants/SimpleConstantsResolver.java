@@ -22,7 +22,7 @@ public class SimpleConstantsResolver implements ConstantsResolver{
 	
 	@Override
 	public String resolveConstants(String in) {
-		if (in.matches(".*\\[\\[.*\\]\\].*")){
+		if (in.matches("(?s).*\\[\\[.*\\]\\].*")){
 			String out = in;
 			
 			Iterator<Entry<String, String>> it = this.Constants.entrySet().iterator();
@@ -36,5 +36,4 @@ public class SimpleConstantsResolver implements ConstantsResolver{
 		else 
 			return in;
 	}
-
 }

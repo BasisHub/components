@@ -979,11 +979,17 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 				case java.sql.Types.DOUBLE:
 				case java.sql.Types.FLOAT:
-				case java.sql.Types.REAL:
 					if (dr.getField(fn) == null || dr.getField(fn).getDouble() == null)
 						g.writeNumberField(fn, 0.0);
 					else
 						g.writeNumberField(fn, dr.getField(fn).getDouble().doubleValue());
+					break;
+
+				case java.sql.Types.REAL:
+					if (dr.getField(fn) == null || dr.getField(fn).getFloat() == null)
+						g.writeNumberField(fn, 0.0);
+					else
+						g.writeNumberField(fn, dr.getField(fn).getFloat().floatValue());
 					break;
 
 				case java.sql.Types.BOOLEAN:

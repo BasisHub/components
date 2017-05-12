@@ -4,3 +4,7 @@ java/lib
 .project
 java/build.info
 java/src/com/basiscomponents/VersionInfo.java
+.metadata
+.builaunches
+.bdtPath
+.buildpath
