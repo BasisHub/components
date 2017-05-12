@@ -562,9 +562,13 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public void removeField(String name) throws Exception {
-		int column = getColumnIndex(name);
-		this.ResultSet.removeColumn(column);
+
+		int column = getColumnIndex(name,true);
+		if (column>-1)
+			this.ResultSet.removeColumn(column);
+
 		this.DataFields.remove(name);
+		
 	}
 
 	public ArrayList<String> getAttributeForFields(String attrname) {
@@ -650,6 +654,7 @@ public class DataRow implements java.io.Serializable {
 	public void addDataField(String name, DataField field) throws Exception {
 		Object o = field.getObject(); // default
 		int type;
+		
 		String typeName = o.getClass().getCanonicalName();
 		if (typeName != null && typeName.startsWith("[")) {
 			if (typeName.contains("byte"))
@@ -730,8 +735,15 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public void addDataField(String name, int type, DataField field) throws Exception {
-
-		if (this.ResultSet.getColumnIndex(name) == -1) {
+  	  
+  	   
+  	  	// deal unknown types as String
+  	  	if (type==-1)
+  		   type=12;
+  	  
+  	  	System.out.println("adding "+name+" "+type+" "+field);
+		
+  	  	if (this.ResultSet.getColumnIndex(name) == -1) {
 			int column = this.ResultSet.addColumn(name);
 			this.ResultSet.setColumnType(column, type);
 		}

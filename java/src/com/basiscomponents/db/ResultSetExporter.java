@@ -286,7 +286,7 @@ public class ResultSetExporter {
                 		cell = row.createCell(cellIndex);
                 		columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
                 		if (currentRow.contains(currentFieldName)){
-	            			if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE){
+	            			if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE || columnType == java.sql.Types.INTEGER){
 	            				cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
 	            				cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
 	            			}else{

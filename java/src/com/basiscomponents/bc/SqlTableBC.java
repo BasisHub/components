@@ -165,12 +165,14 @@ public class SqlTableBC implements BusinessComponent{
 		      while (it.hasNext()){
 		    	  Integer type = it.next();
 		    	  DataField o = it1.next();
-		    	  
+
 		    	  switch (type){
 		    	  		case 4:
 		    	  			prep.setInt(index, o.getInt());
 		    	  			index++;
 		    	  			break;
+		    	  		case -1:
+		    	  		case 1:
 		    	  		case 12:
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
@@ -308,6 +310,8 @@ public class SqlTableBC implements BusinessComponent{
 			    	  			prep.setInt(index, o.getInt());
 			    	  			index++;
 			    	  			break;
+			    	  		case -1:
+			    	  		case 1:
 			    	  		case 12:
 			    	  			prep.setString(index, o.getString());
 			    	  			index++;
@@ -426,7 +430,7 @@ public class SqlTableBC implements BusinessComponent{
 						DataField f = r.getField(field);
 						ParamTypes.add(r.getFieldType(field));
 						Params.add(f);
-//						System.out.println(field+" "+f+" "+r.getFieldType(field));
+						System.out.println(field+" "+f+" "+r.getFieldType(field));
 
 				}	
 						
@@ -452,6 +456,8 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setDouble(index, o.getDouble());
 		    	  			index++;
 		    	  			break;		    	  			
+		    	  		case -1:
+		    	  		case 1:
 		    	  		case 12:
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
@@ -475,7 +481,7 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			index++;
 		    	  			break;			    	  			
 		    	  		default:
-		    	  			System.err.println("todo: "+type);
+		    	  			System.err.println("todo: "+type+" for "+o.getObject().getClass());
 		    	  }
 		      }
 		      prep.execute();
@@ -567,6 +573,8 @@ public class SqlTableBC implements BusinessComponent{
 		    	  			prep.setDouble(index, o.getDouble());
 		    	  			index++;
 		    	  			break;
+		    	  		case -1:
+		    	  		case 1:
 		    	  		case 12:
 		    	  			prep.setString(index, o.getString());
 		    	  			index++;
