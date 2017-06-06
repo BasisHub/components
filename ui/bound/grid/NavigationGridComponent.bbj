@@ -2535,7 +2535,16 @@ REM         fi
         offsy=offsy+p1!.getY()
 
         while 1
+            rem Since BBj REV 17.00 the getParentWindow() method doesn't throw an error anymore when 
+            rem called from the BBjTopLevelWindow object, but the reference to the BBjTopLevelWindow itself.
+            rem Therefore we keep track of the previous window in order to get 
+            previousParent! = p1!
             p1! = p1!.getParentWindow(err=*break)
+
+            if(previousParent! = p1!) then
+                break
+            endif
+
             offsx=offsx+p1!.getX()
             offsy=offsy+p1!.getY()
         wend
