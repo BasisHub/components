@@ -4,23 +4,28 @@ use com.basiscomponents.db.DataRow
 
 seterr execerr
 
-System.out.println("REST: new reomte session ")
+debug=0
+debug=num(stbl("DEBUG",err=*next),err=*next)
+
+if debug then System.out.println("REST: new remote session ")
+
 BBjAPI().getConfig().setOptionSetting("ERROR_UNWINDS", 1)
 
 ses$ = argv(1)
 auth$ = argv(2)
 
 chdir stbl("REST_WD")
-System.out.println("DIR: "+stbl("REST_WD"))
-call "bridge/prepSession.bbj",err=*next
+if debug then System.out.println("REST: WORKDIR "+stbl("REST_WD"))
 ses$=stbl("SESSIONID",ses$)
-
 
 auth$=java.util.Base64.getDecoder().decode(auth$)
 user$=auth$(1,pos(":"=auth$)-1)
 password$=auth$(pos(":"=auth$)+1)
 authenticated=0
-call "authenticate.bbj"
+
+authpgm$="authenticate.bbj"
+authpgm$=stbl("REST_AUTHPGM",err=*next)
+call authpgm$
 
 requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
 responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
@@ -33,7 +38,7 @@ timeout=int(num(stbl("REST_TIMEOUT",err=*next),err=*next))
 
 main_loop:
 
-    CLEAR EXCEPT user$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout, usecount
+    CLEAR EXCEPT user$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout, usecount, debug
 
     seterr execerr
 
@@ -54,7 +59,7 @@ main_loop:
         goto main_loop
     fi
 
-    System.out.println("REST: remote session running "+ses$)
+    if debug then System.out.println("REST: remote session running "+ses$)
     dummy$=STBL("!SESSIONINFO",ses$+" - working "+str(request!))
 
     response! = new HashMap()
@@ -297,7 +302,17 @@ main_loop:
 
             fieldsel!=params!.get("_FIELDSEL",err=*next)
             if fieldsel! <> null()
-                bc!.setFieldSelection(new BBjVector(java.util.Arrays.asList(fieldsel!.split(","))))
+                ok=0
+                v! = new BBjVector(java.util.Arrays.asList(fieldsel!.split(",")))
+                fs!.setFieldSelection(vec!,err=*next); ok=1
+                if !ok then
+                    fs! = new DataRow()
+                    it! = v!.iterator()
+                    while it!.hasNext()
+                        fs!.setFieldValue(it!.next(),"")
+                    wend
+                    bc!.setFieldSelection(fs!)
+                fi
             fi
 
             scope!=params!.get("_SCOPE")
@@ -366,7 +381,7 @@ main_loop:
         usecount=usecount+1
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
         responseSemaphore!.release()
-        System.out.println("REST: reomte session done "+ses$)
+        if debug then System.out.println("REST: remote session done "+ses$)
         goto main_loop
 
 
@@ -379,9 +394,6 @@ main_loop:
         stacktrace$ = sw!.toString()
         sw!.close()
         pw!.close()
-
-        debug = 0
-        debug = num(stbl("DEBUG",err=*next),err=*next)
 
         if debug then
             ch=unt
@@ -408,13 +420,13 @@ REM         endif
 
         if authenticated>0 then
             response!.put("statuscode",str(statuscode))
+            response!.put("stacktrace",stacktrace$)
         else
             response!.put("statuscode","401")
         fi
 
         response!.put("errorcode",errorcode)
         response!.put("errormsg",errormsg$)
-        response!.put("stacktrace",stacktrace$)
 
 
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
