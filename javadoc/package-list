@@ -13,4 +13,5 @@ com.basiscomponents.db.sql
 com.basiscomponents.json
 com.basiscomponents.lucene
 com.basiscomponents.ui.layout
+com.basiscomponents.util.windows
 net.miginfocom.layout
