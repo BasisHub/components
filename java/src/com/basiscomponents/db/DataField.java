@@ -20,6 +20,10 @@ import java.util.Set;
 
 import com.google.gson.annotations.Expose;
 
+/**
+ * The DataField class is an object container class which provides multiple cast methods 
+ * to retrieve the initially stored object in different formats / types.
+ */
 public class DataField implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -29,30 +33,67 @@ public class DataField implements java.io.Serializable {
 
 	private HashMap<String, String> Attributes = new HashMap<String, String>();
 
+	/**
+	 * Creates the DatField object with the given object as the DataField's value
+	 * 
+	 * @param value The value object of the DataField to be created 
+	 */
 	public DataField(Object value) {
 		setValue(value);
 	}
 
+	/**
+	 * Return's the DataField's value.
+	 * 
+	 * @return value the DataField's value
+	 */
 	public Object getValue() {
 		return this.Value;
 	}
 
-	public Boolean equals(DataField f) {
-		return this.getString().equals(f.getString());
+	/**
+	 * Returns <code>true</code> in case the given DataField object equals the current DataField object, <code>false</code> otherwise.
+	 * The method does only compare the value object of both DataField objects, not the attributes.
+	 * 
+	 * @param dataField The DataField object to compare with.
+	 * @return equal The boolean value indicating whether the given DataField object equals this DataField object.
+	 */
+	public Boolean equals(DataField dataField) {
+		return this.getString().equals(dataField.getString());
 	}
 
+	/**
+	 * Sets the given object as the DataField's value
+	 * 
+	 * @param value The object to set as the DataField's value
+	 */
 	public void setValue(Object value) {
 		this.Value = value;
 	}
 
+	/**
+	 * Returns the class name of the DataField's value object.
+	 * 
+	 * @return className The DataField value's class name.
+	 */
 	public String getClassName() {
 		return this.Value.getClass().getCanonicalName();
 	}
 
+	/**
+	 * Return's the DataField's value.
+	 * 
+	 * @return value The DataField's value.
+	 */
 	public Object getObject() {
 		return this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.lang.String</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.lang.String</code> object.
+	 */
 	public String getString() {
 		if (this.Value != null && getClassName() == "java.lang.Boolean") {
 			// make this work the same as STR(Boolean.TRUE) in BBj
@@ -67,34 +108,74 @@ public class DataField implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.lang.Integer</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.lang.Integer</code> object.
+	 */
 	public Integer getInt() {
 		return (Integer) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.lang.Byte</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.lang.Byte</code> object.
+	 */
 	public Byte getByte() {
 		return (Byte) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.lang.Short</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.lang.Short</code> object.
+	 */
 	public Short getShort() {
 		return (Short) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.lang.Long</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.lang.Long</code> object.
+	 */
 	public Long getLong() {
 		return (Long) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.math.BigDecimal</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.math.BigDecimal</code> object.
+	 */
 	public BigDecimal getBigDecimal() {
 		return (BigDecimal) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.lang.Double</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.lang.Double</code> object.
+	 */
 	public Double getDouble() {
 		return (Double) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.lang.Float</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.lang.Float</code> object.
+	 */
 	public Float getFloat() {
 		return (Float) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.Date</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.Date</code> object.
+	 */
 	public Date getDate() {
 		if (this.Value != null && getClassName() == "java.sql.Timestamp") {
 			long ms = ((java.sql.Timestamp) this.Value).getTime();
@@ -103,10 +184,20 @@ public class DataField implements java.io.Serializable {
 		return (Date) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.Time</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.Time</code> object.
+	 */
 	public Time getTime() {
 		return (Time) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.Timestamp</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.Timestamp</code> object.
+	 */
 	public Timestamp getTimestamp() {
 		if (this.Value != null && getClassName() == "java.sql.Date") {
 			long ms = ((java.sql.Date) this.Value).getTime();
@@ -115,26 +206,56 @@ public class DataField implements java.io.Serializable {
 		return (Timestamp) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as byte array.
+	 * 
+	 * @return value The DataField's value as byte array.
+	 */
 	public byte[] getBytes() {
 		return (byte[]) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.Array</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.Array</code> object.
+	 */
 	public Array getArray() {
 		return (Array) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.Blob</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.Blob</code> object.
+	 */
 	public Blob getBlob() {
 		return (Blob) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.Clob</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.Clob</code> object.
+	 */
 	public Clob getClob() {
 		return (Clob) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.NClob</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.NClob</code> object.
+	 */
 	public NClob getNClob() {
 		return (NClob) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.lang.Boolean</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.lang.Boolean</code> object.
+	 */
 	public Boolean getBoolean() {
 		
 		if (this.Value!=null && this.Value.getClass().equals(java.lang.String.class)){
@@ -143,41 +264,83 @@ public class DataField implements java.io.Serializable {
 		return (Boolean) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.Ref</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.Ref</code> object.
+	 */
 	public Ref getRef() {
 		return (Ref) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.net.URL</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.net.URL</code> object.
+	 */
 	public URL getURL() {
 		return (URL) this.Value;
 	}
 
+	/**
+	 * Returns the DataField's value as <code>java.sql.SQLXML</code> object.
+	 * 
+	 * @return value The DataField's value as <code>java.sql.SQLXML</code> object.
+	 */
 	public SQLXML getSQLXML() {
 		return (SQLXML) this.Value;
 	}
 
-	public void setAttribute(String name, String value) {
-		this.Attributes.put(name, value);
+	/**
+	 * Sets the value of the attribute with the given name. 
+	 * Creates the attribute if it doesn't exist already.
+	 * 
+	 * @param attributeName The attribute's name.
+	 * @param attributeValue The attribute's value.
+	 */
+	public void setAttribute(String attributeName, String attributeValue) {
+		this.Attributes.put(attributeName, attributeValue);
 	}
 
-	public String getAttribute(String name) {
-		return this.Attributes.get(name);
+	/**
+	 * Returns the value for the given attribute name.
+	 * <code>null</code> is returned if no attribute matches the given name.
+	 * 
+	 * @param attributeName The attribute's name.
+	 * @return attributeValue The attribute's value.
+	 */
+	public String getAttribute(String attributeName) {
+		return this.Attributes.get(attributeName);
 	}
 
+	/**
+	 * Returns a <code>java.util.HashMap</code> object with the DataField's 
+	 * attributes and their corresponding value.
+	 * 
+	 * @return attributesMap The <code>java.util.HashMap</code> object containing the DataField's attributes and their values.
+	 */
 	@SuppressWarnings("unchecked")
 	public HashMap<String, String> getAttributes() {
 		return (HashMap<String, String>) this.Attributes.clone();
 	}
 
-	public void removeAttribute(String name) {
-		this.Attributes.remove(name);
+	/**
+	 * Removes the attribute with the given name. 
+	 * Nothing happens in case the name doesn't exist.
+	 * 
+	 * @param attributeName The name of the attribute to remove.
+	 */
+	public void removeAttribute(String attributeName) {
+		this.Attributes.remove(attributeName);
 	}
 
+	@Override
 	public DataField clone() {
 		DataField f = null;
 		try {
 			f = new DataField(this.Value);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -193,14 +356,18 @@ public class DataField implements java.io.Serializable {
 		return f;
 	}
 
+	@Override
 	public String toString() {
 		if (this.Value == null)
 			return null;
 		return this.Value.toString();
 	}
 
+	/**
+	 * Sets the DataField's value to <code>null</code>
+	 */
 	public void clear() {
-			setValue(null);
+		setValue(null);
 	}
 
 }

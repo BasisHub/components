@@ -27,20 +27,42 @@ public class DataRow implements java.io.Serializable {
 
 	private int RowID;
 
+	/**
+	 * Instantiates an new DataRow object.
+	 */
 	public DataRow() {
 		this.ResultSet = new com.basiscomponents.db.ResultSet();
 	}
 
-	public DataRow(com.basiscomponents.db.ResultSet resultset) {
-		this.ResultSet = resultset;
+	/**
+	 * Instantiates a new DataRow object, and sets the column metadata to 
+	 * the given ResultSet object's column metadata
+	 * 
+	 * @param resultSet The ResultSet whose column metadata will be used for this new DataRow
+	 */
+	public DataRow(com.basiscomponents.db.ResultSet resultSet) {
+		this.ResultSet = resultSet;
 	}
 
+	/**
+	 * Returns a new instance of a DataRow object.
+	 * 
+	 * @return dataRow A newly instantiated DataRow object.
+	 */
 	public static DataRow newInstance() {
 		return new DataRow();
 	}
 
-	public static DataRow newInstance(com.basiscomponents.db.ResultSet resultset) {
-		return new DataRow(resultset);
+	/**
+	 * Returns a new instance of a DataRow object which has been initialized with the column
+	 * metadata from the given ResultSet object.
+	 * 
+	 * @param resultSet The ResultSet object whose metadata will be used for the new DataRow.
+	 * 
+	 * @return dataRow The newly instantiated DataRow object.
+	 */
+	public static DataRow newInstance(com.basiscomponents.db.ResultSet resultSet) {
+		return new DataRow(resultSet);
 	}
 
 	/**
@@ -79,7 +101,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns a BBArrayList object with all field names defined in this DataRow object.
+	 * Returns a {@link com.basiscomponents.db.BBArrayList BBArrayList} object with all field names defined in this DataRow object.
 	 * 
 	 * @return list The BBArrayList containing all field names defined in this DataRow object
 	 */
@@ -120,6 +142,11 @@ public class DataRow implements java.io.Serializable {
 		return this.Attributes.get(name);
 	}
 
+	/**
+	 * Returns a clone of this DataRow's attributes.
+	 * 
+	 * @return attributesMap The java.util.HashMap with this DataRow's attributes
+	 */
 	@SuppressWarnings("unchecked")
 	public java.util.HashMap<String, String> getAttributes() {
 		java.util.HashMap<String, String> clone = (java.util.HashMap<String, String>) this.Attributes.clone();
@@ -136,11 +163,7 @@ public class DataRow implements java.io.Serializable {
 		this.Attributes.remove(name);
 	}
 
-	/**
-	 * Returns a String representation of the DataRow object.
-	 * 
-	 * @return string The String representation of the DataRow object 
-	 */
+	@Override
 	public String toString() {
 		String x = "";
 		Iterator<String> it = this.ResultSet.getColumnNames().iterator();
@@ -150,7 +173,7 @@ public class DataRow implements java.io.Serializable {
 			try {
 				f = this.getFieldAsString(k);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			x = x + "," + k + "=" + f;
@@ -192,7 +215,7 @@ public class DataRow implements java.io.Serializable {
 				try {
 					addDataField(name, field);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 				field.setValue(null);
@@ -201,7 +224,7 @@ public class DataRow implements java.io.Serializable {
 				try {
 					addDataField(name, field);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -239,11 +262,11 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the DataField object with the specified field name.<br>
+	 * Returns the DataField object for the specified field name.<br>
 	 * <br>
 	 * Throws an Exception if no field with the specified name exists 
 	 * 
-	 * @param name The name of the field
+	 * @param name The field's name
 	 * @return dataField The DataField object 
 	 * 
 	 * @throws Exception Gets thrown in case no field with the specified name exists
@@ -253,7 +276,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the DataField object with the specified field name.
+	 * Returns the DataField object for the specified field name.
 	 * 
 	 * In case no field with the specified field name exists, depending on the specified boolean value
 	 * either an Exception is thrown, or not. In fact, this boolean value indicates whether the Exception 
@@ -338,9 +361,18 @@ public class DataRow implements java.io.Serializable {
 		return ret;
 	}
 
+	/**
+	 * Returns the value of the field with given name as double.
+	 * 
+	 * @param fieldName The name of the field whose value should be returned as double
+	 * 
+	 * @return value The field's value as double
+	 * 
+	 * @throws Exception Gets thrown in case no field exists witht the given name 
+	 */
 	@SuppressWarnings("deprecation")
-	public Double getFieldAsNumber(String name) throws Exception {
-		DataField field = getField(name);
+	public Double getFieldAsNumber(String fieldName) throws Exception {
+		DataField field = getField(fieldName);
 		if (ResultSet == null)
 			throw new Exception("ResultSet does not exist");
 		if (field.getValue() == null)
@@ -348,7 +380,7 @@ public class DataRow implements java.io.Serializable {
 
 		Double ret = 0.0;
 
-		int column = this.ResultSet.getColumnIndex(name);
+		int column = this.ResultSet.getColumnIndex(fieldName);
 		int type = this.ResultSet.getColumnType(column);
 		// TODO maybe: make this use reflection and skip the field for the
 		// column type, to honor dynamic type changes??
@@ -489,6 +521,14 @@ public class DataRow implements java.io.Serializable {
 		return this.ResultSet.getColumnNames().get(column);
 	}
 
+	/**
+	 * Returns the SQL Type of the field with the given name. 
+	 * 
+	 * @param name The name of the field.
+	 * @return type The type(java.sql.Types) of the given field.
+	 * 
+	 * @throws Exception Gets thrown in case the given field name doesn't exist.
+	 */
 	public int getFieldType(String name) throws Exception {
 		int column = getColumnIndex(name);
 		return this.ResultSet.getColumnType(column);
@@ -499,21 +539,51 @@ public class DataRow implements java.io.Serializable {
 		return this.ResultSet.getColumnTypeName(column);
 	}
 
-	public int getFieldDisplaySize(String name) throws Exception {
-		int column = getColumnIndex(name);
+	/**
+	 * Returns the display size of the field with the given name
+	 * 
+	 * @return displaySize The field's display size 
+	 * 
+	 * @throws Exception
+	 */
+	public int getFieldDisplaySize(String fieldName) throws Exception {
+		int column = getColumnIndex(fieldName);
 		return this.ResultSet.getColumnDisplaySize(column);
 	}
 
-	public String getFieldCatalogName(String name) throws Exception {
-		int column = getColumnIndex(name);
+	/**
+	 * Returns the field value's catalog name of the field with the given name. 
+	 *  
+	 * @param fieldName The name of the field.
+	 * @return catalogName The catalog name of the field's value.
+	 * 
+	 * @throws Exception Gets thrown in case no field exists with the given name.
+	 */
+	public String getFieldCatalogName(String fieldName) throws Exception {
+		int column = getColumnIndex(fieldName);
 		return this.ResultSet.getCatalogName(column);
 	}
 
-	public String getFieldClassName(String name) throws Exception {
-		int column = getColumnIndex(name);
+	/**
+	 * Returns the field value's class name of the field with the given name.  
+	 *  
+	 * @param fieldName The name of the field.
+	 * @return className The class name of the field's value.
+	 * 
+	 * @throws Exception Gets thrown in case no field exists with the given name.
+	 */
+	public String getFieldClassName(String fieldName) throws Exception {
+		int column = getColumnIndex(fieldName);
 		return this.ResultSet.getColumnClassName(column);
 	}
 
+	/**
+	 * Returns the number of columns defined for this DataRow object.
+	 * 
+	 * @return columnCount The number of columns defined for this DataRow object.
+	 * 
+	 * @throws Exception
+	 */
 	public int getColumnCount() throws Exception {
 		return this.ResultSet.getColumnCount();
 	}
@@ -555,19 +625,26 @@ public class DataRow implements java.io.Serializable {
 		DataField field = getField(name);
 		return field.getAttributes();
 	}
-
+	
 	public void removeFieldAttribute(String name, String attrname) throws Exception {
 		DataField field = getField(name);
 		field.removeAttribute(attrname);
 	}
 
-	public void removeField(String name) throws Exception {
+	/**
+	 * Removes the field with the given name from the list of fields.
+	 * 
+	 * @param fieldName The name of the field to remove.
+	 * 
+	 * @throws Exception Gets thrown in case the field name doesn't exist.
+	 */
+	public void removeField(String fieldName) throws Exception {
 
-		int column = getColumnIndex(name,true);
+		int column = getColumnIndex(fieldName,true);
 		if (column>-1)
 			this.ResultSet.removeColumn(column);
 
-		this.DataFields.remove(name);
+		this.DataFields.remove(fieldName);
 		
 	}
 
@@ -631,9 +708,19 @@ public class DataRow implements java.io.Serializable {
 		return formula;
 	}
 
-	public Boolean equals(DataRow dr) throws Exception {
+	/**
+	 * Compares the given DataRow object to the current one, and returns <code>true</code>
+	 * in case they are equal, <code>false</code> otherwise.
+	 * 
+	 * @param dataRow The DataRow object to compare with
+	 * 
+	 * @return equal The boolean value indicating whether the DataRows are equal or not
+	 * 
+	 * @throws Exception
+	 */
+	public Boolean equals(DataRow dataRow) throws Exception {
 		Boolean eq = true;
-		BBArrayList fields = dr.getFieldNames();
+		BBArrayList fields = dataRow.getFieldNames();
 		if (fields.size() != this.DataFields.size())
 			eq = false;
 		else {
@@ -642,7 +729,7 @@ public class DataRow implements java.io.Serializable {
 			while (it.hasNext()) {
 				String name = it.next();
 				DataField f = this.DataFields.get(name);
-				if (f == null || !dr.getFieldAsString(name).equals(this.getFieldAsString(name))) {
+				if (f == null || !dataRow.getFieldAsString(name).equals(this.getFieldAsString(name))) {
 					eq = false;
 					break;
 				}
@@ -651,8 +738,23 @@ public class DataRow implements java.io.Serializable {
 		return eq;
 	}
 
-	public void addDataField(String name, DataField field) throws Exception {
-		Object o = field.getObject(); // default
+	/**
+	 * Adds a field with the given name and the given value(DataField) to the list of 
+	 * fields. The methods analyzes the DataField's value in order to determine its
+	 * SQL Type.  
+	 * <br>
+	 * <br>
+	 * <b>Note: </b> In case a field with the same name does already exist, it will be overwritten.
+	 * 
+	 * @see #addDataField(String fieldName, int sqlType, DataField dataField)
+	 * 
+	 * @param fieldName The name of the field to add
+	 * @param dataField The field's value 
+	 * 
+	 * @throws Exception 
+	 */
+	public void addDataField(String fieldName, DataField dataField) throws Exception {
+		Object o = dataField.getObject(); // default
 		int type;
 		
 		String typeName = o.getClass().getCanonicalName();
@@ -731,29 +833,51 @@ public class DataRow implements java.io.Serializable {
 				break;
 			}
 		}
-		addDataField(name, type, field);
+		addDataField(fieldName, type, dataField);
 	}
 
-	public void addDataField(String name, int type, DataField field) throws Exception {
+	/**
+	 * Adds a field with the given name, the given SQL Type and the given value(DataField) to the list of 
+	 * fields.
+	 * <br>
+	 * <br>
+	 * <b>Note: </b> In case a field with the same name does already exist, it will be overwritten.
+	 * 
+	 * @param fieldName The name of the field to add
+	 * @param sqlType The SQL Type of the field 
+	 * @param dataField The field's value 
+	 * 
+	 * @throws Exception 
+	 */
+	public void addDataField(String fieldName, int sqlType, DataField dataField) throws Exception {
   	  
   	   
   	  	// deal unknown types as String
-  	  	if (type==-1)
-  		   type=12;
+  	  	if (sqlType==-1)
+  	  		sqlType=12;
   	  
-  	  	System.out.println("adding "+name+" "+type+" "+field);
+  	  	System.out.println("adding "+fieldName+" "+sqlType+" "+dataField);
 		
-  	  	if (this.ResultSet.getColumnIndex(name) == -1) {
-			int column = this.ResultSet.addColumn(name);
-			this.ResultSet.setColumnType(column, type);
+  	  	if (this.ResultSet.getColumnIndex(fieldName) == -1) {
+			int column = this.ResultSet.addColumn(fieldName);
+			this.ResultSet.setColumnType(column, sqlType);
 		}
-		this.DataFields.put(name, field);
+		this.DataFields.put(fieldName, dataField);
 	}
 
-	public DataField getDataField(String name) {
-		return this.DataFields.get(name);
+	/**
+	 * Returns the DataField object for the given field name.
+	 * Returns <code>null</code> in case no field exists with the given name.
+	 * 
+	 * @param fieldName The name of the field7
+	 * 
+	 * @return dataField The DataField value for the given field name.
+	 */
+	public DataField getDataField(String fieldName) {
+		return this.DataFields.get(fieldName);
 	}
 
+	@Override
 	public DataRow clone() {
 		DataRow dr = new DataRow();
 		Iterator<String> it = this.ResultSet.getColumnNames().iterator();
@@ -764,13 +888,18 @@ public class DataRow implements java.io.Serializable {
 			try {
 				dr.addDataField(k, this.getFieldType(k), f1);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		return dr;
 	}
 
+	/**
+	 * Returns a SQL Insert statement based on the DataRow fields.
+	 * 
+	 * @return insertStatement The insert statement created based on the DataRow fields.
+	 */
 	public String getInsertStatement() {
 		Set<String> ks = this.DataFields.keySet();
 		Iterator<String> it = ks.iterator();
@@ -783,14 +912,14 @@ public class DataRow implements java.io.Serializable {
 				if (isFieldNull(k))
 					continue;
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			f1 = f1 + "," + k;
 			try {
 				v = v + "," + getFieldForSQL(k);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -798,6 +927,11 @@ public class DataRow implements java.io.Serializable {
 		return sql;
 	}
 
+	/**
+	 * Returns a SQL Update statement based on the DataRow fields.
+	 * 
+	 * @return updateStatement The update statement created based on the DataRow fields.
+	 */
 	public String getUpdateStatement() {
 		Set<String> ks = this.DataFields.keySet();
 		Iterator<String> it = ks.iterator();
@@ -808,13 +942,13 @@ public class DataRow implements java.io.Serializable {
 				if (isFieldNull(k))
 					continue;
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				sql = sql + ", " + k + "=" + getFieldForSQL(k);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -823,6 +957,12 @@ public class DataRow implements java.io.Serializable {
 		return sql;
 	}
 
+	/**
+	 * Returns a <code>java.util.HashMap&lt;String,Object&gt;</code> object with the DataRow's field's 
+	 * as key value pairs.
+	 * 
+	 * @return fieldMap The DataRow's fields as <code>java.util.HashMap&lt;String,Object&gt;</code> object. 
+	 */
 	public java.util.HashMap<String, Object> getObjects() {
 		HashMap<String, Object> hm = new HashMap<String, Object>();
 		Set<String> ks = this.DataFields.keySet();
@@ -833,29 +973,38 @@ public class DataRow implements java.io.Serializable {
 				if (isFieldNull(k))
 					continue;
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				hm.put(k, getField(k));
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		return hm;
 	}
 
-	public void mergeRecord(DataRow dr) {
-		BBArrayList names = dr.getFieldNames();
+	/**
+	 * Merges this DataRow object with the given one by adding all fields 
+	 * of the given DataRow object to the current one. <br>
+	 * <br>
+	 * <b>Note:</b> The DataRow's field values will be overwritten 
+	 * by the values of the passed DataRow in case the field's exist in both.
+	 * 
+	 * @param dataRow The DataRow object to merge with
+	 */
+	public void mergeRecord(DataRow dataRow) {
+		BBArrayList names = dataRow.getFieldNames();
 		@SuppressWarnings("unchecked")
 		Iterator<String> it = names.iterator();
 		while (it.hasNext()) {
 			String f = it.next();
 			try {
-				this.addDataField(f, dr.getFieldType(f), dr.getDataField(f));
+				this.addDataField(f, dataRow.getFieldType(f), dataRow.getDataField(f));
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -867,7 +1016,7 @@ public class DataRow implements java.io.Serializable {
 	 * will result in a DataRow with the two fields field1 and field2
 	 * holding the according values
 	 * 
-	 * @param in: the URL formatted code 
+	 * @param in the URL formatted code 
 	 * @return a new DataRow from the String
 	 * @throws Exception
 	 */
@@ -922,6 +1071,12 @@ public class DataRow implements java.io.Serializable {
 		return ret.toString();
 	}
 	
+	/**
+	 * Returns the DataRow and all of its fields as a JSON String.
+	 * 
+	 * @return The DataRow as JSON String
+	 * @throws Exception
+	 */
 	public String toJson() throws Exception {
 		ResultSet rs = new ResultSet();
 		rs.add(this);
@@ -929,6 +1084,14 @@ public class DataRow implements java.io.Serializable {
 
 	}
 
+	/**
+	 * Initializes and returns a DataRow object based on the values provided in the given JSON String. 
+	 * 
+	 * @param in The JSON String
+	 * @return the DataRow object created based on the JSOn String's content
+	 * 
+	 * @throws Exception Gets thrown in case the JSON could not be parsed / is invalid
+	 */
 	public static DataRow fromJson(String in) throws Exception {
 
 		if (in.length() <2 )
@@ -1118,13 +1281,18 @@ public class DataRow implements java.io.Serializable {
 		return dr;
 	}
 
+	/**
+	 * Returns the DataRow as {@link com.google.gson.JsonArray JsonArray} object.
+	 * 
+	 * @return jsonArray The DataRow as {@link com.google.gson.JsonArray JsonArray} object.
+	 */
 	public Object toJsonElement() {
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		try {
 			com.google.gson.JsonArray o = parser.parse(this.toJson()).getAsJsonArray();
 			return o;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 
 		}
@@ -1200,7 +1368,7 @@ public class DataRow implements java.io.Serializable {
 							n.removeField(f);
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 		}
@@ -1208,6 +1376,10 @@ public class DataRow implements java.io.Serializable {
 	}
 
 
+	/**
+	 * Iterates over each DataField object, and calls the {@link DataField#clear() clear()} 
+	 * method which sets the DataRow's value to <code>null</code>
+	 */
 	public void clear() {
 
 		@SuppressWarnings("unchecked")
@@ -1216,7 +1388,7 @@ public class DataRow implements java.io.Serializable {
 			try {
 				this.getField(it.next()).clear();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
