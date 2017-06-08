@@ -11,11 +11,20 @@ class public RestBridge
         request! = context!.getRequest()
         response! = context!.getResponse()
 
-        System.out.println("REST request --------------------------")
-        System.out.println("REST request METHOD "+request!.getMethod())
-        System.out.println("REST request HEADER "+request!.getRequestURL())
-        System.out.println("REST request end -----------------------")
+        #this!.service(request!,response!)
 
+    METHODEND
+
+    METHOD PUBLIC void service(BBjspWebRequest request!, BBjspWebResponse response!)
+
+        debug = num(stbl("DEBUG",err=*next),err=*next)
+
+        if debug then
+            System.out.println("REST request --------------------------")
+            System.out.println("REST request METHOD "+request!.getMethod())
+            System.out.println("REST request HEADER "+request!.getRequestURL())
+            System.out.println("REST request end -----------------------")
+        fi
 
         response!.setHeader("Access-Control-Allow-Origin",request!.getHeader("Origin"))
         response!.setHeader("Access-Control-Allow-Credentials","true")
@@ -63,9 +72,12 @@ class public RestBridge
         test$=stbl("REST_WD",err=setup_err)
         test$=stbl("REST_ADAPTERPGM",err=setup_err)
 
-        rem response!.setContentType("text/plain")
-        auth$=str(request!.getHeader("authorization",err=*next))
-
+        token$=request!.getParameter("_TOKEN")
+        if token$>"" then
+            auth$="Basic "+token$
+        else
+            auth$=str(request!.getHeader("authorization",err=*next))
+        fi
 
         if auth$="null" or len(auth$)<8 OR auth$(1,5)<>"Basic" then
             response!.setHeader("WWW-Authenticate","Basic realm=""REST Web Service""")
@@ -104,8 +116,13 @@ class public RestBridge
             params!.put(cvs(p$,4),request!.getParameter(p$))
         wend
 
+        uri$=request!.getPathInfo()
+        if pos("/_output_"=uri$)>0 then
+            uri$=uri$(1,pos("/_output_"=uri$)-1)
+        fi
+
         req!.put("method",method$)
-        req!.put("uri",request!.getPathInfo())
+        req!.put("uri",uri$)
         req!.put("params",params!)
         req!.put("body",request!.getBody(err=*next))
 
@@ -123,9 +140,29 @@ class public RestBridge
             fi
         fi
 
+        rem check for multi-value accept headers
+        atmp$=accept$
+        alist!=new java.util.ArrayList()
+        alist!.addAll(java.util.Arrays.asList(new String(accept$).split(",")))
+        alist!.retainAll(java.util.Arrays.asList(new String("debug#text/html#application/json#text/csv#text/plain#application/xml#*/*#text/xml#application/xls").split("#")))
+        if alist!.size() > 0 then
+            accept$ = alist!.get(0)
+        else
+            accept$ = ""
+        fi
 
-        debug = 0
-        debug = num(stbl("DEBUG",err=*next),err=*next)
+        if accept$ = "" then
+            if debug then
+                System.out.println("REST: error 406 Unsupported content type requested in Accept header: "+atmp$)
+            fi
+            response!.sendError(406, "Unsupported content type requested in Accept header: "+atmp$)
+            methodret
+        fi
+
+        if debug then
+            System.out.println("REST Accept: "+accept$)
+        fi
+
         statuscode! = answer!.get("statuscode",err=*next)
         errormsg! = answer!.get("errormsg",err=*next)
         errorcode$ = str(answer!.get("errorcode"))
@@ -190,7 +227,7 @@ class public RestBridge
             if rs!.size() then
                 custom_css! = rs!.get(0).getAttribute("CUSTOM_CSS")
             endif
-            response!.setContentType("text/html")
+            response!.setContentType("text/html; charset="+info(1,2))
             s! = response!.getOutputStream()
 
             if custom_css! <> null() then
@@ -245,7 +282,7 @@ class public RestBridge
                 if (pk! <> null() ) then
                     pk$=str(pk!)
                     links! = new java.util.HashMap()
-                    link$=request!.getRequestURI()
+                    link$ = request!.getContextPath()+request!.getServletPath()+request!.getPathInfo().replaceAll("(/[^/]+)/.*|$","$1")
 
                     while pk$>""
                         if pos("/"=pk$)>0 then
@@ -316,36 +353,58 @@ class public RestBridge
 
                         methodret
                     else
-                        if pos("debug"=accept$)>0 then
-                            response!.setContentType("text/plain")
-                            s! = response!.getOutputStream()
-                            s!.write(str(req!))
-                            s!.write($0a$)
+                        if pos("application/xls"=accept$) >0 then
+                            response!.setContentType("application/xls")
+                            d$=System.getProperty("basis.cacheDirectory")+"/_output_/"
+                            mkdir d$,err=*next
 
-                            s!.write(str(answer!))
-                            s!.write($0a$)
-                            s!.write("Debug: ")
-                            s!.write($0a$)
-                            s!.write("getAttributeNames:"+str(request!.getAttributeNames()))
-                            s!.write($0a$)
-                            s!.write("getHeaderNames:"+str(request!.getHeaderNames()))
-                            s!.write($0a$)
-                            s!.write("getParameterNames:"+str(request!.getParameterNames()))
-                            s!.write($0a$)
-                            s!.write("getMethod:"+str(request!.getMethod()))
-                            s!.write($0a$)
-                            s!.write("getRequestURL:"+str(request!.getRequestURL()))
-                            s!.write($0a$)
-                            s!.write("getRequestURI:"+str(request!.getRequestURI()))
-                            s!.write($0a$)
-                            s!.write("Accept:"+str(request!.getHeader("Accept")))
-                            s!.write($0a$)
+                            wr! = new java.io.StringWriter()
+                            f! = java.io.File.createTempFile("output_", "xls", new java.io.File(d$))
+                            com.basiscomponents.db.ResultSetExporter.writeXLSX(rs!, f!, 1)
 
+                            if debug then
+                                System.out.println("REST: WRITING Excel to "+d$)
+                                System.out.println(f!.getAbsolutePath())
+                                System.out.println(str(rs!.size())+" Records written")
+                            fi
+
+                            java.nio.file.Files.copy(f!.toPath(), response!.getOutputStream())
+                            f!.delete()
                             methodret
                         else
-                            System.out.println("REST: error 406 Unsupported content type requested in Accept header: "+accept$)
-                            response!.sendError(406, "Unsupported content type requested in Accept header: "+accept$)
-                            methodret
+                            if pos("debug"=accept$)>0 then
+                                response!.setContentType("text/plain")
+                                s! = response!.getOutputStream()
+                                s!.write(str(req!))
+                                s!.write($0a$)
+
+                                s!.write(str(answer!))
+                                s!.write($0a$)
+                                s!.write("Debug: ")
+                                s!.write($0a$)
+                                s!.write("getAttributeNames:"+str(request!.getAttributeNames()))
+                                s!.write($0a$)
+                                s!.write("getHeaderNames:"+str(request!.getHeaderNames()))
+                                s!.write($0a$)
+                                s!.write("getParameterNames:"+str(request!.getParameterNames()))
+                                s!.write($0a$)
+                                s!.write("getMethod:"+str(request!.getMethod()))
+                                s!.write($0a$)
+                                s!.write("getRequestURL:"+str(request!.getRequestURL()))
+                                s!.write($0a$)
+                                s!.write("getRequestURI:"+str(request!.getRequestURI()))
+                                s!.write($0a$)
+                                s!.write("Accept:"+str(request!.getHeader("Accept")))
+                                s!.write($0a$)
+
+                                methodret
+                            else
+                                if debug then
+                                    System.out.println("REST: error 406 Unsupported content type requested in Accept header: "+accept$)
+                                fi
+                                response!.sendError(406, "Unsupported content type requested in Accept header: "+accept$)
+                                methodret
+                            fi
                         fi
                     fi
                 fi
