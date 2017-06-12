@@ -355,6 +355,7 @@ class public RestBridge
                     else
                         if pos("application/xls"=accept$) >0 then
                             response!.setContentType("application/xls")
+                            response!.setHeader("content-disposition","attachment; filename="""+request!.getPathInfo().replaceAll("/([^/]+).*","$1")+".xlsx""")
                             d$=System.getProperty("basis.cacheDirectory")+"/_output_/"
                             mkdir d$,err=*next
 
