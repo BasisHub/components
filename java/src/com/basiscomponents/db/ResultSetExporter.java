@@ -124,6 +124,25 @@ public class ResultSetExporter {
 		return sb.toString();
 	}
 	
+	/**
+	 * Replaces all characters from the given String whose ascii decimal value is >127 
+	 * by the ascii decimal value preceeded by "&#" and followed by ";"(Without the quotes).
+	 * 
+	 * Additionally replaces the following characters using the same mechanism: ",&,',&lt;,&gt;<br>
+	 * <br>
+	 * For example, the following String: <br>
+	 * <br>
+	 * &lt;p&gt;Let's write a "Hello World" program!&lt;/p&gt;<br>
+	 * <br>
+	 * would become:<br>
+	 * <br>
+	 * &amp;#60;p&amp;#62;Let&amp;#38;s write a &amp;#34;Hello World&amp;#34; program!&amp;#60;/p&amp;#62;<br>
+	 * <br>
+	 * 
+	 * @param s The String whose special characters should be replaced
+	 * 
+	 * @return The String with the escaped characters 
+	 */
 	public static String escapeHTML(String s) {
 	    StringBuilder out = new StringBuilder(Math.max(16, s.length()));
 	    for (int i = 0; i < s.length(); i++) {
@@ -400,13 +419,13 @@ public class ResultSetExporter {
 	}	
 	
 	/**
-	 * Writes the content of the given ResultSet into the specified File. 
+	 * Writes the content of the given ResultSet as XLSX into the specified File. 
 	 * 
 	 * @param resultSet The ResultSet to export.
 	 * @param outputFile The File in which to write the ResultSet's content.
 	 * @param writeHeader The boolean value indicating whether writing the column headers or not.
 	 * 
-	 * @throws Exception Gets thrown in case the ResultSet could not be converted to a JSON String
+	 * @throws Exception Gets thrown in case the ResultSet could not be converted to a XLSX File
 	 */
     @SuppressWarnings("deprecation")
 	public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader) throws Exception{
