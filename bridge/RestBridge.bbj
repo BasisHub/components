@@ -116,13 +116,13 @@ class public RestBridge
             params!.put(cvs(p$,4),request!.getParameter(p$))
         wend
 
-        uri$=request!.getPathInfo()
-        if pos("/_output_"=uri$)>0 then
-            uri$=uri$(1,pos("/_output_"=uri$)-1)
+        uri!=request!.getPathInfo()
+        if uri! <> null() and uri!.lastIndexOf("/_output_") <> -1 then
+            uri! = uri!.substring(0,uri!.lastIndexOf("/_output_"))
         fi
 
         req!.put("method",method$)
-        req!.put("uri",uri$)
+        req!.put("uri",uri!)
         req!.put("params",params!)
         req!.put("body",request!.getBody(err=*next))
 
