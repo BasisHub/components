@@ -94,7 +94,7 @@ main_loop:
     fi
 
 REM     inp! = new String(request!,"UTF-8")
-REM     request!=str(inp!.getBytes("ISO-8859-15"))
+REM     request!=str(inp!.getBytes(info(1,2)))
 
     if (debug) then
         System.out.println("-------------request-------------------------------")
