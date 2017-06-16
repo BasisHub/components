@@ -949,14 +949,11 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception 
 	 */
 	public void addDataField(String fieldName, int sqlType, DataField dataField) throws Exception {
-  	  
-  	   
+
   	  	// deal unknown types as String
   	  	if (sqlType==-1)
   	  		sqlType=12;
-  	  
-  	  	System.out.println("adding "+fieldName+" "+sqlType+" "+dataField);
-		
+
   	  	if (this.ResultSet.getColumnIndex(fieldName) == -1) {
 			int column = this.ResultSet.addColumn(fieldName);
 			this.ResultSet.setColumnType(column, sqlType);
