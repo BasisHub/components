@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.basiscomponents.db.constants.ConstantsResolver;
@@ -1493,6 +1494,58 @@ public class DataRow implements java.io.Serializable {
 			}
 		}
 
+	}
+	
+	/**
+	 * Returns a DataRow object with all fields defined in this DataRow which have the given attribute name.
+	 * The fields where the attribute is defined but the attribute value is empty or null, will be ignored by this method.
+	 * 
+	 * @see #getFieldsHavingAttribute(String, boolean)
+	 * 
+	 * @param attributeName The name of the attribute.
+	 * 
+	 * @return The DataRow with the fields where the attribute with the given name is defined.
+	 */
+	public DataRow getFieldsHavingAttribute(String attributeName){
+		return getFieldsHavingAttribute(attributeName, false);
+	}
+	
+	/**
+	 * Returns a DataRow object with all fields defined in this DataRow which have the given attribute name.
+	 * The given boolean value defines whether to include the fields where the attribute is defined but the attribute value
+	 * is empty (null or Empty String). If the value is set to true, these fields are included. If it is set to false, those fields
+	 * will be ignored by the method.
+	 * 
+	 * @see #getFieldsHavingAttribute(String)
+	 * 
+	 * @param attributeName The name of the attribute.
+	 * @param includeEmptyValues The boolean value indicating whether to include fields with empty attribute values 
+	 * 
+	 * @return The DataRow with the fields where the attribute with the given name is defined.
+	 */
+	public DataRow getFieldsHavingAttribute(String attributeName, boolean includeEmptyValues){
+		DataRow dataRow = new DataRow();
+		
+		Entry<String,DataField> entry;
+		DataField fieldValue;
+		
+		Iterator<Entry<String, DataField>> it = DataFields.entrySet().iterator();
+		while(it.hasNext()){
+			entry = it.next();
+			fieldValue = entry.getValue();
+			
+			if(fieldValue.getAttribute(attributeName) != null){
+				if(!includeEmptyValues){
+					if(fieldValue.getAttribute(attributeName) == null || fieldValue.getAttribute(attributeName).isEmpty()){
+						continue;
+					}
+				}
+				
+				dataRow.setFieldValue(entry.getKey(), fieldValue.clone());
+			}
+		}
+		
+		return dataRow;
 	}
 
 }
