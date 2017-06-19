@@ -1531,7 +1531,7 @@ public class DataRow implements java.io.Serializable {
 			entry = it.next();
 			fieldValue = entry.getValue();
 			
-			if(fieldValue.getAttribute(attributeName) != null){
+			if(fieldValue.getAttributes().containsKey(attributeName)){
 				if(!includeEmptyValues){
 					if(fieldValue.getAttribute(attributeName) == null || fieldValue.getAttribute(attributeName).isEmpty()){
 						continue;
