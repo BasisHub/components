@@ -144,12 +144,17 @@ class public RestBridge
         atmp$=accept$
         alist!=new java.util.ArrayList()
         alist!.addAll(java.util.Arrays.asList(new String(accept$).split(",")))
-        alist!.retainAll(java.util.Arrays.asList(new String("debug#text/html#application/json#text/csv#text/plain#application/xml#*/*#text/xml#application/xls").split("#")))
-        if alist!.size() > 0 then
-            accept$ = alist!.get(0)
-        else
-            accept$ = ""
-        fi
+        accept$ = ""
+        it! = alist!.iterator()
+        while it!.hasNext()
+            accept$ = it!.next()
+            if mask(accept$,"^debug|^text/html|^application/json|^text/csv|^text/plain|^application/xml|^*/*|^text/xml|^application/xls") then
+                if pos(";"=accept$) then
+                    accept$=cvs(accept$(1,pos(";"=accept$)-1),3)
+                endif
+                break
+            endif
+        wend
 
         if accept$ = "" then
             if debug then
