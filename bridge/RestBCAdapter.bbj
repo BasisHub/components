@@ -303,15 +303,17 @@ main_loop:
             fieldsel!=params!.get("_FIELDSEL",err=*next)
             if fieldsel! <> null()
                 ok=0
-                v! = new BBjVector(java.util.Arrays.asList(fieldsel!.split(",")))
-                fs!.setFieldSelection(vec!,err=*next); ok=1
-                if !ok then
+                vec! = new BBjVector(java.util.Arrays.asList(fieldsel!.split(",")))
+                bc!.setFieldSelection(vec!,err=*next); ok=1
+                if !ok and pos("no match for method"=cvs(errmes(-1),8)) then
                     fs! = new DataRow()
                     it! = v!.iterator()
                     while it!.hasNext()
                         fs!.setFieldValue(it!.next(),"")
                     wend
                     bc!.setFieldSelection(fs!)
+                else
+                    throw errmes(-1),err()
                 fi
             fi
 
