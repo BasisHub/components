@@ -106,9 +106,9 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns a ArrayList object with all field names defined in this DataRow object.
+	 * Returns a {@link com.basiscomponents.db.BBArrayList BBArrayList} object with all field names defined in this DataRow object.
 	 *
-	 * @return list The ArrayList containing all field names defined in this DataRow object
+	 * @return list The BBArrayList<String> containing all field names defined in this DataRow object
 	 */
 	public BBArrayList<String> getFieldNames() {
 		return new BBArrayList<String>(this.ResultSet.getColumnNames());
