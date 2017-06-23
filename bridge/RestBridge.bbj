@@ -360,7 +360,13 @@ class public RestBridge
                     else
                         if pos("application/xls"=accept$) >0 then
                             response!.setContentType("application/xls")
-                            response!.setHeader("content-disposition","attachment; filename="""+request!.getPathInfo().replaceAll("/([^/]+).*","$1")+".xlsx""")
+                            if request!.getPathInfo().matches("/[^/]+/_output_/([^/]+)$") then
+                                filename$ = request!.getPathInfo().replaceAll("/[^/]+/_output_/([^/]+)$","$1")
+                            else
+                                filename$ = request!.getPathInfo().replaceAll("/([^/]+).*","$1")+".xlsx"""
+                            endif
+                            System.out.println(filename$)
+                            response!.setHeader("content-disposition","attachment; filename="""+filename$+"""")
                             d$=System.getProperty("basis.cacheDirectory")+"/_output_/"
                             mkdir d$,err=*next
 
