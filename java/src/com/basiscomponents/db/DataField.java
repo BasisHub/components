@@ -292,7 +292,7 @@ public class DataField implements java.io.Serializable {
 	}
 
 	/**
-	 * Sets the value of the attribute with the given name. 
+	 * Sets the value of the attribute with the given name.
 	 * Creates the attribute if it doesn't exist already.
 	 * 
 	 * @param attributeName The attribute's name.
@@ -319,9 +319,17 @@ public class DataField implements java.io.Serializable {
 	 * 
 	 * @return attributesMap The <code>java.util.HashMap</code> object containing the DataField's attributes and their values.
 	 */
-	@SuppressWarnings("unchecked")
 	public HashMap<String, String> getAttributes() {
-		return (HashMap<String, String>) this.Attributes.clone();
+		return new HashMap<String, String>(this.Attributes);
+	}
+
+	/**
+	 * Sets the attributes for this DataField.
+	 * 
+	 * @param attributes The attribute's <code>java.util.HashMap</code> object with the attributes and their corresponding values.
+	 */
+	public void setAttributes(HashMap<String, String> attributes) {
+		this.Attributes = attributes;
 	}
 
 	/**

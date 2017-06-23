@@ -8,19 +8,17 @@ import java.util.Collection;
 
 /**
  * A java.util.ArrayList providing the same method names as the BBjVector class.
- * The class doesn't add any additional features to the list itself. 
+ * The class doesn't add any additional features to the list itself.
  * <br><br>
- * This class was originally created to replace the BBjVector usage in the basiscomponents. 
+ * This class was originally created to replace the BBjVector usage in the basiscomponents.
  * 
  * @see <a href="http://documentation.basis.com/BASISHelp/WebHelp/gridctrl/bbjvector_bbj.htm">BBjVector documentation</a>
  */
-@SuppressWarnings("rawtypes")
-public class BBArrayList extends ArrayList {
+public class BBArrayList<T> extends ArrayList<T> {
 
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("unchecked")
-	public BBArrayList(Collection c) {
+	public BBArrayList(Collection<T> c) {
 		super.addAll(c);
 	}
 
@@ -30,8 +28,7 @@ public class BBArrayList extends ArrayList {
 	 * @param element The element to be appended to this list
 	 * @return true (as specified by {@link java.util.Collection#add(Object) Collection.add(E)})
 	 */
-	@SuppressWarnings("unchecked")
-	public boolean addItem(Object element) {
+	public boolean addItem(T element) {
 		return super.add(element);
 	}
 
@@ -41,7 +38,7 @@ public class BBArrayList extends ArrayList {
 	 * @param index The index of the element to return.
 	 * @return the element at the specified position in this list.
 	 */
-	public Object getItem(int index) {
+	public T getItem(int index) {
 		return super.get(index);
 	}
 
@@ -51,8 +48,7 @@ public class BBArrayList extends ArrayList {
 	 * @param index The index at which the specified element is to be inserted.
 	 * @param element The object to be inserted.
 	 */
-	@SuppressWarnings("unchecked")
-	public void insertItem(int index, Object element) {
+	public void insertItem(int index, T element) {
 		super.add(index, element);
 	}
 
@@ -74,8 +70,7 @@ public class BBArrayList extends ArrayList {
 	 * 
 	 * @return the element previously at the specified position.
 	 */
-	@SuppressWarnings("unchecked")
-	public Object setItem(int index, Object element) {
+	public Object setItem(int index, T element) {
 		return super.set(index, element);
 	}
 

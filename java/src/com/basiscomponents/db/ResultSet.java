@@ -164,7 +164,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 
-		BBArrayList filterFields = simpleFilterCondition.getFieldNames();
+		BBArrayList<String> filterFields = simpleFilterCondition.getFieldNames();
 
 		Iterator<DataRow> it = this.iterator();
 		while (it.hasNext()) {
@@ -281,6 +281,30 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			KeyTemplate = TemplateInfo.createTemplate(getKeyTemplate());
 		}
 
+		column = 0;
+		HashMap<String, HashMap<String, String>> fieldAttributes = new HashMap<String, HashMap<String, String>>();
+		for (HashMap.Entry<Integer, String> entry : columns.entrySet()) {
+			name = entry.getValue();
+			HashMap<String, String> attribute = new HashMap<String, String>();
+
+			if (this.MetaData.get(column).get("ColumnTypeName").equals("JSON"))
+				attribute.put("StringFormat", "JSON");
+
+			if (KeyColumns != null && KeyColumns.contains(name)) {
+				attribute.put("EDITABLE", "2");
+			}
+			else {
+				if (this.isAutoIncrement(column) || !this.isWritable(column) || !this.isDefinitelyWritable(column))
+					attribute.put("EDITABLE", "0");
+				else
+					attribute.put("EDITABLE", "1");
+			}
+
+			fieldAttributes.put(name, attribute);
+
+			column++;
+		}
+
 		try {
 			rs.beforeFirst();
 		} catch (Exception e) {
@@ -296,19 +320,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				HashMap.Entry<Integer, String> entry = it.next();
 				name = entry.getValue();
 				DataField field = new DataField(rs.getObject(entry.getKey()));
-				if (defaultMetaData == true)
-					type = types.get(column - 1);
-				else
-					type = getColumnType(column - 1);
+				type = defaultMetaData? types.get(column - 1) : getColumnType(column - 1);
+				field.setAttributes(new HashMap<String, String>(fieldAttributes.get(name)));
 				dr.addDataField(name, type, field);
-				if (this.MetaData.get(column - 1).get("ColumnTypeName").equals("JSON"))
-					dr.setFieldAttribute(name, "StringFormat", "JSON");
-
-				if (this.isAutoIncrement(column - 1) || !this.isWritable(column - 1)
-						|| !this.isDefinitelyWritable(column - 1))
-					dr.setFieldAttribute(name, "EDITABLE", "0");
-				else
-					dr.setFieldAttribute(name, "EDITABLE", "1");
 			}
 
 			if (KeyColumns != null && KeyColumns.size() > 0) {
@@ -332,8 +346,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param dr The DataRow whose field will be merged into the DataRows from this ResultSet.
 	 */
 	private void mergeDataRowFields(DataRow dr) {
-		BBArrayList names = dr.getFieldNames();
-		@SuppressWarnings("unchecked")
+		BBArrayList<String> names = dr.getFieldNames();
 		Iterator<String> it = names.iterator();
 		while (it.hasNext()) {
 			String name = it.next();
@@ -1692,8 +1705,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		Iterator<DataRow> it = this.DataRows.iterator();
 		while (it.hasNext()) {
 			DataRow dr = it.next();
-			BBArrayList f = dr.getFieldNames();
-			@SuppressWarnings("unchecked")
+			BBArrayList<String> f = dr.getFieldNames();
 			Iterator<String> itf = f.iterator();
 
 			g.writeStartObject();
@@ -2318,7 +2330,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 
 		if (top > 0) {
-			BBArrayList map = dr.getFieldNames();
+			BBArrayList<String> map = dr.getFieldNames();
 			while (map.size() > top) {
 				int i = map.size() - 1;
 				String f = (String) map.get(i);
@@ -2355,9 +2367,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		// that can sort on the value, the name or any attribute
 
 		DataRow drn = new DataRow();
-		BBArrayList f = dr.getFieldNames();
-		@SuppressWarnings("rawtypes")
-		Iterator it = f.iterator();
+		BBArrayList<String> f = dr.getFieldNames();
+		Iterator<String> it = f.iterator();
 		TreeMap<String, String> tm = new TreeMap<>();
 		while (it.hasNext()) {
 			String k = (String) it.next();
@@ -2510,10 +2521,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 
 		if (top > 0) {
-			BBArrayList map = dr.getFieldNames();
+			BBArrayList<String> map = dr.getFieldNames();
 			while (map.size() > top) {
 				int i = map.size() - 1;
-				String f = (String) map.get(i);
+				String f = map.get(i);
 				dr.removeField(f);
 				map.remove(i);
 			}
