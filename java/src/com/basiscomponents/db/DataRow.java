@@ -1541,5 +1541,159 @@ public class DataRow implements java.io.Serializable {
 
 		return dataRow;
 	}
-
+	
+	/**
+	 * Returns a BBj String Template based on the values defined in this DataRow
+	 * 
+	 * @see #getString()
+	 * 
+	 * @return a BBj String Template with the values defined in this DataRow.
+	 */
+	public String getTemplate(){		
+		ArrayList<Integer> numericTypeCodeList = new ArrayList<Integer>();
+		numericTypeCodeList.add(java.sql.Types.BIGINT);
+		numericTypeCodeList.add(java.sql.Types.TINYINT);
+		numericTypeCodeList.add(java.sql.Types.INTEGER);
+		numericTypeCodeList.add(java.sql.Types.SMALLINT);
+		numericTypeCodeList.add(java.sql.Types.NUMERIC);
+		numericTypeCodeList.add(java.sql.Types.DOUBLE);
+		numericTypeCodeList.add(java.sql.Types.FLOAT);
+		numericTypeCodeList.add(java.sql.Types.DECIMAL);
+		numericTypeCodeList.add(java.sql.Types.REAL);
+		numericTypeCodeList.add(java.sql.Types.BOOLEAN);
+		numericTypeCodeList.add(java.sql.Types.BIT);
+		numericTypeCodeList.add(java.sql.Types.DATE);
+		numericTypeCodeList.add(9); // Basis DATE
+		
+		StringBuilder templatedString = new StringBuilder();
+		
+		int sqlType;
+		int precision;
+		
+		int size = this.ResultSet.getColumnCount();
+		for(int index=0; index<size ; index++){
+			sqlType = ResultSet.getColumnType(index);
+			precision = ResultSet.getPrecision(index);
+			
+			templatedString.append(ResultSet.getColumnName(index) + ":");
+			
+			if(!numericTypeCodeList.contains(sqlType)){	
+				templatedString.append("C");
+				
+				if(sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE || sqlType == 11){
+					precision = 21;
+				}
+			}else{
+				templatedString.append("N");
+				
+				if(sqlType == java.sql.Types.BOOLEAN){
+					precision = 1;
+				}else if(sqlType == 9 || sqlType == java.sql.Types.DATE){
+					precision = 9;
+				}
+			}
+			
+			templatedString.append("(");
+			
+			if(precision == 0){
+				// Using the backspace character as delimiter ($08$)
+				templatedString.append("1*=8");
+			}else{
+				templatedString.append(precision);
+			}
+			
+			templatedString.append(")");
+			
+			if(index +1 < size){
+				templatedString.append(",");
+			}
+		}
+		return templatedString.toString();
+	}
+	
+	/**
+	 * Returns the record String to initialize a BBj Templated String based on the values
+	 * of this DataRow object.
+	 * 
+	 * @see #getTemplate()
+	 * 
+	 * @return the record to initialize the BBj Templated String.
+	 * 
+	 * @throws Exception 
+	 */
+	public String getString() throws Exception{
+		ArrayList<Integer> numericTypeCodeList = new ArrayList<Integer>();
+		numericTypeCodeList.add(java.sql.Types.BIGINT);
+		numericTypeCodeList.add(java.sql.Types.TINYINT);
+		numericTypeCodeList.add(java.sql.Types.INTEGER);
+		numericTypeCodeList.add(java.sql.Types.SMALLINT);
+		numericTypeCodeList.add(java.sql.Types.NUMERIC);
+		numericTypeCodeList.add(java.sql.Types.DOUBLE);
+		numericTypeCodeList.add(java.sql.Types.FLOAT);
+		numericTypeCodeList.add(java.sql.Types.DECIMAL);
+		numericTypeCodeList.add(java.sql.Types.REAL);
+		numericTypeCodeList.add(java.sql.Types.BOOLEAN);
+		numericTypeCodeList.add(java.sql.Types.BIT);
+		numericTypeCodeList.add(java.sql.Types.DATE);
+		numericTypeCodeList.add(9); // Basis DATE
+		
+		StringBuilder builder = new StringBuilder();
+		
+		int sqlType;
+		int precision;
+		String value;
+		DataField fieldValue;
+		
+		int size = this.ResultSet.getColumnCount();
+		for(int index=0; index<size ; index++){
+			sqlType = ResultSet.getColumnType(index);
+			precision = ResultSet.getPrecision(index);
+			
+			fieldValue = this.getField(this.ResultSet.getColumnName(index));
+			value = fieldValue.toString();
+			
+			if(numericTypeCodeList.contains(sqlType)){	
+				if(sqlType == java.sql.Types.BOOLEAN){
+					precision = 1;
+					if(fieldValue.getBoolean()){
+						value = "1";
+					}else{
+						value = "0";
+					}
+				}else if(sqlType == 9 || sqlType == java.sql.Types.DATE){
+					precision = 9;
+					
+					if(fieldValue.getTimestamp() != null){
+						Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(fieldValue.getDate().getTime()));
+						value = String.valueOf(String.valueOf(ret2.doubleValue()));
+					}else{
+						value = "00000000";
+					}
+				}else{
+					// Fixed length numeric fields need to padded with leading zeros
+					if(precision != 0){
+						String prefix = "";
+						for(int i=precision-value.length(); i>0; i--){
+							prefix = prefix + "0";
+						}
+						
+						value = prefix + value;
+					}
+				}
+			}else{
+				if(sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE || sqlType == 11){
+					precision = 21;
+				}
+			}
+			
+			builder.append(value);
+			
+			// Adding the backspace character as a delimiter for variable length fields
+			if(precision == 0){
+				builder.append("\b");
+			}
+		}
+			
+		return builder.toString();
+	}
 }

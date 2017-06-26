@@ -428,70 +428,14 @@ public class ResultSetExporter {
 	 * 
 	 * @throws Exception Gets thrown in case the ResultSet could not be converted to a XLSX File
 	 */
-    @SuppressWarnings("deprecation")
 	public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader) throws Exception{
-    	if(!rs.isEmpty()){
-    		if(outputFile != null && outputFile.canWrite()){
-    			String sheetName = "Sheet1";//name of sheet
-                
-                XSSFWorkbook wb = new XSSFWorkbook();
-                XSSFSheet sheet = wb.createSheet(sheetName) ;
-                
-                List<String> fieldnames = rs.getColumnNames();
-        		Iterator<DataRow> it = rs.iterator();
-        		Iterator<String> fieldNameIterator;
-                
-        		XSSFRow row;
-        		XSSFCell cell;
-        		int rowIndex = 0;
-        		int cellIndex = 0;
-        		
-                if(writeHeader){
-                	fieldNameIterator = fieldnames.iterator();
-                	row = sheet.createRow(rowIndex);
-                	rowIndex++;
-                	
-            		while(fieldNameIterator.hasNext()){
-            			cell = row.createCell(cellIndex);
-            			cell.setCellValue(fieldNameIterator.next());
-            			cellIndex++;
-            		}
-                }
-                
-                DataRow currentRow;
-                String currentFieldName;
-                while(it.hasNext()){
-                	fieldNameIterator = fieldnames.iterator();
-                	
-                	row = sheet.createRow(rowIndex);
-                	rowIndex++;
-                	
-                	cellIndex = 0;
-                	currentRow = it.next();
-                	int columnType;
-                	while(fieldNameIterator.hasNext()){
-                		currentFieldName = fieldNameIterator.next();
-                		cell = row.createCell(cellIndex);
-                		columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
-                		if (currentRow.contains(currentFieldName)){
-	            			if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE || columnType == java.sql.Types.INTEGER){
-	            				cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
-	            				cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
-	            			}else{
-	            				cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
-	            			}
-                		}
-            			cellIndex++;
-                	}
-                }
-                
-                FileOutputStream os = new FileOutputStream(outputFile);
-                wb.write(os);
-                wb.close();
-                
-                os.flush();
-                os.close();
-        	}
+    	if(outputFile != null){
+    		FileOutputStream os = new FileOutputStream(outputFile);
+    				
+    		writeXLSX(rs, new FileOutputStream(outputFile), writeHeader);
+    		
+    		os.flush();
+            os.close();
     	}
     }
 
@@ -504,65 +448,80 @@ public class ResultSetExporter {
 	 * 
 	 * @throws Exception Gets thrown in case the ResultSet could not be read or output stream can not be written
 	 */
-    @SuppressWarnings("deprecation")
-	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader) throws Exception{
-        if(!rs.isEmpty()){
-            String sheetName = "Sheet1";//name of sheet
+	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader) throws Exception{  
+        String sheetName = "Sheet1"; //name of sheet
 
-            XSSFWorkbook wb = new XSSFWorkbook();
-            XSSFSheet sheet = wb.createSheet(sheetName) ;
-
-            List<String> fieldnames = rs.getColumnNames();
-            Iterator<DataRow> it = rs.iterator();
-            Iterator<String> fieldNameIterator;
-
-            XSSFRow row;
-            XSSFCell cell;
-            int rowIndex = 0;
-            int cellIndex = 0;
-
-            if(writeHeader){
-                fieldNameIterator = fieldnames.iterator();
-                row = sheet.createRow(rowIndex);
-                rowIndex++;
-
-                while(fieldNameIterator.hasNext()){
-                    cell = row.createCell(cellIndex);
-                    cell.setCellValue(fieldNameIterator.next());
-                    cellIndex++;
-                }
-            }
-
-            DataRow currentRow;
-            String currentFieldName;
-            while(it.hasNext()){
-                fieldNameIterator = fieldnames.iterator();
-
-                row = sheet.createRow(rowIndex);
-                rowIndex++;
-
-                cellIndex = 0;
-                currentRow = it.next();
-                int columnType;
-                while(fieldNameIterator.hasNext()){
-                    currentFieldName = fieldNameIterator.next();
-                    cell = row.createCell(cellIndex);
-                    columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
-                    if (currentRow.contains(currentFieldName)){
-                        if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE || columnType == java.sql.Types.INTEGER){
-                            cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
-                            cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
-                        }else{
-                            cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
-                        }
-                    }
-                    cellIndex++;
-                }
-            }
-
-            wb.write(out);
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        
+        XSSFRow row;
+        XSSFCell cell;
+        
+        if(rs == null || rs.isEmpty()){
+        	row = sheet.createRow(0);
+        	cell = row.createCell(0);
+        	
+        	if(rs == null){
+        		cell.setCellValue("null ResultSet");
+        	}else{
+        		cell.setCellValue("Empty ResultSet");
+        	}
+        	
+        	wb.write(out);
             wb.close();
+            
+            return;
         }
+
+        List<String> fieldnames = rs.getColumnNames();
+        Iterator<DataRow> it = rs.iterator();
+        Iterator<String> fieldNameIterator;
+
+        int rowIndex = 0;
+        int cellIndex = 0;
+
+        if(writeHeader){
+            fieldNameIterator = fieldnames.iterator();
+            row = sheet.createRow(rowIndex);
+            rowIndex++;
+
+            while(fieldNameIterator.hasNext()){
+                cell = row.createCell(cellIndex);
+                cell.setCellValue(fieldNameIterator.next());
+                cellIndex++;
+            }
+        }
+
+        DataRow currentRow;
+        String currentFieldName;
+        while(it.hasNext()){
+            fieldNameIterator = fieldnames.iterator();
+
+            row = sheet.createRow(rowIndex);
+            rowIndex++;
+
+            cellIndex = 0;
+            currentRow = it.next();
+            int columnType;
+            while(fieldNameIterator.hasNext()){
+                currentFieldName = fieldNameIterator.next();
+                cell = row.createCell(cellIndex);
+                columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
+                if (currentRow.contains(currentFieldName)){
+                    if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE || columnType == java.sql.Types.INTEGER){
+                        cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+                        cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
+                    }else{
+                        cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
+                    }
+                }
+                cellIndex++;
+            }
+        }
+
+        wb.write(out);
+        wb.close();
+        
     }
 
 //  sample code:

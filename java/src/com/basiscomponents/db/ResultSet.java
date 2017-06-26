@@ -834,7 +834,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the value of the ColumnType property from the ResultSet's metadata, 
-	 * for the column at the specified index. Returns an empty String in case the property isn't set.
+	 * for the column at the specified index. Returns 0 in case the property isn't set.
 	 * 
 	 * @param column The column index.
 	 * 
