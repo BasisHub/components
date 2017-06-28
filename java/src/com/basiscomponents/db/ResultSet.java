@@ -1340,8 +1340,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public DataField getField(int column) {
 		String name = "";
+		//TODO this check is breaking code where distinct DataRows in a ResultSet do not contain one or more of the fields. 
+		// Then the column index will be skewed anyway so the column number may not match the column names order in other data rows
+		// disabling the check to fix a problem in the QV Grid. This needs to be discussed again (SW)
 		try {
-			name = this.currentDataRow.getColumnName(column);
+			//name = this.currentDataRow.getColumnName(column);
+			name = this.getColumnName(column);
 		} catch (Exception e) {
 			// Auto-generated catch block
 			e.printStackTrace();
@@ -1362,6 +1366,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	// column get methods (0-based)
 	public String getString(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;
 		return field.getString();
 	}
 
@@ -1377,6 +1383,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public String getNString(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;
 		return field.getString();
 	}
 
@@ -1392,6 +1400,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Integer getInt(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getInt();
 	}
 
@@ -1407,6 +1417,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Byte getByte(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getByte();
 	}
 
@@ -1422,6 +1434,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Short getShort(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getShort();
 	}
 
@@ -1437,6 +1451,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Long getLong(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getLong();
 	}
 
@@ -1452,6 +1468,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public BigDecimal getBigDecimal(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getBigDecimal();
 	}
 
@@ -1467,6 +1485,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Double getDouble(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getDouble();
 	}
 
@@ -1482,6 +1502,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Float getFloat(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getFloat();
 	}
 
@@ -1497,6 +1519,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Boolean getBoolean(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getBoolean();
 	}
 
@@ -1512,6 +1536,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Date getDate(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getDate();
 	}
 
@@ -1527,6 +1553,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Time getTime(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getTime();
 	}
 
@@ -1542,6 +1570,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Timestamp getTimestamp(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;
 		return field.getTimestamp();
 	}
 
@@ -1557,6 +1587,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public byte[] getBytes(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getBytes();
 	}
 
@@ -1572,6 +1604,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Array getArray(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getArray();
 	}
 
@@ -1587,6 +1621,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Blob getBlob(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getBlob();
 	}
 
@@ -1602,6 +1638,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Clob getClob(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getClob();
 	}
 
@@ -1617,6 +1655,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Clob getNClob(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;		
 		return field.getNClob();
 	}
 
@@ -1632,6 +1672,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Object getObject(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;
 		return field.getObject();
 	}
 
@@ -1647,6 +1689,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public Ref getRef(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;
 		return field.getRef();
 	}
 
@@ -1662,6 +1706,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public URL getURL(int column) {
 		DataField field = getField(column);
+		if (field==null)
+			return null;
 		return field.getURL();
 	}
 
