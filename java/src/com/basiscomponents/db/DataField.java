@@ -177,9 +177,18 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.sql.Date</code> object.
 	 */
 	public Date getDate() {
-		if (this.Value != null && getClassName() == "java.sql.Timestamp") {
-			long ms = ((java.sql.Timestamp) this.Value).getTime();
-			return new java.sql.Date(ms);
+		
+		if (this.Value != null){
+			if (getClassName() == "java.sql.Timestamp") {
+				long ms = ((java.sql.Timestamp) this.Value).getTime();
+				return new java.sql.Date(ms);
+			}
+			if (getClassName() == "java.lang.Integer") {
+				
+				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date((Integer)this.Value);
+				return new java.sql.Date(d.getTime());
+			}
+			
 		}
 		return (Date) this.Value;
 	}
@@ -258,9 +267,17 @@ public class DataField implements java.io.Serializable {
 	 */
 	public Boolean getBoolean() {
 		
-		if (this.Value!=null && this.Value.getClass().equals(java.lang.String.class)){
-			return ("trueTRUE1".indexOf((String)this.Value) > 0);
-		};
+		if (this.Value!=null){
+			if (this.Value.getClass().equals(java.lang.String.class)){
+				return ("trueTRUE1".indexOf((String)this.Value) > 0);
+			};
+			if (this.Value.getClass().equals(java.lang.Integer.class)){
+				return ((Integer)this.Value > 0);
+			};	
+			if (this.Value.getClass().equals(java.lang.Double.class)){
+				return ((Double)this.Value > 0);
+			};
+		}
 		return (Boolean) this.Value;
 	}
 
