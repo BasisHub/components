@@ -1,6 +1,7 @@
 package com.basiscomponents.db;
 
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.basis.bbj.datatypes.TemplatedString;
+import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -179,7 +182,7 @@ public class DataRow implements java.io.Serializable {
 				f = this.getFieldAsString(k);
 			} catch (Exception e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			x = x + "," + k + "=" + f;
 		}
@@ -1660,12 +1663,21 @@ public class DataRow implements java.io.Serializable {
 					}else{
 						value = "0";
 					}
-				}else if(sqlType == 9 || sqlType == java.sql.Types.DATE){
+				}else if(sqlType == 9){
+					precision = 9;
+					
+					if(fieldValue.getInt() != null){
+						Integer ret2 = fieldValue.getInt();
+						value = String.valueOf(ret2.doubleValue());
+					}else{
+						value = "00000000";
+					}
+				}else if(sqlType == java.sql.Types.DATE){
 					precision = 9;
 					
 					if(fieldValue.getTimestamp() != null){
 						Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(fieldValue.getDate().getTime()));
-						value = String.valueOf(String.valueOf(ret2.doubleValue()));
+						value = String.valueOf(ret2.doubleValue());
 					}else{
 						value = "00000000";
 					}
@@ -1696,4 +1708,148 @@ public class DataRow implements java.io.Serializable {
 			
 		return builder.toString();
 	}
+	
+	/**
+	 * Converts and returns the given String Template as DataRow object
+	 * containing the default field values.
+	 * 
+	 * @see #fromTemplate(String, String)
+	 * 
+	 * @param template The String Template
+	 * 
+	 * @return a DataRow object created based on the given String Template
+	 * 
+	 * @throws Exception
+	 */
+	public static DataRow fromTemplate(String template) throws Exception{
+		return fromTemplate(template, "");
+	}
+	
+	/**
+	 * Converts and returns the given String Template as DataRow object
+	 * containing the values of the given record String.
+	 * 
+	 * @see #fromTemplate(String)
+	 * 
+	 * @param template The String Template
+	 * @param record The record to set
+	 * 
+	 * @return a DataRow object created based on the given String Template
+	 * 
+	 * @throws Exception
+	 */
+	public static DataRow fromTemplate(String template, String record) throws Exception{
+		TemplatedString stringTemplate = new TemplatedString(template);
+		stringTemplate.setBytes(record.getBytes());
+		
+		String fieldName;
+		byte fieldType;
+		int fieldSize;
+		String dType = "";
+		
+		int value;
+		int sqlType = java.sql.Types.VARCHAR;
+		DataField df = null;
+
+		DataRow row = new DataRow();
+		
+		int fieldCount = stringTemplate.getNumFields();
+		for(int i=0; i<fieldCount; i++){
+			fieldName = stringTemplate.getFieldName(i).toString();
+			fieldType = stringTemplate.getFieldType(i);
+			fieldSize = stringTemplate.getFieldSize(i);
+			
+			switch(fieldType){
+				case TemplateInfo.BLOB: sqlType = java.sql.Types.BLOB;
+										try{
+											df = new DataField(stringTemplate.getFieldAsString(i));
+										}catch(Exception e){
+											df = new DataField("");
+										}
+										break;	
+										
+				case TemplateInfo.INTEGER: sqlType = java.sql.Types.INTEGER;
+			     						   try{
+			     							   df = new DataField(stringTemplate.getFieldAsNumber(i).toBigInteger());
+			     						   }catch(Exception e){
+			     							   df = new DataField(0);
+			     						   }
+			     						   break;
+			
+				case TemplateInfo.CHARACTER: sqlType = java.sql.Types.CHAR;
+											 try{
+											 	 df = new DataField(stringTemplate.getFieldAsString(i));
+											 }catch(Exception e){
+												 df = new DataField("");
+											 }
+					 						 break; 						   
+			     			
+				case TemplateInfo.RESIDENT_FLOAT: sqlType = java.sql.Types.FLOAT;
+		           								  try{
+												 	  df = new DataField(stringTemplate.getFloat(i));
+												  }catch(Exception e){
+													  df = new DataField(0f);
+												  }
+		           								  break;
+					
+				case TemplateInfo.RESIDENT_DOUBLE: sqlType = java.sql.Types.DOUBLE;
+					  							   try{
+												 	   df = new DataField(stringTemplate.getDouble(i));
+												   }catch(Exception e){
+													   df = new DataField(0);
+												   }
+					  							   break;
+					 						 
+				case TemplateInfo.BUS:
+				case TemplateInfo.NUMERIC:
+				case TemplateInfo.ADJN_BUS:
+				case TemplateInfo.BCD_FLOAT:
+				case TemplateInfo.IEEE_FLOAT:
+				case TemplateInfo.ORDERED_NUMERIC: 
+				case TemplateInfo.UNSIGNED_INTEGER: sqlType = java.sql.Types.NUMERIC;
+										            try{
+										            	df = new DataField(stringTemplate.getFieldAsNumber(i).toBigDecimal());
+													}catch(Exception e){
+														df = new DataField(0);
+													}
+										            break;
+				
+				default: sqlType = java.sql.Types.VARCHAR;
+						 try{
+						     df = new DataField(stringTemplate.getFieldAsString(i));
+						 }catch(Exception e){
+							df = new DataField("");
+						 }
+				   	     break;
+			}
+			
+			if(sqlType == java.sql.Types.NUMERIC){
+				try{
+					dType = stringTemplate.getAttribute(fieldName, "DTYPE");
+					
+					if(dType.equals("D") && fieldSize == 8){
+						// Date
+						sqlType = 9; // BASIS Date
+						value = stringTemplate.getFieldAsNumber(i).intValue();
+						df = new DataField(value);
+					}else if(dType.equals("N") && fieldSize == 1){
+						// Boolean
+						sqlType = java.sql.Types.BOOLEAN;
+						if(stringTemplate.getFieldAsNumber(i).intValue() == 0){
+							df = new DataField(false);
+						}else{
+							df = new DataField(true);
+						}
+					}
+				}catch(Exception e){	
+					//e.printStackTrace();
+					// ignoring because not all fields have an attribute DTYPE
+				}
+			}
+			
+			row.addDataField(fieldName, sqlType, df);			
+		}
+		
+		return row;
+	}	
 }
