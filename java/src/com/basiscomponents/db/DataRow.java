@@ -1202,7 +1202,7 @@ public class DataRow implements java.io.Serializable {
 			if (in.charAt(i) <31){
 				String hex = String.format("%04x", (int) in.charAt(i));
 				in=in.substring(0,i)+"\\u"+hex+in.substring(i+1);
-				System.out.println(i+ "-" +hex);
+				//System.out.println(i+ "-" +hex);
 			}
 			i++;
 		}
