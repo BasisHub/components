@@ -100,7 +100,7 @@ public class BBjSearchGizmo {
 	public void removeDocument(String id) throws IOException,
 			LockObtainFailedException, ParseException {
 
-		String id2 = new sun.misc.BASE64Encoder().encode(id.getBytes());
+		String id2 = new String(java.util.Base64.getEncoder().encode(id.getBytes()));
 
 		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault()
 				.getPath(directoryName));
@@ -141,7 +141,7 @@ public class BBjSearchGizmo {
 			int docId = hits[i].doc;
 			Document d = searcher.doc(docId);
 			String s = d.get("id");
-			s = new String(new sun.misc.BASE64Decoder().decodeBuffer(s));
+			s = new String(java.util.Base64.getDecoder().decode(s));
 			result.add(s);
 		}
 		reader.close();

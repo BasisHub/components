@@ -1,6 +1,5 @@
 package com.basiscomponents.lucene;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class BBjSearchGizmoDoc {
@@ -9,9 +8,9 @@ public class BBjSearchGizmoDoc {
 	private ArrayList<BBjSearchGizmoDocField> fields = new ArrayList<>();
 
 	public String getId() {
-		try {
-			return new String(new sun.misc.BASE64Decoder().decodeBuffer(id));
-		} catch (IOException e) {
+		try{
+			return new String(java.util.Base64.getDecoder().decode(id));
+		}catch(IllegalArgumentException e){
 			System.err.println("Cant decode!");
 		}
 		return id;
@@ -26,7 +25,7 @@ public class BBjSearchGizmoDoc {
 	}
 
 	public BBjSearchGizmoDoc(String id) {
-		this.id = new sun.misc.BASE64Encoder().encode(id.getBytes());
+		this.id = new String(java.util.Base64.getEncoder().encode(id.getBytes()));
 	}
 
 	public void addField(String name, String content, float boost) {
