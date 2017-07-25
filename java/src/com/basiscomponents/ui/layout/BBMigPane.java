@@ -937,4 +937,22 @@ public class BBMigPane implements BBjControl {
 		return this.container.getWindow();
 	}
 
+	@Override
+	public String getComputedStyle(String arg0) throws BBjException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getStyle(String arg0) throws BBjException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setStyle(String arg0, String arg1) throws BBjException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
