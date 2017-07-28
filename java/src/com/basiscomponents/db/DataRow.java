@@ -335,6 +335,15 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
+	 * Returns true if the DataRow has now fields, otherwise false.<br>
+	 *
+	 * @return isNull True in case the value of the field is null, false otherwise.
+	 */
+	public boolean isEmpty() {
+		return this.ResultSet.getColumnNames().isEmpty();
+	}
+
+	/**
 	 * Returns true if the value of the field with the given name is null, false otherwise.<br>
 	 * <br>
 	 * Throws an Exception in case the field with the given name doesn't exist.

@@ -161,6 +161,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		DataRows.sort(java.util.Comparator.comparing(DataRow::getRowID));
 	}
 
+	/**
+	 * Search for DataRow(s) containing a specific value(s)
+	 * Returns a new ResultSet with the DataRow(s) found in the current instance.
+	 * 
+	 * If the type of field in simpleFilterCondition is 12 (String) and the value starts with "regex:" then a regular search will be applied
+	 * 
+	 * @param simpleFilterCondition A DataRow with the vlaues to search for.
+	 * 
+	 * @return a ResultSet with the DataRows found in the current instance.
+	 */
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 
