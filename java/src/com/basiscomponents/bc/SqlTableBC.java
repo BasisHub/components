@@ -353,11 +353,13 @@ public class SqlTableBC implements BusinessComponent{
 				filter.setFieldValue(f, ret.getField(f));
 			}
 			this.setFilter(filter);
-			ResultSet retrs = this.retrieve(1,2);
+			ResultSet retrs = this.retrieve(0,3);
 			if (retrs.size() == 1)
 				ret=retrs.getItem(0);
-			else
-				System.err.println("could not read written record - got "+retrs.size()+" records back!");
+			else {
+				 System.err.println("could not read written record - got "+retrs.size()+" records back!");
+				 System.err.println("filter = "+filter);
+			}
 
 			this.setFilter(oldfilter);
 		}
