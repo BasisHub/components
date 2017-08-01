@@ -15,7 +15,7 @@
 	<properties>
 		<destDir>javadoc</destDir>
 		<doctitle>Components</doctitle>
-
+		<project-root>${basedir}</project-root>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>dd-MM-yyyy HH:mm</maven.build.timestamp.format>
 	</properties>
@@ -171,7 +171,7 @@
 			<artifactId>BuildVersionGenerator</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${basedir}/java/build/BuildVersionGenerator.jar</systemPath>
+			<systemPath>${project-root}/java/build/BuildVersionGenerator.jar</systemPath>
 		</dependency>
 
 	</dependencies>
@@ -217,6 +217,7 @@
 			<plugin>
 				<artifactId>exec-maven-plugin</artifactId>
 				<groupId>org.codehaus.mojo</groupId>
+				<version>1.5.0</version>
 				<executions>
 					<execution>
 						<phase>validate</phase>

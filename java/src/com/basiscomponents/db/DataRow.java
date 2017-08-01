@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.basis.bbj.datatypes.TemplatedString;
+import com.basis.util.common.BasisNumber;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -1672,73 +1673,45 @@ public class DataRow implements java.io.Serializable {
 		numericTypeCodeList.add(java.sql.Types.DATE);
 		numericTypeCodeList.add(9); // Basis DATE
 		
-		StringBuilder builder = new StringBuilder();
+		String template = getTemplate();
+		TemplatedString stringTemplate = new TemplatedString(template);
 		
-		int sqlType;
-		int precision;
-		String value;
-		DataField fieldValue;
-		
-		int size = this.ResultSet.getColumnCount();
-		for(int index=0; index<size ; index++){
-			sqlType = ResultSet.getColumnType(index);
-			precision = ResultSet.getPrecision(index);
+		int fieldType;
+		Entry<String, DataField> entry;
+		Iterator<Entry<String, DataField>> it = this.DataFields.entrySet().iterator();
+		while(it.hasNext()){
+			entry = it.next();
+			fieldType = getFieldType(entry.getKey());
 			
-			fieldValue = this.getField(this.ResultSet.getColumnName(index));
-			value = fieldValue.toString();
-			
-			if(numericTypeCodeList.contains(sqlType)){	
-				if(sqlType == java.sql.Types.BOOLEAN){
-					precision = 1;
-					if(fieldValue.getBoolean()){
-						value = "1";
+			if(numericTypeCodeList.contains(fieldType)){
+				if(fieldType == java.sql.Types.BOOLEAN){
+					if(entry.getValue().getBoolean()){
+						stringTemplate.setFieldValue(entry.getKey(), "1");
 					}else{
-						value = "0";
+						stringTemplate.setFieldValue(entry.getKey(), "0");
 					}
-				}else if(sqlType == 9){
-					precision = 9;
-					
-					if(fieldValue.getInt() != null){
-						Integer ret2 = fieldValue.getInt();
-						value = String.valueOf(ret2.doubleValue());
+				}else if(fieldType == 9){
+					stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(entry.getValue().getInt().doubleValue()));
+				}else if(fieldType == java.sql.Types.DATE){
+					if(entry.getValue().getTimestamp() != null){
+						Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(entry.getValue().getDate().getTime()));
+						stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(ret2.doubleValue()));
 					}else{
-						value = "00000000";
-					}
-				}else if(sqlType == java.sql.Types.DATE){
-					precision = 9;
-					
-					if(fieldValue.getTimestamp() != null){
-						Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(fieldValue.getDate().getTime()));
-						value = String.valueOf(ret2.doubleValue());
-					}else{
-						value = "00000000";
+						stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(0));
 					}
 				}else{
-					// Fixed length numeric fields need to padded with leading zeros
-					if(precision != 0){
-						String prefix = "";
-						for(int i=precision-value.length(); i>0; i--){
-							prefix = prefix + "0";
-						}
-						
-						value = prefix + value;
+					if(fieldType == java.sql.Types.BIGINT || fieldType == java.sql.Types.TINYINT || fieldType == java.sql.Types.INTEGER || fieldType == java.sql.Types.SMALLINT){
+						stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(entry.getValue().getInt().doubleValue()));
+					}else{
+						stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(entry.getValue().getDouble()));
 					}
-				}
+				}			
 			}else{
-				if(sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE || sqlType == 11){
-					precision = 21;
-				}
-			}
-			
-			builder.append(value);
-			
-			// Adding the backspace character as a delimiter for variable length fields
-			if(precision == 0){
-				builder.append("\b");
+				stringTemplate.setFieldValue(entry.getKey(), entry.getValue().toString());
 			}
 		}
-			
-		return builder.toString();
+		
+		return stringTemplate.getString().toString(); 
 	}
 	
 	/**
