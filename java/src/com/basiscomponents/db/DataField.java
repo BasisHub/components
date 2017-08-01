@@ -61,6 +61,37 @@ public class DataField implements java.io.Serializable {
 	public Boolean equals(DataField dataField) {
 		return this.getString().equals(dataField.getString());
 	}
+	
+	/**
+	 * Returns <code>true</code> in case the given DataField object equals the current DataField object, <code>false</code> otherwise.
+	 * The method does only compare the value object of both DataField objects, not the attributes.
+	 * 
+	 * @param dataField The DataField object to compare with.
+	 * @return equal The boolean value indicating whether the given DataField object equals this DataField object.
+	 */
+	public Boolean equals(String pattern) {
+		
+		Boolean isStringPar = false;
+		if (pattern.startsWith("'") && pattern.endsWith("'"))
+		{
+			pattern=pattern.substring(1, pattern.length()-1);
+			isStringPar=true;
+		}
+
+		String cn = getClassName();
+		switch (cn){
+		case "java.lang.Integer":
+				return getInt().equals(Integer.parseInt(pattern));
+				
+		case "java.lang.String":
+				return getString().trim().equals(pattern);
+				
+		default:
+			System.err.println("unimplemented: field type "+cn);
+			return false;
+		}		
+		
+	}	
 
 	/**
 	 * Sets the given object as the DataField's value

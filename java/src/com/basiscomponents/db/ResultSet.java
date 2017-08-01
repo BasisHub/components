@@ -162,6 +162,28 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
+	 * Applies the queryClause to a ResultSet and returns a new ResultSet that only contains
+	 * records that match the clause. The clause syntax is similar to an SQL WHERE clause.
+	 * 
+	 * CAUTION: this method is experimental!!
+	 * 
+	 * @param QueryClause: the query
+	 * @return ResultSet: the records that match the query clause
+	 * @throws Exception
+	 */
+	public ResultSet filterBy(String QueryClause) throws Exception{
+		System.out.println("WARNING: using experimental method implementation filterBy clause on ResultSet");
+		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
+		Iterator<DataRow> it = this.iterator();
+		while (it.hasNext()) {
+			DataRow dr = it.next();
+			if (DataRowQueryMatcher.matches(QueryClause, dr))
+				r.add(dr);
+		}
+		return r;
+	}
+	
+	/**
 	 * Search for DataRow(s) containing a specific value(s)
 	 * Returns a new ResultSet with the DataRow(s) found in the current instance.
 	 * 
