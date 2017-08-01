@@ -1,7 +1,6 @@
 package com.basiscomponents.db;
 
 import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -335,7 +334,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns true if the DataRow has now fields, otherwise false.<br>
+	 * Returns true if the DataRow has no fields, otherwise false.<br>
 	 *
 	 * @return isNull True in case the value of the field is null, false otherwise.
 	 */
@@ -1507,13 +1506,14 @@ public class DataRow implements java.io.Serializable {
 	 * The fields where the attribute is defined but the attribute value is empty or null, will be ignored by this method.
 	 *
 	 * @see #getFieldsHavingAttribute(String, boolean)
+	 * @see #getFieldsHavingAttribute(String, boolean, DataRow)
 	 *
 	 * @param attributeName The name of the attribute.
 	 *
 	 * @return The DataRow with the fields where the attribute with the given name is defined.
 	 */
 	public DataRow getFieldsHavingAttribute(String attributeName){
-		return getFieldsHavingAttribute(attributeName, false);
+		return getFieldsHavingAttribute(attributeName, false, this);
 	}
 
 	/**
@@ -1523,6 +1523,7 @@ public class DataRow implements java.io.Serializable {
 	 * will be ignored by the method.
 	 *
 	 * @see #getFieldsHavingAttribute(String)
+	 * @see #getFieldsHavingAttribute(String, boolean, DataRow)
 	 *
 	 * @param attributeName The name of the attribute.
 	 * @param includeEmptyValues The boolean value indicating whether to include fields with empty attribute values
@@ -1530,24 +1531,46 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow with the fields where the attribute with the given name is defined.
 	 */
 	public DataRow getFieldsHavingAttribute(String attributeName, boolean includeEmptyValues){
+		return getFieldsHavingAttribute(attributeName, includeEmptyValues, this);
+	}
+	
+	/**
+	 * Returns all fields of this DataRow object being defined in the given DataRow object and also having the given attribute name set.
+	 * The given boolean value defines whether to include the fields where the attribute is defined but the attribute value
+	 * is empty (null or Empty String). If the value is set to true, these fields are included. If it is set to false, those fields
+	 * will be ignored by the method.
+	 *   
+	 * @see #getFieldsHavingAttribute(String)
+	 * @see #getFieldsHavingAttribute(String, boolean)
+	 *
+	 * @param attributeName The name of the attribute.
+	 * @param includeEmptyValues The boolean value indicating whether to include fields with empty attribute values
+	 * @param dr The DataRow object's whose fields will be iterated over.
+	 *
+	 * @return The DataRow with the fields where the attribute with the given name is defined.
+	 */
+	public DataRow getFieldsHavingAttribute(String attributeName, boolean includeEmptyValues, DataRow dr){
 		DataRow dataRow = new DataRow();
 
-		Entry<String,DataField> entry;
+		Entry<String,Object> entry;
 		DataField fieldValue;
 
-		Iterator<Entry<String, DataField>> it = DataFields.entrySet().iterator();
+		Iterator<Entry<String, Object>> it = dr.getObjects().entrySet().iterator();
 		while(it.hasNext()){
 			entry = it.next();
-			fieldValue = entry.getValue();
+			fieldValue = (DataField) entry.getValue();
 
 			if(fieldValue.getAttributes().containsKey(attributeName)){
-				if(!includeEmptyValues){
-					if(fieldValue.getAttribute(attributeName) == null || fieldValue.getAttribute(attributeName).isEmpty()){
-						continue;
+				// Checking that the current DataRow also contains the field name
+				if(this.contains(entry.getKey())){
+					if(!includeEmptyValues){
+						if(fieldValue.getAttribute(attributeName) == null || fieldValue.getAttribute(attributeName).isEmpty()){
+							continue;
+						}
 					}
-				}
 
-				dataRow.setFieldValue(entry.getKey(), fieldValue.clone());
+					dataRow.setFieldValue(entry.getKey(), fieldValue.clone());
+				}
 			}
 		}
 
@@ -1861,4 +1884,5 @@ public class DataRow implements java.io.Serializable {
 		
 		return row;
 	}	
+
 }
