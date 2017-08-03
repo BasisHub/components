@@ -1682,38 +1682,38 @@ public class DataRow implements java.io.Serializable {
 		while(it.hasNext()){
 			entry = it.next();
 			fieldType = getFieldType(entry.getKey());
-			
+			String fieldName = entry.getKey();
+			DataField field = entry.getValue();
+
 			if(numericTypeCodeList.contains(fieldType)){
-				if(fieldType == java.sql.Types.BOOLEAN){
-					if(entry.getValue().getBoolean()){
-						stringTemplate.setFieldValue(entry.getKey(), "1");
-					}else{
-						stringTemplate.setFieldValue(entry.getKey(), "0");
-					}
-				}else if(fieldType == 9){
-					stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(entry.getValue().getInt().doubleValue()));
-				}else if(fieldType == java.sql.Types.DATE){
-					if(entry.getValue().getTimestamp() != null){
-						Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(entry.getValue().getDate().getTime()));
-						stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(ret2.doubleValue()));
-					}else{
-						stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(0));
-					}
+				if(field.getValue()==null) {
+					stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));
 				}else{
-					if(fieldType == java.sql.Types.BIGINT || fieldType == java.sql.Types.TINYINT || fieldType == java.sql.Types.INTEGER || fieldType == java.sql.Types.SMALLINT){
-						stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(entry.getValue().getInt().doubleValue()));
+					if(fieldType == java.sql.Types.BOOLEAN){
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getBoolean()? 1: 0));
+					}else if(fieldType == 9){
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getInt()));
+					}else if(fieldType == java.sql.Types.DATE){
+						Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(field.getDate().getTime()));
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(ret2.doubleValue()));
 					}else{
-						stringTemplate.setFieldValue(entry.getKey(), BasisNumber.valueOf(entry.getValue().getDouble()));
+						if(fieldType == java.sql.Types.BIGINT || fieldType == java.sql.Types.TINYINT || fieldType == java.sql.Types.INTEGER || fieldType == java.sql.Types.SMALLINT){
+							stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getInt()));
+						}else if(fieldType == java.sql.Types.DOUBLE){
+							stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getDouble()));
+						}else{
+							stringTemplate.setFieldValue(fieldName, new BasisNumber(field.getBigDecimal()));
+						}
 					}
-				}			
+				}
 			}else{
-				stringTemplate.setFieldValue(entry.getKey(), entry.getValue().toString());
+				if (field.getValue()!=null) stringTemplate.setFieldValue(fieldName, field.toString());
 			}
 		}
-		
+
 		return stringTemplate.getString().toString(); 
 	}
-	
+
 	/**
 	 * Converts and returns the given String Template as DataRow object
 	 * containing the default field values.
