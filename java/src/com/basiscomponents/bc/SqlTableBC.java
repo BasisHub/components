@@ -15,7 +15,7 @@ import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.DataField;
 
-public class SqlTableBC implements BusinessComponent{
+public class SqlTableBC implements BusinessComponent {
 
 	private String Url;
 	private String User;
@@ -26,16 +26,14 @@ public class SqlTableBC implements BusinessComponent{
 	private ArrayList<String> PrimaryKeys;
 	private ArrayList<String> AutoIncrementKeys;
 	private DataRow AttributesRecord;
+	private Connection Conn;
+	private String retrieveSql;
 
 	private DataRow   Filter;
 	private DataRow   FieldSelection;
-	private ResultSet LastResultSet;
 
+	private String DBType;
 	private String DBQuoteString = "";
-
-
-	@SuppressWarnings("unused")
-	private SqlTableBC(){};
 
 
 	public SqlTableBC(String Url) {
@@ -52,7 +50,16 @@ public class SqlTableBC implements BusinessComponent{
 	}
 
 
+	public SqlTableBC(Connection con) throws SQLException {
+		if (con != null && !con.isClosed()) {
+			Conn = con;
+		}
+	}
+
+
 	private Connection getConnection() throws SQLException {
+		if (Conn != null) return Conn;
+
 		if (User == null || Password == null)
 			return DriverManager.getConnection(Url);
 		else
@@ -71,6 +78,7 @@ public class SqlTableBC implements BusinessComponent{
 			conn = getConnection();
 
 			DatabaseMetaData meta = conn.getMetaData();
+			DBType = meta.getDatabaseProductName().toUpperCase();
 			DBQuoteString = meta.getIdentifierQuoteString();
 			java.sql.ResultSet rs = meta.getPrimaryKeys(null, null, Table);
 
@@ -91,15 +99,20 @@ public class SqlTableBC implements BusinessComponent{
 
 			//read attributes (for getAttributesRecord() method)
 			Statement stmt = conn.createStatement();
-			ResultSet ar = new ResultSet(stmt.executeQuery("SELECT * FROM "+DBQuoteString+Table+DBQuoteString+" WHERE 1=0"));
+			ResultSet ar ;
+			if (retrieveSql != null && !retrieveSql.equals(""))
+				ar = new ResultSet(stmt.executeQuery("SELECT * FROM ("+retrieveSql+") WHERE 1=0"));
+			else
+				ar = new ResultSet(stmt.executeQuery("SELECT * FROM "+DBQuoteString+Table+DBQuoteString+" WHERE 1=0"));
 			for (String field : ar.getColumnNames()) {
 				HashMap<String, Object> attrmap = ar.getColumnMetaData(field);
 				try {
 					int type = (int)attrmap.get("ColumnType");
 					AttributesRecord.addDataField(field, type, new DataField(null));
 					for (String attr : attrmap.keySet()) {
-						AttributesRecord.setFieldAttribute(field, attr, attrmap.get("attr").toString());
+						AttributesRecord.setFieldAttribute(field, attr, attrmap.get(attr).toString());
 					}
+					if (PrimaryKeys.contains(field)) AttributesRecord.setFieldAttribute(field, "EDITABLE", "2");
 				}
 				catch (Exception ex) { }
 			}
@@ -112,7 +125,7 @@ public class SqlTableBC implements BusinessComponent{
 			e.printStackTrace();
 		}
 		finally {
-			if (conn != null) {
+			if (Conn == null && conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {
@@ -123,15 +136,32 @@ public class SqlTableBC implements BusinessComponent{
 	}
 
 
+	public void setRetrieveSql(String sql) {
+		retrieveSql = sql;
+	}
+
+	public String getDBQuoteString() {
+		return DBQuoteString;
+	}
+
+
+	public DataRow getFilter() {
+		return this.Filter;
+	}
+
+
 	public void setFilter(DataRow filter) {
 		this.Filter = filter;
-		this.LastResultSet = null;
+	}
+
+
+	public DataRow getFieldSelection() {
+		return this.FieldSelection;
 	}
 
 
 	public void setFieldSelection(DataRow FieldSelection) {
 		this.FieldSelection = FieldSelection;
-		this.LastResultSet = null;
 	}
 
 
@@ -146,7 +176,15 @@ public class SqlTableBC implements BusinessComponent{
 			}
 			this.FieldSelection = fields;
 		}
-		this.LastResultSet = null;
+	}
+
+
+	/**
+	 * Get current scope (if scope is set).
+	 * return  String scope  the selected scope.
+	 */
+	public String getScope() {
+		return this.Scope;
 	}
 
 
@@ -157,11 +195,15 @@ public class SqlTableBC implements BusinessComponent{
 	 */
 	public void setScope(String scope) {
 		this.Scope = scope;
-		LastResultSet = null;
 	}
 
 
-	public void setScopes(HashMap<String,ArrayList<String>> scopes) {
+	public HashMap<String,ArrayList<String>> getScopeDef() {
+		return this.Scopes;
+	}
+
+
+	public void setScopeDef(HashMap<String,ArrayList<String>> scopes) {
 		this.Scopes = scopes;
 	}
 
@@ -172,8 +214,7 @@ public class SqlTableBC implements BusinessComponent{
 
 
 	public ResultSet retrieve(int first, int last) throws Exception {
-
-		if (first > 0 && last < first) {
+		if (first >= 0 && last < first) {
 			throw new Exception("Invalid range: last could not be lower than first!");
 		}
 
@@ -181,11 +222,8 @@ public class SqlTableBC implements BusinessComponent{
 			throw new Exception("Full text search not implemented yet!");
 		}
 
-		if (this.LastResultSet != null){
-			return this.LastResultSet;
-		}
-
-		Connection conn=null;
+		ResultSet retrs = null;
+		Connection conn = null;
 		try {
 			conn = getConnection();
 			String sql;
@@ -217,7 +255,10 @@ public class SqlTableBC implements BusinessComponent{
 				sqlfields = new StringBuffer(sqlfields.substring(1));
 			}
 
-			sql = "SELECT "+sqlfields+" FROM "+DBQuoteString+Table+DBQuoteString;
+			if (retrieveSql != null && !retrieveSql.equals(""))
+				sql = "SELECT "+sqlfields+" FROM ("+retrieveSql+")";
+			else
+				sql = "SELECT "+sqlfields+" FROM "+DBQuoteString+Table+DBQuoteString;
 
 			if (Filter != null && Filter.getFieldNames().size() > 0) {
 				StringBuffer wh = new StringBuffer("");
@@ -227,8 +268,25 @@ public class SqlTableBC implements BusinessComponent{
 				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
 			}
 
-			if (first > 0 && last > 0) {
-				sql+=" LIMIT "+first+","+last;
+			if (first >= 0 && last >= first) {
+				switch(DBType) {
+					case "BASIS DBMS":
+						sql+=" LIMIT "+(first+1)+","+(last - first + 1);
+						break;
+					case "MYSQL":
+						sql+=" LIMIT "+first+","+(last - first + 1);
+						break;
+					case "MICROSOFT SQL SERVER":
+						//OFFSET is available since MS SQL Server 2012 (version 11)
+						int dbVersion = Integer.valueOf(conn.getMetaData().getDatabaseProductVersion().replaceAll("(\\d+)\\..*", "$1"));
+						if (dbVersion >= 11)
+							sql="SELECT * FROM ("+sql+") T ORDER BY (SELECT NULL) OFFSET "+first+" ROWS FETCH NEXT "+(last - first + 1)+" ROWS ONLY";
+						else
+							throw new Exception("Pagination is not supported or not implemented with the "+DBType+" (version "+dbVersion+") database.");
+						break;
+					default:
+						throw new Exception("Pagination is not supported or not implemented with the "+DBType+" database.");
+				}
 			}
 
 			PreparedStatement prep = conn.prepareStatement(sql);
@@ -238,16 +296,14 @@ public class SqlTableBC implements BusinessComponent{
 			}
 
 			java.sql.ResultSet rs = prep.executeQuery();
-			ResultSet retrs = new ResultSet();
-//			retrs.setKeyColumns(PrimaryKeys);
+			retrs = new ResultSet();
 			retrs.populate(rs, true);
-			this.LastResultSet = retrs;
 		}
 		catch (SQLException ex) {
 			throw ex;
 		}
 		finally {
-			if (conn != null) {
+			if (Conn == null && conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {
@@ -257,20 +313,24 @@ public class SqlTableBC implements BusinessComponent{
 		}
 
 
-		//now set the EDITABLE flag for primary key fields in the result set to "2"
-		ArrayList<String> fields = LastResultSet.getColumnNames();
-		for (DataRow dr : LastResultSet) {
+		// now set the EDITABLE flag for primary key fields in the result set to "2"
+		ArrayList<String> fields = retrs.getColumnNames();
+		for (DataRow dr : retrs) {
 			for (String field : PrimaryKeys) {
 				if (fields.contains(field)) dr.setFieldAttribute(field, "EDITABLE", "2");
 			}
 		}
 
-		return LastResultSet;
+		return retrs;
+	}
+
+
+	public Collection<String> validateWrite(DataRow dr) {
+		return new ArrayList<String>();
 	}
 
 
 	public DataRow write(DataRow r) throws Exception {
-
 		Boolean pk_present=false;
 		if (PrimaryKeys != null && PrimaryKeys.size() > 0) {
 			pk_present=r.getFieldNames().containsAll(PrimaryKeys);
@@ -278,41 +338,57 @@ public class SqlTableBC implements BusinessComponent{
 
 		Connection conn = getConnection();
 
+		// Read table field names from the table (not from getAttributesRecord()).
+		// The field may differ if a custom retrieve sql statement is used.
+		DatabaseMetaData meta = conn.getMetaData();
+		java.sql.ResultSet rs = meta.getColumns(null, null, Table, null);
+		ArrayList<String> tableFields = new ArrayList<String>();
+		while (rs.next()) {
+			tableFields.add(rs.getString("COLUMN_NAME"));
+		}
+
 		String sql="";
 		int affectedRows = 0;
 		DataRow ret = r.clone();
 		PreparedStatement prep;
 
 
-		// update (Try an update an check affected rows. If affected rows are 0, then make an insert.)
+		// update (Try an update an check affected rows. If there are no (0) affected rows, then make an insert.)
 		if (pk_present) {
 			sql="UPDATE "+DBQuoteString+Table+DBQuoteString+" SET ";
 
-			ArrayList<String> fields = new ArrayList<String>(r.getFieldNames());
-			fields.removeAll(PrimaryKeys);
+			ArrayList<String> fields = new ArrayList<String>();
 
 			StringBuffer update = new StringBuffer("");
-			for (String field : fields) {
-				update.append(","+DBQuoteString+field+DBQuoteString+"=?");
+			for (String field : tableFields) {
+				if (PrimaryKeys.contains(field)) continue;
+				if (r.getFieldNames().contains(field)) {
+					fields.add(field);
+					update.append(","+DBQuoteString+field+DBQuoteString+"=?");
+				}
 			}
+
 			
 			if (update.length()>0){
 				// if the fields are _only_ fields that are part of the primary key 
 				// (e.g. a table with PK being a compount, not having fields outside the PK)
 				// then update would be "" and this portion would fail
+
 				sql+=update.substring(1);
-	
+
 				StringBuffer wh = new StringBuffer("");
 				for (String pkfield : PrimaryKeys) {
 					wh.append(" AND "+DBQuoteString+pkfield+DBQuoteString+"=?");
+					fields.add(pkfield);
 				}
-				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
-	
-				fields.addAll(PrimaryKeys);
+				sql+=" WHERE "+wh.substring(5);
+
 				prep = conn.prepareStatement(sql);
 				setSqlParams(prep, r, fields);
-	
+
 				affectedRows = prep.executeUpdate();
+				
+				
 			}
 			else {
 				///so now we have to do a SELECT to see if the record is there, as we can't check with update
@@ -325,27 +401,32 @@ public class SqlTableBC implements BusinessComponent{
 				fields.addAll(PrimaryKeys);
 				prep = conn.prepareStatement(sql);
 				setSqlParams(prep, r, fields);
-				java.sql.ResultSet rs = prep.executeQuery();
+				java.sql.ResultSet jrs = prep.executeQuery();
 				ResultSet retrs = new ResultSet();
-				retrs.populate(rs, true);
+				retrs.populate(jrs, true);
 				affectedRows = retrs.get(0).getFieldAsNumber("C").intValue();
 			}
+
 		}
 
 		// insert
 		if (!pk_present || affectedRows == 0) {
 			sql="INSERT INTO "+DBQuoteString+Table+DBQuoteString+" (";
 
+			ArrayList<String> fields = new ArrayList<String>();
 			StringBuffer keys = new StringBuffer("");
 			StringBuffer values = new StringBuffer("");
-			for (String field : r.getFieldNames()) {
-				keys.append(","+DBQuoteString+field+DBQuoteString);
-				values.append(",?");
+			for (String field : tableFields) {
+				if (r.contains(field)) {
+					fields.add(field);
+					keys.append(","+DBQuoteString+field+DBQuoteString);
+					values.append(",?");
+				}
 			}
 			sql+=keys.substring(1)+") VALUES("+values.substring(1)+")";
 
 			prep = conn.prepareStatement(sql,PreparedStatement.RETURN_GENERATED_KEYS);
-			setSqlParams(prep, r, null);
+			setSqlParams(prep, r, fields);
 
 			affectedRows = prep.executeUpdate();
 
@@ -365,8 +446,6 @@ public class SqlTableBC implements BusinessComponent{
 		}
 
 
-		this.LastResultSet=null;
-
 		//reload from the database
 		if (pk_present) {
 			DataRow oldfilter = this.Filter;
@@ -375,19 +454,19 @@ public class SqlTableBC implements BusinessComponent{
 				filter.setFieldValue(f, ret.getField(f));
 			}
 			this.setFilter(filter);
-			ResultSet retrs = this.retrieve(0,3);
+			ResultSet retrs = this.retrieve(0,2);
 			if (retrs.size() == 1)
 				ret=retrs.getItem(0);
 			else {
-				 System.err.println("could not read written record - got "+retrs.size()+" records back!");
-				 System.err.println("filter = "+filter);
+				System.err.println("could not read written record - got more than 1 record back!");
+				System.err.println("filter = "+filter);
 			}
 
 			this.setFilter(oldfilter);
 		}
 
 
-		if (conn != null) {
+		if (Conn == null && conn != null) {
 			try {
 				conn.close();
 			}
@@ -398,11 +477,17 @@ public class SqlTableBC implements BusinessComponent{
 	}
 
 
-	public void remove(DataRow r) throws Exception {
+	public Collection<String> validateRemove(DataRow dr) {
+		return new ArrayList<String>();
+	}
 
+
+	public void remove(DataRow r) throws Exception {
 		if (PrimaryKeys == null || PrimaryKeys.size() == 0) {
 			throw new Exception("No primary key definition for table \""+Table+"\"");
-			//remove by all data fields???
+		}
+		else if (!r.getFieldNames().containsAll(PrimaryKeys)) {
+			throw new Exception("Missing primary column for table \""+Table+"\"");
 		}
 
 		String sql = "DELETE FROM "+DBQuoteString+Table+DBQuoteString+" ";
@@ -420,11 +505,9 @@ public class SqlTableBC implements BusinessComponent{
 
 		prep.execute();
 
-		if (conn != null && !conn.isClosed()) {
+		if (Conn == null && conn != null && !conn.isClosed()) {
 			conn.close();
 		}
-
-		this.LastResultSet = null;
 	}
 
 
@@ -433,7 +516,7 @@ public class SqlTableBC implements BusinessComponent{
 	}
 
 
-	public DataRow getNewObjectTemplate(DataRow conditions) throws Exception {
+	public DataRow getNewObjectTemplate(DataRow conditions) {
 		return getAttributesRecord();
 	}
 
@@ -454,40 +537,70 @@ public class SqlTableBC implements BusinessComponent{
 			switch (type) {
 				case 4:
 					prep.setInt(index, o.getInt());
-					index++;
 					break;
 				case java.sql.Types.DOUBLE:
 					prep.setDouble(index, o.getDouble());
-					index++;
 					break;
 				case -1:
 				case 1:
 				case 12:
 					prep.setString(index, o.getString());
-					index++;
 					break;
 				case java.sql.Types.BIT:
 				case java.sql.Types.BOOLEAN:
 					prep.setBoolean(index, o.getBoolean());
-					index++;
 					break;
 				case java.sql.Types.DATE:
 					prep.setDate(index, o.getDate());
-					index++;
 					break;
 				case java.sql.Types.TIMESTAMP:
 					prep.setTimestamp(index, o.getTimestamp());
-					index++;
 					break;
 				case 1111:
 					///this is an auto-generated key. set as string and hope for the best
 					prep.setString(index, o.getString());
-					index++;
 					break;
 				default:
-					System.err.println("todo: "+type+" for "+o.getObject().getClass());
+					System.err.println("WARNING: using prep.setObject(object) will fail if there is no equivalent SQL type for the given object");
+					prep.setObject(index, o.getValue());
+			}
+			index++;
+		}
+	}
+
+
+	public ResultSet retrieve(String sql, DataRow params) throws Exception {
+		ResultSet brs = null;
+		Connection conn = null;
+
+		try {
+			conn = getConnection();
+			PreparedStatement prep = conn.prepareStatement(sql);
+
+			// Set params if there are any
+			if (params != null) {
+				int i = 1;
+				for (String p : params.getFieldNames()) {
+					prep.setObject(i, params.getFieldValue(p));
+					i++;
+				}
+			}
+
+			brs = new ResultSet(prep.executeQuery());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		finally {
+			if (Conn == null && conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}
 		}
+
+		return brs;
 	}
 
 }

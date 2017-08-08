@@ -400,10 +400,10 @@ main_loop:
         if debug then
             ch=unt
             open (ch,mode="O_CREATE,O_APPEND",err=notrace)"bridgeerrlog.txt"
-            print (ch)date(0:"%Yl-%Mz-%Dz %Hz:%mz:%sz")
-            print (ch)"!ERROR "+str(err)+" "+stacktrace$
-            print (ch)errmes(-1)
-            close (ch)
+            print (ch,err=*next)date(0:"%Yl-%Mz-%Dz %Hz:%mz:%sz")
+            print (ch,err=*next)"!ERROR "+str(err)+" "+stacktrace$
+            print (ch,err=*next)errmes(-1)
+            close (ch,err=*next)
         endif
 
         notrace:
