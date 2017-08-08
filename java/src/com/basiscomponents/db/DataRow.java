@@ -1702,7 +1702,7 @@ public class DataRow implements java.io.Serializable {
 						}else if(fieldType == java.sql.Types.DOUBLE){
 							stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getDouble()));
 						}else{
-							stringTemplate.setFieldValue(fieldName, new BasisNumber(field.getBigDecimal()));
+							stringTemplate.setFieldValue(fieldName, new BasisNumber(field.getValue().toString()));
 						}
 					}
 				}
