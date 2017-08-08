@@ -1,64 +1,54 @@
 package com.basiscomponents.bc;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 
-import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
-import com.basiscomponents.db.BBArrayList;
-import com.basiscomponents.db.DataField;
+
 
 public class SqlQueryBC {
-	
-		private String Driver;  
-	    private String Url;
-		private String User;
-		private String Password;
-		
-		private SqlQueryBC(){
-		};
-		
-		public SqlQueryBC(String Driver, String Url, String User, String Password) throws ClassNotFoundException{
-			this.Driver 	= Driver;
-			this.Url 		= Url;
-			this.User 		= User;
-			this.Password 	= Password;
-			
-			Class.forName(Driver);
 
-		}
-		
+	private String Url;
+	private String User;
+	private String Password;
 
-		
-		
-		public ResultSet retrieve(String sql) {
-			com.basiscomponents.db.ResultSet brs=null;
-			Connection conn=null;
+
+	public SqlQueryBC(String Driver, String Url, String User, String Password) throws ClassNotFoundException {
+		this.Url 		= Url;
+		this.User 		= User;
+		this.Password	= Password;
+
+		Class.forName(Driver);
+	}
+
+
+	public ResultSet retrieve(String sql, ArrayList<Object> params) {
+		ResultSet brs = null;
+		Connection conn = null;
+
 		try {
 			conn = DriverManager.getConnection(Url,User,Password);
-		      Statement stmt = conn.createStatement();
-		      
-		      
-		     
-		      PreparedStatement prep = conn.prepareStatement(sql);
-		      //System.out.println(sql);
-		      
-		     
-		      
-		      java.sql.ResultSet rs = prep.executeQuery();
-		      brs = new ResultSet(rs);
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			PreparedStatement prep = conn.prepareStatement(sql);
+
+			// Set params if there are any
+			if (params != null) {
+				int i = 1;
+				for (Object p : params) {
+					prep.setObject(i, p);
+					i++;
+				}
 			}
-		finally{
-			if (conn != null){
+
+			brs = new ResultSet(prep.executeQuery());
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		finally {
+			if (conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {
@@ -67,28 +57,35 @@ public class SqlQueryBC {
 				}
 			}
 		}
-		      
-		
-			return brs; 			 
-		}
 
-		public Boolean execute(String sql) {
+		return brs;
+	}
 
-			Connection conn=null;
-			Boolean b=false;
-			
+
+	public Boolean execute(String sql, ArrayList<Object> params) {
+		Connection conn = null;
+		Boolean b = false;
+
 		try {
 			conn = DriverManager.getConnection(Url,User,Password);
-		      Statement stmt = conn.createStatement();
-		      PreparedStatement prep = conn.prepareStatement(sql);
-		      b = prep.execute();
+			PreparedStatement prep = conn.prepareStatement(sql);
 
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			// Set params if there are any
+			if (params != null) {
+				int i = 1;
+				for (Object p : params) {
+					prep.setObject(i, p);
+					i++;
+				}
 			}
-		finally{
-			if (conn != null){
+
+			b = prep.execute();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		finally {
+			if (conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {
@@ -97,11 +94,8 @@ public class SqlQueryBC {
 				}
 			}
 		}
-		      
-		
-			return b; 			 
-		}
 
-		
+		return b;
+	}
 
 }
