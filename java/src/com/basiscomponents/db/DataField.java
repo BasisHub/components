@@ -172,6 +172,12 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Long</code> object.
 	 */
 	public Long getLong() {
+		if (this.Value != null && getClassName() == "java.lang.Integer") {
+			// make this work the same as STR(Boolean.TRUE) in BBj
+			// for compatibility reasons.
+			// If it's a problem, we might introduce a COMPAT flag later.
+			return Integer.toUnsignedLong((Integer)this.Value);
+		}
 		return (Long) this.Value;
 	}
 
@@ -181,6 +187,12 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.math.BigDecimal</code> object.
 	 */
 	public BigDecimal getBigDecimal() {
+		if (this.Value != null && getClassName() == "java.lang.Double") {
+			// make this work the same as STR(Boolean.TRUE) in BBj
+			// for compatibility reasons.
+			// If it's a problem, we might introduce a COMPAT flag later.
+			return new BigDecimal((Double)this.Value);
+		}		
 		return (BigDecimal) this.Value;
 	}
 
@@ -199,6 +211,13 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Float</code> object.
 	 */
 	public Float getFloat() {
+		if (this.Value != null && getClassName() == "java.lang.Double") {
+			// make this work the same as STR(Boolean.TRUE) in BBj
+			// for compatibility reasons.
+			// If it's a problem, we might introduce a COMPAT flag later.
+			return new Float((Double)this.Value);
+		}		
+	
 		return (Float) this.Value;
 	}
 
@@ -224,6 +243,11 @@ public class DataField implements java.io.Serializable {
 				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date(((Double)this.Value).intValue());
 				return new java.sql.Date(d.getTime());
 			}
+			if (getClassName() == "java.lang.String") {
+				String s = (String)this.Value;
+				if (s.isEmpty())
+					return null;
+			}				
 		}
 		return (Date) this.Value;
 	}
@@ -247,6 +271,11 @@ public class DataField implements java.io.Serializable {
 			long ms = ((java.sql.Date) this.Value).getTime();
 			return new java.sql.Timestamp(ms);
 		}
+		if (this.Value != null && getClassName() == "java.lang.String") {
+			String s = (String)this.Value;
+			if (s.isEmpty())
+				return null;
+		}		
 		return (Timestamp) this.Value;
 	}
 

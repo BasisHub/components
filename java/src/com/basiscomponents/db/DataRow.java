@@ -1200,11 +1200,28 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception Gets thrown in case the JSON could not be parsed / is invalid
 	 */
-	public static DataRow fromJson(String in) throws Exception {
+	public static DataRow fromJson(String j) throws Exception {
+		return fromJson(j,null);
+	}
+
+	/**
+	 * Initializes and returns a DataRow object based on the values provided in the given JSON String.
+	 *
+	 * @param in The JSON String
+	 * @param ar A DataRow that will be used to determine the field types if not given in the meta section of the JSON String
+	 * @return the DataRow object created based on the JSOn String's content
+	 *
+	 * @throws Exception Gets thrown in case the JSON could not be parsed / is invalid
+	 */
+	@SuppressWarnings("rawtypes")
+	public static DataRow fromJson(String in, DataRow ar) throws Exception {
 
 		if (in.length() <2 )
 			return new DataRow();
 
+		if (ar == null)
+			ar = new DataRow();
+		
 		// convert characters below chr(32) to \\uxxxx notation
 		int i=0;
 		while (i<in.length()){
@@ -1242,17 +1259,50 @@ public class DataRow implements java.io.Serializable {
 
 			@SuppressWarnings("rawtypes")
 			HashMap meta = (HashMap) hm.get("meta");
+			Iterator<?> it = hm.keySet().iterator();
+			while (it.hasNext()){
+				String fieldName = (String) it.next();
+				Object fieldObj = hm.get(fieldName);
+				@SuppressWarnings("unchecked")
+				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
+				if (!ar.contains(fieldName)  && !fieldName.equals("meta")){
+					
+					String s = (String)fieldMeta.get("ColumnType");
+					if (s!=null){
+						
+						ar.setFieldValue(fieldName, Integer.parseInt(s), "");
+						Set<String> ks = fieldMeta.keySet();
+						if (ks.size() > 1) {
+							Iterator<String> itm = ks.iterator();
+							while (itm.hasNext()) {
+								String k = (String) itm.next();
+								if (k.equals("ColumnType"))
+									continue;
+								ar.setFieldAttribute((String) fieldName, k, (String) fieldMeta.get(k));
+							}
+						}
+					
+					}//if s!=null
+				
+				}
+			}
+		}
+		
+		if (!ar.isEmpty()){
+			BBArrayList<String> names = ar.getFieldNames();
+			
 			@SuppressWarnings("rawtypes")
-			Iterator it = meta.keySet().iterator();
+			Iterator it = names.iterator();
 
 			while (it.hasNext()) {
 				String fieldName = (String) it.next();
+				
+				
 				@SuppressWarnings({ "rawtypes", "unchecked" })
-				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
 				Object fieldObj = hm.get(fieldName);
 				if (fieldObj == null)
 					continue;
-				int fieldType = Integer.parseInt((String) fieldMeta.get("ColumnType"));
+				int fieldType = ar.getFieldType(fieldName);
 				switch (fieldType) {
 				case java.sql.Types.CHAR:
 				case java.sql.Types.VARCHAR:
@@ -1338,17 +1388,8 @@ public class DataRow implements java.io.Serializable {
 
 				}// switch
 
-				Set<String> ks = fieldMeta.keySet();
-				if (ks.size() > 1) {
-					Iterator<String> itm = ks.iterator();
-					while (itm.hasNext()) {
-						String k = (String) itm.next();
-						if (k.equals("ColumnType"))
-							continue;
-
-						dr.setFieldAttribute(fieldName, k, (String) fieldMeta.get(k));
-					}
-				}
+				HashMap<String, String> attr = ar.getFieldAttributes(fieldName);
+				dr.setFieldAttributes(fieldName, attr);
 
 			}
 
@@ -1387,6 +1428,15 @@ public class DataRow implements java.io.Serializable {
 
 		}
 		return dr;
+	}
+
+	public void setFieldAttributes(String fieldName, HashMap<String, String> attr) throws Exception {
+		
+		Iterator<String> it = attr.keySet().iterator();
+		while (it.hasNext()){
+			String k = it.next();
+			setFieldAttribute(fieldName, k, attr.get(k));
+		}
 	}
 
 	/**
@@ -1856,6 +1906,8 @@ public class DataRow implements java.io.Serializable {
 		}
 		
 		return row;
-	}	
+	}
+
+	
 
 }
