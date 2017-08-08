@@ -188,7 +188,9 @@ main_loop:
                     endif
                 endif
 
-                response!.put("resultset","")
+				rs! = new ResultSet()
+				rs!.addItem(dr!)
+                response!.put("resultset",rs!)
                 response!.put("request",str(request!))
                 response!.put("BC",bc$)
                 response!.put("sel",sel$)
