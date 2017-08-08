@@ -295,19 +295,41 @@ public class SqlTableBC implements BusinessComponent{
 			for (String field : fields) {
 				update.append(","+DBQuoteString+field+DBQuoteString+"=?");
 			}
-			sql+=update.substring(1);
-
-			StringBuffer wh = new StringBuffer("");
-			for (String pkfield : PrimaryKeys) {
-				wh.append(" AND "+DBQuoteString+pkfield+DBQuoteString+"=?");
+			
+			if (update.length()>0){
+				// if the fields are _only_ fields that are part of the primary key 
+				// (e.g. a table with PK being a compount, not having fields outside the PK)
+				// then update would be "" and this portion would fail
+				sql+=update.substring(1);
+	
+				StringBuffer wh = new StringBuffer("");
+				for (String pkfield : PrimaryKeys) {
+					wh.append(" AND "+DBQuoteString+pkfield+DBQuoteString+"=?");
+				}
+				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
+	
+				fields.addAll(PrimaryKeys);
+				prep = conn.prepareStatement(sql);
+				setSqlParams(prep, r, fields);
+	
+				affectedRows = prep.executeUpdate();
 			}
-			if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
-
-			fields.addAll(PrimaryKeys);
-			prep = conn.prepareStatement(sql);
-			setSqlParams(prep, r, fields);
-
-			affectedRows = prep.executeUpdate();
+			else {
+				///so now we have to do a SELECT to see if the record is there, as we can't check with update
+				sql="SELECT COUNT(*) AS C FROM "+DBQuoteString+Table+DBQuoteString+"  ";
+				StringBuffer wh = new StringBuffer("");
+				for (String pkfield : PrimaryKeys) {
+					wh.append(" AND "+DBQuoteString+pkfield+DBQuoteString+"=?");
+				}
+				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
+				fields.addAll(PrimaryKeys);
+				prep = conn.prepareStatement(sql);
+				setSqlParams(prep, r, fields);
+				java.sql.ResultSet rs = prep.executeQuery();
+				ResultSet retrs = new ResultSet();
+				retrs.populate(rs, true);
+				affectedRows = retrs.get(0).getFieldAsNumber("C").intValue();
+			}
 		}
 
 		// insert

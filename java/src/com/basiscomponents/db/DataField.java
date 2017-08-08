@@ -224,7 +224,6 @@ public class DataField implements java.io.Serializable {
 				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date(((Double)this.Value).intValue());
 				return new java.sql.Date(d.getTime());
 			}
-			
 		}
 		return (Date) this.Value;
 	}
