@@ -368,7 +368,6 @@ public class SqlTableBC implements BusinessComponent {
 				}
 			}
 
-			
 			if (update.length()>0){
 				// if the fields are _only_ fields that are part of the primary key 
 				// (e.g. a table with PK being a compount, not having fields outside the PK)
@@ -387,8 +386,7 @@ public class SqlTableBC implements BusinessComponent {
 				setSqlParams(prep, r, fields);
 
 				affectedRows = prep.executeUpdate();
-				
-				
+				prep.close();
 			}
 			else {
 				///so now we have to do a SELECT to see if the record is there, as we can't check with update
@@ -405,6 +403,7 @@ public class SqlTableBC implements BusinessComponent {
 				ResultSet retrs = new ResultSet();
 				retrs.populate(jrs, true);
 				affectedRows = retrs.get(0).getFieldAsNumber("C").intValue();
+				prep.close();
 			}
 
 		}
@@ -443,6 +442,8 @@ public class SqlTableBC implements BusinessComponent {
 					}
 				}
 			}
+
+			prep.close();
 		}
 
 
@@ -512,7 +513,7 @@ public class SqlTableBC implements BusinessComponent {
 
 
 	public DataRow getAttributesRecord() {
-		return AttributesRecord;
+		return AttributesRecord.clone();
 	}
 
 
