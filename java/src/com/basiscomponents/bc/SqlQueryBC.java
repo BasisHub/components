@@ -25,6 +25,10 @@ public class SqlQueryBC {
 	}
 
 
+	public ResultSet retrieve(String sql) {
+		return retrieve(sql,null);
+	}
+	
 	public ResultSet retrieve(String sql, ArrayList<Object> params) {
 		ResultSet brs = null;
 		Connection conn = null;
@@ -61,6 +65,9 @@ public class SqlQueryBC {
 		return brs;
 	}
 
+	public Boolean execute(String sql){
+		return execute(sql,null);
+	}
 
 	public Boolean execute(String sql, ArrayList<Object> params) {
 		Connection conn = null;
