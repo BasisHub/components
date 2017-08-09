@@ -1,6 +1,7 @@
 package com.basiscomponents.db;
 
 import java.sql.Time;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -215,8 +216,12 @@ public class DataRow implements java.io.Serializable {
 		} catch (Exception e) {
 			// do nothing
 		}
-		if (field != null)
+		if (field != null){
+			try {
+				value = DataField.convertType(value, getFieldType(name));
+			} catch (Exception e) {}	
 			field.setValue(value);
+		}
 		else {
 			if (value == null) {
 				field = new DataField("");
@@ -251,6 +256,8 @@ public class DataRow implements java.io.Serializable {
 	public void setFieldValue(String name, int type, Object value) throws Exception {
 		DataField field = null;
 
+		value = DataField.convertType(value, type);
+		
 		String c = value.getClass().getCanonicalName();
 		if (c.contains("BBjNumber") | c.contains("BBjInt")) {
 			value = Double.parseDouble(value.toString());
@@ -962,9 +969,10 @@ public class DataRow implements java.io.Serializable {
 	public void addDataField(String fieldName, int sqlType, DataField dataField) throws Exception {
 
   	  	// deal unknown types as String
-  	  	if (sqlType==-1)
-  	  		sqlType=12;
-
+//  	  	if (sqlType==-1)
+//  	  		sqlType=12;
+// -1 is LONGVARCHAR in sql types!
+		
   	  	if (this.ResultSet.getColumnIndex(fieldName) == -1) {
 			int column = this.ResultSet.addColumn(fieldName);
 			this.ResultSet.setColumnType(column, sqlType);

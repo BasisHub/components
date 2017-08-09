@@ -13,11 +13,13 @@ import java.sql.Ref;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.basis.bbj.processor.instruction.a.e;
 import com.google.gson.annotations.Expose;
 
 /**
@@ -126,17 +128,13 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.String</code> object.
 	 */
 	public String getString() {
-		if (this.Value != null && getClassName() == "java.lang.Boolean") {
-			// make this work the same as STR(Boolean.TRUE) in BBj
-			// for compatibility reasons.
-			// If it's a problem, we might introduce a COMPAT flag later.
-			return (boolean) this.Value ? "1" : "0";
-		}
+		
 		try {
-			return this.Value.toString();
-		} catch (Exception e) {
+			return (String) convertType(this.Value, java.sql.Types.VARCHAR);
+			} catch (Exception e) {
 			return "";
 		}
+		
 	}
 
 	/**
@@ -459,4 +457,95 @@ public class DataField implements java.io.Serializable {
 		setValue(null);
 	}
 
+	static Object convertType(Object o, int targetType) throws Exception{
+		
+		String classname = o.getClass().getName();
+		
+		switch (targetType){
+		// NOOP types first
+
+		
+		case java.sql.Types.VARCHAR:
+			if (!classname.equals("java.lang.String"))
+				return o.toString();
+			else
+				return o;
+		case java.sql.Types.BOOLEAN:
+			if (classname.equals("java.lang.Boolean"))
+				return o;
+			if (classname.equals("java.lang.String")){
+				String c = o.toString().toLowerCase();
+				if (c.equals("true") || c.equals(".t.") || c.equals("1"))
+					return true;
+				else
+					return false;
+			}
+			if (classname.equals("java.lang.Integer"))
+				return (Integer)o > 0;
+			if (classname.equals("java.lang.Double"))
+					return (Double)o >0;
+		    if (classname.contains("BBjNumber")||classname.contains("BBjInt"))
+						return Double.parseDouble(o.toString())>0;
+			break;
+			
+		case java.sql.Types.TINYINT:
+		case java.sql.Types.BIGINT:
+		case java.sql.Types.SMALLINT:
+		case java.sql.Types.INTEGER:
+			if (classname.equals("java.lang.Integer"))
+				return o;
+			if (classname.equals("java.lang.Boolean"))
+				return (Boolean)o ? 1:0;
+			return (Integer.parseInt(o.toString()));
+		case java.sql.Types.DOUBLE:
+		case java.sql.Types.REAL:
+		case java.sql.Types.NUMERIC:
+			if (classname.equals("java.lang.Double"))
+				return o;
+			if (classname.equals("java.lang.Boolean"))
+				return (Boolean)o ? 1.0:0.0;
+			
+			return (Double.parseDouble(o.toString()));			
+
+		case java.sql.Types.DATE:
+			if (classname.equals("java.sql.Date"))
+				return o;
+			if (classname.equals("java.lang.Integer"))
+				return new java.sql.Date(com.basis.util.BasisDate.date((Integer)o).getTime());
+			if (classname.equals("java.lang.Double"))
+				return new java.sql.Date(com.basis.util.BasisDate.date(((Double)o).intValue()).getTime());
+			if (classname.equals("java.lang.String"))
+				return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse((String)o).getTime());
+			break;
+			
+		case java.sql.Types.TIMESTAMP:
+			if (classname.equals("java.sql.Timestamp"))
+				return o;
+			if (classname.equals("java.lang.Integer"))
+				return new java.sql.Timestamp(com.basis.util.BasisDate.date((Integer)o).getTime());
+			if (classname.equals("java.lang.Double"))
+				return new java.sql.Timestamp(com.basis.util.BasisDate.date(((Double)o).intValue()).getTime());
+			if (classname.equals("java.lang.String")){
+				String p = (String)o;
+				String mask = "yyyy-MM-dd HH:mm:ss.SSS";
+				if (p.length()<mask.length())
+					mask = mask.substring(0, p.length());
+				return new java.sql.Timestamp(new SimpleDateFormat(mask).parse((String)o).getTime());
+			}
+			
+			break;
+		}
+		
+		if (classname.contains("DataField")){
+			Exception e = new Exception("What's happening here? Setting a DataField into a DataField?");
+			e.printStackTrace();
+			throw e;
+		}
+			
+		
+		System.out.println("warning: unclear type conversion for type "+targetType+ " and class "+classname);
+		return o;
+		
+	}
+	
 }
