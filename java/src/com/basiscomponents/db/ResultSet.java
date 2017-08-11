@@ -1790,6 +1790,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 			while (itf.hasNext()) {
 				String fn = itf.next();
+				if (dr.getField(fn).getValue() == null) {
+					g.writeNullField(fn);
+					continue;
+				}
 				int t = dr.getFieldType(fn);
 				switch (t) {
 				case java.sql.Types.CHAR:
