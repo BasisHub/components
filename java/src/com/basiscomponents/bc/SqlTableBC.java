@@ -318,7 +318,7 @@ public class SqlTableBC implements BusinessComponent {
 		if (retrs.size() > 0) {
 			DataRow dr = retrs.get(0);
 			for (String field : AttributesRecord.getFieldNames()) {
-				dr.setFieldAttributes(field, AttributesRecord.getFieldAttributes(field));
+				if (dr.contains(field)) dr.setFieldAttributes(field, AttributesRecord.getFieldAttributes(field));
 			}
 		}
 
