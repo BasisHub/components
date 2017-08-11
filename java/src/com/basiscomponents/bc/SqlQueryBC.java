@@ -14,27 +14,51 @@ public class SqlQueryBC {
 	private String Url;
 	private String User;
 	private String Password;
+	private Connection Conn;
+
+
+	public SqlQueryBC(String Url) {
+		this.Url      = Url;
+	}
 
 
 	public SqlQueryBC(String Driver, String Url, String User, String Password) throws ClassNotFoundException {
-		this.Url 		= Url;
-		this.User 		= User;
-		this.Password	= Password;
+		this.Url        = Url;
+		this.User       = User;
+		this.Password   = Password;
 
 		Class.forName(Driver);
+	}
+
+
+	public SqlQueryBC(Connection con) throws SQLException {
+		if (con != null && !con.isClosed()) {
+			Conn = con;
+		}
+	}
+
+
+	private Connection getConnection() throws SQLException {
+		if (Conn != null) return Conn;
+
+		if (User == null || Password == null)
+			return DriverManager.getConnection(Url);
+		else
+			return DriverManager.getConnection(Url, User, Password);
 	}
 
 
 	public ResultSet retrieve(String sql) {
 		return retrieve(sql,null);
 	}
-	
+
+
 	public ResultSet retrieve(String sql, ArrayList<Object> params) {
 		ResultSet brs = null;
 		Connection conn = null;
 
 		try {
-			conn = DriverManager.getConnection(Url,User,Password);
+			conn = getConnection();
 			PreparedStatement prep = conn.prepareStatement(sql);
 
 			// Set params if there are any
@@ -52,7 +76,7 @@ public class SqlQueryBC {
 			e1.printStackTrace();
 		}
 		finally {
-			if (conn != null) {
+			if (Conn == null && conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {
@@ -74,7 +98,7 @@ public class SqlQueryBC {
 		Boolean b = false;
 
 		try {
-			conn = DriverManager.getConnection(Url,User,Password);
+			conn = getConnection();
 			PreparedStatement prep = conn.prepareStatement(sql);
 
 			// Set params if there are any
@@ -92,7 +116,7 @@ public class SqlQueryBC {
 			e1.printStackTrace();
 		}
 		finally {
-			if (conn != null) {
+			if (Conn == null && conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {
