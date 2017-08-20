@@ -28,6 +28,7 @@ public class SqlTableBC implements BusinessComponent {
 	private DataRow AttributesRecord;
 	private Connection Conn;
 	private String retrieveSql;
+	private HashMap<String,String> mapping = new HashMap<String,String>();
 
 	private DataRow   Filter;
 	private DataRow   FieldSelection;
@@ -112,7 +113,7 @@ public class SqlTableBC implements BusinessComponent {
 					for (String attr : attrmap.keySet()) {
 						AttributesRecord.setFieldAttribute(field, attr, attrmap.get(attr).toString());
 					}
-					if (PrimaryKeys.contains(field)) AttributesRecord.setFieldAttribute(field, "EDITABLE", "2");
+					if (PrimaryKeys.contains(getMapping(field))) AttributesRecord.setFieldAttribute(field, "EDITABLE", "2");
 				}
 				catch (Exception ex) { }
 			}
@@ -313,11 +314,11 @@ public class SqlTableBC implements BusinessComponent {
 		}
 
 
-		// now set the EDITABLE flag for primary key fields in the result set to "2"
-		ArrayList<String> fields = retrs.getColumnNames();
-		for (DataRow dr : retrs) {
-			for (String field : PrimaryKeys) {
-				if (fields.contains(field)) dr.setFieldAttribute(field, "EDITABLE", "2");
+		// Set the generated meta attributes to the first record
+		if (retrs.size() > 0) {
+			DataRow dr = retrs.get(0);
+			for (String field : AttributesRecord.getFieldNames()) {
+				if (dr.contains(field)) dr.setFieldAttributes(field, AttributesRecord.getFieldAttributes(field));
 			}
 		}
 
@@ -333,7 +334,12 @@ public class SqlTableBC implements BusinessComponent {
 	public DataRow write(DataRow r) throws Exception {
 		Boolean pk_present=false;
 		if (PrimaryKeys != null && PrimaryKeys.size() > 0) {
-			pk_present=r.getFieldNames().containsAll(PrimaryKeys);
+			// Use mapped field names to check if r contains the primary key field(s)
+			ArrayList<String> list = new ArrayList<String>();
+			for (String field : r.getFieldNames()) {
+				list.add(getMapping(field));
+			}
+			pk_present=list.containsAll(PrimaryKeys);
 		}
 
 		Connection conn = getConnection();
@@ -360,15 +366,15 @@ public class SqlTableBC implements BusinessComponent {
 			ArrayList<String> fields = new ArrayList<String>();
 
 			StringBuffer update = new StringBuffer("");
-			for (String field : tableFields) {
+			for (String field : r.getFieldNames()) {
+				String field2 = getMapping(field);
 				if (PrimaryKeys.contains(field)) continue;
-				if (r.getFieldNames().contains(field)) {
+				if (tableFields.contains(field2)) {
 					fields.add(field);
-					update.append(","+DBQuoteString+field+DBQuoteString+"=?");
+					update.append(","+DBQuoteString+field2+DBQuoteString+"=?");
 				}
 			}
 
-			
 			if (update.length()>0){
 				// if the fields are _only_ fields that are part of the primary key 
 				// (e.g. a table with PK being a compount, not having fields outside the PK)
@@ -378,7 +384,7 @@ public class SqlTableBC implements BusinessComponent {
 
 				StringBuffer wh = new StringBuffer("");
 				for (String pkfield : PrimaryKeys) {
-					wh.append(" AND "+DBQuoteString+pkfield+DBQuoteString+"=?");
+					wh.append(" AND "+DBQuoteString+getMapping(pkfield)+DBQuoteString+"=?");
 					fields.add(pkfield);
 				}
 				sql+=" WHERE "+wh.substring(5);
@@ -387,26 +393,25 @@ public class SqlTableBC implements BusinessComponent {
 				setSqlParams(prep, r, fields);
 
 				affectedRows = prep.executeUpdate();
-				
-				
+				prep.close();
 			}
 			else {
 				///so now we have to do a SELECT to see if the record is there, as we can't check with update
-				sql="SELECT COUNT(*) AS C FROM "+DBQuoteString+Table+DBQuoteString+"  ";
+				sql="SELECT COUNT(*) AS C FROM "+DBQuoteString+Table+DBQuoteString;
 				StringBuffer wh = new StringBuffer("");
 				for (String pkfield : PrimaryKeys) {
-					wh.append(" AND "+DBQuoteString+pkfield+DBQuoteString+"=?");
+					wh.append(" AND "+DBQuoteString+getMapping(pkfield)+DBQuoteString+"=?");
+					fields.add(pkfield);
 				}
 				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
-				fields.addAll(PrimaryKeys);
 				prep = conn.prepareStatement(sql);
 				setSqlParams(prep, r, fields);
 				java.sql.ResultSet jrs = prep.executeQuery();
 				ResultSet retrs = new ResultSet();
 				retrs.populate(jrs, true);
 				affectedRows = retrs.get(0).getFieldAsNumber("C").intValue();
+				prep.close();
 			}
-
 		}
 
 		// insert
@@ -416,10 +421,11 @@ public class SqlTableBC implements BusinessComponent {
 			ArrayList<String> fields = new ArrayList<String>();
 			StringBuffer keys = new StringBuffer("");
 			StringBuffer values = new StringBuffer("");
-			for (String field : tableFields) {
-				if (r.contains(field)) {
+			for (String field : r.getFieldNames()) {
+				String field2 = getMapping(field);
+				if (tableFields.contains(field2)) {
 					fields.add(field);
-					keys.append(","+DBQuoteString+field+DBQuoteString);
+					keys.append(","+DBQuoteString+field2+DBQuoteString);
 					values.append(",?");
 				}
 			}
@@ -439,10 +445,16 @@ public class SqlTableBC implements BusinessComponent {
 						ret.setFieldValue(name, gkeys.getObject(i+1));
 					}
 					if (PrimaryKeys != null && PrimaryKeys.size() > 0) {
-						pk_present=ret.getFieldNames().containsAll(PrimaryKeys);
+						ArrayList<String> list = new ArrayList<String>();
+						for (String field : ret.getFieldNames()) {
+							list.add(getMapping(field));
+						}
+						pk_present=list.containsAll(PrimaryKeys);
 					}
 				}
 			}
+
+			prep.close();
 		}
 
 
@@ -494,7 +506,7 @@ public class SqlTableBC implements BusinessComponent {
 
 		StringBuilder wh = new StringBuilder("");
 		for (String pkfieldname : PrimaryKeys) {
-			wh.append(" AND "+DBQuoteString+pkfieldname+DBQuoteString+"=?");
+			wh.append(" AND "+DBQuoteString+getMapping(pkfieldname)+DBQuoteString+"=?");
 		}
 		sql+=" WHERE "+wh.substring(5);
 
@@ -512,7 +524,7 @@ public class SqlTableBC implements BusinessComponent {
 
 
 	public DataRow getAttributesRecord() {
-		return AttributesRecord;
+		return AttributesRecord.clone();
 	}
 
 
@@ -603,4 +615,17 @@ public class SqlTableBC implements BusinessComponent {
 		return brs;
 	}
 
+	public void addMapping(String bcFieldName, String dbFieldName) {
+		mapping.put(bcFieldName, dbFieldName);
+	}
+
+	public HashMap<String,String> getMappings() {
+		return new HashMap<String,String>(mapping);
+	}
+
+	public String getMapping(String bcFieldName) {
+		String dbFieldName = mapping.get(bcFieldName);
+		if (dbFieldName == null) return bcFieldName;
+		return dbFieldName;
+	}
 }

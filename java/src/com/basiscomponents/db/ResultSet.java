@@ -1790,6 +1790,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 			while (itf.hasNext()) {
 				String fn = itf.next();
+				if (dr.getField(fn).getValue() == null) {
+					g.writeNullField(fn);
+					continue;
+				}
 				int t = dr.getFieldType(fn);
 				switch (t) {
 				case java.sql.Types.CHAR:
@@ -1871,7 +1875,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
 						DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
 						String fd = df1.format(dr.getField(fn).getTimestamp()) + "T"
-								+ df2.format(dr.getField(fn).getTimestamp()) + ".000Z";
+								+ df2.format(dr.getField(fn).getTimestamp()) + ".0";
 						g.writeStringField(fn, fd);
 					}
 					break;
@@ -1883,7 +1887,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
 						DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
 						String fd = df1.format(dr.getField(fn).getDate()) + "T" + df2.format(dr.getField(fn).getDate())
-								+ ".000Z";
+								+ ".0";
 						g.writeStringField(fn, fd);
 					}
 					break;

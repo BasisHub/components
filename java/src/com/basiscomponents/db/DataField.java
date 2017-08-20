@@ -458,13 +458,15 @@ public class DataField implements java.io.Serializable {
 	}
 
 	static Object convertType(Object o, int targetType) throws Exception{
-		
+
+		if (o == null) return null;
+
 		String classname = o.getClass().getName();
 		String tmpstr = o.toString();
+
 		switch (targetType){
 		// NOOP types first
 
-		
 		case java.sql.Types.VARCHAR:
 			if (!classname.equals("java.lang.String"))
 				return o.toString();
@@ -483,11 +485,11 @@ public class DataField implements java.io.Serializable {
 			if (classname.equals("java.lang.Integer"))
 				return (Integer)o > 0;
 			if (classname.equals("java.lang.Double"))
-					return (Double)o >0;
+				return (Double)o >0;
 		    if (classname.contains("BBjNumber")||classname.contains("BBjInt"))
-						return Double.parseDouble(o.toString())>0;
+				return Double.parseDouble(o.toString())>0;
 			break;
-			
+
 		case java.sql.Types.TINYINT:
 		case java.sql.Types.BIGINT:
 		case java.sql.Types.SMALLINT:
@@ -523,7 +525,7 @@ public class DataField implements java.io.Serializable {
 				else
 					return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse((String)o).getTime());
 			break;
-			
+
 		case java.sql.Types.TIMESTAMP:
 			if (classname.equals("java.sql.Timestamp"))
 				return o;
@@ -540,20 +542,19 @@ public class DataField implements java.io.Serializable {
 					return null;
 				return new java.sql.Timestamp(new SimpleDateFormat(mask).parse((String)o).getTime());
 			}
-			
+
 			break;
 		}
-		
+
 		if (classname.contains("DataField")){
 			Exception e = new Exception("What's happening here? Setting a DataField into a DataField?");
 			e.printStackTrace();
 			throw e;
 		}
-			
-		
+
+
 		System.out.println("warning: unclear type conversion for type "+targetType+ " and class "+classname);
 		return o;
-		
 	}
-	
+
 }
