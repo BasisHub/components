@@ -460,7 +460,7 @@ public class DataField implements java.io.Serializable {
 	static Object convertType(Object o, int targetType) throws Exception{
 		
 		String classname = o.getClass().getName();
-		
+		String tmpstr = o.toString();
 		switch (targetType){
 		// NOOP types first
 
@@ -496,7 +496,9 @@ public class DataField implements java.io.Serializable {
 				return o;
 			if (classname.equals("java.lang.Boolean"))
 				return (Boolean)o ? 1:0;
-			return (Integer.parseInt(o.toString()));
+			if (tmpstr.isEmpty())
+				tmpstr = "0";
+			return (Integer.parseInt(tmpstr));
 		case java.sql.Types.DOUBLE:
 		case java.sql.Types.REAL:
 		case java.sql.Types.NUMERIC:
@@ -504,8 +506,9 @@ public class DataField implements java.io.Serializable {
 				return o;
 			if (classname.equals("java.lang.Boolean"))
 				return (Boolean)o ? 1.0:0.0;
-			
-			return (Double.parseDouble(o.toString()));			
+			if (tmpstr.isEmpty())
+				tmpstr = "0.0";			
+			return (Double.parseDouble(tmpstr));			
 
 		case java.sql.Types.DATE:
 			if (classname.equals("java.sql.Date"))
@@ -515,7 +518,10 @@ public class DataField implements java.io.Serializable {
 			if (classname.equals("java.lang.Double"))
 				return new java.sql.Date(com.basis.util.BasisDate.date(((Double)o).intValue()).getTime());
 			if (classname.equals("java.lang.String"))
-				return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse((String)o).getTime());
+				if (tmpstr.isEmpty())
+					return null;
+				else
+					return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse((String)o).getTime());
 			break;
 			
 		case java.sql.Types.TIMESTAMP:
@@ -530,6 +536,8 @@ public class DataField implements java.io.Serializable {
 				String mask = "yyyy-MM-dd HH:mm:ss.SSS";
 				if (p.length()<mask.length())
 					mask = mask.substring(0, p.length());
+				if (tmpstr.isEmpty())
+					return null;
 				return new java.sql.Timestamp(new SimpleDateFormat(mask).parse((String)o).getTime());
 			}
 			

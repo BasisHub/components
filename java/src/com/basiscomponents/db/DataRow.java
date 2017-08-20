@@ -256,9 +256,9 @@ public class DataRow implements java.io.Serializable {
 	public void setFieldValue(String name, int type, Object value) throws Exception {
 		DataField field = null;
 
+		String c = value.getClass().getCanonicalName();
 		value = DataField.convertType(value, type);
 		
-		String c = value.getClass().getCanonicalName();
 		if (c.contains("BBjNumber") | c.contains("BBjInt")) {
 			value = Double.parseDouble(value.toString());
 		}
