@@ -467,11 +467,21 @@ public class DataField implements java.io.Serializable {
 		switch (targetType){
 		// NOOP types first
 
+		case java.sql.Types.BINARY:
+		case java.sql.Types.VARBINARY:
+		case java.sql.Types.LONGVARBINARY:
+			if(!classname.equals("java.lang.String")){
+				return o.toString().getBytes();
+			}
+			return ((String)o).getBytes();
+		case java.sql.Types.CHAR:
 		case java.sql.Types.VARCHAR:
+		case java.sql.Types.LONGVARCHAR:
 			if (!classname.equals("java.lang.String"))
 				return o.toString();
 			else
 				return o;
+		case java.sql.Types.BIT:
 		case java.sql.Types.BOOLEAN:
 			if (classname.equals("java.lang.Boolean"))
 				return o;
@@ -498,11 +508,23 @@ public class DataField implements java.io.Serializable {
 				return o;
 			if (classname.equals("java.lang.Boolean"))
 				return (Boolean)o ? 1:0;
+			if (classname.equals("java.lang.Double"))
+				return ((Double)o).intValue();
 			if (tmpstr.isEmpty())
 				tmpstr = "0";
 			return (Integer.parseInt(tmpstr));
-		case java.sql.Types.DOUBLE:
+		
+		case java.sql.Types.DECIMAL:
+			if (classname.equals("java.lang.Double"))
+				return new BigDecimal((double) o);
+			if (classname.equals("java.lang.Integer"))
+				return new BigDecimal((int) o);
+			if (tmpstr.isEmpty())
+				tmpstr = "0";
+			return new BigDecimal(tmpstr);
+		
 		case java.sql.Types.REAL:
+		case java.sql.Types.DOUBLE:
 		case java.sql.Types.NUMERIC:
 			if (classname.equals("java.lang.Double"))
 				return o;
@@ -526,6 +548,12 @@ public class DataField implements java.io.Serializable {
 					return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse((String)o).getTime());
 			break;
 
+		case java.sql.Types.TIME:
+			if(classname.equals("java.sql.Time"))
+				return o;
+			if(classname.equals("java.lang.String"))
+				return new java.sql.Time(new SimpleDateFormat("HH:mm:ss").parse((String)o).getTime());
+			break;
 		case java.sql.Types.TIMESTAMP:
 			if (classname.equals("java.sql.Timestamp"))
 				return o;
@@ -552,8 +580,13 @@ public class DataField implements java.io.Serializable {
 			throw e;
 		}
 
-
-		System.out.println("warning: unclear type conversion for type "+targetType+ " and class "+classname);
+		String typeName = ResultSet.getSQLTypeName(targetType);
+		if(typeName != null){
+			System.out.println("warning: unclear type conversion for type " + targetType + "(" + typeName + ") and class " + classname);
+		}else{
+			System.out.println("warning: unclear type conversion for type " + targetType + " and class "+ classname);
+		}
+		
 		return o;
 	}
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -448,6 +449,7 @@ public class ResultSetExporter {
 	 * 
 	 * @throws Exception Gets thrown in case the ResultSet could not be read or output stream can not be written
 	 */
+	@SuppressWarnings("deprecation")
 	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader) throws Exception{  
         String sheetName = "Sheet1"; //name of sheet
 
@@ -491,6 +493,17 @@ public class ResultSetExporter {
                 cellIndex++;
             }
         }
+        
+        ArrayList<Integer> numericTypes = new ArrayList<Integer>();
+        numericTypes.add(java.sql.Types.BIGINT);
+        numericTypes.add(java.sql.Types.DOUBLE);
+        numericTypes.add(java.sql.Types.NUMERIC);
+        numericTypes.add(java.sql.Types.INTEGER);
+        numericTypes.add(java.sql.Types.DECIMAL);
+        numericTypes.add(java.sql.Types.FLOAT);
+        numericTypes.add(java.sql.Types.REAL);
+        numericTypes.add(java.sql.Types.TINYINT);
+        numericTypes.add(java.sql.Types.SMALLINT);
 
         DataRow currentRow;
         String currentFieldName;
@@ -508,11 +521,18 @@ public class ResultSetExporter {
                 cell = row.createCell(cellIndex);
                 columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
                 if (currentRow.contains(currentFieldName)){
-                    if(columnType == java.sql.Types.NUMERIC || columnType == java.sql.Types.DOUBLE || columnType == java.sql.Types.INTEGER){
+                    if(numericTypes.contains(columnType)){
                         cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
                         cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
+                    }else if(columnType == java.sql.Types.BOOLEAN){
+                    	cell.setCellType(XSSFCell.CELL_TYPE_BOOLEAN);
+                    	cell.setCellValue(currentRow.getField(currentFieldName).getBoolean());
+                    }else if(columnType == java.sql.Types.BINARY || columnType == java.sql.Types.LONGVARBINARY || columnType == java.sql.Types.VARBINARY){
+                    	cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                    	cell.setCellValue(new String(currentRow.getField(currentFieldName).getBytes()));
                     }else{
-                        cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
+                    	cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                    	cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
                     }
                 }
                 cellIndex++;

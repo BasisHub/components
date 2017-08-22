@@ -422,10 +422,34 @@ public class DataRow implements java.io.Serializable {
 			break;
 		case java.sql.Types.INTEGER:
 		case java.sql.Types.SMALLINT:
-			ret = field.getInt().doubleValue();
+			/* 
+			 * Columns with an unsigned numeric type in MySQL are treated as the next 'larger' Java type that the signed variant of the MySQL:
+			 * http://www.mysqlab.net/knowledge/kb/detail/topic/java/id/4929
+			 * 
+			 * In the populate method, the value of an unsigned integer is stored as java.lang.Long in the DataField although its 
+			 * type remains java.sql.Types.INTEGER in the Column metadata. Calling the getInt() method will then result in an Exception.
+			 * This checks prevents this Exception. 
+			 */
+			if(!this.ResultSet.isSigned(column)){
+				ret = field.getLong().doubleValue();
+			}else{
+				ret = field.getInt().doubleValue();
+			}
 			break;
 		case java.sql.Types.BIGINT:
-			ret = field.getLong().doubleValue();
+			/* 
+			 * Columns with an unsigned numeric type in MySQL are treated as the next 'larger' Java type that the signed variant of the MySQL:
+			 * http://www.mysqlab.net/knowledge/kb/detail/topic/java/id/4929
+			 * 
+			 * In the populate method, the value of an unsigned big integer is stored as java.math.BigInteger in the DataField although its 
+			 * type remains java.sql.Types.BIGINT in the Column metadata. Calling the getLong() method will then result in an Exception.
+			 * This checks prevents this Exception. 
+			 */
+			if(!this.ResultSet.isSigned(column)){
+				ret = ((java.math.BigInteger) field.getValue()).doubleValue();
+			}else{
+				ret = field.getLong().doubleValue();
+			}
 			break;
 		case java.sql.Types.DECIMAL:
 		case java.sql.Types.NUMERIC:
@@ -468,7 +492,7 @@ public class DataRow implements java.io.Serializable {
 				ret = 0.0;
 			break;
 		case java.sql.Types.TINYINT:
-			ret = ((Integer) Byte.toUnsignedInt(field.getByte())).doubleValue();
+			ret = field.getInt().doubleValue();
 			break;
 		default:
 			ret = null;
