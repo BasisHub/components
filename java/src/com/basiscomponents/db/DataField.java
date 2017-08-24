@@ -477,6 +477,13 @@ public class DataField implements java.io.Serializable {
 		case java.sql.Types.CHAR:
 		case java.sql.Types.VARCHAR:
 		case java.sql.Types.LONGVARCHAR:
+			//make Boolean special, for compatibility with BBj IF statements
+			//want true as "1" and false as "0"
+			if (classname.equals("java.lang.Boolean"))
+				if ((Boolean)o)
+					return "1";
+				else
+					return "0";
 			if (!classname.equals("java.lang.String"))
 				return o.toString();
 			else
