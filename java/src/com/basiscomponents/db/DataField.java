@@ -532,15 +532,17 @@ public class DataField implements java.io.Serializable {
 		
 		case java.sql.Types.REAL:
 		case java.sql.Types.DOUBLE:
-		case java.sql.Types.NUMERIC:
 			if (classname.equals("java.lang.Double"))
 				return o;
 			if (classname.equals("java.lang.Boolean"))
 				return (Boolean)o ? 1.0:0.0;
 			if (tmpstr.isEmpty())
-				tmpstr = "0.0";			
+				tmpstr = "0.0";
 			return (Double.parseDouble(tmpstr));			
-
+		case java.sql.Types.NUMERIC:
+			if (tmpstr.isEmpty())
+				tmpstr = "0.0";
+			return new java.math.BigDecimal(o.toString());
 		case java.sql.Types.DATE:
 			if (classname.equals("java.sql.Date"))
 				return o;
