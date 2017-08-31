@@ -1302,7 +1302,7 @@ public class DataRow implements java.io.Serializable {
 					String s = (String)fieldMeta.get("ColumnType");
 					if (s!=null){
 						
-						ar.setFieldValue(fieldName, Integer.parseInt(s), "");
+						ar.addDataField(fieldName, Integer.parseInt(s), new DataField(null));
 						Set<String> ks = fieldMeta.keySet();
 						if (ks.size() > 1) {
 							Iterator<String> itm = ks.iterator();
@@ -1356,6 +1356,8 @@ public class DataRow implements java.io.Serializable {
 					break;
 
 				case java.sql.Types.NUMERIC:
+					dr.addDataField(fieldName, fieldType, new DataField(new java.math.BigDecimal(fieldObj.toString())));
+					break;
 				case java.sql.Types.DOUBLE:
 				case java.sql.Types.FLOAT:
 				case java.sql.Types.DECIMAL:
@@ -1939,7 +1941,5 @@ public class DataRow implements java.io.Serializable {
 		
 		return row;
 	}
-
-	
 
 }
