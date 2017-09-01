@@ -1770,6 +1770,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	@SuppressWarnings("deprecation")
 	public String toJson() throws Exception {
+			return toJson(true);
+	}
+	
+	/**
+	 * Returns a JSON String with the ResultSet's content.
+	 * 
+	 * @return The JSON String with the ResultSet's content.
+	 * 
+	 * @throws Exception Gets thrown in case the JSON String could not be created.
+	 */
+	@SuppressWarnings("deprecation")
+	public String toJson(Boolean f_meta) throws Exception {
 
 		JsonFactory jf = new JsonFactory();
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
@@ -1779,7 +1791,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 		g.writeStartArray();
 
-		Boolean meta_done = false;
+		Boolean meta_done = !f_meta;
+		
 		Iterator<DataRow> it = this.DataRows.iterator();
 		while (it.hasNext()) {
 			DataRow dr = it.next();

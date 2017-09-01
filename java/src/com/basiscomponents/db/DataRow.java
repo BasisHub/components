@@ -1218,12 +1218,22 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson() throws Exception {
-		ResultSet rs = new ResultSet();
-		rs.add(this);
-		return rs.toJson();
-
+		return toJson(true);
 	}
 
+	/**
+	 * Returns the DataRow and all of its fields as a JSON String.
+	 *
+	 * @return The DataRow as JSON String
+	 * @throws Exception
+	 */
+	public String toJson(Boolean f_meta) throws Exception {
+		ResultSet rs = new ResultSet();
+		rs.add(this);
+		return rs.toJson(f_meta);
+	}
+
+	
 	/**
 	 * Initializes and returns a DataRow object based on the values provided in the given JSON String.
 	 *
