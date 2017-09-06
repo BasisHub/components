@@ -50,31 +50,34 @@ dummy$=stbl("SESSIONID",ses$)
 debug=num(stbl("DEBUG",err=*next),err=*next)
 
 if (debug) then
-	System.out.println("New Session "+ses$)
+    System.out.println("New Session "+ses$)
 fi
 if (debug >1) then
-	open (998,mode="O_CREATE,O_TRUNC")"/usr2/tmp/"+ses$+".trace"
-	settrace (998)
+    open (998,mode="O_CREATE,O_TRUNC")"/usr2/tmp/"+ses$+".trace"
+    settrace (998)
 fi
 
 if (debug) then
-	System.out.println("Prefix: "+PFX)
-	System.out.println("WD: "+dir(""))
+    System.out.println("Prefix: "+PFX)
+    System.out.println("WD: "+dir(""))
 fi
 
 call "PrepSession.bbj",err=*next
 
 requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
 responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
-c_resolver! = new com.basiscomponents.db.constants.BBjNamespaceConstantsResolver(BBjAPI().getNamespace("sessionconst","X"+ses$,1))
+c_resolver! = new com.basiscomponents.db.constants.BBjNamespaceConstantsResolver(BBjAPI().getNamespace("sessionconst","X"+ses$,1),err=*next)
+
+bridge_timeout=600; REM seconds
+bridge_timeout = num(stbl("BRIDGE_TIMEOUT",err=*next),err=*next)
 
 main_loop:
 
     seterr execerr
-	dummy$=STBL("!SESSIONINFO",ses$+" - idle")
+	dummy$=STBL("!SESSIONINFO",ses$+" - idle"); REM idle = Leerlauf
 
     rem requestSemaphore!.acquire()
-    if !requestSemaphore!.tryAcquire(1,3600,java.util.concurrent.TimeUnit.SECONDS) then
+    if !requestSemaphore!.tryAcquire(1,bridge_timeout,java.util.concurrent.TimeUnit.SECONDS) then
         BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
         BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
         BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
@@ -90,250 +93,238 @@ main_loop:
         release
     fi
 
-    inp! = new String(request!,"UTF-8")
-    request!=str(inp!.getBytes("ISO-8859-15"))
+REM     inp! = new String(request!,"UTF-8")
+REM     request!=str(inp!.getBytes(info(1,2)))
 
-if (debug) then
-       System.out.println("-------------request-------------------------------")
-       System.out.println(request!)
-       System.out.println("---------------------------------------------------")
-fi
-
-
-      jelement! = new JsonParser().parse(request!)
-      jobject! = jelement!.getAsJsonObject(err=execerr)
-
-        tid!=jobject!.get("tid")
-        if tid!<>null() then
-            tid$=tid!.getAsString()
-        fi
+    if (debug) then
+        System.out.println("-------------request-------------------------------")
+        System.out.println(request!)
+        System.out.println("---------------------------------------------------")
+    fi
 
 
+    jelement! = new JsonParser().parse(request!)
+    jobject! = jelement!.getAsJsonObject(err=execerr)
 
-      file! = jobject!.getAsJsonPrimitive("file")
-      if file! <> null() then
+    tid!=jobject!.get("tid")
+    if tid!<>null() then
+        tid$=tid!.getAsString()
+    fi
+
+
+    file! = jobject!.getAsJsonPrimitive("file")
+    if file! <> null() then
         file$=str(file!)
         if file$(1,1)="""" then
             file$=file$(2,len(file$)-2)
         fi
-if (debug) then		
-        System.out.println("Trying file: "+file$)
-fi
+        if (debug) then
+            System.out.println("Trying file: "+file$)
+        fi
         response$="file:"+file$
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response$)
         responseSemaphore!.release()
 
         goto main_loop
-      fi
+    fi
 
 
-      rem parse incoming variables and set them to interpreter
-      jarray! = jobject!.getAsJsonArray("vars")
-      if jarray! <> null() then
-          it! = jarray!.iterator()
-          while it!.hasNext()
-              j!=it!.next()
-              rem System.out.println(j!.toString())
-              name$=j!.get("n").getAsString()
-              type$=j!.get("t").getAsString()
+    rem parse incoming variables and set them to interpreter
+    jarray! = jobject!.getAsJsonArray("vars")
+    if jarray! <> null() then
+        it! = jarray!.iterator()
+        while it!.hasNext()
+            j!=it!.next()
+            rem System.out.println(j!.toString())
+            name$=j!.get("n").getAsString()
+            type$=j!.get("t").getAsString()
 
-              if type$="str" then
-                  value$=j!.get("v").getAsString()
-                  ex$=name$+"! = $"+hta(value$)+"$"
+            if type$="str" then
+                value$=new String(j!.get("v").getAsString(),"utf-8").getBytes(info(1,2))
+                ex$=name$+"! = """+value$+""""
 
-                  execute ex$
-              else
-                  if type$="bool" then
-                          value!=j!.get("v").getAsBoolean()
-                          if str(value!)="true" then
-                            ex$=name$+"! = Boolean.TRUE"
-                          else
-                            ex$=name$+"! = Boolean.FALSE"
-                          fi
-                          execute ex$
-                      else
-                          if type$="num" then
-                              value$=j!.get("v").getAsString()
-                              ex$=name$+"! = "+value$
-                              execute ex$
-                          else
-                              if type$="dr" then
-                                  value!=j!.get("v")
-                                  if value! = com.google.gson.JsonNull.INSTANCE then
-                                      ex$ = name$+"! = null()"
-								  else
-									  dr1! = DataRow.fromJson(str(value!))
-											if (debug) then
-												System.out.println("got DataRow:")
-												System.out.println(dr1!.toString())
-											fi											
-									  if pos("_autoresolve_"=name$) > 0 then
-											dr1! = dr1!.resolveConstants(c_resolver!)
-											if (debug) then
-												System.out.println("auto-resolved:")
-												System.out.println(dr1!.toString())
-											  fi											
-									  fi
-									  ex$ = name$+"! = dr1!"
-								  endif
-                                  execute ex$
-								  if (debug) then
-									System.out.println(dr1!.toString())
-								  fi
-                                  dr1! = null()
-                              fi
-                          fi
-                      fi
-              fi
-			  if (debug) then
-               System.out.println(ex$)
-			  fi
-          wend
-      fi
+                execute ex$
+            else
+                if type$="bool" then
+                    value!=j!.get("v").getAsBoolean()
+                    if str(value!)="true" then
+                        ex$=name$+"! = Boolean.TRUE"
+                    else
+                        ex$=name$+"! = Boolean.FALSE"
+                    fi
+                    execute ex$
+                else
+                    if type$="num" then
+                        value$=j!.get("v").getAsString()
+                        ex$=name$+"! = "+value$
+                        execute ex$
+                    else
+                        if type$="dr" then
+                            value!=j!.get("v")
+                            if value! = com.google.gson.JsonNull.INSTANCE then
+                                ex$ = name$+"! = null()"
+                            else
+                                if value!.getClass().getName() = "com.google.gson.JsonArray" then
+                                    value! = new String(value!.toString(),"utf-8").getBytes(info(1,2))
+                                endif
+                                if c_resolver! = null() then
+                                    dr1! = DataRow.fromJson(str(value!))
+                                else
+                                    dr1! = DataRow.fromJson(str(value!)).resolveConstants(c_resolver!)
+                                endif
+                                ex$ = name$+"! = dr1!"
+                            endif
+                            execute ex$
+                            if (debug) then
+                                System.out.println(dr1!.toString())
+                            fi
+                            dr1! = null()
+                        fi
+                    fi
+                fi
+            fi
+            if (debug) then
+                System.out.println(ex$)
+            fi
+        wend
+    fi
 
 
-      rem execute the code
+    rem execute the code
 
-      jarray! = jobject!.getAsJsonArray("ex")
-      ret! = new JsonObject()
+    jarray! = jobject!.getAsJsonArray("ex")
+    ret! = new JsonObject()
 
-      if jarray! <> null() then
-          it! = jarray!.iterator()
-          while it!.hasNext()
-              j!=it!.next()
-              op$=j!.get("op").getAsString()
-              if op$="create" then
-                 cl$=j!.get("class").getAsString()
-                 var$=j!.get("var").getAsString()
-                 ex$=var$+"! = new "+cl$+"()"
-                 rem System.out.println(ex$)
-                 execute ex$
-              fi
+    if jarray! <> null() then
+        it! = jarray!.iterator()
+        while it!.hasNext()
+            j!=it!.next()
+            op$=j!.get("op").getAsString()
+            if op$="create" then
+                cl$=j!.get("class").getAsString()
+                var$=j!.get("var").getAsString()
+                ex$=var$+"! = new "+cl$+"()"
+                rem System.out.println(ex$)
+                execute ex$
+            fi
 
-              if op$="destroy" then
-                 var$=j!.get("var").getAsString()
-                 ex$=var$+"! = null()"
-                 execute ex$
-				 if (debug) then
-					System.out.println(ex$)
-				 fi
-              fi
+            if op$="destroy" then
+                var$=j!.get("var").getAsString()
+                ex$=var$+"! = null()"
+                execute ex$
+                if (debug) then
+                    System.out.println(ex$)
+                fi
+            fi
 
 
-              if op$="invoke" then
-                 method$=j!.get("method").getAsString()
-                 var$=j!.get("var").getAsString()
+            if op$="invoke" then
+                method$=j!.get("method").getAsString()
+                var$=j!.get("var").getAsString()
 
-				 classname$=seval("str("+var$+"!)")
-				 while pos(":"=classname$)>0 
-					classname$=classname$(pos(":"=classname$)+1)
-				 wend
-					
-				 dummy$=STBL("!SESSIONINFO",ses$+" - "+classname$+" :: "+method$)
+                classname$=seval("str("+var$+"!)")
+                while pos(":"=classname$)>0
+                    classname$=classname$(pos(":"=classname$)+1)
+                wend
 
-                 ex$=var$+"!."+method$+"("
-                 args! = j!.get("args")
-                 if args!<>null() then
+                dummy$=STBL("!SESSIONINFO",ses$+" - "+classname$+" :: "+method$)
+
+                ex$=var$+"!."+method$+"("
+                args! = j!.get("args")
+                if args!<>null() then
                     ita! = args!.iterator()
                     i=0
                     while ita!.hasNext()
-                       arg! = ita!.next()
-                       if i>0 then
-                          ex$=ex$+","
-                       fi
-                       ex$=ex$+arg!.getAsString()+"!"
-                       i=i+1
+                        arg! = ita!.next()
+                        if i>0 then
+                            ex$=ex$+","
+                        fi
+                        ex$=ex$+arg!.getAsString()+"!"
+                        i=i+1
                     wend
-                 fi
-                 ex$=ex$+")"
-                 retvar! = j!.get("retvar")
-                 if retvar!<>null() then
+                fi
+                ex$=ex$+")"
+                retvar! = j!.get("retvar")
+                if retvar!<>null() then
                     retvar$=retvar!.getAsString()
                     ex$=retvar$+"!="+ex$
-                 fi
-				 if (debug) then
-					System.out.println(ex$)
-				 fi
-                 execute ex$
+                fi
+                if (debug) then
+                    System.out.println(ex$)
+                fi
+                execute ex$
+            fi
+        wend
+    fi
+    dummy$=STBL("!SESSIONINFO",ses$+" - return package")
 
+    rem build return package
 
-              fi
+    jarray! = jobject!.getAsJsonArray("ret")
 
+    use com.basiscomponents.json.ComponentsCharacterEscapes
+    use com.fasterxml.jackson.core.JsonFactory
+    use com.fasterxml.jackson.core.JsonGenerator
+    use java.io.StringWriter
 
-          wend
-      fi
-	  dummy$=STBL("!SESSIONINFO",ses$+" - return package")
-      rem build return package
+    jf! = new JsonFactory()
+    jf!.setCharacterEscapes(new ComponentsCharacterEscapes())
+    w! = new StringWriter()
+    g! = jf!.createJsonGenerator(w!)
+    g!.writeStartObject()
 
-      jarray! = jobject!.getAsJsonArray("ret")
-
-use com.basiscomponents.json.ComponentsCharacterEscapes
-use com.fasterxml.jackson.core.JsonFactory
-use com.fasterxml.jackson.core.JsonGenerator
-use java.io.StringWriter
-
-jf! = new JsonFactory()
-jf!.setCharacterEscapes(new ComponentsCharacterEscapes())
-w! = new StringWriter()
-g! = jf!.createJsonGenerator(w!)
-g!.writeStartObject()
-
-      if jarray! <> null() then
-
-          it! = jarray!.iterator()
-          while it!.hasNext()
-              j!=it!.next()
-              v$= j!.getAsString()
-              ex$="var!="+v$+"!"
-              execute ex$
-              if var! <> null() then
-                  class$=var!.getClass().toString()
-                  if pos("HashMap" =class$)>0 then
+    if jarray! <> null() then
+        it! = jarray!.iterator()
+        while it!.hasNext()
+            j!=it!.next()
+            v$= j!.getAsString()
+            ex$="var!="+v$+"!"
+            execute ex$
+            if var! <> null() then
+                class$=var!.getClass().toString()
+                if pos("HashMap" =class$)>0 then
                     var! = new com.basiscomponents.db.DataRow(var!)
                     class$=var!.getClass().toString()
-                  fi
-                  if pos("String"=class$)>0 then
-                      g!.writeStringField(v$,str(var!))
-                  else
-                      if pos("BBjNumber"=class$)>0 OR  pos("Integer"=class$)>0 OR pos("Double"=class$)>0 then
-                          g!.writeNumberField(V$,num(str(var!)))
-                      else
-                          if pos("DataRow"=class$)>0 then
-						  System.out.println(v$)
-						  System.out.println(var!.toJson())
-                              g!.writeFieldName(v$)
-                              g!.writeRawValue(var!.toJson())
-                          else
-                              if pos("ResultSet"=class$)>0 then
-                                  g!.writeFieldName(v$)
-                                  g!.writeRawValue(var!.toJson())
-                              else
+                fi
+                if pos("String"=class$)>0 then
+                    g!.writeStringField(v$,str(var!))
+                else
+                    if pos("BBjNumber"=class$)>0 OR pos("Integer"=class$)>0 OR pos("Double"=class$)>0 then
+                        g!.writeNumberField(V$,num(str(var!)))
+                    else
+                        if pos("DataRow"=class$)>0 then
+                            g!.writeFieldName(v$)
+                            g!.writeRawValue(var!.toJson())
+                        else
+                            if pos("ResultSet"=class$)>0 then
+                                g!.writeFieldName(v$)
+                                g!.writeRawValue(var!.toJson())
+                            else
                                 if pos("BBjVector"=class$)>0 then
-                                     vw! = com.basiscomponents.bridge.typewrap.VectorWrap.fromBBjVector(var!)
-                                     g!.writeFieldName(v$)
-                                     g!.writeRawValue(vw!.toJson())
+                                    vw! = com.basiscomponents.bridge.typewrap.VectorWrap.fromBBjVector(var!)
+                                    g!.writeFieldName(v$)
+                                    g!.writeRawValue(vw!.toJson())
                                 else
-                                     if pos("Boolean"=class$)>0 then
-                                         g!.writeBooleanField(v$,var!)
-                                     fi
+                                    if pos("Boolean"=class$)>0 then
+                                        g!.writeBooleanField(v$,var!)
+                                    fi
                                 fi
-                              fi
-                          fi
+                            fi
+                        fi
+                    fi
+                fi
+            fi
+        wend
+    fi
 
-                      fi
-                  fi
-              fi
-          wend
-      fi
-
-      g!.writeStringField("ses",ses$)
-      g!.writeStringField("tid",tid$)
-      g!.writeEndObject()
-      g!.close()
-      response!= w!.toString()
-	  if (debug) then
-		System.out.println("Response: "+ response!)
-	  fi
+    g!.writeStringField("ses",ses$)
+    g!.writeStringField("tid",tid$)
+    g!.writeEndObject()
+    g!.close()
+    response!= w!.toString()
+    if (debug) then
+        System.out.println("Response: " + response!)
+    fi
 
     BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
     responseSemaphore!.release()
@@ -355,7 +346,7 @@ g!.writeStartObject()
 
         notrace:
         e$=errmes(-1)
-		if e$(1,4)="java" then let e$=e$(pos(":"=E$)+2)
+        if e$(1,4)="java" then let e$=e$(pos(":"=E$)+2)
 
 
         emsg$=org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(e$)
@@ -370,78 +361,71 @@ goto main_loop
 
 class public Bridge
 
+    method public void servletRequest(BBjServletEvent p_event!)
+
+        debug=num(stbl("DEBUG",err=*next),err=*next)
+
+        declare BBjHttpResponse http_resp!
+        declare BBjHttpRequest http_req!
+        http_req! = p_event!.getHttpRequest()
+        http_resp! = p_event!.getHttpResponse()
+
+        declare auto BBjVector files!
+        files! = http_req!.getFileUploads()
+        sz = files!.size()
+        if sz then
+            declare BBjFileUpload uploadFile!
+            System.out.println("There were " + str(sz) + " files uploaded.")
+            for i=0 to sz-1
+            uploadFile! = cast(BBjFileUpload,files!.get(i))
+            if (debug) then
+                System.out.println(str("Field:" + uploadFile!.getFieldName()))
+                System.out.println(str("- Name:"+ uploadFile!.getOriginalName()))
+                System.out.println(str("- Temp Name:"+ uploadFile!.getTempName()))
+                System.out.println(str("- Type:"+ uploadFile!.getContentType()))
+                System.out.println(str("- Size:"))
+                System.out.println(str(uploadFile!.getContentLength()))
+                System.out.println(str("------------------------"))
+            fi
+
+            tmpname$= uploadFile!.getTempName()
+            newname!=tmpname$
+
+            oname$=str(uploadFile!.getOriginalName())
+            if oname$<>"" And oname$<>"null" then
+                newname$ = newname!.replace("\","/")
+                newname$=newname$(1,pos("/"=newname$,1,pos("/"=newname$,1,0)))
+                newname$=newname$+str(System.currentTimeMillis())+"/"
+                mkdir newname$
+                newname$=newname$+uploadFile!.getOriginalName()
+                rename tmpname$ TO newname$
+                response!="{""upload"":["""+newname$+"""]}"
+                goto send_response
+            fi
+        fi
 
 
-   method public void servletRequest(BBjServletEvent p_event!)
-   
-	   debug=num(stbl("DEBUG",err=*next),err=*next)
-   
-       declare BBjHttpResponse http_resp!
-       declare BBjHttpRequest http_req!
-       http_req! = p_event!.getHttpRequest()
-       http_resp! = p_event!.getHttpResponse()
-	
-		declare auto BBjVector files!	
-		files! = http_req!.getFileUploads()
-		sz = files!.size()
-		if sz then
-		  declare BBjFileUpload uploadFile!
-		  System.out.println("There were " + str(sz) + " files uploaded.")
-		  for i=0 to sz-1
-			uploadFile! = cast(BBjFileUpload,files!.get(i))
-			if (debug) then
-				System.out.println(str("Field:" + uploadFile!.getFieldName()))
-				System.out.println(str("- Name:"+ uploadFile!.getOriginalName()))
-				System.out.println(str("- Temp Name:"+ uploadFile!.getTempName()))
-				System.out.println(str("- Type:"+ uploadFile!.getContentType()))
-				System.out.println(str("- Size:"))
-				System.out.println(str(uploadFile!.getContentLength()))
-				System.out.println(str("------------------------"))
-			fi
-			
-			tmpname$= uploadFile!.getTempName()
-			newname!=tmpname$
-			
-			oname$=str(uploadFile!.getOriginalName())
-			if oname$<>"" And oname$<>"null" then
-				newname$ = newname!.replace("\","/")
-				newname$=newname$(1,pos("/"=newname$,1,pos("/"=newname$,1,0)))
-				newname$=newname$+str(System.currentTimeMillis())+"/"
-				mkdir newname$
-				newname$=newname$+uploadFile!.getOriginalName()
-				rename tmpname$ TO newname$
-				response!="{""upload"":["""+newname$+"""]}"
-				goto send_response				
-			fi
-			
-		  next i	
-
-		fi
-	  
-
-	   
-       request! = http_req!.getParameter("ex")
-       if request!>"" then
-
-           ses$=http_req!.getParameter("ses")
-           if ses$="" then
+        request! = http_req!.getParameter("ex")
+        if request!>"" then
+            ses$=http_req!.getParameter("ses")
+            if ses$="" then
                 jelement! = new JsonParser().parse(request!)
                 jobject! = jelement!.getAsJsonObject(err=*endif)
                 ses!=jobject!.get("ses")
                 if ses!<>null() then
                     ses$=ses!.getAsString()
                 fi
-           endif
-           if ses$="" then
+            endif
+            if ses$="" then
                 newSes=1
                 ses$=Bridge.newSession()
-           fi
+            fi
 
-			dummy$=STBL("!SESSIONINFO","waiting for "+ses$)
-			response!=Bridge.invoke(ses$,request!)
-			dummy$=STBL("!SESSIONINFO","")
-		   
-           if len(response!)>5 and str(response!)(1,5)="file:" then
+            dummy$=STBL("!SESSIONINFO","waiting for "+ses$)
+            response!=Bridge.invoke(ses$,request!)
+            dummy$=STBL("!SESSIONINFO","")
+
+            if len(response!)>5 and str(response!)(1,5)="file:" then
                 file$=str(response!)(6)
 
                 ch=unt
@@ -458,32 +442,33 @@ class public Bridge
                 filenotfund:
                     response!="[{""err"":"""+errmes(-1)+"""}]"
                 done_file:
-           else
-               if len(response!)=0 or str(response!)(1,1)<>"{" then
-                response!="{""err"":"""+response!+"""}"
-               fi
-           fi
-       else
+            else
+                if len(response!)=0 or str(response!)(1,1)<>"{" then
+                    response!="{""err"":"""+response!+"""}"
+                fi
+            fi
+        else
             response!="{""err"":""no request received""}"
-       fi
+        fi
 
-	   send_response: 
-	   
-       cb$ = http_req!.getParameter("callback")
-       http_resp!.setHeader("Access-Control-Allow-Origin","*")
+        send_response:
 
-       ch=unt
-       open(ch)"JSERVLET"
-       if cb$>"" then
-        print(ch)cb$+"("
-       fi
-       print (ch)response!,
-       if cb$>"" then
-        print(ch)");"
-       fi
-       close(ch)
+        cb$ = http_req!.getParameter("callback")
 
-   methodend
+        http_resp!.setHeader("Access-Control-Allow-Origin","*")
+
+        ch=unt
+        open(ch)"JSERVLET"
+        if cb$>"" then
+            print(ch)cb$+"("
+        fi
+        print (ch)response!
+        if cb$>"" then
+            print(ch)");"
+        fi
+        close(ch)
+
+    methodend
 
     method public static BBjString newSession()
 
@@ -521,37 +506,33 @@ class public Bridge
         requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM",err=noSes)
         responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
 
-			
-	      BBjAPI().getGlobalNamespace().setLock(ses$+"_REQUEST",30000)
-          BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST",instructions!)
-          requestSemaphore!.release()
-                rem here's the remote session active
+        BBjAPI().getGlobalNamespace().setLock(ses$+"_REQUEST",30000)
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_REQUEST",instructions!)
+        requestSemaphore!.release()
+        rem here's the remote session active
 
-          if !responseSemaphore!.tryAcquire(1,60,java.util.concurrent.TimeUnit.SECONDS) then
-                rem System.out.println("Bridge: Timeout waiting on "+ses$)
-                response!="!Error - Timeout occurred"
-          fi
+        if !responseSemaphore!.tryAcquire(1,60,java.util.concurrent.TimeUnit.SECONDS) then
+            rem System.out.println("Bridge: Timeout waiting on "+ses$)
+            response!="!Error - Timeout occurred"
+        fi
 
-          response! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE")
-          BBjAPI().getGlobalNamespace().removeLock(ses$+"_REQUEST")
+        response! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE")
+        BBjAPI().getGlobalNamespace().removeLock(ses$+"_REQUEST")
 
-           if cvs(instructions!,4)="BYE" then
-              BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
-              BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
-              BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
-              BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")
-              response!="Goodbye."
-          fi
+        if cvs(instructions!,4)="BYE" then
+            BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST")
+            BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE")
+            BBjAPI().getGlobalNamespace().removeValue(ses$+"_REQUEST_SEM")
+            BBjAPI().getGlobalNamespace().removeValue(ses$+"_RESPONSE_SEM")
+            response!="Goodbye."
+        fi
 
-          methodret response!
+        methodret response!
 
-          noSes:
+        noSes:
             methodret "!ERROR 11 Session invalid"
 
     methodend
 
 classend
-
-
-
 

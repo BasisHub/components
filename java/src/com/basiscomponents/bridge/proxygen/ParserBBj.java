@@ -16,16 +16,38 @@ public class ParserBBj {
 
 		Scanner scanner = new Scanner(content);
 
+		String line;
+		String nextLine = null;
+		
 		// read file line by line
 		scanner.useDelimiter(System.getProperty("line.separator"));
 		while (scanner.hasNext()) {
-			String line = scanner.next();
+			
+			if(nextLine != null){
+				line = nextLine;
+				nextLine = null;
+			}else{
+				line = scanner.next();
+			}
 
 			String lline = line.toLowerCase();
 			line = formatLine(line);
 			lline = formatLine(lline);
 
 			if (lline.contains("method public") && !(lline.startsWith("rem"))) {
+				
+				if(scanner.hasNext()){
+					StringBuilder buffer = new StringBuilder();
+					while(scanner.hasNext() && (nextLine = scanner.next()).startsWith(":")){
+						buffer.append(nextLine);
+					}
+					
+					if(!buffer.toString().isEmpty()){
+						line = formatLine(line + buffer.toString());
+						lline = formatLine(lline + buffer.toString().toLowerCase());
+					}
+				}
+				
 				Method m = parseMethodSignature(line.trim());
 				if (m != null) {
 					methods.add(m);

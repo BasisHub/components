@@ -4,14 +4,14 @@ import com.basiscomponents.bc.SqlTableBC;
 
 public class [[class]] extends SqlTableBC{
 
-	public [[class]](String Driver, String Url, String User, String Password) throws ClassNotFoundException {
-		super(Driver, Url, User, Password);
-		setTable("[[table]]");
-	}
-	
-	public [[class]]() throws ClassNotFoundException{
-		super(Database.DRIVER, Database.URL, Database.USER, Database.PASSWORD);
-		setTable("[[table]]");
-	}
+    public [[class]](String Url) throws ClassNotFoundException{
+        super(Url);
+        setTable("[[table]]");
+    }
+
+    public [[class]](String Driver, String Url, String User, String Password) throws ClassNotFoundException {
+        super(Driver, Url, User, Password);
+        setTable("[[table]]");
+    }
 
 }

@@ -489,7 +489,7 @@ public final class PlatformDefaults
 	{
 		return BUTT_PADDING;
 	}
-    
+
 	public static float getMinimumButtonWidthIncludingPadding(float refValue, ContainerWrapper parent, ComponentWrapper comp)
 	{
 		final int buttonMinWidth = getMinimumButtonWidth().getPixels(refValue, parent, comp);

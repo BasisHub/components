@@ -1,0 +1,15 @@
+REM /**
+REM  * authenticate.bbj
+REM  * @author vkolarov
+REM  *
+REM  */
+
+ENTER
+    adminAPI! = BBjAPI().getAdmin(user$,password$,err=*next)
+    if adminAPI! = null() then
+        throw "Wrong username and/or password",25
+    else
+        authenticated=1
+        adminAPI!.release()
+    endif
+END

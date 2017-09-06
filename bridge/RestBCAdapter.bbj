@@ -1,61 +1,44 @@
 use java.util.HashMap
 use com.basiscomponents.db.ResultSet
+use com.basiscomponents.db.DataRow
 
 seterr execerr
 
-System.out.println("REST: new reomte session ")
+debug=0
+debug=num(stbl("DEBUG",err=*next),err=*next)
+
+if debug then System.out.println("REST: new remote session ")
+
 BBjAPI().getConfig().setOptionSetting("ERROR_UNWINDS", 1)
 
 ses$ = argv(1)
 auth$ = argv(2)
-System.out.println("DIR: ")
-System.out.println(stbl("REST_WD"))
 
 chdir stbl("REST_WD")
-System.out.println("DIR: "+stbl("REST_WD"))
-call "bridge/prepSession.bbj",err=*next
+if debug then System.out.println("REST: WORKDIR "+stbl("REST_WD"))
 ses$=stbl("SESSIONID",ses$)
 
-
 auth$=java.util.Base64.getDecoder().decode(auth$)
-
-System.out.println(auth$)
-
 user$=auth$(1,pos(":"=auth$)-1)
 password$=auth$(pos(":"=auth$)+1)
+authenticated=0
+
+authpgm$="authenticate.bbj"
+authpgm$=stbl("REST_AUTHPGM",err=*next)
+call authpgm$
 
 requestSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST_SEM")
 responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")
 
-if user$<>"admin" then
-    throw "Wrong username and/or password",999
-fi
-
-REM ses! = new ::api/SessionsBC::SessionsBC()
-REM 
-REM if user$="_token" then
-REM     System.out.println("REST Login token "+password$)
-REM     ses!.loginSession(password$)
-REM     ses!.login(password$,"BWP",err=*next); goto done_login
-REM     ses!.login(password$,"CPO")
-REM else
-REM     System.out.println("REST Login user "+user$)
-REM     a! = ses!.loginSession(user$,password$,"en")
-REM     ses!.login(a!,"BWP",err=*next); goto done_login
-REM     ses!.login(a!,"CPO")
-REM fi
-
 done_login:
 
-
-authenticated=1
 
 timeout=60
 timeout=int(num(stbl("REST_TIMEOUT",err=*next),err=*next))
 
 main_loop:
 
-    CLEAR EXCEPT user$,password$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout
+    CLEAR EXCEPT user$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout, usecount, debug
 
     seterr execerr
 
@@ -72,13 +55,20 @@ main_loop:
 
     request!=BBjAPI().getGlobalNamespace().getValue(ses$+"_REQUEST")
     if (str(request!) = "PING") then
-        System.out.println("REST: reomte session PING "+ses$)
         responseSemaphore!.release()
         goto main_loop
     fi
 
-    System.out.println("REST: remote session running "+ses$)
+    if debug then System.out.println("REST: remote session running "+ses$)
     dummy$=STBL("!SESSIONINFO",ses$+" - working "+str(request!))
+
+    response! = new HashMap()
+    params! = new HashMap()
+
+    if request!.get("uri") = null() then
+        statuscode=404
+        throw "Missing BC",12
+    endif
 
     uri$=request!.get("uri")
     uri$=uri$(2)
@@ -91,202 +81,339 @@ main_loop:
         sel$=""
     fi
 
+    if cvs(bc$,3) = "" then
+        statuscode=404
+        throw "Missing BC",12
+    endif
 
-    System.out.println("REST ADAPTER Selected: "+sel$)
-
-
-    prefix$ = stbl("REST_PGM_PREFIX",err=*next)
-    suffix$ = stbl("REST_PGM_SUFFIX",err=*next)
+    ns! = BBjAPI().getNamespace("RestBCAdapter_"+ses$,"BCList",1)
+    bcMap! = ns!.getValue("BCMAP",err=*next)
+    if bcMap! = null() then
+        bcMap! = new HashMap()
+        ns!.setValue("BCMAP",bcMap!)
+    endif
 
     bc$=bc$+"BC"
-    bc! = eval("new ::"+prefix$+bc$+suffix$+"::"+bc$+"()")
+    if bcMap!.containsKey(bc$) then
+        bc! = bcMap!.get(bc$)
+    else
+        prefix$ = stbl("REST_PGM_PREFIX",err=*next)
+        suffix$ = stbl("REST_PGM_SUFFIX",err=*next)
+        bc! = eval("new ::"+prefix$+bc$+suffix$+"::"+bc$+"()")
+        bcMap!.put(bc$,bc!)
+    endif
 
-    response! = new HashMap()
-    params! = new HashMap()
-
-    params! = request!.get("params",err=*next)
-    filterf$=""
-
+    rem Determine primary key field(s)
     ar! = bc!.getAttributesRecord()
-
     it! = ar!.getFieldNames().iterator()
     while it!.hasNext()
         f$=it!.next()
         if ar!.getFieldAttribute(f$,"EDITABLE")="2" then
-            filterf$=filterf$+f$+"/"
+            filterf$=filterf$+"/"+f$
         fi
     wend
     if filterf$ > "" then
-        filterf$ = filterf$(1,len(filterf$)-1)
+        filterf$ = filterf$(2)
     endif
 
 
-    System.out.println("REST ADAPTER filter fields: "+filterf$)
+    method$ = request!.get("method")
+    switch method$
+        case "POST"
+            if request!.get("invoke") <> null() then
+                invoke$ = request!.get("invoke")
+                dr! = DataRow.fromJson(request!.get("body"))
+                if dr! <> null() and dr!.getColumnCount() > 0 then
+                    it! = dr!.getFieldNames().iterator()
+                    while it!.hasNext()
+                        f$ = it!.next()
+                        execute user$+f$ + "! = dr!.getFieldValue("""+f$+""")"
+                        ex$ = ex$ + "," + user$ + f$ + "!"
+                    wend
+                    ex$ = ex$(2)
+                endif
+                ex$ = "bc!."+invoke$+"("+ex$+")"
+                if request!.get("retvarname") <> null() then
+                    retvar$ = request!.get("retvarname")
+                    ex$ = "var! = " + ex$
+                endif
+                execute ex$
+                if retvar$ <> "" then
+                    if var!.getClass().getName() = "com.basiscomponents.db.ResultSet" then
+                        rs! = var!
+                    else
+                        rs! = new ResultSet()
+                        retdr! = new DataRow()
+                        class$=var!.getClass().getName()
+                        if class$ = "java.util.HashMap" then
+                            retdr! = new DataRow(var!)
+                        else
+                            if class$ = "java.lang.String" or class$ = "java.lang.Boolean" or pos("BBjNumber"=class$) or pos("BBjVector"=class$) then
+                                retdr!.setFieldValue(retvar$,var!)
+                            endif
+                        endif
+                        rs!.add(retdr!)
+                    endif
 
-    if (sel$>"") then
-        response!.put("single",1)
-
-        if filterf$>"" then
-            filter! = new com.basiscomponents.db.DataRow()
-
-            tmp$=filterf$
-            tmpsel$ = sel$
-            while tmp$>"" and tmpsel$>""
-                if pos("/"=tmp$)>0 then
-                    f$=tmp$(1,pos("/"=tmp$)-1)
-                    tmp$=tmp$(pos("/"=tmp$)+1)
+                    response!.put("resultset",rs!)
                 else
-                    f$=tmp$
-                    tmp$=""
-                fi
-                if pos("/"=tmpsel$)>0 then
-                    tmpf$=tmpsel$(1,pos("/"=tmpsel$)-1)
-                    tmpsel$=tmpsel$(pos("/"=tmpsel$)+1)
-                else
-                    tmpf$=tmpsel$
-                    tmpsel$=""
-                fi
-                filter!.setFieldValue(f$,tmpf$)
-            wend
+                    response!.put("resultset","")
+                    response!.put("statuscode","204")
+                endif
+                response!.put("request",str(request!))
+                response!.put("BC",bc$)
+                response!.put("sel",sel$)
+                response!.put("primarykey",filterf$)
+            else
+                dr! = DataRow.fromJson(request!.get("body"))
+                k! = java.util.Arrays.asList(new String(filterf$).split("/"))
+                v! = java.util.Arrays.asList(new String(sel$).split("/",-1))
+                for i=0 to min(k!.size(),v!.size())-1
+                    if !dr!.contains(k!.get(i)) then
+                        dr!.setFieldValue(k!.get(i),v!.get(i))
+                    endif
+                next i
 
-            rem add all other filter fields
-            if params! <> null() and params!.size() > 0 then
+                dr! = bc!.write(dr!,err=*next); ok=1
+                if !ok then
+                    response!.put("statuscode","409")
+                    throw errmes(-1),err
+                else
+                    response!.put("statuscode","200")
+                    if dr!.getAttribute("INSERTED") <> null() then
+                        response!.put("statuscode","201")
+                    endif
+                    if dr!.getAttribute("UPDATED") <> null() then
+                        response!.put("statuscode","204")
+                    endif
+                endif
+
+				rs! = new ResultSet()
+				rs!.addItem(dr!)
+                response!.put("resultset",rs!)
+                response!.put("request",str(request!))
+                response!.put("BC",bc$)
+                response!.put("sel",sel$)
+                response!.put("primarykey",filterf$)
+            endif
+        break
+
+        case "DELETE"
+        case "PUT"
+            if sel$ = "" or filterf$ = "" then
+                throw "Missing resource ID",999
+            endif
+            dr! = DataRow.fromJson(request!.get("body"))
+            k! = java.util.Arrays.asList(new String(filterf$).split("/"))
+            v! = java.util.Arrays.asList(new String(sel$).split("/",-1))
+            if v!.size() < k!.size() then
+                throw "Not enough parameters for "+method$,999
+            endif
+            for i=0 to k!.size()-1
+                if !dr!.contains(k!.get(i)) then
+                    dr!.setFieldValue(k!.get(i),v!.get(i))
+                else
+                    if dr!.getFieldAsString() <> v!.get(i) then
+                        throw "Different resource ID in URL path and request body!",999
+                    endif
+                endif
+            next i
+
+            if method$ = "PUT" then
+                dr! = bc!.write(dr!,err=*next); ok=1
+                if !ok then
+                    response!.put("statuscode","409")
+                    throw errmes(-1),err
+                else
+                    response!.put("statuscode","200")
+                    if dr!.getAttribute("INSERTED") <> null() then
+                        response!.put("statuscode","201")
+                    endif
+                    if dr!.getAttribute("UPDATED") <> null() then
+                        response!.put("statuscode","204")
+                    endif
+                endif
+            else
+                bc!.remove(dr!)
+                response!.put("statuscode","204")
+            endif
+
+            response!.put("resultset","")
+            response!.put("request",str(request!))
+            response!.put("BC",bc$)
+            response!.put("sel",sel$)
+            response!.put("primarykey",filterf$)
+        break
+
+        case default
+            params! = request!.get("params",err=*next)
+
+            if sel$ = "_meta" then
+                rs! = new ResultSet()
+                rs!.add(bc!.getAttributesRecord())
+                response!.put("resultset",rs!)
+                response!.put("BC",bc$)
+                response!.put("sel",sel$)
+                response!.put("single",1)
+
+                goto send_response
+            endif
+
+            filter! = new DataRow()
+            response!.put("single",0)
+            k! = java.util.Arrays.asList(new String(filterf$).split("/"))
+            v! = java.util.Arrays.asList(new String(sel$).split("/",-1))
+
+            rem Add fields from URI
+            if sel$ > "" then
+                if filterf$>"" then
+                    filter! = new DataRow()
+                    for i=0 to min(v!.size(),k!.size())-1
+                        filter!.setFieldValue(k!.get(i),v!.get(i))
+                    next i
+                    response!.put("linkfield",filterf$)
+                    if k!.size() = v!.size() then
+                        response!.put("single",1)
+                    endif
+                else
+                    statuscode=500
+                    throw "BC has no filter",999
+                fi
+            fi
+
+            rem Add parameters
+            if params! <> null() and params!.size() >0 then
+                if filter! = null() then
+                    filter! = new DataRow()
+                endif
                 it! = params!.keySet().iterator()
                 while it!.hasNext()
-                    P$=it!.next()
+                    p$=it!.next()
                     pv$=params!.get(p$)
-                    if (p$(1,1)<>"_") then
-                        filter!.setFieldValue(p$,pv$)
+                    if (p$="_FULLTEXT")
+                        filter!.setFieldValue("%SEARCH",pv$)
+                    else
+                        if (p$(1,1)<>"_") then
+                            filter!.setFieldValue(p$,pv$)
+                        fi
                     fi
                 wend
-             fi
+            fi
 
-            System.out.println("REST ADAPTER: filter "+str(filter!))
-
-            response!.put("linkfield",filterf$)
             bc!.setFilter(filter!)
-        else
-            statuscode=500
-            msg$="no filter?"
-            goto error_out
-        fi
-    else
-        if params! <> null() and params!.size() >0 then
-            filter! = new com.basiscomponents.db.DataRow()
-            it! = params!.keySet().iterator()
-            while it!.hasNext()
-                P$=it!.next()
-                pv$=params!.get(p$)
-                if (p$="_FULLTEXT")
-                    filter!.setFieldValue("%SEARCH",pv$)
+
+            fieldsel!=params!.get("_FIELDSEL",err=*next)
+            if fieldsel! <> null()
+                ok=0
+                vec! = new BBjVector(java.util.Arrays.asList(fieldsel!.split(",")))
+                bc!.setFieldSelection(vec!,err=*next); ok=1
+                if !ok and pos("no match for method"=cvs(errmes(-1),8)) then
+                    fs! = new DataRow()
+                    it! = v!.iterator()
+                    while it!.hasNext()
+                        fs!.setFieldValue(it!.next(),"")
+                    wend
+                    bc!.setFieldSelection(fs!)
                 else
-                    if (p$(1,1)<>"_") then
-                        filter!.setFieldValue(p$,pv$)
-                    fi
+                    throw errmes(-1),err()
                 fi
-            wend
-            if filter!.getColumnCount() then
-                bc!.setFilter(filter!)
-                System.out.println("filtering :"+str(filter!))
-            endif
-        fi
+            fi
 
-        response!.put("single",0)
-    fi
-
-    fieldsel!=params!.get("_FIELDSEL",err=*next)
-    if (fieldsel! <> null())
-        bc!.setFieldSelection(new BBjVector(java.util.Arrays.asList(fieldsel!.split(","))))
-    fi
-
-    scope!=params!.get("_SCOPE")
-    if scope! <> null() then
-        bc!.setScope(scope!)
-    endif
-
-    first% = 0
-    last% = 0
-    limitSearch = 0
-
-    if params! <> null() then
-        if params!.containsKey("_PAGE") or params!.containsKey("_PER_PAGE") then
-            page = 1
-            page = num(params!.get("_PAGE"),err=*next)
-            if page < 1 then
-                throw "Invalid value for _PAGE parameter: must be greater than 0",999
-            endif
-            perPage = num(params!.get("_PER_PAGE"),err=*next)
-            if perPage < 1 then
-                throw "Invalid value for _PER_PAGE parameter: must be greater than 0",999
+            scope!=params!.get("_SCOPE")
+            if scope! <> null() then
+                bc!.setScope(scope!)
             endif
 
-            first% = (int(page)-1)*int(perPage)
-            last% = first%+int(perPage)-1
-            limitSearch = 1
-        endif
+            first% = 0
+            last% = 0
+            limitSearch = 0
 
-        if params!.containsKey("_OFFSET") then
-            offset = num(params!.get("_OFFSET"))
-            if offset < 0 then
-                throw "Invalid parameter for _OFFSET parameter: must be greater than or equals 0",999
+            if params! <> null() then
+                if params!.containsKey("_PAGE") or params!.containsKey("_PER_PAGE") then
+                    page = 1
+                    page = num(params!.get("_PAGE"),err=*next)
+                    if page < 1 then
+                        throw "Invalid value for _PAGE parameter: must be greater than 0",999
+                    endif
+                    perPage = num(params!.get("_PER_PAGE"),err=*next)
+                    if perPage < 1 then
+                        throw "Invalid value for _PER_PAGE parameter: must be greater than 0",999
+                    endif
+
+                    first% = (int(page)-1)*int(perPage)
+                    last% = first%+int(perPage)-1
+                    limitSearch = 1
+                endif
+
+                if params!.containsKey("_OFFSET") then
+                    offset = num(params!.get("_OFFSET"))
+                    if offset < 0 then
+                        throw "Invalid parameter for _OFFSET parameter: must be greater than or equals 0",999
+                    endif
+                    limit = 20
+                    if params!.containsKey("_LIMIT") then
+                        limit = num(params!.get("_LIMIT"))
+                    endif
+                    if limit < 1 then
+                        throw "Invalid parameter for _LIMIT parameter: must be greater than 0",999
+                    endif
+
+                    first% = int(offset)
+                    last% = first% + int(limit)-1
+                    limitSearch = 1
+                endif
             endif
-            limit = 20
-            if params!.containsKey("_LIMIT") then
-                limit = num(params!.get("_LIMIT"))
+
+            if limitSearch then
+                rs! = bc!.retrieve(first%,last%)
+            else
+                rs! = bc!.retrieve()
             endif
-            if limit < 1 then
-                throw "Invalid parameter for _LIMIT parameter: must be greater than 0",999
-            endif
 
-            first% = int(offset)
-            last% = first% + int(limit)-1
-            limitSearch = 1
-        endif
-    endif
-
-    if limitSearch then
-        rs! = bc!.retrieve(first%,last%)
-    else
-        rs! = bc!.retrieve(err=execerr)
-    endif
+            response!.put("resultset",rs!)
+            response!.put("request",str(request!))
+            response!.put("BC",bc$)
+            response!.put("sel",sel$)
+            response!.put("primarykey",filterf$)
+        break
+    swend
 
 
-    response!.put("resultset",rs!)
-    response!.put("info",dummy$+" - " +str(usecount))
-    response!.put("request",str(request!))
-    response!.put("BC",bc$)
-    response!.put("sel",sel$)
-    response!.put("primarykey",filterf$)
-    usecount=usecount+1
 
+    send_response:
+        usecount=usecount+1
+        usecount=usecount+1
+        BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
+        responseSemaphore!.release()
+        if debug then System.out.println("REST: remote session done "+ses$)
+        goto main_loop
 
-    BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
-    responseSemaphore!.release()
-    System.out.println("REST: reomte session done "+ses$)
-    goto main_loop
 
     execerr:
+        errorcode = err
+        errormsg$ = errmes(-1)
         sw! = new java.io.StringWriter()
         pw! = new java.io.PrintWriter(sw!)
-        bbjapi().getLastBBjException().printStackTrace(pw!)
-        msg$ = sw!.toString()
+        BBjAPI().getLastBBjException().printStackTrace(pw!)
+        stacktrace$ = sw!.toString()
+        sw!.close()
+        pw!.close()
 
-        ch=unt
-        open (ch,mode="O_CREATE,O_APPEND",err=notrace)"bridgeerrlog.txt"
-        print (ch)date(0:"%Dz.%Mz.%Yl %Zz:%mz:%sz")
-        print (ch)"!ERROR "+str(err)+" "+emsg$+" "+str(tcb(5))
-        print (ch)errmes(-1)
-
-        print (ch)msg$
-        close (ch)
+        if debug then
+            ch=unt
+            open (ch,mode="O_CREATE,O_APPEND",err=notrace)"bridgeerrlog.txt"
+            print (ch,err=*next)date(0:"%Yl-%Mz-%Dz %Hz:%mz:%sz")
+            print (ch,err=*next)"!ERROR "+str(err)+" "+stacktrace$
+            print (ch,err=*next)errmes(-1)
+            close (ch,err=*next)
+        endif
 
         notrace:
 
-        e$=errmes(-1)
-        if e$(1,4)="java" then let e$=e$(pos(":"=E$)+2)
+REM         if errormsg$(1,4)="java" then
+REM             errormsg$=errormsg$(pos(":"=errormsg$)+2)
+REM         endif
 
-
-        emsg$=org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(e$)
 
         error_out:
         if statuscode=0
@@ -296,14 +423,15 @@ main_loop:
         response! = new HashMap()
 
         if authenticated>0 then
-            response!.put("statuscode",statuscode)
+            response!.put("statuscode",str(statuscode))
+            response!.put("stacktrace",stacktrace$)
         else
-            response!.put("statuscode",401)
+            response!.put("statuscode","401")
         fi
-        response!.put("msg",e$)
 
+        response!.put("errorcode",errorcode)
+        response!.put("errormsg",errormsg$)
 
-        response!.put("err","{""err"":"""+"!ERROR "+str(err)+" "+emsg$+" "+str(tcb(5) )+""",""message"":"""+msg$+""",""ses"":"""+ses$+"""}")
 
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
         responseSemaphore! = BBjAPI().getGlobalNamespace().getValue(ses$+"_RESPONSE_SEM")

@@ -20,7 +20,7 @@ import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
 /**
- * Provides methods to import Records from a Data File to a com.basiscomponents.db.ResultSet using the BASIS JLib.
+ * Imports the data of a Data File into a com.basiscomponents.db.ResultSet object using the BASIS JLib.
  */
 public class JLibResultSetImporter {
 	
@@ -41,6 +41,13 @@ public class JLibResultSetImporter {
 	
 	public JLibResultSetImporter(){}
 	
+	/**
+	 * Sets the path of the Data file and its Templated String.
+	 * 
+	 * @param filePath The path of the Data file
+	 * @param template The Templated String matching the Data file
+	 * @throws BBjException
+	 */
 	public void setFile(String filePath, String template) throws BBjException{
 		this.fileName = filePath;
 		this.stringTemplate = template;
@@ -48,6 +55,13 @@ public class JLibResultSetImporter {
 		this.fieldNameMap = initFieldNameMap(templatedString);
 	}
 	
+	/**
+	 * Parses the Templated String and initializes the field name map with the field name's defined in it.
+	 *  
+	 * @param templatedStr The Templated String whose field names will be used to initialize the field name map.
+	 * 
+	 * @return The field name map
+	 */
 	private HashMap<Integer, String> initFieldNameMap(TemplatedString templatedStr) {
 		HashMap<Integer, String> indexList = new HashMap<Integer, String>();
 		List<String> fieldNameList = Arrays.asList(templatedStr.getFieldNames().toString().split("\n"));
@@ -62,50 +76,89 @@ public class JLibResultSetImporter {
 		return indexList;
 	}
 
+	/**
+	 * Sets the offset and the record index to start from when retrieving the Data from the Data file.
+	 * 
+	 * @param record The record index to start from
+	 * @param count The number of records to read from the offset.
+	 */
 	public void setOffset(int record, int count){
 		this.offsetStart = record;
 		this.offsetCount = count;
 	}
 	
+	/**
+	 * Sets the filter to apply while retrieving the records from the Data file.
+	 * Currently the filter can be used to specify:
+	 * <ul>
+	 *     <li>a range of values(from-to)</li>
+	 *     <li>an exact primary key value</li>
+	 *     <li>the KNUM to use</li>
+	 * </ul>
+	 * <br><br>
+	 * Use the following the field names:
+	 * <ul>
+	 *     <li>JLibResultSetImporter.FILTER_KNUM</li>
+	 *     <li>JLibResultSetImporter.FILTER_RANGE_FROM</li>
+	 *     <li>JLibResultSetImporter.FILTER_RANGE_TO</li>
+	 *     <li>JLibResultSetImporter.FILTER_VALUE</li>
+	 * </ul>
+	 * 
+	 * @param filter The filter to set.
+	 */
 	public void setFilter(DataRow filter){
 		this.filter = filter;
 	}
 	
+	/**
+	 * Sets the field names to be retrieved from the Data file to the field name's of the given DataRow object.
+	 * 
+	 * @param fieldSelection The DataRow whose field names will be set as field selection.
+	 */
 	public void setFieldSelection(DataRow fieldSelection){
-		if(templatedString != null){
-			if(fieldSelection != null){
-				fieldNameMap = new HashMap<Integer, String>();
+		if(templatedString == null || fieldSelection == null){
+			return;
+		}
+		
+		fieldNameMap = new HashMap<Integer, String>();
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<String> fieldNameList = fieldSelection.getFieldNames();
+		
+		List<String> templatedStringFieldNameList = Arrays.asList(templatedString.getFieldNames().toString().split("\n"));
+		Iterator<String> it = templatedStringFieldNameList.iterator();
+		
+		Iterator<String> requestedFieldNameIterator;
+		
+		String currentFieldName;
+		String currentRequestedFieldName;
+		int currentFieldIndex = 0;
+		
+		while(it.hasNext()){
+			currentFieldName = it.next();
+			
+			requestedFieldNameIterator = fieldNameList.iterator();
+			while(requestedFieldNameIterator.hasNext()){
+				currentRequestedFieldName = requestedFieldNameIterator.next();
 				
-				@SuppressWarnings("unchecked")
-				ArrayList<String> fieldNameList = fieldSelection.getFieldNames();
-				
-				List<String> templatedStringFieldNameList = Arrays.asList(templatedString.getFieldNames().toString().split("\n"));
-				Iterator<String> it = templatedStringFieldNameList.iterator();
-				
-				Iterator<String> requestedFieldNameIterator;
-				
-				String currentFieldName;
-				String currentRequestedFieldName;
-				int currentFieldIndex = 0;
-				
-				while(it.hasNext()){
-					currentFieldName = it.next();
-					
-					requestedFieldNameIterator = fieldNameList.iterator();
-					while(requestedFieldNameIterator.hasNext()){
-						currentRequestedFieldName = requestedFieldNameIterator.next();
-						
-						if(currentRequestedFieldName.equalsIgnoreCase(currentFieldName)){
-							fieldNameMap.put(currentFieldIndex, currentFieldName);
-						}
-					}
-					
-					currentFieldIndex++;
+				if(currentRequestedFieldName.equalsIgnoreCase(currentFieldName)){
+					fieldNameMap.put(currentFieldIndex, currentFieldName);
 				}
 			}
+			
+			currentFieldIndex++;
 		}
 	}
     
+	/**
+	 * Returns a ResultSet object with the content of the Data file based on the specified filter, offset, field selection.
+	 * 
+	 * @return A ResultSet object with the records of the data file.
+	 * 
+	 * @throws IndexOutOfBoundsException
+	 * @throws NoSuchFieldException
+	 * @throws Exception
+	 */
     public ResultSet retrieve() throws IndexOutOfBoundsException, NoSuchFieldException, Exception {
     	if(fieldNameMap == null || fieldNameMap.isEmpty()){
     		return null;
@@ -285,12 +338,17 @@ public class JLibResultSetImporter {
 	}
 
     /**
+     * Returns a DataRow object with the values defined in the given Set, using the given Templated String and the numericFieldIndeces 
+     * list to determine the exact type of the field in order to cast the value.
+     * 
      * Parses the given Templated String for the field values defined in the given Set, and returns a DataRow with those values.
      * 
-     * @param entrySet
-     * @param templatedStr
-     * @param numericFieldIndeces
-     * @return
+     * @param entrySet The Entry with the field names and field values.
+     * @param templatedStr The templated String used to retrieve the field type.
+     * @param numericFieldIndeces The list of field indexes which are defined as numeric fields.
+     * 
+     * @return A DataRow object with the key-value pairs of the given Set.
+     * 
      * @throws IndexOutOfBoundsException
      * @throws NoSuchFieldException
      * @throws BBjException
@@ -316,8 +374,8 @@ public class JLibResultSetImporter {
 			value = entry.getValue();
 			
 			if(containsNumericValues){
-				if(numericFieldIndeces.contains(entry.getKey())){
-					type = templatedStr.getFieldType(entry.getKey());
+				if(numericFieldIndeces.contains(key)){
+					type = templatedStr.getFieldType(key);
 					
 					if(type == 'X'){
 						dr.setFieldValue(value, templatedStr.getFloat(key));
@@ -335,6 +393,18 @@ public class JLibResultSetImporter {
 		return dr;
 	}
 
+	/**
+	 * Parses the given Templated String using the given field names(Map) and returns a list of indexes with the field's
+	 * defined as Numeric fields in the templated String.
+	 * 
+	 * @param templatedString The Templated String to parse.
+	 * @param fieldMap The name of the fields
+	 * 
+	 * @return A list with the field indexes which are defined as Numeric fields.
+	 * 
+	 * @throws IndexOutOfBoundsException
+	 * @throws NoSuchFieldException
+	 */
 	private List<Integer> initNumericFieldsIndeces(TemplatedString templatedString, HashMap<Integer, String> fieldMap) throws IndexOutOfBoundsException, NoSuchFieldException {
 		Iterator<Entry<Integer, String>> it = fieldMap.entrySet().iterator();
 		ArrayList<Integer> indexList = new ArrayList<Integer>();
@@ -357,6 +427,15 @@ public class JLibResultSetImporter {
 		return indexList;
 	}
 
+	/**
+	 * Initializes the given ResultSet object's metadata(Column types) based on the defined values of the given Templated String. 
+	 * 
+	 * @param rs The ResultSet whose metadata will be set 
+	 * @param templatedStr The Templated String to parse.
+	 * @param fieldMap The map with the field names of the Templated String
+	 * 
+	 * @throws Exception
+	 */
 	private void initColumnMetadata(ResultSet rs, TemplatedString templatedStr, HashMap<Integer, String> fieldMap) throws Exception {
 		Iterator<Entry<Integer,String>> it = fieldMap.entrySet().iterator();
     	int columnIndex;
@@ -406,6 +485,13 @@ public class JLibResultSetImporter {
     	}
 	}
 
+	/**
+	 * Returns true if the given byte Array is empty, false otherwise.
+	 * 
+	 * @param buffer The byte Array
+	 * 
+	 * @return True if the byte Array is empty, false otherwise.
+	 */
 	private Boolean isRecordEmpty(byte[] buffer) {
     	for(byte b : buffer){
 			if(b != 0){
@@ -418,10 +504,12 @@ public class JLibResultSetImporter {
 	/**
      * Returns a byte Array with the keys from the given FilePosition object as first dimension 
      * and the second dimension a byte Array with the size of the key. The second value will mostly be used
-     * as buffer where to write the key content
+     * as buffer where to write the key content.
      * 
-     * @param pos
-     * @return
+     * @param pos the FilePosition.
+     * 
+     * @return The byte Array with the keys and the key sizes.
+     * 
      * @throws FilesystemException
      */
 	private byte[][] getKeys(FilePosition pos) throws FilesystemException {
@@ -444,10 +532,23 @@ public class JLibResultSetImporter {
 		return keys;
 	}
     
+	/**
+	 * Returns the Templated String.
+	 * 
+	 * @return The Templated String.
+	 */
     public String getTemplatedString() {
 		return this.stringTemplate;
 	}
     
+    /**
+     * Returns a ConnectionMgr object which takes care of the BLM Connection and 
+     * which is used to open files using the JLIB.
+     *
+     * @return The ConnectionMgr object.
+     * 
+     * @throws FilesystemException
+     */
     private ConnectionMgr getConnectionMgr() throws FilesystemException{
         ConnectionMgr connectionMgr = Filesystem.getConnectionMgr();
         connectionMgr.setUser(System.getProperty("user.name"));
@@ -459,26 +560,26 @@ public class JLibResultSetImporter {
         return connectionMgr;
     }
     
-    public static void main(String[] args) throws IndexOutOfBoundsException, NoSuchFieldException, Exception{
-    	JLibResultSetImporter importer = new JLibResultSetImporter();
-    	importer.setFile("C:/bbj/demos/chiledd/data/Customer", "CUST_NUM:C(6):LABEL=CUST_NUM:,FIRST_NAME:C(20):LABEL=FIRST_NAME:,LAST_NAME:C(30):LABEL=Last:,COMPANY:C(30):LABEL=Company:,BILL_ADDR1:C(30):LABEL=BILL_ADDR1:,BILL_ADDR2:C(30):LABEL=BILL_ADDR2:,CITY:C(20):LABEL=CITY:,STATE:C(2):LABEL=STATE:,COUNTRY:C(20):LABEL=COUNTRY:,POST_CODE:C(12):LABEL=POST_CODE:,PHONE:C(15):LABEL=PHONE:,FAX:C(15):LABEL=FAX:,SALESPERSON:C(3):LABEL=SALESPERSON:,SHIP_ZONE:C(2):LABEL=SHIP_ZONE:,SHIP_METHOD:C(5):LABEL=SHIP_METHOD:,CURRENT_BAL:N(12):LABEL=CURRENT_BAL:,OVER_30:N(12):LABEL=OVER_30:,OVER_60:N(12):LABEL=OVER_60:,OVER_90:N(12):LABEL=OVER_90:,OVER_120:N(12):LABEL=OVER_120:,SALES_MTD:N(12):LABEL=SALES_MTD:,SALES_YTD:N(12):LABEL=SALES_YTD:,SALES_LY:N(12):LABEL=SALES_LY:,LAST_PURCH_DATE:N(7):LABEL=LAST_PURCH_DATE:,LAST_PAY_DATE:N(7):LABEL=LAST_PAY_DATE:,CREDIT_CODE:C(2):LABEL=CREDIT_CODE:");
-    	
-    	DataRow selection = new DataRow();
-    	selection.setFieldValue("CUST_NUM", "");
-    	selection.setFieldValue("FIRST_NAME", "");
-    	selection.setFieldValue("LAST_NAME", "");
-    	importer.setFieldSelection(selection);
-    	
-    	//importer.setOffset(10, 10);
-    	
-    	//DataRow filter = new DataRow();
-    	//filter.setFieldValue(JLibResultSetImporter.FILTER_VALUE, "000010");
-    	//filter.setFieldValue(JLibResultSetImporter.FILTER_RANGE_FROM, "000020");
-    	//filter.setFieldValue(JLibResultSetImporter.FILTER_RANGE_TO, "000040");
-    	//importer.setFilter(filter);
-    			
-    	ResultSet set = importer.retrieve();
-    	System.out.println(set.toJson());
-    }
+//    public static void main(String[] args) throws IndexOutOfBoundsException, NoSuchFieldException, Exception{
+//    	JLibResultSetImporter importer = new JLibResultSetImporter();
+//    	importer.setFile("C:/bbj/demos/chiledd/data/Customer", "CUST_NUM:C(6):LABEL=CUST_NUM:,FIRST_NAME:C(20):LABEL=FIRST_NAME:,LAST_NAME:C(30):LABEL=Last:,COMPANY:C(30):LABEL=Company:,BILL_ADDR1:C(30):LABEL=BILL_ADDR1:,BILL_ADDR2:C(30):LABEL=BILL_ADDR2:,CITY:C(20):LABEL=CITY:,STATE:C(2):LABEL=STATE:,COUNTRY:C(20):LABEL=COUNTRY:,POST_CODE:C(12):LABEL=POST_CODE:,PHONE:C(15):LABEL=PHONE:,FAX:C(15):LABEL=FAX:,SALESPERSON:C(3):LABEL=SALESPERSON:,SHIP_ZONE:C(2):LABEL=SHIP_ZONE:,SHIP_METHOD:C(5):LABEL=SHIP_METHOD:,CURRENT_BAL:N(12):LABEL=CURRENT_BAL:,OVER_30:N(12):LABEL=OVER_30:,OVER_60:N(12):LABEL=OVER_60:,OVER_90:N(12):LABEL=OVER_90:,OVER_120:N(12):LABEL=OVER_120:,SALES_MTD:N(12):LABEL=SALES_MTD:,SALES_YTD:N(12):LABEL=SALES_YTD:,SALES_LY:N(12):LABEL=SALES_LY:,LAST_PURCH_DATE:N(7):LABEL=LAST_PURCH_DATE:,LAST_PAY_DATE:N(7):LABEL=LAST_PAY_DATE:,CREDIT_CODE:C(2):LABEL=CREDIT_CODE:");
+//    	
+//    	DataRow selection = new DataRow();
+//    	selection.setFieldValue("CUST_NUM", "");
+//    	selection.setFieldValue("FIRST_NAME", "");
+//    	selection.setFieldValue("LAST_NAME", "");
+//    	importer.setFieldSelection(selection);
+//    	
+//    	//importer.setOffset(10, 10);
+//    	
+//    	//DataRow filter = new DataRow();
+//    	//filter.setFieldValue(JLibResultSetImporter.FILTER_VALUE, "000010");
+//    	//filter.setFieldValue(JLibResultSetImporter.FILTER_RANGE_FROM, "000020");
+//    	//filter.setFieldValue(JLibResultSetImporter.FILTER_RANGE_TO, "000040");
+//    	//importer.setFilter(filter);
+//    			
+//    	ResultSet set = importer.retrieve();
+//    	System.out.println(set.toJson());
+//    }
     
 }
