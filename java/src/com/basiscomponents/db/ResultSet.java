@@ -1949,17 +1949,34 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						g.writeFieldName(c);
 						g.writeStartObject();
 
+						HashMap<String, String> atr = dr.getFieldAttributes(c);
+						
 						Set<String> ks = hm.keySet();
 						Iterator<String> its = ks.iterator();
 						while (its.hasNext()) {
 							String key = its.next();
 							if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
 								continue;
+							
+							if (atr.containsKey(key))
+								continue;
+							
 							String value = null;
 							if (hm.get(key) != null)
 								value = hm.get(key).toString();
 							g.writeStringField(key, value);
 						}
+						
+						if (!atr.isEmpty()){
+	
+							Iterator<String> itks = atr.keySet().iterator();
+							while (itks.hasNext()){
+								String itk = itks.next();
+								g.writeStringField(itk,atr.get(itk));
+							}
+
+						}
+						
 						g.writeEndObject();
 					}
 				}
@@ -1972,9 +1989,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				{
 					BBArrayList<String> fields = dr.getFieldNames();
 					itf = fields.iterator();
-					
+					boolean m_written = false;					
 					while (itf.hasNext()){
-						boolean m_written = false;
+
 						String fieldname = itf.next();
 						HashMap<String, String> l = dr.getFieldAttributes(fieldname);
 						if (!l.isEmpty()){
@@ -1992,11 +2009,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							}
 							g.writeEndObject();
 						}
-						if (m_written)
-							g.writeEndObject();
-					}
+
 					
 				}
+					if (m_written)
+						g.writeEndObject();
+				}					
 			}
 
 			g.writeEndObject();
