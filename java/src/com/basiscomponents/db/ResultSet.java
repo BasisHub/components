@@ -1934,7 +1934,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 			} // while on fields
 
-			if (!meta_done) {
+			if (f_meta){
+				if (!meta_done) {
 
 				g.writeFieldName("meta");
 
@@ -1966,6 +1967,36 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				g.writeEndObject();
 
 				meta_done = true;
+				}
+				else
+				{
+					BBArrayList<String> fields = dr.getFieldNames();
+					itf = fields.iterator();
+					
+					while (itf.hasNext()){
+						boolean m_written = false;
+						String fieldname = itf.next();
+						HashMap<String, String> l = dr.getFieldAttributes(fieldname);
+						if (!l.isEmpty()){
+							if (!m_written){
+								g.writeFieldName("meta");
+								g.writeStartObject();
+								m_written=true;
+							}
+							g.writeFieldName(fieldname);
+							g.writeStartObject();
+							Iterator<String> itks = l.keySet().iterator();
+							while (itks.hasNext()){
+								String itk = itks.next();
+								g.writeStringField(itk,l.get(itk));
+							}
+							g.writeEndObject();
+						}
+						if (m_written)
+							g.writeEndObject();
+					}
+					
+				}
 			}
 
 			g.writeEndObject();
