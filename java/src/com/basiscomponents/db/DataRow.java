@@ -256,9 +256,10 @@ public class DataRow implements java.io.Serializable {
 	public void setFieldValue(String name, int type, Object value) throws Exception {
 		DataField field = null;
 
-		String c = value.getClass().getCanonicalName();
+		String c = "";
+		if (value != null) c = value.getClass().getCanonicalName();
 		value = DataField.convertType(value, type);
-		
+
 		if (c.contains("BBjNumber") | c.contains("BBjInt")) {
 			value = Double.parseDouble(value.toString());
 		}
@@ -399,13 +400,19 @@ public class DataRow implements java.io.Serializable {
 		DataField field = getField(fieldName);
 		if (ResultSet == null)
 			throw new Exception("ResultSet does not exist");
-		if (field.getValue() == null)
-			return 0.0;
-
-		Double ret = 0.0;
 
 		int column = this.ResultSet.getColumnIndex(fieldName);
 		int type = this.ResultSet.getColumnType(column);
+
+		if (field.getValue() == null) {
+			if (type == java.sql.Types.DATE || type == java.sql.Types.TIMESTAMP || type == java.sql.Types.TIMESTAMP_WITH_TIMEZONE)
+				return -1d;
+			else
+				return 0.0;
+		}
+
+		Double ret = 0.0;
+
 		// TODO maybe: make this use reflection and skip the field for the
 		// column type, to honor dynamic type changes??
 		switch (type) {
@@ -1781,7 +1788,10 @@ public class DataRow implements java.io.Serializable {
 
 			if(numericTypeCodeList.contains(fieldType)){
 				if(field.getValue()==null) {
-					stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));
+					if (fieldType == java.sql.Types.DATE)
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(-1));
+					else
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));
 				}else{
 					if(fieldType == java.sql.Types.BOOLEAN){
 						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getBoolean()? 1: 0));
