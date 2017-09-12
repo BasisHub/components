@@ -257,8 +257,9 @@ public class DataRow implements java.io.Serializable {
 		DataField field = null;
 
 		String c = "";
-		if (value != null) c = value.getClass().getCanonicalName();
+
 		value = DataField.convertType(value, type);
+		if (value != null) c = value.getClass().getCanonicalName();
 
 		if (c.contains("BBjNumber") | c.contains("BBjInt")) {
 			value = Double.parseDouble(value.toString());

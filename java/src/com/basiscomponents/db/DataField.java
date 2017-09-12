@@ -549,6 +549,14 @@ public class DataField implements java.io.Serializable {
 		case java.sql.Types.DATE:
 			if (classname.equals("java.sql.Date"))
 				return o;
+			if (classname.contains("com.basis.util.common.BasisNumber") || classname.contains("com.basis.util.common.BBjNumber")) {
+				com.basis.util.common.BasisNumber val = com.basis.util.common.BasisNumber.getBasisNumber((com.basis.util.common.BBjNumber)o);
+				java.util.Date d = com.basis.util.BasisDate.date(val.intValueExact());
+				if (d != null)
+					return new java.sql.Date(d.getTime());
+				else
+					return null;
+			}
 			if (classname.equals("java.lang.Integer")) {
 				java.util.Date d = com.basis.util.BasisDate.date((Integer)o);
 				if (d != null)
