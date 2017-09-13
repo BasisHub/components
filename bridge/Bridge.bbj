@@ -369,6 +369,7 @@ class public Bridge
         declare BBjHttpRequest http_req!
         http_req! = p_event!.getHttpRequest()
         http_resp! = p_event!.getHttpResponse()
+        http_resp!.setContentType("application/json")
 
         declare auto BBjVector files!
         files! = http_req!.getFileUploads()
