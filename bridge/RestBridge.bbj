@@ -125,6 +125,7 @@ class public RestBridge
         req!.put("uri",uri!)
         req!.put("params",params!)
         req!.put("body",request!.getBody(err=*next))
+        req!.put("preferredlocales",request!.getLocales())
 
         answer!=#invoke(ses$,req!)
         ses_list!.push(ses$)
