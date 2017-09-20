@@ -1,11 +1,13 @@
 package com.basiscomponents.bc;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -547,30 +549,45 @@ public class SqlTableBC implements BusinessComponent {
 			Integer type = dr.getFieldType(field);
 			DataField o = dr.getField(field);
 			switch (type) {
-				case 4:
-					prep.setInt(index, o.getInt());
+				case Types.NUMERIC:
+					if (DBType.equals("BASIS DBMS") && o.getValue() == null)
+						prep.setBigDecimal(index, new BigDecimal(0));
+					else
+						prep.setBigDecimal(index, o.getBigDecimal());
 					break;
-				case java.sql.Types.DOUBLE:
+				case Types.INTEGER:
+					if (DBType.equals("BASIS DBMS") && o.getValue() == null)
+						prep.setInt(index, 0);
+					else
+						prep.setInt(index, o.getInt());
+					break;
+				case Types.DOUBLE:
 					prep.setDouble(index, o.getDouble());
 					break;
-				case -1:
-				case 1:
-				case 12:
-					prep.setString(index, o.getString());
+				case Types.LONGNVARCHAR:
+				case Types.CHAR:
+				case Types.VARCHAR:
+					if (DBType.equals("BASIS DBMS") && o.getValue() == null)
+						prep.setString(index, "");
+					else
+						prep.setString(index, o.getString());
 					break;
-				case java.sql.Types.BIT:
-				case java.sql.Types.BOOLEAN:
+				case Types.BIT:
+				case Types.BOOLEAN:
 					prep.setBoolean(index, o.getBoolean());
 					break;
-				case java.sql.Types.DATE:
+				case Types.DATE:
 					prep.setDate(index, o.getDate());
 					break;
-				case java.sql.Types.TIMESTAMP:
+				case Types.TIMESTAMP:
 					prep.setTimestamp(index, o.getTimestamp());
 					break;
-				case 1111:
+				case Types.OTHER:
 					///this is an auto-generated key. set as string and hope for the best
-					prep.setString(index, o.getString());
+					if (DBType.equals("BASIS DBMS") && o.getValue() == null)
+						prep.setString(index, "");
+					else
+						prep.setString(index, o.getString());
 					break;
 				default:
 					System.err.println("WARNING: using prep.setObject(object) will fail if there is no equivalent SQL type for the given object");

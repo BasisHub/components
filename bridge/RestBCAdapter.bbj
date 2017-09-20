@@ -70,6 +70,11 @@ main_loop:
         throw "Missing BC",12
     endif
 
+    vec! = request!.get("preferredlocales")
+    if vec! <> null() and vec!.size() then
+        void$ = stbl("!LOCALE",vec!.getItem(0).getLanguage())
+    endif
+
     uri$=request!.get("uri")
     uri$=uri$(2)
     if pos("/"=uri$)>0

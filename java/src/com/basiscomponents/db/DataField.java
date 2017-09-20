@@ -214,8 +214,8 @@ public class DataField implements java.io.Serializable {
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
 			return new Float((Double)this.Value);
-		}		
-	
+		}
+
 		return (Float) this.Value;
 	}
 
@@ -225,27 +225,30 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.sql.Date</code> object.
 	 */
 	public Date getDate() {
-		
 		if (this.Value != null){
 			if (getClassName() == "java.sql.Timestamp") {
 				long ms = ((java.sql.Timestamp) this.Value).getTime();
 				return new java.sql.Date(ms);
 			}
 			if (getClassName() == "java.lang.Integer") {
-				
 				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date((Integer)this.Value);
-				return new java.sql.Date(d.getTime());
+				if (d != null)
+					return new java.sql.Date(d.getTime());
+				else
+					return null;
 			}
 			if (getClassName() == "java.lang.Double") {
-				
 				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date(((Double)this.Value).intValue());
-				return new java.sql.Date(d.getTime());
+				if (d != null)
+					return new java.sql.Date(d.getTime());
+				else
+					return null;
 			}
 			if (getClassName() == "java.lang.String") {
 				String s = (String)this.Value;
-				if (s.isEmpty())
+				if (s.isEmpty() || s.equals("-1"))
 					return null;
-			}				
+			}
 		}
 		return (Date) this.Value;
 	}
@@ -520,7 +523,7 @@ public class DataField implements java.io.Serializable {
 			if (tmpstr.isEmpty())
 				tmpstr = "0";
 			return (Integer.parseInt(tmpstr));
-		
+
 		case java.sql.Types.DECIMAL:
 			if (classname.equals("java.lang.Double"))
 				return new BigDecimal((double) o);
@@ -529,7 +532,7 @@ public class DataField implements java.io.Serializable {
 			if (tmpstr.isEmpty())
 				tmpstr = "0";
 			return new BigDecimal(tmpstr);
-		
+
 		case java.sql.Types.REAL:
 		case java.sql.Types.DOUBLE:
 			if (classname.equals("java.lang.Double"))
@@ -538,7 +541,7 @@ public class DataField implements java.io.Serializable {
 				return (Boolean)o ? 1.0:0.0;
 			if (tmpstr.isEmpty())
 				tmpstr = "0.0";
-			return (Double.parseDouble(tmpstr));			
+			return (Double.parseDouble(tmpstr));
 		case java.sql.Types.NUMERIC:
 			if (tmpstr.isEmpty())
 				tmpstr = "0.0";
@@ -546,10 +549,28 @@ public class DataField implements java.io.Serializable {
 		case java.sql.Types.DATE:
 			if (classname.equals("java.sql.Date"))
 				return o;
-			if (classname.equals("java.lang.Integer"))
-				return new java.sql.Date(com.basis.util.BasisDate.date((Integer)o).getTime());
-			if (classname.equals("java.lang.Double"))
-				return new java.sql.Date(com.basis.util.BasisDate.date(((Double)o).intValue()).getTime());
+			if (classname.contains("com.basis.util.common.BasisNumber") || classname.contains("com.basis.util.common.BBjNumber")) {
+				com.basis.util.common.BasisNumber val = com.basis.util.common.BasisNumber.getBasisNumber((com.basis.util.common.BBjNumber)o);
+				java.util.Date d = com.basis.util.BasisDate.date(val.intValueExact());
+				if (d != null)
+					return new java.sql.Date(d.getTime());
+				else
+					return null;
+			}
+			if (classname.equals("java.lang.Integer")) {
+				java.util.Date d = com.basis.util.BasisDate.date((Integer)o);
+				if (d != null)
+					return new java.sql.Date(d.getTime());
+				else
+					return null;
+			}
+			if (classname.equals("java.lang.Double")) {
+				java.util.Date d = com.basis.util.BasisDate.date(((Double)o).intValue());
+				if (d != null)
+					return new java.sql.Date(d.getTime());
+				else
+					return null;
+			}
 			if (classname.equals("java.lang.String"))
 				if (tmpstr.isEmpty())
 					return null;
@@ -595,7 +616,7 @@ public class DataField implements java.io.Serializable {
 		}else{
 			System.out.println("warning: unclear type conversion for type " + targetType + " and class "+ classname);
 		}
-		
+
 		return o;
 	}
 

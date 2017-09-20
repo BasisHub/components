@@ -256,9 +256,11 @@ public class DataRow implements java.io.Serializable {
 	public void setFieldValue(String name, int type, Object value) throws Exception {
 		DataField field = null;
 
-		String c = value.getClass().getCanonicalName();
+		String c = "";
+
 		value = DataField.convertType(value, type);
-		
+		if (value != null) c = value.getClass().getCanonicalName();
+
 		if (c.contains("BBjNumber") | c.contains("BBjInt")) {
 			value = Double.parseDouble(value.toString());
 		}
@@ -399,13 +401,19 @@ public class DataRow implements java.io.Serializable {
 		DataField field = getField(fieldName);
 		if (ResultSet == null)
 			throw new Exception("ResultSet does not exist");
-		if (field.getValue() == null)
-			return 0.0;
-
-		Double ret = 0.0;
 
 		int column = this.ResultSet.getColumnIndex(fieldName);
 		int type = this.ResultSet.getColumnType(column);
+
+		if (field.getValue() == null) {
+			if (type == java.sql.Types.DATE || type == java.sql.Types.TIMESTAMP || type == java.sql.Types.TIMESTAMP_WITH_TIMEZONE)
+				return -1d;
+			else
+				return 0.0;
+		}
+
+		Double ret = 0.0;
+
 		// TODO maybe: make this use reflection and skip the field for the
 		// column type, to honor dynamic type changes??
 		switch (type) {
@@ -1615,7 +1623,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow with the fields where the attribute with the given name is defined.
 	 */
 	public DataRow getFieldsHavingAttribute(String attributeName){
-		return getFieldsHavingAttribute(attributeName, false, this);
+		return getFieldsHavingAttribute(attributeName, false, null);
 	}
 
 	/**
@@ -1633,9 +1641,9 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow with the fields where the attribute with the given name is defined.
 	 */
 	public DataRow getFieldsHavingAttribute(String attributeName, boolean includeEmptyValues){
-		return getFieldsHavingAttribute(attributeName, includeEmptyValues, this);
+		return getFieldsHavingAttribute(attributeName, includeEmptyValues, null);
 	}
-	
+
 	/**
 	 * Returns all fields of this DataRow object being defined in the given DataRow object and also having the given attribute name set.
 	 * The given boolean value defines whether to include the fields where the attribute is defined but the attribute value
@@ -1654,31 +1662,81 @@ public class DataRow implements java.io.Serializable {
 	public DataRow getFieldsHavingAttribute(String attributeName, boolean includeEmptyValues, DataRow dr){
 		DataRow dataRow = new DataRow();
 
-		Entry<String,Object> entry;
 		DataField fieldValue;
 
-		Iterator<Entry<String, Object>> it = dr.getObjects().entrySet().iterator();
+		if (dr == null) dr = this;
+		Iterator<String> it = dr.getFieldNames().iterator();
 		while(it.hasNext()){
-			entry = it.next();
-			fieldValue = (DataField) entry.getValue();
+			String fieldName = it.next();
+			if(!this.contains(fieldName)) continue;
+
+			try {
+				fieldValue = this.getField(fieldName);
+			} catch (Exception e) {
+				continue;
+			}
 
 			if(fieldValue.getAttributes().containsKey(attributeName)){
-				// Checking that the current DataRow also contains the field name
-				if(this.contains(entry.getKey())){
-					if(!includeEmptyValues){
-						if(fieldValue.getAttribute(attributeName) == null || fieldValue.getAttribute(attributeName).isEmpty()){
-							continue;
-						}
+				if(!includeEmptyValues){
+					if(fieldValue.getAttribute(attributeName) == null || fieldValue.getAttribute(attributeName).isEmpty()){
+						continue;
 					}
-
-					dataRow.setFieldValue(entry.getKey(), fieldValue.clone());
 				}
+
+				dataRow.setFieldValue(fieldName, fieldValue.clone());
 			}
 		}
 
 		return dataRow;
 	}
-	
+
+	/**
+	 * Returns all fields of this DataRow, having the specified attribute name and attribute value.
+	 *
+	 * @param attributeName The name of the attribute.
+	 * @param attributeValue The value of the attribute.
+	 *
+	 * @return The DataRow with the fields where the attribute with the given name and value is defined.
+	 */
+	public DataRow getFieldsHavingAttributeValue(String attributeName, String attributeValue){
+		return getFieldsHavingAttributeValue(attributeName, attributeValue, null);
+	}
+
+	/**
+	 * Returns all fields of this DataRow, having the specified attribute name and attribute value.
+	 *
+	 * @param attributeName The name of the attribute.
+	 * @param attributeValue The value of the attribute.
+	 * @param dr The DataRow object's whose fields will be iterated over.
+	 *
+	 * @return The DataRow with the fields where the attribute with the given name and value is defined.
+	 */
+	public DataRow getFieldsHavingAttributeValue(String attributeName, String attributeValue, DataRow dr){
+		DataRow dataRow = new DataRow();
+
+		DataField fieldValue;
+
+		if(dr == null) dr = this;
+		Iterator<String> it = dr.getFieldNames().iterator();
+		while(it.hasNext()){
+			String fieldName = it.next();
+			if(!this.contains(fieldName)) continue;
+
+			try {
+				fieldValue = this.getField(fieldName);
+			} catch (Exception e) {
+				continue;
+			}
+
+			String value = fieldValue.getAttribute(attributeName);
+			if(value != null && value.equals(attributeValue)){
+				dataRow.setFieldValue(fieldName, fieldValue.clone());
+			}
+		}
+
+		return dataRow;
+	}
+
 	/**
 	 * Returns a BBj String Template based on the values defined in this DataRow
 	 * 
@@ -1788,7 +1846,10 @@ public class DataRow implements java.io.Serializable {
 
 			if(numericTypeCodeList.contains(fieldType)){
 				if(field.getValue()==null) {
-					stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));
+					if (fieldType == java.sql.Types.DATE)
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(-1));
+					else
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));
 				}else{
 					if(fieldType == java.sql.Types.BOOLEAN){
 						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getBoolean()? 1: 0));
