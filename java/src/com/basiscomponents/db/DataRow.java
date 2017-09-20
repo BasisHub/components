@@ -1309,7 +1309,14 @@ public class DataRow implements java.io.Serializable {
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
 				if (!ar.contains(fieldName)  && !fieldName.equals("meta")){
 					
-					String s = (String)fieldMeta.get("ColumnType");
+					String s = "12";
+
+					if (fieldMeta == null){
+						fieldMeta = new HashMap<>();
+					}
+						
+					if (fieldMeta.get("ColumnType")!=null)
+						s = (String)fieldMeta.get("ColumnType");
 					if (s!=null){
 						
 						ar.addDataField(fieldName, Integer.parseInt(s), new DataField(null));
