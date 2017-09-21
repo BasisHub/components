@@ -1949,7 +1949,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						g.writeFieldName(c);
 						g.writeStartObject();
 
-						HashMap<String, String> atr = dr.getFieldAttributes(c);
+						HashMap<String, String> atr;
+						try {
+							atr = dr.getFieldAttributes(c);
+						} catch (Exception e) {
+							atr = null;
+						}
 						
 						Set<String> ks = hm.keySet();
 						Iterator<String> its = ks.iterator();
@@ -1958,7 +1963,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
 								continue;
 							
-							if (atr.containsKey(key))
+							if (atr != null && atr.containsKey(key))
 								continue;
 							
 							String value = null;
@@ -1967,7 +1972,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							g.writeStringField(key, value);
 						}
 						
-						if (!atr.isEmpty()){
+						if (atr != null && !atr.isEmpty()){
 	
 							Iterator<String> itks = atr.keySet().iterator();
 							while (itks.hasNext()){
