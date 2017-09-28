@@ -15,18 +15,22 @@ public class Node {
 	    private DataRow rowData = new DataRow();
 
 		public Node(String text) {
-	        this.rowData.setFieldValue("__node__name", text);
+	        try {
+				this.rowData.setFieldValue("__node__name", text);
+			} catch (Exception e) {}
 	    }
 
 	    public Node(String text, Node parent) {
-	    	this.rowData.setFieldValue("__node__name", text);
+	    	try {
+				this.rowData.setFieldValue("__node__name", text);
+			} catch (Exception e) {}
 	        this.parent = parent;
 	    }
 
 	    public List<Node> getChildren() {
 	        return children;
 	    }
-	    
+
 	    public ResultSet getResultSet() {
 	        return resultset;
 	    }
@@ -34,7 +38,7 @@ public class Node {
 	    public void setParent(Node n){
 	    	this.parent = n;
 	    }
-	    
+
 	    public Node addChild(String text) {
 	        Node child = new Node(text);
 	        child.setParent(this);
@@ -52,9 +56,11 @@ public class Node {
 		}
 
 		public void setText(String text) {
-			this.rowData.setFieldValue("__node__name", text);
+			try {
+				this.rowData.setFieldValue("__node__name", text);
+			} catch (Exception e) {}
 		}
-	    
+
 	    public boolean isRoot() {
 	        return (this.parent == null);
 	    }
@@ -69,12 +75,12 @@ public class Node {
 	    public void removeParent() {
 	        this.parent = null;
 	    }
-	    
+
 	    public void setResultSet(ResultSet rs){
 	    	if (rs != null)
 	    		this.resultset = rs;
 	    }
-	    
+
 	    public void add(DataRow rec){
 	    	if (rec != null)
 	    		this.resultset.add(rec);
@@ -88,9 +94,8 @@ public class Node {
 			return this.rowData;
 		}
 
-		public void setFieldValue(String string, Object value) {
+		public void setFieldValue(String string, Object value) throws Exception {
 			this.rowData.setFieldValue(string, value);
-			
 		}
 
 		public boolean hasResultSet() {

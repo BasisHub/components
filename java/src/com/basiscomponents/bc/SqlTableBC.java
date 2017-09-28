@@ -175,7 +175,9 @@ public class SqlTableBC implements BusinessComponent {
 		else {
 			DataRow fields = new DataRow();
 			for (String field : FieldSelection) {
-				fields.setFieldValue(field, "");
+				try {
+					fields.setFieldValue(field, "");
+				} catch (Exception e) {}
 			}
 			this.FieldSelection = fields;
 		}

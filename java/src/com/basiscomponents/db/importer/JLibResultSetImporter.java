@@ -356,40 +356,41 @@ public class JLibResultSetImporter {
 	private DataRow getDataRowFromRecord(Set<Entry<Integer,String>> entrySet, TemplatedString templatedStr, List<Integer> numericFieldIndeces) throws IndexOutOfBoundsException, NoSuchFieldException, BBjException {
 		Iterator<Entry<Integer,String>> it = entrySet.iterator();
 		Entry<Integer, String> entry;
-		
+
 		DataRow dr = new DataRow();
-		
+
 		boolean containsNumericValues = false;
 		if(numericFieldIndeces != null && !numericFieldIndeces.isEmpty()){
 			containsNumericValues = true;
 		}
-		
+
 		byte type;
 		int key;
 		String value;
-		
+
 		while(it.hasNext()){
 			entry = it.next();
 			key = entry.getKey();
 			value = entry.getValue();
-			
-			if(containsNumericValues){
-				if(numericFieldIndeces.contains(key)){
-					type = templatedStr.getFieldType(key);
-					
-					if(type == 'X'){
-						dr.setFieldValue(value, templatedStr.getFloat(key));
+			try {
+				if(containsNumericValues){
+					if(numericFieldIndeces.contains(key)){
+						type = templatedStr.getFieldType(key);
+
+						if(type == 'X'){
+							dr.setFieldValue(value, templatedStr.getFloat(key));
+						}else{
+							dr.setFieldValue(value, templatedStr.getDouble(key));
+						}
 					}else{
-						dr.setFieldValue(value, templatedStr.getDouble(key));
+						dr.setFieldValue(value, templatedStr.getFieldAsString(key).toString());
 					}
 				}else{
 					dr.setFieldValue(value, templatedStr.getFieldAsString(key).toString());
 				}
-			}else{
-				dr.setFieldValue(value, templatedStr.getFieldAsString(key).toString());
-			}
+			}catch (Exception e) {}
 		}
-		
+
 		return dr;
 	}
 
