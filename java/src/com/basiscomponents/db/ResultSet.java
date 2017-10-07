@@ -89,7 +89,17 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return new ResultSet(MetaData, ColumnNames, DataRows, KeyColumns);
 	}
 
+	
+	/**
+	 * re-orders a result set according to an ORDER BY clause like in SQL ORDER BY:
+	 * e.g. (ORDER BY) NAME, FIRST_NAME DESC, ZIP  
+	 * NOTE: DESC and other scalar functions not yet implemented!
+	 * @param orderByClause: order by clause 
+	 * @return the ordered result set
+	 * @throws Exception
+	 */
 	public ResultSet orderBy(String orderByClause) throws Exception {
+		
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 
 		String[] fields = orderByClause.split(",");
@@ -104,12 +114,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 		Iterator<DataRow> it = this.iterator();
 		TreeMap<String, DataRow> tm = new TreeMap<>();
+		int row_id=0;
 		while (it.hasNext()) {
 			DataRow dr = it.next();
 			String idx = "";
 			for (int i = 0; i < fields.length; i++) {
 				idx += dr.getFieldAsString(fields[i]);
 			}
+			idx += "_"+row_id;
+			row_id++;
 			tm.put(idx, dr);
 		}
 
