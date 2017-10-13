@@ -92,48 +92,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	
 	/**
 	 * re-orders a result set according to an ORDER BY clause like in SQL ORDER BY:
-	 * e.g. (ORDER BY) NAME, FIRST_NAME DESC, ZIP  
-	 * NOTE: DESC and other scalar functions not yet implemented!
+	 * e.g. (ORDER BY) NAME, FIRST_NAME DESC, ZIP
+	 * NOTE: Only ASC and DESC are allowed!
 	 * @param orderByClause: order by clause 
 	 * @return the ordered result set
 	 * @throws Exception
 	 */
 	public ResultSet orderBy(String orderByClause) throws Exception {
-		
-		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
-
-		String[] fields = orderByClause.split(",");
-		for (int i = 0; i < fields.length; i++) {
-			fields[i] = fields[i].trim();
-			if (fields[i].contains(" ")) {
-				fields[i] = fields[i].substring(0, fields[i].indexOf(' '));
-				// TODO implement DESCending and ASCending predicates, maybe
-				// UCASE() etc., like in an SQL ORDER BY clause
-			}
-		}
-
-		Iterator<DataRow> it = this.iterator();
-		TreeMap<String, DataRow> tm = new TreeMap<>();
-		int row_id=0;
-		while (it.hasNext()) {
-			DataRow dr = it.next();
-			String idx = "";
-			for (int i = 0; i < fields.length; i++) {
-				idx += dr.getFieldAsString(fields[i]);
-			}
-			idx += "_"+row_id;
-			row_id++;
-			tm.put(idx, dr);
-		}
-
-		Iterator<String> it2 = tm.keySet().iterator();
-		while (it2.hasNext()) {
-			String k = it2.next();
-			DataRow dr = tm.get(k);
-			r.add(dr);
-		}
-
-		return r;
+		ResultSet rs = this.clone();
+		rs.orderByColumn(new DataRowMultifieldComparator(orderByClause));
+		return rs;
 	}
 
 	/**
@@ -156,7 +124,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
-	 * Re-order the ResultSet using the given Comparator object. 
+	 * Re-order the ResultSet using the given Comparator object.
 	 * 
 	 * @param comparator The comparator used to re-order the ResultSet.
 	 */
@@ -1793,19 +1761,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
-	@SuppressWarnings("deprecation")
 	public String toJson(Boolean f_meta) throws Exception {
 
 		JsonFactory jf = new JsonFactory();
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
 		StringWriter w = new StringWriter();
-		JsonGenerator g = jf.createJsonGenerator(w);
+		JsonGenerator g = jf.createGenerator(w);
 		// g.useDefaultPrettyPrinter();
 
 		g.writeStartArray();
 
 		Boolean meta_done = !f_meta;
-		
+
 		Iterator<DataRow> it = this.DataRows.iterator();
 		while (it.hasNext()) {
 			DataRow dr = it.next();
@@ -2117,7 +2084,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		com.google.gson.JsonArray o = new com.google.gson.JsonArray();
 		try {
 			o = parser.parse(js).getAsJsonArray();
-
 		} catch (Exception e) {
 			// Auto-generated catch block
 			e.printStackTrace();
@@ -2130,7 +2096,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				meta = el.getAsJsonObject().getAsJsonObject("meta");
 			if (meta == null) 
 				System.err.println("error parsing - meta data missing");
-			
+
 			DataRow r = null;
 			try {
 				//System.out.println(el.toString());
@@ -3340,5 +3306,22 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 
 		System.out.println("-------------------ResultSet End-------------------------");
+	}
+
+	public static void main(String[] args) throws Exception {
+//		Class.forName("com.basis.jdbc.BasisDriver");
+//		java.sql.Connection con = java.sql.DriverManager.getConnection("jdbc:basis:localhost?database=ChileCompany&user=admin&password=admin123");
+//		java.sql.PreparedStatement st = con.prepareStatement("INSERT INTO CUSTOMER(CUST_NUM,FIRST_NAME,LAST_NAME,COMPANY,CITY,COUNTRY) VALUES(SEQ_CUSTNUM.NEXTVAL,?,?,?,?,?)",new String[]{"CUST_NUM","FIRST_NAME","LAST_NAME","COMPANY","CITY","COUNTRY"});
+//		st.setString(1, "Veselin");
+//		st.setString(2, "Kolarov");
+//		st.setString(3, "BASIS Europe");
+//		st.setString(4, "Saarbr?cken");
+//		st.setString(5, "DE");
+//		st.executeUpdate();
+//		java.sql.ResultSet r = st.getGeneratedKeys();
+//		if (r.next()) {
+//			System.out.println(r.getObject(1));
+//			System.out.println(r.getObject(1).getClass());
+//		} else System.out.println("NO KEYS");
 	}
 }
