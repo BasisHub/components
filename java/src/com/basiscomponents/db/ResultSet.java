@@ -3307,21 +3307,4 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 		System.out.println("-------------------ResultSet End-------------------------");
 	}
-
-	public static void main(String[] args) throws Exception {
-//		Class.forName("com.basis.jdbc.BasisDriver");
-//		java.sql.Connection con = java.sql.DriverManager.getConnection("jdbc:basis:localhost?database=ChileCompany&user=admin&password=admin123");
-//		java.sql.PreparedStatement st = con.prepareStatement("INSERT INTO CUSTOMER(CUST_NUM,FIRST_NAME,LAST_NAME,COMPANY,CITY,COUNTRY) VALUES(SEQ_CUSTNUM.NEXTVAL,?,?,?,?,?)",new String[]{"CUST_NUM","FIRST_NAME","LAST_NAME","COMPANY","CITY","COUNTRY"});
-//		st.setString(1, "Veselin");
-//		st.setString(2, "Kolarov");
-//		st.setString(3, "BASIS Europe");
-//		st.setString(4, "Saarbr?cken");
-//		st.setString(5, "DE");
-//		st.executeUpdate();
-//		java.sql.ResultSet r = st.getGeneratedKeys();
-//		if (r.next()) {
-//			System.out.println(r.getObject(1));
-//			System.out.println(r.getObject(1).getClass());
-//		} else System.out.println("NO KEYS");
-	}
 }
