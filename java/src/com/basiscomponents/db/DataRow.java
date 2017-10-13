@@ -1350,9 +1350,12 @@ public class DataRow implements java.io.Serializable {
 
 				@SuppressWarnings({ "rawtypes", "unchecked" })
 				Object fieldObj = hm.get(fieldName);
-				if (fieldObj == null)
-					continue;
 				int fieldType = ar.getFieldType(fieldName);
+				if (fieldObj == null) {
+					dr.addDataField(fieldName, fieldType, new DataField(null));
+					dr.setFieldAttributes(fieldName, ar.getFieldAttributes(fieldName));
+					continue;
+				}
 				switch (fieldType) {
 				case java.sql.Types.CHAR:
 				case java.sql.Types.VARCHAR:
