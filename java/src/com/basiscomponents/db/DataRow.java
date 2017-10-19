@@ -647,7 +647,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception
 	 */
-	public int getColumnCount() throws Exception {
+	public int getColumnCount() {
 		return this.ResultSet.getColumnCount();
 	}
 

@@ -28,6 +28,7 @@ public class SqlTableBC implements BusinessComponent {
 	private ArrayList<String> PrimaryKeys;
 	private ArrayList<String> AutoIncrementKeys;
 	private DataRow AttributesRecord;
+	private DataRow MetaData;
 	private Connection Conn;
 	private String retrieveSql;
 	private HashMap<String,String> mapping = new HashMap<String,String>();
@@ -37,6 +38,8 @@ public class SqlTableBC implements BusinessComponent {
 
 	private String DBType;
 	private String DBQuoteString = "";
+
+	private Boolean truncateFieldValues = false;
 
 
 	public SqlTableBC(String Url) {
@@ -83,6 +86,7 @@ public class SqlTableBC implements BusinessComponent {
 			DatabaseMetaData meta = conn.getMetaData();
 			DBType = meta.getDatabaseProductName().toUpperCase();
 			DBQuoteString = meta.getIdentifierQuoteString();
+			MetaData = new DataRow();
 			java.sql.ResultSet rs = meta.getPrimaryKeys(null, null, Table);
 
 			while (rs.next()) {
@@ -91,12 +95,25 @@ public class SqlTableBC implements BusinessComponent {
 			}
 
 			rs = meta.getColumns(null, null, Table, null);
-			if (rs.getMetaData().getColumnCount() > 22) { //IS_AUTOINCREMENT=23 (BBj doesn't support the IS_AUTOINCREMENT property)
-				while (rs.next()) {
+			while (rs.next()) {
+				if (rs.getMetaData().getColumnCount() > 22) { //IS_AUTOINCREMENT=23 (BBj doesn't support the IS_AUTOINCREMENT property)
 					String name = rs.getString("COLUMN_NAME");
 					String autoIncrement = rs.getString("IS_AUTOINCREMENT");
 					if ("YES".equals(autoIncrement))
 						AutoIncrementKeys.add(name);
+				}
+
+				String columnName = rs.getString("COLUMN_NAME");
+				try {
+					MetaData.setFieldValue(columnName, rs.getInt("DATA_TYPE"), null);
+				} catch (Exception e1) {continue;}
+
+				for (int i=1; i<=rs.getMetaData().getColumnCount(); i++) {
+					if (rs.getString(i) != null) {
+						try {
+							MetaData.setFieldAttribute(columnName, rs.getMetaData().getColumnName(i), rs.getString(i));
+						} catch (Exception e) {}
+					}
 				}
 			}
 
@@ -330,12 +347,57 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
-	public Collection<String> validateWrite(DataRow dr) {
-		return new ArrayList<String>();
+	public ResultSet validateWrite(DataRow dr) {
+		ResultSet rs = new ResultSet();
+
+		if (dr == null || dr.getColumnCount() == 0)
+			return rs;
+
+		for (String fieldName : dr.getFieldNames()) {
+			fieldName = getMapping(fieldName);
+			if (!MetaData.contains(fieldName) || PrimaryKeys.contains(fieldName)) continue;
+
+			try {
+				int type = MetaData.getFieldType(fieldName);
+				if (type==Types.CHAR || type==Types.VARCHAR || type==Types.LONGVARCHAR || type==Types.NCHAR || type==Types.NVARCHAR || type==Types.LONGNVARCHAR || type==Types.CLOB) {
+					String sSize = MetaData.getFieldAttribute(fieldName,"COLUMN_SIZE");
+					if (!"".equals(sSize)) {
+						int size = Integer.parseInt(sSize);
+						if (dr.getFieldAsString(fieldName).length() > size) {
+							String errType = "ERROR";
+							String errMsg = "String is too long for column "+fieldName+".";
+							if (truncateFieldValues) {
+								dr.setFieldValue(fieldName, dr.getFieldAsString(fieldName).substring(0, size));
+								errType = "INFO";
+								errMsg = "\""+fieldName+"\" was truncated to "+size+" characters.";
+							}
+							DataRow de = new DataRow();
+							de.setFieldValue("FIELD_NAME", Types.VARCHAR, fieldName);
+							de.setFieldValue("TYPE", Types.VARCHAR, errType);
+							de.setFieldValue("MESSAGE", Types.VARCHAR, errMsg);
+							rs.add(de);
+						}
+					}
+				}
+			} catch (Exception e1) {continue;}
+		}
+
+		return rs;
 	}
 
 
 	public DataRow write(DataRow r) throws Exception {
+		ResultSet errors = validateWrite(r);
+		if (errors.size() > 0) {
+			StringBuffer errMsg = new StringBuffer();
+			for (int i=0; i<errors.size(); i++) {
+				DataRow dr = errors.get(i);
+				if (dr.getFieldAsString("TYPE").equals("ERROR"))
+					errMsg.append("\n"+dr.getFieldAsString("TYPE")+" on column "+dr.getFieldAsString("FIELD_NAME")+": "+dr.getFieldAsString("MESSAGE"));
+			}
+			if (errMsg.length() > 0) throw new Exception(errMsg.substring(1));
+		}
+
 		Boolean pk_present=false;
 		if (PrimaryKeys != null && PrimaryKeys.size() > 0) {
 			// Use mapped field names to check if r contains the primary key field(s)
@@ -493,12 +555,23 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
-	public Collection<String> validateRemove(DataRow dr) {
-		return new ArrayList<String>();
+	public ResultSet validateRemove(DataRow dr) {
+		return new ResultSet();
 	}
 
 
 	public void remove(DataRow r) throws Exception {
+		ResultSet errors = validateRemove(r);
+		if (errors.size() > 0) {
+			StringBuffer errMsg = new StringBuffer();
+			for (int i=0; i<errors.size(); i++) {
+				DataRow dr = errors.get(i);
+				if (dr.getFieldAsString("TYPE").equals("ERROR"))
+					errMsg.append("\n"+dr.getFieldAsString("TYPE")+" on column "+dr.getFieldAsString("FIELD_NAME")+": "+dr.getFieldAsString("MESSAGE"));
+			}
+			if (errMsg.length() > 0) throw new Exception(errMsg.substring(1));
+		}
+
 		if (PrimaryKeys == null || PrimaryKeys.size() == 0) {
 			throw new Exception("No primary key definition for table \""+Table+"\"");
 		}
@@ -646,5 +719,9 @@ public class SqlTableBC implements BusinessComponent {
 		String dbFieldName = mapping.get(bcFieldName);
 		if (dbFieldName == null) return bcFieldName;
 		return dbFieldName;
+	}
+
+	public void setTruncateFieldValues(boolean truncate) {
+		truncateFieldValues = truncate;
 	}
 }
