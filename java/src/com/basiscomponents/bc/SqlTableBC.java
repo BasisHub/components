@@ -6,7 +6,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +30,7 @@ public class SqlTableBC implements BusinessComponent {
 	private DataRow MetaData;
 	private Connection Conn;
 	private String retrieveSql;
+	private DataRow retrieveParams;
 	private HashMap<String,String> mapping = new HashMap<String,String>();
 
 	private DataRow   Filter;
@@ -118,12 +118,20 @@ public class SqlTableBC implements BusinessComponent {
 			}
 
 			//read attributes (for getAttributesRecord() method)
-			Statement stmt = conn.createStatement();
-			ResultSet ar ;
-			if (retrieveSql != null && !retrieveSql.equals(""))
-				ar = new ResultSet(stmt.executeQuery("SELECT * FROM ("+retrieveSql+") WHERE 1=0"));
-			else
-				ar = new ResultSet(stmt.executeQuery("SELECT * FROM "+DBQuoteString+Table+DBQuoteString+" WHERE 1=0"));
+			PreparedStatement stmt;
+			ResultSet ar;
+			if (retrieveSql != null && !retrieveSql.equals("")) {
+				stmt = conn.prepareStatement("SELECT * FROM ("+retrieveSql+") WHERE 1=0");
+				if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
+					try {
+						setSqlParams(stmt, retrieveParams, null);
+					} catch (Exception e) {}
+				}
+			}
+			else {
+				stmt = conn.prepareStatement("SELECT * FROM "+DBQuoteString+Table+DBQuoteString+" WHERE 1=0");
+			}
+			ar = new ResultSet(stmt.executeQuery());
 			for (String field : ar.getColumnNames()) {
 				HashMap<String, Object> attrmap = ar.getColumnMetaData(field);
 				try {
@@ -158,6 +166,15 @@ public class SqlTableBC implements BusinessComponent {
 
 	public void setRetrieveSql(String sql) {
 		retrieveSql = sql;
+	}
+
+	public void setRetrieveSql(String sql, DataRow retrieveDr) {
+		retrieveSql = sql;
+		retrieveParams = retrieveDr;
+	}
+
+	public void setRetrieveParameters(DataRow retrieveDr) {
+		retrieveParams = retrieveDr;
 	}
 
 	public String getDBQuoteString() {
@@ -313,9 +330,13 @@ public class SqlTableBC implements BusinessComponent {
 
 			PreparedStatement prep = conn.prepareStatement(sql);
 
-			if (Filter != null) {
-				setSqlParams(prep, Filter, Filter.getFieldNames());
-			}
+			DataRow params = new DataRow();
+			if (retrieveParams != null && retrieveParams.getColumnCount() > 0)
+				params = retrieveParams.clone();
+			if (Filter != null && Filter.getColumnCount() > 0)
+				params.mergeRecord(Filter);
+			if (params.getColumnCount() > 0)
+				setSqlParams(prep, params, params.getFieldNames());
 
 			java.sql.ResultSet rs = prep.executeQuery();
 			retrs = new ResultSet();
