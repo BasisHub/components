@@ -295,10 +295,10 @@ main_loop:
                 while it!.hasNext()
                     p$=it!.next()
                     pv$=params!.get(p$)
-                    if (p$="_FULLTEXT")
+                    if (p$="_FULLTEXT" OR P$="_SEARCH")
                         filter!.setFieldValue("%SEARCH",pv$)
                     else
-                        if (p$(1,1)<>"_") then
+                        if (p$(1,1)<>"_" AND ar!.contains(p$)) then
                             filter!.setFieldValue(p$,pv$)
                         fi
                     fi
