@@ -220,7 +220,7 @@ public class SqlTableBC implements BusinessComponent {
 
 	/**
 	 * Get current scope (if scope is set).
-	 * return  String scope  the selected scope.
+	 * @return  scope  the selected scope.
 	 */
 	public String getScope() {
 		return this.Scope;
@@ -237,6 +237,11 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * Get a HashMap with defined scopes (A-Z).
+	 * If no or a wrong scope is set then the default scope will be used.
+	 * @return  scope  a HashMap with scope name as key and field names as ArrayList.
+	 */
 	public HashMap<String,ArrayList<String>> getScopeDef() {
 		return this.Scopes;
 	}
@@ -728,13 +733,16 @@ public class SqlTableBC implements BusinessComponent {
 		return brs;
 	}
 
+
 	public void addMapping(String bcFieldName, String dbFieldName) {
 		mapping.put(bcFieldName, dbFieldName);
 	}
 
+
 	public HashMap<String,String> getMappings() {
 		return new HashMap<String,String>(mapping);
 	}
+
 
 	public String getMapping(String bcFieldName) {
 		String dbFieldName = mapping.get(bcFieldName);
@@ -742,6 +750,13 @@ public class SqlTableBC implements BusinessComponent {
 		return dbFieldName;
 	}
 
+
+	/**
+	 * Set if (<code>String</code>) field values should be automatically truncated, on validation, to the field length defined in the table.<br>
+	 * <b>NOTE</b>: only field, that are not a primary key or a part of the primary key, will be truncated.
+	 * @param  truncate  <code>true</code> all <code>String</code> field values will be truncated in the validateWrite method.<br>
+	 *                   <code>false</code> will not automatically truncate any string fields.
+	 */
 	public void setTruncateFieldValues(boolean truncate) {
 		truncateFieldValues = truncate;
 	}
