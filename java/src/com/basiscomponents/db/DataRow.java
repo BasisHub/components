@@ -16,6 +16,7 @@ import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -1269,6 +1270,8 @@ public class DataRow implements java.io.Serializable {
 
 		if (ar == null)
 			ar = new DataRow();
+		else
+			ar = ar.clone();
 		
 		// convert characters below chr(32) to \\uxxxx notation
 		int i=0;
@@ -1276,7 +1279,6 @@ public class DataRow implements java.io.Serializable {
 			if (in.charAt(i) <31){
 				String hex = String.format("%04x", (int) in.charAt(i));
 				in=in.substring(0,i)+"\\u"+hex+in.substring(i+1);
-				//System.out.println(i+ "-" +hex);
 			}
 			i++;
 		}
@@ -1285,26 +1287,35 @@ public class DataRow implements java.io.Serializable {
 		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
 			in = in.substring(11, in.length() - 1);
 		}
-		if (in.startsWith("{") && in.endsWith("}"))
+		String intmp = in;
+		JsonNode root = new ObjectMapper().readTree(intmp);
+
+		
+		if (in.startsWith("{") && in.endsWith("}")){
 			in = "[" + in + "]";
+		}
 		JsonFactory f = new JsonFactory();
 		@SuppressWarnings("deprecation")
 		JsonParser jp = f.createJsonParser(in);
 		jp.nextToken();
 		ObjectMapper objectMapper = new ObjectMapper();
 		@SuppressWarnings("rawtypes")
+		
 		List navigation = objectMapper.readValue(jp,
 				objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-
+		
+		
+		
+		
 		if (navigation.size()==0)
 			return new DataRow();
+		
 		HashMap<?, ?> hm = (HashMap<?, ?>) navigation.get(0);
-
+		
 		DataRow dr = new DataRow();
 
 		if (hm.containsKey("meta")) {
 			// new format
-
 			@SuppressWarnings("rawtypes")
 			HashMap meta = (HashMap) hm.get("meta");
 			Iterator<?> it = hm.keySet().iterator();
@@ -1339,6 +1350,25 @@ public class DataRow implements java.io.Serializable {
 			}
 		}
 
+		// add all fields to the attributes record that were not part of it before
+		Iterator it2 = hm.keySet().iterator();
+		while (it2.hasNext()){
+			String fieldName = (String) it2.next();
+			if (!ar.contains(fieldName)){
+				switch (root.get(fieldName).getNodeType().toString()){
+				case "STRING":
+					ar.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
+					break;
+				case "NUMBER":
+					ar.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
+					break;
+				case "BOOLEAN":
+					ar.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
+					break;					
+				}
+			}
+		}
+		
 		if (!ar.isEmpty()){
 			BBArrayList<String> names = ar.getFieldNames();
 
@@ -1363,7 +1393,14 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.NCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
+					
+					//got a JSON object - save it as a JSON String
+					if (fieldObj.getClass().equals(java.util.LinkedHashMap.class)) {
+						dr.addDataField(fieldName, fieldType, new DataField(root.get(fieldName).toString()));
+						dr.setFieldAttribute(fieldName, "StringFormat", "JSON");
+					}
+					else
+						dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
 					break;
 
 				case java.sql.Types.BIGINT:
