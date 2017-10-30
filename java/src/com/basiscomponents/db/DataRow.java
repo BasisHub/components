@@ -1356,15 +1356,16 @@ public class DataRow implements java.io.Serializable {
 			String fieldName = (String) it2.next();
 			if (!ar.contains(fieldName)){
 				switch (root.get(fieldName).getNodeType().toString()){
-				case "STRING":
-					ar.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
-					break;
 				case "NUMBER":
 					ar.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
 					break;
 				case "BOOLEAN":
 					ar.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
 					break;					
+				default:
+					ar.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
+					break;
+
 				}
 			}
 		}
