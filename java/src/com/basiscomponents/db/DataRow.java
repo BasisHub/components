@@ -1354,7 +1354,7 @@ public class DataRow implements java.io.Serializable {
 		Iterator it2 = hm.keySet().iterator();
 		while (it2.hasNext()){
 			String fieldName = (String) it2.next();
-			if (!ar.contains(fieldName)){
+			if (!ar.contains(fieldName) && !fieldName.equals("meta")){
 				switch (root.get(fieldName).getNodeType().toString()){
 				case "NUMBER":
 					ar.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
