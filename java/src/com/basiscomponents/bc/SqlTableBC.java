@@ -16,6 +16,21 @@ import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.DataField;
 
+/**
+ * <h1>SqlTableBC represents a table in a database.</h1>
+ * <p>
+ * Data can be read/written from/into the database using a JDBC driver.<br>
+ * {@link #setTable(String)} sets the table, which should be used for reading/writing data.
+ * <p>
+ * SqlTableBC is using {@link DataRow} for a single data row representation and {@link ResultSet} for a set of data rows.
+ * <p>
+ * The developer has to work with DataRow's and ResultSet's only. No SQL knowledge is required.
+ * <p>
+ * SqlTableBC is using the JDBC metadata to determine the table information (such as column names, column types, field lengths, and so on).
+ * 
+ * @author vkolarov
+ *
+ */
 public class SqlTableBC implements BusinessComponent {
 
 	private String Url;
@@ -42,11 +57,27 @@ public class SqlTableBC implements BusinessComponent {
 	private Boolean truncateFieldValues = false;
 
 
+	/**
+	 * Constructor.
+	 * <p>
+	 * Creates a new SqlTableBC object using a database URL.
+	 * @param Url database URL to the database.
+	 */
 	public SqlTableBC(String Url) {
 		this.Url      = Url;
 	}
 
 
+	/**
+	 * Constructor.
+	 * <p>
+	 * Creates a new SqlTableBC object using driver, URL, user and password.
+	 * @param Driver the name/package of the JDBC driver.
+	 * @param Url database URL to the database.
+	 * @param User the name of the database user.
+	 * @param Password the password of the database user.
+	 * @throws ClassNotFoundException thrown if the JDBC driver could not be found.
+	 */
 	public SqlTableBC(String Driver, String Url, String User, String Password) throws ClassNotFoundException {
 		this.Url      = Url;
 		this.User     = User;
@@ -56,6 +87,15 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * Constructor.
+	 * <p>
+	 * Creates a new SqlTableBC object using a database connection.
+	 * <p>
+	 * <b>NOTE</b>: SqlTableBC will not close the connection (after reading or writing).
+	 * @param con the database connection to the database.
+	 * @throws SQLException thrown if the connection status (con.isCloses()) cannot be determined
+	 */
 	public SqlTableBC(Connection con) throws SQLException {
 		if (con != null && !con.isClosed()) {
 			Conn = con;
@@ -63,6 +103,14 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * Returns a database connection.
+	 * <p>
+	 * If {@link #SqlTableBC(Connection con)} was used, the connection passed in the constructor will be returned.<br>
+	 * Otherwise a new connection, using the database URL, will be created.
+	 * @return a {@link java.sql.Connection} to the database.
+	 * @throws SQLException thrown if connection cannot be established.
+	 */
 	private Connection getConnection() throws SQLException {
 		if (Conn != null) return Conn;
 
@@ -73,6 +121,18 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * Sets the name of the table for reading and writing data.
+	 * <p>
+	 * This method reads the JDBC metadata for the table.<br>
+	 * The metadata can be retrieved bye the {@link #getAttributesRecord()} method.
+	 * <p>
+	 * <b>NOTE</b>: if a custom retrieve SQL statement was set, then this will be used for the metadata generation.
+	 * @param Table the table for reading and writing data.
+	 * @see #getAttributesRecord()
+	 * @see #setRetrieveSql(String)
+	 * @see #setRetrieveSql(String, DataRow)
+	 */
 	public void setTable(String Table) {
 		this.Table = Table;
 		this.PrimaryKeys = new ArrayList<>();
@@ -164,44 +224,98 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * Sets a custom retrieve SQL statement.
+	 * <p>
+	 * A custom retrieve SQL statement can be set when a more complex select statement is needed (f.g. to retrieve foreign key values).
+	 * The SQL statement can be a prepared statement. Parameters can be set with {@link #setRetrieveParameters(DataRow)}.
+	 * <p>
+	 * <b>NOTE</b>: if a custom retrieve SQL statement is used, a table name need to be set (using {@link #setTable(String)})
+	 * for writing/removing data from the main table.
+	 * 
+	 * @param sql the custom retrieve SQL statement.
+	 * @see #setRetrieveParameters(DataRow)
+	 */
 	public void setRetrieveSql(String sql) {
 		retrieveSql = sql;
 	}
 
+	/**
+	 * Sets a custom retrieve SQL prepared statement.
+	 * <p>
+	 * A custom retrieve SQL statement can be set when a more complex select statement is needed (f.g. to retrieve foreign key values).<br>
+	 * <p>
+	 * Prepared values (question marks in the SQL statement) can be passed within a DataRow.<br>
+	 * The field count and field type in the DataRow should match the count and the type of the question mark in the prepared select statement.
+	 * <p>
+	 * <b>NOTE</b>: if a custom retrieve SQL statement is used, a table name need to be set (using {@link #setTable(String)})
+	 * for writing/removing data from the main table.
+	 * 
+	 * @param sql the custom retrieve SQL statement.
+	 * @param retrieveDr the data row with values for the prepared statement.
+	 */
 	public void setRetrieveSql(String sql, DataRow retrieveDr) {
 		retrieveSql = sql;
 		retrieveParams = retrieveDr;
 	}
 
+	/**
+	 * Sets prepared parameters when a custom retrieve SQL statement is used.
+	 * 
+	 * @param retrieveDr the data row with values for the prepared statement.
+	 */
 	public void setRetrieveParameters(DataRow retrieveDr) {
 		retrieveParams = retrieveDr;
 	}
 
+	/**
+	 * Get the database specific quote string character.<br>
+	 * <b>NOTE</b>: the quote string character is returned from the JDBC driver and it is determined in the setTable(String) method.
+	 * @return the database specific quote string character.
+	 */
 	public String getDBQuoteString() {
 		return DBQuoteString;
 	}
 
 
+	/**
+	 * Returns a previously set filter. May be null.
+	 * @return a DataRow with filter fields.
+	 * @see #setFilter(DataRow)
+	 */
 	public DataRow getFilter() {
 		return this.Filter;
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setFilter(DataRow filter) {
 		this.Filter = filter;
 	}
 
 
+	/**
+	 * Returns a previously set field selection. May be null.
+	 * @return a DataRow with field names for selection.
+	 */
 	public DataRow getFieldSelection() {
 		return this.FieldSelection;
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setFieldSelection(DataRow FieldSelection) {
 		this.FieldSelection = FieldSelection;
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setFieldSelection(Collection<String> FieldSelection) {
 		if (FieldSelection == null) {
 			this.FieldSelection = null;
@@ -220,7 +334,7 @@ public class SqlTableBC implements BusinessComponent {
 
 	/**
 	 * Get current scope (if scope is set).
-	 * @return  scope  the selected scope.
+	 * @return the selected scope.
 	 */
 	public String getScope() {
 		return this.Scope;
@@ -228,9 +342,7 @@ public class SqlTableBC implements BusinessComponent {
 
 
 	/**
-	 * Set a field selection scope (A-Z).
-	 * If no or a wrong scope is set then the default scope will be used.
-	 * @param  String scope  the scope to set.
+	 * {@inheritDoc}
 	 */
 	public void setScope(String scope) {
 		this.Scope = scope;
@@ -238,25 +350,35 @@ public class SqlTableBC implements BusinessComponent {
 
 
 	/**
-	 * Get a HashMap with defined scopes (A-Z).
-	 * If no or a wrong scope is set then the default scope will be used.
-	 * @return  scope  a HashMap with scope name as key and field names as ArrayList.
+	 * Get a HashMap with all defined scopes (A-Z).
+	 * @return a HashMap with scope name as key and field names as ArrayList.
 	 */
 	public HashMap<String,ArrayList<String>> getScopeDef() {
 		return this.Scopes;
 	}
 
 
+	/**
+	 * Sets the scope definition.<br>
+	 * The scope definition is a HashMap with the scope name as key and an ArrayList with field names as value.
+	 * @param scopes the HashMap with the scope definitions
+	 */
 	public void setScopeDef(HashMap<String,ArrayList<String>> scopes) {
 		this.Scopes = scopes;
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public ResultSet retrieve() throws Exception {
 		return retrieve(-1,-1);
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public ResultSet retrieve(int first, int last) throws Exception {
 		if (first >= 0 && last < first) {
 			throw new Exception("Invalid range: last could not be lower than first!");
@@ -291,10 +413,10 @@ public class SqlTableBC implements BusinessComponent {
 
 			StringBuffer sqlfields = new StringBuffer("");
 			if (fields.contains("*"))
-				sqlfields.append("*");
+				sqlfields.append(DBQuoteString+Table+DBQuoteString+".*");
 			else {
 				for (String field : fields) {
-					sqlfields.append(","+DBQuoteString+field+DBQuoteString);
+					sqlfields.append(","+DBQuoteString+getMapping(field)+DBQuoteString);
 				}
 				sqlfields = new StringBuffer(sqlfields.substring(1));
 			}
@@ -307,7 +429,7 @@ public class SqlTableBC implements BusinessComponent {
 			if (Filter != null && Filter.getFieldNames().size() > 0) {
 				StringBuffer wh = new StringBuffer("");
 				for (String f : Filter.getFieldNames()) {
-					wh.append(" AND "+DBQuoteString+f+DBQuoteString+"=?");
+					wh.append(" AND "+DBQuoteString+getMapping(f)+DBQuoteString+"=?");
 				}
 				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
 			}
@@ -373,6 +495,9 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public ResultSet validateWrite(DataRow dr) {
 		ResultSet rs = new ResultSet();
 
@@ -412,6 +537,9 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public DataRow write(DataRow r) throws Exception {
 		ResultSet errors = validateWrite(r);
 		if (errors.size() > 0) {
@@ -581,11 +709,17 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public ResultSet validateRemove(DataRow dr) {
 		return new ResultSet();
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void remove(DataRow r) throws Exception {
 		ResultSet errors = validateRemove(r);
 		if (errors.size() > 0) {
@@ -626,17 +760,30 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public DataRow getAttributesRecord() {
 		return AttributesRecord.clone();
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public DataRow getNewObjectTemplate(DataRow conditions) {
 		return getAttributesRecord();
 	}
 
 
-	private void setSqlParams(PreparedStatement prep, DataRow dr, ArrayList<String> fields) throws Exception {
+	/**
+	 * Sets values in a prepared statement using a DataRow.
+	 * @param prep the prepared statement.
+	 * @param dr a DataRow containing the values for the prepared statement.
+	 * @param fields an ArrayList with field names. If not null and not empty, this list will be used to get a portion of values from the DataRow dr. Otherwise all fields from dr will be set in the prepared statement.
+	 * @throws SQLException is thrown when a value cannot be set.
+	 */
+	private void setSqlParams(PreparedStatement prep, DataRow dr, ArrayList<String> fields) throws SQLException {
 		if (prep == null || dr == null) {
 			return;
 		}
@@ -647,8 +794,24 @@ public class SqlTableBC implements BusinessComponent {
 
 		int index = 1;
 		for (String field : fields) {
-			Integer type = dr.getFieldType(field);
-			DataField o = dr.getField(field);
+			Integer type;
+			DataField o;
+
+			try {
+				type = dr.getFieldType(field);
+				o = dr.getField(field);
+			} catch (Exception e) {
+				// Should never occur. This loop iterates over the DataRow fields. This ensures that all fields exists in the DataRow.
+				e.printStackTrace();
+				index++;
+				continue;
+			}
+
+			if (o.getValue() == null) {
+				prep.setNull(index, type);
+				index++;
+				continue;
+			}
 			switch (type) {
 				case Types.NUMERIC:
 					if (DBType.equals("BASIS DBMS") && o.getValue() == null)
@@ -699,7 +862,13 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
-	public ResultSet retrieve(String sql, DataRow params) throws Exception {
+	/**
+	 * Executes a SQL query statement and returns the result as a {@link ResultSet}.
+	 * @param sql the query statement.
+	 * @param params if not null or empty the values from this DataRow will be used to set prepared parameters in the sql statement.
+	 * @return the query result as {@link ResultSet}.
+	 */
+	public ResultSet retrieve(String sql, DataRow params) {
 		ResultSet brs = null;
 		Connection conn = null;
 
@@ -711,7 +880,11 @@ public class SqlTableBC implements BusinessComponent {
 			if (params != null) {
 				int i = 1;
 				for (String p : params.getFieldNames()) {
-					prep.setObject(i, params.getFieldValue(p));
+					try {
+						prep.setObject(i, params.getFieldValue(p));
+					} catch (Exception e) {
+						// Should never occur. This loop iterates over the DataRow fields. This ensures that all fields exists in the DataRow.
+					}
 					i++;
 				}
 			}
@@ -734,16 +907,32 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 
+	/**
+	 * Adds a field mapping. If a custom retrieve SQL statement with alias names is used, a field mapping can be added.<br>
+	 * The field mapping is internally used when the where clause (filters) are created (on retrieve) and on insert/update and deleting data.
+	 * 
+	 * @param bcFieldName the alias name
+	 * @param dbFieldName the table field name
+	 */
 	public void addMapping(String bcFieldName, String dbFieldName) {
 		mapping.put(bcFieldName, dbFieldName);
 	}
 
 
+	/**
+	 * Returns all defined field mappings.
+	 * @return a HashMap with field mappings. Where key is the alias name and value is the table field name.
+	 */
 	public HashMap<String,String> getMappings() {
 		return new HashMap<String,String>(mapping);
 	}
 
 
+	/**
+	 * Gets the mapping for a field. If no mapping exists, then the alias field name (bcFieldName) is returned.
+	 * @param bcFieldName the alias field name.
+	 * @return the table field name.
+	 */
 	public String getMapping(String bcFieldName) {
 		String dbFieldName = mapping.get(bcFieldName);
 		if (dbFieldName == null) return bcFieldName;
@@ -752,10 +941,11 @@ public class SqlTableBC implements BusinessComponent {
 
 
 	/**
-	 * Set if (<code>String</code>) field values should be automatically truncated, on validation, to the field length defined in the table.<br>
-	 * <b>NOTE</b>: only field, that are not a primary key or a part of the primary key, will be truncated.
-	 * @param  truncate  <code>true</code> all <code>String</code> field values will be truncated in the validateWrite method.<br>
-	 *                   <code>false</code> will not automatically truncate any string fields.
+	 * Sets if values of character fields should be automatically truncated on validation to the field length defined in the table.
+	 * <p>
+	 * <b>NOTE</b>: only character fields that are not primary keys will be truncated!
+	 * @param  truncate  <code>true</code> - all character fields (except primary keys) will be truncated in the {@link #validateWrite(DataRow)} method.
+	 *                   <code>false</code> - don't truncate character fields.
 	 */
 	public void setTruncateFieldValues(boolean truncate) {
 		truncateFieldValues = truncate;
