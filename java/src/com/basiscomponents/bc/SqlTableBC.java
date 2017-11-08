@@ -200,7 +200,10 @@ public class SqlTableBC implements BusinessComponent {
 					for (String attr : attrmap.keySet()) {
 						AttributesRecord.setFieldAttribute(field, attr, attrmap.get(attr).toString());
 					}
-					if (PrimaryKeys.contains(getMapping(field))) AttributesRecord.setFieldAttribute(field, "EDITABLE", "2");
+					if (MetaData.getFieldAttributes(field).containsKey("REMARKS"))
+						AttributesRecord.setFieldAttribute(field, "REMARKS", MetaData.getFieldAttribute(field, "REMARKS"));
+					if (PrimaryKeys.contains(getMapping(field)))
+						AttributesRecord.setFieldAttribute(field, "EDITABLE", "2");
 				}
 				catch (Exception ex) { }
 			}
@@ -411,17 +414,19 @@ public class SqlTableBC implements BusinessComponent {
 				fields.addAll(FieldSelection.getFieldNames());
 			}
 
+			boolean customStatementUsed = (retrieveSql != null && !retrieveSql.equals(""));
+
 			StringBuffer sqlfields = new StringBuffer("");
 			if (fields.contains("*"))
-				sqlfields.append(DBQuoteString+Table+DBQuoteString+".*");
+				sqlfields.append("*");
 			else {
 				for (String field : fields) {
-					sqlfields.append(","+DBQuoteString+getMapping(field)+DBQuoteString);
+					sqlfields.append(","+DBQuoteString+field+DBQuoteString);
 				}
 				sqlfields = new StringBuffer(sqlfields.substring(1));
 			}
 
-			if (retrieveSql != null && !retrieveSql.equals(""))
+			if (customStatementUsed)
 				sql = "SELECT "+sqlfields+" FROM ("+retrieveSql+")";
 			else
 				sql = "SELECT "+sqlfields+" FROM "+DBQuoteString+Table+DBQuoteString;
@@ -429,7 +434,10 @@ public class SqlTableBC implements BusinessComponent {
 			if (Filter != null && Filter.getFieldNames().size() > 0) {
 				StringBuffer wh = new StringBuffer("");
 				for (String f : Filter.getFieldNames()) {
-					wh.append(" AND "+DBQuoteString+getMapping(f)+DBQuoteString+"=?");
+					if (customStatementUsed)
+						wh.append(" AND "+DBQuoteString+f+DBQuoteString+"=?");
+					else
+						wh.append(" AND "+DBQuoteString+getMapping(f)+DBQuoteString+"=?");
 				}
 				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
 			}
