@@ -664,7 +664,7 @@ class public RestBridge
         ch=unt
         open (ch)rlog$ 
         
-        tpl$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*)"
+        tpl$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*),STATUS:C(1*)"
         
         dim log$:tpl$
         
@@ -715,12 +715,14 @@ class public RestBridge
         ch=unt
         open (ch,err=skip)rlog$ 
         
-        tpl$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*)"
+        tpl$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*),STATUS:C(1*)"
         dim log$:tpl$
         
         read record (ch,dom=skip,key=id$)log$
         log.END=System.currentTimeMillis()
         log.DURATION = log.END-log.START
+        
+        log.STATUS$=STR(response!.getStatus())
         
         write record (ch)log$
     
