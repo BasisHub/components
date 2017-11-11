@@ -26,10 +26,69 @@ class public RestBridge
             System.out.println("REST request end -----------------------")
         fi
 
+        req_id$ = #logRequest(request!)
+
         response!.setHeader("Access-Control-Allow-Origin",request!.getHeader("Origin"))
         response!.setHeader("Access-Control-Allow-Credentials","true")
         response!.setHeader("Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS")
         response!.setHeader("Access-Control-Allow-Headers",request!.getHeader("Access-Control-Request-Headers"))
+
+
+        files! = request!.getFileUploads()
+        System.out.println("files!")
+        System.out.println(str(files!))
+        System.out.println(request!.getBody())
+        System.out.println(request!.getPathInfo())
+        if (files!<>null()) then
+            sz = files!.size()
+            if sz then
+              declare BBjFileUpload uploadFile!
+              hm_resp! = new HashMap()
+              for i=0 to sz-1
+                      uploadFile! = cast(BBjFileUpload,files!.get(i))
+                      if (debug) then
+                          System.out.println(str("Field:" + uploadFile!.getFieldName()))
+                          System.out.println(str("- Name:"+ uploadFile!.getOriginalName()))
+                          System.out.println(str("- Temp Name:"+ uploadFile!.getTempName()))
+                          System.out.println(str("- Type:"+ uploadFile!.getContentType()))
+                          System.out.println(str("- Size:"))
+                          System.out.println(str(uploadFile!.getContentLength()))
+                          System.out.println(str("------------------------"))
+                      fi
+                      
+                      tmpname$= uploadFile!.getTempName()
+                      newname!=tmpname$
+                      
+                      oname$=str(uploadFile!.getOriginalName())
+                      if oname$<>"" And oname$<>"null" then
+                          newname$ = newname!.replace("\","/")
+                          newname$=newname$(1,pos("/"=newname$,1,pos("/"=newname$,1,0)))
+                          newname$=newname$+str(System.currentTimeMillis())+"/"
+                          mkdir newname$
+                          newname$=newname$+uploadFile!.getOriginalName()
+                          rename tmpname$ TO newname$
+                          hm_resp!.put(uploadFile!.getFieldName(),newname$)
+                      fi
+              next i
+              
+              resp$=""
+              it! = hm_resp!.keySet().iterator()
+              while it!.hasNext()
+                    x$=it!.next()
+                    x1$=hm_resp!.get(x$)
+                    if resp$>"" then
+                        resp$=resp$+","
+                    fi
+                    resp$=resp$+""""+x$+""":"""+x1$+""""
+              wend
+                  
+              response!.getOutputStream().write("{"+resp$+"}")
+              response!.setStatus(200)
+              #logResponse(req_id$,response!)
+              methodret     
+           fi
+        fi
+
 
         req! = new HashMap()
 
@@ -39,6 +98,7 @@ class public RestBridge
             break
             case "OPTIONS"
                 response!.setStatus(200)
+                #logResponse(req_id$,response!)
                 methodret
             break
             case "DELETE"
@@ -63,6 +123,7 @@ class public RestBridge
                 response!.setContentType("text/plain")
                 s! = response!.getOutputStream()
                 response!.sendError(501,"Unsupported HTTP method """+request!.getMethod()+"""")
+                #logResponse(req_id$,response!)
                 methodret
             break
         swend
@@ -83,6 +144,7 @@ class public RestBridge
             response!.setHeader("WWW-Authenticate","Basic realm=""REST Web Service""")
             System.out.println("REST: error 401 Authentication required")
             response!.sendError(401,"Authentication required")
+            #logResponse(req_id$,response!)
             methodret
         else
             auth$=auth$(7)
@@ -162,6 +224,7 @@ class public RestBridge
                 System.out.println("REST: error 406 Unsupported content type requested in Accept header: "+atmp$)
             fi
             response!.sendError(406, "Unsupported content type requested in Accept header: "+atmp$)
+            #logResponse(req_id$,response!)
             methodret
         fi
 
@@ -172,12 +235,67 @@ class public RestBridge
         statuscode! = answer!.get("statuscode",err=*next)
         errormsg! = answer!.get("errormsg",err=*next)
         errorcode$ = str(answer!.get("errorcode"))
+            
+
+        
+        if answer!.containsKey("file") then
+            file$ = answer!.get("file")
+            
+            tryagain:
+            
+            ch=unt
+            open (ch,err=filenotfund)file$
+            close (ch)
+            System.out.println(file$)
+            fullPath$ = BBjAPI().getFileSystem().resolvePath(file$)
+            System.out.println(fullPath$)
+
+            filename$=fullPath$
+            if (pos("/"=filename$)>0) then 
+                filename$=filename$(pos("/"=filename$,1,pos("/"=filename$,1,0))+1)
+            fi
+            if (pos("\"=filename$)>0) then 
+                filename$=filename$(pos("\"=filename$,1,pos("\"=filename$,1,0))+1)
+            fi
+            
+            ext$="dat"
+            
+            if pos("."=filename$)>0 then
+                ext$=filename$(pos("."=filename$,1,pos("."=filename$,1,0))+1)
+            fi
+            
+            f! = new java.io.File(fullPath$)
+            java.nio.file.Files.copy(f!.toPath(), response!.getOutputStream())
+            
+            response!.setContentType("application/"+ext$)
+            response!.setHeader("Content-Disposition","inline; filename="""+filename$+"""")
+
+            goto done_file
+            filenotfund:
+            
+            if info(3,4)="DEVPR01" and file$<>"D:\tmp\demo.pdf"then
+                file$="D:\tmp\demo.pdf"
+                goto tryagain
+            fi
+            
+            System.out.println("not found")
+
+            response!.getOutputStream().write("file not found!")
+            response!.setStatus(404)
+                
+            done_file:
+            #logResponse(req_id$,response!)
+            methodret 
+            
+            
+        endif 
+        
         if answer!.containsKey("stacktrace") then
             stacktrace$ = answer!.get("stacktrace")
         endif
 
         if statuscode! <> null() and !mask(statuscode!,"20\d") then
-            System.out.println("REST: error "+str(statuscode!)+" - "+str(errormsg!))
+            rem System.out.println("REST: error "+str(statuscode!)+" - "+str(errormsg!))
             if pos("application/json"=accept$) > 0 then
                 response!.setStatus(num(statuscode!))
                 response!.setContentType("application/json")
@@ -199,6 +317,7 @@ class public RestBridge
                 response!.setStatus(num(statuscode!))
             endif
             rem ToDo: add error output for xml and csv
+            #logResponse(req_id$,response!)
             methodret
         fi
 
@@ -211,11 +330,13 @@ class public RestBridge
             response!.setHeader("Reason-Phrase",str(errormsg!))
             System.out.println("REST: error 500 "+str(errormsg!))
             response!.sendError(500,str(errormsg!))
+            #logResponse(req_id$,response!)
             methodret
         fi
 
         if method$ = "PUT" or method$ = "DELETE" then
             response!.setStatus(num(statuscode!))
+            #logResponse(req_id$,response!)
             methodret
         endif
 
@@ -224,6 +345,7 @@ class public RestBridge
                 response!.setStatus(num(statuscode!))
             endif
             if str(rs!) = "" then
+                #logResponse(req_id$,response!)
                 methodret
             endif
         endif
@@ -316,7 +438,7 @@ class public RestBridge
             System.out.println("REST: 200 - sent answer text/html")
 
             response!.setStatus(200)
-
+            #logResponse(req_id$,response!)
             methodret
         else
             if pos("text/xml"=accept$) >0 or pos("application/xml"=accept$) >0  then
@@ -332,7 +454,7 @@ class public RestBridge
                 wr!.flush()
                 wr!.close()
                 s!.write(wr!.toString())
-
+                #logResponse(req_id$,response!)
                 methodret
             else
                 if pos("application/json"=accept$) >0  then
@@ -344,7 +466,7 @@ class public RestBridge
                     wr!.flush()
                     wr!.close()
                     s!.write(wr!.toString())
-
+                    #logResponse(req_id$,response!)
                     methodret
                 else
                     if pos("text/csv"=accept$) >0 OR pos("text/plain"=accept$) >0 then
@@ -356,7 +478,7 @@ class public RestBridge
                         wr!.flush()
                         wr!.close()
                         s!.write(wr!.toString())
-
+                        #logResponse(req_id$,response!)
                         methodret
                     else
                         if pos("application/xls"=accept$) >0 then
@@ -366,7 +488,7 @@ class public RestBridge
                             else
                                 filename$ = request!.getPathInfo().replaceAll("/([^/]+).*","$1")+".xlsx"""
                             endif
-                            System.out.println(filename$)
+                            rem System.out.println(filename$)
                             response!.setHeader("content-disposition","attachment; filename="""+filename$+"""")
                             d$=System.getProperty("basis.cacheDirectory")+"/_output_/"
                             mkdir d$,err=*next
@@ -383,6 +505,7 @@ class public RestBridge
 
                             java.nio.file.Files.copy(f!.toPath(), response!.getOutputStream())
                             f!.delete()
+                            #logResponse(req_id$,response!)
                             methodret
                         else
                             if pos("debug"=accept$)>0 then
@@ -409,6 +532,7 @@ class public RestBridge
                                 s!.write($0a$)
                                 s!.write("Accept:"+str(request!.getHeader("Accept")))
                                 s!.write($0a$)
+                                #logResponse(req_id$,response!)
 
                                 methodret
                             else
@@ -416,6 +540,7 @@ class public RestBridge
                                     System.out.println("REST: error 406 Unsupported content type requested in Accept header: "+accept$)
                                 fi
                                 response!.sendError(406, "Unsupported content type requested in Accept header: "+accept$)
+                                #logResponse(req_id$,response!)
                                 methodret
                             fi
                         fi
@@ -423,7 +548,7 @@ class public RestBridge
                 fi
             fi
         fi
-
+        #logResponse(req_id$,response!)
         methodret
 
 
@@ -433,7 +558,7 @@ class public RestBridge
             s!.write("stbl not set up correctly!")
             System.out.println("REST: error 500 STBLs not set up correctly! Need REST_WD and REST_ADAPTERPGM in config.bbx" )
             response!.sendError(500,"STBLs not set up correctly! Need REST_WD and REST_ADAPTERPGM in config.bbx" )
-
+            #logResponse(req_id$,response!)
     METHODEND
 
 
@@ -528,6 +653,81 @@ class public RestBridge
         noSes:
             throw  "Session invalid",11
 
+    methodend
+
+    method private BBjString logRequest(BBjspWebRequest request!)
+        
+        rlog$=stbl("REST_REQUESTLOG",err=skip)
+        System.out.println("Logging request into "+rlog$)
+        id$=""
+
+        ch=unt
+        open (ch)rlog$ 
+        
+        tpl$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*)"
+        
+        dim log$:tpl$
+        
+        id$=str(System.currentTimeMillis())+"_"+str(dec(INFO(3,0)))
+        
+        log.id$=id$
+        log.METHOD$=request!.getMethod()
+        log.START=System.currentTimeMillis()
+        log.ADDR$=request!.getRemoteAddr()
+        log.URI$=request!.getRequestURI()
+        log.URL$=request!.getRequestURL()
+        log.QUERY$=request!.getQueryString()
+        
+        h! = request!.getHeaderNames()
+        it! =h!.iterator()
+        while it!.hasNext()
+            hn$=it!.next()
+            h$=h$+hn$+"="+request!.getHeader(hn$)+","
+        wend
+        log.HEADERS$=h$
+        
+        p! = request!.getParameterNames()
+        it! =p!.iterator()
+        while it!.hasNext()
+            pn$=it!.next()
+            p$=p$+pn$+"="+request!.getParameter(pn$)+","
+        wend
+        log.PARAMS$=p$
+        
+        write record (ch)log$
+        
+        close (ch)
+        
+        skip:
+        
+        methodret id$
+    
+    methodend
+    
+    method private void logResponse(BBjString id$, BBjspWebResponse response!)
+        
+        rlog$=stbl("REST_REQUESTLOG",err=skip)
+        
+        if id$="" then
+            methodret
+        fi
+        
+        ch=unt
+        open (ch,err=skip)rlog$ 
+        
+        tpl$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*)"
+        dim log$:tpl$
+        
+        read record (ch,dom=skip,key=id$)log$
+        log.END=System.currentTimeMillis()
+        log.DURATION = log.END-log.START
+        
+        write record (ch)log$
+    
+        close (ch)
+        
+        skip:
+            
     methodend
 
 classend
