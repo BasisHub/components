@@ -671,12 +671,12 @@ class public RestBridge
         id$=str(System.currentTimeMillis())+"_"+str(dec(INFO(3,0)))
         
         log.id$=id$
-        log.METHOD$=request!.getMethod()
+        log.METHOD$=str(request!.getMethod())
         log.START=System.currentTimeMillis()
-        log.ADDR$=request!.getRemoteAddr()
-        log.URI$=request!.getRequestURI()
-        log.URL$=request!.getRequestURL()
-        log.QUERY$=request!.getQueryString()
+        log.ADDR$=str(request!.getRemoteAddr())
+        log.URI$=str(request!.getRequestURI())
+        log.URL$=str(request!.getRequestURL())
+        log.QUERY$=str(request!.getQueryString())
         
         h! = request!.getHeaderNames()
         it! =h!.iterator()
