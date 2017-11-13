@@ -334,16 +334,18 @@ main_loop:
                 ok=0
                 vec! = new BBjVector(java.util.Arrays.asList(fieldsel!.split(",")))
                 bc!.setFieldSelection(vec!,err=*next); ok=1
-                if !ok and pos("no match for method"=cvs(errmes(-1),8)) then
-                    fs! = new DataRow()
-                    it! = v!.iterator()
-                    while it!.hasNext()
-                        fs!.setFieldValue(it!.next(),"")
-                    wend
-                    bc!.setFieldSelection(fs!)
-                else
-                    throw errmes(-1),err()
-                fi
+                if !ok then
+                    if pos("no match for method"=cvs(errmes(-1),8)) then
+                        fs! = new DataRow()
+                        it! = vec!.iterator()
+                        while it!.hasNext()
+                            fs!.setFieldValue(it!.next(),"")
+                        wend
+                        bc!.setFieldSelection(fs!)
+                    else
+                        throw errmes(-1),err()
+                    fi
+                 fi
             fi
 
             scope!=params!.get("_SCOPE")
