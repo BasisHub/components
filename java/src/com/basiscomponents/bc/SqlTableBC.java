@@ -816,7 +816,10 @@ public class SqlTableBC implements BusinessComponent {
 			}
 
 			if (o.getValue() == null) {
-				prep.setNull(index, type);
+				if (DBType.equals("BASIS DBMS") && type == Types.CHAR)
+					prep.setString(index, "");
+				else
+					prep.setNull(index, type);
 				index++;
 				continue;
 			}
