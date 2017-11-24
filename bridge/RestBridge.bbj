@@ -3,6 +3,9 @@ use com.basiscomponents.db.ResultSet
 
 class public RestBridge
 
+    field private BBjString pgmPrefix$ = ""
+    field private BBjString pgmSuffix$ = ""
+
     METHOD PUBLIC void service(BBjspServletContext context!)
 
         declare BBjspWebRequest request!
@@ -10,6 +13,13 @@ class public RestBridge
 
         request! = context!.getRequest()
         response! = context!.getResponse()
+
+        if context!.getInitParameter("REST_PGM_PREFIX") <> null() then
+            #pgmPrefix$ = context!.getInitParameter("REST_PGM_PREFIX")
+        endif
+        if context!.getInitParameter("REST_PGM_SUFFIX") <> null() then
+            #pgmSuffix$ = context!.getInitParameter("REST_PGM_SUFFIX")
+        endif
 
         #this!.service(request!,response!)
 
@@ -188,6 +198,8 @@ class public RestBridge
         req!.put("params",params!)
         req!.put("body",request!.getBody(err=*next))
         req!.put("preferredlocales",request!.getLocales())
+        req!.put("REST_PGM_PREFIX",#pgmPrefix$)
+        req!.put("REST_PGM_SUFFIX",#pgmSuffix$)
 
         answer!=#invoke(ses$,req!)
         ses_list!.push(ses$)

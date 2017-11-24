@@ -38,7 +38,7 @@ timeout=int(num(stbl("REST_TIMEOUT",err=*next),err=*next))
 
 main_loop:
 
-    CLEAR EXCEPT user$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout, usecount, debug
+    CLEAR EXCEPT user$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout, usecount, debug, authpgm$
 
     seterr execerr
 
@@ -58,6 +58,8 @@ main_loop:
         responseSemaphore!.release()
         goto main_loop
     fi
+
+    call authpgm$+"::ON_REQUEST",err=*next
 
     if debug then System.out.println("REST: remote session running "+ses$)
     dummy$=STBL("!SESSIONINFO",ses$+" - working "+str(request!))
@@ -102,8 +104,19 @@ main_loop:
     if bcMap!.containsKey(bc$) then
         bc! = bcMap!.get(bc$)
     else
-        prefix$ = stbl("REST_PGM_PREFIX",err=*next)
-        suffix$ = stbl("REST_PGM_SUFFIX",err=*next)
+        prefix$ = request!.get("REST_PGM_PREFIX")
+        suffix$ = request!.get("REST_PGM_SUFFIX")
+        if prefix$ = "" then
+            prefix$ = stbl("REST_PGM_PREFIX",err=*next)
+        else
+            void$ = stbl("REST_PGM_PREFIX", prefix$)
+        endif
+        if suffix$ = "" then
+            suffix$ = stbl("REST_PGM_SUFFIX",err=*next)
+        else
+            suffix$ = stbl("REST_PGM_SUFFIX", suffix$)
+        endif
+        bc! = null()
         bc! = eval("new ::"+prefix$+bc$+suffix$+"::"+bc$+"()")
         bcMap!.put(bc$,bc!)
     endif
@@ -193,8 +206,8 @@ main_loop:
                     endif
                 endif
 
-		rs! = new ResultSet()
-		rs!.addItem(dr!)
+                rs! = new ResultSet()
+                rs!.addItem(dr!)
                 response!.put("resultset",rs!)
                 response!.put("request",str(request!))
                 response!.put("BC",bc$)
