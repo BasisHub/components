@@ -1482,6 +1482,8 @@ public class DataRow implements java.io.Serializable {
 				}// switch
 
 				HashMap<String, String> attr = ar.getFieldAttributes(fieldName);
+				HashMap m = (HashMap)hm.get("meta");
+				attr.putAll((HashMap)m.get(fieldName));
 				dr.setFieldAttributes(fieldName, attr);
 			}
 		} else {
