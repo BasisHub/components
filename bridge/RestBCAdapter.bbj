@@ -363,7 +363,7 @@ main_loop:
 
             scope!=params!.get("_SCOPE")
             if scope! <> null() then
-                bc!.setScope(scope!)
+                bc!.setScope(str(scope!))
             endif
 
             first% = 0
