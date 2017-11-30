@@ -864,10 +864,11 @@ public class DataRow implements java.io.Serializable {
 	 * @param dataRow The DataRow object to compare with
 	 *
 	 * @return equal The boolean value indicating whether the DataRows are equal or not
-	 *
-	 * @throws Exception
 	 */
-	public Boolean equals(DataRow dataRow) throws Exception {
+	public Boolean equals(DataRow dataRow) {
+		if (dataRow == null)
+			return false;
+
 		Boolean eq = true;
 		BBArrayList<String> fields = dataRow.getFieldNames();
 		if (fields.size() != this.DataFields.size())
@@ -877,9 +878,14 @@ public class DataRow implements java.io.Serializable {
 			while (it.hasNext()) {
 				String name = it.next();
 				DataField f = this.DataFields.get(name);
-				if (f == null || !dataRow.getFieldAsString(name).equals(this.getFieldAsString(name))) {
-					eq = false;
-					break;
+				try {
+					if (f == null || !dataRow.getFieldAsString(name).equals(this.getFieldAsString(name))) {
+						eq = false;
+						break;
+					}
+				}
+				catch (Exception ex) {
+					return false;
 				}
 			}
 		}
