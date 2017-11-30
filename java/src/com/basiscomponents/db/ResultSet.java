@@ -334,22 +334,29 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				name = entry.getValue();
 				DataField field = new DataField(rs.getObject(entry.getKey()));
 				type = defaultMetaData? types.get(column - 1) : getColumnType(column - 1);
-				field.setAttributes(new HashMap<String, String>(fieldAttributes.get(name)));
+//				field.setAttributes(new HashMap<String, String>(fieldAttributes.get(name)));
 				dr.addDataField(name, type, field);
 			}
 
 			if (KeyColumns != null && KeyColumns.size() > 0) {
 				try {
 					buildRowKey(rs, dr);
-				} catch (Exception e) {
-					// Auto-generated catch block
-					// e.printStackTrace();
-				}
+				} catch (Exception e) {}
 			}
 
 			dr.setRowID(rowId);
 			this.DataRows.add(dr);
 			rowId++;
+		}
+
+		// Add meta data to the first row only
+		if (DataRows.size() > 0 && fieldAttributes.size() > 0) {
+			DataRow dr = DataRows.get(0);
+			Iterator<String> it = dr.getFieldNames().iterator();
+			while (it.hasNext()) {
+				String fieldName = it.next();
+				dr.setFieldAttributes(fieldName, new HashMap<String, String>(fieldAttributes.get(fieldName)));
+			}
 		}
 	}
 
@@ -1749,7 +1756,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
-	@SuppressWarnings("deprecation")
 	public String toJson() throws Exception {
 			return toJson(true);
 	}
@@ -1914,70 +1920,69 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 			} // while on fields
 
-			if (f_meta){
+			if (f_meta) {
 				if (!meta_done) {
+					g.writeFieldName("meta");
 
-				g.writeFieldName("meta");
+					g.writeStartObject();
 
-				g.writeStartObject();
+					Iterator<HashMap<String, Object>> i = this.MetaData.iterator();
+					while (i.hasNext()) {
+						HashMap<String, Object> hm = i.next();
+						String c = (String) hm.get("ColumnName");
+						if (c != null) {
+							g.writeFieldName(c);
+							g.writeStartObject();
 
-				Iterator<HashMap<String, Object>> i = this.MetaData.iterator();
-				while (i.hasNext()) {
-					HashMap<String, Object> hm = i.next();
-					String c = (String) hm.get("ColumnName");
-					if (c != null) {
-						g.writeFieldName(c);
-						g.writeStartObject();
-
-						HashMap<String, String> atr;
-						try {
-							atr = dr.getFieldAttributes(c);
-						} catch (Exception e) {
-							atr = null;
-						}
-
-						Set<String> ks = hm.keySet();
-						Iterator<String> its = ks.iterator();
-						while (its.hasNext()) {
-							String key = its.next();
-							if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
-								continue;
-
-							if (atr != null && atr.containsKey(key))
-								continue;
-
-							String value = null;
-							if (hm.get(key) != null)
-								value = hm.get(key).toString();
-							g.writeStringField(key, value);
-						}
-
-						if (atr != null && !atr.isEmpty()){
-							Iterator<String> itks = atr.keySet().iterator();
-							while (itks.hasNext()){
-								String itk = itks.next();
-								g.writeStringField(itk,atr.get(itk));
+							HashMap<String, String> atr;
+							try {
+								atr = dr.getFieldAttributes(c);
+							} catch (Exception e) {
+								atr = null;
 							}
+
+							Set<String> ks = hm.keySet();
+							Iterator<String> its = ks.iterator();
+							while (its.hasNext()) {
+								String key = its.next();
+								if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
+									continue;
+
+								if (atr != null && atr.containsKey(key))
+									continue;
+
+								String value = null;
+								if (hm.get(key) != null)
+									value = hm.get(key).toString();
+								g.writeStringField(key, value);
+							}
+
+							if (atr != null && !atr.isEmpty()){
+								Iterator<String> itks = atr.keySet().iterator();
+								while (itks.hasNext()){
+									String itk = itks.next();
+									g.writeStringField(itk,atr.get(itk));
+								}
+							}
+
+							g.writeEndObject();
 						}
-
-						g.writeEndObject();
 					}
-				}
 
-				g.writeEndObject();
+					g.writeEndObject();
 
-				meta_done = true;
+					meta_done = true;
 				}
 				else
 				{
 					BBArrayList<String> fields = dr.getFieldNames();
 					itf = fields.iterator();
 					boolean m_written = false;
-					while (itf.hasNext()){
+					while (itf.hasNext()) {
 						String fieldname = itf.next();
 						HashMap<String, String> l = dr.getFieldAttributes(fieldname);
-						if (!l.isEmpty()){
-							if (!m_written){
+						if (!l.isEmpty()) {
+							if (!m_written) {
 								g.writeFieldName("meta");
 								g.writeStartObject();
 								m_written=true;
@@ -1985,7 +1990,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 							g.writeFieldName(fieldname);
 							g.writeStartObject();
 							Iterator<String> itks = l.keySet().iterator();
-							while (itks.hasNext()){
+							while (itks.hasNext()) {
 								String itk = itks.next();
 								g.writeStringField(itk,l.get(itk));
 							}
