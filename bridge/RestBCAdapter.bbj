@@ -231,7 +231,7 @@ main_loop:
                 if !dr!.contains(k!.get(i)) then
                     dr!.setFieldValue(k!.get(i),v!.get(i))
                 else
-                    if dr!.getFieldAsString() <> v!.get(i) then
+                    if dr!.getFieldAsString(k!.get(i)) <> v!.get(i) then
                         throw "Different resource ID in URL path and request body!",999
                     endif
                 endif
