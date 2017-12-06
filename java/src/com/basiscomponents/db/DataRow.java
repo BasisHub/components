@@ -16,6 +16,7 @@ import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -200,8 +201,9 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param name The name of the field
 	 * @param value The value of the field
+	 * @throws Exception Thrown when field already exists and new value can not be casted to the current field type.
 	 */
-	public void setFieldValue(String name, Object value)  {
+	public void setFieldValue(String name, Object value) throws Exception  {
 
 		if (value != null) {
 			String c = value.getClass().getCanonicalName();
@@ -217,9 +219,7 @@ public class DataRow implements java.io.Serializable {
 			// do nothing
 		}
 		if (field != null){
-			try {
-				value = DataField.convertType(value, getFieldType(name));
-			} catch (Exception e) {}	
+			value = DataField.convertType(value, getFieldType(name));
 			field.setValue(value);
 		}
 		else {
@@ -241,7 +241,6 @@ public class DataRow implements java.io.Serializable {
 					e.printStackTrace();
 				}
 			}
-
 		}
 	}
 
@@ -434,9 +433,9 @@ public class DataRow implements java.io.Serializable {
 			 * Columns with an unsigned numeric type in MySQL are treated as the next 'larger' Java type that the signed variant of the MySQL:
 			 * http://www.mysqlab.net/knowledge/kb/detail/topic/java/id/4929
 			 * 
-			 * In the populate method, the value of an unsigned integer is stored as java.lang.Long in the DataField although its 
+			 * In the populate method, the value of an unsigned integer is stored as java.lang.Long in the DataField although its
 			 * type remains java.sql.Types.INTEGER in the Column metadata. Calling the getInt() method will then result in an Exception.
-			 * This checks prevents this Exception. 
+			 * This checks prevents this Exception.
 			 */
 			if(!this.ResultSet.isSigned(column)){
 				ret = field.getLong().doubleValue();
@@ -449,9 +448,9 @@ public class DataRow implements java.io.Serializable {
 			 * Columns with an unsigned numeric type in MySQL are treated as the next 'larger' Java type that the signed variant of the MySQL:
 			 * http://www.mysqlab.net/knowledge/kb/detail/topic/java/id/4929
 			 * 
-			 * In the populate method, the value of an unsigned big integer is stored as java.math.BigInteger in the DataField although its 
+			 * In the populate method, the value of an unsigned big integer is stored as java.math.BigInteger in the DataField although its
 			 * type remains java.sql.Types.BIGINT in the Column metadata. Calling the getLong() method will then result in an Exception.
-			 * This checks prevents this Exception. 
+			 * This checks prevents this Exception.
 			 */
 			if(!this.ResultSet.isSigned(column)){
 				ret = ((java.math.BigInteger) field.getValue()).doubleValue();
@@ -649,7 +648,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception
 	 */
-	public int getColumnCount() throws Exception {
+	public int getColumnCount() {
 		return this.ResultSet.getColumnCount();
 	}
 
@@ -865,10 +864,11 @@ public class DataRow implements java.io.Serializable {
 	 * @param dataRow The DataRow object to compare with
 	 *
 	 * @return equal The boolean value indicating whether the DataRows are equal or not
-	 *
-	 * @throws Exception
 	 */
-	public Boolean equals(DataRow dataRow) throws Exception {
+	public Boolean equals(DataRow dataRow) {
+		if (dataRow == null)
+			return false;
+
 		Boolean eq = true;
 		BBArrayList<String> fields = dataRow.getFieldNames();
 		if (fields.size() != this.DataFields.size())
@@ -878,9 +878,14 @@ public class DataRow implements java.io.Serializable {
 			while (it.hasNext()) {
 				String name = it.next();
 				DataField f = this.DataFields.get(name);
-				if (f == null || !dataRow.getFieldAsString(name).equals(this.getFieldAsString(name))) {
-					eq = false;
-					break;
+				try {
+					if (f == null || !dataRow.getFieldAsString(name).equals(this.getFieldAsString(name))) {
+						eq = false;
+						break;
+					}
+				}
+				catch (Exception ex) {
+					return false;
 				}
 			}
 		}
@@ -1004,7 +1009,7 @@ public class DataRow implements java.io.Serializable {
 //  	  	if (sqlType==-1)
 //  	  		sqlType=12;
 // -1 is LONGVARCHAR in sql types!
-		
+
   	  	if (this.ResultSet.getColumnIndex(fieldName) == -1) {
 			int column = this.ResultSet.addColumn(fieldName);
 			this.ResultSet.setColumnType(column, sqlType);
@@ -1241,7 +1246,6 @@ public class DataRow implements java.io.Serializable {
 		return rs.toJson(f_meta);
 	}
 
-	
 	/**
 	 * Initializes and returns a DataRow object based on the values provided in the given JSON String.
 	 *
@@ -1271,14 +1275,15 @@ public class DataRow implements java.io.Serializable {
 
 		if (ar == null)
 			ar = new DataRow();
-		
+		else
+			ar = ar.clone();
+
 		// convert characters below chr(32) to \\uxxxx notation
 		int i=0;
 		while (i<in.length()){
 			if (in.charAt(i) <31){
 				String hex = String.format("%04x", (int) in.charAt(i));
 				in=in.substring(0,i)+"\\u"+hex+in.substring(i+1);
-				//System.out.println(i+ "-" +hex);
 			}
 			i++;
 		}
@@ -1287,39 +1292,46 @@ public class DataRow implements java.io.Serializable {
 		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
 			in = in.substring(11, in.length() - 1);
 		}
-		if (in.startsWith("{") && in.endsWith("}"))
+		String intmp = in;
+		JsonNode root = new ObjectMapper().readTree(intmp);
+
+		if (in.startsWith("{") && in.endsWith("}")){
 			in = "[" + in + "]";
+		}
 		JsonFactory f = new JsonFactory();
-		@SuppressWarnings("deprecation")
-		JsonParser jp = f.createJsonParser(in);
+		JsonParser jp = f.createParser(in);
 		jp.nextToken();
 		ObjectMapper objectMapper = new ObjectMapper();
-		@SuppressWarnings("rawtypes")
+
 		List navigation = objectMapper.readValue(jp,
 				objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
 
+
 		if (navigation.size()==0)
 			return new DataRow();
+
 		HashMap<?, ?> hm = (HashMap<?, ?>) navigation.get(0);
 
 		DataRow dr = new DataRow();
 
 		if (hm.containsKey("meta")) {
 			// new format
-
-			@SuppressWarnings("rawtypes")
 			HashMap meta = (HashMap) hm.get("meta");
 			Iterator<?> it = hm.keySet().iterator();
 			while (it.hasNext()){
 				String fieldName = (String) it.next();
-				Object fieldObj = hm.get(fieldName);
 				@SuppressWarnings("unchecked")
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
 				if (!ar.contains(fieldName)  && !fieldName.equals("meta")){
-					
-					String s = (String)fieldMeta.get("ColumnType");
+					String s = "12";
+
+					if (fieldMeta == null){
+						fieldMeta = new HashMap<>();
+					}
+
+					if (fieldMeta.get("ColumnType")!=null)
+						s = (String)fieldMeta.get("ColumnType");
 					if (s!=null){
-						
 						ar.addDataField(fieldName, Integer.parseInt(s), new DataField(null));
 						Set<String> ks = fieldMeta.keySet();
 						if (ks.size() > 1) {
@@ -1331,28 +1343,46 @@ public class DataRow implements java.io.Serializable {
 								ar.setFieldAttribute((String) fieldName, k, (String) fieldMeta.get(k));
 							}
 						}
-					
 					}//if s!=null
-				
 				}
 			}
 		}
-		
+
+		// add all fields to the attributes record that were not part of it before
+		Iterator it2 = hm.keySet().iterator();
+		while (it2.hasNext()){
+			String fieldName = (String) it2.next();
+			if (!ar.contains(fieldName) && !fieldName.equals("meta") && root.get(fieldName) != null){
+				switch (root.get(fieldName).getNodeType().toString()){
+				case "NUMBER":
+					ar.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
+					break;
+				case "BOOLEAN":
+					ar.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
+					break;
+				default:
+					ar.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
+					break;
+
+				}
+			}
+		}
+
 		if (!ar.isEmpty()){
 			BBArrayList<String> names = ar.getFieldNames();
-			
-			@SuppressWarnings("rawtypes")
+
 			Iterator it = names.iterator();
 
 			while (it.hasNext()) {
 				String fieldName = (String) it.next();
-				
-				
-				@SuppressWarnings({ "rawtypes", "unchecked" })
+
 				Object fieldObj = hm.get(fieldName);
-				if (fieldObj == null)
-					continue;
 				int fieldType = ar.getFieldType(fieldName);
+				if (fieldObj == null) {
+					dr.addDataField(fieldName, fieldType, new DataField(null));
+					dr.setFieldAttributes(fieldName, ar.getFieldAttributes(fieldName));
+					continue;
+				}
 				switch (fieldType) {
 				case java.sql.Types.CHAR:
 				case java.sql.Types.VARCHAR:
@@ -1360,9 +1390,14 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.NCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
+					//got a JSON object - save it as a JSON String
+					if (fieldObj.getClass().equals(java.util.LinkedHashMap.class)) {
+						dr.addDataField(fieldName, fieldType, new DataField(root.get(fieldName).toString()));
+						dr.setFieldAttribute(fieldName, "StringFormat", "JSON");
+					}
+					else
+						dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
 					break;
-
 				case java.sql.Types.BIGINT:
 				case java.sql.Types.TINYINT:
 				case java.sql.Types.INTEGER:
@@ -1372,7 +1407,6 @@ public class DataRow implements java.io.Serializable {
 						tmp="0";
 					dr.addDataField(fieldName, fieldType, new DataField(Integer.parseInt(tmp)));
 					break;
-
 				case java.sql.Types.NUMERIC:
 					dr.addDataField(fieldName, fieldType, new DataField(new java.math.BigDecimal(fieldObj.toString())));
 					break;
@@ -1382,12 +1416,10 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.REAL:
 					dr.addDataField(fieldName, fieldType, new DataField(Double.parseDouble(fieldObj.toString())));
 					break;
-
 				case java.sql.Types.BOOLEAN:
 				case java.sql.Types.BIT:
 					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
 					break;
-
 				case java.sql.Types.TIMESTAMP:
 				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
 				case (int) 11:
@@ -1404,7 +1436,6 @@ public class DataRow implements java.io.Serializable {
 
 					}
 					break;
-
 				case java.sql.Types.DATE:
 				case (int) 9:
 					tss = fieldObj.toString();
@@ -1415,7 +1446,6 @@ public class DataRow implements java.io.Serializable {
 					dr.addDataField(fieldName, fieldType, new DataField(ds));
 
 					break;
-
 				case java.sql.Types.ARRAY:
 				case java.sql.Types.BINARY:
 				case java.sql.Types.BLOB:
@@ -1441,13 +1471,13 @@ public class DataRow implements java.io.Serializable {
 				}// switch
 
 				HashMap<String, String> attr = ar.getFieldAttributes(fieldName);
+				@SuppressWarnings("unchecked")
+				HashMap<String, HashMap> m = (HashMap<String, HashMap>)hm.get("meta");
+				attr.putAll((HashMap<String, String>)m.get(fieldName));
 				dr.setFieldAttributes(fieldName, attr);
-
 			}
-
 		} else {
 			// old format - deprecated
-			@SuppressWarnings("rawtypes")
 			Iterator it = navigation.iterator();
 			while (it.hasNext()) {
 				@SuppressWarnings("unchecked")
@@ -1475,15 +1505,13 @@ public class DataRow implements java.io.Serializable {
 				default:
 					break;
 				}
-
 			}
-
 		}
 		return dr;
 	}
 
 	public void setFieldAttributes(String fieldName, HashMap<String, String> attr) throws Exception {
-		
+
 		Iterator<String> it = attr.keySet().iterator();
 		while (it.hasNext()){
 			String k = it.next();
@@ -1616,7 +1644,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow with the fields where the attribute with the given name is defined.
 	 */
 	public DataRow getFieldsHavingAttribute(String attributeName){
-		return getFieldsHavingAttribute(attributeName, false, this);
+		return getFieldsHavingAttribute(attributeName, false, null);
 	}
 
 	/**
@@ -1634,15 +1662,15 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow with the fields where the attribute with the given name is defined.
 	 */
 	public DataRow getFieldsHavingAttribute(String attributeName, boolean includeEmptyValues){
-		return getFieldsHavingAttribute(attributeName, includeEmptyValues, this);
+		return getFieldsHavingAttribute(attributeName, includeEmptyValues, null);
 	}
-	
+
 	/**
 	 * Returns all fields of this DataRow object being defined in the given DataRow object and also having the given attribute name set.
 	 * The given boolean value defines whether to include the fields where the attribute is defined but the attribute value
 	 * is empty (null or Empty String). If the value is set to true, these fields are included. If it is set to false, those fields
 	 * will be ignored by the method.
-	 *   
+	 * 
 	 * @see #getFieldsHavingAttribute(String)
 	 * @see #getFieldsHavingAttribute(String, boolean)
 	 *
@@ -1655,31 +1683,85 @@ public class DataRow implements java.io.Serializable {
 	public DataRow getFieldsHavingAttribute(String attributeName, boolean includeEmptyValues, DataRow dr){
 		DataRow dataRow = new DataRow();
 
-		Entry<String,Object> entry;
 		DataField fieldValue;
 
-		Iterator<Entry<String, Object>> it = dr.getObjects().entrySet().iterator();
+		if (dr == null) dr = this;
+		Iterator<String> it = dr.getFieldNames().iterator();
 		while(it.hasNext()){
-			entry = it.next();
-			fieldValue = (DataField) entry.getValue();
+			String fieldName = it.next();
+			if(!this.contains(fieldName)) continue;
+
+			try {
+				fieldValue = this.getField(fieldName);
+			} catch (Exception e) {
+				continue;
+			}
 
 			if(fieldValue.getAttributes().containsKey(attributeName)){
-				// Checking that the current DataRow also contains the field name
-				if(this.contains(entry.getKey())){
-					if(!includeEmptyValues){
-						if(fieldValue.getAttribute(attributeName) == null || fieldValue.getAttribute(attributeName).isEmpty()){
-							continue;
-						}
+				if(!includeEmptyValues){
+					if(fieldValue.getAttribute(attributeName) == null || fieldValue.getAttribute(attributeName).isEmpty()){
+						continue;
 					}
-
-					dataRow.setFieldValue(entry.getKey(), fieldValue.clone());
 				}
+
+				try {
+					dataRow.setFieldValue(fieldName, fieldValue.clone());
+				} catch (Exception e) {}
 			}
 		}
 
 		return dataRow;
 	}
-	
+
+	/**
+	 * Returns all fields of this DataRow, having the specified attribute name and attribute value.
+	 *
+	 * @param attributeName The name of the attribute.
+	 * @param attributeValue The value of the attribute.
+	 *
+	 * @return The DataRow with the fields where the attribute with the given name and value is defined.
+	 */
+	public DataRow getFieldsHavingAttributeValue(String attributeName, String attributeValue){
+		return getFieldsHavingAttributeValue(attributeName, attributeValue, null);
+	}
+
+	/**
+	 * Returns all fields of this DataRow, having the specified attribute name and attribute value.
+	 *
+	 * @param attributeName The name of the attribute.
+	 * @param attributeValue The value of the attribute.
+	 * @param dr The DataRow object's whose fields will be iterated over.
+	 *
+	 * @return The DataRow with the fields where the attribute with the given name and value is defined.
+	 */
+	public DataRow getFieldsHavingAttributeValue(String attributeName, String attributeValue, DataRow dr){
+		DataRow dataRow = new DataRow();
+
+		DataField fieldValue;
+
+		if(dr == null) dr = this;
+		Iterator<String> it = dr.getFieldNames().iterator();
+		while(it.hasNext()){
+			String fieldName = it.next();
+			if(!this.contains(fieldName)) continue;
+
+			try {
+				fieldValue = this.getField(fieldName);
+			} catch (Exception e) {
+				continue;
+			}
+
+			String value = fieldValue.getAttribute(attributeName);
+			if(value != null && value.equals(attributeValue)){
+				try {
+					dataRow.setFieldValue(fieldName, fieldValue.clone());
+				} catch (Exception e) {}
+			}
+		}
+
+		return dataRow;
+	}
+
 	/**
 	 * Returns a BBj String Template based on the values defined in this DataRow
 	 * 
@@ -1687,7 +1769,7 @@ public class DataRow implements java.io.Serializable {
 	 * 
 	 * @return a BBj String Template with the values defined in this DataRow.
 	 */
-	public String getTemplate(){		
+	public String getTemplate(){
 		ArrayList<Integer> numericTypeCodeList = new ArrayList<Integer>();
 		numericTypeCodeList.add(java.sql.Types.BIGINT);
 		numericTypeCodeList.add(java.sql.Types.TINYINT);
@@ -1702,53 +1784,53 @@ public class DataRow implements java.io.Serializable {
 		numericTypeCodeList.add(java.sql.Types.BIT);
 		numericTypeCodeList.add(java.sql.Types.DATE);
 		numericTypeCodeList.add(9); // Basis DATE
-		
+
 		StringBuilder templatedString = new StringBuilder();
-		
+
 		int sqlType;
 		int precision;
-		
+
 		int size = this.ResultSet.getColumnCount();
 		for(int index=0; index<size ; index++){
 			sqlType = ResultSet.getColumnType(index);
 			precision = ResultSet.getPrecision(index);
-			
+
 			templatedString.append(ResultSet.getColumnName(index) + ":");
-			
-			if(!numericTypeCodeList.contains(sqlType)){	
+
+			if(!numericTypeCodeList.contains(sqlType)){
 				templatedString.append("C");
-				
+
 				if(sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE || sqlType == 11){
 					precision = 21;
 				}
 			}else{
 				templatedString.append("N");
-				
+
 				if(sqlType == java.sql.Types.BOOLEAN){
 					precision = 1;
 				}else if(sqlType == 9 || sqlType == java.sql.Types.DATE){
 					precision = 9;
 				}
 			}
-			
+
 			templatedString.append("(");
-			
+
 			if(precision == 0){
 				// Using the backspace character as delimiter ($08$)
 				templatedString.append("1*=8");
 			}else{
 				templatedString.append(precision);
 			}
-			
+
 			templatedString.append(")");
-			
+
 			if(index +1 < size){
 				templatedString.append(",");
 			}
 		}
 		return templatedString.toString();
 	}
-	
+
 	/**
 	 * Returns the record String to initialize a BBj Templated String based on the values
 	 * of this DataRow object.
@@ -1757,7 +1839,7 @@ public class DataRow implements java.io.Serializable {
 	 * 
 	 * @return the record to initialize the BBj Templated String.
 	 * 
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public String getString() throws Exception{
 		ArrayList<Integer> numericTypeCodeList = new ArrayList<Integer>();
@@ -1774,10 +1856,10 @@ public class DataRow implements java.io.Serializable {
 		numericTypeCodeList.add(java.sql.Types.BIT);
 		numericTypeCodeList.add(java.sql.Types.DATE);
 		numericTypeCodeList.add(9); // Basis DATE
-		
+
 		String template = getTemplate();
 		TemplatedString stringTemplate = new TemplatedString(template);
-		
+
 		int fieldType;
 		Entry<String, DataField> entry;
 		Iterator<Entry<String, DataField>> it = this.DataFields.entrySet().iterator();
@@ -1816,7 +1898,7 @@ public class DataRow implements java.io.Serializable {
 			}
 		}
 
-		return stringTemplate.getString().toString(); 
+		return stringTemplate.getString().toString();
 	}
 
 	/**
@@ -1834,7 +1916,7 @@ public class DataRow implements java.io.Serializable {
 	public static DataRow fromTemplate(String template) throws Exception{
 		return fromTemplate(template, "");
 	}
-	
+
 	/**
 	 * Converts and returns the given String Template as DataRow object
 	 * containing the values of the given record String.
@@ -1851,24 +1933,24 @@ public class DataRow implements java.io.Serializable {
 	public static DataRow fromTemplate(String template, String record) throws Exception{
 		TemplatedString stringTemplate = new TemplatedString(template);
 		stringTemplate.setBytes(record.getBytes());
-		
+
 		String fieldName;
 		byte fieldType;
 		int fieldSize;
 		String dType = "";
-		
+
 		int value;
 		int sqlType = java.sql.Types.VARCHAR;
 		DataField df = null;
 
 		DataRow row = new DataRow();
-		
+
 		int fieldCount = stringTemplate.getNumFields();
 		for(int i=0; i<fieldCount; i++){
 			fieldName = stringTemplate.getFieldName(i).toString();
 			fieldType = stringTemplate.getFieldType(i);
 			fieldSize = stringTemplate.getFieldSize(i);
-			
+
 			switch(fieldType){
 				case TemplateInfo.BLOB: sqlType = java.sql.Types.BLOB;
 										try{
@@ -1876,8 +1958,8 @@ public class DataRow implements java.io.Serializable {
 										}catch(Exception e){
 											df = new DataField("");
 										}
-										break;	
-										
+										break;
+
 				case TemplateInfo.INTEGER: sqlType = java.sql.Types.INTEGER;
 			     						   try{
 			     							   df = new DataField(stringTemplate.getFieldAsNumber(i).toBigInteger());
@@ -1885,15 +1967,15 @@ public class DataRow implements java.io.Serializable {
 			     							   df = new DataField(0);
 			     						   }
 			     						   break;
-			
+
 				case TemplateInfo.CHARACTER: sqlType = java.sql.Types.CHAR;
 											 try{
 											 	 df = new DataField(stringTemplate.getFieldAsString(i));
 											 }catch(Exception e){
 												 df = new DataField("");
 											 }
-					 						 break; 						   
-			     			
+					 						 break;
+
 				case TemplateInfo.RESIDENT_FLOAT: sqlType = java.sql.Types.FLOAT;
 		           								  try{
 												 	  df = new DataField(stringTemplate.getFloat(i));
@@ -1901,29 +1983,29 @@ public class DataRow implements java.io.Serializable {
 													  df = new DataField(0f);
 												  }
 		           								  break;
-					
+
 				case TemplateInfo.RESIDENT_DOUBLE: sqlType = java.sql.Types.DOUBLE;
 					  							   try{
 												 	   df = new DataField(stringTemplate.getDouble(i));
 												   }catch(Exception e){
-													   df = new DataField(0);
+													   df = new DataField(0d);
 												   }
 					  							   break;
-					 						 
+
 				case TemplateInfo.BUS:
 				case TemplateInfo.NUMERIC:
 				case TemplateInfo.ADJN_BUS:
 				case TemplateInfo.BCD_FLOAT:
 				case TemplateInfo.IEEE_FLOAT:
-				case TemplateInfo.ORDERED_NUMERIC: 
+				case TemplateInfo.ORDERED_NUMERIC:
 				case TemplateInfo.UNSIGNED_INTEGER: sqlType = java.sql.Types.NUMERIC;
 										            try{
 										            	df = new DataField(stringTemplate.getFieldAsNumber(i).toBigDecimal());
 													}catch(Exception e){
-														df = new DataField(0);
+														df = new DataField(new java.math.BigDecimal(0));
 													}
 										            break;
-				
+
 				default: sqlType = java.sql.Types.VARCHAR;
 						 try{
 						     df = new DataField(stringTemplate.getFieldAsString(i));
@@ -1932,11 +2014,11 @@ public class DataRow implements java.io.Serializable {
 						 }
 				   	     break;
 			}
-			
+
 			if(sqlType == java.sql.Types.NUMERIC){
 				try{
 					dType = stringTemplate.getAttribute(fieldName, "DTYPE");
-					
+
 					if(dType.equals("D") && fieldSize == 8){
 						// Date
 						sqlType = 9; // BASIS Date
@@ -1951,16 +2033,57 @@ public class DataRow implements java.io.Serializable {
 							df = new DataField(true);
 						}
 					}
-				}catch(Exception e){	
+				}catch(Exception e){
 					//e.printStackTrace();
 					// ignoring because not all fields have an attribute DTYPE
 				}
 			}
-			
-			row.addDataField(fieldName, sqlType, df);			
+
+			row.addDataField(fieldName, sqlType, df);
 		}
-		
+
 		return row;
+	}
+
+
+	/**
+	 * Adds the values from a BBj templated string to the current DataRow object.
+	 * If the current DataRow object has already field definitions, then they will be used to cast/convert the value to the required field type.
+	 * Otherwise the type from the templated string will be used.
+	 * 
+	 * @param template The String Template
+	 * @param record The record to set
+	 * 
+	 * @return a DataRow object created based on the given String Template
+	 * 
+	 * @throws Exception Thrown when one of the templated string values doesn't match the field type of the DataRow.
+	 */
+	public void setString(String template, String record) throws Exception {
+		TemplatedString tmpl = new TemplatedString(template);
+		tmpl.setBytes(record.getBytes());
+
+		for (int i=0; i<tmpl.getNumFields(); i++) {
+			String name = tmpl.getJavaFieldName(i);
+			byte type = tmpl.getFieldType(i);
+			switch (type) {
+			case TemplateInfo.ADJN_BUS:
+			case TemplateInfo.BCD_FLOAT:
+			case TemplateInfo.BUS:
+			case TemplateInfo.IEEE_FLOAT:
+			case TemplateInfo.INTEGER:
+			case TemplateInfo.NUMERIC:
+			case TemplateInfo.ORDERED_NUMERIC:
+			case TemplateInfo.RESIDENT_DOUBLE:
+			case TemplateInfo.RESIDENT_FLOAT:
+			case TemplateInfo.UNSIGNED_INTEGER:
+				this.setFieldValue(name, tmpl.getFieldAsNumber(name));
+				break;
+
+			default:
+				this.setFieldValue(name, tmpl.getFieldAsString(name));
+				break;
+			}
+		}
 	}
 
 }

@@ -48,12 +48,12 @@ public class SqlQueryBC {
 	}
 
 
-	public ResultSet retrieve(String sql) {
+	public ResultSet retrieve(String sql) throws SQLException {
 		return retrieve(sql,null);
 	}
 
 
-	public ResultSet retrieve(String sql, ArrayList<Object> params) {
+	public ResultSet retrieve(String sql, ArrayList<Object> params) throws SQLException {
 		ResultSet brs = null;
 		Connection conn = null;
 
@@ -72,28 +72,24 @@ public class SqlQueryBC {
 
 			brs = new ResultSet(prep.executeQuery());
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw e1;
 		}
 		finally {
 			if (Conn == null && conn != null) {
 				try {
 					conn.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				} catch (SQLException e) {}
 			}
 		}
 
 		return brs;
 	}
 
-	public Boolean execute(String sql){
+	public Boolean execute(String sql) throws SQLException {
 		return execute(sql,null);
 	}
 
-	public Boolean execute(String sql, ArrayList<Object> params) {
+	public Boolean execute(String sql, ArrayList<Object> params) throws SQLException {
 		Connection conn = null;
 		Boolean b = false;
 
@@ -112,17 +108,13 @@ public class SqlQueryBC {
 
 			b = prep.execute();
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw e1;
 		}
 		finally {
 			if (Conn == null && conn != null) {
 				try {
 					conn.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				} catch (SQLException e) {}
 			}
 		}
 

@@ -38,7 +38,7 @@ timeout=int(num(stbl("REST_TIMEOUT",err=*next),err=*next))
 
 main_loop:
 
-    CLEAR EXCEPT user$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout, usecount, debug
+    CLEAR EXCEPT user$, ses$, requestSemaphore!, responseSemaphore!, ses!, authenticated, timeout, usecount, debug, authpgm$
 
     seterr execerr
 
@@ -59,6 +59,8 @@ main_loop:
         goto main_loop
     fi
 
+    call authpgm$+"::ON_REQUEST",err=*next
+
     if debug then System.out.println("REST: remote session running "+ses$)
     dummy$=STBL("!SESSIONINFO",ses$+" - working "+str(request!))
 
@@ -68,6 +70,11 @@ main_loop:
     if request!.get("uri") = null() then
         statuscode=404
         throw "Missing BC",12
+    endif
+
+    vec! = request!.get("preferredlocales")
+    if vec! <> null() and vec!.size() then
+        void$ = stbl("!LOCALE",vec!.getItem(0).getLanguage())
     endif
 
     uri$=request!.get("uri")
@@ -97,8 +104,19 @@ main_loop:
     if bcMap!.containsKey(bc$) then
         bc! = bcMap!.get(bc$)
     else
-        prefix$ = stbl("REST_PGM_PREFIX",err=*next)
-        suffix$ = stbl("REST_PGM_SUFFIX",err=*next)
+        prefix$ = request!.get("REST_PGM_PREFIX")
+        suffix$ = request!.get("REST_PGM_SUFFIX")
+        if prefix$ = "" then
+            prefix$ = stbl("REST_PGM_PREFIX",err=*next)
+        else
+            void$ = stbl("REST_PGM_PREFIX", prefix$)
+        endif
+        if suffix$ = "" then
+            suffix$ = stbl("REST_PGM_SUFFIX",err=*next)
+        else
+            suffix$ = stbl("REST_PGM_SUFFIX", suffix$)
+        endif
+        bc! = null()
         bc! = eval("new ::"+prefix$+bc$+suffix$+"::"+bc$+"()")
         bcMap!.put(bc$,bc!)
     endif
@@ -188,8 +206,8 @@ main_loop:
                     endif
                 endif
 
-				rs! = new ResultSet()
-				rs!.addItem(dr!)
+                rs! = new ResultSet()
+                rs!.addItem(dr!)
                 response!.put("resultset",rs!)
                 response!.put("request",str(request!))
                 response!.put("BC",bc$)
@@ -213,12 +231,13 @@ main_loop:
                 if !dr!.contains(k!.get(i)) then
                     dr!.setFieldValue(k!.get(i),v!.get(i))
                 else
-                    if dr!.getFieldAsString() <> v!.get(i) then
+                    if dr!.getFieldAsString(k!.get(i)) <> v!.get(i) then
                         throw "Different resource ID in URL path and request body!",999
                     endif
                 endif
             next i
 
+            rs! = new ResultSet()
             if method$ = "PUT" then
                 dr! = bc!.write(dr!,err=*next); ok=1
                 if !ok then
@@ -233,12 +252,13 @@ main_loop:
                         response!.put("statuscode","204")
                     endif
                 endif
+                rs!.addItem(dr!)
             else
                 bc!.remove(dr!)
                 response!.put("statuscode","204")
             endif
 
-            response!.put("resultset","")
+            response!.put("resultset",rs!)
             response!.put("request",str(request!))
             response!.put("BC",bc$)
             response!.put("sel",sel$)
@@ -246,6 +266,7 @@ main_loop:
         break
 
         case default
+        
             params! = request!.get("params",err=*next)
 
             if sel$ = "_meta" then
@@ -281,6 +302,20 @@ main_loop:
                 fi
             fi
 
+            rem iterate params to fill in [[var]]=value into param=[[var]]
+            if params! <> null() and params!.size() >0 then
+                it! = params!.keySet().iterator()
+                while it!.hasNext()
+                    p$=it!.next()
+                    v$=params!.get(p$)
+                    if len(v$)>4 and v$(1,2)="[[" then
+                        x!=params!.get(v$,err=*next)
+                        params!.put(p$,str(x!))
+                    fi
+                wend
+            fi
+
+
             rem Add parameters
             if params! <> null() and params!.size() >0 then
                 if filter! = null() then
@@ -290,38 +325,45 @@ main_loop:
                 while it!.hasNext()
                     p$=it!.next()
                     pv$=params!.get(p$)
-                    if (p$="_FULLTEXT")
+                    if (p$="_FULLTEXT" OR P$="_SEARCH")
                         filter!.setFieldValue("%SEARCH",pv$)
                     else
-                        if (p$(1,1)<>"_") then
+                        if (p$(1,1)<>"_" and pv$>"" and (ar!.contains(p$) OR bc$="DataSourceDataBC")) then
+                            rem todo: all BCs should accept filters with fields that are not part of the attributes record
+                            rem and still honor all other fields in the filter correctly, instead of giving no result 
+                            
                             filter!.setFieldValue(p$,pv$)
                         fi
                     fi
                 wend
             fi
 
-            bc!.setFilter(filter!)
+            if filter! <> null() then
+                bc!.setFilter(filter!)
+            fi
 
             fieldsel!=params!.get("_FIELDSEL",err=*next)
             if fieldsel! <> null()
                 ok=0
                 vec! = new BBjVector(java.util.Arrays.asList(fieldsel!.split(",")))
                 bc!.setFieldSelection(vec!,err=*next); ok=1
-                if !ok and pos("no match for method"=cvs(errmes(-1),8)) then
-                    fs! = new DataRow()
-                    it! = v!.iterator()
-                    while it!.hasNext()
-                        fs!.setFieldValue(it!.next(),"")
-                    wend
-                    bc!.setFieldSelection(fs!)
-                else
-                    throw errmes(-1),err()
-                fi
+                if !ok then
+                    if pos("no match for method"=cvs(errmes(-1),8)) then
+                        fs! = new DataRow()
+                        it! = vec!.iterator()
+                        while it!.hasNext()
+                            fs!.setFieldValue(it!.next(),"")
+                        wend
+                        bc!.setFieldSelection(fs!)
+                    else
+                        throw errmes(-1),err()
+                    fi
+                 fi
             fi
 
             scope!=params!.get("_SCOPE")
             if scope! <> null() then
-                bc!.setScope(scope!)
+                bc!.setScope(str(scope!))
             endif
 
             first% = 0
@@ -364,12 +406,55 @@ main_loop:
                 endif
             endif
 
+            if len(sel$)>8 and sel$(1,8) = "_lookup/" then
+                rs! = new ResultSet()
+
+                if filter!<>null() then
+                    rs!.add(filter!)
+                fi
+                
+                field$=sel$(9)
+                System.out.println(field$)
+                
+                rs! = bc!.retrieveLookup(field$,filter!)
+                
+                response!.put("resultset",rs!)
+                response!.put("BC",bc$)
+                response!.put("single",0)
+                
+                goto send_response            
+            endif
+
             if limitSearch then
                 rs! = bc!.retrieve(first%,last%)
             else
                 rs! = bc!.retrieve()
             endif
 
+
+            if params!.containsKey("_ATTACHMENT") then
+                if rs!.size() =1 then
+                    rec! = rs!.getItem(0)
+                    attachfield$ = params!.get("_ATTACHMENT")
+                    
+                    rs! = new ResultSet()
+                    dr! = new DataRow()
+                    filename$=rec!.getFieldAsString(attachfield$)
+                    dr!.setFieldValue("FILEDELIVERY",filename$)
+                    rs!.addItem(dr!)
+                    
+                    response!.put("resultset",rs!)
+                    response!.put("BC",bc$)
+                    response!.put("single",1)
+                    response!.put("file",filename$)
+                
+                    goto send_response                    
+                    
+                else
+                    throw "file / record not found",11
+                endif
+            endif
+            
             response!.put("resultset",rs!)
             response!.put("request",str(request!))
             response!.put("BC",bc$)
@@ -424,13 +509,18 @@ REM         endif
 
         if authenticated>0 then
             response!.put("statuscode",str(statuscode))
-            response!.put("stacktrace",stacktrace$)
+            response!.put("errorcode",errorcode)
+            response!.put("errormsg",errormsg$)
+            rem consider: stack trace only with DEBUG flag in config?
+            response!.put("stacktrace",stacktrace$)         
         else
             response!.put("statuscode","401")
+            response!.put("errorcode",errorcode)
+            response!.put("errormsg",errormsg$)
+            rem no stack trace for unauthenticated users
         fi
 
-        response!.put("errorcode",errorcode)
-        response!.put("errormsg",errormsg$)
+
 
 
         BBjAPI().getGlobalNamespace().setValue(ses$+"_RESPONSE",response!)
