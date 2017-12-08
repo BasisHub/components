@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 
 import com.basiscomponents.db.ResultSet;
 
@@ -53,7 +53,7 @@ public class SqlQueryBC {
 	}
 
 
-	public ResultSet retrieve(String sql, ArrayList<Object> params) throws SQLException {
+	public ResultSet retrieve(String sql, List<Object> params) throws SQLException {
 		ResultSet brs = null;
 		Connection conn = null;
 
@@ -89,7 +89,7 @@ public class SqlQueryBC {
 		return execute(sql,null);
 	}
 
-	public Boolean execute(String sql, ArrayList<Object> params) throws SQLException {
+	public Boolean execute(String sql, List<Object> params) throws SQLException {
 		Connection conn = null;
 		Boolean b = false;
 
