@@ -218,24 +218,28 @@ main_loop:
 
         case "DELETE"
         case "PUT"
-            if sel$ = "" or filterf$ = "" then
-                throw "Missing resource ID",999
-            endif
-            dr! = DataRow.fromJson(request!.get("body"))
-            k! = java.util.Arrays.asList(new String(filterf$).split("/"))
-            v! = java.util.Arrays.asList(new String(sel$).split("/",-1))
-            if v!.size() < k!.size() then
-                throw "Not enough parameters for "+method$,999
-            endif
-            for i=0 to k!.size()-1
-                if !dr!.contains(k!.get(i)) then
-                    dr!.setFieldValue(k!.get(i),v!.get(i))
-                else
-                    if dr!.getFieldAsString(k!.get(i)) <> v!.get(i) then
-                        throw "Different resource ID in URL path and request body!",999
-                    endif
+            if method$ = "PUT" and cvs(sel$,4) = "IGNOREKEYS" then
+                dr! = DataRow.fromJson(request!.get("body"))
+            else
+                if sel$ = "" or filterf$ = "" then
+                    throw "Missing resource ID",999
                 endif
-            next i
+                dr! = DataRow.fromJson(request!.get("body"))
+                k! = java.util.Arrays.asList(new String(filterf$).split("/"))
+                v! = java.util.Arrays.asList(new String(sel$).split("/",-1))
+                if v!.size() < k!.size() then
+                    throw "Not enough parameters for "+method$,999
+                endif
+                for i=0 to k!.size()-1
+                    if !dr!.contains(k!.get(i)) then
+                        dr!.setFieldValue(k!.get(i),v!.get(i))
+                    else
+                        if dr!.getFieldAsString(k!.get(i)) <> v!.get(i) then
+                            throw "Different resource ID in URL path and request body!",999
+                        endif
+                    endif
+                next i
+            endif
 
             rs! = new ResultSet()
             if method$ = "PUT" then
@@ -266,7 +270,6 @@ main_loop:
         break
 
         case default
-        
             params! = request!.get("params",err=*next)
 
             if sel$ = "_meta" then
