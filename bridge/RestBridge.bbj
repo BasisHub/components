@@ -3,6 +3,7 @@ use com.basiscomponents.db.ResultSet
 
 class public RestBridge
 
+    field public static BBjString LOGTPL$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*),STATUS:C(1*)"
     field private BBjString pgmPrefix$ = ""
     field private BBjString pgmSuffix$ = ""
 
@@ -38,9 +39,10 @@ class public RestBridge
 
         req_id$ = #logRequest(request!)
 
-        response!.setHeader("Access-Control-Allow-Origin","*")
         if request!.getHeader("Origin") <> null() then
             response!.setHeader("Access-Control-Allow-Origin",request!.getHeader("Origin"))
+    	else
+	        response!.setHeader("Access-Control-Allow-Origin","*")
         endif
         response!.setHeader("Access-Control-Allow-Credentials","true")
         response!.setHeader("Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS")
@@ -154,8 +156,10 @@ class public RestBridge
         fi
 
         if auth$="null" or len(auth$)<8 OR auth$(1,5)<>"Basic" then
-            response!.setHeader("WWW-Authenticate","Basic realm=""REST Web Service""")
-            System.out.println("REST: error 401 Authentication required")
+            tmp$=str(request!.getHeader("X-REQUESTED-WITH",err=*next))
+            if tmp$<> "XMLHttpRequest" then
+                response!.setHeader("WWW-Authenticate","Basic realm=""REST Web Service""")
+            fi
             response!.sendError(401,"Authentication required")
             #logResponse(req_id$,response!)
             methodret
@@ -204,7 +208,11 @@ class public RestBridge
         req!.put("REST_PGM_PREFIX",#pgmPrefix$)
         req!.put("REST_PGM_SUFFIX",#pgmSuffix$)
 
-        answer!=#invoke(ses$,req!)
+        if str(uri!)="/admin/requestlog" then
+            answer! = #getRequestLog(request!)
+        else
+            answer!=#invoke(ses$,req!)
+        fi
         ses_list!.push(ses$)
 
         accept$=str(params!.get("_ACCEPT"))
@@ -251,6 +259,48 @@ class public RestBridge
         errormsg! = answer!.get("errormsg",err=*next)
         errorcode$ = str(answer!.get("errorcode"))
             
+        blobdata$=str(params!.get("_BLOBDATA"))
+        System.out.println(params!)
+        System.out.println("BLOBDATA : "+blobdata$)
+        if blobdata$<>"null" then
+        
+                rs! = answer!.get("resultset",err=*next)
+                if rs! = null() or rs!.size()<>1 or !rs!.getItem(0).getFieldNames().contains(blobdata$) then
+                    goto blob_err
+                fi
+                
+                blobname$=str(params!.get("_BLOBNAME"))
+                if blobname$="null" then
+                    blobname$="attachment.dat"
+                fi
+                if pos("."=blobname$)>0 then
+                    ext$=blobname$(pos("."=blobname$,1,pos("."=blobname$,1,0))+1)
+                fi
+                d$=System.getProperty("basis.cacheDirectory")+"/_output_/"
+                mkdir d$,err=*next
+
+                wr! = new java.io.StringWriter()
+                f! = java.io.File.createTempFile("output_", ext$, new java.io.File(d$))
+                ch=unt
+                open (ch)str(f!.toPath())
+                write (ch)rs!.getItem(0).getFieldAsString(blobdata$,err=blob_err)
+                close (ch)
+
+                java.nio.file.Files.copy(f!.toPath(), response!.getOutputStream())
+                f!.delete()
+                                            
+                response!.setContentType("application/"+ext$)
+                response!.setHeader("Content-Disposition","inline; filename="""+blobname$+"""")
+    
+                #logResponse(req_id$,response!)
+                methodret 
+                
+                blob_err:
+                  response!.getOutputStream().write("BLOB not found")
+                  response!.setStatus(404)
+                  #logResponse(req_id$,response!)
+                  methodret 
+        endif 
 
         
         if answer!.containsKey("file") then
@@ -679,11 +729,9 @@ class public RestBridge
         ch=unt
         open (ch)rlog$ 
         
-        tpl$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*),STATUS:C(1*)"
+        dim log$:#LOGTPL$
         
-        dim log$:tpl$
-        
-        id$=str(System.currentTimeMillis())+"_"+str(dec(INFO(3,0)))
+        id$=str(System.currentTimeMillis())+"_"+str(dec(INFO(3,0)):"000000")
         
         log.id$=id$
         log.METHOD$=str(request!.getMethod())
@@ -697,7 +745,7 @@ class public RestBridge
         it! =h!.iterator()
         while it!.hasNext()
             hn$=it!.next()
-            h$=h$+hn$+"="+request!.getHeader(hn$)+","
+            h$=h$+hn$+"="+str(request!.getHeader(hn$))+","
         wend
         log.HEADERS$=h$
         
@@ -705,7 +753,7 @@ class public RestBridge
         it! =p!.iterator()
         while it!.hasNext()
             pn$=it!.next()
-            p$=p$+pn$+"="+request!.getParameter(pn$)+","
+            p$=p$+pn$+"="+str(request!.getParameter(pn$))+","
         wend
         log.PARAMS$=p$
         
@@ -730,10 +778,9 @@ class public RestBridge
         ch=unt
         open (ch,err=skip)rlog$ 
         
-        tpl$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*),STATUS:C(1*)"
-        dim log$:tpl$
-        
-        read record (ch,dom=skip,key=id$)log$
+        dim log$:#LOGTPL$
+        log.id$=id$
+        read record (ch,dom=skip,key=log.id$)log$
         log.END=System.currentTimeMillis()
         log.DURATION = log.END-log.START
         
@@ -745,6 +792,41 @@ class public RestBridge
         
         skip:
             
+    methodend
+    
+    method private HashMap getRequestLog(BBjspWebRequest request!)
+    
+        answer! = new HashMap()
+        rs! = new ResultSet()
+    
+        rlog$=stbl("REST_REQUESTLOG",err=skip)
+        
+
+        ch=unt
+        open (ch,err=skip)rlog$ 
+        
+        tpl$=#LOGTPL$
+        dim log$:tpl$
+
+        while 1
+            read record (ch,end=*break)log$
+            dr! = com.basiscomponents.db.DataRow.fromTemplate(tpl$,log$)
+            rs!.addItem(dr!)
+        wend
+        
+        close (ch)
+        
+        answer!.put("statuscode","200")
+        answer!.put("resultset",rs!)
+        answer!.put("single",0)
+        methodret answer!
+        
+        skip:        
+            answer!.put("statuscode","404")
+            answer!.put("errormsg","request logging not enabled")
+            answer!.put("single",0)
+            methodret answer!
+    
     methodend
 
 classend
