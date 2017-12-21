@@ -106,7 +106,7 @@ public class SqlQueryBC {
 				}
 			}
 
-			b = prep.execute();
+			b = prep.execute() || prep.getUpdateCount() > 0;
 		} catch (SQLException e1) {
 			throw e1;
 		}
