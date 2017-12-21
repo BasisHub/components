@@ -45,6 +45,7 @@ public class SqlTableBC implements BusinessComponent {
 	private DataRow MetaData;
 	private Connection Conn;
 	private String retrieveSql;
+	private String sqlStatement;
 	private DataRow retrieveParams;
 	private HashMap<String,String> mapping = new HashMap<String,String>();
 
@@ -463,6 +464,7 @@ public class SqlTableBC implements BusinessComponent {
 				}
 			}
 
+			sqlStatement = sql;
 			PreparedStatement prep = conn.prepareStatement(sql);
 
 			DataRow params = new DataRow();
@@ -685,6 +687,7 @@ public class SqlTableBC implements BusinessComponent {
 			prep.close();
 		}
 
+		sqlStatement = sql;
 
 		//reload from the database
 		if (pk_present) {
@@ -757,6 +760,7 @@ public class SqlTableBC implements BusinessComponent {
 
 		Connection conn = getConnection();
 		PreparedStatement prep = conn.prepareStatement(sql);
+		sqlStatement = sql;
 
 		setSqlParams(prep, r, PrimaryKeys);
 
@@ -960,5 +964,15 @@ public class SqlTableBC implements BusinessComponent {
 	 */
 	public void setTruncateFieldValues(boolean truncate) {
 		truncateFieldValues = truncate;
+	}
+
+
+	/**
+	 * Returns the last executed sql statement. The last executed sql statement is set after a retrieve, write or delete.
+	 * <p>
+	 * @return the last executed sql statement.
+	 */
+	public String getLastSqlStatement() {
+		return sqlStatement;
 	}
 }
