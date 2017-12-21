@@ -1773,6 +1773,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
 		StringWriter w = new StringWriter();
 		JsonGenerator g = jf.createGenerator(w);
+		g.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
 		// g.useDefaultPrettyPrinter();
 
 		g.writeStartArray();
@@ -1831,7 +1832,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					break;
 
 				case java.sql.Types.NUMERIC:
-					g.writeNumberField(fn, dr.getField(fn).getBigDecimal());
+					g.writeNumberField(fn, dr.getField(fn).getBigDecimal().stripTrailingZeros());
 					break;
 
 				case java.sql.Types.DECIMAL:

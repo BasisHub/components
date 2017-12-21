@@ -487,6 +487,8 @@ public class DataField implements java.io.Serializable {
 					return "1";
 				else
 					return "0";
+			if (classname.equals("java.math.BigDecimal"))
+				return ((BigDecimal)o).stripTrailingZeros().toPlainString();
 			if (!classname.equals("java.lang.String"))
 				return o.toString();
 			else
@@ -545,7 +547,7 @@ public class DataField implements java.io.Serializable {
 		case java.sql.Types.NUMERIC:
 			if (tmpstr.isEmpty())
 				tmpstr = "0.0";
-			return new java.math.BigDecimal(o.toString());
+			return new java.math.BigDecimal(tmpstr);
 		case java.sql.Types.DATE:
 			if (classname.equals("java.sql.Date"))
 				return o;
