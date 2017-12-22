@@ -177,16 +177,31 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 
+		// Check for "cond:" filters. If found, then create new ExpressionMatcher object's per field.
+		HashMap<String, java.util.Comparator<DataRow>> comparatorMap = new HashMap<String, java.util.Comparator<DataRow>>();
+		HashMap<String, ExpressionMatcher> matcherMap = new HashMap<String, ExpressionMatcher>();
 		BBArrayList<String> filterFields = simpleFilterCondition.getFieldNames();
+		if (size() > 0) {
+			DataRow dr = get(0);
+			Iterator<String> it = filterFields.iterator();
+			while (it.hasNext()) {
+				String fieldName = it.next();
+				if (!dr.contains(fieldName)) continue;
+				DataField field = simpleFilterCondition.getField(fieldName);
+				if (field.getValue() != null && field.getString().startsWith("cond:")) {
+					comparatorMap.put(fieldName, new DataRowComparator(fieldName));
+					matcherMap.put(fieldName, new ExpressionMatcher(field.getString().substring(5), dr.getFieldType(fieldName), fieldName));
+				}
+			}
+		}
 
 		Iterator<DataRow> it = this.iterator();
 		while (it.hasNext()) {
 			DataRow dr = it.next();
-			@SuppressWarnings("rawtypes")
-			Iterator it2 = filterFields.iterator();
+			Iterator<String> it2 = filterFields.iterator();
 			Boolean match = true;
 			while (it2.hasNext()) {
-				String k = (String) it2.next();
+				String k = it2.next();
 				match = true;
 				DataField cond = simpleFilterCondition.getField(k);
 
@@ -195,7 +210,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						match = false;
 						break;
 					}
-				} else {
+				}
+				else if(matcherMap.containsKey(k)) {
+					java.util.Comparator<DataRow> comparator = comparatorMap.get(k);
+					ExpressionMatcher matcher = matcherMap.get(k);
+					if (!matcher.match(comparator, dr, k)) {
+						match = false;
+						break;
+					}
+				}
+				else {
 					DataField comp = dr.getField(k);
 					if (!cond.equals(comp)) {
 						match = false;
