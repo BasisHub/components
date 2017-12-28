@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -453,11 +458,11 @@ public class ResultSetExporter {
 	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader) throws Exception{  
         String sheetName = "Sheet1"; //name of sheet
 
-        XSSFWorkbook wb = new XSSFWorkbook();
-        XSSFSheet sheet = wb.createSheet(sheetName);
+        Workbook wb = new SXSSFWorkbook(400);
+        Sheet sheet = wb.createSheet(sheetName);
         
-        XSSFRow row;
-        XSSFCell cell;
+        Row row;
+        Cell cell;
         
         if(rs == null || rs.isEmpty()){
         	row = sheet.createRow(0);
