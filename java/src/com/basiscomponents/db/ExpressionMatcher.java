@@ -7,10 +7,6 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
 
 public class ExpressionMatcher {
 
@@ -208,52 +204,18 @@ public class ExpressionMatcher {
 	}
 
 
-	public static void main(String[] args) throws Exception {
-
-		String s = generatePreparedWhereClause("ABC", ">=10&<=100|101");
-		System.out.println(s);
-
-		//Eigene Implementierung
-		DataRowComparator comp = new DataRowComparator("VALUE");
+	public static DataRow getPreparedWhereClauseValues(String condition, int fieldType) throws Exception {
 		DataRow dr = new DataRow();
-		dr.setFieldValue("VALUE", Types.CHAR, "d");
-		long tt1 = System.currentTimeMillis();
-		ExpressionMatcher matcher = new ExpressionMatcher(">=a&<=i|z", Types.CHAR, "VALUE");
-		for (int i=0; i<1000000; i++) {
-//			boolean b = matcher.match(Character.toString((char)(i%26+97)));
-			boolean b = matcher.match(comp, dr, "VALUE");
+		String[] conditions = condition.split("(?<!\\\\)[\\|&]");
+		Pattern p = Pattern.compile("^(!|<=|>=|=<|=>|<|>){0,1}(.*)");
+		int i = 1;
+		for (String cond : conditions) {
+			Matcher m = p.matcher(cond);
+			if (m.find()) {
+				dr.setFieldValue("VALUE"+i, fieldType, m.group(2).replaceAll("\\\\([\\|&])", "$1"));
+				i++;
+			}
 		}
-		tt1 = System.currentTimeMillis() - tt1;
-
-
-		//Implementierung mit der JavaScript Engine
-		long tt2 = System.currentTimeMillis();
-		ScriptEngineManager mgr = new ScriptEngineManager();
-		ScriptEngine jsEngine = mgr.getEngineByName("JavaScript");
-		jsEngine.eval("var fun1 = function(a,value,i,z) {if (value==null) return false; else return value>=a && value<=i || value==z;};");
-		Invocable invocable = (Invocable) jsEngine;
-		for (int i=0; i < 1000000; i++) {
-			boolean b = (boolean)invocable.invokeFunction("fun1", "a", Character.toString((char)(i%26+97)), "i", "z");
-		}
-		tt2 = System.currentTimeMillis() - tt2;
-
-
-		long tt3 = System.currentTimeMillis();
-		mgr = new ScriptEngineManager();
-		jsEngine = mgr.getEngineByName("JavaScript");
-		String a = ">=a&<=i|z";
-		String jsFunc = ExpressionMatcher.generateJavaScriptExpression(a, java.sql.Types.TIMESTAMP);
-		jsEngine.eval(jsFunc);
-		invocable = (Invocable) jsEngine;
-		for (int i=0; i < 1000000; i++) {
-			boolean b = (boolean)invocable.invokeFunction("func1", Character.toString((char)(i%26+97)));
-		}
-		tt3 = System.currentTimeMillis() - tt3;
-
-
-		System.out.println(tt1);
-		System.out.println(tt2);
-		System.out.println(tt3);
-
+		return dr;
 	}
 }

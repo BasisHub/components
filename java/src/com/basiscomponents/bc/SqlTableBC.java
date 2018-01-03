@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ExpressionMatcher;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.DataField;
 
@@ -435,10 +436,15 @@ public class SqlTableBC implements BusinessComponent {
 			if (Filter != null && Filter.getFieldNames().size() > 0) {
 				StringBuffer wh = new StringBuffer("");
 				for (String f : Filter.getFieldNames()) {
-					if (customStatementUsed)
-						wh.append(" AND "+DBQuoteString+f+DBQuoteString+"=?");
-					else
-						wh.append(" AND "+DBQuoteString+getMapping(f)+DBQuoteString+"=?");
+					if (Filter.getFieldAsString(f).startsWith("cond:")) {
+						wh.append(" AND ("+com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f, Filter.getFieldAsString(f).substring(5)) + ")");
+					}
+					else {
+						if (customStatementUsed)
+							wh.append(" AND "+DBQuoteString+f+DBQuoteString+"=?");
+						else
+							wh.append(" AND "+DBQuoteString+getMapping(f)+DBQuoteString+"=?");
+					}
 				}
 				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
 			}
@@ -795,7 +801,7 @@ public class SqlTableBC implements BusinessComponent {
 	 * @param fields an ArrayList with field names. If not null and not empty, this list will be used to get a portion of values from the DataRow dr. Otherwise all fields from dr will be set in the prepared statement.
 	 * @throws SQLException is thrown when a value cannot be set.
 	 */
-	private void setSqlParams(PreparedStatement prep, DataRow dr, ArrayList<String> fields) throws SQLException {
+	private void setSqlParams(PreparedStatement prep, DataRow dr, ArrayList<String> fields) throws Exception {
 		if (prep == null || dr == null) {
 			return;
 		}
@@ -825,6 +831,14 @@ public class SqlTableBC implements BusinessComponent {
 				else
 					prep.setNull(index, type);
 				index++;
+				continue;
+			}
+			else if (o.getValue() instanceof String && ((String)o.getValue()).startsWith("cond:")) {
+				DataRow drv = ExpressionMatcher.getPreparedWhereClauseValues(((String)o.getValue()).substring(5), type);
+				for (String expField : drv.getFieldNames()) {
+					prep.setObject(index, drv.getFieldValue(expField));
+					index++;
+				}
 				continue;
 			}
 			switch (type) {
