@@ -1473,8 +1473,10 @@ public class DataRow implements java.io.Serializable {
 				HashMap<String, String> attr = ar.getFieldAttributes(fieldName);
 				@SuppressWarnings("unchecked")
 				HashMap<String, HashMap> m = (HashMap<String, HashMap>)hm.get("meta");
-				attr.putAll((HashMap<String, String>)m.get(fieldName));
-				dr.setFieldAttributes(fieldName, attr);
+				if (m != null && m.containsKey(fieldName)){
+					attr.putAll((HashMap<String, String>)m.get(fieldName));
+					dr.setFieldAttributes(fieldName, attr);
+				}
 			}
 		} else {
 			// old format - deprecated
