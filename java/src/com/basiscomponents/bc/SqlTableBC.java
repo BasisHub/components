@@ -200,7 +200,9 @@ public class SqlTableBC implements BusinessComponent {
 					int type = (int)attrmap.get("ColumnType");
 					AttributesRecord.addDataField(field, type, new DataField(null));
 					for (String attr : attrmap.keySet()) {
-						AttributesRecord.setFieldAttribute(field, attr, attrmap.get(attr).toString());
+						String value = null;
+						if (attrmap.get(attr) != null) value = attrmap.get(attr).toString();
+						AttributesRecord.setFieldAttribute(field, attr, value);
 					}
 					if (MetaData.getFieldAttributes(field).containsKey("REMARKS"))
 						AttributesRecord.setFieldAttribute(field, "REMARKS", MetaData.getFieldAttribute(field, "REMARKS"));
