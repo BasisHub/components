@@ -702,10 +702,10 @@ public class SqlTableBC implements BusinessComponent {
 			DataRow oldfilter = this.Filter;
 			DataRow filter = new DataRow();
 			for (String f : PrimaryKeys) {
-				filter.setFieldValue(f, ret.getField(f));
+				filter.setFieldValue(f, ret.getFieldType(f), ret.getField(f).getValue());
 			}
 			this.setFilter(filter);
-			ResultSet retrs = this.retrieve(0,2);
+			ResultSet retrs = this.retrieve(0,1);
 			if (retrs.size() == 1)
 				ret=retrs.getItem(0);
 			else {
