@@ -395,6 +395,9 @@ public class SqlTableBC implements BusinessComponent {
 			throw new Exception("Full text search not implemented yet!");
 		}
 
+		DataRow filter = Filter;
+		if (filter != null) filter = filter.clone();
+
 		ResultSet retrs = null;
 		Connection conn = null;
 		try {
@@ -435,17 +438,21 @@ public class SqlTableBC implements BusinessComponent {
 			else
 				sql = "SELECT "+sqlfields+" FROM "+DBQuoteString+Table+DBQuoteString;
 
-			if (Filter != null && Filter.getFieldNames().size() > 0) {
+			if (filter != null && filter.getFieldNames().size() > 0) {
 				StringBuffer wh = new StringBuffer("");
-				for (String f : Filter.getFieldNames()) {
-					if (Filter.getFieldAsString(f).startsWith("cond:")) {
-						wh.append(" AND ("+com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f, Filter.getFieldAsString(f).substring(5)) + ")");
+				for (String f : filter.getFieldNames()) {
+					if (filter.getFieldAsString(f).startsWith("cond:")) {
+						wh.append(" AND ("+com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f, filter.getFieldAsString(f).substring(5)) + ")");
 					}
 					else {
-						if (customStatementUsed)
-							wh.append(" AND "+DBQuoteString+f+DBQuoteString+"=?");
+						String ff = f;
+						if (!customStatementUsed) ff = getMapping(f);
+						if (filter.getField(f).getValue() == null) {
+							wh.append(" AND "+DBQuoteString+ff+DBQuoteString+" IS NULL");
+							filter.removeField(f);
+						}
 						else
-							wh.append(" AND "+DBQuoteString+getMapping(f)+DBQuoteString+"=?");
+							wh.append(" AND "+DBQuoteString+ff+DBQuoteString+"=?");
 					}
 				}
 				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
@@ -478,8 +485,8 @@ public class SqlTableBC implements BusinessComponent {
 			DataRow params = new DataRow();
 			if (retrieveParams != null && retrieveParams.getColumnCount() > 0)
 				params = retrieveParams.clone();
-			if (Filter != null && Filter.getColumnCount() > 0)
-				params.mergeRecord(Filter);
+			if (filter != null && filter.getColumnCount() > 0)
+				params.mergeRecord(filter);
 			if (params.getColumnCount() > 0)
 				setSqlParams(prep, params, params.getFieldNames());
 
