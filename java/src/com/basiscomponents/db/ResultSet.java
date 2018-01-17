@@ -177,16 +177,31 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 
+		// Check for "cond:" filters. If found, then create new ExpressionMatcher object's per field.
+		HashMap<String, java.util.Comparator<DataRow>> comparatorMap = new HashMap<String, java.util.Comparator<DataRow>>();
+		HashMap<String, ExpressionMatcher> matcherMap = new HashMap<String, ExpressionMatcher>();
 		BBArrayList<String> filterFields = simpleFilterCondition.getFieldNames();
+		if (size() > 0) {
+			DataRow dr = get(0);
+			Iterator<String> it = filterFields.iterator();
+			while (it.hasNext()) {
+				String fieldName = it.next();
+				if (!dr.contains(fieldName)) continue;
+				DataField field = simpleFilterCondition.getField(fieldName);
+				if (field.getValue() != null && field.getString().startsWith("cond:")) {
+					comparatorMap.put(fieldName, new DataRowComparator(fieldName));
+					matcherMap.put(fieldName, new ExpressionMatcher(field.getString().substring(5), dr.getFieldType(fieldName), fieldName));
+				}
+			}
+		}
 
 		Iterator<DataRow> it = this.iterator();
 		while (it.hasNext()) {
 			DataRow dr = it.next();
-			@SuppressWarnings("rawtypes")
-			Iterator it2 = filterFields.iterator();
+			Iterator<String> it2 = filterFields.iterator();
 			Boolean match = true;
 			while (it2.hasNext()) {
-				String k = (String) it2.next();
+				String k = it2.next();
 				match = true;
 				DataField cond = simpleFilterCondition.getField(k);
 
@@ -195,7 +210,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						match = false;
 						break;
 					}
-				} else {
+				}
+				else if(matcherMap.containsKey(k)) {
+					java.util.Comparator<DataRow> comparator = comparatorMap.get(k);
+					ExpressionMatcher matcher = matcherMap.get(k);
+					if (!matcher.match(comparator, dr, k)) {
+						match = false;
+						break;
+					}
+				}
+				else {
 					DataField comp = dr.getField(k);
 					if (!cond.equals(comp)) {
 						match = false;
@@ -1773,6 +1797,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
 		StringWriter w = new StringWriter();
 		JsonGenerator g = jf.createGenerator(w);
+		g.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
 		// g.useDefaultPrettyPrinter();
 
 		g.writeStartArray();
@@ -1831,7 +1856,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					break;
 
 				case java.sql.Types.NUMERIC:
-					g.writeNumberField(fn, dr.getField(fn).getBigDecimal());
+					g.writeNumberField(fn, dr.getField(fn).getBigDecimal().stripTrailingZeros());
 					break;
 
 				case java.sql.Types.DECIMAL:
@@ -1871,11 +1896,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					if (dr.getField(fn) == null || dr.getField(fn).getTimestamp() == null)
 						g.writeStringField(fn, "");
 					else {
-						DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-						DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-						String fd = df1.format(dr.getField(fn).getTimestamp()) + "T"
-								+ df2.format(dr.getField(fn).getTimestamp()) + ".0";
-						g.writeStringField(fn, fd);
+						g.writeStringField(fn, dr.getField(fn).getTimestamp().toString().replaceFirst(" ", "T"));
 					}
 					break;
 				case java.sql.Types.DATE:
@@ -1883,11 +1904,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					if (dr.getField(fn) == null || dr.getField(fn).getDate() == null)
 						g.writeStringField(fn, "");
 					else {
-						DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-						DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-						String fd = df1.format(dr.getField(fn).getDate()) + "T" + df2.format(dr.getField(fn).getDate())
-								+ ".0";
-						g.writeStringField(fn, fd);
+						g.writeStringField(fn, dr.getField(fn).getDate().toString());
 					}
 					break;
 

@@ -1,7 +1,7 @@
 package com.basiscomponents.db;
 
 import java.sql.Time;
-import java.text.ParseException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1424,27 +1424,13 @@ public class DataRow implements java.io.Serializable {
 				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
 				case (int) 11:
 					String tss = fieldObj.toString();
-					try{
-					java.sql.Timestamp ts = java.sql.Timestamp
-							.valueOf(tss.substring(0, 10) + " " + tss.substring(11, 19));
+					java.sql.Timestamp ts = (java.sql.Timestamp)DataField.convertType(tss, fieldType);
 					dr.addDataField(fieldName, fieldType, new DataField(ts));
-					}
-					catch (Exception e) {
-						dr.addDataField(fieldName, fieldType, new DataField(new java.sql.Timestamp(0)));
-					}
-					finally {
-
-					}
 					break;
 				case java.sql.Types.DATE:
 				case (int) 9:
 					tss = fieldObj.toString();
-				java.sql.Date ds=null;
-					if (tss.length()>9){
-						ds = java.sql.Date.valueOf(tss.substring(0, 10));
-					}
-					dr.addDataField(fieldName, fieldType, new DataField(ds));
-
+					dr.addDataField(fieldName, fieldType, new DataField((java.sql.Date)DataField.convertType(tss, fieldType)));
 					break;
 				case java.sql.Types.ARRAY:
 				case java.sql.Types.BINARY:
@@ -1473,8 +1459,10 @@ public class DataRow implements java.io.Serializable {
 				HashMap<String, String> attr = ar.getFieldAttributes(fieldName);
 				@SuppressWarnings("unchecked")
 				HashMap<String, HashMap> m = (HashMap<String, HashMap>)hm.get("meta");
-				attr.putAll((HashMap<String, String>)m.get(fieldName));
-				dr.setFieldAttributes(fieldName, attr);
+				if (m != null && m.containsKey(fieldName)){
+					attr.putAll((HashMap<String, String>)m.get(fieldName));
+					dr.setFieldAttributes(fieldName, attr);
+				}
 			}
 		} else {
 			// old format - deprecated
@@ -1501,6 +1489,22 @@ public class DataRow implements java.io.Serializable {
 					else
 						numval = Double.parseDouble(o.toString());
 					dr.setFieldValue(name, numval);
+					break;
+				case "D":
+					Object d = field.get("DateValue");
+					if (d == null) {
+						dr.setFieldValue(name, Types.DATE, null);
+					}
+					else {
+						dr.setFieldValue(name, Types.DATE, d.toString());
+					}
+					break;
+				case "T":
+					Object t = field.get("TimestampValue");
+					if (t == null)
+						dr.setFieldValue(name, Types.TIMESTAMP, null);
+					else
+						dr.setFieldValue(name, Types.TIMESTAMP, t.toString());
 					break;
 				default:
 					break;

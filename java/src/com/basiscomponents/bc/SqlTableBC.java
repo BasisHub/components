@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ExpressionMatcher;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.DataField;
 
@@ -45,6 +46,7 @@ public class SqlTableBC implements BusinessComponent {
 	private DataRow MetaData;
 	private Connection Conn;
 	private String retrieveSql;
+	private String sqlStatement;
 	private DataRow retrieveParams;
 	private HashMap<String,String> mapping = new HashMap<String,String>();
 
@@ -198,7 +200,9 @@ public class SqlTableBC implements BusinessComponent {
 					int type = (int)attrmap.get("ColumnType");
 					AttributesRecord.addDataField(field, type, new DataField(null));
 					for (String attr : attrmap.keySet()) {
-						AttributesRecord.setFieldAttribute(field, attr, attrmap.get(attr).toString());
+						String value = null;
+						if (attrmap.get(attr) != null) value = attrmap.get(attr).toString();
+						AttributesRecord.setFieldAttribute(field, attr, value);
 					}
 					if (MetaData.getFieldAttributes(field).containsKey("REMARKS"))
 						AttributesRecord.setFieldAttribute(field, "REMARKS", MetaData.getFieldAttribute(field, "REMARKS"));
@@ -391,6 +395,9 @@ public class SqlTableBC implements BusinessComponent {
 			throw new Exception("Full text search not implemented yet!");
 		}
 
+		DataRow filter = Filter;
+		if (filter != null) filter = filter.clone();
+
 		ResultSet retrs = null;
 		Connection conn = null;
 		try {
@@ -431,13 +438,22 @@ public class SqlTableBC implements BusinessComponent {
 			else
 				sql = "SELECT "+sqlfields+" FROM "+DBQuoteString+Table+DBQuoteString;
 
-			if (Filter != null && Filter.getFieldNames().size() > 0) {
+			if (filter != null && filter.getFieldNames().size() > 0) {
 				StringBuffer wh = new StringBuffer("");
-				for (String f : Filter.getFieldNames()) {
-					if (customStatementUsed)
-						wh.append(" AND "+DBQuoteString+f+DBQuoteString+"=?");
-					else
-						wh.append(" AND "+DBQuoteString+getMapping(f)+DBQuoteString+"=?");
+				for (String f : filter.getFieldNames()) {
+					if (filter.getFieldAsString(f).startsWith("cond:")) {
+						wh.append(" AND ("+com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f, filter.getFieldAsString(f).substring(5)) + ")");
+					}
+					else {
+						String ff = f;
+						if (!customStatementUsed) ff = getMapping(f);
+						if (filter.getField(f).getValue() == null) {
+							wh.append(" AND "+DBQuoteString+ff+DBQuoteString+" IS NULL");
+							filter.removeField(f);
+						}
+						else
+							wh.append(" AND "+DBQuoteString+ff+DBQuoteString+"=?");
+					}
 				}
 				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
 			}
@@ -463,13 +479,14 @@ public class SqlTableBC implements BusinessComponent {
 				}
 			}
 
+			sqlStatement = sql;
 			PreparedStatement prep = conn.prepareStatement(sql);
 
 			DataRow params = new DataRow();
 			if (retrieveParams != null && retrieveParams.getColumnCount() > 0)
 				params = retrieveParams.clone();
-			if (Filter != null && Filter.getColumnCount() > 0)
-				params.mergeRecord(Filter);
+			if (filter != null && filter.getColumnCount() > 0)
+				params.mergeRecord(filter);
 			if (params.getColumnCount() > 0)
 				setSqlParams(prep, params, params.getFieldNames());
 
@@ -685,16 +702,17 @@ public class SqlTableBC implements BusinessComponent {
 			prep.close();
 		}
 
+		sqlStatement = sql;
 
 		//reload from the database
 		if (pk_present) {
 			DataRow oldfilter = this.Filter;
 			DataRow filter = new DataRow();
 			for (String f : PrimaryKeys) {
-				filter.setFieldValue(f, ret.getField(f));
+				filter.setFieldValue(f, ret.getFieldType(f), ret.getField(f).getValue());
 			}
 			this.setFilter(filter);
-			ResultSet retrs = this.retrieve(0,2);
+			ResultSet retrs = this.retrieve(0,1);
 			if (retrs.size() == 1)
 				ret=retrs.getItem(0);
 			else {
@@ -757,6 +775,7 @@ public class SqlTableBC implements BusinessComponent {
 
 		Connection conn = getConnection();
 		PreparedStatement prep = conn.prepareStatement(sql);
+		sqlStatement = sql;
 
 		setSqlParams(prep, r, PrimaryKeys);
 
@@ -791,7 +810,7 @@ public class SqlTableBC implements BusinessComponent {
 	 * @param fields an ArrayList with field names. If not null and not empty, this list will be used to get a portion of values from the DataRow dr. Otherwise all fields from dr will be set in the prepared statement.
 	 * @throws SQLException is thrown when a value cannot be set.
 	 */
-	private void setSqlParams(PreparedStatement prep, DataRow dr, ArrayList<String> fields) throws SQLException {
+	private void setSqlParams(PreparedStatement prep, DataRow dr, ArrayList<String> fields) throws Exception {
 		if (prep == null || dr == null) {
 			return;
 		}
@@ -821,6 +840,14 @@ public class SqlTableBC implements BusinessComponent {
 				else
 					prep.setNull(index, type);
 				index++;
+				continue;
+			}
+			else if (o.getValue() instanceof String && ((String)o.getValue()).startsWith("cond:")) {
+				DataRow drv = ExpressionMatcher.getPreparedWhereClauseValues(((String)o.getValue()).substring(5), type);
+				for (String expField : drv.getFieldNames()) {
+					prep.setObject(index, drv.getFieldValue(expField));
+					index++;
+				}
 				continue;
 			}
 			switch (type) {
@@ -960,5 +987,15 @@ public class SqlTableBC implements BusinessComponent {
 	 */
 	public void setTruncateFieldValues(boolean truncate) {
 		truncateFieldValues = truncate;
+	}
+
+
+	/**
+	 * Returns the last executed sql statement. The last executed sql statement is set after a retrieve, write or delete.
+	 * <p>
+	 * @return the last executed sql statement.
+	 */
+	public String getLastSqlStatement() {
+		return sqlStatement;
 	}
 }
