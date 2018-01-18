@@ -6,6 +6,7 @@ class public RestBridge
     field public static BBjString LOGTPL$="ID:C(16*),METHOD:C(1*),START:N(1*),END:N(1*),DURATION:N(1*),ADDR:C(1*),URL:C(1*),URI:C(1*),QUERY:C(1*),HEADERS:C(1*),PARAMS:C(1*),STATUS:C(1*)"
     field private BBjString pgmPrefix$ = ""
     field private BBjString pgmSuffix$ = ""
+    field private BBjNumber pgmUseAllowedFilter
 
     METHOD PUBLIC void service(BBjspServletContext context!)
 
@@ -20,6 +21,9 @@ class public RestBridge
         endif
         if context!.getInitParameter("REST_PGM_SUFFIX") <> null() then
             #pgmSuffix$ = context!.getInitParameter("REST_PGM_SUFFIX")
+        endif
+        if context!.getInitParameter("USE_GET_ALLOWED_FILTER") <> null() then
+            #pgmUseAllowedFilter = (context!.getInitParameter("USE_GET_ALLOWED_FILTER") = "true")
         endif
 
         #this!.service(request!,response!)
@@ -207,6 +211,7 @@ class public RestBridge
         req!.put("preferredlocales",request!.getLocales())
         req!.put("REST_PGM_PREFIX",#pgmPrefix$)
         req!.put("REST_PGM_SUFFIX",#pgmSuffix$)
+        req!.put("USE_GET_ALLOWED_FILTER",#pgmUseAllowedFilter)
 
         if str(uri!)="/admin/requestlog" then
             answer! = #getRequestLog(request!)
