@@ -43,6 +43,7 @@ public class SqlTableBC implements BusinessComponent {
 	private ArrayList<String> PrimaryKeys;
 	private ArrayList<String> AutoIncrementKeys;
 	private DataRow AttributesRecord;
+	private DataRow AllowedFilter;
 	private DataRow MetaData;
 	private Connection Conn;
 	private String retrieveSql;
@@ -997,5 +998,37 @@ public class SqlTableBC implements BusinessComponent {
 	 */
 	public String getLastSqlStatement() {
 		return sqlStatement;
+	}
+
+
+	/**
+	 * Returns a DataRow with fields (the values are not used) which are allowed for filtering.
+	 * This method returns a clone of the attributes record plus additionally added fields.
+	 * Additional fields can be added using the registerFilterField method.
+	 * @return a DataRow with fields used for filtering.
+	 * @see #registerFilterField(String fieldName)
+	 */
+	@Override
+	public DataRow getAllowedFilter() {
+		if (AllowedFilter == null) {
+			AllowedFilter = getAttributesRecord();
+		}
+
+		return AllowedFilter;
+	}
+
+
+	/**
+	 * Add a field to the allowed filter DataRow.
+	 * @param fieldName
+	 * @see #getAllowedFilter()
+	 */
+	public void registerFilterField(String fieldName) {
+		if (AllowedFilter == null) {
+			AllowedFilter = getAttributesRecord();
+		}
+		try {
+			AllowedFilter.setFieldValue(fieldName, Types.VARCHAR, null);
+		} catch (Exception e) {}
 	}
 }

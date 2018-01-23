@@ -113,4 +113,12 @@ public interface BusinessComponent {
      */
 	public DataRow getNewObjectTemplate(DataRow conditions);
 
+	/**
+	 * Returns a DataRow with fields (the values are not used) which are allowed for filtering.
+	 * The default implementation returns getAttributeRecords()
+	 * @return a DataRow with fields used for filtering.
+	 */
+	default public DataRow getAllowedFilter() {
+		return getAttributesRecord();
+	}
 }
