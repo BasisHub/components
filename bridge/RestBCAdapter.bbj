@@ -202,12 +202,11 @@ main_loop:
                     response!.put("statuscode","409")
                     throw errmes(-1),err
                 else
-                    response!.put("statuscode","200")
-                    if dr!.getAttribute("INSERTED") <> null() then
+                    created! = dr!.getAttribute("CREATED")
+                    if created! <> null() and created!.equals("true") then
                         response!.put("statuscode","201")
-                    endif
-                    if dr!.getAttribute("UPDATED") <> null() then
-                        response!.put("statuscode","204")
+                    else
+                        response!.put("statuscode","200")
                     endif
                 endif
 
@@ -218,6 +217,7 @@ main_loop:
                 response!.put("BC",bc$)
                 response!.put("sel",sel$)
                 response!.put("primarykey",filterf$)
+                response!.put("single",1)
             endif
         break
 
@@ -253,13 +253,13 @@ main_loop:
                     response!.put("statuscode","409")
                     throw errmes(-1),err
                 else
-                    response!.put("statuscode","200")
-                    if dr!.getAttribute("INSERTED") <> null() then
+                    created! = dr!.getAttribute("CREATED")
+                    if created! <> null() and created!.equals("true") then
                         response!.put("statuscode","201")
+                    else
+                        response!.put("statuscode","200")
                     endif
-                    if dr!.getAttribute("UPDATED") <> null() then
-                        response!.put("statuscode","204")
-                    endif
+                    response!.put("single",1)
                 endif
                 rs!.addItem(dr!)
             else
@@ -426,17 +426,17 @@ main_loop:
                 if filter!<>null() then
                     rs!.add(filter!)
                 fi
-                
+
                 field$=sel$(9)
                 System.out.println(field$)
-                
+
                 rs! = bc!.retrieveLookup(field$,filter!)
-                
+
                 response!.put("resultset",rs!)
                 response!.put("BC",bc$)
                 response!.put("single",0)
-                
-                goto send_response            
+
+                goto send_response
             endif
 
             if limitSearch then
@@ -450,25 +450,24 @@ main_loop:
                 if rs!.size() =1 then
                     rec! = rs!.getItem(0)
                     attachfield$ = params!.get("_ATTACHMENT")
-                    
+
                     rs! = new ResultSet()
                     dr! = new DataRow()
                     filename$=rec!.getFieldAsString(attachfield$)
                     dr!.setFieldValue("FILEDELIVERY",filename$)
                     rs!.addItem(dr!)
-                    
+
                     response!.put("resultset",rs!)
                     response!.put("BC",bc$)
                     response!.put("single",1)
                     response!.put("file",filename$)
-                
-                    goto send_response                    
-                    
+
+                    goto send_response
                 else
                     throw "file / record not found",11
                 endif
             endif
-            
+
             response!.put("resultset",rs!)
             response!.put("request",str(request!))
             response!.put("BC",bc$)
