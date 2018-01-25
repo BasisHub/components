@@ -1,8 +1,6 @@
 package com.basiscomponents.db;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,8 +11,6 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import com.basiscomponents.bc.SqlTableBC;
 
 /**
  * This class provides static methods to create a com.basiscomponents.db.ResultSet object
@@ -143,17 +139,31 @@ public class ResultSetImporter {
 	    	cellIterator = row.cellIterator();
 		    while(cellIterator.hasNext()){
 		    	cell = (XSSFCell) cellIterator.next();
-		    	
 		    	cellIndex = cell.getColumnIndex();
 		    	colName = rs.getColumnName(cellIndex);
 		    	colType = rs.getColumnType(cellIndex);
 		    	cellType = cell.getCellTypeEnum();
-		    	
 		    	if(colType != 0){
 		    		if(cellType.equals(CellType.STRING)){
 			    		dataRow.setFieldValue(colName, colType, cell.getStringCellValue());
 			    	}else if(cellType.equals(CellType.NUMERIC)){
-			    		dataRow.setFieldValue(colName, colType, cell.getNumericCellValue());
+			    		if (colType==12) {
+			    			// doing some extra effort to avoid .0 being appended to 
+			    			// numeric integer values in a cell that is considered numeric on the excel side 
+			    			 Double value = cell.getNumericCellValue();
+			    			 String strCellValue;
+			    			 if ((value == Math.floor(value)) && !Double.isInfinite(value)) {
+			    				    //this is an integer!
+			                     Long longValue = value.longValue();
+			                     strCellValue = new String(longValue.toString()); 
+			    				}
+			    			 else {
+			    				 strCellValue = new String(value.toString());
+			    			 }
+			    			 dataRow.setFieldValue(colName, colType, strCellValue);
+			    		}
+			    		else
+			    			dataRow.setFieldValue(colName, colType, cell.getNumericCellValue());
 			    	}else if(cellType.equals(CellType.BOOLEAN)){
 			    		dataRow.setFieldValue(colName, colType, cell.getBooleanCellValue());
 			    	}else if(cellType.equals(CellType.BLANK)){
