@@ -43,6 +43,7 @@ public class SqlTableBC implements BusinessComponent {
 	private ArrayList<String> PrimaryKeys;
 	private ArrayList<String> AutoIncrementKeys;
 	private DataRow AttributesRecord;
+	private DataRow AllowedFilter;
 	private DataRow MetaData;
 	private Connection Conn;
 	private String retrieveSql;
@@ -200,7 +201,9 @@ public class SqlTableBC implements BusinessComponent {
 					int type = (int)attrmap.get("ColumnType");
 					AttributesRecord.addDataField(field, type, new DataField(null));
 					for (String attr : attrmap.keySet()) {
-						AttributesRecord.setFieldAttribute(field, attr, attrmap.get(attr).toString());
+						String value = null;
+						if (attrmap.get(attr) != null) value = attrmap.get(attr).toString();
+						AttributesRecord.setFieldAttribute(field, attr, value);
 					}
 					if (MetaData.getFieldAttributes(field).containsKey("REMARKS"))
 						AttributesRecord.setFieldAttribute(field, "REMARKS", MetaData.getFieldAttribute(field, "REMARKS"));
@@ -393,6 +396,9 @@ public class SqlTableBC implements BusinessComponent {
 			throw new Exception("Full text search not implemented yet!");
 		}
 
+		DataRow filter = Filter;
+		if (filter != null) filter = filter.clone();
+
 		ResultSet retrs = null;
 		Connection conn = null;
 		try {
@@ -433,17 +439,21 @@ public class SqlTableBC implements BusinessComponent {
 			else
 				sql = "SELECT "+sqlfields+" FROM "+DBQuoteString+Table+DBQuoteString;
 
-			if (Filter != null && Filter.getFieldNames().size() > 0) {
+			if (filter != null && filter.getFieldNames().size() > 0) {
 				StringBuffer wh = new StringBuffer("");
-				for (String f : Filter.getFieldNames()) {
-					if (Filter.getFieldAsString(f).startsWith("cond:")) {
-						wh.append(" AND ("+com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f, Filter.getFieldAsString(f).substring(5)) + ")");
+				for (String f : filter.getFieldNames()) {
+					if (filter.getFieldAsString(f).startsWith("cond:")) {
+						wh.append(" AND ("+com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f, filter.getFieldAsString(f).substring(5)) + ")");
 					}
 					else {
-						if (customStatementUsed)
-							wh.append(" AND "+DBQuoteString+f+DBQuoteString+"=?");
+						String ff = f;
+						if (!customStatementUsed) ff = getMapping(f);
+						if (filter.getField(f).getValue() == null) {
+							wh.append(" AND "+DBQuoteString+ff+DBQuoteString+" IS NULL");
+							filter.removeField(f);
+						}
 						else
-							wh.append(" AND "+DBQuoteString+getMapping(f)+DBQuoteString+"=?");
+							wh.append(" AND "+DBQuoteString+ff+DBQuoteString+"=?");
 					}
 				}
 				if (wh.length()>0) sql+=" WHERE "+wh.substring(5);
@@ -476,8 +486,8 @@ public class SqlTableBC implements BusinessComponent {
 			DataRow params = new DataRow();
 			if (retrieveParams != null && retrieveParams.getColumnCount() > 0)
 				params = retrieveParams.clone();
-			if (Filter != null && Filter.getColumnCount() > 0)
-				params.mergeRecord(Filter);
+			if (filter != null && filter.getColumnCount() > 0)
+				params.mergeRecord(filter);
 			if (params.getColumnCount() > 0)
 				setSqlParams(prep, params, params.getFieldNames());
 
@@ -700,10 +710,10 @@ public class SqlTableBC implements BusinessComponent {
 			DataRow oldfilter = this.Filter;
 			DataRow filter = new DataRow();
 			for (String f : PrimaryKeys) {
-				filter.setFieldValue(f, ret.getField(f));
+				filter.setFieldValue(f, ret.getFieldType(f), ret.getField(f).getValue());
 			}
 			this.setFilter(filter);
-			ResultSet retrs = this.retrieve(0,2);
+			ResultSet retrs = this.retrieve(0,1);
 			if (retrs.size() == 1)
 				ret=retrs.getItem(0);
 			else {
@@ -988,5 +998,37 @@ public class SqlTableBC implements BusinessComponent {
 	 */
 	public String getLastSqlStatement() {
 		return sqlStatement;
+	}
+
+
+	/**
+	 * Returns a DataRow with fields (the values are not used) which are allowed for filtering.
+	 * This method returns a clone of the attributes record plus additionally added fields.
+	 * Additional fields can be added using the registerFilterField method.
+	 * @return a DataRow with fields used for filtering.
+	 * @see #registerFilterField(String fieldName)
+	 */
+	@Override
+	public DataRow getAllowedFilter() {
+		if (AllowedFilter == null) {
+			AllowedFilter = getAttributesRecord();
+		}
+
+		return AllowedFilter;
+	}
+
+
+	/**
+	 * Add a field to the allowed filter DataRow.
+	 * @param fieldName
+	 * @see #getAllowedFilter()
+	 */
+	public void registerFilterField(String fieldName) {
+		if (AllowedFilter == null) {
+			AllowedFilter = getAttributesRecord();
+		}
+		try {
+			AllowedFilter.setFieldValue(fieldName, Types.VARCHAR, null);
+		} catch (Exception e) {}
 	}
 }

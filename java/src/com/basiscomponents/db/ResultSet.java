@@ -1896,11 +1896,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					if (dr.getField(fn) == null || dr.getField(fn).getTimestamp() == null)
 						g.writeStringField(fn, "");
 					else {
-						DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-						DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-						String fd = df1.format(dr.getField(fn).getTimestamp()) + "T"
-								+ df2.format(dr.getField(fn).getTimestamp()) + ".0";
-						g.writeStringField(fn, fd);
+						g.writeStringField(fn, dr.getField(fn).getTimestamp().toString().replaceFirst(" ", "T"));
 					}
 					break;
 				case java.sql.Types.DATE:
@@ -1908,11 +1904,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					if (dr.getField(fn) == null || dr.getField(fn).getDate() == null)
 						g.writeStringField(fn, "");
 					else {
-						DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-						DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-						String fd = df1.format(dr.getField(fn).getDate()) + "T" + df2.format(dr.getField(fn).getDate())
-								+ ".0";
-						g.writeStringField(fn, fd);
+						g.writeStringField(fn, dr.getField(fn).getDate().toString());
 					}
 					break;
 

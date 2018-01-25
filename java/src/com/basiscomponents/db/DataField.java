@@ -13,13 +13,11 @@ import java.sql.Ref;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.basis.bbj.processor.instruction.a.e;
 import com.google.gson.annotations.Expose;
 
 /**
@@ -63,7 +61,7 @@ public class DataField implements java.io.Serializable {
 	public Boolean equals(DataField dataField) {
 		return this.getString().equals(dataField.getString());
 	}
-	
+
 	/**
 	 * Returns <code>true</code> in case the given DataField object equals the current DataField object, <code>false</code> otherwise.
 	 * The method does only compare the value object of both DataField objects, not the attributes.
@@ -72,28 +70,26 @@ public class DataField implements java.io.Serializable {
 	 * @return equal The boolean value indicating whether the given DataField object equals this DataField object.
 	 */
 	public Boolean equals(String pattern) {
-		
-		Boolean isStringPar = false;
+
 		if (pattern.startsWith("'") && pattern.endsWith("'"))
 		{
 			pattern=pattern.substring(1, pattern.length()-1);
-			isStringPar=true;
 		}
 
 		String cn = getClassName();
 		switch (cn){
 		case "java.lang.Integer":
 				return getInt().equals(Integer.parseInt(pattern));
-				
+
 		case "java.lang.String":
 				return getString().trim().equals(pattern);
-				
+
 		default:
 			System.err.println("unimplemented: field type "+cn);
 			return false;
-		}		
-		
-	}	
+		}
+
+	}
 
 	/**
 	 * Sets the given object as the DataField's value
@@ -573,11 +569,20 @@ public class DataField implements java.io.Serializable {
 				else
 					return null;
 			}
+			if (classname.equals("java.lang.Long")) {
+				return new java.sql.Date((long)o);
+			}
 			if (classname.equals("java.lang.String"))
 				if (tmpstr.isEmpty())
 					return null;
-				else
-					return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse((String)o).getTime());
+				else {
+					if (tmpstr.indexOf('.') != -1)
+						return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S").parse((String)o).getTime());
+					else if (tmpstr.indexOf(':') != -1)
+						return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String)o).getTime());
+					else
+						return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse(tmpstr).getTime());
+				}
 			break;
 
 		case java.sql.Types.TIME:
@@ -594,13 +599,10 @@ public class DataField implements java.io.Serializable {
 			if (classname.equals("java.lang.Double"))
 				return new java.sql.Timestamp(com.basis.util.BasisDate.date(((Double)o).intValue()).getTime());
 			if (classname.equals("java.lang.String")){
-				String p = (String)o;
-				String mask = "yyyy-MM-dd HH:mm:ss.SSS";
-				if (p.length()<mask.length())
-					mask = mask.substring(0, p.length());
+				String p = ((String)o).replaceFirst("T", " ");
 				if (tmpstr.isEmpty())
 					return null;
-				return new java.sql.Timestamp(new SimpleDateFormat(mask).parse((String)o).getTime());
+				return java.sql.Timestamp.valueOf(p);
 			}
 
 			break;

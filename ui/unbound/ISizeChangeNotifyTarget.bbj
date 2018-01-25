@@ -1,7 +1,0 @@
-interface public ISizeChangeNotifyTarget
-
-    method public void notifySizeChange()
-
-interfaceend
-
-
