@@ -106,7 +106,7 @@ class public RestBridge
             case "PUT"
                 method$ = request!.getMethod()
                 rem Only JSON is supported for now
-                if cvs(request!.getContentType(),8) <> "application/json" then
+                if request!.getContentType() <> null() AND cvs(request!.getContentType(),8) <> "application/json" then
                     s! = response!.getOutputStream()
                     response!.sendError(415,"Unsupported media type """+request!.getContentType()+"""")
                 endif
@@ -252,43 +252,42 @@ class public RestBridge
         System.out.println(params!)
         System.out.println("BLOBDATA : "+blobdata$)
         if blobdata$<>"null" then
+            rs! = answer!.get("resultset",err=*next)
+            if rs! = null() or rs!.size()<>1 or !rs!.getItem(0).getFieldNames().contains(blobdata$) then
+                goto blob_err
+            fi
 
-                rs! = answer!.get("resultset",err=*next)
-                if rs! = null() or rs!.size()<>1 or !rs!.getItem(0).getFieldNames().contains(blobdata$) then
-                    goto blob_err
-                fi
+            blobname$=str(params!.get("_BLOBNAME"))
+            if blobname$="null" then
+                blobname$="attachment.dat"
+            fi
+            if pos("."=blobname$)>0 then
+                ext$=blobname$(pos("."=blobname$,1,pos("."=blobname$,1,0))+1)
+            fi
+            d$=System.getProperty("basis.cacheDirectory")+"/_output_/"
+            mkdir d$,err=*next
 
-                blobname$=str(params!.get("_BLOBNAME"))
-                if blobname$="null" then
-                    blobname$="attachment.dat"
-                fi
-                if pos("."=blobname$)>0 then
-                    ext$=blobname$(pos("."=blobname$,1,pos("."=blobname$,1,0))+1)
-                fi
-                d$=System.getProperty("basis.cacheDirectory")+"/_output_/"
-                mkdir d$,err=*next
+            wr! = new java.io.StringWriter()
+            f! = java.io.File.createTempFile("output_", ext$, new java.io.File(d$))
+            ch=unt
+            open (ch)str(f!.toPath())
+            write (ch)rs!.getItem(0).getFieldAsString(blobdata$,err=blob_err)
+            close (ch)
 
-                wr! = new java.io.StringWriter()
-                f! = java.io.File.createTempFile("output_", ext$, new java.io.File(d$))
-                ch=unt
-                open (ch)str(f!.toPath())
-                write (ch)rs!.getItem(0).getFieldAsString(blobdata$,err=blob_err)
-                close (ch)
+            java.nio.file.Files.copy(f!.toPath(), response!.getOutputStream())
+            f!.delete()
 
-                java.nio.file.Files.copy(f!.toPath(), response!.getOutputStream())
-                f!.delete()
+            response!.setContentType("application/"+ext$)
+            response!.setHeader("Content-Disposition","inline; filename="""+blobname$+"""")
 
-                response!.setContentType("application/"+ext$)
-                response!.setHeader("Content-Disposition","inline; filename="""+blobname$+"""")
+            #logResponse(req_id$,response!)
+            methodret
 
-                #logResponse(req_id$,response!)
-                methodret
-
-                blob_err:
-                  response!.getOutputStream().write("BLOB not found")
-                  response!.setStatus(404)
-                  #logResponse(req_id$,response!)
-                  methodret
+            blob_err:
+              response!.getOutputStream().write("BLOB not found")
+              response!.setStatus(404)
+              #logResponse(req_id$,response!)
+              methodret
         endif
 
 
@@ -340,8 +339,6 @@ class public RestBridge
             done_file:
             #logResponse(req_id$,response!)
             methodret
-
-
         endif
 
         if answer!.containsKey("stacktrace") then
@@ -390,8 +387,10 @@ class public RestBridge
 
         if method$ = "PUT" or method$ = "DELETE" then
             response!.setStatus(num(statuscode!))
-            #logResponse(req_id$,response!)
-            methodret
+            if method$ = "DELETE" then
+                #logResponse(req_id$,response!)
+                methodret
+            endif
         endif
 
         if method$ = "POST" then
@@ -418,7 +417,7 @@ class public RestBridge
                 s!.write("<html><head><style>table, th, td {padding:5px;border: 1px solid black;}</style></head><body>")
             endif
 
-            single = answer!.get("single",err=*next)
+            single = num(answer!.get("single",err=*next),err=*next)
             if single>0 AND rs!.size()=1 then
                 rem TODO move this pivoted display into the writer
                 rec! = rs!.get(0)
@@ -511,7 +510,7 @@ class public RestBridge
                 #logResponse(req_id$,response!)
                 methodret
             else
-                if pos("application/json"=accept$) >0  then
+                if pos("application/json"=accept$) > 0 then
                     response!.setContentType("application/json")
                     wr! = new java.io.StringWriter()
                     com.basiscomponents.db.ResultSetExporter.writeJSON(rs!,wr!)
