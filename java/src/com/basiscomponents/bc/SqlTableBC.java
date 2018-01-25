@@ -661,6 +661,7 @@ public class SqlTableBC implements BusinessComponent {
 		}
 
 		// insert
+		Boolean inserted = false;
 		if (!pk_present || affectedRows == 0) {
 			sql="INSERT INTO "+DBQuoteString+Table+DBQuoteString+" (";
 
@@ -681,6 +682,7 @@ public class SqlTableBC implements BusinessComponent {
 			setSqlParams(prep, r, fields);
 
 			affectedRows = prep.executeUpdate();
+			inserted = affectedRows > 0;
 
 			//get generated keys
 			if (affectedRows > 0) {
@@ -731,6 +733,9 @@ public class SqlTableBC implements BusinessComponent {
 			}
 			catch (SQLException ex) {}
 		}
+
+		if (inserted)
+			ret.setAttribute("CREATED", inserted.toString());
 
 		return ret;
 	}
