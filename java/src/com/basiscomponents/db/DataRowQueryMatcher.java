@@ -33,10 +33,6 @@ public class DataRowQueryMatcher {
 		DataField dataField = dataRow.getField(exp_parts[0]);
 
 //		System.out.println("term: "+term+" resolved to "+b);
-		boolean equals;
-		if (caseSensitive) {
-			equals = dataField.equals(exp_parts[1], caseSensitive, trimmed);
-		}
 		if (dataField.equals(exp_parts[1], caseSensitive, trimmed))
 			return "1";
 		else 
