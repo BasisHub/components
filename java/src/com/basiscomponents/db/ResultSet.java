@@ -12,8 +12,6 @@ import java.sql.Ref;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -153,12 +151,28 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception
 	 */
 	public ResultSet filterBy(String QueryClause) throws Exception{
+		return filterBy(QueryClause, true, false); // this was the default behavior
+	}
+
+	/**
+	 * Applies the queryClause to a ResultSet and returns a new ResultSet that only contains
+	 * records that match the clause. The clause syntax is similar to an SQL WHERE clause.
+	 * 
+	 * CAUTION: this method is experimental!!
+	 * 
+	 * @param QueryClause: the query
+	 * @param caseSensitive whether the filter query should be case sensitive or not
+	 * @param trimmed {@code true} if the query paramters should get trimmed
+	 * @return ResultSet: the records that match the query clause
+	 * @throws Exception
+	 */
+	public ResultSet filterBy(String QueryClause, final boolean caseSensitive, final boolean trimmed) throws Exception{
 		System.out.println("WARNING: using experimental method implementation filterBy clause on ResultSet");
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 		Iterator<DataRow> it = this.iterator();
 		while (it.hasNext()) {
 			DataRow dr = it.next();
-			if (DataRowQueryMatcher.matches(QueryClause, dr))
+			if (DataRowQueryMatcher.matches(QueryClause, dr, caseSensitive, trimmed))
 				r.add(dr);
 		}
 		return r;

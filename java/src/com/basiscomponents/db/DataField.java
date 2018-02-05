@@ -70,6 +70,16 @@ public class DataField implements java.io.Serializable {
 	 * @return equal The boolean value indicating whether the given DataField object equals this DataField object.
 	 */
 	public Boolean equals(String pattern) {
+		return equals(pattern, false, true);
+	}
+	/**
+	 * Returns <code>true</code> in case the given DataField object equals the current DataField object, <code>false</code> otherwise.
+	 * The method does only compare the value object of both DataField objects, not the attributes.
+	 * 
+	 * @param dataField The DataField object to compare with.
+	 * @return equal The boolean value indicating whether the given DataField object equals this DataField object.
+	 */
+	public Boolean equals(String pattern,final boolean caseSensitive, final boolean trimmed) {
 
 		if (pattern.startsWith("'") && pattern.endsWith("'"))
 		{
@@ -80,17 +90,26 @@ public class DataField implements java.io.Serializable {
 		switch (cn){
 		case "java.lang.Integer":
 				return getInt().equals(Integer.parseInt(pattern));
-
 		case "java.lang.String":
-				return getString().trim().equals(pattern);
-
+				return compareString(getString(), pattern, caseSensitive, trimmed);
 		default:
 			System.err.println("unimplemented: field type "+cn);
 			return false;
 		}
 
 	}
+	private static boolean compareString(final String dataRowString, final String pattern, boolean caseSensitive, boolean trimmed) {
+		String compareString = dataRowString;
+		if(trimmed) {
+			 compareString = compareString.trim();
+		}
+		if(caseSensitive) {
+			return compareString.equals(pattern);
+		}else {
 
+			return compareString.equalsIgnoreCase(pattern);
+		}
+	}
 	/**
 	 * Sets the given object as the DataField's value
 	 * 

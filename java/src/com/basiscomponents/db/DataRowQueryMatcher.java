@@ -5,9 +5,10 @@ import java.security.InvalidAlgorithmParameterException;
 public class DataRowQueryMatcher {
 	
 	
-	private static String resolveTerm(String term,DataRow r) throws Exception{
+	private static String resolveTerm(String term, final DataRow dataRow, final boolean caseSensitive,
+			final boolean trimmed) throws Exception {
 		if (term.trim().isEmpty())
-			return"";
+			return "";
 		
 		switch (term.trim().toUpperCase()){
 		case "AND":
@@ -29,17 +30,22 @@ public class DataRowQueryMatcher {
 		String[] exp_parts = term.split("=");
 		if (exp_parts.length != 2)
 			throw new InvalidAlgorithmParameterException("invalid expression: "+term); 
-		
-		DataField f = r.getField(exp_parts[0]);
+		DataField dataField = dataRow.getField(exp_parts[0]);
 
 //		System.out.println("term: "+term+" resolved to "+b);
-		if (f.equals(exp_parts[1]))
+		boolean equals;
+		if (caseSensitive) {
+			equals = dataField.equals(exp_parts[1], caseSensitive, trimmed);
+		}
+		if (dataField.equals(exp_parts[1], caseSensitive, trimmed))
 			return "1";
 		else 
 			return "0";
 	}	
 	
-	
+	public static Boolean matches(String statement, DataRow datarow) throws Exception{
+		return matches(statement, datarow, true, false);
+	}
 	/**
 	 * 
 	 * @param stmt: the statement, syntax as in a WHERE clause of an SQL statement
@@ -47,57 +53,43 @@ public class DataRowQueryMatcher {
 	 * @return Boolean if the datarow matches the statement
 	 * @throws Exception
 	 */
-	public static Boolean matches(String stmt, DataRow dr) throws Exception {
+	public static Boolean matches(String statement, DataRow datarow, final boolean caseSensitive, final boolean trimmed) throws Exception {
 
-		
-		stmt = stmt.replaceAll("\\s"," ");
-		while (stmt.contains("  "))
-			stmt = stmt.replace("  ", " ");
+		statement = statement.replaceAll("\\s"," ");
+		while (statement.contains("  "))
+			statement = statement.replace("  ", " ");
 //		System.out.println(stmt);
-		stmt += " ";
+		statement += " ";
 				
-		int i=0;
 		Boolean status = false; //false=term true=punctuation
 		
-		String bexp = "";
+		StringBuilder booleanExpression = new StringBuilder();
 		
-		String curterm="";
-		while (i<stmt.length()){
-			char c = stmt.charAt(i);
+		StringBuilder curterm=new StringBuilder();
+		for (final char c:statement.toCharArray()){
 			switch (c) {
 				case ' ':
-
-						bexp += resolveTerm(curterm,dr);
-					
+					booleanExpression.append(resolveTerm(curterm.toString(),datarow, caseSensitive, trimmed));
 					status = !status;
-					curterm="";
+					curterm=new StringBuilder(); //reset curterm
 					break;
 				case '(':
 				case ')':
 				case '!':
-						bexp += resolveTerm(curterm,dr);
-					
-					status = !status;
-					curterm="";
-					String tmp = new String();
-					tmp+=c;
-					bexp += resolveTerm(tmp,dr);
+					booleanExpression.append(resolveTerm(curterm.toString(),datarow, caseSensitive, trimmed));
+					curterm=new StringBuilder(); //reset curterm
+					String tmp = ""+c;
+					booleanExpression.append(resolveTerm(tmp,datarow, caseSensitive, trimmed));
 					
 					status=false;
 				break;
 				default:
-					curterm += c;
+					curterm.append(c);
 					break;
 			}
-			i++;
-		
 		}
-		
 //		System.out.println(bexp);
-		return resolveBooleanExp(bexp);
-
-		
-		
+		return resolveBooleanExp(booleanExpression.toString());
 	}
 
 	private static Boolean resolveBooleanExp(String bexp) {
@@ -105,7 +97,7 @@ public class DataRowQueryMatcher {
 //		System.out.println("resolve: "+bexp);
 		while (bexp.contains("(")){
 			int first_par = bexp.indexOf('(');
-			int last_par =first_par;
+			int last_par = first_par;
 			int more_opens=0;
 			//find matching parenthesis
 			while (true){
@@ -126,8 +118,8 @@ public class DataRowQueryMatcher {
 
 			String exp = bexp.substring(first_par+1,last_par);
 			
-			Boolean b = resolveBooleanExp(exp);
-			if (b)
+			
+			if (resolveBooleanExp(exp))
 				bexp = bexp.substring(0,first_par)+'1'+bexp.substring(last_par+1);
 			else
 				bexp = bexp.substring(0,first_par)+'0'+bexp.substring(last_par+1);
@@ -152,8 +144,7 @@ public class DataRowQueryMatcher {
 				if (tmp_res){
 //					System.out.println(bexp+" is true");
 					return true;
-				}
-				else {
+				} else {
 //					System.out.println(bexp+" is false");
 
 					continue;
