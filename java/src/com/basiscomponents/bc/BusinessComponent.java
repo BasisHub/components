@@ -115,7 +115,7 @@ public interface BusinessComponent {
 
 	/**
 	 * Returns a DataRow with fields (the values are not used) which are allowed for filtering.
-	 * The default implementation returns getAttributeRecord()
+	 * The default implementation returns getAttributesRecord().
 	 * @return a DataRow with fields used for filtering.
 	 */
 	default public DataRow getAllowedFilter() {
