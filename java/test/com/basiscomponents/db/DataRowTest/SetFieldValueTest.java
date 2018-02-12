@@ -1,6 +1,6 @@
 package com.basiscomponents.db.DataRowTest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import com.basiscomponents.db.DataRow;
 public class SetFieldValueTest {
 
 	@Test
-	public void RedefineFieldContentsTest() {
+	public void RedefineFieldContentsTest() throws Exception {
 		DataRow dr = new DataRow();
 		dr.setFieldValue("TEST", "ONE");
 		dr.setFieldValue("TEST", "TWO");
