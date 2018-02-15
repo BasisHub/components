@@ -18,22 +18,23 @@ public class SqlQueryBC {
 	private String password;
 	private Connection conn;
 
-	private List<String> queryStrings;
-	private boolean tracing;
+	private final List<String> queryStrings;
+	private final boolean tracing;
 	private String lastRetrieve;
 	private String lastExecute;
  
 	public SqlQueryBC(String url) {
-		new SqlQueryBC(url, false);
+		this(url, false);
 	}
 
 	public SqlQueryBC(String url, boolean tracing) {
 		this.url = url;
 		this.tracing = tracing;
+		this.queryStrings = tracing ? new ArrayList<>(1024) : null;
 	}
 
 	public SqlQueryBC(String driver, String url, String user, String password) throws ClassNotFoundException {
-		new SqlQueryBC(driver, url, user, password, false);
+		this(driver, url, user, password, false);
 	}
 
 	public SqlQueryBC(String driver, String url, String user, String password, boolean tracing)
@@ -42,19 +43,23 @@ public class SqlQueryBC {
 		this.user = user;
 		this.password = password;
 		this.tracing = tracing;
-		if (tracing) {
-			queryStrings = new ArrayList<>(1024);
-		}
+		this.queryStrings = tracing ? new ArrayList<>(1024) : null;
 		Class.forName(driver);
 	}
 
 
 	public SqlQueryBC(Connection con) throws SQLException {
+		this(con, false);
+	}
+
+	public SqlQueryBC(Connection con, boolean tracing) throws SQLException {
 		if (con != null && !con.isClosed()) {
 			conn = con;
 		}
-	}
+		this.tracing = tracing;
+		this.queryStrings = tracing ? new ArrayList<>(1024) : null;
 
+	}
 
 	private Connection getConnection() throws SQLException {
 		if (conn != null) return conn;
@@ -164,7 +169,7 @@ public class SqlQueryBC {
 		if (!tracing) {
 			throw new UnsupportedOperationException("No tracing enabled");
 		}
-		List<String> result = new ArrayList();
+		List<String> result = new ArrayList<>(1024);
 		Collections.copy(result, queryStrings);
 		return result;
 	}
