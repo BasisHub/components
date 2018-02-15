@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.basiscomponents.db.ResultSet;
@@ -11,40 +13,56 @@ import com.basiscomponents.db.ResultSet;
 
 public class SqlQueryBC {
 
-	private String Url;
-	private String User;
-	private String Password;
-	private Connection Conn;
+	private String url;
+	private String user;
+	private String password;
+	private Connection conn;
 
-
-	public SqlQueryBC(String Url) {
-		this.Url      = Url;
+	private List<String> queryStrings;
+	private boolean tracing;
+	private String lastRetrieve;
+	private String lastExecute;
+ 
+	public SqlQueryBC(String url) {
+		new SqlQueryBC(url, false);
 	}
 
+	public SqlQueryBC(String url, boolean tracing) {
+		this.url = url;
+		this.tracing = tracing;
+	}
 
-	public SqlQueryBC(String Driver, String Url, String User, String Password) throws ClassNotFoundException {
-		this.Url        = Url;
-		this.User       = User;
-		this.Password   = Password;
+	public SqlQueryBC(String driver, String url, String user, String password) throws ClassNotFoundException {
+		new SqlQueryBC(driver, url, user, password, false);
+	}
 
-		Class.forName(Driver);
+	public SqlQueryBC(String driver, String url, String user, String password, boolean tracing)
+			throws ClassNotFoundException {
+		this.url = url;
+		this.user = user;
+		this.password = password;
+		this.tracing = tracing;
+		if (tracing) {
+			queryStrings = new ArrayList<>(1024);
+		}
+		Class.forName(driver);
 	}
 
 
 	public SqlQueryBC(Connection con) throws SQLException {
 		if (con != null && !con.isClosed()) {
-			Conn = con;
+			conn = con;
 		}
 	}
 
 
 	private Connection getConnection() throws SQLException {
-		if (Conn != null) return Conn;
+		if (conn != null) return conn;
 
-		if (User == null || Password == null)
-			return DriverManager.getConnection(Url);
+		if (user == null || password == null)
+			return DriverManager.getConnection(url);
 		else
-			return DriverManager.getConnection(Url, User, Password);
+			return DriverManager.getConnection(url, user, password);
 	}
 
 
@@ -55,11 +73,11 @@ public class SqlQueryBC {
 
 	public ResultSet retrieve(String sql, List<Object> params) throws SQLException {
 		ResultSet brs = null;
-		Connection conn = null;
+		Connection connection = null;
 
 		try {
-			conn = getConnection();
-			PreparedStatement prep = conn.prepareStatement(sql);
+			connection = getConnection();
+			PreparedStatement prep = connection.prepareStatement(sql);
 
 			// Set params if there are any
 			if (params != null) {
@@ -69,15 +87,19 @@ public class SqlQueryBC {
 					i++;
 				}
 			}
-
+			if (tracing) {
+				String query = prep.toString();
+				lastRetrieve = query;
+				if (queryStrings.size() >= 1024) {
+					queryStrings.remove(0);
+				}
+				queryStrings.add(query);
+			}
 			brs = new ResultSet(prep.executeQuery());
-		} catch (SQLException e1) {
-			throw e1;
-		}
-		finally {
-			if (Conn == null && conn != null) {
+		} finally {
+			if (this.conn == null && connection != null) {
 				try {
-					conn.close();
+					connection.close();
 				} catch (SQLException e) {}
 			}
 		}
@@ -90,12 +112,12 @@ public class SqlQueryBC {
 	}
 
 	public Boolean execute(String sql, List<Object> params) throws SQLException {
-		Connection conn = null;
+		Connection connection = null;
 		Boolean b = false;
 
 		try {
-			conn = getConnection();
-			PreparedStatement prep = conn.prepareStatement(sql);
+			connection = getConnection();
+			PreparedStatement prep = connection.prepareStatement(sql);
 
 			// Set params if there are any
 			if (params != null) {
@@ -105,20 +127,37 @@ public class SqlQueryBC {
 					i++;
 				}
 			}
-
+			if (tracing) {
+				String query = prep.toString();
+				lastExecute = query;
+				if (queryStrings.size() >= 1024) {
+					queryStrings.remove(0);
+				}
+				queryStrings.add(query);
+			}
 			b = prep.execute() || prep.getUpdateCount() > 0;
-		} catch (SQLException e1) {
-			throw e1;
-		}
-		finally {
-			if (Conn == null && conn != null) {
+		} finally {
+			if (this.conn == null && connection != null) {
 				try {
-					conn.close();
+					connection.close();
 				} catch (SQLException e) {}
 			}
 		}
-
 		return b;
+	}
+
+	public String getLastRetrieve() {
+		return lastRetrieve;
+	}
+
+	public String getLastExecute() {
+		return lastExecute;
+	}
+
+	public List<String> getQueryStrings() {
+		List<String> result = new ArrayList();
+		Collections.copy(result, queryStrings);
+		return result;
 	}
 
 }
