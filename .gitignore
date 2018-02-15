@@ -9,3 +9,4 @@ java/src/com/basiscomponents/VersionInfo.java
 .bdtPath
 .buildpath
 target/
+.settings/
