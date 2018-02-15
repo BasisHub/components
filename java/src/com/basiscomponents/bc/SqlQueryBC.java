@@ -147,14 +147,23 @@ public class SqlQueryBC {
 	}
 
 	public String getLastRetrieve() {
+		if (!tracing) {
+			throw new UnsupportedOperationException("No tracing enabled");
+		}
 		return lastRetrieve;
 	}
 
 	public String getLastExecute() {
+		if (!tracing) {
+			throw new UnsupportedOperationException("No tracing enabled");
+		}
 		return lastExecute;
 	}
 
 	public List<String> getQueryStrings() {
+		if (!tracing) {
+			throw new UnsupportedOperationException("No tracing enabled");
+		}
 		List<String> result = new ArrayList();
 		Collections.copy(result, queryStrings);
 		return result;
