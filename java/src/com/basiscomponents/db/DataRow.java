@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * A DataRow is container object with key-value pairs.
- * Each key being a String, and each value being a com.basiscomponents.db.DataField object.
+ * A DataRow is a container object with key/value pairs.
+ * Each key being a String and each value being a com.basiscomponents.db.DataField object.
  */
 public class DataRow implements java.io.Serializable {
 
@@ -38,15 +38,15 @@ public class DataRow implements java.io.Serializable {
 	private int rowID;
 
 	/**
-	 * Instantiates an new DataRow object.
+	 * Instantiates a new DataRow object.
 	 */
 	public DataRow() {
 		this.resultSet = new com.basiscomponents.db.ResultSet();
 	}
 
 	/**
-	 * Instantiates a new DataRow object, and sets the column metadata to
-	 * the given ResultSet object's column metadata
+	 * Instantiates a new DataRow object and sets the column metadata to
+	 * the given ResultSet object's column metadata.
 	 *
 	 * @param resultSet The ResultSet whose column metadata will be used for this new DataRow
 	 */
@@ -77,9 +77,9 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Creates a new DataRow object by parsing the specified HashMap object
-	 * and creating DataField for each of the HashMap's entries.
+	 * and DataFields for each of the HashMap's entries.
 	 *
-	 * @param map HashMap containing key value pairs used to initializes the DataRow object
+	 * @param map HashMap containing key/value pairs used to initialize the DataRow object
 	 */
 	public DataRow(java.util.Map<String, Object> map) throws Exception {
 		this.resultSet = new com.basiscomponents.db.ResultSet();
@@ -102,7 +102,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Sets the row ID of this DataRow object to the given value
+	 * Sets the row ID of this DataRow object to the given value.
 	 *
 	 * @param rowId The new row ID value of this DataRow object
 	 */
@@ -132,7 +132,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Sets the attribute with the specified name and value to this DataRow object.
+	 * Sets the attribute with the specified name and value for this DataRow object.
 	 *
 	 * @param name The attribute's name
 	 * @param value The attribute's value
@@ -143,10 +143,10 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Returns the attribute with the specified name or
-	 * null if no attribute with this name exists
+	 * null if no attribute with this name exists.
 	 *
 	 * @param name The attribute's name
-	 * @return attribute The attribute, or null if no attriute with the given name exists
+	 * @return attribute The attribute or null if no attribute with the given name exists
 	 */
 	public String getAttribute(String name) {
 		return this.attributes.get(name);
@@ -193,12 +193,12 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Sets the specified value as value to the field with the specified name.
+	 * Sets the specified value for the field with the specified name.
 	 * In case no field with the specified name exists, then the field will be created.
 	 *
 	 * @param name The name of the field
 	 * @param value The value of the field
-	 * @throws Exception Thrown when field already exists and new value can not be casted to the current field type.
+	 * @throws Exception Thrown when field already exists and the new value cannot be casted to the current field type.
 	 */
 	public void setFieldValue(String name, Object value) throws Exception  {
 
@@ -242,7 +242,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Sets the specified value as value to the field with the specified name.
+	 * Sets the specified value for the field with the specified name.
 	 * In case no field with the specified name exists, then the field will be created with the specified SQL type.
 	 *
 	 * @param name The name of the field
@@ -277,12 +277,12 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Returns the DataField object for the specified field name.<br>
 	 * <br>
-	 * Throws an Exception if no field with the specified name exists
+	 * Throws an Exception if no field with the specified name exists.
 	 *
 	 * @param name The field's name
 	 * @return dataField The DataField object
 	 *
-	 * @throws Exception Gets thrown in case no field with the specified name exists
+	 * @throws Exception No field with the specified name exists
 	 */
 	public DataField getField(String name) throws Exception {
 		return getField(name, false);
@@ -291,15 +291,15 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Returns the DataField object for the specified field name.
 	 *
-	 * In case no field with the specified field name exists, depending on the specified boolean value
-	 * either an Exception is thrown, or not. In fact, this boolean value indicates whether the Exception
+	 * In case no field with the specified field name exists, depending on the specified boolean value,
+	 * either an Exception is thrown or not. In fact, this boolean value indicates whether the Exception
 	 * should be suppressed or not.
 	 *
 	 * @param name The field name
-	 * @param silent Boolean value indicating whether the eventual Exception should be suppressed or not
+	 * @param silent Boolean value indicating whether the eventual exception should be suppressed or not
 	 * @return dataField The DataField
 	 *
-	 * @throws Exception Gets thrown if no field with the specified name exists and the specified boolean value is false
+	 * @throws Exception No field with the specified name exists and the specified boolean value is false
 	 */
 	public DataField getField(String name, Boolean silent) throws Exception {
 		DataField field = this.dataFields.get(name);
@@ -309,12 +309,12 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the field with the specified name as java.lang.Object
+	 * Returns the value of the field with the specified name as a java.lang.Object.
 	 *
 	 * @param name The name of the field
-	 * @return value The field's value as Object
+	 * @return value The field's value as an Object
 	 *
-	 * @throws Exception Gets thrown in case no field with the specified name exists.
+	 * @throws Exception No field with the specified name exists.
 	 */
 	public Object getFieldValue(String name) throws Exception {
 		DataField field = getField(name);
@@ -322,15 +322,15 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the string value of the field matching the given field name,
-	 * or an empty String in case the field's value has not been set or is null.<br>
+	 * Returns the string value of the field matching the given field name
+	 * or an empty string in case the field's value has not been set or is null.<br>
 	 * <br>
 	 * Throws an Exception if the given field name does not exist.
 	 *
 	 * @param name The name of the field.
 	 * @return fieldValue The String representation of the field's value.
 	 *
-	 * @throws Exception Gets thrown in case no field with the specified name exists.
+	 * @throws Exception No field with the specified name exists.
 	 */
 	public String getFieldAsString(String name) throws Exception {
 		if (isFieldNull(name))
@@ -342,7 +342,7 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Returns true if the DataRow has no fields, otherwise false.<br>
 	 *
-	 * @return isNull True in case the value of the field is null, false otherwise.
+	 * @return isEmpty True if the DataRow has no fields, false otherwise.
 	 */
 	public boolean isEmpty() {
 		return this.resultSet.getColumnNames().isEmpty();
@@ -356,7 +356,7 @@ public class DataRow implements java.io.Serializable {
 	 * @param name The name of the field
 	 * @return isNull True in case the value of the field is null, false otherwise.
 	 *
-	 * @throws Exception Gets thrown in case no field with the specified name exists.
+	 * @throws Exception No field with the specified name exists.
 	 */
 	public Boolean isFieldNull(String name) throws Exception {
 		DataField field = getField(name);
@@ -364,14 +364,14 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the field with the given name as String for usage in SQL statements.
-	 * The field's value will be returned in single quotes if it has a value, if not NULL will be returned.<br>
+	 * Returns the value of the field with the given name as a String for usage in SQL statements.
+	 * The field's value will be returned in single quotes if it has a value, otherwise NULL will be returned.<br>
 	 * <br>
 	 *
 	 * @param name The name of the field
-	 * @return fieldValue The field's value as String for usage in SQL statements
+	 * @return fieldValue The field's value as a String for usage in SQL statements
 	 *
-	 * @throws Exception Gets thrown in case no field with the specified name exists.
+	 * @throws Exception No field with the specified name exists.
 	 */
 	public String getFieldForSQL(String name) throws Exception {
 		DataField field = getField(name);
@@ -384,13 +384,13 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the field with given name as double.
+	 * Returns the value of the field with given name as a Double.
 	 *
-	 * @param fieldName The name of the field whose value should be returned as double
+	 * @param fieldName The name of the field whose value should be returned as Double
 	 *
-	 * @return value The field's value as double
+	 * @return value The field's value as a Double
 	 *
-	 * @throws Exception Gets thrown in case no field exists witht the given name
+	 * @throws Exception No field exists with the given name
 	 */
 	@SuppressWarnings("deprecation")
 	public Double getFieldAsNumber(String fieldName) throws Exception {
@@ -513,7 +513,7 @@ public class DataRow implements java.io.Serializable {
 	 * @param name The name of the column
 	 * @return index The column's index
 	 *
-	 * @throws Exception Gets thrown if the specified column name doesn't exist
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public int getColumnIndex(String name) throws Exception {
 		return getColumnIndex(name, false);
@@ -522,15 +522,15 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Returns the index of the column with the specified name.<br>
 	 * <br>
-	 * In case the specified column name doesn't exist, depending on the specified boolean value
-	 * either an Exception is thrown, or not. In fact, this boolean value indicates whether the Exception
+	 * In case the specified column name doesn't exist, depending on the specified boolean value,
+	 * either an Exception is thrown or not. In fact, this boolean value indicates whether the Exception
 	 * should be suppressed or not.
 	 *
 	 * @param name The name of the column
-	 * @param silent Boolean value indicating whether the eventual Exception should be suppressed or not
+	 * @param silent Boolean value indicating whether an eventual Exception should be suppressed or not
 	 * @return index The column's index
 	 *
-	 * @throws Exception Gets thrown if the specified column name doesn't exist and the silent boolean value is false
+	 * @throws Exception The specified column name doesn't exist and the silent boolean value is false
 	 */
 	public int getColumnIndex(String name, Boolean silent) throws Exception {
 		int column = this.resultSet.getColumnIndex(name);
@@ -547,7 +547,7 @@ public class DataRow implements java.io.Serializable {
 	 * @param column The column index
 	 * @return name The column's name
 	 *
-	 * @throws Exception Gets thrown in case the specified column index doesn't exist
+	 * @throws Exception The specified column index doesn't exist
 	 */
 	public String getColumnName(int column) throws Exception {
 		return getColumnName(column, false);
@@ -556,15 +556,15 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Returns the column name for the specified column index.<br>
 	 * <br>
-	 * In case the specified column index doesn't exist, depending on the specified boolean value
+	 * In case the specified column index doesn't exist, depending on the specified boolean value,
 	 * either an Exception is thrown, or not. In fact, this boolean value indicates whether the Exception
 	 * should be suppressed or not.
 	 *
 	 * @param column The column index
-	 * @param silent Boolean value indicating whether eventual Exception should be suppressed or not
+	 * @param silent Boolean value indicating whether an eventual Exception should be suppressed or not
 	 * @return name The column's name
 	 *
-	 * @throws Exception Gets thrown in case the specified column index doesn't exist and the silent boolean value is false
+	 * @throws Exception The specified column index doesn't exist and the silent boolean value is false
 	 */
 	public String getColumnName(int column, Boolean silent) throws Exception {
 		if ((this.resultSet.getColumnNames().isEmpty() || column < 0
@@ -575,11 +575,12 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Returns the value of the ColumnType property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the ColumnType property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public int getFieldType(String name) throws Exception {
 		int column = getColumnIndex(name);
@@ -587,12 +588,14 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the ColumnTypeName property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
+	 * Returns the value of the ColumnTypeName property from the metadata for the field with the given name
+	 * or an empty string in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the ColumnTypeName property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public String getFieldTypeName(String name) throws Exception {
 		int column = getColumnIndex(name);
@@ -601,11 +604,12 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Returns the value of the DisplaySize property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the DisplaySize property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public int getFieldDisplaySize(String fieldName) throws Exception {
 		int column = getColumnIndex(fieldName);
@@ -613,12 +617,14 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the CatalogName property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
+	 * Returns the value of the CatalogName property from the metadata for the field with the given name
+	 * or an empty string in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the CatalogName property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public String getFieldCatalogName(String fieldName) throws Exception {
 		int column = getColumnIndex(fieldName);
@@ -626,12 +632,14 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the ClassName property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
+	 * Returns the value of the ClassName property from the metadata for the field with the given name
+	 * or an empty string in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the ClassName property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public String getFieldClassName(String fieldName) throws Exception {
 		int column = getColumnIndex(fieldName);
@@ -650,12 +658,14 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the Label property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
+	 * Returns the value of the Label property from the metadata for the field with the given name
+	 * or an empty string in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the Label property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public String getFieldLabel(String name) throws Exception {
 		int column = getColumnIndex(name);
@@ -664,11 +674,12 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Returns the value of the Precision property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the Precision property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public int getFieldPrecision(String name) throws Exception {
 		int column = getColumnIndex(name);
@@ -676,12 +687,14 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the SchemaName property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
+	 * Returns the value of the SchemaName property from the metadata for the field with the given name
+	 * or an empty string in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the SchemaName property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public String getFieldSchemaName(String name) throws Exception {
 		int column = getColumnIndex(name);
@@ -689,12 +702,14 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the TableName property from the metadata for the field with the given name.
-	 * Returns an empty String in case the property isn't set.
+	 * Returns the value of the TableName property from the metadata for the field with the given name
+	 * or an empty string in case the property isn't set.
 	 *
 	 * @param name The name of the field.
 	 *
 	 * @return The value of the TableName property for the field name.
+	 *
+	 * @throws Exception The specified column name doesn't exist
 	 */
 	public String getFieldTableName(String name) throws Exception {
 		int column = getColumnIndex(name);
@@ -702,13 +717,13 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Sets the given attribute name and value to the field with the given name.
-	 * Overwrites the attribute's value with the specified one in case the attribute already exist.
+	 * Sets the given attribute name and value for the field with the given name.
+	 * Overwrites the attribute's value with the specified one in case the attribute already exists.
 	 *
 	 * @param name The field's name.
 	 * @param attrname The name of the attribute to set.
 	 * @param value The value of the attribute to set.
-	 * @throws Exception Gets thrown in case no field exists with the given name.
+	 * @throws Exception No field exists with the given name.
 	 */
 	public void setFieldAttribute(String name, String attrname, String value) throws Exception {
 		DataField field = getField(name);
@@ -716,7 +731,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the attribute with the given name,
+	 * Returns the value of the attribute with the given name
 	 * for the field with the given name.
 	 *
 	 * @param name The field name.
@@ -724,7 +739,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @return The attribute's name.
 	 *
-	 * @throws Exception Gets thrown in case the field name doesn't exist.
+	 * @throws Exception The field name doesn't exist.
 	 */
 	public String getFieldAttribute(String name, String attrname) throws Exception {
 		DataField field = getField(name);
@@ -736,14 +751,14 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Returns a HashMap with the attributes of the field with the given name.
-	 * The HashMap's keys will be the attribute names, and the HashMap values will be
+	 * The HashMap keys will be the attribute names and the HashMap values will be
 	 * the attribute values.
 	 *
 	 * @param name The name of the field.
 	 *
-	 * @return The HashMap with the field's attributes(key-value).
+	 * @return A HashMap with the field's attributesas key/value pairs.
 	 *
-	 * @throws Exception Gets thrown in case no field exists for the given field name
+	 * @throws Exception No field exists with the given name
 	 */
 	public HashMap<String, String> getFieldAttributes(String name) throws Exception {
 		DataField field = getField(name);
@@ -751,12 +766,12 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Removes the attribute with the given name, from the field attribute's.
+	 * Removes the attribute with the given name from the field's attributes.
 	 *
 	 * @param name The name of the field.
 	 * @param attrname The name of the attribute.
 	 *
-	 * @throws Exception Gets thrown in case no field exists for the given field name.
+	 * @throws Exception No field exists with the given name.
 	 */
 	public void removeFieldAttribute(String name, String attrname) throws Exception {
 		DataField field = getField(name);
@@ -768,7 +783,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param fieldName The name of the field to remove.
 	 *
-	 * @throws Exception Gets thrown in case the field name doesn't exist.
+	 * @throws Exception The field name doesn't exist.
 	 */
 	public void removeField(String fieldName) throws Exception {
 
@@ -781,7 +796,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns a list containing all the attribute values for the given attribute name,
+	 * Returns a list containing all the attribute values for the given attribute name
 	 * for each field defined in this DataRow.
 	 * <br><br>
 	 * <b>Note: </b> The method also includes null values in case the attribute is not defined for a field.
@@ -790,7 +805,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param attrname The name of the attribute
 	 *
-	 * @return the list with the field's attribute values for the given attribute name.
+	 * @return A list with the attribute values for the given attribute name.
 	 */
 	public ArrayList<String> getAttributeForFields(String attrname) {
 		return this.getAttributeForFields(attrname, false);
@@ -808,7 +823,7 @@ public class DataRow implements java.io.Serializable {
 	 * @param defaultToFieldname The boolean value indicating whether to add <code>null</code> or empty Strings
 	 * 							 to the list or not.
 	 *
-	 * @return The list with the attribute values of each field defined in this DataRow, for the given attribute name.
+	 * @return The list with the attribute values of each field defined in this DataRow for the given attribute name.
 	 */
 	public ArrayList<String> getAttributeForFields(String attrname, Boolean defaultToFieldname) {
 		DataField field;
