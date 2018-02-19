@@ -11,40 +11,40 @@ import com.basiscomponents.db.ResultSet;
 
 public class SqlQueryBC {
 
-	private String Url;
-	private String User;
-	private String Password;
-	private Connection Conn;
+	private String url;
+	private String user;
+	private String password;
+	private Connection connection;
 
 
 	public SqlQueryBC(String Url) {
-		this.Url      = Url;
+		this.url      = Url;
 	}
 
 
-	public SqlQueryBC(String Driver, String Url, String User, String Password) throws ClassNotFoundException {
-		this.Url        = Url;
-		this.User       = User;
-		this.Password   = Password;
+	public SqlQueryBC(String driver, String url, String user, String password) throws ClassNotFoundException {
+		this.url        = url;
+		this.user       = user;
+		this.password   = password;
 
-		Class.forName(Driver);
+		Class.forName(driver);
 	}
 
 
 	public SqlQueryBC(Connection con) throws SQLException {
 		if (con != null && !con.isClosed()) {
-			Conn = con;
+			connection = con;
 		}
 	}
 
 
 	private Connection getConnection() throws SQLException {
-		if (Conn != null) return Conn;
+		if (connection != null) return connection;
 
-		if (User == null || Password == null)
-			return DriverManager.getConnection(Url);
+		if (user == null || password == null)
+			return DriverManager.getConnection(url);
 		else
-			return DriverManager.getConnection(Url, User, Password);
+			return DriverManager.getConnection(url, user, password);
 	}
 
 
@@ -75,7 +75,7 @@ public class SqlQueryBC {
 			throw e1;
 		}
 		finally {
-			if (Conn == null && conn != null) {
+			if (connection == null && conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {}
@@ -111,7 +111,7 @@ public class SqlQueryBC {
 			throw e1;
 		}
 		finally {
-			if (Conn == null && conn != null) {
+			if (connection == null && conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {}

@@ -1,10 +1,12 @@
 package com.basiscomponents.bc;
 
 import java.util.Collection;
-
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
+/**
+ * Interface to represent a BusinessComponent
+ */
 public interface BusinessComponent {
 
 	/**
