@@ -1,4 +1,4 @@
-#Contribution Guide
+# Contribution Guide
 ## Create a Ticket
 Reporting an issue or making a feature request is a great way to contribute. Your feedback and the conversations that result from it provide a continuous flow of ideas.
 

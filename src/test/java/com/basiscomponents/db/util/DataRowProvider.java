@@ -1,5 +1,7 @@
 package com.basiscomponents.db.util;
 
+import java.sql.Date;
+import java.sql.Timestamp;
 import com.basiscomponents.db.DataRow;
 
 public class DataRowProvider {
@@ -10,16 +12,16 @@ public class DataRowProvider {
   public static final String DATEFIELD = "DATEFIELD";
   public static final String TIMESTAMPFIELD = "TIMESTAMPFIELD";
 
-  public static DataRow buildSampleDataRow(boolean f_nullAllFields) throws Exception {
+  public static DataRow buildSampleDataRow(boolean nullAllFields) throws Exception {
     DataRow dr = new DataRow();
     dr.setFieldValue(STRINGFIELD, "Value");
     dr.setFieldValue(INTFIELD, 1);
     dr.setFieldValue(DOUBLEFIELD, 1.1);
     dr.setFieldValue(BOOLFIELD, true);
-    dr.setFieldValue(DATEFIELD, new java.sql.Date(System.currentTimeMillis()));
-    dr.setFieldValue(TIMESTAMPFIELD, new java.sql.Timestamp(System.currentTimeMillis()));
+    dr.setFieldValue(DATEFIELD, new Date(System.currentTimeMillis()));
+    dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
 
-    if (f_nullAllFields) {
+    if (nullAllFields) {
       dr.setFieldValue(STRINGFIELD, null);
       dr.setFieldValue(INTFIELD, null);
       dr.setFieldValue(DOUBLEFIELD, null);
@@ -34,7 +36,6 @@ public class DataRowProvider {
     dr.setFieldAttribute(BOOLFIELD, "ISNUMERIC", "0");
     dr.setFieldAttribute(DATEFIELD, "ISNUMERIC", "0");
     dr.setFieldAttribute(TIMESTAMPFIELD, "ISNUMERIC", "0");
-
 
     dr.setFieldAttribute(STRINGFIELD, "TYPE", "TEXT");
     dr.setFieldAttribute(INTFIELD, "TYPE", "NUMBER");
