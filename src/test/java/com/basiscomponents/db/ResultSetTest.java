@@ -23,7 +23,6 @@ public class ResultSetTest {
 		assertNotNull(rs);
 		rs.getColumnNames().contains("ISO639-1");
 		rs.getColumnNames().contains("LANGUAGE");
-		System.out.println("Hallo????");
 	}
 
 }
