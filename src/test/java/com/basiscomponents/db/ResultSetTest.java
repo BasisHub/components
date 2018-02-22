@@ -1,6 +1,7 @@
 package com.basiscomponents.db;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,8 +22,8 @@ public class ResultSetTest {
 		String str = new String(buffer);
 		ResultSet rs = ResultSet.fromJson(str);
 		assertNotNull(rs);
-		rs.getColumnNames().contains("ISO639-1");
-		rs.getColumnNames().contains("LANGUAGE");
+		assertTrue(rs.getColumnNames().contains("ISO639-1"));
+		assertTrue(rs.getColumnNames().contains("LANGUAGE"));
 	}
 
 }
