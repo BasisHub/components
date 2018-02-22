@@ -2109,27 +2109,23 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return The ResultSet object created from the values provided in the given JSON String.
 	 * @throws Exception throws an exception if can not parse the json string to a DataRow.
 	 */
-	public static ResultSet fromJson(String js) throws Exception {
-
+	public static ResultSet fromJson(final String js) throws Exception {
+		String cleanString = js.trim();
 		ResultSet rs = new ResultSet();
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		com.google.gson.JsonArray o = new com.google.gson.JsonArray();
-		try {
-			o = parser.parse(js).getAsJsonArray();
-		} catch (Exception e) {
-			// Auto-generated catch block
-			e.printStackTrace();
-		}
+		o = parser.parse(js).getAsJsonArray();
 
-		//Check if first row contains meta data. If so then use it as template row.
-		JsonObject meta=null;
-		DataRow metaRow=null;
+		// Check if first row contains meta data. If so then use it as template row.
+		JsonObject meta = null;
+		DataRow metaRow = null;
 		if (o.size() > 0) {
 			meta = o.get(0).getAsJsonObject().getAsJsonObject("meta");
 			try {
 				metaRow = DataRow.fromJson(o.get(0).toString());
 				metaRow.clear();
-			} catch(Exception ex) {}
+			} catch (Exception ex) {
+			}
 		}
 		if (meta == null)
 			System.err.println("error parsing - meta data missing");
