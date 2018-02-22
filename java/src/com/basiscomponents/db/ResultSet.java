@@ -2114,7 +2114,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		ResultSet rs = new ResultSet();
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		com.google.gson.JsonArray o = new com.google.gson.JsonArray();
-		o = parser.parse(js).getAsJsonArray();
+		o = parser.parse(cleanString).getAsJsonArray();
 
 		// Check if first row contains meta data. If so then use it as template row.
 		JsonObject meta = null;
