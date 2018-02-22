@@ -49,6 +49,16 @@
 				<jar-directory>C:/bbj/lib</jar-directory>
 			</properties>
 		</profile>
+		<profile>
+			<id>unixbbjlib</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+
+			<properties>
+				<jar-directory>/opt/bbj/lib</jar-directory>
+			</properties>
+		</profile>
 
 	</profiles>
 
