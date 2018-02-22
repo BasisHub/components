@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -56,7 +55,6 @@ public class PropertyReader {
 			fileInput.close();
 			return properties;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -89,12 +87,7 @@ public class PropertyReader {
 
 			ArrayList<Map.Entry<String, String>> list = new ArrayList<Map.Entry<String, String>>(
 					tmpMap.entrySet());
-			Collections.sort(list, new Comparator<Map.Entry<String, String>>() {
-				public int compare(Map.Entry<String, String> o1,
-						Map.Entry<String, String> o2) {
-					return (o1.getValue()).compareToIgnoreCase(o2.getValue());
-				}
-			});
+			Collections.sort(list, (o1, o2) -> (o1.getValue()).compareToIgnoreCase(o2.getValue()));
 
 			BBjVector rs = new BBjVector();
 			for (Map.Entry<String, String> entry : list) {
@@ -110,7 +103,7 @@ public class PropertyReader {
 				rs.addItem(r);
 			}
 
-			tmpVectorMap = new LinkedHashMap<BBjVector, BBjVector>();
+			tmpVectorMap = new LinkedHashMap<>();
 			tmpVectorMap.put(keyVector, valueVector);
 			finalMap.put(keyname, tmpVectorMap);
 			finalResultSet.put(keyname, rs);
@@ -143,7 +136,7 @@ public class PropertyReader {
 
 	private String getKeyName(String key) {
 		if (key.contains("_")) {
-			return key.substring(0, key.lastIndexOf("_"));
+			return key.substring(0, key.lastIndexOf('_'));
 		}
 		return null;
 	}

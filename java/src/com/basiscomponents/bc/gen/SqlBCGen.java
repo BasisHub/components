@@ -80,4 +80,7 @@ public class SqlBCGen {
 		return tableName.substring(0, 1).toUpperCase()+tableName.substring(1).toLowerCase();
 	}
 
+  private SqlBCGen() {
+    // private constructor
+  }
 }
