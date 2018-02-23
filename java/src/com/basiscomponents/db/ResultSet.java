@@ -227,23 +227,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			Boolean match = true;
 			while (match && filterFieldsIterator.hasNext()) {
 				String filterFieldKey = filterFieldsIterator.next();
-				match = true;
 				DataField cond = simpleFilterCondition.getField(filterFieldKey);
 				if (dataRow.getFieldType(filterFieldKey) == 12 && cond.getString().startsWith("regex:")) {
-					if (!dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6))) {
-						match = false;
-					}
+					match = dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6));
 				} else if (matcherMap.containsKey(filterFieldKey)) {
 					Comparator<DataRow> comparator = comparatorMap.get(filterFieldKey);
 					ExpressionMatcher matcher = matcherMap.get(filterFieldKey);
-					if (!matcher.match(comparator, dataRow, filterFieldKey)) {
-						match = false;
-					}
+					match = matcher.match(comparator, dataRow, filterFieldKey);
 				} else {
 					DataField comp = dataRow.getField(filterFieldKey);
-					if (!cond.equals(comp)) {
-						match = false;
-					}
+					match = cond.equals(comp);
 				}
 			}
 			if (match) {
