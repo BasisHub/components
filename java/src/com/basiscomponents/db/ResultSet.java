@@ -199,58 +199,72 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (size() == 0) {
 			return resultSet;
 		}
-		// Check for "cond:" filters. If found, then create new ExpressionMatcher object's per field.
-		HashMap<String, Comparator<DataRow>> comparatorMap = new HashMap<>();
-		HashMap<String, ExpressionMatcher> matcherMap = new HashMap<>();
-		BBArrayList<String> filterFields = simpleFilterCondition.getFieldNames();
-		DataRow dataRow = get(0);
-		for (String filterFieldName : filterFields) {
-			if (dataRow.contains(filterFieldName)) {
-				DataField filterField = simpleFilterCondition.getField(filterFieldName);
-				if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
-					comparatorMap.put(filterFieldName, 
-							new DataRowComparator(filterFieldName));
-					matcherMap.put(filterFieldName, 
-							new ExpressionMatcher(
-									filterField.getString().substring(5), // after "cond:"
-									dataRow.getFieldType(filterFieldName), 
-									filterFieldName));
-				}
-			}
-		}
+		final SimpleFilterHelper sfh = new SimpleFilterHelper(simpleFilterCondition, get(0));
 
 		Iterator<DataRow> dataRowIterator = this.iterator();
 		while (dataRowIterator.hasNext()) {
 			DataRow dataRow = dataRowIterator.next();
-			Iterator<String> filterFieldsIterator = filterFields.iterator();
-			boolean match = true;
-			while (match && filterFieldsIterator.hasNext()) {
-				String filterFieldKey = filterFieldsIterator.next();
-				DataField cond = simpleFilterCondition.getField(filterFieldKey);
-				match = matchesCondition(comparatorMap, matcherMap, dataRow, filterFieldKey, cond);
-			}
-			if (match) {
+			if (sfh.matches(dataRow)) {
 				resultSet.add(dataRow);
 			}
 		}
 		return resultSet;
 	}
 
-	private boolean matchesCondition(HashMap<String, Comparator<DataRow>> comparatorMap,
-			HashMap<String, ExpressionMatcher> matcherMap, DataRow dataRow, String filterFieldKey, DataField cond)
-			throws Exception {
-		boolean match = true;
-		if (dataRow.getFieldType(filterFieldKey) == 12 && cond.getString().startsWith("regex:")) {
-			match = dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6));
-		} else if (matcherMap.containsKey(filterFieldKey)) {
-			Comparator<DataRow> comparator = comparatorMap.get(filterFieldKey);
-			ExpressionMatcher matcher = matcherMap.get(filterFieldKey);
-			match = matcher.match(comparator, dataRow, filterFieldKey);
-		} else {
-			DataField comp = dataRow.getField(filterFieldKey);
-			match = cond.equals(comp);
+	private class SimpleFilterHelper {
+		private DataRow simpleFilterCondition;
+		private HashMap<String, Comparator<DataRow>> comparatorMap = new HashMap<>();
+		private HashMap<String, ExpressionMatcher> matcherMap = new HashMap<>();
+
+		SimpleFilterHelper(DataRow simpleFilterCondition, DataRow metadata) throws Exception {
+			this.simpleFilterCondition = simpleFilterCondition;
+			prepareFilterMaps(metadata);
 		}
-		return match;
+
+		private boolean matches(DataRow dataRow) throws Exception {
+			Iterator<String> filterFieldsIterator = simpleFilterCondition.getFieldNames().iterator();
+			boolean match = true;
+			while (match && filterFieldsIterator.hasNext()) {
+				String filterFieldKey = filterFieldsIterator.next();
+				DataField cond = simpleFilterCondition.getField(filterFieldKey);
+				// here the real matching will be tested
+				match = matchesCondition(dataRow, filterFieldKey, cond);
+			}
+			return match;
+		}
+
+		private void prepareFilterMaps(DataRow metadata) throws Exception {
+			// Check for "cond:" filters. If found, then create new ExpressionMatcher
+			// object's per field.
+
+			for (String filterFieldName : simpleFilterCondition.getFieldNames()) {
+				if (metadata.contains(filterFieldName)) {
+					DataField filterField = simpleFilterCondition.getField(filterFieldName);
+					if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
+						comparatorMap.put(filterFieldName, new DataRowComparator(filterFieldName));
+						matcherMap.put(filterFieldName, new ExpressionMatcher(filterField.getString().substring(5),
+								metadata.getFieldType(filterFieldName), filterFieldName));
+					}
+				}
+			}
+
+		}
+
+		private boolean matchesCondition(DataRow dataRow, String filterFieldKey, DataField cond) throws Exception {
+			boolean match = true;
+			if (dataRow.getFieldType(filterFieldKey) == 12 && cond.getString().startsWith("regex:")) {
+				match = dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6));
+			} else if (matcherMap.containsKey(filterFieldKey)) {
+				Comparator<DataRow> comparator = comparatorMap.get(filterFieldKey);
+				ExpressionMatcher matcher = matcherMap.get(filterFieldKey);
+				match = matcher.match(comparator, dataRow, filterFieldKey);
+			} else {
+				DataField comp = dataRow.getField(filterFieldKey);
+				match = cond.equals(comp);
+			}
+			return match;
+		}
+
 	}
 
 	/**
