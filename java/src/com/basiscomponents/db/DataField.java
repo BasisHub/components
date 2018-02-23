@@ -34,7 +34,7 @@ public class DataField implements java.io.Serializable {
 	private HashMap<String, String> Attributes = new HashMap<String, String>();
 
 	/**
-	 * Creates the DatField object with the given object as the DataField's value
+	 * Creates the DataField object with the given object as the DataField's value
 	 * 
 	 * @param value The value object of the DataField to be created 
 	 */
@@ -43,7 +43,7 @@ public class DataField implements java.io.Serializable {
 	}
 
 	/**
-	 * Return's the DataField's value.
+	 * Returns the DataField's value.
 	 * 
 	 * @return value the DataField's value
 	 */
@@ -129,7 +129,7 @@ public class DataField implements java.io.Serializable {
 	}
 
 	/**
-	 * Return's the DataField's value.
+	 * Returns the DataField's value.
 	 * 
 	 * @return value The DataField's value.
 	 */
@@ -390,7 +390,7 @@ public class DataField implements java.io.Serializable {
 
 	/**
 	 * Sets the value of the attribute with the given name.
-	 * Creates the attribute if it doesn't exist already.
+	 * Creates the attribute if it doesn't exist.
 	 * 
 	 * @param attributeName The attribute's name.
 	 * @param attributeValue The attribute's value.
