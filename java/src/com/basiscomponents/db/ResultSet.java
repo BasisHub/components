@@ -14,14 +14,12 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
-
-import javax.naming.OperationNotSupportedException;
 
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
@@ -189,63 +187,62 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return a ResultSet with the DataRows found in the current instance.
 	 */
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
-		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
+		ResultSet resultSet = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 
 		// Check for "cond:" filters. If found, then create new ExpressionMatcher object's per field.
-		HashMap<String, java.util.Comparator<DataRow>> comparatorMap = new HashMap<String, java.util.Comparator<DataRow>>();
-		HashMap<String, ExpressionMatcher> matcherMap = new HashMap<String, ExpressionMatcher>();
+		HashMap<String, Comparator<DataRow>> comparatorMap = new HashMap<>();
+		HashMap<String, ExpressionMatcher> matcherMap = new HashMap<>();
 		BBArrayList<String> filterFields = simpleFilterCondition.getFieldNames();
 		if (size() > 0) {
-			DataRow dr = get(0);
-			Iterator<String> it = filterFields.iterator();
-			while (it.hasNext()) {
-				String fieldName = it.next();
-				if (!dr.contains(fieldName)) continue;
-				DataField field = simpleFilterCondition.getField(fieldName);
-				if (field.getValue() != null && field.getString().startsWith("cond:")) {
-					comparatorMap.put(fieldName, new DataRowComparator(fieldName));
-					matcherMap.put(fieldName, new ExpressionMatcher(field.getString().substring(5), dr.getFieldType(fieldName), fieldName));
+			DataRow dataRow = get(0);
+			for (String filterFieldName : filterFields) {
+				if (dataRow.contains(filterFieldName)) {
+					DataField filterField = simpleFilterCondition.getField(filterFieldName);
+					if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
+
+						comparatorMap.put(filterFieldName, 
+								new DataRowComparator(filterFieldName));
+						matcherMap.put(filterFieldName, 
+								new ExpressionMatcher(
+										filterField.getString().substring(5), // after "cond:"
+										dataRow.getFieldType(filterFieldName), 
+										filterFieldName));
+					}
 				}
 			}
 		}
 
-		Iterator<DataRow> it = this.iterator();
-		while (it.hasNext()) {
-			DataRow dr = it.next();
-			Iterator<String> it2 = filterFields.iterator();
+		Iterator<DataRow> dataRowIterator = this.iterator();
+		while (dataRowIterator.hasNext()) {
+			DataRow dataRow = dataRowIterator.next();
+			Iterator<String> filterFieldsIterator = filterFields.iterator();
 			Boolean match = true;
-			while (it2.hasNext()) {
-				String k = it2.next();
+			while (match && filterFieldsIterator.hasNext()) {
+				String filterFieldKey = filterFieldsIterator.next();
 				match = true;
-				DataField cond = simpleFilterCondition.getField(k);
-
-				if (dr.getFieldType(k) == 12 && cond.getString().startsWith("regex:")) {
-					if (!dr.getFieldAsString(k).matches(cond.getString().substring(6))) {
+				DataField cond = simpleFilterCondition.getField(filterFieldKey);
+				if (dataRow.getFieldType(filterFieldKey) == 12 && cond.getString().startsWith("regex:")) {
+					if (!dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6))) {
 						match = false;
-						break;
 					}
-				}
-				else if(matcherMap.containsKey(k)) {
-					java.util.Comparator<DataRow> comparator = comparatorMap.get(k);
-					ExpressionMatcher matcher = matcherMap.get(k);
-					if (!matcher.match(comparator, dr, k)) {
+				} else if (matcherMap.containsKey(filterFieldKey)) {
+					Comparator<DataRow> comparator = comparatorMap.get(filterFieldKey);
+					ExpressionMatcher matcher = matcherMap.get(filterFieldKey);
+					if (!matcher.match(comparator, dataRow, filterFieldKey)) {
 						match = false;
-						break;
 					}
-				}
-				else {
-					DataField comp = dr.getField(k);
+				} else {
+					DataField comp = dataRow.getField(filterFieldKey);
 					if (!cond.equals(comp)) {
 						match = false;
-						break;
 					}
 				}
 			}
 			if (match) {
-				r.add(dr);
+				resultSet.add(dataRow);
 			}
 		}
-		return r;
+		return resultSet;
 	}
 
 	/**
@@ -2210,47 +2207,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public Iterator<DataRow> iterator() {
 		// Auto-generated method stub
 		return new ResultSetIterator(this.DataRows);
-	}
-
-	public static class ResultSetIterator implements Iterator<DataRow> {
-
-		private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
-		private int current;
-
-		ResultSetIterator(ArrayList<DataRow> DataRows) {
-			this.DataRows = DataRows;
-			this.current = 0;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return current < DataRows.size();
-		}
-
-		@Override
-		public DataRow next() {
-			if (!hasNext())
-				throw new NoSuchElementException();
-			return DataRows.get(current++);
-		}
-
-		@Override
-		public void remove() {
-			// Choose exception or implementation:
-			try {
-				throw new OperationNotSupportedException();
-			} catch (OperationNotSupportedException e) {
-				// Auto-generated catch block
-				e.printStackTrace();
-			}
-			// or
-			// // if (! hasNext()) throw new NoSuchElementException();
-			// // if (currrent + 1 < myArray.end) {
-			// // System.arraycopy(myArray.arr, current+1, myArray.arr, current,
-			// myArray.end - current-1);
-			// // }
-			// // myArray.end--;
-		}
 	}
 
 	// ---------- scalar functions on one field in the resultset ----------
