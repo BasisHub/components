@@ -2630,20 +2630,17 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				field = d.getFieldAsString(fieldname);
 				label = d.getFieldAsString(labelname);
 			} catch (Exception e) {
-			} finally {
 			}
 			tmp = 0.0;
 			tmp1 = 0.0;
 			try {
 				tmp = d.getFieldAsNumber(sumfieldname);
 			} catch (Exception e) {
-			} finally {
 			}
 
 			try {
 				tmp1 = dr.getFieldAsNumber(field);
 			} catch (Exception e) {
-			} finally {
 			}
 			dr.setFieldValue(field, tmp + tmp1);
 			dr.setFieldAttribute(field, "label", label);
