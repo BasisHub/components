@@ -48,21 +48,21 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public static final int SORT_ON_RESULT_DESC = 13;
 
 	@Expose
-	private ArrayList<HashMap<String, Object>> MetaData = new ArrayList<HashMap<String, Object>>();
+	private ArrayList<HashMap<String, Object>> MetaData = new ArrayList<>();
 	@Expose
-	private ArrayList<String> ColumnNames = new ArrayList<String>();
+	private ArrayList<String> ColumnNames = new ArrayList<>();
 	@Expose
-	private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
+	private ArrayList<DataRow> DataRows = new ArrayList<>();
 	private ArrayList<String> FieldSelection;
 
-	private ArrayList<String> KeyColumns = new ArrayList<String>();
+	private ArrayList<String> KeyColumns = new ArrayList<>();
 	private String KeyTemplateString = "";
 	private Template KeyTemplate = null;
 
 	private int currentRow = -1;
 	private DataRow currentDataRow;
 
-	public static HashMap<Integer, String> SQLTypeNameMap = new HashMap<Integer, String>();
+	public static HashMap<Integer, String> SQLTypeNameMap = new HashMap<>();
 
 	private SQLResultSet sqlResultSet = null;
 
