@@ -39,6 +39,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final int NO_SORT = 0;
+	public static final int SORT_ON_GROUPFIELD = 1;
+	public static final int SORT_ON_GROUPLABEL = 2;
+	public static final int SORT_ON_RESULT = 3;
+	public static final int SORT_ON_GROUPFIELD_DESC = 11;
+	public static final int SORT_ON_GROUPLABEL_DESC = 12;
+	public static final int SORT_ON_RESULT_DESC = 13;
+
 	@Expose
 	private ArrayList<HashMap<String, Object>> MetaData = new ArrayList<HashMap<String, Object>>();
 	@Expose
@@ -2369,13 +2377,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return this.countByGroup(fieldname, fieldname, NO_SORT, 0);
 	}
 
-	public static final int NO_SORT = 0;
-	public static final int SORT_ON_GROUPFIELD = 1;
-	public static final int SORT_ON_GROUPLABEL = 2;
-	public static final int SORT_ON_RESULT = 3;
-	public static final int SORT_ON_GROUPFIELD_DESC = 11;
-	public static final int SORT_ON_GROUPLABEL_DESC = 12;
-	public static final int SORT_ON_RESULT_DESC = 13;
+
 
 	/**
 	 * Returns a DataRow which contains all field values of the DataRows defined in this ResultSet for the given field name.
