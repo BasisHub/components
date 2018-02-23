@@ -207,7 +207,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				if (dataRow.contains(filterFieldName)) {
 					DataField filterField = simpleFilterCondition.getField(filterFieldName);
 					if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
-
 						comparatorMap.put(filterFieldName, 
 								new DataRowComparator(filterFieldName));
 						matcherMap.put(filterFieldName, 
@@ -224,26 +223,34 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		while (dataRowIterator.hasNext()) {
 			DataRow dataRow = dataRowIterator.next();
 			Iterator<String> filterFieldsIterator = filterFields.iterator();
-			Boolean match = true;
+			boolean match = true;
 			while (match && filterFieldsIterator.hasNext()) {
 				String filterFieldKey = filterFieldsIterator.next();
 				DataField cond = simpleFilterCondition.getField(filterFieldKey);
-				if (dataRow.getFieldType(filterFieldKey) == 12 && cond.getString().startsWith("regex:")) {
-					match = dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6));
-				} else if (matcherMap.containsKey(filterFieldKey)) {
-					Comparator<DataRow> comparator = comparatorMap.get(filterFieldKey);
-					ExpressionMatcher matcher = matcherMap.get(filterFieldKey);
-					match = matcher.match(comparator, dataRow, filterFieldKey);
-				} else {
-					DataField comp = dataRow.getField(filterFieldKey);
-					match = cond.equals(comp);
-				}
+				match = matchesCondition(comparatorMap, matcherMap, dataRow, filterFieldKey, cond);
 			}
 			if (match) {
 				resultSet.add(dataRow);
 			}
 		}
 		return resultSet;
+	}
+
+	private boolean matchesCondition(HashMap<String, Comparator<DataRow>> comparatorMap,
+			HashMap<String, ExpressionMatcher> matcherMap, DataRow dataRow, String filterFieldKey, DataField cond)
+			throws Exception {
+		boolean match = true;
+		if (dataRow.getFieldType(filterFieldKey) == 12 && cond.getString().startsWith("regex:")) {
+			match = dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6));
+		} else if (matcherMap.containsKey(filterFieldKey)) {
+			Comparator<DataRow> comparator = comparatorMap.get(filterFieldKey);
+			ExpressionMatcher matcher = matcherMap.get(filterFieldKey);
+			match = matcher.match(comparator, dataRow, filterFieldKey);
+		} else {
+			DataField comp = dataRow.getField(filterFieldKey);
+			match = cond.equals(comp);
+		}
+		return match;
 	}
 
 	/**
