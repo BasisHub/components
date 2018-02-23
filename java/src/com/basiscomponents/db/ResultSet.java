@@ -196,25 +196,25 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
 		ResultSet resultSet = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
-
+		if (size() == 0) {
+			return resultSet;
+		}
 		// Check for "cond:" filters. If found, then create new ExpressionMatcher object's per field.
 		HashMap<String, Comparator<DataRow>> comparatorMap = new HashMap<>();
 		HashMap<String, ExpressionMatcher> matcherMap = new HashMap<>();
 		BBArrayList<String> filterFields = simpleFilterCondition.getFieldNames();
-		if (size() > 0) {
-			DataRow dataRow = get(0);
-			for (String filterFieldName : filterFields) {
-				if (dataRow.contains(filterFieldName)) {
-					DataField filterField = simpleFilterCondition.getField(filterFieldName);
-					if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
-						comparatorMap.put(filterFieldName, 
-								new DataRowComparator(filterFieldName));
-						matcherMap.put(filterFieldName, 
-								new ExpressionMatcher(
-										filterField.getString().substring(5), // after "cond:"
-										dataRow.getFieldType(filterFieldName), 
-										filterFieldName));
-					}
+		DataRow dataRow = get(0);
+		for (String filterFieldName : filterFields) {
+			if (dataRow.contains(filterFieldName)) {
+				DataField filterField = simpleFilterCondition.getField(filterFieldName);
+				if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
+					comparatorMap.put(filterFieldName, 
+							new DataRowComparator(filterFieldName));
+					matcherMap.put(filterFieldName, 
+							new ExpressionMatcher(
+									filterField.getString().substring(5), // after "cond:"
+									dataRow.getFieldType(filterFieldName), 
+									filterFieldName));
 				}
 			}
 		}
