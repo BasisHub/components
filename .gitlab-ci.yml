@@ -1,0 +1,41 @@
+image: maven:3.3-jdk-8-alpine
+
+stages:
+  - build
+  - test
+  - package
+build:
+  tags:
+    - docker
+  stage: build
+  script:
+    - mvn compile
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - target/
+
+test:
+  tags:
+    - docker
+  stage: test
+  script:
+    - mvn test
+  dependencies:
+    - build
+
+package:
+  tags:
+    - docker
+  only:
+    - master
+    - develop
+  stage: package
+  script:
+    - mvn -DskipTests package
+  dependencies:
+    - build
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 h
