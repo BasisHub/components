@@ -5,8 +5,6 @@ stages:
   - test
   - package
 build:
-  tags:
-    - docker
   stage: build
   script:
     - mvn compile
@@ -16,8 +14,6 @@ build:
       - target/
 
 test:
-  tags:
-    - docker
   stage: test
   script:
     - mvn test
@@ -25,8 +21,6 @@ test:
     - build
 
 package:
-  tags:
-    - docker
   only:
     - master
     - develop
