@@ -31,5 +31,5 @@ package:
     - build
   artifacts:
     paths:
-      - target/*.jar
+      - java/lib/*.jar
     expire_in: 1 h
