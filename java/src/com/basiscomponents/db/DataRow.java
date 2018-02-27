@@ -284,7 +284,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception No field with the specified name exists
 	 */
-	public DataField getField(String name) throws Exception {
+	public DataField getField(String name) {
 		return getField(name, false);
 	}
 
@@ -301,10 +301,10 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception No field with the specified name exists and the specified boolean value is false
 	 */
-	public DataField getField(String name, Boolean silent) throws Exception {
+	public DataField getField(String name, Boolean silent) {
 		DataField field = this.dataFields.get(name);
 		if (field == null && !(silent))
-			throw new Exception("Field " + name + " does not exist");
+			throw new RuntimeException("Field " + name + " does not exist");
 		return field;
 	}
 
