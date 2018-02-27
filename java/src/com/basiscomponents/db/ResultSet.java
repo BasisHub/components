@@ -437,11 +437,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				}
 				try {
 					HashMap<String, String> attrMap = dr.getFieldAttributes(name);
-					Iterator<String> it2 = attrMap.keySet().iterator();
-					while (it2.hasNext()) {
-						String attrKey = it2.next();
-						this.setAttribute(column, attrKey, attrMap.get(attrKey));
-					}
+				
+					attrMap.keySet().forEach(attrKey->
+					this.setAttribute(column, attrKey, attrMap.get(attrKey)));
+					
 				} catch (Exception e) {
 					// Auto-generated catch block
 					e.printStackTrace();

@@ -1,9 +1,7 @@
 package com.basiscomponents.db;
 
 import java.math.BigDecimal;
-
 import java.net.URL;
-
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -13,6 +11,7 @@ import java.sql.Ref;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -475,7 +474,7 @@ public class DataField implements java.io.Serializable {
 		setValue(null);
 	}
 
-	static Object convertType(Object o, int targetType) throws Exception{
+	static Object convertType(Object o, int targetType) throws ParseException {
 
 		if (o == null) return null;
 
@@ -628,9 +627,7 @@ public class DataField implements java.io.Serializable {
 		}
 
 		if (classname.contains("DataField")){
-			Exception e = new Exception("What's happening here? Setting a DataField into a DataField?");
-			e.printStackTrace();
-			throw e;
+			throw new IllegalArgumentException("Setting a DataField into a DataField is not supported");
 		}
 
 		String typeName = ResultSet.getSQLTypeName(targetType);
