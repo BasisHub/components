@@ -2,6 +2,7 @@ package com.basiscomponents.db;
 
 import java.sql.Time;
 import java.sql.Types;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -193,14 +194,20 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Sets the specified value for the field with the specified name.
-	 * In case no field with the specified name exists, then the field will be created.
+	 * Sets the specified value for the field with the specified name. In case no
+	 * field with the specified name exists, then the field will be created.
 	 *
-	 * @param name The name of the field
-	 * @param value The value of the field
-	 * @throws Exception Thrown when field already exists and the new value cannot be casted to the current field type.
+	 * @param name
+	 *            The name of the field
+	 * @param value
+	 *            The value of the field
+	 * @throws ParseException
+	 *             if a DataField cannot been parsed
+	 * @throws Exception
+	 *             Thrown when field already exists and the new value cannot be
+	 *             casted to the current field type.
 	 */
-	public void setFieldValue(final String name, Object value) throws Exception {
+	public void setFieldValue(final String name, Object value) throws ParseException {
 
 		if (value != null) {
 			String c = value.getClass().getCanonicalName();
@@ -515,7 +522,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception The specified column name doesn't exist
 	 */
-	public int getColumnIndex(String name) throws Exception {
+	public int getColumnIndex(String name) {
 		return getColumnIndex(name, false);
 	}
 
@@ -532,10 +539,10 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception The specified column name doesn't exist and the silent boolean value is false
 	 */
-	public int getColumnIndex(String name, Boolean silent) throws Exception {
+	public int getColumnIndex(String name, Boolean silent) {
 		int column = this.resultSet.getColumnIndex(name);
 		if (column == -1 && !(silent))
-			throw new Exception("Field " + name + " does not exist");
+			throw new RuntimeException("Field " + name + " does not exist");
 		return column;
 	}
 
@@ -574,15 +581,18 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value of the ColumnType property from the metadata for the field with the given name.
+	 * Returns the value of the ColumnType property from the metadata for the field
+	 * with the given name.
 	 *
-	 * @param name The name of the field.
+	 * @param name
+	 *            The name of the field.
 	 *
 	 * @return The value of the ColumnType property for the field name.
 	 *
-	 * @throws Exception The specified column name doesn't exist
+	 * @throws RuntimeException
+	 *             The specified column name doesn't exist
 	 */
-	public int getFieldType(String name) throws Exception {
+	public int getFieldType(String name) {
 		int column = getColumnIndex(name);
 		return this.resultSet.getColumnType(column);
 	}
@@ -725,7 +735,7 @@ public class DataRow implements java.io.Serializable {
 	 * @param value The value of the attribute to set.
 	 * @throws Exception No field exists with the given name.
 	 */
-	public void setFieldAttribute(String name, String attrname, String value) throws Exception {
+	public void setFieldAttribute(String name, String attrname, String value) {
 		DataField field = getField(name);
 		field.setAttribute(attrname, value);
 	}
