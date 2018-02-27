@@ -1640,7 +1640,10 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public boolean matches(DataRow toCompare) {
-		return toCompare.getFieldNames().stream().allMatch(x -> this.getField(x).equals(toCompare.getField(x)));
+		return toCompare.getFieldNames().stream().filter(x -> this.getField(x, true) != null) // don't use those which
+																								// are not present in
+																								// the DataRow
+				.allMatch(x -> this.getField(x).equals(toCompare.getField(x)));
 	}
 
 	/**
