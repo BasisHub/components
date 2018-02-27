@@ -23,7 +23,7 @@ public class DataRowMatchesTest {
 	public void testNegative() throws ParseException {
 		DataRow dataRow = DataRowProvider.buildSampleDataRow(false);
 		DataRow filter = new DataRow();
-		filter.setFieldValue(DataRowProvider.STRINGFIELD, "totally not the val u looking for");
+		filter.setFieldValue(DataRowProvider.STRINGFIELD, "This is not the value, you are looking for");
 		assertFalse(dataRow.matches(filter));
 	}
 
