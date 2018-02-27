@@ -200,7 +200,7 @@ public class DataRow implements java.io.Serializable {
 	 * @param value The value of the field
 	 * @throws Exception Thrown when field already exists and the new value cannot be casted to the current field type.
 	 */
-	public void setFieldValue(String name, Object value) throws Exception  {
+	public void setFieldValue(final String name, Object value) throws Exception {
 
 		if (value != null) {
 			String c = value.getClass().getCanonicalName();
@@ -1629,6 +1629,9 @@ public class DataRow implements java.io.Serializable {
 		return n;
 	}
 
+	public boolean matches(DataRow toCompare) {
+		return toCompare.getFieldNames().stream().allMatch(x -> this.getField(x).equals(toCompare.getField(x)));
+	}
 
 	/**
 	 * Iterates over each DataField object, and calls the {@link DataField#clear() clear()}
