@@ -1,0 +1,35 @@
+image: bbj:latest 
+
+stages:
+  - build
+  - test
+  - package
+build:
+  stage: build
+  script:
+    - mvn -Punixbbjlib compile
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - target/
+
+test:
+  stage: test
+  script:
+    - mvn -Punixbbjlib test
+  dependencies:
+    - build
+
+package:
+  only:
+    - master
+    - develop
+  stage: package
+  script:
+    - mvn -Punixbbjlib -DskipTests package
+  dependencies:
+    - build
+  artifacts:
+    paths:
+      - java/lib/*.jar
+    expire_in: 1 h

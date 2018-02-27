@@ -48,6 +48,16 @@
 				<jar-directory>C:/bbj/lib</jar-directory>
 			</properties>
 		</profile>
+		<profile>
+			<id>unixbbjlib</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+
+			<properties>
+				<jar-directory>/opt/bbj/lib</jar-directory>
+			</properties>
+		</profile>
 
 	</profiles>
 
@@ -172,7 +182,12 @@
 			<scope>system</scope>
 			<systemPath>${project-root}/java/build/BuildVersionGenerator.jar</systemPath>
 		</dependency>
-
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

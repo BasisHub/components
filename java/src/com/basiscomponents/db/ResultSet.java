@@ -14,14 +14,12 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
-
-import javax.naming.OperationNotSupportedException;
 
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
@@ -41,22 +39,30 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final int NO_SORT = 0;
+	public static final int SORT_ON_GROUPFIELD = 1;
+	public static final int SORT_ON_GROUPLABEL = 2;
+	public static final int SORT_ON_RESULT = 3;
+	public static final int SORT_ON_GROUPFIELD_DESC = 11;
+	public static final int SORT_ON_GROUPLABEL_DESC = 12;
+	public static final int SORT_ON_RESULT_DESC = 13;
+
 	@Expose
-	private ArrayList<HashMap<String, Object>> MetaData = new ArrayList<HashMap<String, Object>>();
+	private ArrayList<HashMap<String, Object>> MetaData = new ArrayList<>();
 	@Expose
-	private ArrayList<String> ColumnNames = new ArrayList<String>();
+	private ArrayList<String> ColumnNames = new ArrayList<>();
 	@Expose
-	private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
+	private ArrayList<DataRow> DataRows = new ArrayList<>();
 	private ArrayList<String> FieldSelection;
 
-	private ArrayList<String> KeyColumns = new ArrayList<String>();
+	private ArrayList<String> KeyColumns = new ArrayList<>();
 	private String KeyTemplateString = "";
 	private Template KeyTemplate = null;
 
 	private int currentRow = -1;
 	private DataRow currentDataRow;
 
-	public static HashMap<Integer, String> SQLTypeNameMap = new HashMap<Integer, String>();
+	public static HashMap<Integer, String> SQLTypeNameMap = new HashMap<>();
 
 	private SQLResultSet sqlResultSet = null;
 
@@ -189,63 +195,76 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return a ResultSet with the DataRows found in the current instance.
 	 */
 	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
-		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
+		ResultSet resultSet = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
+		if (size() == 0) {
+			return resultSet;
+		}
+		final SimpleFilterHelper sfh = new SimpleFilterHelper(simpleFilterCondition, get(0));
 
-		// Check for "cond:" filters. If found, then create new ExpressionMatcher object's per field.
-		HashMap<String, java.util.Comparator<DataRow>> comparatorMap = new HashMap<String, java.util.Comparator<DataRow>>();
-		HashMap<String, ExpressionMatcher> matcherMap = new HashMap<String, ExpressionMatcher>();
-		BBArrayList<String> filterFields = simpleFilterCondition.getFieldNames();
-		if (size() > 0) {
-			DataRow dr = get(0);
-			Iterator<String> it = filterFields.iterator();
-			while (it.hasNext()) {
-				String fieldName = it.next();
-				if (!dr.contains(fieldName)) continue;
-				DataField field = simpleFilterCondition.getField(fieldName);
-				if (field.getValue() != null && field.getString().startsWith("cond:")) {
-					comparatorMap.put(fieldName, new DataRowComparator(fieldName));
-					matcherMap.put(fieldName, new ExpressionMatcher(field.getString().substring(5), dr.getFieldType(fieldName), fieldName));
-				}
+		Iterator<DataRow> dataRowIterator = this.iterator();
+		while (dataRowIterator.hasNext()) {
+			DataRow dataRow = dataRowIterator.next();
+			if (sfh.matches(dataRow)) {
+				resultSet.add(dataRow);
 			}
 		}
+		return resultSet;
+	}
 
-		Iterator<DataRow> it = this.iterator();
-		while (it.hasNext()) {
-			DataRow dr = it.next();
-			Iterator<String> it2 = filterFields.iterator();
-			Boolean match = true;
-			while (it2.hasNext()) {
-				String k = it2.next();
-				match = true;
-				DataField cond = simpleFilterCondition.getField(k);
+	private class SimpleFilterHelper {
+		private DataRow simpleFilterCondition;
+		private HashMap<String, Comparator<DataRow>> comparatorMap = new HashMap<>();
+		private HashMap<String, ExpressionMatcher> matcherMap = new HashMap<>();
 
-				if (dr.getFieldType(k) == 12 && cond.getString().startsWith("regex:")) {
-					if (!dr.getFieldAsString(k).matches(cond.getString().substring(6))) {
-						match = false;
-						break;
-					}
-				}
-				else if(matcherMap.containsKey(k)) {
-					java.util.Comparator<DataRow> comparator = comparatorMap.get(k);
-					ExpressionMatcher matcher = matcherMap.get(k);
-					if (!matcher.match(comparator, dr, k)) {
-						match = false;
-						break;
-					}
-				}
-				else {
-					DataField comp = dr.getField(k);
-					if (!cond.equals(comp)) {
-						match = false;
-						break;
-					}
-				}
-			}
-			if (match) {
-				r.add(dr);
-			}
+		SimpleFilterHelper(DataRow simpleFilterCondition, DataRow metadata) throws Exception {
+			this.simpleFilterCondition = simpleFilterCondition;
+			prepareFilterMaps(metadata);
 		}
-		return r;
+
+		private boolean matches(DataRow dataRow) throws Exception {
+			Iterator<String> filterFieldsIterator = simpleFilterCondition.getFieldNames().iterator();
+			boolean match = true;
+			while (match && filterFieldsIterator.hasNext()) {
+				String filterFieldKey = filterFieldsIterator.next();
+				DataField cond = simpleFilterCondition.getField(filterFieldKey);
+				// here the real matching will be tested
+				match = matchesCondition(dataRow, filterFieldKey, cond);
+			}
+			return match;
+		}
+
+		private void prepareFilterMaps(DataRow metadata) throws Exception {
+			// Check for "cond:" filters. If found, then create new ExpressionMatcher
+			// object's per field.
+
+			for (String filterFieldName : simpleFilterCondition.getFieldNames()) {
+				if (metadata.contains(filterFieldName)) {
+					DataField filterField = simpleFilterCondition.getField(filterFieldName);
+					if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
+						comparatorMap.put(filterFieldName, new DataRowComparator(filterFieldName));
+						matcherMap.put(filterFieldName, new ExpressionMatcher(filterField.getString().substring(5),
+								metadata.getFieldType(filterFieldName), filterFieldName));
+					}
+				}
+			}
+
+		}
+
+		private boolean matchesCondition(DataRow dataRow, String filterFieldKey, DataField cond) throws Exception {
+			boolean match = true;
+			if (dataRow.getFieldType(filterFieldKey) == 12 && cond.getString().startsWith("regex:")) {
+				match = dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6));
+			} else if (matcherMap.containsKey(filterFieldKey)) {
+				Comparator<DataRow> comparator = comparatorMap.get(filterFieldKey);
+				ExpressionMatcher matcher = matcherMap.get(filterFieldKey);
+				match = matcher.match(comparator, dataRow, filterFieldKey);
+			} else {
+				DataField comp = dataRow.getField(filterFieldKey);
+				match = cond.equals(comp);
+			}
+			return match;
+		}
+
 	}
 
 	/**
@@ -418,11 +437,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				}
 				try {
 					HashMap<String, String> attrMap = dr.getFieldAttributes(name);
-					Iterator<String> it2 = attrMap.keySet().iterator();
-					while (it2.hasNext()) {
-						String attrKey = it2.next();
-						this.setAttribute(column, attrKey, attrMap.get(attrKey));
-					}
+				
+					attrMap.keySet().forEach(attrKey->
+					this.setAttribute(column, attrKey, attrMap.get(attrKey)));
+					
 				} catch (Exception e) {
 					// Auto-generated catch block
 					e.printStackTrace();
@@ -2208,47 +2226,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return new ResultSetIterator(this.DataRows);
 	}
 
-	public static class ResultSetIterator implements Iterator<DataRow> {
-
-		private ArrayList<DataRow> DataRows = new ArrayList<DataRow>();
-		private int current;
-
-		ResultSetIterator(ArrayList<DataRow> DataRows) {
-			this.DataRows = DataRows;
-			this.current = 0;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return current < DataRows.size();
-		}
-
-		@Override
-		public DataRow next() {
-			if (!hasNext())
-				throw new NoSuchElementException();
-			return DataRows.get(current++);
-		}
-
-		@Override
-		public void remove() {
-			// Choose exception or implementation:
-			try {
-				throw new OperationNotSupportedException();
-			} catch (OperationNotSupportedException e) {
-				// Auto-generated catch block
-				e.printStackTrace();
-			}
-			// or
-			// // if (! hasNext()) throw new NoSuchElementException();
-			// // if (currrent + 1 < myArray.end) {
-			// // System.arraycopy(myArray.arr, current+1, myArray.arr, current,
-			// myArray.end - current-1);
-			// // }
-			// // myArray.end--;
-		}
-	}
-
 	// ---------- scalar functions on one field in the resultset ----------
 
 	/**
@@ -2409,13 +2386,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return this.countByGroup(fieldname, fieldname, NO_SORT, 0);
 	}
 
-	public static final int NO_SORT = 0;
-	public static final int SORT_ON_GROUPFIELD = 1;
-	public static final int SORT_ON_GROUPLABEL = 2;
-	public static final int SORT_ON_RESULT = 3;
-	public static final int SORT_ON_GROUPFIELD_DESC = 11;
-	public static final int SORT_ON_GROUPLABEL_DESC = 12;
-	public static final int SORT_ON_RESULT_DESC = 13;
+
 
 	/**
 	 * Returns a DataRow which contains all field values of the DataRows defined in this ResultSet for the given field name.
@@ -2654,20 +2625,17 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				field = d.getFieldAsString(fieldname);
 				label = d.getFieldAsString(labelname);
 			} catch (Exception e) {
-			} finally {
 			}
 			tmp = 0.0;
 			tmp1 = 0.0;
 			try {
 				tmp = d.getFieldAsNumber(sumfieldname);
 			} catch (Exception e) {
-			} finally {
 			}
 
 			try {
 				tmp1 = dr.getFieldAsNumber(field);
 			} catch (Exception e) {
-			} finally {
 			}
 			dr.setFieldValue(field, tmp + tmp1);
 			dr.setFieldAttribute(field, "label", label);

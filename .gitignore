@@ -8,3 +8,5 @@ java/src/com/basiscomponents/VersionInfo.java
 .builaunches
 .bdtPath
 .buildpath
+target/
+.settings/
