@@ -1762,8 +1762,9 @@ public class DataRow implements java.io.Serializable {
 	public boolean matches(DataRow toCompare) {
 		List<DataRowMatcher> matchers = new ArrayList<>();
 		toCompare.dataFields.forEach((key, value) -> {
-			if (this.getField(key, true) != null)// only those which are really in this DataRow
+			if (this.getField(key, true) != null) {// only those which are really in this DataRow
 				matchers.add(createMatcher(key, value.getString()));
+			}
 		});
 
 		return matchers.stream().allMatch(matcher -> matcher.matches(this));
@@ -1956,7 +1957,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return a BBj String Template with the values defined in this DataRow.
 	 */
 	public String getTemplate() {
-		ArrayList<Integer> numericTypeCodeList = new ArrayList<Integer>();
+		ArrayList<Integer> numericTypeCodeList = new ArrayList<>();
 		numericTypeCodeList.add(java.sql.Types.BIGINT);
 		numericTypeCodeList.add(java.sql.Types.TINYINT);
 		numericTypeCodeList.add(java.sql.Types.INTEGER);
@@ -2236,7 +2237,6 @@ public class DataRow implements java.io.Serializable {
 					// ignoring because not all fields have an attribute DTYPE
 				}
 			}
-
 			row.addDataField(fieldName, sqlType, df);
 		}
 

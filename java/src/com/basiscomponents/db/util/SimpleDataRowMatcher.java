@@ -4,16 +4,16 @@ import com.basiscomponents.db.DataRow;
 
 public class SimpleDataRowMatcher extends DataRowMatcher {
 
-	private String criteria;
+	private Object criteria;
 
-	SimpleDataRowMatcher(final String fieldname, final String criteria) {
+	SimpleDataRowMatcher(final String fieldname, final Object criteria) {
 		super(fieldname);
 		this.criteria = criteria;
 	}
 
 	@Override
 	public boolean matches(DataRow dr) {
-		return dr.getField(fieldName, true).equals(criteria);
+		return dr.getField(fieldName, true).getString().equals(criteria);
 	}
 
 }
