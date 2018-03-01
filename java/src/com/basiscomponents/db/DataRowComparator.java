@@ -1,5 +1,8 @@
 package com.basiscomponents.db;
 
+/**
+ * This is not a DataRowComparator, it's a DataFieldComparator
+ */
 public class DataRowComparator implements java.util.Comparator<DataRow> {
 
 	private String fieldName;

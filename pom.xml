@@ -53,12 +53,10 @@
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
-
 			<properties>
 				<jar-directory>/opt/bbj/lib</jar-directory>
 			</properties>
 		</profile>
-
 	</profiles>
 
 	<dependencies>
