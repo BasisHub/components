@@ -8,7 +8,8 @@ If creating a ticket, please provide a self-sufficient description in the ticket
 
 
 ## Source Code Style
-To format code in this project we use the [styleguide](https://github.com/google/styleguide) goole provides.
+Formatting the code: Please at least use the built in Formatter for Code of your IDE. in Eclipse it is `ctrl` + `shift` + `f`
 Actually there is no coding guideline right now  but at least the coding conventions of [Oracle](http://www.oracle.com/technetwork/java/javase/documentation/codeconvtoc-136057.html) should be applied.
+
 To get a better test coverage, provide tests to new features as they are implemented.
 
