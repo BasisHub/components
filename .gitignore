@@ -2,8 +2,8 @@
 java/bin
 java/lib
 .project
-java/build.info
-java/src/com/basiscomponents/VersionInfo.java
+src/main/resources/build.info
+src/main/java/com/basiscomponents/VersionInfo.java
 .metadata
 .builaunches
 .bdtPath
