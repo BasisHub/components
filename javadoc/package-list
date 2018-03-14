@@ -6,11 +6,13 @@ com.basiscomponents.bridge
 com.basiscomponents.bridge.proxygen
 com.basiscomponents.bridge.proxygen.Javascript
 com.basiscomponents.bridge.typewrap
+com.basiscomponents.configuration
 com.basiscomponents.db
 com.basiscomponents.db.constants
 com.basiscomponents.db.importer
 com.basiscomponents.db.sql
 com.basiscomponents.db.tree
+com.basiscomponents.db.util
 com.basiscomponents.json
 com.basiscomponents.lucene
 com.basiscomponents.ui.layout
