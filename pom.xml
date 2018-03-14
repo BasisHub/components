@@ -178,7 +178,14 @@
 			<artifactId>BuildVersionGenerator</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${project-root}/java/build/BuildVersionGenerator.jar</systemPath>
+			<systemPath>${project-root}/src/main/resources/build/BuildVersionGenerator.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.basis</groupId>
+			<artifactId>netty</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/netty-all-4.1.13.Final.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -189,27 +196,8 @@
 	</dependencies>
 
 	<build>
-
-		<resources>
-			<resource>
-				<directory>${basedir}/java/</directory>
-				<includes>
-					<include>*.info</include>
-				</includes>
-			</resource>
-		</resources>
-
-		<sourceDirectory>java/src/</sourceDirectory>
-
-		<testSourceDirectory>src/test/java</testSourceDirectory>
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-			</testResource>
-		</testResources>
 		<finalName>basiscomponents</finalName>
 		<plugins>
-
 			<!-- Set a JDK compiler level -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -227,7 +215,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<outputDirectory>java/lib/</outputDirectory>
+					<outputDirectory>target/lib/</outputDirectory>
 				</configuration>
 			</plugin>
 
@@ -242,7 +230,6 @@
 						<goals>
 							<goal>java</goal>
 						</goals>
-
 						<configuration>
 							<classpathScope>system</classpathScope>
 							<includeProjectDependencies>true</includeProjectDependencies>
@@ -251,7 +238,7 @@
 							<arguments>
 								<argument>${jar-directory}/BBjUtil.jar</argument>
 								<argument>${basedir}</argument>
-								<argument>${basedir}/java/build/build.properties</argument>
+								<argument>${basedir}/src/main/resources/build/build.properties</argument>
 							</arguments>
 						</configuration>
 					</execution>
