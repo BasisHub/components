@@ -138,7 +138,7 @@
 			<artifactId>commons-lang.jar</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/commons-lang-2.5.jar</systemPath>
+			<systemPath>${jar-directory}/commons-lang3-3.7.jar</systemPath>
 		</dependency>
 
 		<dependency>
