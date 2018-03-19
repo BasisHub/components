@@ -62,7 +62,7 @@ public class VectorWrap extends BBjVector {
 				
 				Object o = it.next();
 				String tmp = o.toString();
-				tmp = org.apache.commons.lang.StringEscapeUtils
+				tmp = org.apache.commons.lang3.StringEscapeUtils
 						.escapeJavaScript(tmp);
 				Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
 						.create();
