@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.basis.bbj.client.datatypes.BBjVector;
-import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
