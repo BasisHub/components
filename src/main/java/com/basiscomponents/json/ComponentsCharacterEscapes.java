@@ -1,6 +1,6 @@
 package com.basiscomponents.json;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
@@ -40,6 +40,7 @@ public class ComponentsCharacterEscapes extends CharacterEscapes
     	}
 		String s = "";
     	s+=(char) ch;
-    	return  new SerializedString(StringEscapeUtils.escapeJavaScript(s));
+    	return  new SerializedString(StringEscapeUtils.escapeEcmaScript(s));
+
     }
 }
