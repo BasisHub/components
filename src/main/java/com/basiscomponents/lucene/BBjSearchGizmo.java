@@ -45,13 +45,11 @@ public class BBjSearchGizmo {
 		analyzer = new WhitespaceAnalyzer();
 	}
 
-	public void addDocument(BBjSearchGizmoDoc doc) throws IOException,
-			LockObtainFailedException {
+	public void addDocument(BBjSearchGizmoDoc doc) throws IOException {
 
 		try {
 			removeDocument(doc.getId());
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

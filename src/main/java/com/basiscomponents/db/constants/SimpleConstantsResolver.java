@@ -10,13 +10,13 @@ import java.util.Map.Entry;
  */
 public class SimpleConstantsResolver implements ConstantsResolver{
 
-	private HashMap<String,String> Constants;
+	private HashMap<String, String> constants;
 	
 	/**
 	 * Initializes the SimpleConstantResolver.
 	 */
 	public SimpleConstantsResolver() {
-		this.Constants = new HashMap<String, String>();
+		this.constants = new HashMap<String, String>();
 	}
 	
 	/**
@@ -26,7 +26,7 @@ public class SimpleConstantsResolver implements ConstantsResolver{
 	 * @param val The value of the constant.
 	 */
 	public void put(String con, String val){
-		this.Constants.put(con, val);
+		this.constants.put(con, val);
 	}
 	
 	/**
@@ -35,15 +35,15 @@ public class SimpleConstantsResolver implements ConstantsResolver{
 	 * @param con The name of the constant to remove.
 	 */
 	public void remove(String con){
-		this.Constants.remove(con);
+		this.constants.remove(con);
 	}
 	
 	@Override
-	public String resolveConstants(String in) {
+	public String resolveConstants(final String in) {
 		if (in.matches("(?s).*\\[\\[.*\\]\\].*")){
 			String out = in;
 			
-			Iterator<Entry<String, String>> it = this.Constants.entrySet().iterator();
+			Iterator<Entry<String, String>> it = this.constants.entrySet().iterator();
 			while (it.hasNext()){
 				Entry<String, String> e = it.next();
 				out = out.replaceAll("\\[\\["+e.getKey()+"\\]\\]"  , e.getValue());

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ public class DataRow implements java.io.Serializable {
 
 	private HashMap<String, DataField> dataFields = new HashMap<>();
 
-	private HashMap<String, String> attributes = new HashMap<>();
+	private Map<String, String> attributes = new HashMap<>();
 
 	private com.basiscomponents.db.ResultSet resultSet; // containing this row
 
@@ -90,8 +91,9 @@ public class DataRow implements java.io.Serializable {
 	 * @param map
 	 *            HashMap containing key/value pairs used to initialize the DataRow
 	 *            object
+	 * @throws ParseException
 	 */
-	public DataRow(java.util.Map<String, Object> map) throws Exception {
+	public DataRow(java.util.Map<String, Object> map) throws ParseException {
 		this.resultSet = new com.basiscomponents.db.ResultSet();
 		Set<String> ks = map.keySet();
 		Iterator<String> it = ks.iterator();
@@ -176,9 +178,8 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @return attributesMap The java.util.HashMap with this DataRow's attributes
 	 */
-	@SuppressWarnings("unchecked")
-	public java.util.HashMap<String, String> getAttributes() {
-		return (java.util.HashMap<String, String>) this.attributes.clone();
+	public Map<String, String> getAttributes() {
+		return new HashMap<>(attributes);
 	}
 
 	/**

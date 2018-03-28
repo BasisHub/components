@@ -14,7 +14,7 @@ public class JDBCDataSource {
 
 	@SuppressWarnings("unused")
 	private JDBCDataSource() {
-	};
+	}
 
 	public JDBCDataSource(String JDBCDriver, String URL, String User, String Password) throws ClassNotFoundException {
 		this.JDBCDriver = JDBCDriver;

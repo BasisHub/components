@@ -30,7 +30,7 @@ public class DataField implements java.io.Serializable {
 	@Expose
 	private Object Value;
 
-	private HashMap<String, String> Attributes = new HashMap<String, String>();
+	private HashMap<String, String> attributes = new HashMap<>();
 
 	/**
 	 * Creates the DataField object with the given object as the DataField's value
@@ -395,7 +395,7 @@ public class DataField implements java.io.Serializable {
 	 * @param attributeValue The attribute's value.
 	 */
 	public void setAttribute(String attributeName, String attributeValue) {
-		this.Attributes.put(attributeName, attributeValue);
+		this.attributes.put(attributeName, attributeValue);
 	}
 
 	/**
@@ -406,7 +406,7 @@ public class DataField implements java.io.Serializable {
 	 * @return attributeValue The attribute's value.
 	 */
 	public String getAttribute(String attributeName) {
-		return this.Attributes.get(attributeName);
+		return this.attributes.get(attributeName);
 	}
 
 	/**
@@ -416,7 +416,7 @@ public class DataField implements java.io.Serializable {
 	 * @return attributesMap The <code>java.util.HashMap</code> object containing the DataField's attributes and their values.
 	 */
 	public HashMap<String, String> getAttributes() {
-		return new HashMap<String, String>(this.Attributes);
+		return new HashMap<String, String>(this.attributes);
 	}
 
 	/**
@@ -425,7 +425,7 @@ public class DataField implements java.io.Serializable {
 	 * @param attributes The attribute's <code>java.util.HashMap</code> object with the attributes and their corresponding values.
 	 */
 	public void setAttributes(HashMap<String, String> attributes) {
-		this.Attributes = attributes;
+		this.attributes = attributes;
 	}
 
 	/**
@@ -435,7 +435,7 @@ public class DataField implements java.io.Serializable {
 	 * @param attributeName The name of the attribute to remove.
 	 */
 	public void removeAttribute(String attributeName) {
-		this.Attributes.remove(attributeName);
+		this.attributes.remove(attributeName);
 	}
 
 	@Override
@@ -449,11 +449,11 @@ public class DataField implements java.io.Serializable {
 		}
 
 		if (f != null) {
-			Set<String> ks = this.Attributes.keySet();
+			Set<String> ks = this.attributes.keySet();
 			Iterator<String> it = ks.iterator();
 			while (it.hasNext()) {
 				String k = it.next();
-				String v = this.Attributes.get(k);
+				String v = this.attributes.get(k);
 				f.setAttribute(k, v);
 			}
 		}

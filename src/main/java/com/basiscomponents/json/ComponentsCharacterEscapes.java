@@ -38,9 +38,8 @@ public class ComponentsCharacterEscapes extends CharacterEscapes
     	if (ch==172){
     		return new SerializedString("\\u20AC"); 
     	}
-    	String s = new String();
+		String s = "";
     	s+=(char) ch;
     	return  new SerializedString(StringEscapeUtils.escapeJavaScript(s));
-        //return null;
     }
 }
