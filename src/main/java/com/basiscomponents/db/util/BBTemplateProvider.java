@@ -8,10 +8,22 @@ import com.basiscomponents.db.ResultSet;
  * @author damore
  *
  */
-public class BBTemplateColumnProvider {
+public class BBTemplateProvider {
 	private static final String PE_10 = "+=10)";
 	private static final String C_1 = "C(1*)";
 
+	public static String createBBTemplate(ResultSet resultSet, boolean extendedInfo) {
+		StringBuilder s = new StringBuilder();
+		int cols = resultSet.getColumnCount();
+		if (cols > 0) {
+			for (int col = 0; col < cols; col++) {
+				if (col > 0)
+					s.append(",");
+				s.append(createBBTemplateColumn(resultSet, col, cols, extendedInfo));
+			}
+		}
+		return s.toString();
+	}
 	/**
 	 * Creates and returns BB template definition for indexed column used by
 	 * {@link ResultSet#getBBTemplateColumn}
@@ -407,4 +419,5 @@ public class BBTemplateColumnProvider {
 		}
 		return s.toString();
 	}
+
 }

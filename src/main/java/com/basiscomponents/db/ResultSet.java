@@ -1,5 +1,7 @@
 package com.basiscomponents.db;
 
+import static com.basiscomponents.util.StringHelper.invert;
+
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
@@ -25,7 +27,7 @@ import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.sql.SQLResultSet;
-import com.basiscomponents.db.util.BBTemplateColumnProvider;
+import com.basiscomponents.db.util.BBTemplateProvider;
 import com.basiscomponents.db.util.ResultSetJsonMapper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -52,7 +54,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private ArrayList<String> ColumnNames = new ArrayList<>();
 	@Expose
 	private ArrayList<DataRow> DataRows = new ArrayList<>();
-	private ArrayList<String> FieldSelection;
+	private List<String> FieldSelection;
 
 	private ArrayList<String> KeyColumns = new ArrayList<>();
 	private String KeyTemplateString = "";
@@ -71,20 +73,20 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private ResultSet(ArrayList<HashMap<String, Object>> MetaData, ArrayList<String> ColumnNames,
-			ArrayList<DataRow> DataRows, ArrayList<String> KeyColumns) {
-		this.MetaData = (ArrayList<HashMap<String, Object>>) MetaData.clone();
-		this.ColumnNames = (ArrayList<String>) ColumnNames.clone();
-		this.DataRows = (ArrayList<DataRow>) DataRows.clone();
-		this.KeyColumns = (ArrayList<String>) KeyColumns.clone();
+	private ResultSet(ArrayList<HashMap<String, Object>> metaData, ArrayList<String> columnNames,
+			ArrayList<DataRow> dataRows, ArrayList<String> keyColumns) {
+		this.MetaData = (ArrayList<HashMap<String, Object>>) metaData.clone();
+		this.ColumnNames = (ArrayList<String>) columnNames.clone();
+		this.DataRows = (ArrayList<DataRow>) dataRows.clone();
+		this.KeyColumns = (ArrayList<String>) keyColumns.clone();
 	}
 
 	@SuppressWarnings("unchecked")
-	private ResultSet(ArrayList<HashMap<String, Object>> MetaData, ArrayList<String> ColumnNames,
-			ArrayList<String> KeyColumns) {
-		this.MetaData = (ArrayList<HashMap<String, Object>>) MetaData.clone();
-		this.ColumnNames = (ArrayList<String>) ColumnNames.clone();
-		this.KeyColumns = (ArrayList<String>) KeyColumns.clone();
+	private ResultSet(ArrayList<HashMap<String, Object>> metaData, ArrayList<String> columnNames,
+			ArrayList<String> keyColumns) {
+		this.MetaData = (ArrayList<HashMap<String, Object>>) metaData.clone();
+		this.ColumnNames = (ArrayList<String>) columnNames.clone();
+		this.KeyColumns = (ArrayList<String>) keyColumns.clone();
 	}
 
 	@Override
@@ -116,13 +118,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param direction The sort direction("ASC" or "DESC")
 	 */
 	public void orderByColumn(String fieldName, String direction) {
-		if (!"ASC".equalsIgnoreCase(direction) && !"DESC".equalsIgnoreCase(direction))
+		if (!"ASC".equalsIgnoreCase(direction) && !"DESC".equalsIgnoreCase(direction)) {
 			direction = "ASC";
-
+		}
 		java.util.Comparator<DataRow> comparator = new DataRowComparator(fieldName);
-		if ("DESC".equalsIgnoreCase(direction))
+		if ("DESC".equalsIgnoreCase(direction)) {
 			comparator = comparator.reversed();
-
+		}	
 		DataRows.sort(comparator);
 	}
 
@@ -155,8 +157,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return ResultSet: the records that match the query clause
 	 * @throws Exception
 	 */
-	public ResultSet filterBy(String QueryClause) throws Exception{
-		return filterBy(QueryClause, true, false); // this was the default behavior
+	public ResultSet filterBy(String queryClause) throws Exception {
+		return filterBy(queryClause, true, false); // this was the default behavior
 	}
 
 	/**
@@ -341,21 +343,20 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				this.MetaData.add(colMap);
 			}
 		} else {
-			Iterator<String> it = ColumnNames.iterator();
-			while (it.hasNext()) {
-				columns.put(columns.size()+1, it.next());
+			for (String col : ColumnNames) {
+				columns.put(columns.size() + 1, col);
 			}
 		}
 
-		if (KeyColumns != null && KeyColumns.size() > 0) {
+		if (KeyColumns != null && !KeyColumns.isEmpty()) {
 			KeyTemplate = TemplateInfo.createTemplate(getKeyTemplate());
 		}
 
 		column = 0;
-		HashMap<String, HashMap<String, String>> fieldAttributes = new HashMap<String, HashMap<String, String>>();
+		Map<String, Map<String, String>> fieldAttributes = new HashMap<>();
 		for (HashMap.Entry<Integer, String> entry : columns.entrySet()) {
 			name = entry.getValue();
-			HashMap<String, String> attribute = new HashMap<String, String>();
+			Map<String, String> attribute = new HashMap<>();
 
 			if (this.MetaData.get(column).get("ColumnTypeName").equals("JSON"))
 				attribute.put("StringFormat", "JSON");
@@ -1201,9 +1202,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param column The column index.
 	 * @param name The value of the ColumnName property to set.
 	 */
-	public void setColumnName(int column, String name) throws Exception {
-		if (name.isEmpty())
-			throw new Exception("Column name may not be empty");
+	public void setColumnName(int column, String name) {
+		if (name.isEmpty()) {
+			throw new IllegalArgumentException("Column name may not be empty");
+		}
 		this.MetaData.get(column).put("ColumnName", name);
 	}
 
@@ -1214,12 +1216,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param column The column index.
 	 * @param type The value of the ColumnType property to set.
 	 */
-	public void setColumnType(int column, int type) throws Exception {
+	public void setColumnType(int column, int type) {
 		String typeName = getSQLTypeName(type);
-		if (typeName == null)
-			throw new Exception("Unknown column type" + String.valueOf(type));
-		else
+		if (typeName == null) {
+			throw new IllegalStateException("Unknown column type " + type);
+		} else {
 			setColumnTypeName(column, typeName);
+		}
 		this.MetaData.get(column).put("ColumnType", type);
 	}
 
@@ -1346,7 +1349,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (nullable != java.sql.ResultSetMetaData.columnNoNulls
 				&& nullable != java.sql.ResultSetMetaData.columnNullable
 				&& nullable != java.sql.ResultSetMetaData.columnNullableUnknown)
-			throw new Exception("Invalid nullable value" + String.valueOf(nullable));
+			throw new IllegalArgumentException("Invalid nullable value " + nullable);
 		this.MetaData.get(column).put("Nullable", nullable);
 	}
 
@@ -1794,7 +1797,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @param fieldSelection The list of column names to import into the ResultSet when calling the populate method.
 	 */
-	public void setFieldSelection(ArrayList<String> fieldSelection) {
+	public void setFieldSelection(List<String> fieldSelection) {
 		this.FieldSelection = fieldSelection;
 	}
 
@@ -1890,8 +1893,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		String cleanString = js.trim();
 		ResultSet rs = new ResultSet();
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
-		com.google.gson.JsonArray o = new com.google.gson.JsonArray();
-		o = parser.parse(cleanString).getAsJsonArray();
+		com.google.gson.JsonArray o = parser.parse(cleanString).getAsJsonArray();
 
 		// Check if first row contains meta data. If so then use it as template row.
 		JsonObject meta = null;
@@ -1904,9 +1906,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			} catch (Exception ex) {
 			}
 		}
-		if (meta == null)
+		if (meta == null) {
 			System.err.println("error parsing - meta data missing");
-
+		}
 		Iterator<JsonElement> it = o.iterator();
 		while (it.hasNext()) {
 			JsonElement el = it.next();
@@ -1938,8 +1940,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public Object toJsonElement() {
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		try {
-			com.google.gson.JsonArray o = parser.parse(this.toJson()).getAsJsonArray();
-			return o;
+			return parser.parse(this.toJson()).getAsJsonArray();
 		} catch (Exception e) {
 			// Auto-generated catch block
 			e.printStackTrace();
@@ -1972,16 +1973,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	@Override
 	public String toString() {
-		String s=new String("ResultSet ");
-		s += this.DataRows.size();
-		s += " entries @";
-		s += System.identityHashCode(this);
-		return s;
+		StringBuilder s = new StringBuilder("ResultSet ");
+		s.append(this.DataRows.size());
+		s.append(" entries @");
+		s.append(System.identityHashCode(this));
+		return s.toString();
 	}
 
 	@Override
 	public Iterator<DataRow> iterator() {
-		// Auto-generated method stub
 		return new ResultSetIterator(this.DataRows);
 	}
 
@@ -2191,7 +2191,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		DataRow dr = new DataRow();
 		DataRow d;
 		Integer tmp;
-		String field, label;
+		String field;
+		String label;
 		while (it.hasNext()) {
 			d = it.next();
 			field = "(-)";
@@ -2220,7 +2221,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			BBArrayList<String> map = dr.getFieldNames();
 			while (map.size() > top) {
 				int i = map.size() - 1;
-				String f = (String) map.get(i);
+				String f = map.get(i);
 				dr.removeField(f);
 				map.remove(i);
 			}
@@ -2258,7 +2259,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		Iterator<String> it = f.iterator();
 		TreeMap<String, String> tm = new TreeMap<>();
 		while (it.hasNext()) {
-			String k = (String) it.next();
+			String k = it.next();
 			String tmp = "";
 			switch (sort) {
 			case SORT_ON_GROUPFIELD:
@@ -2294,25 +2295,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			drn.setFieldValue(k, dr.getFieldType(k), dr.getFieldValue(k));
 			drn.setFieldAttribute(k, "label", dr.getFieldAttribute(k, "label"));
 		}
-
 		return drn;
 
-	}
-
-	/**
-	 * Returns a String with the inverted bytes of the given input String.
-	 * 
-	 * @param in The String whose bytes will be inverted.
-	 * 
-	 * @return A String with the inverted bytes of the given input String.
-	 */
-	private static String invert(String in) {
-		String out = "";
-		byte[] b = in.getBytes();
-		for (int i = 0; i < b.length; i++) {
-			out += 255 - b[i];
-		}
-		return out;
 	}
 
 	/**
@@ -2587,11 +2571,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return String Key template definition
 	 */
 	private String getBBKeyTemplate(Boolean extendedInfo) {
-		StringBuffer s = new StringBuffer();
-		if (KeyColumns != null && KeyColumns.size() > 0) {
-			Iterator<String> it = KeyColumns.iterator();
-			while (it.hasNext()) {
-				String colName = it.next();
+		StringBuilder s = new StringBuilder();
+		if (KeyColumns != null && !KeyColumns.isEmpty()) {
+			for (String colName : KeyColumns) {
 				if (s.length() > 0)
 					s.append(",");
 				String tmplCol = getBBTemplateColumn(colName, -1, extendedInfo);
@@ -2625,16 +2607,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return String Template definition
 	 */
 	public String getBBTemplate(Boolean extendedInfo) {
-		StringBuilder s = new StringBuilder();
-		int cols = getColumnCount();
-		if (cols > 0) {
-			for (int col = 0; col < cols; col++) {
-				if (col > 0)
-					s.append(",");
-				s.append(getBBTemplateColumn(col, cols, extendedInfo));
-			}
-		}
-		return s.toString();
+		return BBTemplateProvider.createBBTemplate(this, extendedInfo);
 	}
 
 	/**
@@ -2665,8 +2638,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return String Column template definition
 	 */
 	private String getBBTemplateColumn(int col, int cols, Boolean extendedInfo) {
-
-		return BBTemplateColumnProvider.createBBTemplateColumn(this, col, cols, extendedInfo);
+		return BBTemplateProvider.createBBTemplateColumn(this, col, cols, extendedInfo);
 	}
 
 	/**
