@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ExpressionMatcher;
@@ -211,7 +213,7 @@ public class SqlTableBC implements BusinessComponent {
       }
       ar = new ResultSet(stmt.executeQuery());
       for (String field : ar.getColumnNames()) {
-        HashMap<String, Object> attrmap = ar.getColumnMetaData(field);
+		Map<String, Object> attrmap = ar.getColumnMetaData(field);
         try {
           int type = (int) attrmap.get("ColumnType");
           attributesRecord.addDataField(field, type, new DataField(null));

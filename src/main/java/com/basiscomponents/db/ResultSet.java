@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -24,6 +25,7 @@ import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.sql.SQLResultSet;
+import com.basiscomponents.db.util.BBTemplateColumnProvider;
 import com.basiscomponents.db.util.ResultSetJsonMapper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -299,21 +301,22 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		int cc = rsmd.getColumnCount();
 		String name;
 		int type;
-		ArrayList<Integer> types = new ArrayList<Integer>();
-		LinkedHashMap<Integer, String> columns = new LinkedHashMap<Integer, String>();
+		ArrayList<Integer> types = new ArrayList<>();
+		Map<Integer, String> columns = new LinkedHashMap<>();
 		int column = 0;
-		if (defaultMetaData == true) {
+		if (defaultMetaData) {
 			while (column < cc) {
 				column++;
 				if (FieldSelection != null && !FieldSelection.contains(rsmd.getColumnName(column))) continue;
-				HashMap<String, Object> colMap = new HashMap<String, Object>();
+				HashMap<String, Object> colMap = new HashMap<>();
 				colMap.put("CatalogName", rsmd.getCatalogName(column));
 				colMap.put("ColumnClassName", rsmd.getColumnClassName(column));
 				colMap.put("ColumnDisplaySize", rsmd.getColumnDisplaySize(column));
 				colMap.put("ColumnLabel", rsmd.getColumnLabel(column));
 				name = rsmd.getColumnName(column);
-				if (this.ColumnNames.contains(name))
-					name = name + "_" + String.valueOf(column); // handle dups
+				if (this.ColumnNames.contains(name)) {
+					name += "_" + column; // handle dups
+				}
 				colMap.put("ColumnName", name);
 				columns.put(column, name);
 				this.ColumnNames.add(name);
@@ -537,7 +540,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return the column's metadata.
 	 */
-	public HashMap<String, Object> getColumnMetaData(String name) {
+	public Map<String, Object> getColumnMetaData(String name) {
 		int column = getColumnIndex(name);
 		if (column != -1)
 			return this.MetaData.get(column);
@@ -562,7 +565,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return the list with all column names.
 	 */
-	public ArrayList<String> getColumnNames() {
+	public List<String> getColumnNames() {
 		return this.ColumnNames;
 	}
 
@@ -2246,7 +2249,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @throws Exception
 	 */
-	private DataRow sortDataRow(DataRow dr, int sort) throws Exception {
+	private static DataRow sortDataRow(DataRow dr, int sort) throws Exception {
 		// TODO make a generic implementation of this in the DataRow itself,
 		// that can sort on the value, the name or any attribute
 
@@ -2303,7 +2306,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return A String with the inverted bytes of the given input String.
 	 */
-	private String invert(String in) {
+	private static String invert(String in) {
 		String out = "";
 		byte[] b = in.getBytes();
 		for (int i = 0; i < b.length; i++) {
@@ -2416,7 +2419,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	// load row key bytes in order of key columns
 	public void buildRowKey(java.sql.ResultSet rs, DataRow dr)
-			throws IllegalArgumentException, IndexOutOfBoundsException, NoSuchFieldException, SQLException {
+			throws NoSuchFieldException, SQLException {
 
 		String stringVal = "";
 		byte[] bytes;
@@ -2622,7 +2625,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return String Template definition
 	 */
 	public String getBBTemplate(Boolean extendedInfo) {
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		int cols = getColumnCount();
 		if (cols > 0) {
 			for (int col = 0; col < cols; col++) {
@@ -2662,385 +2665,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return String Column template definition
 	 */
 	private String getBBTemplateColumn(int col, int cols, Boolean extendedInfo) {
-		StringBuffer s = new StringBuffer();
-		String colName = getColumnName(col);
-		s.append(colName).append(":");
-		Integer prec = getPrecision(col);
-		Integer scale = java.lang.Math.max(0, getScale(col));
-		Boolean isNum = false;
-		Integer colType = getColumnType(col);
-		String colTypeName = getColumnTypeName(col);
-		if (colTypeName == null)
-			colTypeName = "";
-		switch (colType) {
-		case java.sql.Types.NULL:
-			s.append("C(1)");
-			if (extendedInfo)
-				s.append(":sqltype=NULL");
-			break;
-		case java.sql.Types.CHAR:
-			if (prec <= 0) {
-				s.append("C(1*)");
-			} else {
-				if (prec <= 32767) {
-					s.append("C(").append(prec.toString()).append(")");
-				} else {
-					s.append("C(32767+=10)");
-				}
-			}
-			if (extendedInfo)
-				s.append(":sqltype=CHAR");
-			break;
-		case java.sql.Types.VARCHAR:
-			if (prec <= 0) {
-				s.append("C(1*)");
-			} else {
-				if (prec <= 32767) {
-					s.append("C(").append(prec.toString()).append("*)");
-				} else {
-					s.append("C(32767+=10)");
-				}
-			}
-			if (extendedInfo)
-				s.append(":sqltype=VARCHAR");
-			break;
-		case java.sql.Types.LONGVARCHAR:
-			if (prec <= 0) {
-				s.append("C(1*)");
-			} else {
-				if (prec <= 32767) {
-					s.append("C(").append(prec.toString()).append("*)");
-				} else {
-					s.append("C(32767+=10)");
-				}
-			}
-			if (extendedInfo)
-				s.append(":sqltype=LONGVARCHAR");
-			break;
-		case java.sql.Types.NCHAR:
-			if (prec <= 0) {
-				s.append("C(1*)");
-			} else {
-				if (prec <= 32767) {
-					s.append("C(").append(prec.toString()).append(")");
-				} else {
-					s.append("C(32767+=10)");
-				}
-			}
-			if (extendedInfo)
-				s.append(":sqltype=NCHAR");
-			break;
-		case java.sql.Types.NVARCHAR:
-			if (prec <= 0) {
-				s.append("C(1*)");
-			} else {
-				if (prec <= 32767) {
-					s.append("C(").append(prec.toString()).append("+=10)");
-				} else {
-					s.append("C(32767+=10)");
-				}
-			}
-			if (extendedInfo)
-				s.append(":sqltype=NVARCHAR");
-			break;
-		case java.sql.Types.LONGNVARCHAR:
-			if (prec <= 0) {
-				s.append("C(1*)");
-			} else {
-				if (prec <= 32767) {
-					s.append("C(").append(prec.toString()).append("+=10)");
-				} else {
-					s.append("C(32767+=10)");
-				}
-			}
-			if (extendedInfo)
-				s.append(":sqltype=LONGNVARCHAR");
-			break;
-		case java.sql.Types.INTEGER:
-			if (isSigned(col)) {
-				s.append("I(4)");
-			} else {
-				s.append("U(4)");
-			}
-			if (extendedInfo)
-				s.append(":sqltype=INTEGER");
-			break;
-		case java.sql.Types.TINYINT:
-			if (isSigned(col)) {
-				s.append("I(1)");
-			} else {
-				s.append("U(1)");
-			}
-			if (extendedInfo)
-				s.append(":sqltype=TINYINT");
-			break;
-		case java.sql.Types.SMALLINT:
-			if (isSigned(col)) {
-				s.append("I(2)");
-			} else {
-				s.append("U(2)");
-			}
-			if (extendedInfo)
-				s.append(":sqltype=SMALLINT");
-			break;
-		case java.sql.Types.BIGINT:
-			if (isSigned(col)) {
-				s.append("I(8)");
-			} else {
-				s.append("U(8)");
-			}
-			if (extendedInfo)
-				s.append(":sqltype=BIGINT");
-			break;
-		case java.sql.Types.BIT:
-			s.append("N(1)");
-			if (extendedInfo)
-				s.append(":sqltype=BIT");
-			break;
-		case java.sql.Types.BOOLEAN:
-			s.append("N(1)");
-			if (extendedInfo)
-				s.append(":sqltype=BOOLEAN");
-			break;
-		case java.sql.Types.DECIMAL:
-			s.append("N(" + String.valueOf(getColumnDisplaySize(col)) + ((col == cols - 1) ? "*=)" : "*)"));
-			if (extendedInfo)
-				s.append(":sqltype=DECIMAL size=").append(prec.toString()).append(" scale=" + scale.toString());
-			isNum = true;
-			break;
-		case java.sql.Types.NUMERIC:
-			s.append("N(" + String.valueOf(getColumnDisplaySize(col)) + ((col == cols - 1) ? "*=)" : "*)"));
-			if (extendedInfo)
-				s.append(":sqltype=NUMERIC size=").append(prec.toString()).append(" scale=" + scale.toString());
-			isNum = true;
-			break;
-		case java.sql.Types.DOUBLE:
-			s.append("Y");
-			if (extendedInfo)
-				s.append(":sqltype=DOUBLE size=").append(prec.toString()).append(" scale=" + scale.toString());
-			isNum = true;
-			break;
-		case java.sql.Types.FLOAT:
-			s.append("F");
-			if (extendedInfo)
-				s.append(":sqltype=FLOAT size=").append(prec.toString()).append(" scale=" + scale.toString());
-			isNum = true;
-			break;
-		case java.sql.Types.REAL:
-			s.append("B");
-			if (extendedInfo)
-				s.append(":sqltype=REAL size=").append(prec.toString()).append(" scale=" + scale.toString());
-			isNum = true;
-			break;
-		case java.sql.Types.DATE:
-			s.append("I(4)");
-			if (extendedInfo)
-				s.append(":sqltype=DATE");
-			break;
-		case java.sql.Types.TIME:
-			s.append("C(23)");
-			if (extendedInfo)
-				s.append(":sqltype=TIME");
-			break;
-		case java.sql.Types.TIMESTAMP:
-			s.append("C(23)");
-			if (extendedInfo)
-				s.append(":sqltype=TIMESTAMP");
-			break;
-		case java.sql.Types.BINARY:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=BINARY");
-			break;
-		case java.sql.Types.VARBINARY:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=VARBINARY");
-			break;
-		case java.sql.Types.LONGVARBINARY:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=LONGVARBINARY");
-			break;
-		case java.sql.Types.BLOB:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=BLOB");
-			break;
-		case java.sql.Types.CLOB:
-			if (prec <= 0) {
-				s.append("C(1*)");
-			} else {
-				if (prec <= 32767) {
-					s.append("C(").append(prec.toString()).append("+=10)");
-				} else {
-					s.append("C(32767+=10)");
-				}
-			}
-			if (extendedInfo)
-				s.append(":sqltype=CLOB");
-			break;
-		case java.sql.Types.NCLOB:
-			if (prec <= 0) {
-				s.append("C(1*)");
-			} else {
-				if (prec <= 32767) {
-					s.append("C(").append(prec.toString()).append("+=10)");
-				} else {
-					s.append("C(32767+=10)");
-				}
-			}
-			if (extendedInfo)
-				s.append(":sqltype=NCLOB");
-			break;
-		case 9: // ODBC Date
-			s.append("C(10)");
-			if (extendedInfo)
-				s.append(":sqltype=ODBC_DATE");
-			break;
-		case 11: // ODBC Timestamp
-			s.append("C(19)");
-			if (extendedInfo)
-				s.append(":sqltype=ODBC_TIMESTAMP");
-			break;
-		case java.sql.Types.ARRAY:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=ARRAY");
-			break;
-		case java.sql.Types.JAVA_OBJECT:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=JAVA_OBJECT");
-			break;
-		case java.sql.Types.OTHER:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=OTHER");
-			break;
-		case java.sql.Types.REF:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=REF");
-			break;
-		case java.sql.Types.DATALINK: // (think URL)
-			s.append("C(").append(prec.toString()).append("*)");
-			if (extendedInfo)
-				s.append(":sqltype=DATALINK");
-			break;
-		case java.sql.Types.DISTINCT:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=DISTINCT");
-			break;
-		case java.sql.Types.STRUCT:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=STRUCT");
-			break;
-		case java.sql.Types.ROWID:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=ROWID");
-			break;
-		case java.sql.Types.SQLXML:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=SQLXML");
-			break;
-		default:
-			if (prec > 0) {
-				prec = java.lang.Math.min(prec, 32767);
-			} else {
-				prec = 32767;
-			}
-			s.append("O(").append(prec.toString()).append(")");
-			if (extendedInfo)
-				s.append(":sqltype=UNKNOWN");
-			break;
-		}
-		if (extendedInfo) {
-			if (colTypeName != "") {
-				s.append(" dbtype=").append(colTypeName);
-			}
-			if (isAutoIncrement(col)) {
-				s.append(" auto_increment=1");
-			}
-			if (isReadOnly(col)) {
-				s.append(" read_only=1");
-			}
-			if (isCaseSensitive(col)) {
-				s.append(" case_sensitive=1");
-			}
-			if (isSigned(col) && isNum) {
-				s.append(" signed=1");
-			}
-			if (isNullable(col) == java.sql.ResultSetMetaData.columnNoNulls) {
-				s.append(" required=1");
-			}
-			s.append(":");
-		}
-		return s.toString();
+
+		return BBTemplateColumnProvider.createBBTemplateColumn(this, col, cols, extendedInfo);
 	}
 
 	/**

@@ -857,7 +857,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field exists with the given name
 	 */
-	public HashMap<String, String> getFieldAttributes(String name) throws Exception {
+	public HashMap<String, String> getFieldAttributes(String name) {
 		DataField field = getField(name);
 		return field.getAttributes();
 	}
@@ -1339,7 +1339,7 @@ public class DataRow implements java.io.Serializable {
 	public String toURL() throws Exception {
 
 		StringBuilder ret = new StringBuilder();
-		ArrayList<String> fields = this.resultSet.getColumnNames();
+		List<String> fields = this.resultSet.getColumnNames();
 		Iterator<String> it = fields.iterator();
 		while (it.hasNext()) {
 			String f = it.next();
