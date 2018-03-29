@@ -1151,6 +1151,23 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
+	 * Returns the attribute with the given name, for the column at the specified
+	 * index. Returns an empty String in case the specified attribute name doesn't
+	 * exist.
+	 * 
+	 * @param columnName
+	 *            The column's name
+	 * @param attributeName
+	 *            The attribute's name
+	 * 
+	 * @return The attribute's value, or empty String in case the attribute doesn't
+	 *         exist.
+	 */
+	public String getAttribute(String columnName, String attributeName) {
+		return getAttribute(getColumnIndex(columnName), attributeName);
+	}
+
+	/**
 	 * Sets the value of the CatalogName property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
 	 * 
