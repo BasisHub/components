@@ -798,7 +798,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return true if the cursor was successfully moved to the specified index, false otherwise.
 	 */
-	public Boolean absolute(int row) {
+	public boolean absolute(int row) {
 		if (this.DataRows.isEmpty() || row < 0 || row > this.DataRows.size() - 1)
 			return false;
 		else {
@@ -814,7 +814,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return true if the cursor was moved successfully, false otherwise.
 	 */
-	public Boolean next() {
+	public boolean next() {
 		if (this.DataRows.isEmpty() || this.currentRow > this.DataRows.size() - 2)
 			return false;
 		else {
@@ -1407,6 +1407,22 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public void setAttribute(int column, String name, String value) {
 		this.MetaData.get(column).put(name, value);
+	}
+
+	/**
+	 * Sets the attribute with the specified name and value to the column at the
+	 * specified index. Overwrites the value of the attribute with the given one in
+	 * case an attribute with the given name does already exist.
+	 * 
+	 * @param columnName
+	 *            The column's name.
+	 * @param name
+	 *            The name of the attribute.
+	 * @param value
+	 *            The value of the attribute.
+	 */
+	public void setAttribute(String columnName, String name, String value) {
+		this.setAttribute(getColumnIndex(columnName), name, value);
 	}
 
 	/**
