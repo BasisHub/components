@@ -260,7 +260,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				match = matcher.match(comparator, dataRow, filterFieldKey);
 			} else {
 				DataField comp = dataRow.getField(filterFieldKey);
-				match = cond.equals(comp);
+				match = comp.equals(cond);
 			}
 			return match;
 		}
