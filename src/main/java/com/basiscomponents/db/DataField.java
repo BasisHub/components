@@ -105,7 +105,6 @@ public class DataField implements java.io.Serializable {
 		if(caseSensitive) {
 			return compareString.equals(pattern);
 		}else {
-
 			return compareString.equalsIgnoreCase(pattern);
 		}
 	}
@@ -474,7 +473,7 @@ public class DataField implements java.io.Serializable {
 		setValue(null);
 	}
 
-	static Object convertType(Object o, int targetType) throws ParseException {
+	public static Object convertType(Object o, int targetType) throws ParseException {
 
 		if (o == null) return null;
 

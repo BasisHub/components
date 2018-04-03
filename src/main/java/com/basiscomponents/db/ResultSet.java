@@ -29,6 +29,7 @@ import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.sql.SQLResultSet;
 import com.basiscomponents.db.util.BBTemplateProvider;
 import com.basiscomponents.db.util.ResultSetJsonMapper;
+import com.basiscomponents.db.util.SqlTypeNames;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
@@ -63,13 +64,11 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private int currentRow = -1;
 	private DataRow currentDataRow;
 
-	public static Map<Integer, String> SQLTypeNameMap = new HashMap<>();
+
 
 	private SQLResultSet sqlResultSet = null;
 
 	public ResultSet() {
-		if (SQLTypeNameMap.isEmpty())
-			setSQLTypeNameMap();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1823,52 +1822,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta);
 	}
 
-	/**
-	 * Adds the java.sql.Types and the matching names to the SQLTypeNameMap.
-	 */
-	private static void setSQLTypeNameMap() {
-		SQLTypeNameMap.put(java.sql.Types.ARRAY, "ARRAY");
-		SQLTypeNameMap.put(java.sql.Types.BIGINT, "BIGINT");
-		SQLTypeNameMap.put(java.sql.Types.BINARY, "BINARY");
-		SQLTypeNameMap.put(java.sql.Types.BIT, "BIT");
-		SQLTypeNameMap.put(java.sql.Types.BLOB, "BLOB");
-		SQLTypeNameMap.put(java.sql.Types.BOOLEAN, "BOOLEAN");
-		SQLTypeNameMap.put(java.sql.Types.CHAR, "CHAR");
-		SQLTypeNameMap.put(java.sql.Types.CLOB, "CLOB");
-		SQLTypeNameMap.put(java.sql.Types.DATALINK, "DATALINK");
-		SQLTypeNameMap.put(java.sql.Types.DATE, "DATE");
-		SQLTypeNameMap.put(java.sql.Types.DECIMAL, "DECIMAL");
-		SQLTypeNameMap.put(java.sql.Types.DISTINCT, "DISTINCT");
-		SQLTypeNameMap.put(java.sql.Types.DOUBLE, "DOUBLE");
-		SQLTypeNameMap.put(java.sql.Types.FLOAT, "FLOAT");
-		SQLTypeNameMap.put(java.sql.Types.INTEGER, "INTEGER");
-		SQLTypeNameMap.put(java.sql.Types.JAVA_OBJECT, "JAVA_OBJECT");
-		SQLTypeNameMap.put(java.sql.Types.LONGNVARCHAR, "LONGNVARCHAR");
-		SQLTypeNameMap.put(java.sql.Types.LONGVARBINARY, "LONGVARBINARY");
-		SQLTypeNameMap.put(java.sql.Types.LONGVARCHAR, "LONGVARCHAR");
-		SQLTypeNameMap.put(java.sql.Types.NCHAR, "NCHAR");
-		SQLTypeNameMap.put(java.sql.Types.NCLOB, "NCLOB");
-		SQLTypeNameMap.put(java.sql.Types.NULL, "NULL");
-		SQLTypeNameMap.put(java.sql.Types.NUMERIC, "NUMERIC");
-		SQLTypeNameMap.put(java.sql.Types.NVARCHAR, "NVARCHAR");
-		SQLTypeNameMap.put(java.sql.Types.OTHER, "OTHER");
-		SQLTypeNameMap.put(java.sql.Types.REAL, "REAL");
-		SQLTypeNameMap.put(java.sql.Types.REF, "REF");
-		SQLTypeNameMap.put(java.sql.Types.REF_CURSOR, "REF_CURSOR");
-		SQLTypeNameMap.put(java.sql.Types.ROWID, "ROWID");
-		SQLTypeNameMap.put(java.sql.Types.SMALLINT, "SMALLINT");
-		SQLTypeNameMap.put(java.sql.Types.SQLXML, "SQLXML");
-		SQLTypeNameMap.put(java.sql.Types.STRUCT, "STRUCT");
-		SQLTypeNameMap.put(java.sql.Types.TIME, "TIME");
-		SQLTypeNameMap.put(java.sql.Types.TIME_WITH_TIMEZONE, "TIME_WITH_TIMEZONE");
-		SQLTypeNameMap.put(java.sql.Types.TIMESTAMP, "TIMESTAMP");
-		SQLTypeNameMap.put(java.sql.Types.TIMESTAMP_WITH_TIMEZONE, "TIMESTAMP_WITH_TIMEZONE");
-		SQLTypeNameMap.put(java.sql.Types.TINYINT, "TINYINT");
-		SQLTypeNameMap.put(java.sql.Types.VARBINARY, "VARBINARY");
-		SQLTypeNameMap.put(java.sql.Types.VARCHAR, "VARCHAR");
-		SQLTypeNameMap.put(9, "BASIS DATE");
-		SQLTypeNameMap.put(11, "BASIS TIMESTAMP");
-	}
+
 
 	/**
 	 * Returns the name of the given java.sql.Type value, or null in case the given type is unknown.
@@ -1878,7 +1832,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return sqlTypeName The name of the given SQL Type value.
 	 */
 	public static String getSQLTypeName(int sqlType) {
-		return SQLTypeNameMap.get(sqlType);
+		return SqlTypeNames.get(sqlType);
 	}
 
 	/**
