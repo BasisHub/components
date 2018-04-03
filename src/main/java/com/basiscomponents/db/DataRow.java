@@ -940,6 +940,15 @@ public class DataRow implements java.io.Serializable {
 		}
 		return ret;
 	}
+	
+	/**
+	 * Method to retrieve all keys in the dataFields
+	 * 
+	 * @return the set of keys in the dataFields
+	 */
+	public Set<String> keySet() {
+		return this.dataFields.keySet();
+	}
 
 	/**
 	 * Method replaceFields: Search and replace all the field names in a given
