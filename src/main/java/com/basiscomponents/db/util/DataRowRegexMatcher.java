@@ -4,12 +4,12 @@ import java.util.regex.Pattern;
 
 import com.basiscomponents.db.DataRow;
 
-public class DataRowRegexMatcher extends DataRowMatcher {
+public class DataRowRegexMatcher implements DataRowMatcher {
 	private static final int STRINGTYPE = 12;
 	private String criteria;
-
+	private String fieldName;
 	public DataRowRegexMatcher(String fieldname, String criteria) {
-		super(fieldname);
+		this.fieldName = fieldname;
 		this.criteria = criteria;
 	}
 
@@ -19,6 +19,11 @@ public class DataRowRegexMatcher extends DataRowMatcher {
 			return Pattern.matches(criteria.substring(6), dr.getField(fieldName).getString());
 		}
 		return false;
+	}
+
+	@Override
+	public String getFieldName() {
+		return fieldName;
 	}
 
 }

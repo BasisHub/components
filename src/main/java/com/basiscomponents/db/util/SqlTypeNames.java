@@ -3,7 +3,7 @@ package com.basiscomponents.db.util;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class SqlTypeNames {
+public class SqlTypeNames {
 	private SqlTypeNames() {
 	}
 	private static final Map<Integer, String> typeNameMap = new HashMap<>();

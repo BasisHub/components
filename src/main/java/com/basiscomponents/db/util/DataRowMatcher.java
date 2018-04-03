@@ -2,15 +2,7 @@ package com.basiscomponents.db.util;
 
 import com.basiscomponents.db.DataRow;
 
-public abstract class DataRowMatcher {
-	String fieldName;
-
-	public String getFieldName() {
-		return fieldName;
-	}
-
-	DataRowMatcher(String fieldname) {
-		this.fieldName = fieldname;
-	}
+public interface DataRowMatcher {
+	public String getFieldName();
 	public abstract boolean matches(DataRow dr);
 }
