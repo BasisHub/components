@@ -197,19 +197,19 @@ public class SqlQueryBC {
 
 		public static void traceExecute(final String string) {
 			traceSql(string);
-			if(TracingConfiguration.SQL.isTraceLastExecute()) {
+			if (TracingConfiguration.isTraceLastExecute()) {
 				lastExecute = string;
 			}
 		}
 
 		private static void traceSql(final String string) {
-			if (TracingConfiguration.SQL.isTraceSql()) {
+			if (TracingConfiguration.isTraceSql()) {
 				lastSQL = string;
 			}
 		}
 
 		public static void traceRetrieve(String string) {
-			if (TracingConfiguration.SQL.isTraceLastRetrieve()) {
+			if (TracingConfiguration.isTraceLastRetrieve()) {
 				lastExecute = string;
 			}
 		}
