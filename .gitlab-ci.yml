@@ -26,6 +26,7 @@ package:
     - develop
   stage: package
   script:
+    - mvn -Punixbbjlib validate
     - mvn -Punixbbjlib -DskipTests package
   dependencies:
     - build
