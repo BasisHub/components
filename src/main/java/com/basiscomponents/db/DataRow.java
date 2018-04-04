@@ -372,7 +372,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field with the specified name exists.
 	 */
-	public String getFieldAsString(String name) throws Exception {
+	public String getFieldAsString(String name) {
 		if (isFieldNull(name))
 			return "";
 		DataField field = getField(name);
@@ -401,7 +401,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field with the specified name exists.
 	 */
-	public Boolean isFieldNull(String name) throws Exception {
+	public Boolean isFieldNull(String name) {
 		DataField field = getField(name);
 		return (field.getValue() == null);
 	}

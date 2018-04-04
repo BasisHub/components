@@ -15,7 +15,7 @@ public class ResultSetValuesListProvider {
 	}
 
 	public static List<String> getFieldValuesAsList(ResultSet rs, String columnName, boolean addEmptyRow) {
-		Stream<String> values = rs.getDataRows().stream().map(dr -> dr.getAttribute(columnName));
+		Stream<String> values = rs.getDataRows().stream().map(dr -> dr.getFieldAsString(columnName));
 		if (!addEmptyRow) {
 			values = values.filter(Objects::nonNull);
 		}
