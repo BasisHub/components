@@ -1,7 +1,7 @@
 package com.basiscomponents.db.util;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,15 +11,24 @@ public class ResultSetValuesListProvider {
 	private ResultSetValuesListProvider() {
 	}
 	public static List<String> getFieldValuesAsList(ResultSet rs, String columnName){
-		return getFieldValuesAsList(rs, columnName, false);
+		return getFieldValuesAsList(rs, columnName, false, true);
 	}
 
-	public static List<String> getFieldValuesAsList(ResultSet rs, String columnName, boolean addEmptyRow) {
+	public static List<String> getFieldValuesAsList(ResultSet rs, String columnName, boolean addEmptyRow,
+			boolean unique) {
 		Stream<String> values = rs.getDataRows().stream().map(dr -> dr.getFieldAsString(columnName));
-		if (!addEmptyRow) {
-			values = values.filter(Objects::nonNull);
+		if (unique) {
+			values = values.distinct();
 		}
-		return values.collect(Collectors.toList());
+
+		values = values.sorted();
+		List<String> result = new ArrayList<>();
+
+		if (!addEmptyRow) {
+			result.add("");
+		}
+		result.addAll(values.collect(Collectors.toList()));
+		return result;
 	}
 
 	public static String getFieldValuesListAsString(List<String> list, String delimiter) {
