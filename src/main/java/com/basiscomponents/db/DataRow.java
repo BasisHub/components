@@ -249,7 +249,7 @@ public class DataRow implements java.io.Serializable {
 				try {
 					addDataField(name, field);
 				} catch (Exception e) {
-					// Auto-generated catch block
+
 					e.printStackTrace();
 				}
 				field.setValue(null);
@@ -258,7 +258,6 @@ public class DataRow implements java.io.Serializable {
 				try {
 					addDataField(name, field);
 				} catch (Exception e) {
-					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -1130,7 +1129,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception
 	 */
-	public void addDataField(String fieldName, int sqlType, DataField dataField) throws Exception {
+	public void addDataField(String fieldName, int sqlType, DataField dataField) {
 
 		// deal unknown types as String
 		// if (sqlType==-1)
