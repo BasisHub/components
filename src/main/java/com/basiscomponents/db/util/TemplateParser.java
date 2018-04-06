@@ -26,7 +26,7 @@ public class TemplateParser {
 			DataField df = null;
 
 			DataRow row = new DataRow();
-
+			row.setTemplate(template);
 			int fieldCount = stringTemplate.getNumFields();
 			for (int i = 0; i < fieldCount; i++) {
 				fieldName = stringTemplate.getFieldName(i).toString();

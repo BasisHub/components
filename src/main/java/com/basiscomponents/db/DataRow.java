@@ -40,6 +40,10 @@ public class DataRow implements java.io.Serializable {
 
 	private int rowID;
 
+	private String template;
+
+	private boolean templateChanged;
+
 	/**
 	 * Instantiates a new DataRow object.
 	 */
@@ -270,6 +274,7 @@ public class DataRow implements java.io.Serializable {
 	 *            The value of the field
 	 */
 	public void setFieldValue(String name, int type, Object value) throws Exception {
+
 		DataField field = null;
 
 		String c = "";
@@ -810,6 +815,7 @@ public class DataRow implements java.io.Serializable {
 	 *             No field exists with the given name.
 	 */
 	public void setFieldAttribute(String name, String attrname, String value) {
+		templateChanged = true;
 		DataField field = getField(name);
 		field.setAttribute(attrname, value);
 	}
@@ -1132,12 +1138,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public void addDataField(String fieldName, int sqlType, DataField dataField) {
-
-		// deal unknown types as String
-		// if (sqlType==-1)
-		// sqlType=12;
-		// -1 is LONGVARCHAR in sql types!
-
+		this.templateChanged = true;
 		if (this.resultSet.getColumnIndex(fieldName) == -1) {
 			int column = this.resultSet.addColumn(fieldName);
 			this.resultSet.setColumnType(column, sqlType);
@@ -1403,20 +1404,14 @@ public class DataRow implements java.io.Serializable {
 	 *            given in the meta section of the JSON String
 	 * @return the DataRow object created based on the JSOn String's content
 	 *
-	 * @throws Exception
-	 *             Gets thrown in case the JSON could not be parsed / is invalid
 	 */
 	public static DataRow fromJson(String in, DataRow ar) throws Exception {
 		return DataRowFromJsonProvider.fromJson(in, ar);
 	}
 
-	public void setFieldAttributes(String fieldName, HashMap<String, String> attr) throws Exception {
-
-		Iterator<String> it = attr.keySet().iterator();
-		while (it.hasNext()) {
-			String k = it.next();
-			setFieldAttribute(fieldName, k, attr.get(k));
-		}
+	public void setFieldAttributes(String fieldName, Map<String, String> attr) {
+		templateChanged = true;
+		attr.forEach((key, value) -> setFieldAttribute(fieldName, key, value));
 	}
 
 	/**
@@ -1716,6 +1711,9 @@ public class DataRow implements java.io.Serializable {
 	 * @return a BBj String Template with the values defined in this DataRow.
 	 */
 	public String getTemplate() {
+		if (!templateChanged) {
+			return template;
+		}
 		ArrayList<Integer> numericTypeCodeList = new ArrayList<>();
 		numericTypeCodeList.add(java.sql.Types.BIGINT);
 		numericTypeCodeList.add(java.sql.Types.TINYINT);
@@ -1860,10 +1858,8 @@ public class DataRow implements java.io.Serializable {
 	 *            The String Template
 	 * 
 	 * @return a DataRow object created based on the given String Template
-	 * 
-	 * @throws Exception
 	 */
-	public static DataRow fromTemplate(String template) throws Exception {
+	public static DataRow fromTemplate(String template) {
 		return fromTemplate(template, "");
 	}
 
@@ -1879,8 +1875,6 @@ public class DataRow implements java.io.Serializable {
 	 *            The record to set
 	 * 
 	 * @return a DataRow object created based on the given String Template
-	 * 
-	 * @throws Exception
 	 */
 	public static DataRow fromTemplate(String template, String record) {
 		return TemplateParser.dataRowfromTemplate(template, record);
@@ -1928,6 +1922,13 @@ public class DataRow implements java.io.Serializable {
 				this.setFieldValue(name, tmpl.getFieldAsString(name));
 				break;
 			}
+		}
+	}
+
+	public void setTemplate(String template) {
+		if (this.template == null) {
+			this.template = template;
+			this.templateChanged = false;
 		}
 	}
 
