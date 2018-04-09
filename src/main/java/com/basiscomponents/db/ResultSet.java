@@ -70,22 +70,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	public ResultSet() {
 	}
-
-	@SuppressWarnings("unchecked")
-	private ResultSet(ArrayList<HashMap<String, Object>> metaData, ArrayList<String> columnNames,
-			ArrayList<DataRow> dataRows, ArrayList<String> keyColumns) {
-		this.MetaData = (ArrayList<HashMap<String, Object>>) metaData.clone();
-		this.ColumnNames = (ArrayList<String>) columnNames.clone();
-		this.DataRows = (ArrayList<DataRow>) dataRows.clone();
-		this.KeyColumns = (ArrayList<String>) keyColumns.clone();
+	private ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<DataRow> dataRows,
+			List<String> keyColumns) {
+		this.MetaData = new ArrayList<>(metaData);
+		this.ColumnNames = new ArrayList<>(columnNames);
+		this.DataRows = new ArrayList<>(dataRows);
+		this.KeyColumns = new ArrayList<>(keyColumns);
 	}
 
-	@SuppressWarnings("unchecked")
-	private ResultSet(ArrayList<HashMap<String, Object>> metaData, ArrayList<String> columnNames,
-			ArrayList<String> keyColumns) {
-		this.MetaData = (ArrayList<HashMap<String, Object>>) metaData.clone();
-		this.ColumnNames = (ArrayList<String>) columnNames.clone();
-		this.KeyColumns = (ArrayList<String>) keyColumns.clone();
+	private ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<String> keyColumns) {
+		this.MetaData = new ArrayList<>(metaData);
+		this.ColumnNames = new ArrayList<>(columnNames);
+		this.KeyColumns = new ArrayList<>(keyColumns);
 	}
 
 	@Override
@@ -574,7 +570,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return the list with the key columns.
 	 */
-	public ArrayList<String> getKeyColumns() {
+	public List<String> getKeyColumns() {
 		return this.KeyColumns;
 	}
 
@@ -592,6 +588,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public void addKeyColumn(String name) {
 		this.KeyColumns.add(name);
+	}
+
+	public List<DataRow> getDataRows() {
+		return new ArrayList<>(DataRows);
 	}
 
 	/**
