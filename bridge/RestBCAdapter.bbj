@@ -188,36 +188,46 @@ main_loop:
                 response!.put("sel",sel$)
                 response!.put("primarykey",filterf$)
             else
-                dr! = DataRow.fromJson(request!.get("body"))
+                errorOccurred=0
+                rs! = new ResultSet()
+                res! = ResultSet.fromJson(request!.get("body"))
                 k! = java.util.Arrays.asList(new String(filterf$).split("/"))
                 v! = java.util.Arrays.asList(new String(sel$).split("/",-1))
-                for i=0 to min(k!.size(),v!.size())-1
-                    if !dr!.contains(k!.get(i)) then
-                        dr!.setFieldValue(k!.get(i),v!.get(i))
-                    endif
-                next i
+                it! = res!.iterator()
+                while it!.hasNext()
+                    dr! = it!.next()
+                    for i=0 to min(k!.size(),v!.size())-1
+                        if !dr!.contains(k!.get(i)) then
+                            dr!.setFieldValue(k!.get(i),v!.get(i))
+                        endif
+                    next i
 
-                dr! = bc!.write(dr!,err=*next); ok=1
-                if !ok then
-                    response!.put("statuscode","409")
-                    throw errmes(-1),err
-                else
-                    created! = dr!.getAttribute("CREATED")
-                    if created! <> null() and created!.equals("true") then
-                        response!.put("statuscode","201")
+                    ok=0; dr! = bc!.write(dr!,err=*next); ok=1
+                    if !ok then
+                        errorOccurred=1
+                        response!.put("statuscode","409")
+                        response!.put("errorcode",str(err))
+                        response!.put("errormsg",errmes(-1))
+                        rem throw errmes(-1),err
                     else
-                        response!.put("statuscode","200")
+                        rs!.addItem(dr!)
+                        created! = dr!.getAttribute("CREATED")
+                        if !errorOccurred then
+                            if created! <> null() and created!.equals("true") then
+                                response!.put("statuscode","201")
+                            else
+                                response!.put("statuscode","200")
+                            endif
+                        endif
                     endif
-                endif
+                wend
 
-                rs! = new ResultSet()
-                rs!.addItem(dr!)
                 response!.put("resultset",rs!)
                 response!.put("request",str(request!))
                 response!.put("BC",bc$)
                 response!.put("sel",sel$)
                 response!.put("primarykey",filterf$)
-                response!.put("single",1)
+                response!.put("single",rs!.size()>1)
             endif
         break
 
