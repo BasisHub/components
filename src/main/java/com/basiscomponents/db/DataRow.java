@@ -224,7 +224,7 @@ public class DataRow implements java.io.Serializable {
 	 *             if a DataField cannot been parsed
 	 */
 	public void setFieldValue(final String name, Object value) throws ParseException {
-		templateChanged = true;
+
 		if (value != null) {
 			String c = value.getClass().getCanonicalName();
 			if (c.contains("BBjNumber") || c.contains("BBjInt")) {
@@ -242,6 +242,7 @@ public class DataRow implements java.io.Serializable {
 			value = DataField.convertType(value, getFieldType(name));
 			field.setValue(value);
 		} else {
+			templateChanged = true;
 			if (value == null) {
 				field = new DataField("");
 				try {
