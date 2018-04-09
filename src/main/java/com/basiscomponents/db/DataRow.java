@@ -843,12 +843,12 @@ public class DataRow implements java.io.Serializable {
 	 * @param name
 	 *            The name of the field.
 	 *
-	 * @return A HashMap with the field's attributesas key/value pairs.
+	 * @return A Map with the field's attributes as key/value pairs.
 	 *
 	 * @throws Exception
 	 *             No field exists with the given name
 	 */
-	public HashMap<String, String> getFieldAttributes(String name) {
+	public Map<String, String> getFieldAttributes(String name) {
 		DataField field = getField(name);
 		return field.getAttributes();
 	}
@@ -1409,7 +1409,7 @@ public class DataRow implements java.io.Serializable {
 		return DataRowFromJsonProvider.fromJson(in, ar);
 	}
 
-	public void setFieldAttributes(String fieldName, HashMap<String, String> attr) throws Exception {
+	public void setFieldAttributes(String fieldName, Map<String, String> attr) throws Exception {
 
 		Iterator<String> it = attr.keySet().iterator();
 		while (it.hasNext()) {

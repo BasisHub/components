@@ -4,6 +4,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.basiscomponents.db.BBArrayList;
@@ -203,7 +204,7 @@ public class DataRowFromJsonProvider {
 
 				}// switch
 
-				HashMap<String, String> attr = ar.getFieldAttributes(fieldName);
+				Map<String, String> attr = ar.getFieldAttributes(fieldName);
 				@SuppressWarnings("unchecked")
 				HashMap<String, HashMap> m = (HashMap<String, HashMap>) hm.get("meta");
 				if (m != null && m.containsKey(fieldName)) {

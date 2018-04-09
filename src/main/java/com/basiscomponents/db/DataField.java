@@ -14,9 +14,11 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
+import com.basiscomponents.db.model.Attribute;
 import com.google.gson.annotations.Expose;
 
 /**
@@ -30,7 +32,7 @@ public class DataField implements java.io.Serializable {
 	@Expose
 	private Object Value;
 
-	private HashMap<String, String> attributes = new HashMap<>();
+	private Map<String, Attribute> attributes = new HashMap<>();
 
 	/**
 	 * Creates the DataField object with the given object as the DataField's value
@@ -394,6 +396,10 @@ public class DataField implements java.io.Serializable {
 	 * @param attributeValue The attribute's value.
 	 */
 	public void setAttribute(String attributeName, String attributeValue) {
+		this.attributes.put(attributeName, Attribute.createString(attributeValue));
+	}
+
+	public void setAttribute(String attributeName, Attribute attributeValue) {
 		this.attributes.put(attributeName, attributeValue);
 	}
 
@@ -405,7 +411,7 @@ public class DataField implements java.io.Serializable {
 	 * @return attributeValue The attribute's value.
 	 */
 	public String getAttribute(String attributeName) {
-		return this.attributes.get(attributeName);
+		return this.attributes.get(attributeName).getValue();
 	}
 
 	/**
@@ -414,8 +420,10 @@ public class DataField implements java.io.Serializable {
 	 * 
 	 * @return attributesMap The <code>java.util.HashMap</code> object containing the DataField's attributes and their values.
 	 */
-	public HashMap<String, String> getAttributes() {
-		return new HashMap<String, String>(this.attributes);
+	public Map<String, String> getAttributes() {
+		return this.attributes.entrySet().stream()
+				.collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getValue()));
+
 	}
 
 	/**
@@ -423,8 +431,9 @@ public class DataField implements java.io.Serializable {
 	 * 
 	 * @param attributes The attribute's <code>java.util.HashMap</code> object with the attributes and their corresponding values.
 	 */
-	public void setAttributes(HashMap<String, String> attributes) {
-		this.attributes = attributes;
+	public void setAttributes(Map<String, String> attributes) {
+		this.attributes = attributes.entrySet().stream()
+				.collect(Collectors.toMap(Entry::getKey, e -> Attribute.createString(e.getValue())));
 	}
 
 	/**
@@ -448,12 +457,8 @@ public class DataField implements java.io.Serializable {
 		}
 
 		if (f != null) {
-			Set<String> ks = this.attributes.keySet();
-			Iterator<String> it = ks.iterator();
-			while (it.hasNext()) {
-				String k = it.next();
-				String v = this.attributes.get(k);
-				f.setAttribute(k, v);
+			for (Entry<String, Attribute> e : attributes.entrySet()) {
+				f.setAttribute(e.getKey(), e.getValue());
 			}
 		}
 		return f;

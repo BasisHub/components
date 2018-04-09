@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.basiscomponents.db.BBArrayList;
@@ -175,7 +176,7 @@ public class ResultSetJsonMapper {
 							g.writeFieldName(c);
 							g.writeStartObject();
 
-							HashMap<String, String> atr;
+							Map<String, String> atr;
 							try {
 								atr = dr.getFieldAttributes(c);
 							} catch (Exception e) {
@@ -219,7 +220,7 @@ public class ResultSetJsonMapper {
 					boolean m_written = false;
 					while (itf.hasNext()) {
 						String fieldname = itf.next();
-						HashMap<String, String> l = dr.getFieldAttributes(fieldname);
+						Map<String, String> l = dr.getFieldAttributes(fieldname);
 						if (!l.isEmpty()) {
 							if (!m_written) {
 								g.writeFieldName("meta");
