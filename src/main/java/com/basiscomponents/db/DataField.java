@@ -644,4 +644,8 @@ public class DataField implements java.io.Serializable {
 		return o;
 	}
 
+	public Map<String, Attribute> getAttributes2() {
+		return new HashMap<>(this.attributes);
+	}
+
 }
