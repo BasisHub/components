@@ -17,6 +17,7 @@ import com.basis.bbj.datatypes.TemplatedString;
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
+import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowFromJsonProvider;
 import com.basiscomponents.db.util.DataRowMatcher;
@@ -739,6 +740,24 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
+	 * Returns a HashMap with the attributes as strings of the field with the given
+	 * name. The HashMap keys will be the attribute names and the HashMap values
+	 * will be the attribute values. Might get {@link Deprecated}
+	 *
+	 * @param name
+	 *            The name of the field.
+	 *
+	 * @return A Map with the field's attributes as key/value pairs.
+	 *
+	 * @throws Exception
+	 *             No field exists with the given name
+	 */
+	public Map<String, String> getFieldAttributes(String name) {
+		DataField field = getField(name);
+		return field.getAttributes();
+	}
+
+	/**
 	 * Returns a HashMap with the attributes of the field with the given name. The
 	 * HashMap keys will be the attribute names and the HashMap values will be the
 	 * attribute values.
@@ -746,14 +765,14 @@ public class DataRow implements java.io.Serializable {
 	 * @param name
 	 *            The name of the field.
 	 *
-	 * @return A HashMap with the field's attributesas key/value pairs.
+	 * @return A Map with the field's attributes as key/value pairs.
 	 *
 	 * @throws Exception
 	 *             No field exists with the given name
 	 */
-	public HashMap<String, String> getFieldAttributes(String name) {
+	public Map<String, Attribute> getFieldAttributes2(String name) {
 		DataField field = getField(name);
-		return field.getAttributes();
+		return field.getAttributes2();
 	}
 
 	/**
