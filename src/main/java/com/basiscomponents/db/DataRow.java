@@ -1840,9 +1840,11 @@ public class DataRow implements java.io.Serializable {
 	 */
 	public void copyAttributes(DataRow datarow) {
 		this.dataFields.forEach((k, v) -> {
-			Map<String, String> fieldAttributes = datarow.getFieldAttributes(k);
-			if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
-				this.setFieldAttributes(k, fieldAttributes);
+			if (datarow.contains(k)) {
+				Map<String, String> fieldAttributes = datarow.getFieldAttributes(k);
+				if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
+					this.setFieldAttributes(k, fieldAttributes);
+				}
 			}
 		});
 	}
