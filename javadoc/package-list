@@ -11,6 +11,7 @@ com.basiscomponents.db
 com.basiscomponents.db.constants
 com.basiscomponents.db.exception
 com.basiscomponents.db.importer
+com.basiscomponents.db.model
 com.basiscomponents.db.sql
 com.basiscomponents.db.tree
 com.basiscomponents.db.util
