@@ -450,7 +450,6 @@ public class DataRow implements java.io.Serializable {
 		return DataFieldConverter.fieldToNumber(resultSet, field, column, type);
 	}
 
-
 	/**
 	 * Returns the index of the column with the specified name.<br>
 	 * <br>
@@ -534,15 +533,17 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-
-	 * Returns the value of the ColumnType property from the metadata for the field with the given name.
+	 * 
+	 * Returns the value of the ColumnType property from the metadata for the field
+	 * with the given name.
 	 *
 	 * @param name
 	 *            The name of the field.
 	 *
 	 * @return The value of the ColumnType property for the field name.
 	 *
-	 * @throws RuntimeException The specified column name doesn't exist
+	 * @throws RuntimeException
+	 *             The specified column name doesn't exist
 	 */
 	public int getFieldType(String name) {
 		int column = getColumnIndex(name);
@@ -843,7 +844,7 @@ public class DataRow implements java.io.Serializable {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Method to retrieve all keys in the dataFields
 	 * 
@@ -1828,6 +1829,22 @@ public class DataRow implements java.io.Serializable {
 			this.template = template;
 			this.templateChanged = false;
 		}
+	}
+
+	/**
+	 * Copies the attributes from the passed {@link DataRow} of all fields this
+	 * Object also contains
+	 * 
+	 * @param datarow
+	 *            the Datarow to copie the attributes from
+	 */
+	public void copyAttributes(DataRow datarow) {
+		this.dataFields.forEach((k, v) -> {
+			Map<String, String> fieldAttributes = datarow.getFieldAttributes(k);
+			if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
+				this.setFieldAttributes(k, fieldAttributes);
+			}
+		});
 	}
 
 }
