@@ -1,9 +1,11 @@
 package com.basiscomponents.db.util;
 
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.ResultSet;
 
 public class DataFieldConverter {
@@ -183,5 +185,115 @@ public class DataFieldConverter {
 
 		}
 		return o;
+	}
+
+	public static Double fieldToNumber(ResultSet resultSet, DataField field, int column, int type) {
+		if (field.getValue() == null) {
+			if (type == java.sql.Types.DATE || type == java.sql.Types.TIMESTAMP
+					|| type == java.sql.Types.TIMESTAMP_WITH_TIMEZONE)
+				return -1d;
+			else
+				return 0.0;
+		}
+
+		Double ret = 0.0;
+
+		// TODO maybe: make this use reflection and skip the field for the
+		// column type, to honor dynamic type changes??
+		switch (type) {
+		case java.sql.Types.CHAR:
+		case java.sql.Types.VARCHAR:
+		case java.sql.Types.LONGVARCHAR:
+		case java.sql.Types.NCHAR:
+		case java.sql.Types.NVARCHAR:
+		case java.sql.Types.LONGNVARCHAR:
+			String tmp = field.getString();
+			if (tmp.isEmpty())
+				tmp = "0.0";
+			ret = Double.valueOf(tmp);
+			break;
+		case java.sql.Types.INTEGER:
+		case java.sql.Types.SMALLINT:
+			/*
+			 * Columns with an unsigned numeric type in MySQL are treated as the next
+			 * 'larger' Java type that the signed variant of the MySQL:
+			 * http://www.mysqlab.net/knowledge/kb/detail/topic/java/id/4929
+			 * 
+			 * In the populate method, the value of an unsigned integer is stored as
+			 * java.lang.Long in the DataField although its type remains
+			 * java.sql.Types.INTEGER in the Column metadata. Calling the getInt() method
+			 * will then result in an Exception. This checks prevents this Exception.
+			 */
+			if (!resultSet.isSigned(column)) {
+				ret = field.getLong().doubleValue();
+			} else {
+				ret = field.getInt().doubleValue();
+			}
+			break;
+		case java.sql.Types.BIGINT:
+			/*
+			 * Columns with an unsigned numeric type in MySQL are treated as the next
+			 * 'larger' Java type that the signed variant of the MySQL:
+			 * http://www.mysqlab.net/knowledge/kb/detail/topic/java/id/4929
+			 * 
+			 * In the populate method, the value of an unsigned big integer is stored as
+			 * java.math.BigInteger in the DataField although its type remains
+			 * java.sql.Types.BIGINT in the Column metadata. Calling the getLong() method
+			 * will then result in an Exception. This checks prevents this Exception.
+			 */
+			if (!resultSet.isSigned(column)) {
+				ret = ((java.math.BigInteger) field.getValue()).doubleValue();
+			} else {
+				ret = field.getLong().doubleValue();
+			}
+			break;
+		case java.sql.Types.DECIMAL:
+		case java.sql.Types.NUMERIC:
+			ret = field.getBigDecimal().doubleValue();
+			break;
+		case java.sql.Types.DOUBLE:
+		case java.sql.Types.FLOAT:
+			ret = field.getDouble();
+			break;
+		case java.sql.Types.REAL:
+			ret = field.getFloat().doubleValue();
+			break;
+		case java.sql.Types.DATE:
+		case java.sql.Types.TIMESTAMP:
+		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
+			if (field.getDate() == null)
+				ret = -1.0;
+			else {
+				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(field.getDate().getTime()));
+				ret = ret2.doubleValue();
+			}
+			break;
+		case java.sql.Types.TIME:
+		case java.sql.Types.TIME_WITH_TIMEZONE:
+			Time t = field.getTime();
+			Double d = (double) t.getHours();
+			Double d1 = (double) t.getMinutes();
+			d1 = d1 / 60;
+			d += d1;
+			d1 = (double) t.getSeconds();
+			d1 = d1 / 3600;
+			d += d1;
+			ret = d;
+			break;
+		case java.sql.Types.BIT:
+		case java.sql.Types.BOOLEAN:
+			if (field.getBoolean())
+				ret = 1.0;
+			else
+				ret = 0.0;
+			break;
+		case java.sql.Types.TINYINT:
+			ret = field.getInt().doubleValue();
+			break;
+		default:
+			ret = null;
+			break;
+		}
+		return ret;
 	}
 }

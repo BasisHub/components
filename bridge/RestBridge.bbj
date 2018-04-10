@@ -350,12 +350,22 @@ class public RestBridge
             if pos("application/json"=accept$) > 0 then
                 response!.setStatus(num(statuscode!))
                 response!.setContentType("application/json")
-                e$ = "{""code"":"""+str(errorcode$)+""",""message"":"""+org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(errormsg!)+""","
-                if debug and statuscode! <> "401" then
-                    e$ = e$ + """stacktrace"":"""+org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(stacktrace$)+""","
+                rs! = answer!.get("resultset",err=*next)
+                if method$ = "POST" and rs! <> null() and rs!.size() > 0 then
+                    wr! = new java.io.StringWriter()
+                    com.basiscomponents.db.ResultSetExporter.writeJSON(rs!,wr!)
+                    wr!.flush()
+                    wr!.close()
+                    response!.getOutputStream().write(wr!.toString())
+                    #logResponse(req_id$,response!)
+                else
+                    e$ = "{""code"":"""+str(errorcode$)+""",""message"":"""+org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(errormsg!)+""","
+                    if debug and statuscode! <> "401" then
+                        e$ = e$ + """stacktrace"":"""+org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(stacktrace$)+""","
+                    endif
+                    e$ = e$ + """ses"":"""+ses$+"""}"
+                    response!.getOutputStream().write(e$)
                 endif
-                e$ = e$ + """ses"":"""+ses$+"""}"
-                response!.getOutputStream().write(e$)
             else
                 response!.setContentType("text/html")
                 s! = response!.getOutputStream()

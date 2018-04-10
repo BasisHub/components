@@ -2,7 +2,6 @@ package com.basiscomponents.db;
 
 import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
 
-import java.sql.Time;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,8 +18,10 @@ import com.basis.util.common.BasisNumber;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
 import com.basiscomponents.db.model.Attribute;
+import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowFromJsonProvider;
 import com.basiscomponents.db.util.DataRowMatcher;
+import com.basiscomponents.db.util.TemplateParser;
 
 /**
  * A DataRow is a container object with key/value pairs. Each key being a String
@@ -39,6 +40,10 @@ public class DataRow implements java.io.Serializable {
 	private byte[] rowKey = new byte[0];
 
 	private int rowID;
+
+	private String template;
+
+	private boolean templateChanged;
 
 	/**
 	 * Instantiates a new DataRow object.
@@ -151,6 +156,7 @@ public class DataRow implements java.io.Serializable {
 	 *            The attribute's value
 	 */
 	public void setAttribute(String name, String value) {
+		templateChanged = true;
 		this.attributes.put(name, value);
 	}
 
@@ -184,6 +190,7 @@ public class DataRow implements java.io.Serializable {
 	 *            The attributes name
 	 */
 	public void removeAttribute(String name) {
+		templateChanged = true;
 		this.attributes.remove(name);
 	}
 
@@ -236,12 +243,13 @@ public class DataRow implements java.io.Serializable {
 			value = DataField.convertType(value, getFieldType(name));
 			field.setValue(value);
 		} else {
+			templateChanged = true;
 			if (value == null) {
 				field = new DataField("");
 				try {
 					addDataField(name, field);
 				} catch (Exception e) {
-					// Auto-generated catch block
+
 					e.printStackTrace();
 				}
 				field.setValue(null);
@@ -250,7 +258,6 @@ public class DataRow implements java.io.Serializable {
 				try {
 					addDataField(name, field);
 				} catch (Exception e) {
-					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -270,6 +277,7 @@ public class DataRow implements java.io.Serializable {
 	 *            The value of the field
 	 */
 	public void setFieldValue(String name, int type, Object value) throws Exception {
+
 		DataField field = null;
 
 		String c = "";
@@ -364,7 +372,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field with the specified name exists.
 	 */
-	public String getFieldAsString(String name) throws Exception {
+	public String getFieldAsString(String name) {
 		if (isFieldNull(name))
 			return "";
 		DataField field = getField(name);
@@ -393,7 +401,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field with the specified name exists.
 	 */
-	public Boolean isFieldNull(String name) throws Exception {
+	public Boolean isFieldNull(String name) {
 		DataField field = getField(name);
 		return (field.getValue() == null);
 	}
@@ -432,123 +440,17 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field exists with the given name
 	 */
-	@SuppressWarnings("deprecation")
-	public Double getFieldAsNumber(String fieldName) throws Exception {
-		DataField field = getField(fieldName);
-		if (resultSet == null)
-			throw new Exception("ResultSet does not exist");
+	public Double getFieldAsNumber(String fieldName) {
 
+		if (resultSet == null) {
+			throw new IllegalStateException("ResultSet does not exist");
+		}
+		DataField field = getField(fieldName);
 		int column = this.resultSet.getColumnIndex(fieldName);
 		int type = this.resultSet.getColumnType(column);
-
-		if (field.getValue() == null) {
-			if (type == java.sql.Types.DATE || type == java.sql.Types.TIMESTAMP
-					|| type == java.sql.Types.TIMESTAMP_WITH_TIMEZONE)
-				return -1d;
-			else
-				return 0.0;
-		}
-
-		Double ret = 0.0;
-
-		// TODO maybe: make this use reflection and skip the field for the
-		// column type, to honor dynamic type changes??
-		switch (type) {
-		case java.sql.Types.CHAR:
-		case java.sql.Types.VARCHAR:
-		case java.sql.Types.LONGVARCHAR:
-		case java.sql.Types.NCHAR:
-		case java.sql.Types.NVARCHAR:
-		case java.sql.Types.LONGNVARCHAR:
-			String tmp = field.getString();
-			if (tmp.isEmpty())
-				tmp = "0.0";
-			ret = Double.valueOf(tmp);
-			break;
-		case java.sql.Types.INTEGER:
-		case java.sql.Types.SMALLINT:
-			/*
-			 * Columns with an unsigned numeric type in MySQL are treated as the next
-			 * 'larger' Java type that the signed variant of the MySQL:
-			 * http://www.mysqlab.net/knowledge/kb/detail/topic/java/id/4929
-			 * 
-			 * In the populate method, the value of an unsigned integer is stored as
-			 * java.lang.Long in the DataField although its type remains
-			 * java.sql.Types.INTEGER in the Column metadata. Calling the getInt() method
-			 * will then result in an Exception. This checks prevents this Exception.
-			 */
-			if (!this.resultSet.isSigned(column)) {
-				ret = field.getLong().doubleValue();
-			} else {
-				ret = field.getInt().doubleValue();
-			}
-			break;
-		case java.sql.Types.BIGINT:
-			/*
-			 * Columns with an unsigned numeric type in MySQL are treated as the next
-			 * 'larger' Java type that the signed variant of the MySQL:
-			 * http://www.mysqlab.net/knowledge/kb/detail/topic/java/id/4929
-			 * 
-			 * In the populate method, the value of an unsigned big integer is stored as
-			 * java.math.BigInteger in the DataField although its type remains
-			 * java.sql.Types.BIGINT in the Column metadata. Calling the getLong() method
-			 * will then result in an Exception. This checks prevents this Exception.
-			 */
-			if (!this.resultSet.isSigned(column)) {
-				ret = ((java.math.BigInteger) field.getValue()).doubleValue();
-			} else {
-				ret = field.getLong().doubleValue();
-			}
-			break;
-		case java.sql.Types.DECIMAL:
-		case java.sql.Types.NUMERIC:
-			ret = field.getBigDecimal().doubleValue();
-			break;
-		case java.sql.Types.DOUBLE:
-		case java.sql.Types.FLOAT:
-			ret = field.getDouble();
-			break;
-		case java.sql.Types.REAL:
-			ret = field.getFloat().doubleValue();
-			break;
-		case java.sql.Types.DATE:
-		case java.sql.Types.TIMESTAMP:
-		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
-			if (field.getDate() == null)
-				ret = -1.0;
-			else {
-				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(field.getDate().getTime()));
-				ret = ret2.doubleValue();
-			}
-			break;
-		case java.sql.Types.TIME:
-		case java.sql.Types.TIME_WITH_TIMEZONE:
-			Time t = field.getTime();
-			Double d = (double) t.getHours();
-			Double d1 = (double) t.getMinutes();
-			d1 = d1 / 60;
-			d += d1;
-			d1 = (double) t.getSeconds();
-			d1 = d1 / 3600;
-			d += d1;
-			ret = d;
-			break;
-		case java.sql.Types.BIT:
-		case java.sql.Types.BOOLEAN:
-			if (field.getBoolean())
-				ret = 1.0;
-			else
-				ret = 0.0;
-			break;
-		case java.sql.Types.TINYINT:
-			ret = field.getInt().doubleValue();
-			break;
-		default:
-			ret = null;
-			break;
-		}
-		return ret;
+		return DataFieldConverter.fieldToNumber(resultSet, field, column, type);
 	}
+
 
 	/**
 	 * Returns the index of the column with the specified name.<br>
@@ -810,6 +712,7 @@ public class DataRow implements java.io.Serializable {
 	 *             No field exists with the given name.
 	 */
 	public void setFieldAttribute(String name, String attrname, String value) {
+		templateChanged = true;
 		DataField field = getField(name);
 		field.setAttribute(attrname, value);
 	}
@@ -1149,13 +1052,8 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception
 	 */
-	public void addDataField(String fieldName, int sqlType, DataField dataField) throws Exception {
-
-		// deal unknown types as String
-		// if (sqlType==-1)
-		// sqlType=12;
-		// -1 is LONGVARCHAR in sql types!
-
+	public void addDataField(String fieldName, int sqlType, DataField dataField) {
+		this.templateChanged = true;
 		if (this.resultSet.getColumnIndex(fieldName) == -1) {
 			int column = this.resultSet.addColumn(fieldName);
 			this.resultSet.setColumnType(column, sqlType);
@@ -1428,13 +1326,9 @@ public class DataRow implements java.io.Serializable {
 		return DataRowFromJsonProvider.fromJson(in, ar);
 	}
 
-	public void setFieldAttributes(String fieldName, Map<String, String> attr) throws Exception {
-
-		Iterator<String> it = attr.keySet().iterator();
-		while (it.hasNext()) {
-			String k = it.next();
-			setFieldAttribute(fieldName, k, attr.get(k));
-		}
+	public void setFieldAttributes(String fieldName, Map<String, String> attr) {
+		templateChanged = true;
+		attr.forEach((key, value) -> setFieldAttribute(fieldName, key, value));
 	}
 
 	/**
@@ -1734,6 +1628,9 @@ public class DataRow implements java.io.Serializable {
 	 * @return a BBj String Template with the values defined in this DataRow.
 	 */
 	public String getTemplate() {
+		if (!templateChanged) {
+			return template;
+		}
 		ArrayList<Integer> numericTypeCodeList = new ArrayList<>();
 		numericTypeCodeList.add(java.sql.Types.BIGINT);
 		numericTypeCodeList.add(java.sql.Types.TINYINT);
@@ -1878,10 +1775,8 @@ public class DataRow implements java.io.Serializable {
 	 *            The String Template
 	 * 
 	 * @return a DataRow object created based on the given String Template
-	 * 
-	 * @throws Exception
 	 */
-	public static DataRow fromTemplate(String template) throws Exception {
+	public static DataRow fromTemplate(String template) {
 		return fromTemplate(template, "");
 	}
 
@@ -1897,127 +1792,9 @@ public class DataRow implements java.io.Serializable {
 	 *            The record to set
 	 * 
 	 * @return a DataRow object created based on the given String Template
-	 * 
-	 * @throws Exception
 	 */
-	public static DataRow fromTemplate(String template, String record) throws Exception {
-		TemplatedString stringTemplate = new TemplatedString(template);
-		stringTemplate.setBytes(record.getBytes());
-
-		String fieldName;
-		byte fieldType;
-		int fieldSize;
-		String dType = "";
-
-		int value;
-		int sqlType = java.sql.Types.VARCHAR;
-		DataField df = null;
-
-		DataRow row = new DataRow();
-
-		int fieldCount = stringTemplate.getNumFields();
-		for (int i = 0; i < fieldCount; i++) {
-			fieldName = stringTemplate.getFieldName(i).toString();
-			fieldType = stringTemplate.getFieldType(i);
-			fieldSize = stringTemplate.getFieldSize(i);
-
-			switch (fieldType) {
-			case TemplateInfo.BLOB:
-				sqlType = java.sql.Types.BLOB;
-				try {
-					df = new DataField(stringTemplate.getFieldAsString(i));
-				} catch (Exception e) {
-					df = new DataField("");
-				}
-				break;
-
-			case TemplateInfo.INTEGER:
-				sqlType = java.sql.Types.INTEGER;
-				try {
-					df = new DataField(stringTemplate.getFieldAsNumber(i).toBigInteger());
-				} catch (Exception e) {
-					df = new DataField(0);
-				}
-				break;
-
-			case TemplateInfo.CHARACTER:
-				sqlType = java.sql.Types.CHAR;
-				try {
-					df = new DataField(stringTemplate.getFieldAsString(i));
-				} catch (Exception e) {
-					df = new DataField("");
-				}
-				break;
-
-			case TemplateInfo.RESIDENT_FLOAT:
-				sqlType = java.sql.Types.FLOAT;
-				try {
-					df = new DataField(stringTemplate.getFloat(i));
-				} catch (Exception e) {
-					df = new DataField(0f);
-				}
-				break;
-
-			case TemplateInfo.RESIDENT_DOUBLE:
-				sqlType = java.sql.Types.DOUBLE;
-				try {
-					df = new DataField(stringTemplate.getDouble(i));
-				} catch (Exception e) {
-					df = new DataField(0d);
-				}
-				break;
-
-			case TemplateInfo.BUS:
-			case TemplateInfo.NUMERIC:
-			case TemplateInfo.ADJN_BUS:
-			case TemplateInfo.BCD_FLOAT:
-			case TemplateInfo.IEEE_FLOAT:
-			case TemplateInfo.ORDERED_NUMERIC:
-			case TemplateInfo.UNSIGNED_INTEGER:
-				sqlType = java.sql.Types.NUMERIC;
-				try {
-					df = new DataField(stringTemplate.getFieldAsNumber(i).toBigDecimal());
-				} catch (Exception e) {
-					df = new DataField(new java.math.BigDecimal(0));
-				}
-				break;
-
-			default:
-				sqlType = java.sql.Types.VARCHAR;
-				try {
-					df = new DataField(stringTemplate.getFieldAsString(i));
-				} catch (Exception e) {
-					df = new DataField("");
-				}
-				break;
-			}
-
-			if (sqlType == java.sql.Types.NUMERIC) {
-				try {
-					dType = stringTemplate.getAttribute(fieldName, "DTYPE");
-
-					if (dType.equals("D") && fieldSize == 8) {
-						// Date
-						sqlType = 9; // BASIS Date
-						value = stringTemplate.getFieldAsNumber(i).intValue();
-						df = new DataField(value);
-					} else if (dType.equals("N") && fieldSize == 1) {
-						// Boolean
-						sqlType = java.sql.Types.BOOLEAN;
-						if (stringTemplate.getFieldAsNumber(i).intValue() == 0) {
-							df = new DataField(false);
-						} else {
-							df = new DataField(true);
-						}
-					}
-				} catch (Exception e) {
-					// ignoring because not all fields have an attribute DTYPE
-				}
-			}
-			row.addDataField(fieldName, sqlType, df);
-		}
-
-		return row;
+	public static DataRow fromTemplate(String template, String record) {
+		return TemplateParser.dataRowfromTemplate(template, record);
 	}
 
 	/**
@@ -2062,6 +1839,13 @@ public class DataRow implements java.io.Serializable {
 				this.setFieldValue(name, tmpl.getFieldAsString(name));
 				break;
 			}
+		}
+	}
+
+	public void setTemplate(String template) {
+		if (this.template == null) {
+			this.template = template;
+			this.templateChanged = false;
 		}
 	}
 

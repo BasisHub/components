@@ -70,22 +70,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	public ResultSet() {
 	}
-
-	@SuppressWarnings("unchecked")
-	private ResultSet(ArrayList<HashMap<String, Object>> metaData, ArrayList<String> columnNames,
-			ArrayList<DataRow> dataRows, ArrayList<String> keyColumns) {
-		this.MetaData = (ArrayList<HashMap<String, Object>>) metaData.clone();
-		this.ColumnNames = (ArrayList<String>) columnNames.clone();
-		this.DataRows = (ArrayList<DataRow>) dataRows.clone();
-		this.KeyColumns = (ArrayList<String>) keyColumns.clone();
+	private ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<DataRow> dataRows,
+			List<String> keyColumns) {
+		this.MetaData = new ArrayList<>(metaData);
+		this.ColumnNames = new ArrayList<>(columnNames);
+		this.DataRows = new ArrayList<>(dataRows);
+		this.KeyColumns = new ArrayList<>(keyColumns);
 	}
 
-	@SuppressWarnings("unchecked")
-	private ResultSet(ArrayList<HashMap<String, Object>> metaData, ArrayList<String> columnNames,
-			ArrayList<String> keyColumns) {
-		this.MetaData = (ArrayList<HashMap<String, Object>>) metaData.clone();
-		this.ColumnNames = (ArrayList<String>) columnNames.clone();
-		this.KeyColumns = (ArrayList<String>) keyColumns.clone();
+	private ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<String> keyColumns) {
+		this.MetaData = new ArrayList<>(metaData);
+		this.ColumnNames = new ArrayList<>(columnNames);
+		this.KeyColumns = new ArrayList<>(keyColumns);
 	}
 
 	@Override
@@ -574,7 +570,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return the list with the key columns.
 	 */
-	public ArrayList<String> getKeyColumns() {
+	public List<String> getKeyColumns() {
 		return this.KeyColumns;
 	}
 
@@ -592,6 +588,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public void addKeyColumn(String name) {
 		this.KeyColumns.add(name);
+	}
+
+	public List<DataRow> getDataRows() {
+		return new ArrayList<>(DataRows);
 	}
 
 	/**
@@ -797,7 +797,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return true if the cursor was successfully moved to the specified index, false otherwise.
 	 */
-	public Boolean absolute(int row) {
+	public boolean absolute(int row) {
 		if (this.DataRows.isEmpty() || row < 0 || row > this.DataRows.size() - 1)
 			return false;
 		else {
@@ -813,7 +813,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return true if the cursor was moved successfully, false otherwise.
 	 */
-	public Boolean next() {
+	public boolean next() {
 		if (this.DataRows.isEmpty() || this.currentRow > this.DataRows.size() - 2)
 			return false;
 		else {
@@ -1150,6 +1150,23 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
+	 * Returns the attribute with the given name, for the column at the specified
+	 * index. Returns an empty String in case the specified attribute name doesn't
+	 * exist.
+	 * 
+	 * @param columnName
+	 *            The column's name
+	 * @param attributeName
+	 *            The attribute's name
+	 * 
+	 * @return The attribute's value, or empty String in case the attribute doesn't
+	 *         exist.
+	 */
+	public String getAttribute(String columnName, String attributeName) {
+		return getAttribute(getColumnIndex(columnName), attributeName);
+	}
+
+	/**
 	 * Sets the value of the CatalogName property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
 	 * 
@@ -1406,6 +1423,22 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public void setAttribute(int column, String name, String value) {
 		this.MetaData.get(column).put(name, value);
+	}
+
+	/**
+	 * Sets the attribute with the specified name and value to the column at the
+	 * specified index. Overwrites the value of the attribute with the given one in
+	 * case an attribute with the given name does already exist.
+	 * 
+	 * @param columnName
+	 *            The column's name.
+	 * @param name
+	 *            The name of the attribute.
+	 * @param value
+	 *            The value of the attribute.
+	 */
+	public void setAttribute(String columnName, String name, String value) {
+		this.setAttribute(getColumnIndex(columnName), name, value);
 	}
 
 	/**
