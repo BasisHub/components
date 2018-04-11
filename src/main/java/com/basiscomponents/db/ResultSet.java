@@ -536,7 +536,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return the column's metadata.
 	 */
-	public Map<String, Object> getColumnMetaData(String name) {
+	public HashMap<String, Object> getColumnMetaData(String name) {
 		int column = getColumnIndex(name);
 		if (column != -1)
 			return this.MetaData.get(column);
