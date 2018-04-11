@@ -1,6 +1,7 @@
 package com.basiscomponents.db;
 
 import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
+import static com.basiscomponents.db.util.NumericTypeCodeList.isTypeCode;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowFromJsonProvider;
 import com.basiscomponents.db.util.DataRowMatcher;
+import com.basiscomponents.db.util.NumericTypeCodeList;
+import com.basiscomponents.db.util.SqlTypeNames;
 import com.basiscomponents.db.util.TemplateParser;
 
 /**
@@ -965,74 +968,7 @@ public class DataRow implements java.io.Serializable {
 			else
 				type = java.sql.Types.VARBINARY;
 		} else {
-			switch (typeName) {
-			case "java.lang.String":
-				type = java.sql.Types.VARCHAR;
-				break;
-			case "byte":
-			case "java.lang.Byte":
-				type = java.sql.Types.TINYINT;
-				break;
-			case "long":
-			case "java.lang.Long":
-			case "java.math.BigInteger":
-				type = java.sql.Types.BIGINT;
-				break;
-			case "short":
-			case "java.lang.Short":
-				type = java.sql.Types.SMALLINT;
-				break;
-			case "boolean":
-			case "java.lang.Boolean":
-				type = java.sql.Types.BOOLEAN;
-				break;
-			case "char":
-			case "java.lang.Character":
-				type = java.sql.Types.CHAR;
-				break;
-			case "double":
-			case "java.lang.Double":
-				type = java.sql.Types.DOUBLE;
-				break;
-			case "float":
-			case "java.lang.Float":
-				type = java.sql.Types.REAL;
-				break;
-			case "int":
-			case "java.lang.Integer":
-				type = java.sql.Types.INTEGER;
-				break;
-			case "java.math.BigDecimal":
-				type = java.sql.Types.NUMERIC;
-				break;
-			case "java.sql.Date":
-				type = java.sql.Types.DATE;
-				break;
-			case "java.sql.Time":
-				type = java.sql.Types.TIME;
-				break;
-			case "java.sql.Timestamp":
-				type = java.sql.Types.TIMESTAMP;
-				break;
-			case "java.sql.Blob":
-				type = java.sql.Types.BLOB;
-				break;
-			case "java.sql.Clob":
-				type = java.sql.Types.CLOB;
-				break;
-			case "java.sql.Array":
-				type = java.sql.Types.ARRAY;
-				break;
-			case "java.sql.Struct":
-				type = java.sql.Types.STRUCT;
-				break;
-			case "java.sql.Ref":
-				type = java.sql.Types.REF;
-				break;
-			default:
-				type = java.sql.Types.OTHER;
-				break;
-			}
+			type = SqlTypeNames.getSQLType(typeName);
 		}
 		addDataField(fieldName, type, dataField);
 	}
@@ -1078,9 +1014,7 @@ public class DataRow implements java.io.Serializable {
 	@Override
 	public DataRow clone() {
 		DataRow dr = new DataRow();
-		Iterator<String> it = this.resultSet.getColumnNames().iterator();
-		while (it.hasNext()) {
-			String k = it.next();
+		for (String k : this.resultSet.getColumnNames()) {
 			DataField f = this.dataFields.get(k);
 			DataField f1 = f.clone();
 			try {
@@ -1101,7 +1035,6 @@ public class DataRow implements java.io.Serializable {
 	 *         fields.
 	 */
 	public String getInsertStatement() {
-
 		List<String> values = new ArrayList<>();
 
 		String sql;
@@ -1133,11 +1066,8 @@ public class DataRow implements java.io.Serializable {
 	 *         fields.
 	 */
 	public String getUpdateStatement() {
-		Set<String> ks = this.dataFields.keySet();
-		Iterator<String> it = ks.iterator();
 		String sql = "";
-		while (it.hasNext()) {
-			String k = it.next();
+		for (String k : this.dataFields.keySet()) {
 			try {
 				if (isFieldNull(k))
 					continue;
@@ -1164,7 +1094,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return fieldMap The DataRow's fields as
 	 *         <code>java.util.HashMap&lt;String,Object&gt;</code> object.
 	 */
-	public java.util.HashMap<String, Object> getObjects() {
+	public HashMap<String, Object> getObjects() {
 		HashMap<String, Object> hm = new HashMap<>();
 		Set<String> ks = this.dataFields.keySet();
 		Iterator<String> it = ks.iterator();
@@ -1343,9 +1273,7 @@ public class DataRow implements java.io.Serializable {
 		try {
 			return parser.parse(this.toJson()).getAsJsonArray();
 		} catch (Exception e) {
-			// Auto-generated catch block
 			e.printStackTrace();
-
 		}
 		return null;
 	}
@@ -1373,7 +1301,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return the row key as string of bytes
 	 */
 	public String getRowKey() {
-		return new String(this.rowKey);
+		return String.valueOf(this.rowKey);
 	}
 
 	/**
@@ -1530,9 +1458,7 @@ public class DataRow implements java.io.Serializable {
 
 		if (dr == null)
 			dr = this;
-		Iterator<String> it = dr.getFieldNames().iterator();
-		while (it.hasNext()) {
-			String fieldName = it.next();
+		for (String fieldName : dr.getFieldNames()) {
 			if (!this.contains(fieldName))
 				continue;
 
@@ -1597,9 +1523,7 @@ public class DataRow implements java.io.Serializable {
 
 		if (dr == null)
 			dr = this;
-		Iterator<String> it = dr.getFieldNames().iterator();
-		while (it.hasNext()) {
-			String fieldName = it.next();
+		for (String fieldName : dr.getFieldNames()) {
 			if (!this.contains(fieldName))
 				continue;
 
@@ -1632,20 +1556,6 @@ public class DataRow implements java.io.Serializable {
 		if (!templateChanged) {
 			return template;
 		}
-		ArrayList<Integer> numericTypeCodeList = new ArrayList<>();
-		numericTypeCodeList.add(java.sql.Types.BIGINT);
-		numericTypeCodeList.add(java.sql.Types.TINYINT);
-		numericTypeCodeList.add(java.sql.Types.INTEGER);
-		numericTypeCodeList.add(java.sql.Types.SMALLINT);
-		numericTypeCodeList.add(java.sql.Types.NUMERIC);
-		numericTypeCodeList.add(java.sql.Types.DOUBLE);
-		numericTypeCodeList.add(java.sql.Types.FLOAT);
-		numericTypeCodeList.add(java.sql.Types.DECIMAL);
-		numericTypeCodeList.add(java.sql.Types.REAL);
-		numericTypeCodeList.add(java.sql.Types.BOOLEAN);
-		numericTypeCodeList.add(java.sql.Types.BIT);
-		numericTypeCodeList.add(java.sql.Types.DATE);
-		numericTypeCodeList.add(9); // Basis DATE
 
 		StringBuilder templatedString = new StringBuilder();
 
@@ -1659,7 +1569,7 @@ public class DataRow implements java.io.Serializable {
 
 			templatedString.append(resultSet.getColumnName(index) + ":");
 
-			if (!numericTypeCodeList.contains(sqlType)) {
+			if (!NumericTypeCodeList.isTypeCode(sqlType)) {
 				templatedString.append("C");
 
 				if (sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE
@@ -1705,34 +1615,16 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String getString() throws Exception {
-		ArrayList<Integer> numericTypeCodeList = new ArrayList<Integer>();
-		numericTypeCodeList.add(java.sql.Types.BIGINT);
-		numericTypeCodeList.add(java.sql.Types.TINYINT);
-		numericTypeCodeList.add(java.sql.Types.INTEGER);
-		numericTypeCodeList.add(java.sql.Types.SMALLINT);
-		numericTypeCodeList.add(java.sql.Types.NUMERIC);
-		numericTypeCodeList.add(java.sql.Types.DOUBLE);
-		numericTypeCodeList.add(java.sql.Types.FLOAT);
-		numericTypeCodeList.add(java.sql.Types.DECIMAL);
-		numericTypeCodeList.add(java.sql.Types.REAL);
-		numericTypeCodeList.add(java.sql.Types.BOOLEAN);
-		numericTypeCodeList.add(java.sql.Types.BIT);
-		numericTypeCodeList.add(java.sql.Types.DATE);
-		numericTypeCodeList.add(9); // Basis DATE
 
-		String template = getTemplate();
-		TemplatedString stringTemplate = new TemplatedString(template);
+		TemplatedString stringTemplate = new TemplatedString(getTemplate());
 
 		int fieldType;
-		Entry<String, DataField> entry;
-		Iterator<Entry<String, DataField>> it = this.dataFields.entrySet().iterator();
-		while (it.hasNext()) {
-			entry = it.next();
+		for (Entry<String, DataField> entry : this.dataFields.entrySet()) {
 			fieldType = getFieldType(entry.getKey());
 			String fieldName = entry.getKey();
 			DataField field = entry.getValue();
 
-			if (numericTypeCodeList.contains(fieldType)) {
+			if (isTypeCode(fieldType)) {
 				if (field.getValue() == null) {
 					if (fieldType == java.sql.Types.DATE)
 						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(-1));
@@ -1855,7 +1747,7 @@ public class DataRow implements java.io.Serializable {
 	 * Object also contains
 	 * 
 	 * @param datarow
-	 *            the Datarow to copie the attributes from
+	 *            the {@link DataRow} to copy the attributes from
 	 */
 	public void copyAttributes(DataRow datarow) {
 		this.dataFields.forEach((k, v) -> {
