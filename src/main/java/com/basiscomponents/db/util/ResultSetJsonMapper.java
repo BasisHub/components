@@ -5,10 +5,12 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -26,18 +28,12 @@ public class ResultSetJsonMapper {
 
 		g.writeStartArray();
 
-		Boolean meta_done = !meta;
+		boolean metaDone = !meta;
 
-		Iterator<DataRow> it = dataRows.iterator();
-		while (it.hasNext()) {
-			DataRow dr = it.next();
-			BBArrayList<String> f = dr.getFieldNames();
-			Iterator<String> itf = f.iterator();
-
+		for (DataRow dr : dataRows) {
 			g.writeStartObject();
 
-			while (itf.hasNext()) {
-				String fn = itf.next();
+			for (String fn : dr.getFieldNames()) {
 				if (dr.getField(fn).getValue() == null) {
 					g.writeNullField(fn);
 					continue;
@@ -51,7 +47,7 @@ public class ResultSetJsonMapper {
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
 					String tmp = dr.getField(fn).getAttribute("StringFormat");
-					if (tmp != null && tmp.toUpperCase().equals("JSON")) {
+					if (tmp != null && tmp.equalsIgnoreCase("JSON")) {
 						g.writeFieldName(fn);
 						String s = dr.getField(fn).getString().trim();
 						if (s.isEmpty()) {
@@ -162,36 +158,29 @@ public class ResultSetJsonMapper {
 			} // while on fields
 
 			if (meta) {
-				if (!meta_done) {
+				if (!metaDone) {
 					g.writeFieldName("meta");
 
 					g.writeStartObject();
 
-					Iterator<HashMap<String, Object>> i = metaData.iterator();
-					while (i.hasNext()) {
-						HashMap<String, Object> hm = i.next();
+					for (HashMap<String, Object> hm : metaData) {
+
 						String c = (String) hm.get("ColumnName");
 						if (c != null) {
 							g.writeFieldName(c);
 							g.writeStartObject();
 
-							HashMap<String, String> atr;
+							Map<String, Attribute> atr;
 							try {
-								atr = dr.getFieldAttributes(c);
+								atr = dr.getFieldAttributes2(c);
 							} catch (Exception e) {
 								atr = null;
 							}
-
-							Set<String> ks = hm.keySet();
-							Iterator<String> its = ks.iterator();
-							while (its.hasNext()) {
-								String key = its.next();
-								if (key.equals("ColumnTypeName") || key.equals("ColumnName"))
+							for (String key : hm.keySet()) {
+								if (key.equals("ColumnTypeName") || key.equals("ColumnName")
+										|| (atr != null && atr.containsKey(key))) {
 									continue;
-
-								if (atr != null && atr.containsKey(key))
-									continue;
-
+								}
 								String value = null;
 								if (hm.get(key) != null)
 									value = hm.get(key).toString();
@@ -199,32 +188,36 @@ public class ResultSetJsonMapper {
 							}
 
 							if (atr != null && !atr.isEmpty()) {
-								Iterator<String> itks = atr.keySet().iterator();
-								while (itks.hasNext()) {
-									String itk = itks.next();
-									g.writeStringField(itk, atr.get(itk));
+								for(Entry<String,Attribute> entry:atr.entrySet()) {
+									String k = entry.getKey();
+									Attribute v = entry.getValue();
+									if (v.getType() == String.class) {
+										g.writeStringField(k, v.getValue());
+									} else if (v.getType() == int.class) {
+										g.writeNumber(v.getIntValue());
+									} else if (v.getType() == double.class) {
+										g.writeNumber(v.getDoubleValue());
+									} else if (v.getType() == boolean.class) {
+										g.writeBoolean(v.getBooleanValue());
+									}
 								}
 							}
-
 							g.writeEndObject();
 						}
 					}
-
 					g.writeEndObject();
 
-					meta_done = true;
+					metaDone = true;
 				} else {
 					BBArrayList<String> fields = dr.getFieldNames();
-					itf = fields.iterator();
-					boolean m_written = false;
-					while (itf.hasNext()) {
-						String fieldname = itf.next();
-						HashMap<String, String> l = dr.getFieldAttributes(fieldname);
+					boolean mWritten = false;
+					for (String fieldname : fields) {
+						Map<String, String> l = dr.getFieldAttributes(fieldname);
 						if (!l.isEmpty()) {
-							if (!m_written) {
+							if (!mWritten) {
 								g.writeFieldName("meta");
 								g.writeStartObject();
-								m_written = true;
+								mWritten = true;
 							}
 							g.writeFieldName(fieldname);
 							g.writeStartObject();
@@ -236,7 +229,7 @@ public class ResultSetJsonMapper {
 							g.writeEndObject();
 						}
 					}
-					if (m_written)
+					if (mWritten)
 						g.writeEndObject();
 				}
 			}
@@ -249,4 +242,6 @@ public class ResultSetJsonMapper {
 		g.close();
 		return w.toString();
 	}
+
+
 }

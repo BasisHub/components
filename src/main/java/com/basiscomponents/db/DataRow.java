@@ -17,6 +17,7 @@ import com.basis.bbj.datatypes.TemplatedString;
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
+import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowFromJsonProvider;
 import com.basiscomponents.db.util.DataRowMatcher;
@@ -177,7 +178,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @return attributesMap The java.util.HashMap with this DataRow's attributes
 	 */
-	public Map<String, String> getAttributes() {
+	public HashMap<String, String> getAttributes() {
 		return new HashMap<>(attributes);
 	}
 
@@ -450,7 +451,6 @@ public class DataRow implements java.io.Serializable {
 		return DataFieldConverter.fieldToNumber(resultSet, field, column, type);
 	}
 
-
 	/**
 	 * Returns the index of the column with the specified name.<br>
 	 * <br>
@@ -534,15 +534,17 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-
-	 * Returns the value of the ColumnType property from the metadata for the field with the given name.
+	 * 
+	 * Returns the value of the ColumnType property from the metadata for the field
+	 * with the given name.
 	 *
 	 * @param name
 	 *            The name of the field.
 	 *
 	 * @return The value of the ColumnType property for the field name.
 	 *
-	 * @throws RuntimeException The specified column name doesn't exist
+	 * @throws RuntimeException
+	 *             The specified column name doesn't exist
 	 */
 	public int getFieldType(String name) {
 		int column = getColumnIndex(name);
@@ -739,6 +741,24 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
+	 * Returns a HashMap with the attributes as strings of the field with the given
+	 * name. The HashMap keys will be the attribute names and the HashMap values
+	 * will be the attribute values. Might get {@link Deprecated}
+	 *
+	 * @param name
+	 *            The name of the field.
+	 *
+	 * @return A Map with the field's attributes as key/value pairs.
+	 *
+	 * @throws Exception
+	 *             No field exists with the given name
+	 */
+	public HashMap<String, String> getFieldAttributes(String name) {
+		DataField field = getField(name);
+		return new HashMap<String, String>(field.getAttributes());
+	}
+
+	/**
 	 * Returns a HashMap with the attributes of the field with the given name. The
 	 * HashMap keys will be the attribute names and the HashMap values will be the
 	 * attribute values.
@@ -746,14 +766,14 @@ public class DataRow implements java.io.Serializable {
 	 * @param name
 	 *            The name of the field.
 	 *
-	 * @return A HashMap with the field's attributesas key/value pairs.
+	 * @return A Map with the field's attributes as key/value pairs.
 	 *
 	 * @throws Exception
 	 *             No field exists with the given name
 	 */
-	public HashMap<String, String> getFieldAttributes(String name) {
+	public Map<String, Attribute> getFieldAttributes2(String name) {
 		DataField field = getField(name);
-		return field.getAttributes();
+		return field.getAttributes2();
 	}
 
 	/**
@@ -843,7 +863,7 @@ public class DataRow implements java.io.Serializable {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Method to retrieve all keys in the dataFields
 	 * 
@@ -1827,6 +1847,26 @@ public class DataRow implements java.io.Serializable {
 		if (this.template == null) {
 			this.template = template;
 			this.templateChanged = false;
+		}
+	}
+
+	/**
+	 * Copies the attributes from the passed {@link DataRow} of all fields this
+	 * Object also contains
+	 * 
+	 * @param datarow
+	 *            the Datarow to copie the attributes from
+	 */
+	public void copyAttributes(DataRow datarow) {
+		if (datarow != null) {
+			this.dataFields.forEach((k, v) -> {
+				if (datarow.contains(k)) {
+					Map<String, String> fieldAttributes = datarow.getFieldAttributes(k);
+					if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
+						this.setFieldAttributes(k, fieldAttributes);
+					}
+				}
+			});
 		}
 	}
 

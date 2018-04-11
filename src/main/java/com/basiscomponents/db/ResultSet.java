@@ -432,7 +432,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					e.printStackTrace();
 				}
 				try {
-					HashMap<String, String> attrMap = dr.getFieldAttributes(name);
+					Map<String, String> attrMap = dr.getFieldAttributes(name);
 				
 					attrMap.keySet().forEach(attrKey->
 					this.setAttribute(column, attrKey, attrMap.get(attrKey)));
