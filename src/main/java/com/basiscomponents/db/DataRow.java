@@ -178,7 +178,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @return attributesMap The java.util.HashMap with this DataRow's attributes
 	 */
-	public Map<String, String> getAttributes() {
+	public HashMap<String, String> getAttributes() {
 		return new HashMap<>(attributes);
 	}
 
@@ -753,9 +753,9 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field exists with the given name
 	 */
-	public Map<String, String> getFieldAttributes(String name) {
+	public HashMap<String, String> getFieldAttributes(String name) {
 		DataField field = getField(name);
-		return field.getAttributes();
+		return new HashMap<String, String>(field.getAttributes());
 	}
 
 	/**
