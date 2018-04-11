@@ -411,7 +411,11 @@ public class DataField implements java.io.Serializable {
 	 * @return attributeValue The attribute's value.
 	 */
 	public String getAttribute(String attributeName) {
-		return this.attributes.get(attributeName).getValue();
+		Attribute at = this.attributes.get(attributeName);
+		if (at == null)
+			return null;
+		else
+			return at.getValue();
 	}
 
 	/**

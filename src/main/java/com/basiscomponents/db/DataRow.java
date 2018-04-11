@@ -1858,14 +1858,16 @@ public class DataRow implements java.io.Serializable {
 	 *            the Datarow to copie the attributes from
 	 */
 	public void copyAttributes(DataRow datarow) {
-		this.dataFields.forEach((k, v) -> {
-			if (datarow.contains(k)) {
-				Map<String, String> fieldAttributes = datarow.getFieldAttributes(k);
-				if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
-					this.setFieldAttributes(k, fieldAttributes);
+		if (datarow != null) {
+			this.dataFields.forEach((k, v) -> {
+				if (datarow.contains(k)) {
+					Map<String, String> fieldAttributes = datarow.getFieldAttributes(k);
+					if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
+						this.setFieldAttributes(k, fieldAttributes);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 }
