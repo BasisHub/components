@@ -55,7 +55,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private ArrayList<String> ColumnNames = new ArrayList<>();
 	@Expose
 	private ArrayList<DataRow> DataRows = new ArrayList<>();
-	private List<String> FieldSelection;
+	private ArrayList<String> FieldSelection;
 
 	private ArrayList<String> KeyColumns = new ArrayList<>();
 	private String KeyTemplateString = "";
@@ -561,7 +561,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return the list with all column names.
 	 */
-	public List<String> getColumnNames() {
+	public ArrayList<String> getColumnNames() {
 		return this.ColumnNames;
 	}
 
@@ -570,7 +570,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return the list with the key columns.
 	 */
-	public List<String> getKeyColumns() {
+	public ArrayList<String> getKeyColumns() {
 		return this.KeyColumns;
 	}
 
@@ -590,7 +590,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		this.KeyColumns.add(name);
 	}
 
-	public List<DataRow> getDataRows() {
+	public ArrayList<DataRow> getDataRows() {
 		return new ArrayList<>(DataRows);
 	}
 
@@ -1830,7 +1830,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param fieldSelection The list of column names to import into the ResultSet when calling the populate method.
 	 */
 	public void setFieldSelection(List<String> fieldSelection) {
-		this.FieldSelection = fieldSelection;
+		this.FieldSelection = new ArrayList<String>(fieldSelection);
 	}
 
 	/**

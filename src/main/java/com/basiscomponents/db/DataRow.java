@@ -825,8 +825,8 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @return A list with the attribute values for the given attribute name.
 	 */
-	public List<String> getAttributeForFields(String attrname) {
-		return this.getAttributeForFields(attrname, false);
+	public ArrayList<String> getAttributeForFields(String attrname) {
+		return new ArrayList<String>(this.getAttributeForFields(attrname, false));
 	}
 
 	/**
@@ -847,7 +847,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return The list with the attribute values of each field defined in this
 	 *         DataRow for the given attribute name.
 	 */
-	public List<String> getAttributeForFields(String attrname, Boolean defaultToFieldname) {
+	public ArrayList<String> getAttributeForFields(String attrname, Boolean defaultToFieldname) {
 		DataField field;
 		ArrayList<String> ret = new ArrayList<>();
 		if (!this.resultSet.getColumnNames().isEmpty()) {
