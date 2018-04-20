@@ -3,10 +3,9 @@ package com.basiscomponents.db.importer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.datatypes.TemplatedString;
@@ -35,12 +34,25 @@ public class JLibResultSetImporter {
 	private String fileName;
 	private DataRow filter;
 
-	private HashMap<Integer, String> fieldNameMap;
+	private Map<Integer, String> fieldNameMap;
 
 	private int offsetStart = -1;
 	private int offsetCount = -1;
 
 	public JLibResultSetImporter() {
+		// nothing to see here
+	}
+
+	/**
+	 * Constructor using fields
+	 * 
+	 * @param filePath
+	 *            path to the DataFile
+	 * @param template
+	 *            the Template to read the File
+	 */
+	public JLibResultSetImporter(String filePath, String template) throws BBjException {
+		this.setFile(filePath, template);
 	}
 
 	/**
@@ -69,14 +81,13 @@ public class JLibResultSetImporter {
 	 * 
 	 * @return The field name map
 	 */
-	private HashMap<Integer, String> initFieldNameMap(TemplatedString templatedStr) {
-		HashMap<Integer, String> indexList = new HashMap<Integer, String>();
+	private Map<Integer, String> initFieldNameMap(TemplatedString templatedStr) {
+		Map<Integer, String> indexList = new HashMap<>();
 		List<String> fieldNameList = Arrays.asList(templatedStr.getFieldNames().toString().split("\n"));
-		Iterator<String> it = fieldNameList.iterator();
-		int counter = 0;
 
-		while (it.hasNext()) {
-			indexList.put(counter, it.next());
+		int counter = 0;
+		for (String fieldname : fieldNameList) {
+			indexList.put(counter, fieldname);
 			counter++;
 		}
 
@@ -134,33 +145,19 @@ public class JLibResultSetImporter {
 			return;
 		}
 
-		fieldNameMap = new HashMap<Integer, String>();
+		fieldNameMap = new HashMap<>();
 
-		@SuppressWarnings("unchecked")
-		ArrayList<String> fieldNameList = fieldSelection.getFieldNames();
+		List<String> fieldNameList = fieldSelection.getFieldNames();
 
 		List<String> templatedStringFieldNameList = Arrays
 				.asList(templatedString.getFieldNames().toString().split("\n"));
-		Iterator<String> it = templatedStringFieldNameList.iterator();
-
-		Iterator<String> requestedFieldNameIterator;
-
-		String currentFieldName;
-		String currentRequestedFieldName;
 		int currentFieldIndex = 0;
-
-		while (it.hasNext()) {
-			currentFieldName = it.next();
-
-			requestedFieldNameIterator = fieldNameList.iterator();
-			while (requestedFieldNameIterator.hasNext()) {
-				currentRequestedFieldName = requestedFieldNameIterator.next();
-
-				if (currentRequestedFieldName.equalsIgnoreCase(currentFieldName)) {
+		for (String currentFieldName : templatedStringFieldNameList) {
+			for (String fieldname : fieldNameList) {
+				if (fieldname.equalsIgnoreCase(currentFieldName)) {
 					fieldNameMap.put(currentFieldIndex, currentFieldName);
 				}
 			}
-
 			currentFieldIndex++;
 		}
 	}
@@ -175,7 +172,7 @@ public class JLibResultSetImporter {
 	 * @throws NoSuchFieldException
 	 * @throws Exception
 	 */
-	public ResultSet retrieve() throws IndexOutOfBoundsException, NoSuchFieldException, Exception {
+	public ResultSet retrieve() throws Exception {
 		if (fieldNameMap == null || fieldNameMap.isEmpty() || templatedString == null) {
 			return null;
 		}
@@ -194,8 +191,6 @@ public class JLibResultSetImporter {
 		if (fieldNameMap != null && !fieldNameMap.isEmpty()) {
 			numericFieldIndeces = initNumericFieldsIndeces(templatedStr, fieldNameMap);
 		}
-
-		Set<Entry<Integer, String>> entrySet = fieldNameMap.entrySet();
 		initColumnMetadata(rs, templatedStr, fieldNameMap);
 
 		byte[] record = null;
@@ -236,47 +231,37 @@ public class JLibResultSetImporter {
 				if (filter.contains(FILTER_VALUE)) {
 					byte[] value = filter.getFieldAsString(FILTER_VALUE).getBytes();
 
-					try {
-						pos.readByKey(record, 0, record.length, value, 0, value.length, knum, 0, 0);
-					} catch (Exception e) {
+					readWithoutException(pos, record, knum, value);
+
+					if (isRecordEmpty(record)) {
+						return null;
 					}
+					templatedStr.setValue(record);
 
-					if (!isRecordEmpty(record)) {
-						templatedStr.setValue(record);
+					currentDataRow = getDataRowFromRecord(templatedStr, numericFieldIndeces);
+					rs.add(currentDataRow);
 
-						currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
-						rs.add(currentDataRow);
+					// Closing the open file connection
+					pos.close();
 
-						// Closing the open file connection
-						pos.close();
+					// Checking the license back in
+					connectionManager.clear();
 
-						// Checking the license back in
-						connectionManager.clear();
-
-						return rs;
-					}
-					return null;
+					return rs;
 				}
 
 				if (filter.contains(FILTER_RANGE_FROM) && filter.contains(FILTER_RANGE_TO)) {
 					byte[] startKey = filter.getFieldAsString(FILTER_RANGE_FROM).getBytes();
 
 					if (startKey != null) {
-						try {
-							pos.readByKey(record, 0, record.length, startKey, 0, startKey.length, knum, 0, 0);
-						} catch (Exception e) {
-							// The record could not be read
-						}
+						readWithoutException(pos, record, knum, startKey);
 					}
 
 					byte[] endKey = filter.getFieldAsString(FILTER_RANGE_TO).getBytes();
 					if (endKey != null) {
 						endPos = connectionManager.open(fileName, true, true);
-						try {
-							endPos.readByKey(endRecord, 0, endRecord.length, endKey, 0, endKey.length, knum, 0, 0);
-						} catch (Exception e) {
+						readWithoutException(endPos, endRecord, knum, endKey);
 
-						}
 					}
 				}
 			}
@@ -302,10 +287,8 @@ public class JLibResultSetImporter {
 			}
 
 			while (!complete) {
-
 				if (endPos != null) {
 					pos.getNumKey(keys[knum], keys[knum].length, knum);
-
 					if (Arrays.equals(keys[knum], lastRecordKeys[knum])) {
 						complete = true;
 						if (!includeLastRecord) {
@@ -319,15 +302,14 @@ public class JLibResultSetImporter {
 				pos.read(record, record.length, 1, 5, false);
 				templatedStr.setValue(record);
 
-				currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
+				currentDataRow = getDataRowFromRecord(templatedStr, numericFieldIndeces);
 				rs.add(currentDataRow);
 
-				if (readPerOffset) {
-					// read the records while the offset count is not reached
-					if (rs.size() >= offsetCount) {
-						break;
-					}
+				// read the records while the offset count is not reached
+				if (readPerOffset && rs.size() >= offsetCount) {
+					break;
 				}
+
 			}
 
 			if (rs.size() > 0) {
@@ -336,18 +318,34 @@ public class JLibResultSetImporter {
 
 		} catch (FilesystemEOFException ex) {
 			// End of iteration...
+		} finally {
+
+			// closing the open file connection
+			pos.close();
+
+			if (endPos != null) {
+				endPos.close();
+			}
+
+			// checking back in the checked-out license
+			connectionManager.clear();
 		}
-
-		// closing the open file connection
-		pos.close();
-
-		if (endPos != null) {
-			endPos.close();
-		}
-
-		// checking back in the checked-out license
-		connectionManager.clear();
 		return rs;
+	}
+
+	/**
+	 * @param pos
+	 * @param record
+	 * @param knum
+	 * @param value
+	 * @throws FilesystemException
+	 */
+	private static void readWithoutException(FilePosition pos, byte[] record, int knum, byte[] value) {
+		try {
+			pos.readByKey(record, 0, record.length, value, 0, value.length, knum, 0, 0);
+		} catch (Exception e) {
+			// as said, no exception shall pass
+		}
 	}
 
 	/**
@@ -358,7 +356,7 @@ public class JLibResultSetImporter {
 	 * Parses the given Templated String for the field values defined in the given
 	 * Set, and returns a DataRow with those values.
 	 * 
-	 * @param entrySet
+	 * @param nameMap
 	 *            The Entry with the field names and field values.
 	 * @param templatedStr
 	 *            The templated String used to retrieve the field type.
@@ -371,20 +369,20 @@ public class JLibResultSetImporter {
 	 * @throws NoSuchFieldException
 	 * @throws BBjException
 	 */
-	private DataRow getDataRowFromRecord(Set<Entry<Integer, String>> entrySet, TemplatedString templatedStr,
-			List<Integer> numericFieldIndeces) throws NoSuchFieldException, BBjException {
+	private DataRow getDataRowFromRecord(TemplatedString templatedStr, List<Integer> numericFieldIndeces)
+			throws NoSuchFieldException, BBjException {
 
 		DataRow dr = new DataRow();
 
 		boolean containsNumericValues = numericFieldIndeces != null && !numericFieldIndeces.isEmpty();
 
-		for (Entry<Integer, String> entry : entrySet) {
+		for (Entry<Integer, String> entry : fieldNameMap.entrySet()) {
 			int key = entry.getKey();
 			String value = entry.getValue();
 			try {
 				if (containsNumericValues) {
 					if (numericFieldIndeces.contains(key)) {
-						if ('X'==templatedStr.getFieldType(key)) {
+						if ('X' == templatedStr.getFieldType(key)) {
 							dr.setFieldValue(value, templatedStr.getFloat(key));
 						} else {
 							dr.setFieldValue(value, templatedStr.getDouble(key));
@@ -417,23 +415,20 @@ public class JLibResultSetImporter {
 	 * @throws IndexOutOfBoundsException
 	 * @throws NoSuchFieldException
 	 */
-	private List<Integer> initNumericFieldsIndeces(TemplatedString templatedString, HashMap<Integer, String> fieldMap)
+	private List<Integer> initNumericFieldsIndeces(TemplatedString templatedString, Map<Integer, String> fieldMap)
 			throws NoSuchFieldException {
-		Iterator<Entry<Integer, String>> it = fieldMap.entrySet().iterator();
-		ArrayList<Integer> indexList = new ArrayList<>();
+		List<Integer> indexList = new ArrayList<>();
 
 		int index = 0;
 		int type;
-		Entry<Integer, String> entry;
 
-		while (it.hasNext()) {
-			entry = it.next();
+		for (Entry<Integer, String> entry : fieldMap.entrySet()) {
+
 			type = templatedString.getFieldType(entry.getKey());
 
 			if (type == 'B' || type == 'D' || type == 'F' || type == 'N' || type == 'X' || type == 'Y') {
 				indexList.add(index);
 			}
-
 			index++;
 		}
 
@@ -453,16 +448,13 @@ public class JLibResultSetImporter {
 	 * 
 	 * @throws Exception
 	 */
-	private void initColumnMetadata(ResultSet rs, TemplatedString templatedStr, HashMap<Integer, String> fieldMap)
+	private static void initColumnMetadata(ResultSet rs, TemplatedString templatedStr, Map<Integer, String> fieldMap)
 			throws Exception {
-		Iterator<Entry<Integer, String>> it = fieldMap.entrySet().iterator();
 		int columnIndex;
 		String columnName;
 		char type;
-		Entry<Integer, String> entry;
 
-		while (it.hasNext()) {
-			entry = it.next();
+		for (Entry<Integer, String> entry : fieldMap.entrySet()) {
 			columnName = entry.getValue();
 			columnIndex = rs.addColumn(columnName);
 
@@ -548,13 +540,12 @@ public class JLibResultSetImporter {
 
 		if (pos.getKeySize() > 0) {
 			int size = pos.getKeySize();
-			keys = new byte[1][size];
+			return new byte[1][size];
 		} else if (((pos.getFileType() & Filesystem.TYPEMASK) == Filesystem.MKEYED_FILE)
 				|| ((pos.getFileType() & Filesystem.TYPEMASK) == Filesystem.XKEYED_FILE)) {
 			List<KeyDescription> keyDesc = pos.getKeyDescriptions();
 			keys = new byte[keyDesc.size()][];
 			KeyDescription desc;
-
 			for (int i = 0; i < keys.length; i++) {
 				desc = keyDesc.get(i);
 				keys[i] = new byte[desc.getKeySize()];
