@@ -130,6 +130,7 @@ public class JLibResultSetImporter {
 	 *            The filter to set.
 	 */
 	public void setFilter(DataRow filter) {
+
 		this.filter = filter;
 	}
 
@@ -188,6 +189,7 @@ public class JLibResultSetImporter {
 
 		TemplatedString templatedStr = templatedString;
 		List<Integer> numericFieldIndeces = new ArrayList<>();
+
 		if (fieldNameMap != null && !fieldNameMap.isEmpty()) {
 			numericFieldIndeces = initNumericFieldsIndeces(templatedStr, fieldNameMap);
 		}
@@ -214,18 +216,7 @@ public class JLibResultSetImporter {
 		int knum = 0;
 		try {
 			if (filter != null) {
-				if (filter.contains(FILTER_KNUM)) {
-					int filterKnum;
-
-					try {
-						filterKnum = Integer.valueOf(filter.getFieldAsString(FILTER_KNUM));
-						if (0 <= filterKnum && filterKnum < keys.length) {
-							knum = filterKnum;
-						}
-					} catch (NumberFormatException e) {
-						// Do nothing in case the given KNUM value is not an integer value
-					}
-				}
+				knum = extractKnum(keys);
 
 				// trying to read the record with the given key
 				if (filter.contains(FILTER_VALUE)) {
@@ -245,6 +236,8 @@ public class JLibResultSetImporter {
 
 					// Checking the license back in
 					connectionManager.clear();
+
+					rs.add(currentDataRow);
 
 					return rs;
 				}
@@ -302,6 +295,7 @@ public class JLibResultSetImporter {
 				templatedStr.setValue(record);
 
 				currentDataRow = getDataRowFromRecord(templatedStr, numericFieldIndeces);
+
 				rs.add(currentDataRow);
 
 				// read the records while the offset count is not reached
@@ -329,10 +323,32 @@ public class JLibResultSetImporter {
 			// checking back in the checked-out license
 			connectionManager.clear();
 		}
-		if(filter!=null) {
+		if (filter != null) {
 			return rs.filterBy(filter);
 		}
 		return rs;
+	}
+
+	/**
+	 * @param keys
+	 * @param knum
+	 * @return
+	 */
+	private int extractKnum(byte[][] keys) {
+		int knum = 0;
+		if (filter.contains(FILTER_KNUM)) {
+			int filterKnum;
+
+			try {
+				filterKnum = Integer.valueOf(filter.getFieldAsString(FILTER_KNUM));
+				if (0 <= filterKnum && filterKnum < keys.length) {
+					knum = filterKnum;
+				}
+			} catch (NumberFormatException e) {
+				// Do nothing in case the given KNUM value is not an integer value
+			}
+		}
+		return knum;
 	}
 
 	private static void readWithoutException(FilePosition pos, byte[] record, int knum, byte[] value) {

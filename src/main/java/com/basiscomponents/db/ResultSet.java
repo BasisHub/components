@@ -2035,14 +2035,11 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @return the max value of all numeric fields with the specified name.
 	 * 
-	 * @throws Exception Gets thrown in case the specified field value can't be retrieved as number
 	 */
-	public Double max(String fieldname) throws Exception {
-		Iterator<DataRow> it = iterator();
+	public Double max(String fieldname) {
 		Double s = 0.0;
 		Boolean first = true;
-		while (it.hasNext()) {
-			DataRow dr = it.next();
+		for (DataRow dr : this) {
 			Double d = dr.getFieldAsNumber(fieldname);
 			if (first || d > s) {
 				s = d;
@@ -2050,7 +2047,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			}
 		}
 		return s;
-	};
+	}
 
 	/**
 	 * Returns the average value of all fields with the specified name, by iterating over all DataRow objects of this ResultSet.
