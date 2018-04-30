@@ -39,7 +39,7 @@ public class DataRowMatchesTest {
 	public void testRegex() throws ParseException {
 		DataRow dataRow = DataRowProvider.buildSampleDataRow(false);
 		DataRow filter = new DataRow();
-		filter.setFieldValue(DataRowProvider.STRINGFIELD, "regex:[A-Z][a-z]*");
+		filter.setFieldValue(DataRowProvider.STRINGFIELD, "regex:.*l.*");
 		assertTrue(dataRow.matches(filter));
 	}
 }

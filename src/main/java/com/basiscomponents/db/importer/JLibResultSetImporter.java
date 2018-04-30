@@ -239,7 +239,6 @@ public class JLibResultSetImporter {
 					templatedStr.setValue(record);
 
 					currentDataRow = getDataRowFromRecord(templatedStr, numericFieldIndeces);
-					rs.add(currentDataRow);
 
 					// Closing the open file connection
 					pos.close();
@@ -330,16 +329,12 @@ public class JLibResultSetImporter {
 			// checking back in the checked-out license
 			connectionManager.clear();
 		}
+		if(filter!=null) {
+			return rs.filterBy(filter);
+		}
 		return rs;
 	}
 
-	/**
-	 * @param pos
-	 * @param record
-	 * @param knum
-	 * @param value
-	 * @throws FilesystemException
-	 */
 	private static void readWithoutException(FilePosition pos, byte[] record, int knum, byte[] value) {
 		try {
 			pos.readByKey(record, 0, record.length, value, 0, value.length, knum, 0, 0);
@@ -423,9 +418,7 @@ public class JLibResultSetImporter {
 		int type;
 
 		for (Entry<Integer, String> entry : fieldMap.entrySet()) {
-
 			type = templatedString.getFieldType(entry.getKey());
-
 			if (type == 'B' || type == 'D' || type == 'F' || type == 'N' || type == 'X' || type == 'Y') {
 				indexList.add(index);
 			}

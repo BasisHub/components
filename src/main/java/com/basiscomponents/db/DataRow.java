@@ -1447,11 +1447,9 @@ public class DataRow implements java.io.Serializable {
 	 * clear()} method which sets the DataRow's value to <code>null</code>
 	 */
 	public void clear() {
-
-		Iterator<String> it = this.getFieldNames().iterator();
-		while (it.hasNext()) {
+		for (String name : getFieldNames()) {
 			try {
-				this.getField(it.next()).clear();
+				this.getField(name).clear();
 			} catch (Exception e) {
 				// Auto-generated catch block
 				e.printStackTrace();
