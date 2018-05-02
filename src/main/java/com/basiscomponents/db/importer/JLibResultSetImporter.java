@@ -225,6 +225,12 @@ public class JLibResultSetImporter {
 					readWithoutException(pos, record, knum, value);
 
 					if (isRecordEmpty(record)) {
+						// Closing the open file connection
+						pos.close();
+
+						// Checking the license back in
+						connectionManager.clear();
+
 						return null;
 					}
 					templatedStr.setValue(record);
@@ -275,7 +281,7 @@ public class JLibResultSetImporter {
 				readPerOffset = true;
 
 				// move the file pointer to the offset position
-				pos.read(record, record.length, offsetStart - 1, 5, false);
+				pos.read(record, record.length, offsetStart - 1L, 5, false);
 			}
 
 			while (!complete) {
@@ -289,8 +295,6 @@ public class JLibResultSetImporter {
 					}
 				}
 
-				// read(byte[] p_buffer, int record_length, long p_move, int p_timeout, boolean
-				// p_find)
 				pos.read(record, record.length, 1, 5, false);
 				templatedStr.setValue(record);
 
@@ -329,11 +333,6 @@ public class JLibResultSetImporter {
 		return rs;
 	}
 
-	/**
-	 * @param keys
-	 * @param knum
-	 * @return
-	 */
 	private int extractKnum(byte[][] keys) {
 		int knum = 0;
 		if (filter.contains(FILTER_KNUM)) {
