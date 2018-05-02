@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.basis.util.common.logging.SysOutHandler;
 import com.basiscomponents.db.model.Attribute;
 import com.google.gson.annotations.Expose;
 
@@ -628,6 +629,24 @@ public class DataField implements java.io.Serializable {
 				String p = ((String)o).replaceFirst("T", " ");
 				if (tmpstr.isEmpty())
 					return null;
+				
+				//split off timezone
+				// TODO: detect timezone by offset and adjust the timestamp accordingly
+				// TODO: find a better performing implementation
+				
+				String tz_offs = "";
+				if (p.contains("+")) {
+					tz_offs = tmpstr.substring(p.indexOf("+"));
+					p = p.substring(0, p.indexOf("+"));
+				}
+				p=p.replaceFirst("-", "X");
+				p=p.replaceFirst("-", "X");
+				if (p.contains("-")) {
+					tz_offs = p.substring(p.indexOf("-"));
+					p = p.substring(0, p.indexOf("-")-1);
+				}
+				p=p.replaceFirst("X", "-");
+				p=p.replaceFirst("X", "-");
 				return java.sql.Timestamp.valueOf(p);
 			}
 

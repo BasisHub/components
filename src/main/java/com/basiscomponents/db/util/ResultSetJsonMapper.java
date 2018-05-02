@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Map.Entry;
 
 import com.basiscomponents.db.BBArrayList;
@@ -116,7 +117,45 @@ public class ResultSetJsonMapper {
 					if (dr.getField(fn) == null || dr.getField(fn).getTimestamp() == null)
 						g.writeStringField(fn, "");
 					else {
-						g.writeStringField(fn, dr.getField(fn).getTimestamp().toString().replaceFirst(" ", "T"));
+						
+						String str_ts = dr.getField(fn).getTimestamp().toString().replaceFirst(" ", "T");
+						
+						// calculate the offset of the timezone
+						// TODO: finish according to https://github.com/BBj-Plugins/BBjGridExWidget/issues/38
+						// potentially externalize into a static utility method and add unit tests.
+						
+						TimeZone tz= java.util.TimeZone.getDefault();
+						
+						int offset = tz.getRawOffset();
+
+						int h = (offset/3600000);
+						int m = Math.abs(offset) - Math.abs(h*3600000);
+						
+						StringBuilder sb = new StringBuilder();
+						if (h>=0) 
+							sb.append('+');
+						else {
+							sb.append('-');
+							h*=-1;
+						}
+						
+						if (h<10)
+							sb.append('0');
+						
+						sb.append(h);
+						sb.append(':');
+						if (m==0)
+							sb.append("00");
+						else {
+							if (m<10)
+								sb.append('0');
+							sb.append(m);
+						}
+						str_ts+=sb.toString();
+
+						//-------------end timezone handling -------------------
+						
+						g.writeStringField(fn, str_ts);
 					}
 					break;
 				case java.sql.Types.DATE:
