@@ -917,7 +917,17 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return The value of the ColumnType property of the column.
 	 */
 	public int getColumnType(int column) {
-		Integer type = (Integer) this.MetaData.get(column).get("ColumnType");
+		Integer type;
+		
+		// FIXME this separate handling shouldn't be necessary but
+		// in when a new DataRow gets added, the ResultSet inherits the attributes from the DataRow
+		// in mergeDataRowFields -> so that is the place where we need to put a real fix!
+		
+		if ((this.MetaData.get(column).get("ColumnType")).getClass().equals(java.lang.String.class)) {
+			type= Integer.parseInt((String) this.MetaData.get(column).get("ColumnType"));
+		}
+		else
+			type = (Integer) this.MetaData.get(column).get("ColumnType");
 		if (type == null)
 			type = 0;
 		return type.intValue();
