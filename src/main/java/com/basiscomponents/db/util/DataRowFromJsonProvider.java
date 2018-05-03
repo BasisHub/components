@@ -65,9 +65,13 @@ public class DataRowFromJsonProvider {
 		if (hm.containsKey("meta")) {
 			// new format
 			HashMap meta = (HashMap) hm.get("meta");
+			if (meta == null)
+				meta = new HashMap();
+			
 			Iterator<?> it = hm.keySet().iterator();
 			while (it.hasNext()) {
 				String fieldName = (String) it.next();
+				
 				@SuppressWarnings("unchecked")
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
 				if (!ar.contains(fieldName) && !fieldName.equals("meta")) {
