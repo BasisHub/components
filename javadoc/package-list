@@ -17,6 +17,7 @@ com.basiscomponents.db.tree
 com.basiscomponents.db.util
 com.basiscomponents.json
 com.basiscomponents.lucene
+com.basiscomponents.rest
 com.basiscomponents.ui.layout
 com.basiscomponents.util
 net.miginfocom.layout
