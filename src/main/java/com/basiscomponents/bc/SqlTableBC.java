@@ -1,5 +1,7 @@
 package com.basiscomponents.bc;
 
+import static java.util.stream.Collectors.toList;
+
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -11,7 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.basiscomponents.bc.exception.BcWriteException;
 import com.basiscomponents.db.DataField;
@@ -40,6 +45,7 @@ import com.basiscomponents.db.ResultSet;
  */
 public class SqlTableBC implements BusinessComponent {
 
+	private static final String REMARKS = "REMARKS";
 	private static final String COLUMN_NAME = "COLUMN_NAME";
 	private String url;
 	private String user;
@@ -172,34 +178,35 @@ public class SqlTableBC implements BusinessComponent {
 			dbType = meta.getDatabaseProductName().toUpperCase();
 			dbQuoteString = meta.getIdentifierQuoteString();
 			metaData = new DataRow();
-			java.sql.ResultSet rs = meta.getPrimaryKeys(null, null, table);
+			final java.sql.ResultSet pks = meta.getPrimaryKeys(null, null, table);
 
-			while (rs.next()) {
-				String primaryKey = rs.getString(COLUMN_NAME);
+			while (pks.next()) {
+				String primaryKey = pks.getString(COLUMN_NAME);
 				primaryKeys.add(primaryKey);
 			}
 
-			rs = meta.getColumns(null, null, table, null);
-			while (rs.next()) {
-				if (rs.getMetaData().getColumnCount() > 22) { // IS_AUTOINCREMENT=23 (BBj doesn't support
-																// the IS_AUTOINCREMENT property)
-					String name = rs.getString(COLUMN_NAME);
-					String autoIncrement = rs.getString("IS_AUTOINCREMENT");
+			final java.sql.ResultSet columns = meta.getColumns(null, null, table, null);
+			while (columns.next()) {
+				if (columns.getMetaData().getColumnCount() > 22) { // IS_AUTOINCREMENT=23 (BBj doesn't support
+																	// the IS_AUTOINCREMENT property)
+					String name = columns.getString(COLUMN_NAME);
+					String autoIncrement = columns.getString("IS_AUTOINCREMENT");
 					if ("YES".equals(autoIncrement))
 						autoIncrementKeys.add(name);
 				}
 
-				String columnName = rs.getString(COLUMN_NAME);
+				String columnName = columns.getString(COLUMN_NAME);
 				try {
-					metaData.setFieldValue(columnName, rs.getInt("DATA_TYPE"), null);
+					metaData.setFieldValue(columnName, columns.getInt("DATA_TYPE"), null);
 				} catch (Exception e1) {
 					continue;
 				}
 
-				for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-					if (rs.getString(i) != null) {
+				for (int i = 1; i <= columns.getMetaData().getColumnCount(); i++) {
+					if (columns.getString(i) != null) {
 						try {
-							metaData.setFieldAttribute(columnName, rs.getMetaData().getColumnName(i), rs.getString(i));
+							metaData.setFieldAttribute(columnName, columns.getMetaData().getColumnName(i),
+									columns.getString(i));
 						} catch (Exception e) {
 							// do nothing
 						}
@@ -227,15 +234,12 @@ public class SqlTableBC implements BusinessComponent {
 				try {
 					int type = (int) attrmap.get("ColumnType");
 					attributesRecord.addDataField(field, type, new DataField(null));
-					for (String attr : attrmap.keySet()) {
-						String value = null;
-						if (attrmap.get(attr) != null)
-							value = attrmap.get(attr).toString();
-						attributesRecord.setFieldAttribute(field, attr, value);
+					for (Entry<String, Object> attr : attrmap.entrySet()) {
+						String value = attr.getValue() == null ? null : attr.getValue().toString();
+						attributesRecord.setFieldAttribute(field, attr.getKey(), value);
 					}
-					if (metaData.getFieldAttributes(field).containsKey("REMARKS"))
-						attributesRecord.setFieldAttribute(field, "REMARKS",
-								metaData.getFieldAttribute(field, "REMARKS"));
+					if (metaData.getFieldAttributes(field).containsKey(REMARKS))
+						attributesRecord.setFieldAttribute(field, REMARKS, metaData.getFieldAttribute(field, REMARKS));
 					if (primaryKeys.contains(getMapping(field)))
 						attributesRecord.setFieldAttribute(field, "EDITABLE", "2");
 				} catch (Exception ex) {
@@ -623,13 +627,10 @@ public class SqlTableBC implements BusinessComponent {
 		boolean pkPresent = false;
 		if (primaryKeys != null && !primaryKeys.isEmpty()) {
 			// Use mapped field names to check if r contains the primary key field(s)
-			ArrayList<String> list = new ArrayList<>(r.getFieldNames());
-			for (String field : r.getFieldNames()) {
-				list.add(getMapping(field));
-			}
+			List<String> list = r.getFieldNames().stream().map(this::getMapping).collect(toList());
+
 			pkPresent = list.containsAll(primaryKeys);
 		}
-
 		Connection conn = getConnection();
 
 		// Read table field names from the table (not from getAttributesRecord()).
@@ -644,7 +645,6 @@ public class SqlTableBC implements BusinessComponent {
 		String sql = "";
 		int affectedRows = 0;
 		DataRow ret = r.clone();
-		PreparedStatement prep;
 
 		// update (Try an update an check affected rows. If there are no (0) affected
 		// rows, then make an
@@ -652,13 +652,14 @@ public class SqlTableBC implements BusinessComponent {
 		if (pkPresent) {
 			sql = "UPDATE " + dbQuoteString + table + dbQuoteString + " SET ";
 
-			ArrayList<String> fields = new ArrayList<String>();
-
+			ArrayList<String> fields = new ArrayList<>();
 			StringBuilder update = new StringBuilder("");
+
 			for (String field : r.getFieldNames()) {
 				String field2 = getMapping(field);
-				if (primaryKeys.contains(field))
+				if (primaryKeys.contains(field)) {
 					continue;
+				}
 				if (tableFields.contains(field2)) {
 					fields.add(field);
 					update.append("," + dbQuoteString + field2 + dbQuoteString + "=?");
@@ -679,11 +680,10 @@ public class SqlTableBC implements BusinessComponent {
 				}
 				sql += " WHERE " + wh.substring(5);
 
-				prep = conn.prepareStatement(sql);
-				setSqlParams(prep, r, fields);
-
-				affectedRows = prep.executeUpdate();
-				prep.close();
+				try (PreparedStatement prep = conn.prepareStatement(sql)) {
+					setSqlParams(prep, r, fields);
+					affectedRows = prep.executeUpdate();
+				}
 			} else {
 				/// so now we have to do a SELECT to see if the record is there, as we can't
 				/// check with
@@ -696,13 +696,13 @@ public class SqlTableBC implements BusinessComponent {
 				}
 				if (wh.length() > 0)
 					sql += " WHERE " + wh.substring(5);
-				prep = conn.prepareStatement(sql);
-				setSqlParams(prep, r, fields);
-				java.sql.ResultSet jrs = prep.executeQuery();
-				ResultSet retrs = new ResultSet();
-				retrs.populate(jrs, true);
-				affectedRows = retrs.get(0).getFieldAsNumber("C").intValue();
-				prep.close();
+				try (PreparedStatement prep = conn.prepareStatement(sql)) {
+					setSqlParams(prep, r, fields);
+					java.sql.ResultSet jrs = prep.executeQuery();
+					ResultSet retrs = new ResultSet();
+					retrs.populate(jrs, true);
+					affectedRows = retrs.get(0).getFieldAsNumber("C").intValue();
+				}
 			}
 		}
 
@@ -724,31 +724,33 @@ public class SqlTableBC implements BusinessComponent {
 			}
 			sql += keys.substring(1) + ") VALUES(" + values.substring(1) + ")";
 
-			prep = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-			setSqlParams(prep, r, fields);
+			try (PreparedStatement prep = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+				setSqlParams(prep, r, fields);
 
-			affectedRows = prep.executeUpdate();
-			inserted = affectedRows > 0;
+				affectedRows = prep.executeUpdate();
+				inserted = affectedRows > 0;
 
-			// get generated keys
-			if (affectedRows > 0) {
-				java.sql.ResultSet gkeys = prep.getGeneratedKeys();
-				if (gkeys.next()) {
-					for (int i = 0; i < gkeys.getMetaData().getColumnCount(); i++) {
-						String name = autoIncrementKeys.get(i);
-						ret.setFieldValue(name, gkeys.getObject(i + 1));
-					}
-					if (primaryKeys != null && !primaryKeys.isEmpty()) {
-						ArrayList<String> list = new ArrayList<>();
-						for (String field : ret.getFieldNames()) {
-							list.add(getMapping(field));
+				// get generated keys
+				if (affectedRows > 0) {
+					try (java.sql.ResultSet gkeys = prep.getGeneratedKeys()) {
+						if (gkeys.next()) {
+							for (int i = 0; i < gkeys.getMetaData().getColumnCount(); i++) {
+								String name = autoIncrementKeys.get(i);
+								ret.setFieldValue(name, gkeys.getObject(i + 1));
+							}
+							if (primaryKeys != null && !primaryKeys.isEmpty()) {
+								ArrayList<String> list = new ArrayList<>();
+								for (String field : ret.getFieldNames()) {
+									list.add(getMapping(field));
+								}
+								pkPresent = list.containsAll(primaryKeys);
+							}
 						}
-						pkPresent = list.containsAll(primaryKeys);
+
 					}
 				}
-			}
 
-			prep.close();
+			}
 		}
 
 		sqlStatement = sql;
