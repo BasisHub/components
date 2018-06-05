@@ -688,14 +688,8 @@ public class SqlTableBC implements BusinessComponent {
 				/// so now we have to do a SELECT to see if the record is there, as we can't
 				/// check with
 				/// update
-				sql = "SELECT COUNT(*) AS C FROM " + dbQuoteString + table + dbQuoteString;
-				StringBuilder wh = new StringBuilder("");
-				for (String pkfield : primaryKeys) {
-					wh.append(" AND " + dbQuoteString + getMapping(pkfield) + dbQuoteString + "=?");
-					fields.add(pkfield);
-				}
-				if (wh.length() > 0)
-					sql += " WHERE " + wh.substring(5);
+				sql = "SELECT COUNT(*) AS C FROM " + quote(table);
+				sql += buildWhereClause(fields);
 				try (PreparedStatement prep = conn.prepareStatement(sql)) {
 					setSqlParams(prep, r, fields);
 					java.sql.ResultSet jrs = prep.executeQuery();
@@ -787,6 +781,22 @@ public class SqlTableBC implements BusinessComponent {
 		return ret;
 	}
 
+	private String buildWhereClause(ArrayList<String> fields) {
+		String result = "";
+		StringBuilder wh = new StringBuilder("");
+		for (String pkfield : primaryKeys) {
+			wh.append(" AND " + quote(getMapping(pkfield)) + "=?");
+			fields.add(pkfield);
+		}
+		if (wh.length() > 0) {
+			result += " WHERE " + wh.substring(5);
+		}
+		return result;
+	}
+
+	private String quote(String stringToQuote) {
+		return dbQuoteString + stringToQuote + dbQuoteString;
+	}
 
 	/**
 	 * {@inheritDoc}
