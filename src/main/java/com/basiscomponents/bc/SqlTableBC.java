@@ -650,7 +650,7 @@ public class SqlTableBC implements BusinessComponent {
 		// rows, then make an
 		// insert.)
 		if (pkPresent) {
-			sql = "UPDATE " + dbQuoteString + table + dbQuoteString + " SET ";
+			sql = "UPDATE " + quote(table) + " SET ";
 
 			ArrayList<String> fields = new ArrayList<>();
 			StringBuilder update = new StringBuilder("");
@@ -662,7 +662,7 @@ public class SqlTableBC implements BusinessComponent {
 				}
 				if (tableFields.contains(field2)) {
 					fields.add(field);
-					update.append("," + dbQuoteString + field2 + dbQuoteString + "=?");
+					update.append("," + quote(field2) + "=?");
 				}
 			}
 
@@ -675,7 +675,7 @@ public class SqlTableBC implements BusinessComponent {
 
 				StringBuilder wh = new StringBuilder("");
 				for (String pkfield : primaryKeys) {
-					wh.append(" AND " + dbQuoteString + getMapping(pkfield) + dbQuoteString + "=?");
+					wh.append(" AND " + quote(getMapping(pkfield)) + "=?");
 					fields.add(pkfield);
 				}
 				sql += " WHERE " + wh.substring(5);
@@ -709,7 +709,7 @@ public class SqlTableBC implements BusinessComponent {
 		// insert
 		Boolean inserted = false;
 		if (!pkPresent || affectedRows == 0) {
-			sql = "INSERT INTO " + dbQuoteString + table + dbQuoteString + " (";
+			sql = "INSERT INTO " + quote(table) + " (";
 
 			ArrayList<String> fields = new ArrayList<>();
 			StringBuilder keys = new StringBuilder("");
@@ -718,7 +718,7 @@ public class SqlTableBC implements BusinessComponent {
 				String field2 = getMapping(field);
 				if (tableFields.contains(field2)) {
 					fields.add(field);
-					keys.append("," + dbQuoteString + field2 + dbQuoteString);
+					keys.append("," + quote(field2));
 					values.append(",?");
 				}
 			}
@@ -787,6 +787,7 @@ public class SqlTableBC implements BusinessComponent {
 		return ret;
 	}
 
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -813,7 +814,7 @@ public class SqlTableBC implements BusinessComponent {
 
 		StringBuilder wh = new StringBuilder("");
 		for (String pkfieldname : primaryKeys) {
-			wh.append(" AND " + dbQuoteString + getMapping(pkfieldname) + dbQuoteString + "=?");
+			wh.append(" AND " + quote(getMapping(pkfieldname)) + "=?");
 		}
 		sql += " WHERE " + wh.substring(5);
 
