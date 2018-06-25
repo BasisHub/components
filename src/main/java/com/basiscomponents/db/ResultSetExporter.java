@@ -436,7 +436,12 @@ public class ResultSetExporter {
 	 * @throws Exception Gets thrown in case the ResultSet could not be converted to a XLSX File
 	 */
 	public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader) throws Exception{
-		
+			DataRow ar;
+			if (rs.size()>0)
+					ar = rs.get(0);
+			else
+					ar = new DataRow();
+			writeXLSX(rs, outputFile, writeHeader,false, "Sheet", ar);
 	}
 	/**
 	 * Writes the content of the given ResultSet as XLSX into the specified File. 
