@@ -1864,7 +1864,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
 	public String toJson() throws Exception {
-			return toJson(true);
+			return toJson(true,null);
 	}
 
 	/**
@@ -1875,10 +1875,19 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
 	public String toJson(Boolean f_meta) throws Exception {
-		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta);
+		return toJson(f_meta, null);
 	}
 
-
+	/**
+	 * Returns a JSON String with the ResultSet's content.
+	 * 
+	 * @return The JSON String with the ResultSet's content.
+	 * 
+	 * @throws Exception Gets thrown in case the JSON String could not be created.
+	 */
+	public String toJson(Boolean f_meta, String addIndexColumn) throws Exception {
+		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta, addIndexColumn);
+	}
 
 	/**
 	 * Returns the name of the given java.sql.Type value, or null in case the given type is unknown.

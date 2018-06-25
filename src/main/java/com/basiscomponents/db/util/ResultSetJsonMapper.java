@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 public class ResultSetJsonMapper {
-	public static String toJson(List<DataRow> dataRows, List<HashMap<String, Object>> metaData, boolean meta)
+	public static String toJson(List<DataRow> dataRows, List<HashMap<String, Object>> metaData, boolean meta, String addIndexColumn)
 			throws IOException {
 
 		JsonFactory jf = new JsonFactory();
@@ -30,10 +30,15 @@ public class ResultSetJsonMapper {
 		g.writeStartArray();
 
 		boolean metaDone = !meta;
-
+		int idx=0;
+		
 		for (DataRow dr : dataRows) {
 			g.writeStartObject();
 
+			if (addIndexColumn!= null) {
+				g.writeStringField(addIndexColumn,Integer.toString(idx++));
+			}
+			
 			for (String fn : dr.getFieldNames()) {
 				if (dr.getField(fn).getValue() == null) {
 					g.writeNullField(fn);
@@ -202,6 +207,18 @@ public class ResultSetJsonMapper {
 
 					g.writeStartObject();
 
+					if (addIndexColumn!= null) {
+						
+						{
+							g.writeFieldName(addIndexColumn);
+							g.writeStartObject();
+							g.writeStringField("ColumnType","12");
+							g.writeEndObject();
+						}
+						
+						
+					}
+					
 					for (HashMap<String, Object> hm : metaData) {
 
 						String c = (String) hm.get("ColumnName");
