@@ -35,7 +35,7 @@ public class RestClient {
 		if (request_parms != null && request_parms.length()>0)
 				u=u+"?"+request_parms;
 		
-		URL url = new URL(this.Endpoint+path);
+		URL url = new URL(u);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		String encoding = Base64.getEncoder().encodeToString((this.User+":"+this.Password).getBytes());
