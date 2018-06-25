@@ -1475,6 +1475,19 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
+	 * Checks a DataField for null
+	 * 
+	 * @param column The column's index.
+	 * 
+	 * @return true if the field is null
+	 */
+	public boolean isNull(int column) {
+		DataField field = getField(column);
+		return (field==null);
+	}
+	
+	
+	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as String.
 	 * 
@@ -2655,4 +2668,5 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 		System.out.println("-------------------ResultSet End-------------------------");
 	}
+
 }

@@ -26,6 +26,7 @@ import com.basiscomponents.db.ResultSet;
 public class SQLResultSet implements java.sql.ResultSet {
 	
 	private ResultSet c_rs;
+	private boolean wasnull = false;
 	
 	public SQLResultSet(ResultSet rs){
 		this.c_rs = rs;
@@ -43,92 +44,101 @@ public class SQLResultSet implements java.sql.ResultSet {
 	
 	@Override
 	public String getString(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getString(columnIndex -1);
 	}
 
 	@Override
 	public String getString(String columnLabel) throws SQLException {
-		return c_rs.getString(c_rs.getColumnIndex(columnLabel));
+		return getString(c_rs.getColumnIndex(columnLabel));
 	}
 	
 	@Override
 	public Clob getClob(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getClob(columnIndex -1);
 	}
 
 	@Override
 	public Clob getClob(String columnLabel) throws SQLException {
-		return c_rs.getClob(c_rs.getColumnIndex(columnLabel));
+		return getClob(c_rs.getColumnIndex(columnLabel));
 	}
 	
 	@Override
 	public Date getDate(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getDate(columnIndex -1);
 	}
 
 	@Override
 	public Date getDate(String columnLabel) throws SQLException {
-		return c_rs.getDate(c_rs.getColumnIndex(columnLabel));
+		return getDate(c_rs.getColumnIndex(columnLabel));
 	}
 
 	@Override
 	public double getDouble(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getDouble(columnIndex -1);
 	}
 
 	@Override
 	public double getDouble(String columnLabel) throws SQLException {
-		return c_rs.getDouble(c_rs.getColumnIndex(columnLabel));
+		return getDouble(c_rs.getColumnIndex(columnLabel));
 	}
 	
 	@Override
 	public float getFloat(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getFloat(columnIndex -1);
 	}
 
 	@Override
 	public float getFloat(String columnLabel) throws SQLException {
-		return c_rs.getFloat(c_rs.getColumnIndex(columnLabel));
+		return getFloat(c_rs.getColumnIndex(columnLabel));
 	}
 	
 	@Override
 	public int getInt(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getInt(columnIndex -1);
 	}
 
 	@Override
 	public int getInt(String columnLabel) throws SQLException {
-		return c_rs.getInt(c_rs.getColumnIndex(columnLabel));
+		return getInt(c_rs.getColumnIndex(columnLabel));
 	}
 
 	@Override
 	public long getLong(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getLong(columnIndex -1);
 	}
 
 	@Override
 	public long getLong(String columnLabel) throws SQLException {
-		return c_rs.getLong(c_rs.getColumnIndex(columnLabel));
+		return getLong(c_rs.getColumnIndex(columnLabel));
 	}
 
 	@Override
 	public String getNString(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getNString(columnIndex -1);
 	}
 
 	@Override
 	public String getNString(String columnLabel) throws SQLException {
-		return c_rs.getNString(c_rs.getColumnIndex(columnLabel));
+		return getNString(c_rs.getColumnIndex(columnLabel));
 	}
 	
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getObject(columnIndex -1);
 	}
 
 	@Override
 	public Ref getRef(int columnIndex) throws SQLException {
-		return c_rs.getRef(columnIndex -1);
+		return getRef(columnIndex -1);
 	}
 
 	@Override
@@ -138,107 +148,117 @@ public class SQLResultSet implements java.sql.ResultSet {
 	
 	@Override
 	public int getRow() throws SQLException {
-		return c_rs.getRow();
+		return getRow();
 	}
 	
 	@Override
 	public short getShort(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getShort(columnIndex -1);		
 	}
 
 	@Override
 	public short getShort(String columnLabel) throws SQLException {
-		return c_rs.getShort(c_rs.getColumnIndex(columnLabel));	
+		return getShort(c_rs.getColumnIndex(columnLabel));	
 	}
 
 	@Override
 	public Time getTime(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getTime(columnIndex -1);
 	}
 
 	@Override
 	public Time getTime(String columnLabel) throws SQLException {
-		return c_rs.getTime(c_rs.getColumnIndex(columnLabel));
+		return getTime(c_rs.getColumnIndex(columnLabel));
 	}
 	
 	@Override
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getTimestamp(columnIndex -1);
 	}
 
 	@Override
 	public Timestamp getTimestamp(String columnLabel) throws SQLException {
-		return c_rs.getTimestamp(c_rs.getColumnIndex(columnLabel));
+		return getTimestamp(c_rs.getColumnIndex(columnLabel));
 	}
 	
 	@Override
 	public URL getURL(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getURL(columnIndex -1);
 	}
 
 	@Override
 	public URL getURL(String columnLabel) throws SQLException {
-		return c_rs.getURL(c_rs.getColumnIndex(columnLabel));
+		return getURL(c_rs.getColumnIndex(columnLabel));
 	}
 	
 	@Override
 	public Array getArray(int arg0) throws SQLException {
+		wasnull = c_rs.isNull(arg0 -1);
 		return c_rs.getArray(arg0 -1);
 	}
 
 	@Override
 	public Array getArray(String arg0) throws SQLException {
-		return c_rs.getArray(c_rs.getColumnIndex(arg0));
+		return getArray(c_rs.getColumnIndex(arg0));
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(int arg0) throws SQLException {
+		wasnull = c_rs.isNull(arg0 -1);
 		return c_rs.getBigDecimal(arg0 -1);
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(String arg0) throws SQLException {
-		return c_rs.getBigDecimal(c_rs.getColumnIndex(arg0));
+		return getBigDecimal(c_rs.getColumnIndex(arg0));
 	}
 
 	@Override
 	public Blob getBlob(int arg0) throws SQLException {
+		wasnull = c_rs.isNull(arg0 -1);
 		return c_rs.getBlob(arg0 -1);
 	}
 
 	@Override
 	public Blob getBlob(String arg0) throws SQLException {
-		return c_rs.getBlob(c_rs.getColumnIndex(arg0));
+		return getBlob(c_rs.getColumnIndex(arg0));
 	}
 
 	@Override
 	public boolean getBoolean(int arg0) throws SQLException {
+		wasnull = c_rs.isNull(arg0 -1);
 		return c_rs.getBoolean(arg0 -1);
 	}
 
 	@Override
 	public boolean getBoolean(String arg0) throws SQLException {
-		return c_rs.getBoolean(c_rs.getColumnIndex(arg0));
+		return getBoolean(c_rs.getColumnIndex(arg0));
 	}
 
 	@Override
 	public byte getByte(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getByte(columnIndex -1);
 	}
 
 	@Override
 	public byte getByte(String columnLabel) throws SQLException {
-		return c_rs.getByte(c_rs.getColumnIndex(columnLabel));
+		return getByte(c_rs.getColumnIndex(columnLabel));
 	}
 
 	@Override
 	public byte[] getBytes(int columnIndex) throws SQLException {
+		wasnull = c_rs.isNull(columnIndex -1);
 		return c_rs.getBytes(columnIndex -1);
 	}
 
 	@Override
 	public byte[] getBytes(String columnLabel) throws SQLException {
-		return c_rs.getBytes(c_rs.getColumnIndex(columnLabel));
+		return getBytes(c_rs.getColumnIndex(columnLabel));
 	}
 
 	@Override
@@ -287,7 +307,7 @@ public class SQLResultSet implements java.sql.ResultSet {
 	
 	@Override
 	public boolean wasNull() throws SQLException {
-		return false;
+		return wasnull ;
 	}
 
 	@Override
