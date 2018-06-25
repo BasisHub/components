@@ -10,3 +10,4 @@ src/main/java/com/basiscomponents/VersionInfo.java
 .buildpath
 target/
 .settings/
+/bin/
