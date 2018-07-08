@@ -36,10 +36,12 @@ public class ResultSetJsonMapper {
 			g.writeStartObject();
 
 			if (addIndexColumn!= null) {
-				g.writeStringField(addIndexColumn,Integer.toString(idx++));
+				
+				g.writeStringField(addIndexColumn,dr.getRowKey());
 			}
 			
 			for (String fn : dr.getFieldNames()) {
+
 				if (dr.getField(fn).getValue() == null) {
 					g.writeNullField(fn);
 					continue;

@@ -13,6 +13,7 @@ import java.sql.Ref;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -22,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
@@ -64,7 +64,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private int currentRow = -1;
 	private DataRow currentDataRow;
 
-
+	private Boolean isIndexed = false;
+	private HashMap <String,Integer> rowIndex;
 
 	private SQLResultSet sqlResultSet = null;
 
@@ -453,6 +454,11 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public void add(DataRow dr) {
 		this.DataRows.add(dr);
 		this.mergeDataRowFields(dr);
+		if (isIndexed) {
+			String idx = java.util.UUID.randomUUID().toString();
+			dr.setRowKey(idx);
+			rowIndex.put(idx, size()-1);
+		}
 	}
 
 	/**
@@ -462,8 +468,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param dr The DataRow to insert.
 	 */
 	public void add(int row, DataRow dr) {
-		this.DataRows.add(row, dr);
-		this.mergeDataRowFields(dr);
+		if (row>=size())
+			add(dr);
+		else {
+			this.DataRows.add(row, dr);
+			this.mergeDataRowFields(dr);
+			try {
+				reCreateIndex();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -473,7 +489,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public void addItem(DataRow dr) {
 		add(dr);
-		this.mergeDataRowFields(dr);
 	}
 
 	/**
@@ -484,7 +499,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public void insertItem(int row, DataRow dr) {
 		add(row, dr);
-		this.mergeDataRowFields(dr);
 	}
 
 	/**
@@ -636,6 +650,25 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
+	 * Returns the DataRow with the given row key.
+	 * 
+	 * @param rowkey The index of the DataRow.
+	 * 
+	 * @return The DataRow at the specified index.
+	 * @throws Exception 
+	 */
+	public DataRow get(String rowkey) throws Exception {
+		if (!isIndexed) 
+			throw new Exception("ResultSet is not indexed!");
+		
+		if (!rowIndex.containsKey(rowkey))
+			throw new Exception("Entry not found");
+		
+		
+		int row = rowIndex.get(rowkey);
+		return this.DataRows.get(row);
+	}	
+	/**
 	 * Returns the DataRow at the given index.
 	 * 
 	 * @param row The index of the DataRow.
@@ -696,6 +729,26 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
+	 * Removes the DataRowspecified by key, and shifts any
+	 * subsequent DataRows to the left.
+	 * 
+	 * @param rowkey The key of the DataRow to remove.
+	 * 
+	 * @return The DataRow that was removed.
+	 * @throws Exception 
+	 */
+	public DataRow remove(String rowkey) throws Exception {
+		if (!isIndexed) 
+			throw new Exception("ResultSet is not indexed!");
+		
+		if (!rowIndex.containsKey(rowkey))
+			throw new Exception("Entry not found");
+		
+		int row = rowIndex.get(rowkey);		
+		return remove(row);
+	}
+	
+	/**
 	 * Removes the DataRow at the specified index, and shifts any
 	 * subsequent DataRows to the left.
 	 * 
@@ -708,7 +761,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			this.currentRow -= 1;
 			this.currentDataRow = null;
 		}
-		return this.DataRows.remove(row);
+		DataRow ret = this.DataRows.remove(row);
+		try {
+			reCreateIndex();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ret;
 	}
 
 	/**
@@ -1886,6 +1946,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
 	public String toJson(Boolean f_meta, String addIndexColumn) throws Exception {
+		if (addIndexColumn!=null)
+			createIndex();
 		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta, addIndexColumn);
 	}
 
@@ -2659,6 +2721,46 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private String getBBTemplateColumn(int col, int cols, Boolean extendedInfo) {
 		return BBTemplateProvider.createBBTemplateColumn(this, col, cols, extendedInfo);
 	}
+	
+	/**
+	 * isIndexed: check if the ResultSet has an internal index row
+	 * that would allow access by a key instead of the numeric integer index
+	 * @return
+	 */
+	public Boolean isIndexed() {
+		return isIndexed;
+	}
+	
+	public void createIndex() throws ParseException {
+		if (!isIndexed()) {
+			
+			rowIndex = new HashMap<>();
+
+			Iterator<DataRow> it = iterator();
+			int i=0;
+			while (it.hasNext()) {
+				DataRow r = it.next();
+				String idx = r.getRowKey(); 
+				if (idx.isEmpty()) {
+					idx = java.util.UUID.randomUUID().toString();
+					r.setRowKey(idx);
+				}
+				rowIndex.put(idx, i);
+				i++;
+			}
+			isIndexed = true;
+		}
+	}
+	
+	private void reCreateIndex() throws ParseException {
+		if (isIndexed) {
+		// re-create index since the row numbers change
+		// this might be improved later if necessary
+			isIndexed=false;
+			createIndex();
+		}	
+	}
+	
 
 	/**
 	 * Prints the ResultSet's content to the standard output stream.
