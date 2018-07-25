@@ -266,28 +266,28 @@ public class SQLResultSet implements java.sql.ResultSet {
 		return c_rs.last();
 	}
 
-	public ResultSet getResultSet(){
+	public ResultSet getResultSet() {
 		return c_rs;
 	}
-	
+
 	@Override
 	public void beforeFirst() throws SQLException {
 		c_rs.beforeFirst();
 	}
-	
+
 	@Override
 	public void afterLast() throws SQLException {
 		c_rs.afterLast();
 	}
-	
+
 	@Override
 	public int getConcurrency() throws SQLException {
 		return java.sql.ResultSet.CONCUR_READ_ONLY;
 	}
-	
+
 	@Override
 	public void close() throws SQLException {
-		
+
 	}
 
 	@Override
@@ -298,13 +298,13 @@ public class SQLResultSet implements java.sql.ResultSet {
 	@Override
 	public ResultSetMetaData getMetaData() throws SQLException {
 		return new SQLResultSetMetaData(c_rs);
-	} 
-	
+	}
+
 	@Override
 	public boolean rowDeleted() throws SQLException {
 		return false;
 	}
-	
+
 	@Override
 	public boolean wasNull() throws SQLException {
 		return wasnull ;
@@ -312,841 +312,711 @@ public class SQLResultSet implements java.sql.ResultSet {
 
 	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("isWrapperFor is not supported by SQLResultset");
 	}
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("unwrap is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean absolute(int row) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("absolute is not supported by SQLResultset");
 	}
 
 	@Override
 	public void cancelRowUpdates() throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("cancelRowUpdates is not supported by SQLResultset");
 	}
 
 	@Override
 	public void clearWarnings() throws SQLException {
-		//throw new UnsupportedOperationException();
+		System.out.println("[WARN] SQLResultset::clearWarnings was called, but is not implemented");
 	}
 
 	@Override
 	public void deleteRow() throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("deleteRow is not supported by SQLResultset");
 	}
 
 	@Override
 	public int findColumn(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return 0;
+		throw new UnsupportedOperationException("findColumn is not supported by SQLResultset");
 	}
 
 	@Override
 	public InputStream getAsciiStream(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getAsciiStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public InputStream getAsciiStream(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getAsciiStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getBigDecimal is not supported by SQLResultset");
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getBigDecimal is not supported by SQLResultset");
 	}
 
 	@Override
 	public InputStream getBinaryStream(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getBinaryStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public InputStream getBinaryStream(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getBinaryStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public Reader getCharacterStream(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public Reader getCharacterStream(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public String getCursorName() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getCursorName is not supported by SQLResultset");
 	}
 
 	@Override
 	public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getDate is not supported by SQLResultset");
 	}
 
 	@Override
 	public Date getDate(String columnLabel, Calendar cal) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getDate is not supported by SQLResultset");
 	}
 
 	@Override
 	public int getFetchDirection() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return 0;
+		throw new UnsupportedOperationException("getFetchDirection is not supported by SQLResultset");
 	}
 
 	@Override
 	public int getFetchSize() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return 0;
+		throw new UnsupportedOperationException("getFetchSize is not supported by SQLResultset");
 	}
 
 	@Override
 	public int getHoldability() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return 0;
+		throw new UnsupportedOperationException("getHoldability is not supported by SQLResultset");
 	}
 
 	@Override
 	public Reader getNCharacterStream(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getNCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public Reader getNCharacterStream(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getNCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public NClob getNClob(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getNClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public NClob getNClob(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getNClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public Object getObject(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public RowId getRowId(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getRowId is not supported by SQLResultset");
 	}
 
 	@Override
 	public RowId getRowId(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getRowId is not supported by SQLResultset");
 	}
 
 	@Override
 	public SQLXML getSQLXML(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getSQLXML is not supported by SQLResultset");
 	}
 
 	@Override
 	public SQLXML getSQLXML(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getSQLXML is not supported by SQLResultset");
 	}
 
 	@Override
 	public Statement getStatement() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getStatement is not supported by SQLResultset");
 	}
 
 	@Override
 	public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getTime is not supported by SQLResultset");
 	}
 
 	@Override
 	public Time getTime(String columnLabel, Calendar cal) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getTime is not supported by SQLResultset");
 	}
 
 	@Override
 	public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getTimestamp is not supported by SQLResultset");
 	}
 
 	@Override
 	public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getTimestamp is not supported by SQLResultset");
 	}
 
 	@Override
 	public InputStream getUnicodeStream(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getUnicodeStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public InputStream getUnicodeStream(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return null;
+		throw new UnsupportedOperationException("getUnicodeStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public SQLWarning getWarnings() throws SQLException {
-//		throw new UnsupportedOperationException();
+		System.out.println("getWarnings called, it's not really implemented");
+		// throw new UnsupportedOperationException(" is not supported by SQLResultset");
 		return null;
 	}
 
 	@Override
 	public void insertRow() throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("insertRow is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean isAfterLast() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("isAfterLast is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean isBeforeFirst() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("isBeforeFirst is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean isClosed() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("isClosed is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean isFirst() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("isFirst is not supported by SQLResultset");
 	}
-
+	
 	@Override
 	public boolean isLast() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("isLast is not supported by SQLResultset");
 	}
 
 	@Override
 	public void moveToCurrentRow() throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("moveToCurrentRow is not supported by SQLResultset");
 	}
 
 	@Override
 	public void moveToInsertRow() throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("moveToInsertRow is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean previous() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("previous is not supported by SQLResultset");
 	}
 
 	@Override
 	public void refreshRow() throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("refreshRow is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean relative(int rows) throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("relative is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean rowInserted() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("rowInserted is not supported by SQLResultset");
 	}
 
 	@Override
 	public boolean rowUpdated() throws SQLException {
-		throw new UnsupportedOperationException();
-		// return false;
+		throw new UnsupportedOperationException("rowUpdated is not supported by SQLResultset");
 	}
 
 	@Override
 	public void setFetchDirection(int direction) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("setFetchDirection is not supported by SQLResultset");
 	}
 
 	@Override
 	public void setFetchSize(int rows) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("setFetchSize is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateArray(int columnIndex, Array x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateArray is not supported by SQLResultset");
+
 	}
 
 	@Override
 	public void updateArray(String columnLabel, Array x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateArray is not supported by SQLResultset");
+
 	}
 
 	@Override
 	public void updateAsciiStream(int columnIndex, InputStream x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateAsciiStream is not supported by SQLResultset");
+
 	}
 
 	@Override
 	public void updateAsciiStream(String columnLabel, InputStream x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateAsciiStream is not supported by SQLResultset");
+
 	}
 
 	@Override
 	public void updateAsciiStream(int columnIndex, InputStream x, int length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateAsciiStream is not supported by SQLResultset");
+
 	}
 
 	@Override
 	public void updateAsciiStream(String columnLabel, InputStream x, int length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateAsciiStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateAsciiStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateAsciiStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBigDecimal(int columnIndex, BigDecimal x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBigDecimal is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBigDecimal(String columnLabel, BigDecimal x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBigDecimal is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBinaryStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBinaryStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBinaryStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBinaryStream(String columnLabel, InputStream x, int length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBinaryStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBinaryStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBinaryStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBlob(int columnIndex, Blob x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBlob is not supported by SQLResultset");
+
 	}
 
 	@Override
 	public void updateBlob(String columnLabel, Blob x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBlob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBlob(int columnIndex, InputStream inputStream) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBlob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBlob(String columnLabel, InputStream inputStream) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBlob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBlob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBlob(String columnLabel, InputStream inputStream, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBlob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBoolean(int columnIndex, boolean x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBoolean is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBoolean(String columnLabel, boolean x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBoolean is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateByte(int columnIndex, byte x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateByte is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateByte(String columnLabel, byte x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateByte is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBytes(int columnIndex, byte[] x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBytes is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateBytes(String columnLabel, byte[] x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateBytes is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateCharacterStream(int columnIndex, Reader x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateCharacterStream(String columnLabel, Reader reader) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateCharacterStream(int columnIndex, Reader x, int length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateCharacterStream(String columnLabel, Reader reader, int length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateClob(int columnIndex, Clob x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateClob(String columnLabel, Clob x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateClob(int columnIndex, Reader reader) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateClob(String columnLabel, Reader reader) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateClob(int columnIndex, Reader reader, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateClob(String columnLabel, Reader reader, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateClob is not supported by SQLResultset");
+
 	}
 
 	@Override
 	public void updateDate(int columnIndex, Date x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateDate is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateDate(String columnLabel, Date x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateDate is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateDouble(int columnIndex, double x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateDouble is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateDouble(String columnLabel, double x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateDouble is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateFloat(int columnIndex, float x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateFloat is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateFloat(String columnLabel, float x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateFloat is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateInt(int columnIndex, int x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateInt is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateInt(String columnLabel, int x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateInt is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateLong(int columnIndex, long x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateLong is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateLong(String columnLabel, long x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateLong is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNCharacterStream(int columnIndex, Reader x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException(" is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNCharacterStream is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNClob(String columnLabel, NClob nClob) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNClob(int columnIndex, Reader reader) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNClob(String columnLabel, Reader reader) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNClob(int columnIndex, Reader reader, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNClob(String columnLabel, Reader reader, long length) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNClob is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNString(int columnIndex, String nString) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNString is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNString(String columnLabel, String nString) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNString is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNull(int columnIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNull is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateNull(String columnLabel) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateNull is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateObject(int columnIndex, Object x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateObject(String columnLabel, Object x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateObject(int columnIndex, Object x, int scaleOrLength) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateObject(String columnLabel, Object x, int scaleOrLength) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateObject is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateRef(int columnIndex, Ref x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateRef is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateRef(String columnLabel, Ref x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateRef is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateRow() throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateRow is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateRowId(int columnIndex, RowId x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateRowId is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateRowId(String columnLabel, RowId x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateRowId is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateSQLXML is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateSQLXML is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateShort(int columnIndex, short x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateShort is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateShort(String columnLabel, short x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateShort is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateString(int columnIndex, String x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateString is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateString(String columnLabel, String x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateString is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateTime(int columnIndex, Time x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateTime is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateTime(String columnLabel, Time x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateTime is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateTimestamp(int columnIndex, Timestamp x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateTimestamp is not supported by SQLResultset");
 	}
 
 	@Override
 	public void updateTimestamp(String columnLabel, Timestamp x) throws SQLException {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException("updateTimestamp is not supported by SQLResultset");
 	}
 
 }
