@@ -455,7 +455,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		this.DataRows.add(dr);
 		this.mergeDataRowFields(dr);
 		if (isIndexed) {
-			String idx = java.util.UUID.randomUUID().toString();
+			//TODO: if the ResultSet has a primary index, like from JDBC, use these fields only!					
+			String idx = java.util.UUID.nameUUIDFromBytes(dr.toString().getBytes()).toString();
+			//System.out.println("building UUID from "+dr.toString()+" = "+idx);
 			dr.setRowKey(idx);
 			rowIndex.put(idx, size()-1);
 		}
@@ -2742,8 +2744,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				DataRow r = it.next();
 				String idx = r.getRowKey(); 
 				if (idx.isEmpty()) {
-					idx = java.util.UUID.randomUUID().toString();
+					//TODO: if the ResultSet has a primary index, like from JDBC, use these fields only!					
+					idx = java.util.UUID.nameUUIDFromBytes(r.toString().getBytes()).toString();
 					r.setRowKey(idx);
+					//System.out.println("building UUID from "+r.toString()+" = "+idx);
 				}
 				rowIndex.put(idx, i);
 				i++;

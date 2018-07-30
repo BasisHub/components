@@ -1288,6 +1288,18 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow as JSON String
 	 * @throws Exception
 	 */
+	public String toJson(String rowIndex) throws Exception {
+		ResultSet rs = new ResultSet();
+		rs.add(this);
+		return rs.toJson(true,rowIndex);
+	}
+	
+	/**
+	 * Returns the DataRow and all of its fields as a JSON String.
+	 *
+	 * @return The DataRow as JSON String
+	 * @throws Exception
+	 */
 	public String toJson(Boolean f_meta) throws Exception {
 		ResultSet rs = new ResultSet();
 		rs.add(this);
