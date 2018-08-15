@@ -219,26 +219,26 @@ public class WsServer extends WebSocketServer {
 			e.printStackTrace();
 		}
 		
-		// load up the key store
-		String STORETYPE = "JKS";
-		String KEYSTORE = "d:/github/Java-WebSocket/src/main/example/keystore.jks";
-		String STOREPASSWORD = "storepassword";
-		String KEYPASSWORD = "keypassword";
-
-		KeyStore ks = KeyStore.getInstance( STORETYPE );
-		File kf = new File( KEYSTORE );
-		ks.load( new FileInputStream( kf ), STOREPASSWORD.toCharArray() );
-
-		KeyManagerFactory kmf = KeyManagerFactory.getInstance( "SunX509" );
-		kmf.init( ks, KEYPASSWORD.toCharArray() );
-		TrustManagerFactory tmf = TrustManagerFactory.getInstance( "SunX509" );
-		tmf.init( ks );
-
-		SSLContext sslContext = null;
-		sslContext = SSLContext.getInstance( "TLS" );
-		sslContext.init( kmf.getKeyManagers(), tmf.getTrustManagers(), null );
-
-		ed.setWebSocketFactory( new DefaultSSLWebSocketServerFactory( sslContext ) );
+//		// load up the key store
+//		String STORETYPE = "JKS";
+//		String KEYSTORE = "d:/github/Java-WebSocket/src/main/example/keystore.jks";
+//		String STOREPASSWORD = "storepassword";
+//		String KEYPASSWORD = "keypassword";
+//
+//		KeyStore ks = KeyStore.getInstance( STORETYPE );
+//		File kf = new File( KEYSTORE );
+//		ks.load( new FileInputStream( kf ), STOREPASSWORD.toCharArray() );
+//
+//		KeyManagerFactory kmf = KeyManagerFactory.getInstance( "SunX509" );
+//		kmf.init( ks, KEYPASSWORD.toCharArray() );
+//		TrustManagerFactory tmf = TrustManagerFactory.getInstance( "SunX509" );
+//		tmf.init( ks );
+//
+//		SSLContext sslContext = null;
+//		sslContext = SSLContext.getInstance( "TLS" );
+//		sslContext.init( kmf.getKeyManagers(), tmf.getTrustManagers(), null );
+//
+//		ed.setWebSocketFactory( new DefaultSSLWebSocketServerFactory( sslContext ) );
 		
 		
 		ed.start();
