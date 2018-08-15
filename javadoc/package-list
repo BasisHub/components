@@ -6,6 +6,7 @@ com.basiscomponents.bridge
 com.basiscomponents.bridge.proxygen
 com.basiscomponents.bridge.proxygen.Javascript
 com.basiscomponents.bridge.typewrap
+com.basiscomponents.comm
 com.basiscomponents.configuration
 com.basiscomponents.db
 com.basiscomponents.db.constants
@@ -21,3 +22,13 @@ com.basiscomponents.rest
 com.basiscomponents.ui.layout
 com.basiscomponents.util
 net.miginfocom.layout
+org.java_websocket
+org.java_websocket.client
+org.java_websocket.drafts
+org.java_websocket.exceptions
+org.java_websocket.extensions
+org.java_websocket.framing
+org.java_websocket.handshake
+org.java_websocket.protocols
+org.java_websocket.server
+org.java_websocket.util
