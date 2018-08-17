@@ -18,6 +18,7 @@ public class CrossEventDispatcher  {
 	private HashMap<String,BBjAPI> InterpreterMap;
 	private HashMap<Integer,String> PIDMap;
 	protected static SecureRandom random = new SecureRandom();
+	public static Boolean DEBUG = false;
 	
 	
 	public static Object getInstance(BBjAPI api)  {
@@ -62,13 +63,15 @@ public class CrossEventDispatcher  {
 	}
 	
 	public void postPriorityCustomEvent(String tag, String payload) throws Exception {
-		System.out.println("postPriorityCustomEvent");
+		if (DEBUG)
+			System.out.println("postPriorityCustomEvent");
 		
 		BBjAPI api = InterpreterMap.get(tag);
 
 		if (api != null) {
 			api.postPriorityCustomEvent(tag, payload);
-			System.out.println("posting Event to "+tag);
+			if (DEBUG)
+				System.out.println("posting Event to "+tag);
 		}
 	}
 	
@@ -87,7 +90,8 @@ public class CrossEventDispatcher  {
 			while (it.hasNext())
 			{
 				BBjSessionInfo si = (BBjSessionInfo) it.next();
-				System.out.println("got "+si.getID());
+				if (DEBUG)
+					System.out.println("got "+si.getID());
 				pidlist.add(si.getID());
 			}
 			
