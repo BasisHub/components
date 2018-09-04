@@ -935,8 +935,11 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public int getColumnDisplaySize(int column) {
 		Integer size = (Integer) this.MetaData.get(column).get("ColumnDisplaySize");
+		
 		if (size == null)
-			size = 0;
+			size = 10;
+			// 	guessing a useful default
+		
 		return size.intValue();
 	}
 
