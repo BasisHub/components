@@ -200,7 +200,7 @@ public class SqlTableBC implements BusinessComponent {
       PreparedStatement stmt;
       ResultSet ar;
       if (retrieveSql != null && !retrieveSql.equals("")) {
-        stmt = conn.prepareStatement("SELECT * FROM (" + retrieveSql + ") WHERE 1=0");
+				stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
         if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
           try {
             setSqlParams(stmt, retrieveParams, null);
@@ -209,7 +209,7 @@ public class SqlTableBC implements BusinessComponent {
         }
       } else {
         stmt = conn.prepareStatement(
-            "SELECT * FROM " + dbQuoteString + table + dbQuoteString + " WHERE 1=0");
+						"SELECT TOP 1 * FROM " + dbQuoteString + table + dbQuoteString);
       }
       ar = new ResultSet(stmt.executeQuery());
       for (String field : ar.getColumnNames()) {
