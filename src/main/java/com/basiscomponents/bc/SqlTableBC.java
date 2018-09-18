@@ -199,19 +199,33 @@ public class SqlTableBC implements BusinessComponent {
       // read attributes (for getAttributesRecord() method)
       PreparedStatement stmt;
       ResultSet ar;
-      if (retrieveSql != null && !retrieveSql.equals("")) {
-				stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
-        if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
-          try {
-            setSqlParams(stmt, retrieveParams, null);
-          } catch (Exception e) {
-          }
-        }
-      } else {
-        stmt = conn.prepareStatement(
-						"SELECT TOP 1 * FROM " + dbQuoteString + table + dbQuoteString);
-      }
-      ar = new ResultSet(stmt.executeQuery());
+			if (retrieveSql != null && !retrieveSql.equals("")) {
+				switch (dbType) {
+				case "BASIS DBMS":
+					stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
+					break;
+				default:
+					stmt = conn.prepareStatement("SELECT * FROM (" + retrieveSql + ") WHERE 1=0");
+				}
+
+				if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
+					try {
+						setSqlParams(stmt, retrieveParams, null);
+					} catch (Exception e) {
+				}
+			}
+			} else {
+				switch (dbType) {
+				case "BASIS DBMS":
+					stmt = conn.prepareStatement("SELECT TOP 1 * FROM " + dbQuoteString + table + dbQuoteString);
+					break;
+				default:
+					stmt = conn
+							.prepareStatement("SELECT * FROM " + dbQuoteString + table + dbQuoteString + " WHERE 1=0");
+				}
+
+			}
+			ar = new ResultSet(stmt.executeQuery());
       for (String field : ar.getColumnNames()) {
 		Map<String, Object> attrmap = ar.getColumnMetaData(field);
         try {
