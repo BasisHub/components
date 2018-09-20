@@ -229,7 +229,9 @@ public class SqlTableBC implements BusinessComponent {
           if (primaryKeys.contains(getMapping(field)))
             attributesRecord.setFieldAttribute(field, "EDITABLE", "2");
         } catch (Exception ex) {
+
         }
+				stmt.close();
       }
 
       // set default scope
@@ -433,7 +435,7 @@ public class SqlTableBC implements BusinessComponent {
     if (filter != null)
       filter = filter.clone();
 
-    ResultSet retrs = null;
+    ResultSet result = null;
     Connection conn = null;
     try {
       conn = getConnection();
@@ -520,20 +522,21 @@ public class SqlTableBC implements BusinessComponent {
         }
       }
 
-      sqlStatement = sql;
-      PreparedStatement prep = conn.prepareStatement(sql);
+			sqlStatement = sql;
+			try (PreparedStatement prep = conn.prepareStatement(sql)) {
 
-      DataRow params = new DataRow();
-      if (retrieveParams != null && retrieveParams.getColumnCount() > 0)
-        params = retrieveParams.clone();
-      if (filter != null && filter.getColumnCount() > 0)
-        params.mergeRecord(filter);
-      if (params.getColumnCount() > 0)
-        setSqlParams(prep, params, params.getFieldNames());
+				DataRow params = new DataRow();
+				if (retrieveParams != null && retrieveParams.getColumnCount() > 0)
+					params = retrieveParams.clone();
+				if (filter != null && filter.getColumnCount() > 0)
+					params.mergeRecord(filter);
+				if (params.getColumnCount() > 0)
+					setSqlParams(prep, params, params.getFieldNames());
 
-      java.sql.ResultSet rs = prep.executeQuery();
-      retrs = new ResultSet();
-      retrs.populate(rs, true);
+				java.sql.ResultSet rs = prep.executeQuery();
+				result = new ResultSet();
+				result.populate(rs, true);
+			}
     } catch (SQLException ex) {
       throw ex;
     } finally {
@@ -548,15 +551,15 @@ public class SqlTableBC implements BusinessComponent {
 
 
     // Set the generated meta attributes to the first record
-    if (retrs.size() > 0) {
-      DataRow dr = retrs.get(0);
+    if (result.size() > 0) {
+      DataRow dr = result.get(0);
       for (String field : attributesRecord.getFieldNames()) {
         if (dr.contains(field))
           dr.setFieldAttributes(field, attributesRecord.getFieldAttributes(field));
       }
     }
 
-    return retrs;
+    return result;
   }
 
 
@@ -649,7 +652,7 @@ public class SqlTableBC implements BusinessComponent {
     String sql = "";
     int affectedRows = 0;
     DataRow ret = r.clone();
-    PreparedStatement prep;
+    PreparedStatement statement;
 
 
     // update (Try an update an check affected rows. If there are no (0) affected rows, then make an
@@ -684,11 +687,11 @@ public class SqlTableBC implements BusinessComponent {
         }
         sql += " WHERE " + wh.substring(5);
 
-        prep = conn.prepareStatement(sql);
-        setSqlParams(prep, r, fields);
+        statement = conn.prepareStatement(sql);
+        setSqlParams(statement, r, fields);
 
-        affectedRows = prep.executeUpdate();
-        prep.close();
+        affectedRows = statement.executeUpdate();
+        statement.close();
       } else {
         /// so now we have to do a SELECT to see if the record is there, as we can't check with
         /// update
@@ -700,13 +703,13 @@ public class SqlTableBC implements BusinessComponent {
         }
         if (wh.length() > 0)
           sql += " WHERE " + wh.substring(5);
-        prep = conn.prepareStatement(sql);
-        setSqlParams(prep, r, fields);
-        java.sql.ResultSet jrs = prep.executeQuery();
+        statement = conn.prepareStatement(sql);
+        setSqlParams(statement, r, fields);
+        java.sql.ResultSet jrs = statement.executeQuery();
         ResultSet retrs = new ResultSet();
         retrs.populate(jrs, true);
         affectedRows = retrs.get(0).getFieldAsNumber("C").intValue();
-        prep.close();
+        statement.close();
       }
     }
 
@@ -728,15 +731,15 @@ public class SqlTableBC implements BusinessComponent {
       }
       sql += keys.substring(1) + ") VALUES(" + values.substring(1) + ")";
 
-      prep = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-      setSqlParams(prep, r, fields);
+      statement = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+      setSqlParams(statement, r, fields);
 
-      affectedRows = prep.executeUpdate();
+      affectedRows = statement.executeUpdate();
       inserted = affectedRows > 0;
 
       // get generated keys
       if (affectedRows > 0) {
-        java.sql.ResultSet gkeys = prep.getGeneratedKeys();
+        java.sql.ResultSet gkeys = statement.getGeneratedKeys();
         if (gkeys.next()) {
           for (int i = 0; i < gkeys.getMetaData().getColumnCount(); i++) {
             String name = autoIncrementKeys.get(i);
@@ -752,7 +755,7 @@ public class SqlTableBC implements BusinessComponent {
         }
       }
 
-      prep.close();
+      statement.close();
     }
 
     sqlStatement = sql;
@@ -975,9 +978,9 @@ public class SqlTableBC implements BusinessComponent {
     ResultSet brs = null;
     Connection conn = null;
 
-    try {
-      conn = getConnection();
-      PreparedStatement prep = conn.prepareStatement(sql);
+		try {
+			conn = getConnection();
+			try (PreparedStatement prep = conn.prepareStatement(sql)) {
 
       // Set params if there are any
       if (params != null) {
@@ -994,6 +997,7 @@ public class SqlTableBC implements BusinessComponent {
       }
 
       brs = new ResultSet(prep.executeQuery());
+			}
     } catch (SQLException e1) {
       e1.printStackTrace();
     } finally {
