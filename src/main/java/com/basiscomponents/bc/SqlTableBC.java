@@ -3,7 +3,6 @@ package com.basiscomponents.bc;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -13,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+import com.basiscomponents.bc.util.SqlConnectionHelper;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ExpressionMatcher;
@@ -40,9 +40,9 @@ import com.basiscomponents.db.ResultSet;
 public class SqlTableBC implements BusinessComponent {
 
 	private static final String COLUMN_NAME = "COLUMN_NAME";
-	private String url;
-	private String user;
-	private String password;
+
+	private SqlConnectionHelper connectionHelper;
+
 	private String table;
 	private String scope = "";
 	private HashMap<String, ArrayList<String>> scopes;
@@ -51,7 +51,6 @@ public class SqlTableBC implements BusinessComponent {
 	private DataRow attributesRecord;
 	private DataRow allowedFilter;
 	private DataRow metaData;
-	private Connection connection;
 	private String retrieveSql;
 	private String sqlStatement;
 	private DataRow retrieveParams;
@@ -74,7 +73,7 @@ public class SqlTableBC implements BusinessComponent {
 	 *            database URL to the database.
 	 */
 	public SqlTableBC(String url) {
-		this.url = url;
+		this.connectionHelper = new SqlConnectionHelper(url);
 	}
 
 	/**
@@ -94,11 +93,7 @@ public class SqlTableBC implements BusinessComponent {
 	 *             thrown if the JDBC driver could not be found.
 	 */
 	public SqlTableBC(String driver, String url, String user, String password) throws ClassNotFoundException {
-		this.url = url;
-		this.user = user;
-		this.password = password;
-
-		Class.forName(driver);
+		this.connectionHelper = new SqlConnectionHelper(url, user, password, driver);
 	}
 
 	/**
@@ -116,9 +111,7 @@ public class SqlTableBC implements BusinessComponent {
 	 *             determined
 	 */
 	public SqlTableBC(Connection con) throws SQLException {
-		if (con != null && !con.isClosed()) {
-			connection = con;
-		}
+		connectionHelper = new SqlConnectionHelper(con);
 	}
 
 	/**
@@ -133,13 +126,7 @@ public class SqlTableBC implements BusinessComponent {
 	 *             thrown if connection cannot be established.
 	 */
 	private Connection getConnection() throws SQLException {
-		if (connection != null)
-			return connection;
-
-		if (user == null || password == null)
-			return DriverManager.getConnection(url);
-		else
-			return DriverManager.getConnection(url, user, password);
+		return connectionHelper.getConnection();
 	}
 
 	/**
@@ -248,13 +235,7 @@ public class SqlTableBC implements BusinessComponent {
 			// TODO real logging preferred
 			e.printStackTrace();
 		} finally {
-			if (connection == null && conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			connectionHelper.closeConnection(conn);
 		}
 	}
 
@@ -544,13 +525,7 @@ public class SqlTableBC implements BusinessComponent {
 		} catch (SQLException ex) {
 			throw ex;
 		} finally {
-			if (connection == null && conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			connectionHelper.closeConnection(conn);
 		}
 
 		// Set the generated meta attributes to the first record
@@ -780,16 +755,11 @@ public class SqlTableBC implements BusinessComponent {
 			this.setFilter(oldfilter);
 		}
 
-		if (connection == null && conn != null) {
-			try {
-				conn.close();
-			} catch (SQLException ex) {
-			}
-		}
+		connectionHelper.closeConnection(conn);
 
-		if (inserted)
+		if (inserted) {
 			ret.setAttribute("CREATED", inserted.toString());
-
+		}
 		return ret;
 	}
 
@@ -839,9 +809,7 @@ public class SqlTableBC implements BusinessComponent {
 
 		prep.execute();
 
-		if (connection == null && conn != null && !conn.isClosed()) {
-			conn.close();
-		}
+		connectionHelper.closeConnection(conn);
 	}
 
 	/**
@@ -1002,13 +970,7 @@ public class SqlTableBC implements BusinessComponent {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		} finally {
-			if (connection == null && conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			connectionHelper.closeConnection(conn);
 		}
 
 		return brs;
