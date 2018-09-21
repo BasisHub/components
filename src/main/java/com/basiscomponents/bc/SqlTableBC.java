@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.basiscomponents.bc.util.SqlConnectionHelper;
 import com.basiscomponents.db.DataField;
@@ -149,94 +150,40 @@ public class SqlTableBC implements BusinessComponent {
 		this.primaryKeys = new ArrayList<>();
 		this.autoIncrementKeys = new ArrayList<>();
 		this.attributesRecord = new DataRow();
+		createAttributesRecord();
+	}
 
-		Connection conn = null;
-		try {
-			conn = getConnection();
-
-			DatabaseMetaData meta = conn.getMetaData();
-			dbType = meta.getDatabaseProductName().toUpperCase();
-			dbQuoteString = meta.getIdentifierQuoteString();
-			metaData = new DataRow();
-			java.sql.ResultSet rs = meta.getPrimaryKeys(null, null, table);
-
-			while (rs.next()) {
-				String primaryKey = rs.getString(COLUMN_NAME);
-				primaryKeys.add(primaryKey);
-			}
-
-			rs = meta.getColumns(null, null, table, null);
-			while (rs.next()) {
-				if (rs.getMetaData().getColumnCount() > 22) { // IS_AUTOINCREMENT=23 (BBj doesn't support
-																// the IS_AUTOINCREMENT property)
-					String name = rs.getString(COLUMN_NAME);
-					String autoIncrement = rs.getString("IS_AUTOINCREMENT");
-					if ("YES".equals(autoIncrement))
-						autoIncrementKeys.add(name);
-				}
-
-				String columnName = rs.getString(COLUMN_NAME);
-				try {
-					metaData.setFieldValue(columnName, rs.getInt("DATA_TYPE"), null);
-				} catch (Exception e1) {
-					continue;
-				}
-
-				for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-					if (rs.getString(i) != null) {
-						try {
-							metaData.setFieldAttribute(columnName, rs.getMetaData().getColumnName(i), rs.getString(i));
-						} catch (Exception e) {
-							// do nothing
-						}
-					}
-				}
-			}
-
-			// read attributes (for getAttributesRecord() method)
-			PreparedStatement stmt;
-			ResultSet ar;
-			if (retrieveSql != null && !retrieveSql.equals("")) {
+	/**
+	 * @param conn
+	 * @return
+	 * @throws SQLException
+	 */
+	private PreparedStatement createMetadataStatement(Connection conn) throws SQLException {
+		PreparedStatement stmt;
+		if (retrieveSql != null && !retrieveSql.equals("")) {
+			switch (dbType) {
+			case "BASIS DBMS":
+				stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
+				break;
+			default:
 				stmt = conn.prepareStatement("SELECT * FROM (" + retrieveSql + ") WHERE 1=0");
-				if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
-					try {
-						setSqlParams(stmt, retrieveParams, null);
-					} catch (Exception e) {
-					}
+			}
+			if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
+				try {
+					setSqlParams(stmt, retrieveParams, null, "BASIS DBMS".equals(dbType));
+				} catch (Exception e) {
 				}
-			} else {
+			}
+		} else {
+			switch (dbType) {
+			case "BASIS DBMS":
+				stmt = conn.prepareStatement("SELECT TOP 1 * FROM " + dbQuoteString + table + dbQuoteString);
+				break;
+			default:
 				stmt = conn.prepareStatement("SELECT * FROM " + dbQuoteString + table + dbQuoteString + " WHERE 1=0");
 			}
-			ar = new ResultSet(stmt.executeQuery());
-			for (String field : ar.getColumnNames()) {
-				Map<String, Object> attrmap = ar.getColumnMetaData(field);
-				try {
-					int type = (int) attrmap.get("ColumnType");
-					attributesRecord.addDataField(field, type, new DataField(null));
-					for (String attr : attrmap.keySet()) {
-						String value = null;
-						if (attrmap.get(attr) != null)
-							value = attrmap.get(attr).toString();
-						attributesRecord.setFieldAttribute(field, attr, value);
-					}
-					if (metaData.getFieldAttributes(field).containsKey("REMARKS"))
-						attributesRecord.setFieldAttribute(field, "REMARKS",
-								metaData.getFieldAttribute(field, "REMARKS"));
-					if (primaryKeys.contains(getMapping(field)))
-						attributesRecord.setFieldAttribute(field, "EDITABLE", "2");
-				} catch (Exception ex) {
-				}
-			}
-
-			// set default scope
-			scopes = new HashMap<>();
-			scopes.put("*", attributesRecord.getFieldNames());
-		} catch (SQLException e) {
-			// TODO real logging preferred
-			e.printStackTrace();
-		} finally {
-			connectionHelper.closeConnection(conn);
 		}
+		return stmt;
 	}
 
 	/**
@@ -404,17 +351,13 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
-	// FIXME reduce complexity of this method. See:
-	// https://blog.sonarsource.com/cognitive-complexity-because-testability-understandability
 	public ResultSet retrieve(int first, int last) throws Exception {
 		if (first >= 0 && last < first) {
-			// TODO introduce more specific Exception
-			throw new Exception("Invalid range: last could not be lower than first!");
+			throw new IllegalArgumentException("Invalid range: last could not be lower than first!");
 		}
 
 		if (Filter != null && Filter.contains("%SEARCH")) {
-			// TODO introduce more specific Exception
-			throw new Exception("Full text search not implemented yet!");
+			throw new UnsupportedOperationException("Full text search not implemented yet!");
 		}
 
 		DataRow filter = Filter;
@@ -517,7 +460,7 @@ public class SqlTableBC implements BusinessComponent {
 			if (filter != null && filter.getColumnCount() > 0)
 				params.mergeRecord(filter);
 			if (params.getColumnCount() > 0)
-				setSqlParams(prep, params, params.getFieldNames());
+				setSqlParams(prep, params, params.getFieldNames(), "BASIS DBMS".equals(dbType));
 
 			java.sql.ResultSet rs = prep.executeQuery();
 			retrs = new ResultSet();
@@ -663,7 +606,7 @@ public class SqlTableBC implements BusinessComponent {
 				sql += " WHERE " + wh.substring(5);
 
 				prep = conn.prepareStatement(sql);
-				setSqlParams(prep, r, fields);
+				setSqlParams(prep, r, fields, "BASIS DBMS".equals(dbType));
 
 				affectedRows = prep.executeUpdate();
 				prep.close();
@@ -680,7 +623,7 @@ public class SqlTableBC implements BusinessComponent {
 				if (wh.length() > 0)
 					sql += " WHERE " + wh.substring(5);
 				prep = conn.prepareStatement(sql);
-				setSqlParams(prep, r, fields);
+				setSqlParams(prep, r, fields, "BASIS DBMS".equals(dbType));
 				java.sql.ResultSet jrs = prep.executeQuery();
 				ResultSet retrs = new ResultSet();
 				retrs.populate(jrs, true);
@@ -708,7 +651,7 @@ public class SqlTableBC implements BusinessComponent {
 			sql += keys.substring(1) + ") VALUES(" + values.substring(1) + ")";
 
 			prep = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-			setSqlParams(prep, r, fields);
+			setSqlParams(prep, r, fields, "BASIS DBMS".equals(dbType));
 
 			affectedRows = prep.executeUpdate();
 			inserted = affectedRows > 0;
@@ -805,7 +748,7 @@ public class SqlTableBC implements BusinessComponent {
 		PreparedStatement prep = conn.prepareStatement(sql);
 		sqlStatement = sql;
 
-		setSqlParams(prep, r, primaryKeys);
+		setSqlParams(prep, r, primaryKeys, "BASIS DBMS".equals(dbType));
 
 		prep.execute();
 
@@ -841,7 +784,8 @@ public class SqlTableBC implements BusinessComponent {
 	 * @throws SQLException
 	 *             is thrown when a value cannot be set.
 	 */
-	private void setSqlParams(PreparedStatement prep, DataRow dr, ArrayList<String> fields) throws Exception {
+	private static void setSqlParams(PreparedStatement prep, DataRow dr, ArrayList<String> fields, boolean isBasisDBMS)
+			throws Exception {
 		if (prep == null || dr == null) {
 			return;
 		}
@@ -868,7 +812,7 @@ public class SqlTableBC implements BusinessComponent {
 			}
 
 			if (o.getValue() == null) {
-				if (dbType.equals("BASIS DBMS") && type == Types.CHAR)
+				if (isBasisDBMS && type == Types.CHAR)
 					prep.setString(index, "");
 				else
 					prep.setNull(index, type);
@@ -885,13 +829,13 @@ public class SqlTableBC implements BusinessComponent {
 			}
 			switch (type) {
 			case Types.NUMERIC:
-				if (dbType.equals("BASIS DBMS") && o.getValue() == null)
+				if (isBasisDBMS && o.getValue() == null)
 					prep.setBigDecimal(index, new BigDecimal(0));
 				else
 					prep.setBigDecimal(index, o.getBigDecimal());
 				break;
 			case Types.INTEGER:
-				if (dbType.equals("BASIS DBMS") && o.getValue() == null)
+				if (isBasisDBMS && o.getValue() == null)
 					prep.setInt(index, 0);
 				else
 					prep.setInt(index, o.getInt());
@@ -902,7 +846,7 @@ public class SqlTableBC implements BusinessComponent {
 			case Types.LONGNVARCHAR:
 			case Types.CHAR:
 			case Types.VARCHAR:
-				if (dbType.equals("BASIS DBMS") && o.getValue() == null)
+				if (isBasisDBMS && o.getValue() == null)
 					prep.setString(index, "");
 				else
 					prep.setString(index, o.getString());
@@ -919,7 +863,7 @@ public class SqlTableBC implements BusinessComponent {
 				break;
 			case Types.OTHER:
 				/// this is an auto-generated key. set as string and hope for the best
-				if (dbType.equals("BASIS DBMS") && o.getValue() == null)
+				if (isBasisDBMS && o.getValue() == null)
 					prep.setString(index, "");
 				else
 					prep.setString(index, o.getString());
@@ -994,8 +938,12 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * Returns all defined field mappings.
 	 * 
+	 * 
+	 * TODO APICHANGE to Map instead of HasMap
+	 * 
 	 * @return a HashMap with field mappings. Where key is the alias name and value
 	 *         is the table field name.
+	 * 
 	 */
 	public HashMap<String, String> getMappings() {
 		return new HashMap<>(mapping);
@@ -1074,6 +1022,88 @@ public class SqlTableBC implements BusinessComponent {
 		try {
 			allowedFilter.setFieldValue(fieldName, Types.VARCHAR, null);
 		} catch (Exception e) {
+		}
+	}
+
+	private void createAttributesRecord() {
+		Connection conn = null;
+		try {
+			conn = getConnection();
+			DatabaseMetaData meta = conn.getMetaData();
+			dbType = meta.getDatabaseProductName().toUpperCase();
+			dbQuoteString = meta.getIdentifierQuoteString();
+			metaData = new DataRow();
+			java.sql.ResultSet metadata = meta.getPrimaryKeys(null, null, table);
+
+			while (metadata.next()) {
+				primaryKeys.add(metadata.getString(COLUMN_NAME));
+			}
+
+			java.sql.ResultSet metaColumns = meta.getColumns(null, null, table, null);
+			while (metaColumns.next()) {
+				if (metaColumns.getMetaData().getColumnCount() > 22) { // IS_AUTOINCREMENT=23 (BBj doesn't support
+					// the IS_AUTOINCREMENT property)
+					String name = metaColumns.getString(COLUMN_NAME);
+					String autoIncrement = metaColumns.getString("IS_AUTOINCREMENT");
+					if ("YES".equals(autoIncrement))
+						autoIncrementKeys.add(name);
+				}
+
+				String columnName = metaColumns.getString(COLUMN_NAME);
+				try {
+					metaData.setFieldValue(columnName, metaColumns.getInt("DATA_TYPE"), null);
+				} catch (Exception e1) {
+					continue;
+				}
+
+				for (int i = 1; i <= metaColumns.getMetaData().getColumnCount(); i++) {
+					try {
+						if (metaColumns.getString(i) != null) {
+							metaData.setFieldAttribute(columnName, metaColumns.getMetaData().getColumnName(i),
+									metaColumns.getString(i));
+
+						}
+					} catch (Exception e) {
+						// do nothing
+					}
+				}
+			}
+
+			// read attributes (for getAttributesRecord() method)
+
+			ResultSet ar;
+			try (PreparedStatement stmt = createMetadataStatement(conn)) {
+				ar = new ResultSet(stmt.executeQuery());
+			}
+
+			for (String field : ar.getColumnNames()) {
+				Map<String, Object> attrmap = ar.getColumnMetaData(field);
+				try {
+					int type = (int) attrmap.get("ColumnType");
+					attributesRecord.addDataField(field, type, new DataField(null));
+					for (Entry<String, Object> entry : attrmap.entrySet()) {
+						String value = null;
+						if (entry.getValue() != null) {
+							value = entry.getValue().toString();
+						}
+						attributesRecord.setFieldAttribute(field, entry.getKey(), value);
+					}
+					if (metaData.getFieldAttributes(field).containsKey("REMARKS"))
+						attributesRecord.setFieldAttribute(field, "REMARKS",
+								metaData.getFieldAttribute(field, "REMARKS"));
+					if (primaryKeys.contains(getMapping(field)))
+						attributesRecord.setFieldAttribute(field, "EDITABLE", "2");
+				} catch (Exception ex) {
+				}
+			}
+
+			// set default scope
+			scopes = new HashMap<>();
+			scopes.put("*", attributesRecord.getFieldNames());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			connectionHelper.closeConnection(conn);
 		}
 	}
 }
