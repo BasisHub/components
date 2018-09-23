@@ -224,11 +224,14 @@ public class DataFieldConverter {
 			 * java.sql.Types.INTEGER in the Column metadata. Calling the getInt() method
 			 * will then result in an Exception. This checks prevents this Exception.
 			 */
-			if (!resultSet.isSigned(column)) {
-				ret = field.getLong().doubleValue();
-			} else {
-				ret = field.getInt().doubleValue();
-			}
+			if (field.getClassName().equals("java.lang.Short"))
+				ret=field.getShort().doubleValue();
+			else
+				if (!resultSet.isSigned(column)) {
+					ret = field.getLong().doubleValue();
+				} else {
+					ret = field.getInt().doubleValue();
+				}
 			break;
 		case java.sql.Types.BIGINT:
 			/*
