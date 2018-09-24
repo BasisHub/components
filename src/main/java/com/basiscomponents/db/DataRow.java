@@ -354,7 +354,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field with the specified name exists.
 	 */
-	public Object getFieldValue(String name) throws Exception {
+	public Object getFieldValue(String name) {
 		DataField field = getField(name);
 		return field.getValue();
 	}
