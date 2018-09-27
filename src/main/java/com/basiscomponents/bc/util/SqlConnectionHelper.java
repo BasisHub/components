@@ -36,14 +36,14 @@ public class SqlConnectionHelper {
 		}
 	}
 
-	public Connection getConnection() throws SQLException {
+	public CloseableWrapper<Connection> getConnection() throws SQLException {
 		if (connection != null) {
-			return connection;
+			return new CloseableWrapper<>(connection,false);
 		}
 		if (user == null || password == null) {
-			return DriverManager.getConnection(url);
+			return new CloseableWrapper<>(DriverManager.getConnection(url), true);
 		} else {
-			return DriverManager.getConnection(url, user, password);
+			return new CloseableWrapper<>(DriverManager.getConnection(url, user, password), true);
 		}
 	}
 
