@@ -11,3 +11,4 @@ src/main/java/com/basiscomponents/VersionInfo.java
 target/
 .settings/
 /bin/
+.idea
