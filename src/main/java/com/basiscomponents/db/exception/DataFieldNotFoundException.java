@@ -1,4 +1,4 @@
-package com.basiscomponents.db;
+package com.basiscomponents.db.exception;
 
 public class DataFieldNotFoundException extends RuntimeException {
 
