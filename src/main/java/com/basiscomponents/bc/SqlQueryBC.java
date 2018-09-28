@@ -1,21 +1,19 @@
 package com.basiscomponents.bc;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.basiscomponents.bc.util.CloseableWrapper;
+import com.basiscomponents.bc.util.SqlConnectionHelper;
 import com.basiscomponents.configuration.TracingConfiguration;
 import com.basiscomponents.db.ResultSet;
 
 
 public class SqlQueryBC {
 
-	private String url;
-	private String user;
-	private String password;
-	private Connection conn;
+	private SqlConnectionHelper connectionHelper;
 
 	/**
 	 * default Constructor only with url
@@ -24,7 +22,8 @@ public class SqlQueryBC {
 	 *            the {@code url} to connect to
 	 */
 	public SqlQueryBC(String url) {
-		this.url = url;
+		this.connectionHelper = new SqlConnectionHelper(url);
+
 	}
 
 	/**
@@ -42,10 +41,7 @@ public class SqlQueryBC {
 	 *             if the given driver can not be found by {@link ClassLoader}
 	 */
 	public SqlQueryBC(String driver, String url, String user, String password) throws ClassNotFoundException {
-		this.url = url;
-		this.user = user;
-		this.password = password;
-		Class.forName(driver);
+		this.connectionHelper = new SqlConnectionHelper(url, user, password, driver);
 	}
 
 	/**
@@ -57,9 +53,7 @@ public class SqlQueryBC {
 	 *             if {@link Connection#isClosed()} throws a {@link SQLException}
 	 */
 	public SqlQueryBC(Connection con) throws SQLException {
-		if (con != null && !con.isClosed()) {
-			conn = con;
-		}
+		this.connectionHelper = new SqlConnectionHelper(con);
 	}
 
 	public ResultSet retrieve(String sql) throws SQLException {
@@ -70,8 +64,8 @@ public class SqlQueryBC {
 		ResultSet brs = null;
 		Connection connection = null;
 
-		try {
-			connection = getConnection();
+		try (CloseableWrapper<Connection> connw = getConnection()) {
+			connection = connw.getCloseable();
 			PreparedStatement prep = connection.prepareStatement(sql);
 
 			// Set params if there are any
@@ -86,12 +80,8 @@ public class SqlQueryBC {
 			traceSqlStatement(SqlQueryBcLogger.Method.RETRIEVE, prep.toString());
 
 			brs = new ResultSet(prep.executeQuery());
-		} finally {
-			if (this.conn == null && connection != null) {
-				try {
-					connection.close();
-				} catch (SQLException e) {}
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		return brs;
@@ -105,8 +95,8 @@ public class SqlQueryBC {
 		Connection connection = null;
 		Boolean b = false;
 
-		try {
-			connection = getConnection();
+		try (CloseableWrapper<Connection> connw = getConnection()) {
+			connection = connw.getCloseable();
 			PreparedStatement prep = connection.prepareStatement(sql);
 			// Set params if there are any
 			if (params != null) {
@@ -118,12 +108,8 @@ public class SqlQueryBC {
 			}
 			traceSqlStatement(SqlQueryBcLogger.Method.EXECUTE, prep.toString());
 			b = prep.execute() || prep.getUpdateCount() > 0;
-		} finally {
-			if (this.conn == null && connection != null) {
-				try {
-					connection.close();
-				} catch (SQLException e) {}
-			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 		return b;
 	}
@@ -162,14 +148,8 @@ public class SqlQueryBC {
 		return SqlQueryBcLogger.getLastExecute();
 	}
 
-	private Connection getConnection() throws SQLException {
-		if (conn != null)
-			return conn;
-
-		if (user == null || password == null)
-			return DriverManager.getConnection(url);
-		else
-			return DriverManager.getConnection(url, user, password);
+	private CloseableWrapper<Connection> getConnection() throws SQLException {
+		return connectionHelper.getConnection();
 	}
 
 	private static void traceSqlStatement(SqlQueryBcLogger.Method method, String string) {
