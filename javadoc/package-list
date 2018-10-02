@@ -1,6 +1,7 @@
 com.basiscomponents
 com.basiscomponents.bc
 com.basiscomponents.bc.gen
+com.basiscomponents.bc.util
 com.basiscomponents.bl
 com.basiscomponents.bridge
 com.basiscomponents.bridge.proxygen
