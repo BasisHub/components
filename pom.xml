@@ -187,6 +187,15 @@
 			<scope>system</scope>
 			<systemPath>${jar-directory}/netty-all-4.1.22.Final.jar</systemPath>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>24.0-jre</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/guava-24.0-jre.jar</systemPath>
+		</dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

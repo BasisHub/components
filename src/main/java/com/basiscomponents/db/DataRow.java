@@ -249,7 +249,6 @@ public class DataRow implements java.io.Serializable {
 				try {
 					addDataField(name, field);
 				} catch (Exception e) {
-
 					e.printStackTrace();
 				}
 				field.setValue(null);
@@ -283,9 +282,9 @@ public class DataRow implements java.io.Serializable {
 		String c = "";
 
 		value = DataField.convertType(value, type);
-		if (value != null)
+		if (value != null) {
 			c = value.getClass().getCanonicalName();
-
+		}
 		if (c.contains("BBjNumber") || c.contains("BBjInt")) {
 			value = Double.parseDouble(value.toString());
 		}
@@ -354,7 +353,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             No field with the specified name exists.
 	 */
-	public Object getFieldValue(String name) throws Exception {
+	public Object getFieldValue(String name) {
 		DataField field = getField(name);
 		return field.getValue();
 	}
@@ -826,7 +825,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return A list with the attribute values for the given attribute name.
 	 */
 	public ArrayList<String> getAttributeForFields(String attrname) {
-		return new ArrayList<String>(this.getAttributeForFields(attrname, false));
+		return new ArrayList<>(this.getAttributeForFields(attrname, false));
 	}
 
 	/**
@@ -1164,7 +1163,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return fieldMap The DataRow's fields as
 	 *         <code>java.util.HashMap&lt;String,Object&gt;</code> object.
 	 */
-	public java.util.HashMap<String, Object> getObjects() {
+	public HashMap<String, Object> getObjects() {
 		HashMap<String, Object> hm = new HashMap<>();
 		Set<String> ks = this.dataFields.keySet();
 		Iterator<String> it = ks.iterator();

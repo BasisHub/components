@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataRow;
@@ -30,7 +30,6 @@ public class ResultSetJsonMapper {
 		g.writeStartArray();
 
 		boolean metaDone = !meta;
-		int idx=0;
 		
 		for (DataRow dr : dataRows) {
 			g.writeStartObject();

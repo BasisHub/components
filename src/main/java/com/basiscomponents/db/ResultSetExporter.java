@@ -15,9 +15,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Provides static methods to export a {@link com.basiscomponents.db.ResultSet com.basiscomponents.db.ResultSet} in the following formats:
@@ -457,12 +454,12 @@ public class ResultSetExporter {
 	 */
 	public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader, boolean useLabelIfPresent, String sheetName, DataRow AttributesRecord) throws Exception{
     	if(outputFile != null){
-    		FileOutputStream os = new FileOutputStream(outputFile);
+			try (FileOutputStream os = new FileOutputStream(outputFile)) {
     				
     		writeXLSX(rs, new FileOutputStream(outputFile), writeHeader, useLabelIfPresent, sheetName, AttributesRecord);
     		
     		os.flush();
-            os.close();
+			}
     	}
     }
 
@@ -541,7 +538,8 @@ public class ResultSetExporter {
                 	try {
                 		label = AttributesRecord.getFieldAttribute(fieldname, "LABEL");
                 	}
-                	finally  {}
+					finally {
+					}
                 }
                 cell.setCellValue(label);
                 cellIndex++;
@@ -597,58 +595,5 @@ public class ResultSetExporter {
         wb.close();
         
     }
-
-//  sample code:
-	
-//	public static void main(String[] args) throws Exception {
-//		StringWriter w = new StringWriter();
-//		ResultSet rs = new ResultSet();
-//		DataRow dr = new DataRow();
-//		dr.setFieldValue("feld1","TEST1");
-//		dr.setFieldValue("feld2","TEST2");
-//		rs.add(dr);
-//
-//		dr = new DataRow();
-//		dr.setFieldValue("feld1","TEST1");
-//		dr.setFieldValue("feld3","TEST3");
-//		rs.add(dr);
-//
-//		dr = new DataRow();
-//		dr.setFieldValue("feld1","TEST1");
-//		dr.setFieldValue("feld2","TEST2");
-//		dr.setFieldValue("feld3","TEST3");
-//		rs.add(dr);
-//		
-//		ResultSetExporter.writeXML(rs, "articles","article", w);
-//	    w.flush();
-//	    w.close();			
-//		
-//		System.out.println(w.toString());
-//
-//		FileWriter fw = new FileWriter("D:/test.xml");
-//		ResultSetExporter.writeXML(rs, "articles","article", fw);
-//	    fw.flush();
-//	    fw.close();	
-//	    
-//	    HashMap<String, String> links = new HashMap<>();
-//	    links.put("feld1","/rest/test/{feld1}");
-//	    links.put("feld2","/rest/test/{feld1}/{feld2}");
-//		fw = new FileWriter("D:/test.html");
-//		ResultSetExporter.writeHTML(rs, fw, links);
-//	    fw.flush();
-//	    fw.close();		    
-//
-//		fw = new FileWriter("D:/test.json");
-//		ResultSetExporter.writeJSON(rs, fw);
-//	    fw.flush();
-//	    fw.close();			    
-//
-//		fw = new FileWriter("D:/test.txt");
-//		ResultSetExporter.writeTXT(rs, fw);
-//	    fw.flush();
-//	    fw.close();			    
-//	    
-//	    
-//	}
 
 }
