@@ -31,8 +31,6 @@ public class DataRowQueryMatcher {
 		if (exp_parts.length != 2)
 			throw new InvalidAlgorithmParameterException("invalid expression: "+term); 
 		DataField dataField = dataRow.getField(exp_parts[0]);
-
-//		System.out.println("term: "+term+" resolved to "+b);
 		if (dataField.equals(exp_parts[1], caseSensitive, trimmed))
 			return "1";
 		else 
@@ -54,7 +52,6 @@ public class DataRowQueryMatcher {
 		statement = statement.replaceAll("\\s"," ");
 		while (statement.contains("  "))
 			statement = statement.replace("  ", " ");
-//		System.out.println(stmt);
 		statement += " ";
 				
 		Boolean status = false; //false=term true=punctuation
@@ -84,13 +81,11 @@ public class DataRowQueryMatcher {
 					break;
 			}
 		}
-//		System.out.println(bexp);
 		return resolveBooleanExp(booleanExpression.toString());
 	}
 
 	private static Boolean resolveBooleanExp(String bexp) {
 
-//		System.out.println("resolve: "+bexp);
 		while (bexp.contains("(")){
 			int first_par = bexp.indexOf('(');
 			int last_par = first_par;
@@ -138,21 +133,15 @@ public class DataRowQueryMatcher {
 				}
 				
 				if (tmp_res){
-//					System.out.println(bexp+" is true");
 					return true;
 				} else {
-//					System.out.println(bexp+" is false");
-
 					continue;
 				}
 						
 			}
 			if (or_terms[i].equals("1")){
-//				System.out.println(or_terms[i]+" is true");
 				return true;
 			}
-//			else
-//				System.out.println(or_terms[i]+" is false");
 		}
 
 		

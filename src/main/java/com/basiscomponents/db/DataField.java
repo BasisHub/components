@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
 import com.basiscomponents.db.model.Attribute;
+import com.basiscomponents.db.util.DataFieldConverter;
 import com.google.gson.annotations.Expose;
 
 /**
@@ -482,7 +482,7 @@ public class DataField implements java.io.Serializable {
 	}
 
 	public static Object convertType(Object o, int targetType) throws ParseException {
-		return convertType(o, targetType);
+    return DataFieldConverter.convertType(o, targetType);
 	}
 
 	public Map<String, Attribute> getAttributes2() {
