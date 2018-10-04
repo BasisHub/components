@@ -10,7 +10,6 @@ import com.basiscomponents.bc.util.SqlConnectionHelper;
 import com.basiscomponents.configuration.TracingConfiguration;
 import com.basiscomponents.db.ResultSet;
 
-
 public class SqlQueryBC {
 
 	private SqlConnectionHelper connectionHelper;
@@ -66,20 +65,21 @@ public class SqlQueryBC {
 
 		try (CloseableWrapper<Connection> connw = getConnection()) {
 			connection = connw.getCloseable();
-			PreparedStatement prep = connection.prepareStatement(sql);
+			try (PreparedStatement prep = connection.prepareStatement(sql)) {
 
-			// Set params if there are any
-			if (params != null) {
-				int i = 1;
-				for (Object p : params) {
-					prep.setObject(i, p);
-					i++;
+				// Set params if there are any
+				if (params != null) {
+					int i = 1;
+					for (Object p : params) {
+						prep.setObject(i, p);
+						i++;
+					}
 				}
+
+				traceSqlStatement(SqlQueryBcLogger.Method.RETRIEVE, prep.toString());
+
+				brs = new ResultSet(prep.executeQuery());
 			}
-
-			traceSqlStatement(SqlQueryBcLogger.Method.RETRIEVE, prep.toString());
-
-			brs = new ResultSet(prep.executeQuery());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -166,11 +166,11 @@ public class SqlQueryBC {
 		}
 	}
 
-
 	private static class SqlQueryBcLogger {
 		public enum Method {
 			RETRIEVE, EXECUTE
 		}
+
 		private static String lastSQL;
 		private static String lastRetrieve;
 		private static String lastExecute;
@@ -201,9 +201,11 @@ public class SqlQueryBC {
 		public static String getLastRetrieve() {
 			return lastRetrieve;
 		}
+
 		public static String getLastExecute() {
 			return lastExecute;
 		}
+
 		private SqlQueryBcLogger() {
 			// should not be invoked, this is only a static helper class
 		}
