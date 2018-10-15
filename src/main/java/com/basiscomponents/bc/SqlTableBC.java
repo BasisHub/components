@@ -226,6 +226,7 @@ public class SqlTableBC implements BusinessComponent {
 
 			}
 			ar = new ResultSet(stmt.executeQuery());
+			stmt.close();
       for (String field : ar.getColumnNames()) {
 		Map<String, Object> attrmap = ar.getColumnMetaData(field);
         try {
@@ -545,9 +546,10 @@ public class SqlTableBC implements BusinessComponent {
       if (params.getColumnCount() > 0)
         setSqlParams(prep, params, params.getFieldNames());
 
-      java.sql.ResultSet rs = prep.executeQuery();
-      retrs = new ResultSet();
-      retrs.populate(rs, true);
+      try(java.sql.ResultSet rs = prep.executeQuery()){
+    	  retrs = new ResultSet();
+    	  retrs.populate(rs, true);
+      }
     } catch (SQLException ex) {
       throw ex;
     } finally {
@@ -562,7 +564,7 @@ public class SqlTableBC implements BusinessComponent {
 
 
     // Set the generated meta attributes to the first record
-    if (retrs.size() > 0) {
+    if (!retrs.isEmpty()) {
       DataRow dr = retrs.get(0);
       for (String field : attributesRecord.getFieldNames()) {
         if (dr.contains(field))
@@ -749,6 +751,7 @@ public class SqlTableBC implements BusinessComponent {
       inserted = affectedRows > 0;
 
       // get generated keys
+
       if (affectedRows > 0) {
         java.sql.ResultSet gkeys = prep.getGeneratedKeys();
         if (gkeys.next()) {
@@ -765,7 +768,7 @@ public class SqlTableBC implements BusinessComponent {
           }
         }
       }
-
+      
       prep.close();
     }
 
@@ -851,8 +854,8 @@ public class SqlTableBC implements BusinessComponent {
     setSqlParams(prep, r, primaryKeys);
 
     prep.execute();
-
-    if (connection == null && conn != null && !conn.isClosed()) {
+    prep.close();
+    if (connection == null &&  !conn.isClosed()) {
       conn.close();
     }
   }
@@ -1008,6 +1011,7 @@ public class SqlTableBC implements BusinessComponent {
       }
 
       brs = new ResultSet(prep.executeQuery());
+      prep.close();
     } catch (SQLException e1) {
       e1.printStackTrace();
     } finally {
