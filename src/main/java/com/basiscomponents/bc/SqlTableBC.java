@@ -550,6 +550,7 @@ public class SqlTableBC implements BusinessComponent {
     	  retrs = new ResultSet();
     	  retrs.populate(rs, true);
       }
+      prep.close();
     } catch (SQLException ex) {
       throw ex;
     } finally {
