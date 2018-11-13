@@ -73,7 +73,10 @@ public class BBjSearchGizmo {
 			BBjSearchGizmoDocField f = it.next();
 			TextField lucene_field = new TextField(f.getName(), f.getContent()
 					.toLowerCase(), Field.Store.YES);
-			lucene_field.setBoost(f.getBoost());
+			
+			//this appears to have passed away with some recent Lucene version
+			// lucene_field.setBoost(f.getBoost());
+			
 			lucene_doc.add(lucene_field);
 
 		}
