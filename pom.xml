@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -123,8 +124,7 @@
 			<scope>system</scope>
 			<version>1.0</version>
 			<systemPath>${jar-directory}/jackson-all-2.9.4.jar</systemPath>
-        </dependency>
-        
+		</dependency>
 		<dependency>
 			<groupId>com.basis.lib</groupId>
 			<artifactId>gson.jar</artifactId>
@@ -187,6 +187,14 @@
 			<scope>system</scope>
 			<systemPath>${jar-directory}/netty-all-4.1.22.Final.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.6.0</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/jasperreports-javaflow-6.6.0.jar</systemPath>
+		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
