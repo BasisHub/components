@@ -45,6 +45,8 @@ public class SqlTableBC implements BusinessComponent {
   private static final String ERROR = "ERROR";
 
   private static final String BASIS_DBMS = "BASIS DBMS";
+  
+  private static final String MYSQL_DBMS = "MYSQL";
 
   private static final String COLUMN_NAME = "COLUMN_NAME";
 
@@ -354,8 +356,11 @@ public class SqlTableBC implements BusinessComponent {
         sqlfields = new StringBuilder(sqlfields.substring(1));
       }
 
-      if (customStatementUsed)
-        sql = new StringBuilder("SELECT " + sqlfields + " FROM (" + retrieveSql + ")");
+      if (customStatementUsed) {
+        sql = new StringBuilder("SELECT " + sqlfields + " FROM (" + retrieveSql + ") ");
+        if (MYSQL_DBMS.equals(dbType))
+        	sql.append(" as s ");
+      }
       else
         sql = new StringBuilder(
             "SELECT " + sqlfields + " FROM " + dbQuoteString + table + dbQuoteString);
@@ -386,7 +391,7 @@ public class SqlTableBC implements BusinessComponent {
           case BASIS_DBMS:
             sql.append(" LIMIT " + (first + 1) + "," + (last - first + 1));
             break;
-          case "MYSQL":
+          case MYSQL_DBMS:
             sql.append(" LIMIT " + first + "," + (last - first + 1));
             break;
           case "MICROSOFT SQL SERVER":
@@ -408,6 +413,7 @@ public class SqlTableBC implements BusinessComponent {
       }
 
       sqlStatement = sql.toString();
+
       try (PreparedStatement prep = conn.prepareStatement(sqlStatement)) {
         DataRow params = new DataRow();
         if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
@@ -1059,11 +1065,20 @@ public class SqlTableBC implements BusinessComponent {
 
   private PreparedStatement createMetadataStatement(Connection conn) throws SQLException {
     PreparedStatement stmt;
+
     if (retrieveSql != null && !retrieveSql.equals("")) {
-      if (BASIS_DBMS.equals(dbType)) {
-        stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
-      } else {
-        stmt = conn.prepareStatement("SELECT * FROM (" + retrieveSql + ") WHERE 1=0");
+    	
+      switch (dbType) {
+      case BASIS_DBMS:
+    	  stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
+    	  break;
+      case MYSQL_DBMS:
+    	  stmt = conn.prepareStatement(retrieveSql + " LIMIT 0");
+    	  break;
+      default: 
+    	  stmt = conn.prepareStatement("SELECT * FROM (" + retrieveSql + ") WHERE 1=0");
+    	  break;
+    	  
       }
       if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
         try {
