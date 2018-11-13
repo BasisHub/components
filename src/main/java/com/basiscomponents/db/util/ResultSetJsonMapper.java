@@ -11,6 +11,7 @@ import java.util.TimeZone;
 
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -47,6 +48,19 @@ public class ResultSetJsonMapper {
 				}
 				int t = dr.getFieldType(fn);
 				switch (t) {
+				
+				//a nested ResultSet
+				case -975:{
+					ResultSet rs = (ResultSet) dr.getField(fn).getObject();
+					try {
+						g.writeFieldName(fn);
+						g.writeRawValue(rs.toJson(meta, addIndexColumn));
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				break;
 				case java.sql.Types.CHAR:
 				case java.sql.Types.VARCHAR:
 				case java.sql.Types.NVARCHAR:
