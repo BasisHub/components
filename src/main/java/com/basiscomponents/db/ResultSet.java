@@ -306,12 +306,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			while (column < cc) {
 				column++;
 				if (FieldSelection != null && !FieldSelection.contains(rsmd.getColumnName(column))) continue;
+				name = rsmd.getColumnName(column);
+				if (name.equals("*")) continue;
+
 				HashMap<String, Object> colMap = new HashMap<>();
 				colMap.put("CatalogName", rsmd.getCatalogName(column));
 				colMap.put("ColumnClassName", rsmd.getColumnClassName(column));
 				colMap.put("ColumnDisplaySize", rsmd.getColumnDisplaySize(column));
 				colMap.put("ColumnLabel", rsmd.getColumnLabel(column));
-				name = rsmd.getColumnName(column);
 				if (this.ColumnNames.contains(name)) {
 					name += "_" + column; // handle dups
 				}
@@ -322,20 +324,27 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				colMap.put("ColumnType", type);
 				types.add(type);
 				colMap.put("ColumnTypeName", rsmd.getColumnTypeName(column));
+				colMap.put("ReadOnly", rsmd.isReadOnly(column));
+				colMap.put("Writable", rsmd.isWritable(column));
+				colMap.put("StringFormat", "");
+				colMap.put("DefinitelyWritable", rsmd.isDefinitelyWritable(column));
 				colMap.put("Precision", rsmd.getPrecision(column));
 				colMap.put("Scale", rsmd.getScale(column));
 				colMap.put("SchemaName", rsmd.getSchemaName(column));
 				colMap.put("TableName", rsmd.getTableName(column));
-				colMap.put("AutoIncrement", rsmd.isAutoIncrement(column));
-				colMap.put("CaseSensitive", rsmd.isCaseSensitive(column));
 				colMap.put("Currency", rsmd.isCurrency(column));
-				colMap.put("DefinitelyWritable", rsmd.isDefinitelyWritable(column));
 				colMap.put("Nullable", rsmd.isNullable(column));
-				colMap.put("ReadOnly", rsmd.isReadOnly(column));
 				colMap.put("Searchable", rsmd.isSearchable(column));
 				colMap.put("Signed", rsmd.isSigned(column));
-				colMap.put("Writable", rsmd.isWritable(column));
-				colMap.put("StringFormat", "");
+				colMap.put("AutoIncrement", rsmd.isAutoIncrement(column));
+				
+				//hack for MySQL for JOINed / calculated fields
+				colMap.put("CaseSensitive", false);
+				try {
+					colMap.put("CaseSensitive", rsmd.isCaseSensitive(column));
+				}
+				catch (Exception e) {} finally {};
+				
 				this.MetaData.add(colMap);
 			}
 		} else {
