@@ -21,7 +21,10 @@ import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowFromJsonProvider;
 import com.basiscomponents.db.util.DataRowMatcher;
+import com.basiscomponents.db.util.JRDataSourceAdapter;
 import com.basiscomponents.db.util.TemplateParser;
+
+import net.sf.jasperreports.engine.JRDataSource;
 
 /**
  * A DataRow is a container object with key/value pairs. Each key being a String
@@ -1359,6 +1362,17 @@ public class DataRow implements java.io.Serializable {
 
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns this DaaRow as a JRDataSource
+	 * 
+	 * @return JRDataSourceAdapter representing a ResultSet with this record 
+	 */
+	public JRDataSource toJRDataSource() {
+		ResultSet rs = new ResultSet();
+		rs.add(this);
+		return new JRDataSourceAdapter(rs);
 	}
 
 	/**

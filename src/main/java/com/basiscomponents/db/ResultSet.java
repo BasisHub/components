@@ -28,11 +28,14 @@ import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.sql.SQLResultSet;
 import com.basiscomponents.db.util.BBTemplateProvider;
+import com.basiscomponents.db.util.JRDataSourceAdapter;
 import com.basiscomponents.db.util.ResultSetJsonMapper;
 import com.basiscomponents.db.util.SqlTypeNames;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+
+import net.sf.jasperreports.engine.JRDataSource;
 
 /**
  * The ResultSet class is a container class for DataRow objects.
@@ -1990,6 +1993,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (addIndexColumn!=null)
 			createIndex();
 		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta, addIndexColumn);
+	}
+	
+	/**
+	 * Returns this ResultSet as a JRDataSource
+	 * 
+	 * @return JRDataSourceAdapter representing this ResultSet
+	 */
+	public JRDataSource toJRDataSource() {
+		return new JRDataSourceAdapter(this);
 	}
 
 	/**
