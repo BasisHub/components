@@ -24,7 +24,7 @@ public class CrossEventDispatcher  {
 	public static Object getInstance(BBjAPI api)  {
 		BBjNamespace ns = api.getGlobalNamespace();
 		try {
-			Object ed = ns.getValue("bde2937e9287be9273be9273be90273b0e273b0e273b0e273b0e7");
+			Object ed = ns.getValue("bde2937e9287be9273be9273be90273b0e273b0e273b0e273b0e7"+api.getConfig().getCommandLineObject().getOriginalClasspathName());
 			return ed;
 		} catch (BBjException e) {
 			// TODO Auto-generated catch block
@@ -33,7 +33,7 @@ public class CrossEventDispatcher  {
 		
 		Object ed = new CrossEventDispatcher();
 		try {
-			ns.setValue("bde2937e9287be9273be9273be90273b0e273b0e273b0e273b0e7",ed);
+			ns.setValue("bde2937e9287be9273be9273be90273b0e273b0e273b0e273b0e7"+api.getConfig().getCommandLineObject().getOriginalClasspathName(),ed);
 		} catch (BBjException e) {
 			e.printStackTrace();
 		}
