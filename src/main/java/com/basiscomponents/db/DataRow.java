@@ -1365,7 +1365,7 @@ public class DataRow implements java.io.Serializable {
 	}
 	
 	/**
-	 * Returns this DaaRow as a JRDataSource
+	 * Returns this DataRow as a JRDataSource
 	 * 
 	 * @return JRDataSourceAdapter representing a ResultSet with this record 
 	 */
