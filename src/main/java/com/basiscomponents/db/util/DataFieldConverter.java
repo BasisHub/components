@@ -165,7 +165,25 @@ public class DataFieldConverter {
 				String p = ((String) o).replaceFirst("T", " ");
 				if (tmpstr.isEmpty())
 					return null;
-				return java.sql.Timestamp.valueOf(p);
+				
+				try {
+					return java.sql.Timestamp.valueOf(p);	
+				}
+				catch (Exception e){
+				}
+				finally {
+				}
+				if (p.contains("+")) {
+					String p1 = p.substring(0, p.indexOf("+"));
+					try {
+						return java.sql.Timestamp.valueOf(p1);	
+					}
+					catch (Exception e){
+					}
+					finally {
+					}
+				}
+				System.err.println("ERROR PARSING DATE "+p);
 			}
 
 			break;
