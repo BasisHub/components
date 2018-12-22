@@ -955,4 +955,16 @@ public class BBMigPane implements BBjControl {
 		
 	}
 
+	@Override
+	public boolean isGrouped() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setGrouped(boolean arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
