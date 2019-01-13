@@ -175,6 +175,9 @@ public class DataRowFromJsonProvider {
 				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
 				case (int) 11:
 					String tss = fieldObj.toString();
+					if (!tss.contains("T")) {
+						tss+="T00:00:00.0";
+					}
 					java.sql.Timestamp ts = (java.sql.Timestamp) DataField.convertType(tss, fieldType);
 					dr.addDataField(fieldName, fieldType, new DataField(ts));
 					break;
