@@ -183,7 +183,9 @@ public class ResultSetJsonMapper {
 					if (dr.getField(fn) == null || dr.getField(fn).getDate() == null)
 						g.writeStringField(fn, "");
 					else {
-						g.writeStringField(fn, dr.getField(fn).getDate().toString());
+						g.writeStringField(fn, dr.getField(fn).getDate().toString()+"T00:00:00");
+						// adding T00:00:00 for JavaScript to understand the correct order of day and month
+						// see https://github.com/BBj-Plugins/BBjGridExWidget/issues/89
 					}
 					break;
 
