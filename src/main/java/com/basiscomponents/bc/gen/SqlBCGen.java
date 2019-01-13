@@ -1,6 +1,7 @@
 package com.basiscomponents.bc.gen;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +19,9 @@ public class SqlBCGen {
 	private static String Tpl;
 
 	public static void gen(String Driver, String Url, String User, String Password, String packageName, String outputDir) throws FileNotFoundException {
+		
+
+		
 		if (Tpl == null){
 			SqlBCGen.loadTpl(SqlBCGen.class.getResourceAsStream("/com/basiscomponents/bc/gen/TableBC.txt"));
 		}
@@ -62,11 +66,17 @@ public class SqlBCGen {
 
 
 	private static void genClass(String tableName, String packageName, String outputDir) throws FileNotFoundException {
+		
+		
+		String className = SqlBCGen.toCamelCase(tableName)+"BC";
+		if (new File(outputDir+className+".java").exists()) {
+			System.out.println(outputDir+className+".java already exists. Skipping...");
+		    return;
+		}
+		
+		
 		System.out.println("generating: "+tableName);
 		String tmp = SqlBCGen.Tpl;
-
-		String className = SqlBCGen.toCamelCase(tableName)+"BC";
-
 		tmp=tmp.replace("[[class]]", className);
 		tmp=tmp.replace("[[package]]", packageName);
 		tmp=tmp.replace("[[table]]", tableName);
