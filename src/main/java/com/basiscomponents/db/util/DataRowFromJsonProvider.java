@@ -10,6 +10,7 @@ import java.util.Set;
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -136,6 +137,14 @@ public class DataRowFromJsonProvider {
 					continue;
 				}
 				switch (fieldType) {
+				
+				case -975:
+					// nested ResultSet
+					System.err.println("fromJson not implemented for nested ResultSet!");
+					// FIXME: need to parse and create the nested ResultSet as well
+					// this is https://github.com/BasisHub/components/issues/115
+					dr.setFieldValue(fieldName, new ResultSet());
+					break;
 				case java.sql.Types.CHAR:
 				case java.sql.Types.VARCHAR:
 				case java.sql.Types.NVARCHAR:

@@ -1347,7 +1347,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param type The value of the ColumnType property to set.
 	 */
 	public void setColumnType(int column, int type) {
-		String typeName = getSQLTypeName(type);
+		
+		String typeName;
+		if (type == -975)
+			typeName ="ResultSet"; 
+		else
+			typeName = getSQLTypeName(type);
 		if (typeName == null) {
 			throw new IllegalStateException("Unknown column type " + type);
 		} else {

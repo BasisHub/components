@@ -968,6 +968,9 @@ public class DataRow implements java.io.Serializable {
 				type = java.sql.Types.VARBINARY;
 		} else {
 			switch (typeName) {
+			case "com.basiscomponents.db.ResultSet":
+				type=-975;
+				break;
 			case "java.lang.String":
 				type = java.sql.Types.VARCHAR;
 				break;

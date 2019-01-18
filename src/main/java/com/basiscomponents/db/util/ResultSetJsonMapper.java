@@ -212,6 +212,7 @@ public class ResultSetJsonMapper {
 
 				default:
 					// this is a noop - TODO
+					System.err.println("unknown column type: "+t);
 					break;
 
 				}// switch
