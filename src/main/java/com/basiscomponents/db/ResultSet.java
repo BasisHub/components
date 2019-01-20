@@ -2842,5 +2842,31 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 		System.out.println("-------------------ResultSet End-------------------------");
 	}
+	
+	/**
+	 * 
+	 * @param rs2: the resultset to merge in
+	 * @param onFieldName: the field name to use to identify matches
+	 * @param fOverwrite: set to true if you want to overwrite fields that exist in both
+	 */
+	public void merge(ResultSet rs2, String onFieldName, boolean fOverwrite) {
+		Iterator<DataRow> it = rs2.iterator();
+		while (it.hasNext()) {
+			DataRow rec = it.next();
+			Object o=rec.getField(onFieldName).getObject();
+			
+			Iterator<DataRow> myIt = iterator();
+			while (myIt.hasNext()){
+				DataRow myRec = myIt.next();
+				Object myO=myRec.getField(onFieldName).getObject();
+				if (myO.equals(o)) {
+					myRec.mergeRecord(rec, fOverwrite);
+					break;
+				}
+			}
+			
+		}
+		//optimization potential: always search in the smaller ResultSet
+	}
 
 }
