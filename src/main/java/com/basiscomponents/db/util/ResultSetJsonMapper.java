@@ -92,7 +92,7 @@ public class ResultSetJsonMapper {
 						}
 						g.writeRawValue(s);
 					} else {
-						String s = dr.getField(fn).getString().trim();
+						String s = dr.getField(fn).getString();
 						g.writeStringField(fn, s);
 					}
 					break;
