@@ -90,7 +90,25 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	@Override
 	public ResultSet clone() {
-		return new ResultSet(MetaData, ColumnNames, DataRows, KeyColumns);
+		return clone(true);
+	}
+
+	/**
+	 * creates a clone of the ResultSet
+	 * @param fDeepClone set to true to also clone all the DataRows contained, false will only clone the container but both will continue to reference the same DataRows
+	 * @return
+	 */
+	public ResultSet clone(Boolean fDeepClone) {
+		if (!fDeepClone)
+			return new ResultSet(MetaData, ColumnNames, DataRows, KeyColumns);
+
+		
+		ResultSet rs = new ResultSet();
+		Iterator<DataRow> it = iterator();
+		while (it.hasNext()) {
+			rs.add(it.next().clone());
+		}
+		return rs;
 	}
 
 
