@@ -137,7 +137,13 @@ public class DataRowFromJsonProvider {
 					continue;
 				}
 				switch (fieldType) {
-				
+				case -974:
+					// nested DataRow
+					System.err.println("fromJson not implemented for nested DataRow!");
+					// FIXME: need to parse and create the nested ResultSet as well
+					// this is https://github.com/BasisHub/components/issues/115
+					dr.setFieldValue(fieldName, new DataRow());
+					break;					
 				case -975:
 					// nested ResultSet
 					System.err.println("fromJson not implemented for nested ResultSet!");
@@ -145,6 +151,7 @@ public class DataRowFromJsonProvider {
 					// this is https://github.com/BasisHub/components/issues/115
 					dr.setFieldValue(fieldName, new ResultSet());
 					break;
+				
 				case java.sql.Types.CHAR:
 				case java.sql.Types.VARCHAR:
 				case java.sql.Types.NVARCHAR:

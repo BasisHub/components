@@ -48,7 +48,23 @@ public class ResultSetJsonMapper {
 				}
 				int t = dr.getFieldType(fn);
 				switch (t) {
-				
+
+				//a nested ResultSet
+				case -974:{
+					DataRow drj = (DataRow) dr.getField(fn).getObject();
+					try {
+						g.writeFieldName(fn);
+						String jstr = drj.toJson(meta);
+						if (jstr.startsWith("[")) {
+							jstr = jstr.substring(1,jstr.length()-1);
+						}
+						g.writeRawValue(jstr);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				break;
 				//a nested ResultSet
 				case -975:{
 					ResultSet rs = (ResultSet) dr.getField(fn).getObject();
