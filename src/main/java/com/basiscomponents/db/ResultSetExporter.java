@@ -422,6 +422,16 @@ public class ResultSetExporter {
 		writer.write(resultSet.toJson());
 	}	
 	
+	/**
+	 * 
+	 * @param resultSet The ResultSet object to write as JSON.
+	 * @param writer The Writer used to write the JSON String.
+	 * @param fMeta A Boolean indicating whether to write out the meta data object
+	 * @throws Exception Gets thrown in case the ResultSet could not be converted to a JSON String.
+	 */
+	public static void writeJSON(ResultSet resultSet, Writer writer, Boolean fMeta) throws Exception{
+		writer.write(resultSet.toJson(fMeta));
+	}	
 	
 	/**
 	 * Writes the content of the given ResultSet as XLSX into the specified File. 
