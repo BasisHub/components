@@ -968,6 +968,12 @@ public class DataRow implements java.io.Serializable {
 				type = java.sql.Types.VARBINARY;
 		} else {
 			switch (typeName) {
+			case "com.basiscomponents.db.DataRow":
+				type=-974;
+				break;
+			case "com.basiscomponents.db.ResultSet":
+				type=-975;
+				break;
 			case "java.lang.String":
 				type = java.sql.Types.VARCHAR;
 				break;
@@ -1196,15 +1202,16 @@ public class DataRow implements java.io.Serializable {
 	 * <b>Note:</b> The DataRow's field values will be overwritten by the values of
 	 * the passed DataRow in case the field's exist in both.
 	 *
-	 * @param dataRow
-	 *            The DataRow object to merge with
+	 * @param dataRow The DataRow object to merge with
+	 * @param fOverwrite set to true to always overwrite fields that already exist, false to skip those
 	 */
-	public void mergeRecord(DataRow dataRow) {
+	public void mergeRecord(DataRow dataRow, Boolean fOverwrite) {
 		BBArrayList<String> names = dataRow.getFieldNames();
 		Iterator<String> it = names.iterator();
 		while (it.hasNext()) {
 			String f = it.next();
 			try {
+				if (fOverwrite || !contains(f))
 				this.addDataField(f, dataRow.getFieldType(f), dataRow.getDataField(f));
 			} catch (Exception e) {
 				// Auto-generated catch block
@@ -1213,6 +1220,20 @@ public class DataRow implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Merges this DataRow object with the given one by adding all fields of the
+	 * given DataRow object to the current one. <br>
+	 * <br>
+	 * <b>Note:</b> The DataRow's field values will be overwritten by the values of
+	 * the passed DataRow in case the field's exist in both.
+	 *
+	 * @param dataRow The DataRow object to merge with
+	 */
+	public void mergeRecord(DataRow dataRow) {
+		mergeRecord(dataRow, true);
+	}
+	
+	
 	/**
 	 * Creates a DataRow from a String in URL format Sample:
 	 * field1=value1&field2=value2 will result in a DataRow with the two fields

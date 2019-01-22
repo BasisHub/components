@@ -90,7 +90,25 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	@Override
 	public ResultSet clone() {
-		return new ResultSet(MetaData, ColumnNames, DataRows, KeyColumns);
+		return clone(true);
+	}
+
+	/**
+	 * creates a clone of the ResultSet
+	 * @param fDeepClone set to true to also clone all the DataRows contained, false will only clone the container but both will continue to reference the same DataRows
+	 * @return
+	 */
+	public ResultSet clone(Boolean fDeepClone) {
+		if (!fDeepClone)
+			return new ResultSet(MetaData, ColumnNames, DataRows, KeyColumns);
+
+		
+		ResultSet rs = new ResultSet();
+		Iterator<DataRow> it = iterator();
+		while (it.hasNext()) {
+			rs.add(it.next().clone());
+		}
+		return rs;
 	}
 
 
@@ -1347,7 +1365,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param type The value of the ColumnType property to set.
 	 */
 	public void setColumnType(int column, int type) {
-		String typeName = getSQLTypeName(type);
+		
+		String typeName;
+		if (type == -975)
+			typeName ="ResultSet"; 
+		else
+			if (type == -974)
+				typeName ="DataRow"; 
+			else
+				typeName = getSQLTypeName(type);
 		if (typeName == null) {
 			throw new IllegalStateException("Unknown column type " + type);
 		} else {
@@ -2833,6 +2859,32 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 
 		System.out.println("-------------------ResultSet End-------------------------");
+	}
+	
+	/**
+	 * 
+	 * @param rs2: the resultset to merge in
+	 * @param onFieldName: the field name to use to identify matches
+	 * @param fOverwrite: set to true if you want to overwrite fields that exist in both
+	 */
+	public void merge(ResultSet rs2, String onFieldName, boolean fOverwrite) {
+		Iterator<DataRow> it = rs2.iterator();
+		while (it.hasNext()) {
+			DataRow rec = it.next();
+			Object o=rec.getField(onFieldName).getObject();
+			
+			Iterator<DataRow> myIt = iterator();
+			while (myIt.hasNext()){
+				DataRow myRec = myIt.next();
+				Object myO=myRec.getField(onFieldName).getObject();
+				if (myO.equals(o)) {
+					myRec.mergeRecord(rec, fOverwrite);
+					break;
+				}
+			}
+			
+		}
+		//optimization potential: always search in the smaller ResultSet
 	}
 
 }
