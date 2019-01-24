@@ -18,7 +18,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 public class ResultSetJsonMapper {
-	public static String toJson(List<DataRow> dataRows, List<HashMap<String, Object>> metaData, boolean meta, String addIndexColumn)
+	public static String toJson(List<DataRow> dataRows, List<HashMap<String, Object>> metaData, boolean meta, String addIndexColumn, boolean f_trimStrings)
 			throws IOException {
 
 		JsonFactory jf = new JsonFactory();
@@ -93,6 +93,8 @@ public class ResultSetJsonMapper {
 						g.writeRawValue(s);
 					} else {
 						String s = dr.getField(fn).getString();
+						if (f_trimStrings)
+							s=s.trim();
 						g.writeStringField(fn, s);
 					}
 					break;

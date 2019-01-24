@@ -1994,7 +1994,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
 	public String toJson() throws Exception {
-			return toJson(true,null);
+			return toJson(true,null, true);
 	}
 
 	/**
@@ -2005,7 +2005,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
 	public String toJson(Boolean f_meta) throws Exception {
-		return toJson(f_meta, null);
+		return toJson(f_meta, null, true);
 	}
 
 	/**
@@ -2016,9 +2016,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
 	public String toJson(Boolean f_meta, String addIndexColumn) throws Exception {
+		return toJson(f_meta, addIndexColumn, true);
+	}
+	
+	public String toJson(Boolean f_meta, String addIndexColumn, Boolean f_trimStrings) throws Exception {
 		if (addIndexColumn!=null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta, addIndexColumn);
+		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta, addIndexColumn, f_trimStrings);
 	}
 	
 	/**
