@@ -13,7 +13,7 @@ public class ExpressionMatcher {
 	private String function;
 	private String operand;
 	private boolean orCombined;
-	private ArrayList<ExpressionMatcher> matcherList = new ArrayList<ExpressionMatcher>();
+	private ArrayList<ExpressionMatcher> matcherList = new ArrayList<>();
 	private DataRow drCompare;
 
 
@@ -198,6 +198,8 @@ public class ExpressionMatcher {
 		if (m1.find()) {
 			String oper = m1.group(1);
 			if (oper == null) oper = "=";
+			if (oper.equals("!"))
+				oper = "!=";
 			ret += fieldName + " " + oper + " ?";
 		}
 		return ret;
