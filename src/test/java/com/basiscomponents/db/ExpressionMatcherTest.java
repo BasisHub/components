@@ -11,7 +11,7 @@ public class ExpressionMatcherTest {
 		String wh = ExpressionMatcher.generatePreparedWhereClause("LICENSE", "!123");
 		assertEquals("LICENSE != ?", wh);
 		wh = ExpressionMatcher.generatePreparedWhereClause("LICENSE", "<>123");
-		// assertEquals("LICENSE != ?", wh); FIXME this still needs to be fixed
+		assertEquals("LICENSE != ?", wh);
 
 		System.out.println(wh);
 		wh = ExpressionMatcher.generatePreparedWhereClause("LICENSE", "<123");

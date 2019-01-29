@@ -178,9 +178,10 @@ public class ExpressionMatcher {
 	}
 
 
-	public static String generatePreparedWhereClause(String fieldName, String condition) {
+	public static String generatePreparedWhereClause(String fieldName, final String condition) {
+		String cond = condition.replace("<>", "!");
 		String ret = "";
-		String[] conditions = condition.split("(?<!\\\\)[\\|&]");
+		String[] conditions = cond.split("(?<!\\\\)[\\|&]");
 		int i = 0;
 		Pattern p = Pattern.compile("(?<!\\\\)([\\|&])");
 		Matcher m = p.matcher(condition);
