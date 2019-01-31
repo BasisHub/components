@@ -209,11 +209,12 @@ public class ExpressionMatcher {
 
 	public static DataRow getPreparedWhereClauseValues(String condition, int fieldType) throws Exception {
 		DataRow dr = new DataRow();
-		String[] conditions = condition.split("(?<!\\\\)[\\|&]");
+		String cond = condition.replace("<>", "!");
+		String[] conditions = cond.split("(?<!\\\\)[\\|&]");
 		Pattern p = Pattern.compile("^(!|<=|>=|=<|=>|<|>){0,1}(.*)");
 		int i = 1;
-		for (String cond : conditions) {
-			Matcher m = p.matcher(cond);
+		for (String co : conditions) {
+			Matcher m = p.matcher(co);
 			if (m.find()) {
 				dr.setFieldValue("VALUE"+i, fieldType, m.group(2).replaceAll("\\\\([\\|&])", "$1"));
 				i++;
