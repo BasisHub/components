@@ -26,4 +26,8 @@ public class DataRowRegexMatcher implements DataRowMatcher {
 		return fieldName;
 	}
 
+	String getCriteria() {
+		return criteria;
+	}
+
 }
