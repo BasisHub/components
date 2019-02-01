@@ -2,6 +2,7 @@ package com.basiscomponents.db.constants;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -10,13 +11,13 @@ import java.util.Map.Entry;
  */
 public class SimpleConstantsResolver implements ConstantsResolver{
 
-	private HashMap<String, String> constants;
+	private Map<String, String> constants;
 	
 	/**
 	 * Initializes the SimpleConstantResolver.
 	 */
 	public SimpleConstantsResolver() {
-		this.constants = new HashMap<String, String>();
+		this.constants = new HashMap<>();
 	}
 	
 	/**

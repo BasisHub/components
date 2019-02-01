@@ -30,17 +30,19 @@ import com.basiscomponents.util.KeyValuePair;
  * <h1>SqlTableBC represents a table in a database.</h1>
  * <p>
  * Data can be read/written from/into the database using a JDBC driver.<br>
- * {@link #setTable(String)} sets the table, which should be used for reading/writing data.
+ * {@link #setTable(String)} sets the table, which should be used for
+ * reading/writing data.
  * <p>
- * SqlTableBC is using {@link DataRow} for a single data row representation and {@link ResultSet}
- * for a set of data rows.
+ * SqlTableBC is using {@link DataRow} for a single data row representation and
+ * {@link ResultSet} for a set of data rows.
  * <p>
- * The developer has to work with DataRow's and ResultSet's only. No SQL knowledge is required.
+ * The developer has to work with DataRow's and ResultSet's only. No SQL
+ * knowledge is required.
  * <p>
- * SqlTableBC is using the JDBC metadata to determine the table information (such as column names,
- * column types, field lengths, and so on).
+ * SqlTableBC is using the JDBC metadata to determine the table information
+ * (such as column names, column types, field lengths, and so on).
  *
- * @author vkolarov
+ * @author vkolarov, damore
  */
 public class SqlTableBC implements BusinessComponent {
 
@@ -236,14 +238,14 @@ public class SqlTableBC implements BusinessComponent {
 			this.filter = new DataRow();
 		} else {
 			DataRow f = filter.clone();
-			Map<String, DataField> regexes = f.getFieldNames().stream()
+			Map<String, DataField> rgxs = f.getFieldNames().stream()
 					.map(x -> new KeyValuePair<String, DataField>(x, filter.getField(x)))
 					.filter(x -> x.getValue().getString().startsWith("regex:"))
 					// .peek(x -> System.out.println(x.getValue().getString()))
 					.collect(Collectors.toMap(KeyValuePair::getKey, KeyValuePair::getValue));
 
-			this.regexes = regexes;
-			regexes.forEach((k, v) -> f.removeField(k));
+			this.regexes = rgxs;
+			rgxs.forEach((k, v) -> f.removeField(k));
 			this.filter = f;
 		}
 	}
@@ -900,6 +902,7 @@ public class SqlTableBC implements BusinessComponent {
     try {
       allowedFilter.setFieldValue(fieldName, Types.VARCHAR, null);
     } catch (Exception e) {
+			// Do nothing
     }
   }
 

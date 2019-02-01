@@ -1,7 +1,5 @@
 package com.basiscomponents.db.constants;
 
-import com.basis.bbj.client.util.BBjException;
-
 public interface ConstantsResolver {
 	
 	
