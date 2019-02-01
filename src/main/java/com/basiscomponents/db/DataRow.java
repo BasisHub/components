@@ -956,7 +956,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception
 	 */
-	public void addDataField(String fieldName, DataField dataField) throws Exception {
+	public void addDataField(String fieldName, DataField dataField) {
 		Object o = dataField.getObject(); // default
 		int type;
 
