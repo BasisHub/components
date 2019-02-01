@@ -58,7 +58,7 @@ public class SqlTableBC implements BusinessComponent {
 
   private static final String COLUMN_NAME = "COLUMN_NAME";
 
-  private SqlConnectionHelper connectionHelper;
+	private final SqlConnectionHelper connectionHelper;
 
   private String table;
   private String scope = "";
@@ -74,7 +74,6 @@ public class SqlTableBC implements BusinessComponent {
   private Map<String, String> mapping = new HashMap<>();
 
 	private DataRow filter = new DataRow();
-	private List<DataRowRegexMatcher> regexMatchers = new ArrayList<>();
   private DataRow fieldSelection;
 
   private String dbType;

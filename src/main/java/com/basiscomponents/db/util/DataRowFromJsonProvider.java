@@ -21,37 +21,40 @@ public class DataRowFromJsonProvider {
 	private static final String COLUMN_TYPE = "ColumnType";
 
 	@SuppressWarnings("unchecked")
-	public static DataRow fromJson(String in, DataRow ar) throws Exception {
-
-		if (in.length() < 2)
+	public static DataRow fromJson(final String in, final DataRow ar) throws Exception {
+		String input = in;
+		if (input.length() < 2) {
 			return new DataRow();
-
-		if (ar == null)
-			ar = new DataRow();
-		else
-			ar = ar.clone();
+		}
+		DataRow attributes;
+		if (ar == null) {
+			attributes = new DataRow();
+		} else {
+			attributes = ar.clone();
+		}
 
 		// convert characters below chr(32) to \\uxxxx notation
 		int i = 0;
-		while (i < in.length()) {
-			if (in.charAt(i) < 31) {
-				String hex = String.format("%04x", (int) in.charAt(i));
-				in = in.substring(0, i) + "\\u" + hex + in.substring(i + 1);
+
+		while (i < input.length()) {
+			if (input.charAt(i) < 31) {
+				String hex = String.format("%04x", (int) input.charAt(i));
+				input = input.substring(0, i) + "\\u" + hex + input.substring(i + 1);
 			}
 			i++;
 		}
 
-		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
-			in = in.substring(11, in.length() - 1);
+		if (input.startsWith("{\"datarow\":[") && input.endsWith("]}")) {
+			input = input.substring(11, input.length() - 1);
 		}
-		String intmp = in;
+		String intmp = input;
 		JsonNode root = new ObjectMapper().readTree(intmp);
 
-		if (in.startsWith("{") && in.endsWith("}")) {
-			in = "[" + in + "]";
+		if (input.startsWith("{") && input.endsWith("}")) {
+			input = "[" + input + "]";
 		}
 		JsonFactory f = new JsonFactory();
-		JsonParser jp = f.createParser(in);
+		JsonParser jp = f.createParser(input);
 		jp.nextToken();
 		ObjectMapper objectMapper = new ObjectMapper();
 
@@ -78,7 +81,7 @@ public class DataRowFromJsonProvider {
 				
 				@SuppressWarnings("unchecked")
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
-				if (!ar.contains(fieldName) && !fieldName.equals("meta")) {
+				if (!attributes.contains(fieldName) && !fieldName.equals("meta")) {
 					String s = "12";
 
 					if (fieldMeta == null) {
@@ -89,7 +92,7 @@ public class DataRowFromJsonProvider {
 					if (fieldMeta.get(COLUMN_TYPE) != null)
 						s = (String) fieldMeta.get(COLUMN_TYPE);
 					if (s != null) {
-						ar.addDataField(fieldName, Integer.parseInt(s), new DataField(null));
+						attributes.addDataField(fieldName, Integer.parseInt(s), new DataField(null));
 						Set<String> ks = fieldMeta.keySet();
 						if (ks.size() > 1) {
 							Iterator<String> itm = ks.iterator();
@@ -97,7 +100,7 @@ public class DataRowFromJsonProvider {
 								String k = itm.next();
 								if (k.equals(COLUMN_TYPE))
 									continue;
-								ar.setFieldAttribute((String) fieldName, k, (String) fieldMeta.get(k));
+								attributes.setFieldAttribute((String) fieldName, k, (String) fieldMeta.get(k));
 							}
 						}
 					} // if s!=null
@@ -109,24 +112,24 @@ public class DataRowFromJsonProvider {
 		Iterator<?> it2 = hm.keySet().iterator();
 		while (it2.hasNext()) {
 			String fieldName = (String) it2.next();
-			if (!ar.contains(fieldName) && !fieldName.equals("meta") && root.get(fieldName) != null) {
+			if (!attributes.contains(fieldName) && !fieldName.equals("meta") && root.get(fieldName) != null) {
 				switch (root.get(fieldName).getNodeType().toString()) {
 				case "NUMBER":
-					ar.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
+					attributes.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
 					break;
 				case "BOOLEAN":
-					ar.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
+					attributes.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
 					break;
 				default:
-					ar.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
+					attributes.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
 					break;
 
 				}
 			}
 		}
 
-		if (!ar.isEmpty()) {
-			BBArrayList<String> names = ar.getFieldNames();
+		if (!attributes.isEmpty()) {
+			BBArrayList<String> names = attributes.getFieldNames();
 
 			Iterator<?> it = names.iterator();
 
@@ -134,10 +137,10 @@ public class DataRowFromJsonProvider {
 				String fieldName = (String) it.next();
 
 				Object fieldObj = hm.get(fieldName);
-				int fieldType = ar.getFieldType(fieldName);
+				int fieldType = attributes.getFieldType(fieldName);
 				if (fieldObj == null) {
 					dr.addDataField(fieldName, fieldType, new DataField(null));
-					dr.setFieldAttributes(fieldName, ar.getFieldAttributes(fieldName));
+					dr.setFieldAttributes(fieldName, attributes.getFieldAttributes(fieldName));
 					continue;
 				}
 				switch (fieldType) {
@@ -231,7 +234,7 @@ public class DataRowFromJsonProvider {
 
 				}// switch
 
-				Map<String, String> attr = ar.getFieldAttributes(fieldName);
+				Map<String, String> attr = attributes.getFieldAttributes(fieldName);
 
 
 				@SuppressWarnings("unchecked")
@@ -290,3 +293,4 @@ public class DataRowFromJsonProvider {
 		return dr;
 	}
 }
+;

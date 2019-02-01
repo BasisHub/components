@@ -34,11 +34,11 @@ public class DataRow implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Map<String, DataField> dataFields = new HashMap<>();
+	private final Map<String, DataField> dataFields = new HashMap<>();
 
-	private Map<String, String> attributes = new HashMap<>();
+	private final Map<String, String> attributes = new HashMap<>();
 
-	private com.basiscomponents.db.ResultSet resultSet; // containing this row
+	private final ResultSet resultSet; // containing this row
 
 	private byte[] rowKey = new byte[0];
 

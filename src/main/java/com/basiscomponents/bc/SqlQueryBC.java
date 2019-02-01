@@ -12,7 +12,7 @@ import com.basiscomponents.db.ResultSet;
 
 public class SqlQueryBC {
 
-	private SqlConnectionHelper connectionHelper;
+	private final SqlConnectionHelper connectionHelper;
 
 	/**
 	 * default Constructor only with url
