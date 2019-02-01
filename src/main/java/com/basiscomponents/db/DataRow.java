@@ -803,7 +803,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             The field name doesn't exist.
 	 */
-	public void removeField(String fieldName) throws Exception {
+	public void removeField(String fieldName) {
 
 		int column = getColumnIndex(fieldName, true);
 		if (column > -1)
@@ -956,7 +956,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception
 	 */
-	public void addDataField(String fieldName, DataField dataField) throws Exception {
+	public void addDataField(String fieldName, DataField dataField) {
 		Object o = dataField.getObject(); // default
 		int type;
 

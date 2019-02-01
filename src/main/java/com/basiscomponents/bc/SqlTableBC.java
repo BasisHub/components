@@ -1,6 +1,7 @@
 package com.basiscomponents.bc;
 
 import static com.basiscomponents.db.ExpressionMatcher.getPreparedWhereClauseValues;
+
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -10,15 +11,20 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import com.basiscomponents.bc.util.CloseableWrapper;
 import com.basiscomponents.bc.util.SqlConnectionHelper;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.util.DataRowRegexMatcher;
+import com.basiscomponents.util.KeyValuePair;
 
 /**
  * <h1>SqlTableBC represents a table in a database.</h1>
@@ -65,13 +71,16 @@ public class SqlTableBC implements BusinessComponent {
   private DataRow retrieveParams;
   private Map<String, String> mapping = new HashMap<>();
 
-  private DataRow filter;
+	private DataRow filter = new DataRow();
+	private List<DataRowRegexMatcher> regexMatchers = new ArrayList<>();
   private DataRow fieldSelection;
 
   private String dbType;
   private String dbQuoteString = "";
 
   private Boolean truncateFieldValues = false;
+
+	private Map<String, DataField> regexes;
 
   /**
    * Constructor.
@@ -214,16 +223,30 @@ public class SqlTableBC implements BusinessComponent {
    * @return a DataRow with filter fields.
    * @see #setFilter(DataRow)
    */
-  public DataRow getFilter() {
-    return this.filter;
-  }
+	public DataRow getFilter() {
+		regexes.forEach((k, v) -> filter.addDataField(k, v));
+		return this.filter;
+	}
 
   /**
    * {@inheritDoc}
    */
-  public void setFilter(DataRow filter) {
-    this.filter = filter;
-  }
+	public void setFilter(final DataRow filter) {
+		if (filter == null) {
+			this.filter = new DataRow();
+		} else {
+			DataRow f = filter.clone();
+			Map<String, DataField> regexes = f.getFieldNames().stream()
+					.map(x -> new KeyValuePair<String, DataField>(x, filter.getField(x)))
+					.filter(x -> x.getValue().getString().startsWith("regex:"))
+					// .peek(x -> System.out.println(x.getValue().getString()))
+					.collect(Collectors.toMap(KeyValuePair::getKey, KeyValuePair::getValue));
+
+			this.regexes = regexes;
+			regexes.forEach((k, v) -> f.removeField(k));
+			this.filter = f;
+		}
+	}
 
   /**
    * Returns a previously set field selection. May be null.
@@ -307,143 +330,153 @@ public class SqlTableBC implements BusinessComponent {
    * {@inheritDoc}
    */
   // TODO Still too complex
-  public ResultSet retrieve(int first, int last) throws Exception {
-    if (first >= 0 && last < first) {
-      throw new IllegalArgumentException("Invalid range: last could not be lower than first!");
-    }
+	public ResultSet retrieve(int first, int last) throws Exception {
+		if (first >= 0 && last < first) {
+			throw new IllegalArgumentException("Invalid range: last could not be lower than first!");
+		}
 
-    if (filter != null && filter.contains("%SEARCH")) {
-      throw new UnsupportedOperationException("Full text search not implemented yet!");
-    }
+		if (filter.contains("%SEARCH")) {
+			throw new UnsupportedOperationException("Full text search not implemented yet!");
+		}
 
-    DataRow filterRow = filter;
-    if (filterRow != null)
-      filterRow = filterRow.clone();
+		DataRow filterRow = filter.clone();
+		List<DataRowRegexMatcher> regexmatchers = regexes.entrySet().stream()
+				.map(x -> new DataRowRegexMatcher(x.getKey(), x.getValue().getString()))
+				.collect(Collectors.toList());
 
-    ResultSet retrs = null;
+		ResultSet retrs = null;
 
-    try (CloseableWrapper<Connection> connw = getConnection()) {
-      Connection conn = connw.getCloseable();
-      StringBuilder sql;
+		try (CloseableWrapper<Connection> connw = getConnection()) {
+			Connection conn = connw.getCloseable();
+			StringBuilder sql;
 
-      LinkedHashSet<String> fields = new LinkedHashSet<>();
-      if ((this.fieldSelection == null || this.fieldSelection.getFieldNames().isEmpty())
-          && (scope == null || scope.equals(""))) {
-        fields.add("*");
-      }
+			LinkedHashSet<String> fields = new LinkedHashSet<>();
+			if ((this.fieldSelection == null || this.fieldSelection.getFieldNames().isEmpty())
+					&& (scope == null || scope.equals(""))) {
+				fields.add("*");
+			}
 
-      if (scope != null) {
-        for (char s : scope.toCharArray()) {
-          String localScope = String.valueOf(s);
-          if (scopes.containsKey(localScope))
-            fields.addAll(scopes.get(localScope));
-        }
-      }
+			if (scope != null) {
+				for (char s : scope.toCharArray()) {
+					String localScope = String.valueOf(s);
+					if (scopes.containsKey(localScope))
+						fields.addAll(scopes.get(localScope));
+				}
+			}
 
-      if (fieldSelection != null) {
-        fields.addAll(fieldSelection.getFieldNames());
-      }
+			if (fieldSelection != null) {
+				fields.addAll(fieldSelection.getFieldNames());
+			}
 
-      boolean customStatementUsed = (retrieveSql != null && !retrieveSql.equals(""));
+			boolean customStatementUsed = (retrieveSql != null && !retrieveSql.equals(""));
 
-      StringBuilder sqlfields = new StringBuilder("");
-      if (fields.contains("*"))
-        sqlfields.append("*");
-      else {
-        for (String field : fields) {
-          sqlfields.append("," + dbQuoteString + field + dbQuoteString);
-        }
-        sqlfields = new StringBuilder(sqlfields.substring(1));
-      }
+			StringBuilder sqlfields = new StringBuilder("");
+			if (fields.contains("*"))
+				sqlfields.append("*");
+			else {
+				for (String field : fields) {
+					sqlfields.append("," + dbQuoteString + field + dbQuoteString);
+				}
+				sqlfields = new StringBuilder(sqlfields.substring(1));
+			}
 
-      if (customStatementUsed) {
-        sql = new StringBuilder("SELECT " + sqlfields + " FROM (" + retrieveSql + ") ");
-        if (MYSQL_DBMS.equals(dbType))
-        	sql.append(" as s ");
-      }
-      else
-        sql = new StringBuilder(
-            "SELECT " + sqlfields + " FROM " + dbQuoteString + table + dbQuoteString);
+			if (customStatementUsed) {
+				sql = new StringBuilder("SELECT " + sqlfields + " FROM (" + retrieveSql + ") ");
+				if (MYSQL_DBMS.equals(dbType))
+					sql.append(" as s ");
+			} else
+				sql = new StringBuilder("SELECT " + sqlfields + " FROM " + dbQuoteString + table + dbQuoteString);
 
-      if (filterRow != null && !filterRow.getFieldNames().isEmpty()) {
-        StringBuilder wh = new StringBuilder("");
-        for (String f : filterRow.getFieldNames()) {
-          if (filterRow.getFieldAsString(f).startsWith("cond:")) {
-            wh.append(" AND (" + com.basiscomponents.db.ExpressionMatcher
-                .generatePreparedWhereClause(f, filterRow.getFieldAsString(f).substring(5)) + ")");
-          } else {
-            String ff = f;
-            if (!customStatementUsed)
-              ff = getMapping(f);
-            if (filterRow.getField(f).getValue() == null) {
-              wh.append(AND + dbQuoteString + ff + dbQuoteString + " IS NULL");
-              filterRow.removeField(f);
-            } else
-              wh.append(AND + dbQuoteString + ff + dbQuoteString + "=?");
-          }
-        }
-        if (wh.length() > 0)
-          sql.append(WHERE + wh.substring(5));
-      }
+			if (filterRow != null && !filterRow.getFieldNames().isEmpty()) {
+				StringBuilder wh = new StringBuilder("");
+				for (String f : filterRow.getFieldNames()) {
 
-      if (first >= 0 && last >= first) {
-        switch (dbType) {
-          case BASIS_DBMS:
-            sql.append(" LIMIT " + (first + 1) + "," + (last - first + 1));
-            break;
-          case MYSQL_DBMS:
-            sql.append(" LIMIT " + first + "," + (last - first + 1));
-            break;
-          case "MICROSOFT SQL SERVER":
-            // OFFSET is available since MS SQL Server 2012 (version 11)
-            int dbVersion = Integer.parseInt(
-                conn.getMetaData().getDatabaseProductVersion().replaceAll("(\\d+)\\..*", "$1"));
-            if (dbVersion >= 11)
-              sql = new StringBuilder("SELECT * FROM (" + sql + ") T ORDER BY (SELECT NULL) OFFSET "
-                  + first + " ROWS FETCH NEXT " + (last - first + 1) + " ROWS ONLY");
-            else
-              throw new UnsupportedOperationException(
-                  "Pagination is not supported or not implemented with the " + dbType + " (version "
-                      + dbVersion + ") database.");
-            break;
-          default:
-            throw new UnsupportedOperationException(
-                "Pagination is not supported or not implemented with the " + dbType + " database.");
-        }
-      }
+					if (filterRow.getFieldAsString(f).startsWith("cond:")) {
+						wh.append(" AND (" + com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f,
+								filterRow.getFieldAsString(f).substring(5)) + ")");
+					} else {
+						String ff = f;
+						if (!customStatementUsed)
+							ff = getMapping(f);
+						if (filterRow.getField(f).getValue() == null) {
+							wh.append(AND + dbQuoteString + ff + dbQuoteString + " IS NULL");
+							filterRow.removeField(f);
+						} else
+							wh.append(AND + dbQuoteString + ff + dbQuoteString + "=?");
+					}
+				}
+				if (wh.length() > 0)
+					sql.append(WHERE + wh.substring(5));
+			}
 
-      sqlStatement = sql.toString();
+			if (first >= 0 && last >= first) {
+				switch (dbType) {
+				case BASIS_DBMS:
+					sql.append(" LIMIT " + (first + 1) + "," + (last - first + 1));
+					break;
+				case MYSQL_DBMS:
+					sql.append(" LIMIT " + first + "," + (last - first + 1));
+					break;
+				case "MICROSOFT SQL SERVER":
+					// OFFSET is available since MS SQL Server 2012 (version 11)
+					int dbVersion = Integer
+							.parseInt(conn.getMetaData().getDatabaseProductVersion().replaceAll("(\\d+)\\..*", "$1"));
+					if (dbVersion >= 11)
+						sql = new StringBuilder("SELECT * FROM (" + sql + ") T ORDER BY (SELECT NULL) OFFSET " + first
+								+ " ROWS FETCH NEXT " + (last - first + 1) + " ROWS ONLY");
+					else
+						throw new UnsupportedOperationException(
+								"Pagination is not supported or not implemented with the " + dbType + " (version "
+										+ dbVersion + ") database.");
+					break;
+				default:
+					throw new UnsupportedOperationException(
+							"Pagination is not supported or not implemented with the " + dbType + " database.");
+				}
+			}
 
-      try (PreparedStatement prep = conn.prepareStatement(sqlStatement)) {
-        DataRow params = new DataRow();
-        if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
-          params = retrieveParams.clone();
-        }
-        if (filterRow != null && filterRow.getColumnCount() > 0) {
-          params.mergeRecord(filterRow);
-        }
-        if (params.getColumnCount() > 0) {
-          setSqlParams(prep, params, params.getFieldNames(), BASIS_DBMS.equals(dbType));
-        }
+			sqlStatement = sql.toString();
 
-        try (java.sql.ResultSet rs = prep.executeQuery()) {
-          retrs = new ResultSet();
-          retrs.populate(rs, true);
-        }
-      }
-    }
+			try (PreparedStatement prep = conn.prepareStatement(sqlStatement)) {
+				DataRow params = new DataRow();
+				if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
+					params = retrieveParams.clone();
+				}
+				if (filterRow != null && filterRow.getColumnCount() > 0) {
+					params.mergeRecord(filterRow);
+				}
+				if (params.getColumnCount() > 0) {
+					setSqlParams(prep, params, params.getFieldNames(), BASIS_DBMS.equals(dbType));
+				}
 
-    // Set the generated meta attributes to the first record
-    if (retrs.size() > 0) {
-      DataRow dr = retrs.get(0);
-      for (String field : attributesRecord.getFieldNames()) {
-        if (dr.contains(field))
-          dr.setFieldAttributes(field, attributesRecord.getFieldAttributes(field));
-      }
-    }
+				try (java.sql.ResultSet rs = prep.executeQuery()) {
+					retrs = new ResultSet();
+					retrs.populate(rs, true);
+				}
+			}
+		}
 
-    return retrs;
-  }
+		// Set the generated meta attributes to the first record
+		if (retrs.size() > 0) {
+			Iterator<DataRow> iterator = retrs.iterator();
+			if (!regexmatchers.isEmpty()) {
+				while (iterator.hasNext()) {
+					DataRow dr = iterator.next();
+					if (!regexmatchers.stream().allMatch(x -> x.matches(dr))) {
+						retrs.remove(dr.getRowID());
+					}
+				}
+			}
+			DataRow dr = retrs.get(0);
+			for (String field : attributesRecord.getFieldNames()) {
+				if (dr.contains(field))
+					dr.setFieldAttributes(field, attributesRecord.getFieldAttributes(field));
+			}
+		}
+
+
+		return retrs;
+	}
 
   /**
    * {@inheritDoc}

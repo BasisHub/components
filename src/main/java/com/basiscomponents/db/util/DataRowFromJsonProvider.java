@@ -18,6 +18,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DataRowFromJsonProvider {
 
+	private static final String COLUMN_TYPE = "ColumnType";
+
+	@SuppressWarnings("unchecked")
 	public static DataRow fromJson(String in, DataRow ar) throws Exception {
 
 		if (in.length() < 2)
@@ -65,7 +68,7 @@ public class DataRowFromJsonProvider {
 
 		if (hm.containsKey("meta")) {
 			// new format
-			HashMap meta = (HashMap) hm.get("meta");
+			HashMap<?, ?> meta = (HashMap<?, ?>) hm.get("meta");
 			if (meta == null)
 				meta = new HashMap();
 			
@@ -82,8 +85,9 @@ public class DataRowFromJsonProvider {
 						fieldMeta = new HashMap<>();
 					}
 
-					if (fieldMeta.get("ColumnType") != null)
-						s = (String) fieldMeta.get("ColumnType");
+
+					if (fieldMeta.get(COLUMN_TYPE) != null)
+						s = (String) fieldMeta.get(COLUMN_TYPE);
 					if (s != null) {
 						ar.addDataField(fieldName, Integer.parseInt(s), new DataField(null));
 						Set<String> ks = fieldMeta.keySet();
@@ -91,7 +95,7 @@ public class DataRowFromJsonProvider {
 							Iterator<String> itm = ks.iterator();
 							while (itm.hasNext()) {
 								String k = itm.next();
-								if (k.equals("ColumnType"))
+								if (k.equals(COLUMN_TYPE))
 									continue;
 								ar.setFieldAttribute((String) fieldName, k, (String) fieldMeta.get(k));
 							}
@@ -228,6 +232,8 @@ public class DataRowFromJsonProvider {
 				}// switch
 
 				Map<String, String> attr = ar.getFieldAttributes(fieldName);
+
+
 				@SuppressWarnings("unchecked")
 				HashMap<String, HashMap> m = (HashMap<String, HashMap>) hm.get("meta");
 				if (m != null && m.containsKey(fieldName)) {
