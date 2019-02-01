@@ -9,6 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -21,10 +23,10 @@ import com.google.gson.JsonParser;
 
 public class Session {
 
-	private ArrayList<SessionExecuteEntity> Ex;
-	private ArrayList<String> Ret;
-	private ArrayList<SessionVarEntity> Vars;
-	private HashMap<String, Object> Result;
+	private List<SessionExecuteEntity> Ex;
+	private List<String> Ret;
+	private List<SessionVarEntity> Vars;
+	private Map<String, Object> Result;
 	private String SessionID;
 	private String BaseUrl;
 	private String lastError;

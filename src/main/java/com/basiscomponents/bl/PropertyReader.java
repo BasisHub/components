@@ -15,8 +15,8 @@ import com.basiscomponents.db.DataRow;
 
 public class PropertyReader {
 
-	private HashMap<String, LinkedHashMap<BBjVector, BBjVector>> finalMap = new HashMap<String, LinkedHashMap<BBjVector, BBjVector>>();
-	private HashMap<String, BBjVector> finalResultSet = new HashMap<String, BBjVector>();
+	private HashMap<String, LinkedHashMap<BBjVector, BBjVector>> finalMap = new HashMap<>();
+	private HashMap<String, BBjVector> finalResultSet = new HashMap<>();
 	private String filename;
 	private String lang;
 

@@ -6,7 +6,7 @@ class SessionInvokeEntity extends SessionExecuteEntity {
 
 	@SuppressWarnings("unused")
 	private SessionInvokeEntity() {
-	};
+	}
 
 	public SessionInvokeEntity(String var, String retvar, String method,
 			String... args) {
