@@ -18,7 +18,10 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 public class ResultSetJsonMapper {
-	public static String toJson(List<DataRow> dataRows, List<HashMap<String, Object>> metaData, boolean meta, String addIndexColumn, boolean f_trimStrings)
+	private ResultSetJsonMapper() {
+	}
+	public static String toJson(List<DataRow> dataRows, List<HashMap<String, Object>> metaData, boolean meta,
+			String addIndexColumn, boolean f_trimStrings)
 			throws IOException {
 
 		JsonFactory jf = new JsonFactory();
