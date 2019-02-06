@@ -1,7 +1,6 @@
 package com.basiscomponents.db.constants;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -44,12 +43,9 @@ public class SimpleConstantsResolver implements ConstantsResolver{
 		if (in.matches("(?s).*\\[\\[.*\\]\\].*")){
 			String out = in;
 			
-			Iterator<Entry<String, String>> it = this.constants.entrySet().iterator();
-			while (it.hasNext()){
-				Entry<String, String> e = it.next();
+			for (Entry<String, String> e : this.constants.entrySet()) {
 				out = out.replaceAll("\\[\\["+e.getKey()+"\\]\\]"  , e.getValue());
 			}
-			
 			return out;
 		}
 		else 

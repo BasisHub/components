@@ -17,6 +17,7 @@ import com.basis.bbj.datatypes.TemplatedString;
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
+import com.basiscomponents.db.exception.DataFieldNotFoundException;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowFromJsonProvider;
@@ -342,7 +343,7 @@ public class DataRow implements java.io.Serializable {
 	public DataField getField(String name, Boolean silent) {
 		DataField field = this.dataFields.get(name);
 		if (field == null && !(silent))
-			throw new RuntimeException("Field " + name + " does not exist");
+			throw new DataFieldNotFoundException("Field " + name + " does not exist");
 		return field;
 	}
 

@@ -97,17 +97,18 @@ public class SqlQueryBC {
 
 		try (CloseableWrapper<Connection> connw = getConnection()) {
 			connection = connw.getCloseable();
-			PreparedStatement prep = connection.prepareStatement(sql);
-			// Set params if there are any
-			if (params != null) {
-				int i = 1;
-				for (Object p : params) {
-					prep.setObject(i, p);
-					i++;
+			try (PreparedStatement prep = connection.prepareStatement(sql)) {
+				// Set params if there are any
+				if (params != null) {
+					int i = 1;
+					for (Object p : params) {
+						prep.setObject(i, p);
+						i++;
+					}
 				}
+				traceSqlStatement(SqlQueryBcLogger.Method.EXECUTE, prep.toString());
+				b = prep.execute() || prep.getUpdateCount() > 0;
 			}
-			traceSqlStatement(SqlQueryBcLogger.Method.EXECUTE, prep.toString());
-			b = prep.execute() || prep.getUpdateCount() > 0;
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}

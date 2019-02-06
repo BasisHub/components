@@ -483,11 +483,11 @@ public class SqlTableBC implements BusinessComponent {
    * {@inheritDoc}
    */
   public ResultSet validateWrite(DataRow dr) {
-    ResultSet rs = new ResultSet();
 
-    if (dr == null || dr.getColumnCount() == 0)
-      return rs;
-
+		if (dr == null || dr.getColumnCount() == 0) {
+			return new ResultSet();
+		}
+		ResultSet rs = new ResultSet();
     for (String fieldName : dr.getFieldNames()) {
       fieldName = getMapping(fieldName);
       if (!metaData.contains(fieldName) || primaryKeys.contains(fieldName))
