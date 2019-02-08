@@ -2,6 +2,7 @@ package com.basiscomponents.db;
 
 import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +25,7 @@ import com.basiscomponents.db.util.DataRowFromJsonProvider;
 import com.basiscomponents.db.util.DataRowMatcher;
 import com.basiscomponents.db.util.JRDataSourceAdapter;
 import com.basiscomponents.db.util.TemplateParser;
+import com.fasterxml.jackson.core.JsonParseException;
 
 import net.sf.jasperreports.engine.JRDataSource;
 
@@ -278,8 +280,9 @@ public class DataRow implements java.io.Serializable {
 	 *            The SQL type of the field
 	 * @param value
 	 *            The value of the field
+	 * @throws ParseException
 	 */
-	public void setFieldValue(String name, int type, Object value) throws Exception {
+	public void setFieldValue(String name, int type, Object value) throws ParseException {
 
 		DataField field = null;
 
@@ -1349,11 +1352,14 @@ public class DataRow implements java.io.Serializable {
 	 * @param in
 	 *            The JSON String
 	 * @return the DataRow object created based on the JSOn String's content
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
 	 *
 	 * @throws Exception
 	 *             Gets thrown in case the JSON could not be parsed / is invalid
 	 */
-	public static DataRow fromJson(String j) throws Exception {
+	public static DataRow fromJson(String j) throws JsonParseException, IOException, ParseException {
 		return fromJson(j, null);
 	}
 
@@ -1363,16 +1369,19 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param in
 	 *            The JSON String
-	 * @param ar
+	 * @param meta
 	 *            A DataRow that will be used to determine the field types if not
 	 *            given in the meta section of the JSON String
 	 * @return the DataRow object created based on the JSOn String's content
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
 	 *
 	 * @throws Exception
 	 *             Gets thrown in case the JSON could not be parsed / is invalid
 	 */
-	public static DataRow fromJson(String in, DataRow ar) throws Exception {
-		return DataRowFromJsonProvider.fromJson(in, ar);
+	public static DataRow fromJson(String in, DataRow meta) throws JsonParseException, IOException, ParseException {
+		return DataRowFromJsonProvider.fromJson(in, meta);
 	}
 
 	public void setFieldAttributes(String fieldName, Map<String, String> attr) {

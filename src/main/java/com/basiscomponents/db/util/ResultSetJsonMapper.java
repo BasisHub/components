@@ -267,9 +267,7 @@ public class ResultSetJsonMapper {
 
 							final Map<String, Attribute> atr = getFieldAttributes(dr, c);
 							
-							hm.entrySet().stream().filter((e) -> !"ColumnTypeName".equals(e.getKey()))
-									.filter((e) -> !"ColumnName".equals(e.getKey()))
-									.filter(e -> !(atr != null && atr.containsKey(e.getKey())));
+
 							for (Entry<String, Object> entry : hm.entrySet()) {
 								if ("ColumnTypeName".equals(entry.getKey()) || "ColumnName".equals(entry.getKey())
 										|| (atr != null && atr.containsKey(entry.getKey()))) {

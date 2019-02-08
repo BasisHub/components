@@ -13,6 +13,7 @@ import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +22,8 @@ public class DataRowFromJsonProvider {
 
 	private static final String COLUMN_TYPE = "ColumnType";
 
-	public static DataRow fromJson(final String in, final DataRow ar) throws Exception {
+	public static DataRow fromJson(final String in, final DataRow meta)
+			throws JsonParseException, IOException, ParseException {
 		String input = in;
 		if (input.length() < 2) {
 			return new DataRow();
@@ -35,28 +37,31 @@ public class DataRowFromJsonProvider {
 		JsonFactory f = new JsonFactory();
 		try (JsonParser jsonParser = f.createParser(input)) {
 			jsonParser.nextToken();
+
 			ObjectMapper objectMapper = new ObjectMapper();
 
 			List<?> navigation = objectMapper.readValue(jsonParser,
 					objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
+
 			if (navigation.isEmpty()) {
 				return new DataRow();
 			}
-			DataRow attributes;
-			if (ar == null) {
-				attributes = new DataRow();
+
+			DataRow metaRow;
+			if (meta == null) {
+				metaRow = new DataRow();
 			} else {
-				attributes = ar.clone();
+				metaRow = meta.clone();
 			}
 			HashMap<?, ?> navigationMap = (HashMap<?, ?>) navigation.get(0);
 
-			createMetaData(attributes, navigationMap);
+			createMetaData(metaRow, navigationMap);
 
-			createNonExistingAttributes(root, attributes, navigationMap);
+			createNonExistingAttributes(root, metaRow, navigationMap);
 
 			DataRow dr = new DataRow();
-			if (!attributes.isEmpty()) {
-				createDataFields(root, attributes, navigationMap, dr);
+			if (!metaRow.isEmpty()) {
+				createDataFields(root, metaRow, navigationMap, dr);
 			} else {
 				handleOldFormat(navigation, dr);
 			}
@@ -65,7 +70,7 @@ public class DataRowFromJsonProvider {
 	}
 
 	private static void createDataFields(JsonNode root, DataRow attributes, HashMap<?, ?> hm, DataRow dr)
-			throws ParseException {
+			throws ParseException, JsonParseException, IOException {
 		for (String fieldName : attributes.getFieldNames()) {
 			Object fieldObj = hm.get(fieldName);
 			int fieldType = attributes.getFieldType(fieldName);
@@ -77,17 +82,19 @@ public class DataRowFromJsonProvider {
 			switch (fieldType) {
 			case -974:
 				// nested DataRow
-				System.err.println("fromJson not implemented for nested DataRow!");
+				System.out.println("fromJson might have issues");
 				// FIXME: need to parse and create the nested ResultSet as well
 				// this is https://github.com/BasisHub/components/issues/115
-				dr.setFieldValue(fieldName, new DataRow());
+
+				dr.setFieldValue(fieldName, DataRow.fromJson(root.get(fieldName).toString()));
+
 				break;
 			case -975:
 				// nested ResultSet
-				System.err.println("fromJson not implemented for nested ResultSet!");
-				// FIXME: need to parse and create the nested ResultSet as well
+				System.err.println("fromJson might have issues");
+				// FIXME: seems to be working, but attributes are lost
 				// this is https://github.com/BasisHub/components/issues/115
-				dr.setFieldValue(fieldName, new ResultSet());
+				dr.setFieldValue(fieldName, ResultSet.fromJson(root.get(fieldName).toString()));
 				break;
 
 			case java.sql.Types.CHAR:
@@ -176,7 +183,7 @@ public class DataRowFromJsonProvider {
 		}
 	}
 
-	private static void handleOldFormat(List<?> navigation, DataRow dr) throws ParseException, Exception {
+	private static void handleOldFormat(List<?> navigation, DataRow dr) throws ParseException {
 		// old format - deprecated
 		@SuppressWarnings("unchecked")
 		Iterator<?> it = navigation.iterator();
@@ -260,16 +267,16 @@ public class DataRowFromJsonProvider {
 				@SuppressWarnings("unchecked")
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
 				if (!attributes.contains(fieldName) && !fieldName.equals("meta")) {
-					String s = "12";
+					String fieldType = "12";
 
 					if (fieldMeta == null) {
 						fieldMeta = new HashMap<>();
 					}
 
 					if (fieldMeta.get(COLUMN_TYPE) != null)
-						s = (String) fieldMeta.get(COLUMN_TYPE);
-					if (s != null) {
-						attributes.addDataField(fieldName, Integer.parseInt(s), new DataField(null));
+						fieldType = (String) fieldMeta.get(COLUMN_TYPE);
+					if (fieldType != null) {
+						attributes.addDataField(fieldName, Integer.parseInt(fieldType), new DataField(null));
 						Set<String> ks = fieldMeta.keySet();
 						if (ks.size() > 1) {
 							Iterator<String> itm = ks.iterator();

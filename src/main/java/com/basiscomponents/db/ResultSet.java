@@ -2,6 +2,7 @@ package com.basiscomponents.db;
 
 import static com.basiscomponents.util.StringHelper.invert;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
@@ -32,6 +33,7 @@ import com.basiscomponents.db.util.BBTemplateProvider;
 import com.basiscomponents.db.util.JRDataSourceAdapter;
 import com.basiscomponents.db.util.ResultSetJsonMapper;
 import com.basiscomponents.db.util.SqlTypeNames;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
@@ -2049,12 +2051,19 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns a ResultSet object created by parsing the given JSON String.
 	 * 
-	 * @param js The JSON String used to create the ResultSet object.
+	 * @param js
+	 *            The JSON String used to create the ResultSet object.
 	 * 
-	 * @return The ResultSet object created from the values provided in the given JSON String.
-	 * @throws Exception throws an exception if can not parse the json string to a DataRow.
+	 * @return The ResultSet object created from the values provided in the given
+	 *         JSON String.
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
+	 *
+	 *             throws an exception if can not parse the json string to a
+	 *             DataRow.
 	 */
-	public static ResultSet fromJson(final String js) throws Exception {
+	public static ResultSet fromJson(final String js) throws JsonParseException, IOException, ParseException {
 		String cleanString = js.trim();
 		ResultSet rs = new ResultSet();
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
