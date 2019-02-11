@@ -2,6 +2,7 @@ package com.basiscomponents.db;
 
 import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,12 +18,14 @@ import com.basis.bbj.datatypes.TemplatedString;
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
+import com.basiscomponents.db.exception.DataFieldNotFoundException;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowFromJsonProvider;
 import com.basiscomponents.db.util.DataRowMatcher;
 import com.basiscomponents.db.util.JRDataSourceAdapter;
 import com.basiscomponents.db.util.TemplateParser;
+import com.fasterxml.jackson.core.JsonParseException;
 
 import net.sf.jasperreports.engine.JRDataSource;
 
@@ -34,11 +37,11 @@ public class DataRow implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Map<String, DataField> dataFields = new HashMap<>();
+	private final Map<String, DataField> dataFields = new HashMap<>();
 
-	private Map<String, String> attributes = new HashMap<>();
+	private final Map<String, String> attributes = new HashMap<>();
 
-	private com.basiscomponents.db.ResultSet resultSet; // containing this row
+	private final ResultSet resultSet; // containing this row
 
 	private byte[] rowKey = new byte[0];
 
@@ -277,8 +280,9 @@ public class DataRow implements java.io.Serializable {
 	 *            The SQL type of the field
 	 * @param value
 	 *            The value of the field
+	 * @throws ParseException
 	 */
-	public void setFieldValue(String name, int type, Object value) throws Exception {
+	public void setFieldValue(String name, int type, Object value) throws ParseException {
 
 		DataField field = null;
 
@@ -342,7 +346,7 @@ public class DataRow implements java.io.Serializable {
 	public DataField getField(String name, Boolean silent) {
 		DataField field = this.dataFields.get(name);
 		if (field == null && !(silent))
-			throw new RuntimeException("Field " + name + " does not exist");
+			throw new DataFieldNotFoundException("Field " + name + " does not exist");
 		return field;
 	}
 
@@ -803,7 +807,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             The field name doesn't exist.
 	 */
-	public void removeField(String fieldName) throws Exception {
+	public void removeField(String fieldName) {
 
 		int column = getColumnIndex(fieldName, true);
 		if (column > -1)
@@ -1348,11 +1352,14 @@ public class DataRow implements java.io.Serializable {
 	 * @param in
 	 *            The JSON String
 	 * @return the DataRow object created based on the JSOn String's content
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
 	 *
 	 * @throws Exception
 	 *             Gets thrown in case the JSON could not be parsed / is invalid
 	 */
-	public static DataRow fromJson(String j) throws Exception {
+	public static DataRow fromJson(String j) throws JsonParseException, IOException, ParseException {
 		return fromJson(j, null);
 	}
 
@@ -1362,16 +1369,19 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param in
 	 *            The JSON String
-	 * @param ar
+	 * @param meta
 	 *            A DataRow that will be used to determine the field types if not
 	 *            given in the meta section of the JSON String
 	 * @return the DataRow object created based on the JSOn String's content
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
 	 *
 	 * @throws Exception
 	 *             Gets thrown in case the JSON could not be parsed / is invalid
 	 */
-	public static DataRow fromJson(String in, DataRow ar) throws Exception {
-		return DataRowFromJsonProvider.fromJson(in, ar);
+	public static DataRow fromJson(String in, DataRow meta) throws JsonParseException, IOException, ParseException {
+		return DataRowFromJsonProvider.fromJson(in, meta);
 	}
 
 	public void setFieldAttributes(String fieldName, Map<String, String> attr) {

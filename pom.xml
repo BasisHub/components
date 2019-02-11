@@ -69,7 +69,13 @@
 			<version>1.0</version>
 			<systemPath>${jar-directory}/BBj.jar</systemPath>
 		</dependency>
-
+		<dependency>
+			<groupId>com.basis.lib</groupId>
+			<artifactId>BBjJDBC.jar</artifactId>
+			<scope>system</scope>
+			<version>1.0</version>
+			<systemPath>${jar-directory}/BBjJDBC.jar</systemPath>
+		</dependency>
 		<dependency>
 			<groupId>com.basis.lib</groupId>
 			<artifactId>BBjThinClient.jar</artifactId>
@@ -134,9 +140,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.basis.lib</groupId>
+			<groupId>org.apache</groupId>
 			<artifactId>commons-lang.jar</artifactId>
-			<version>1.0</version>
+			<version>3.8.1</version>
 			<scope>system</scope>
 			<systemPath>${jar-directory}/commons-lang3-3.8.1.jar</systemPath>
 		</dependency>

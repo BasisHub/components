@@ -2,6 +2,7 @@ package com.basiscomponents.db;
 
 import static com.basiscomponents.util.StringHelper.invert;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
@@ -23,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
@@ -31,6 +33,7 @@ import com.basiscomponents.db.util.BBTemplateProvider;
 import com.basiscomponents.db.util.JRDataSourceAdapter;
 import com.basiscomponents.db.util.ResultSetJsonMapper;
 import com.basiscomponents.db.util.SqlTypeNames;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
@@ -933,10 +936,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return true if the cursor was moved successfully, false otherwise.
 	 */
 	public boolean next() {
-		if (this.DataRows.isEmpty() || this.currentRow > this.DataRows.size() - 2)
+		if (this.DataRows.isEmpty() || this.currentRow >= this.DataRows.size() - 1)
 			return false;
 		else {
-			this.currentRow += 1;
+			this.currentRow++;
 			this.currentDataRow = this.DataRows.get(this.currentRow);
 			return true;
 		}
@@ -2048,12 +2051,19 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns a ResultSet object created by parsing the given JSON String.
 	 * 
-	 * @param js The JSON String used to create the ResultSet object.
+	 * @param js
+	 *            The JSON String used to create the ResultSet object.
 	 * 
-	 * @return The ResultSet object created from the values provided in the given JSON String.
-	 * @throws Exception throws an exception if can not parse the json string to a DataRow.
+	 * @return The ResultSet object created from the values provided in the given
+	 *         JSON String.
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
+	 *
+	 *             throws an exception if can not parse the json string to a
+	 *             DataRow.
 	 */
-	public static ResultSet fromJson(final String js) throws Exception {
+	public static ResultSet fromJson(final String js) throws JsonParseException, IOException, ParseException {
 		String cleanString = js.trim();
 		ResultSet rs = new ResultSet();
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
@@ -2816,9 +2826,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	
 	public void createIndex() throws ParseException {
 		if (!isIndexed()) {
-			
 			rowIndex = new HashMap<>();
-
 			Iterator<DataRow> it = iterator();
 			int i=0;
 			while (it.hasNext()) {
@@ -2828,7 +2836,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					//TODO: if the ResultSet has a primary index, like from JDBC, use these fields only!					
 					idx = java.util.UUID.nameUUIDFromBytes(r.toString().getBytes()).toString();
 					r.setRowKey(idx);
-					//System.out.println("building UUID from "+r.toString()+" = "+idx);
 				}
 				rowIndex.put(idx, i);
 				i++;
@@ -2853,15 +2860,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * will be printed in the Debug.log file.
 	 */
 	public void print() {
-
 		System.out.println("-------------------ResultSet-----------------------------");
-		Iterator<DataRow> it = this.iterator();
-		while (it.hasNext()) {
-
-			DataRow row = it.next();
-			System.out.println(row);
-		}
-
+		this.DataRows.stream().forEach(System.out::println);
 		System.out.println("-------------------ResultSet End-------------------------");
 	}
 	

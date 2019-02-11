@@ -1,6 +1,5 @@
 package com.basiscomponents.db.tree;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,7 +43,6 @@ public class DataTree{
 				rowData.append(tmp);
 			
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -62,7 +60,6 @@ public class DataTree{
 						tmp=tmp.substring(1,tmp.length()-1);
 						rowData.append(tmp);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				

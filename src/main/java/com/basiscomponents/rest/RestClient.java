@@ -10,35 +10,35 @@ import com.basiscomponents.db.ResultSet;
 
 public class RestClient {
 	
-	private String Endpoint;
-	private String User; 
-	private String Password;
+	private String endpoint;
+	private String user;
+	private String password;
 		
 	public void setEndpoint(String endpoint) {
-		this.Endpoint = endpoint;
+		this.endpoint = endpoint;
 		
 	}
 
 	public void setUsername(String user) {
-		this.User = user;
+		this.user = user;
 		
 	}
 
 	public void setPassword(String password) {
-		this.Password = password;
+		this.password = password;
 		
 	}
 
 	public ResultSet get(String path, String request_parms) throws Exception {
 		
-		String u = this.Endpoint + path;
+		String u = this.endpoint + path;
 		if (request_parms != null && request_parms.length()>0)
 				u=u+"?"+request_parms;
 		
 		URL url = new URL(u);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
-		String encoding = Base64.getEncoder().encodeToString((this.User+":"+this.Password).getBytes());
+		String encoding = Base64.getEncoder().encodeToString((this.user + ":" + this.password).getBytes());
 		
 		conn.setRequestProperty("Authorization", "Basic " + encoding);		
 		conn.setRequestProperty("Accept", "application/json");
