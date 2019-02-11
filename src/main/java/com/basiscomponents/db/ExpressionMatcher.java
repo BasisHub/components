@@ -13,7 +13,7 @@ public class ExpressionMatcher {
 	private String function;
 	private String operand;
 	private boolean orCombined;
-	private ArrayList<ExpressionMatcher> matcherList = new ArrayList<ExpressionMatcher>();
+	private ArrayList<ExpressionMatcher> matcherList = new ArrayList<>();
 	private DataRow drCompare;
 
 
@@ -178,9 +178,10 @@ public class ExpressionMatcher {
 	}
 
 
-	public static String generatePreparedWhereClause(String fieldName, String condition) {
+	public static String generatePreparedWhereClause(String fieldName, final String condition) {
+		String cond = condition.replace("<>", "!");
 		String ret = "";
-		String[] conditions = condition.split("(?<!\\\\)[\\|&]");
+		String[] conditions = cond.split("(?<!\\\\)[\\|&]");
 		int i = 0;
 		Pattern p = Pattern.compile("(?<!\\\\)([\\|&])");
 		Matcher m = p.matcher(condition);
@@ -198,6 +199,8 @@ public class ExpressionMatcher {
 		if (m1.find()) {
 			String oper = m1.group(1);
 			if (oper == null) oper = "=";
+			if (oper.equals("!"))
+				oper = "!=";
 			ret += fieldName + " " + oper + " ?";
 		}
 		return ret;
@@ -206,11 +209,12 @@ public class ExpressionMatcher {
 
 	public static DataRow getPreparedWhereClauseValues(String condition, int fieldType) throws Exception {
 		DataRow dr = new DataRow();
-		String[] conditions = condition.split("(?<!\\\\)[\\|&]");
+		String cond = condition.replace("<>", "!");
+		String[] conditions = cond.split("(?<!\\\\)[\\|&]");
 		Pattern p = Pattern.compile("^(!|<=|>=|=<|=>|<|>){0,1}(.*)");
 		int i = 1;
-		for (String cond : conditions) {
-			Matcher m = p.matcher(cond);
+		for (String co : conditions) {
+			Matcher m = p.matcher(co);
 			if (m.find()) {
 				dr.setFieldValue("VALUE"+i, fieldType, m.group(2).replaceAll("\\\\([\\|&])", "$1"));
 				i++;

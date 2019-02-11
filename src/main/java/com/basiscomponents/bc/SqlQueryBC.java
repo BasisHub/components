@@ -22,7 +22,6 @@ public class SqlQueryBC {
 	 */
 	public SqlQueryBC(String url) {
 		this.connectionHelper = new SqlConnectionHelper(url);
-
 	}
 
 	/**

@@ -277,6 +277,7 @@ public class DataRowFromJsonProvider {
 						fieldType = (String) fieldMeta.get(COLUMN_TYPE);
 					if (fieldType != null) {
 						attributes.addDataField(fieldName, Integer.parseInt(fieldType), new DataField(null));
+
 						Set<String> ks = fieldMeta.keySet();
 						if (ks.size() > 1) {
 							Iterator<String> itm = ks.iterator();
