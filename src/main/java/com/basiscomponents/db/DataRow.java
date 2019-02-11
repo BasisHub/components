@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -1090,17 +1091,9 @@ public class DataRow implements java.io.Serializable {
 	@Override
 	public DataRow clone() {
 		DataRow dr = new DataRow();
-		Iterator<String> it = this.resultSet.getColumnNames().iterator();
-		while (it.hasNext()) {
-			String k = it.next();
-			DataField f = this.dataFields.get(k);
-			DataField f1 = f.clone();
-			try {
-				dr.addDataField(k, this.getFieldType(k), f1);
-			} catch (Exception e) {
-				// Auto-generated catch block
-				e.printStackTrace();
-			}
+		for (String k :this.resultSet.getColumnNames()) {
+			DataField f = Optional.ofNullable(this.dataFields.get(k)).map(df -> df.clone()).orElse(null);
+			dr.addDataField(k, this.getFieldType(k), f);
 		}
 		return dr;
 	}
