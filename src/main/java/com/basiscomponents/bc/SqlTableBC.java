@@ -309,6 +309,13 @@ public class SqlTableBC implements BusinessComponent {
     return this.scopes;
   }
 
+	public boolean isFieldInScope(final String fieldName) {
+		return isFieldInScope(this.scope, fieldName);
+	}
+
+	public boolean isFieldInScope(final String scope, final String fieldName) {
+		return this.scopes.get(scope).stream().anyMatch(x -> x.equalsIgnoreCase(fieldName));
+	}
   /**
    * Sets the scope definition.<br>
    * The scope definition is a HashMap with the scope name as key and an ArrayList with field names
