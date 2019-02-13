@@ -138,7 +138,7 @@ public class JLibResultSetImporter {
 		fieldNameMap = new HashMap<>();
 
 		@SuppressWarnings("unchecked")
-		ArrayList<String> fieldNameList = fieldSelection.getFieldNames();
+		List<String> fieldNameList = fieldSelection.getFieldNames();
 
 		List<String> templatedStringFieldNameList = Arrays
 				.asList(templatedString.getFieldNames().toString().split("\n"));

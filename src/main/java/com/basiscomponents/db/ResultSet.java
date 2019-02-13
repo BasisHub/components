@@ -104,13 +104,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public ResultSet clone(Boolean fDeepClone) {
 		if (!fDeepClone)
 			return new ResultSet(MetaData, ColumnNames, DataRows, KeyColumns);
-
-		
 		ResultSet rs = new ResultSet();
-		Iterator<DataRow> it = iterator();
-		while (it.hasNext()) {
-			rs.add(it.next().clone());
-		}
+		this.DataRows.stream().map(DataRow::clone).forEach(rs::add);
 		return rs;
 	}
 
@@ -304,14 +299,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
-	 * Iterates over the given java.sql.Result object and adds a DataRow object for each record
-	 * of it to this ResultSet.
+	 * Iterates over the given {@code java.sql.ResultSet} object and adds a DataRow
+	 * object for each record of it to this ResultSet.
 	 * 
-	 * If the defaultMetaData flag is set to true, the ResultSet will use the metadata from the given java.sql.ResultSet object.
-	 * If it is set to false, no metadata will be created. If the resultSet already has some metadata defined, it will not be removed.
+	 * If the defaultMetaData flag is set to true, the ResultSet will use the
+	 * metadata from the given java.sql.ResultSet object. If it is set to false, no
+	 * metadata will be created. If the resultSet already has some metadata defined,
+	 * it will not be removed.
 	 * 
-	 * In case the field selection list has been set, this method will only create DataRow object's with the
-	 * fields from the field selection list.
+	 * In case the field selection list has been set, this method will only create
+	 * DataRow object's with the fields from the field selection list.
 	 * 
 	 * @param rs
 	 * @param defaultMetaData

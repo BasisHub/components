@@ -16,13 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.google.gson.annotations.Expose;
 
 /**
- * The DataField class is an object container class which provides multiple cast methods 
- * to retrieve the initially stored object in different formats / types.
+ * The DataField class is an object container class which provides multiple cast
+ * methods to retrieve the initially stored object in different formats / types.
  */
 public class DataField implements java.io.Serializable {
 
@@ -36,7 +37,8 @@ public class DataField implements java.io.Serializable {
 	/**
 	 * Creates the DataField object with the given object as the DataField's value
 	 * 
-	 * @param value The value object of the DataField to be created 
+	 * @param value
+	 *            The value object of the DataField to be created
 	 */
 	public DataField(Object value) {
 		setValue(value);
@@ -52,67 +54,80 @@ public class DataField implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns <code>true</code> in case the given DataField object equals the current DataField object, <code>false</code> otherwise.
-	 * The method does only compare the value object of both DataField objects, not the attributes.
+	 * Returns <code>true</code> in case the given DataField object equals the
+	 * current DataField object, <code>false</code> otherwise. The method does only
+	 * compare the value object of both DataField objects, not the attributes.
 	 * 
-	 * @param dataField The DataField object to compare with.
-	 * @return equal The boolean value indicating whether the given DataField object equals this DataField object.
+	 * @param dataField
+	 *            The DataField object to compare with.
+	 * @return equal The boolean value indicating whether the given DataField object
+	 *         equals this DataField object.
 	 */
 	public Boolean equals(DataField dataField) {
 		return this.getString().equals(dataField.getString());
 	}
 
 	/**
-	 * Returns <code>true</code> in case the given DataField object equals the current DataField object, <code>false</code> otherwise.
-	 * The method does only compare the value object of both DataField objects, not the attributes.
+	 * Returns <code>true</code> in case the given DataField object equals the
+	 * current DataField object, <code>false</code> otherwise. The method does only
+	 * compare the value object of both DataField objects, not the attributes.
 	 * 
-	 * @param dataField The DataField object to compare with.
-	 * @return equal The boolean value indicating whether the given DataField object equals this DataField object.
+	 * @param dataField
+	 *            The DataField object to compare with.
+	 * @return equal The boolean value indicating whether the given DataField object
+	 *         equals this DataField object.
 	 */
 	public Boolean equals(String pattern) {
 		return equals(pattern, false, true);
 	}
-	/**
-	 * Returns <code>true</code> in case the given DataField object equals the current DataField object, <code>false</code> otherwise.
-	 * The method does only compare the value object of both DataField objects, not the attributes.
-	 * 
-	 * @param dataField The DataField object to compare with.
-	 * @return equal The boolean value indicating whether the given DataField object equals this DataField object.
-	 */
-	public Boolean equals(String pattern,final boolean caseSensitive, final boolean trimmed) {
 
-		if (pattern.startsWith("'") && pattern.endsWith("'"))
-		{
-			pattern=pattern.substring(1, pattern.length()-1);
+	/**
+	 * Returns <code>true</code> in case the given DataField object equals the
+	 * current DataField object, <code>false</code> otherwise. The method does only
+	 * compare the value object of both DataField objects, not the attributes.
+	 * 
+	 * @param dataField
+	 *            The DataField object to compare with.
+	 * @return equal The boolean value indicating whether the given DataField object
+	 *         equals this DataField object.
+	 */
+	public Boolean equals(String pattern, final boolean caseSensitive, final boolean trimmed) {
+
+		if (pattern.startsWith("'") && pattern.endsWith("'")) {
+			pattern = pattern.substring(1, pattern.length() - 1);
 		}
 
 		String cn = getClassName();
-		switch (cn){
+		switch (cn) {
 		case "java.lang.Integer":
-				return getInt().equals(Integer.parseInt(pattern));
+			return getInt().equals(Integer.parseInt(pattern));
 		case "java.lang.String":
-				return compareString(getString(), pattern, caseSensitive, trimmed);
+			return compareString(getString(), pattern, caseSensitive, trimmed);
 		default:
-			System.err.println("unimplemented: field type "+cn);
+			System.err.println("unimplemented: field type " + cn);
 			return false;
 		}
 
 	}
-	private static boolean compareString(final String dataRowString, final String pattern, boolean caseSensitive, boolean trimmed) {
+
+	private static boolean compareString(final String dataRowString, final String pattern, boolean caseSensitive,
+			boolean trimmed) {
 		String compareString = dataRowString;
-		if(trimmed) {
-			 compareString = compareString.trim();
+		if (trimmed) {
+			compareString = compareString.trim();
 		}
-		if(caseSensitive) {
+		if (caseSensitive) {
 			return compareString.equals(pattern);
-		}else {
+		} else {
 			return compareString.equalsIgnoreCase(pattern);
 		}
 	}
+
 	/**
 	 * Sets the given object as the DataField's value
 	 * 
-	 * @param value The object to set as the DataField's value
+	 * @param value
+	 *            The object to set as the DataField's value
 	 */
 	public void setValue(Object value) {
 		this.Value = value;
@@ -142,13 +157,13 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.String</code> object.
 	 */
 	public String getString() {
-		
+
 		try {
 			return (String) convertType(this.Value, java.sql.Types.VARCHAR);
-			} catch (Exception e) {
+		} catch (Exception e) {
 			return "";
 		}
-		
+
 	}
 
 	/**
@@ -188,7 +203,7 @@ public class DataField implements java.io.Serializable {
 			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
-			return Integer.toUnsignedLong((Integer)this.Value);
+			return Integer.toUnsignedLong((Integer) this.Value);
 		}
 		return (Long) this.Value;
 	}
@@ -196,15 +211,16 @@ public class DataField implements java.io.Serializable {
 	/**
 	 * Returns the DataField's value as <code>java.math.BigDecimal</code> object.
 	 * 
-	 * @return value The DataField's value as <code>java.math.BigDecimal</code> object.
+	 * @return value The DataField's value as <code>java.math.BigDecimal</code>
+	 *         object.
 	 */
 	public BigDecimal getBigDecimal() {
 		if (this.Value != null && getClassName() == "java.lang.Double") {
 			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
-			return new BigDecimal((Double)this.Value);
-		}		
+			return new BigDecimal((Double) this.Value);
+		}
 		return (BigDecimal) this.Value;
 	}
 
@@ -227,7 +243,7 @@ public class DataField implements java.io.Serializable {
 			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
-			return new Float((Double)this.Value);
+			return new Float((Double) this.Value);
 		}
 
 		return (Float) this.Value;
@@ -239,27 +255,27 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.sql.Date</code> object.
 	 */
 	public Date getDate() {
-		if (this.Value != null){
+		if (this.Value != null) {
 			if (getClassName() == "java.sql.Timestamp") {
 				long ms = ((java.sql.Timestamp) this.Value).getTime();
 				return new java.sql.Date(ms);
 			}
 			if (getClassName() == "java.lang.Integer") {
-				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date((Integer)this.Value);
+				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date((Integer) this.Value);
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
 					return null;
 			}
 			if (getClassName() == "java.lang.Double") {
-				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date(((Double)this.Value).intValue());
+				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date(((Double) this.Value).intValue());
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
 					return null;
 			}
 			if (getClassName() == "java.lang.String") {
-				String s = (String)this.Value;
+				String s = (String) this.Value;
 				if (s.isEmpty() || s.equals("-1"))
 					return null;
 			}
@@ -279,7 +295,8 @@ public class DataField implements java.io.Serializable {
 	/**
 	 * Returns the DataField's value as <code>java.sql.Timestamp</code> object.
 	 * 
-	 * @return value The DataField's value as <code>java.sql.Timestamp</code> object.
+	 * @return value The DataField's value as <code>java.sql.Timestamp</code>
+	 *         object.
 	 */
 	public Timestamp getTimestamp() {
 		if (this.Value != null && getClassName() == "java.sql.Date") {
@@ -287,10 +304,10 @@ public class DataField implements java.io.Serializable {
 			return new java.sql.Timestamp(ms);
 		}
 		if (this.Value != null && getClassName() == "java.lang.String") {
-			String s = (String)this.Value;
+			String s = (String) this.Value;
 			if (s.isEmpty())
 				return null;
-		}		
+		}
 		return (Timestamp) this.Value;
 	}
 
@@ -345,17 +362,20 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Boolean</code> object.
 	 */
 	public Boolean getBoolean() {
-		
-		if (this.Value!=null){
-			if (this.Value.getClass().equals(java.lang.String.class)){
-				return ("trueTRUE1".indexOf((String)this.Value) > 0);
-			};
-			if (this.Value.getClass().equals(java.lang.Integer.class)){
-				return ((Integer)this.Value > 0);
-			};	
-			if (this.Value.getClass().equals(java.lang.Double.class)){
-				return ((Double)this.Value > 0);
-			};
+
+		if (this.Value != null) {
+			if (this.Value.getClass().equals(java.lang.String.class)) {
+				return ("trueTRUE1".indexOf((String) this.Value) > 0);
+			}
+			;
+			if (this.Value.getClass().equals(java.lang.Integer.class)) {
+				return ((Integer) this.Value > 0);
+			}
+			;
+			if (this.Value.getClass().equals(java.lang.Double.class)) {
+				return ((Double) this.Value > 0);
+			}
+			;
 		}
 		return (Boolean) this.Value;
 	}
@@ -388,11 +408,13 @@ public class DataField implements java.io.Serializable {
 	}
 
 	/**
-	 * Sets the value of the attribute with the given name.
-	 * Creates the attribute if it doesn't exist.
+	 * Sets the value of the attribute with the given name. Creates the attribute if
+	 * it doesn't exist.
 	 * 
-	 * @param attributeName The attribute's name.
-	 * @param attributeValue The attribute's value.
+	 * @param attributeName
+	 *            The attribute's name.
+	 * @param attributeValue
+	 *            The attribute's value.
 	 */
 	public void setAttribute(String attributeName, String attributeValue) {
 		this.attributes.put(attributeName, Attribute.createString(attributeValue));
@@ -403,10 +425,11 @@ public class DataField implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the value for the given attribute name.
-	 * <code>null</code> is returned if no attribute matches the given name.
+	 * Returns the value for the given attribute name. <code>null</code> is returned
+	 * if no attribute matches the given name.
 	 * 
-	 * @param attributeName The attribute's name.
+	 * @param attributeName
+	 *            The attribute's name.
 	 * @return attributeValue The attribute's value.
 	 */
 	public String getAttribute(String attributeName) {
@@ -418,10 +441,11 @@ public class DataField implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns a <code>java.util.HashMap</code> object with the DataField's 
+	 * Returns a <code>java.util.HashMap</code> object with the DataField's
 	 * attributes and their corresponding value.
 	 * 
-	 * @return attributesMap The <code>java.util.HashMap</code> object containing the DataField's attributes and their values.
+	 * @return attributesMap The <code>java.util.HashMap</code> object containing
+	 *         the DataField's attributes and their values.
 	 */
 	public Map<String, String> getAttributes() {
 		return this.attributes.entrySet().stream()
@@ -432,7 +456,9 @@ public class DataField implements java.io.Serializable {
 	/**
 	 * Sets the attributes for this DataField.
 	 * 
-	 * @param attributes The attribute's <code>java.util.HashMap</code> object with the attributes and their corresponding values.
+	 * @param attributes
+	 *            The attribute's <code>java.util.HashMap</code> object with the
+	 *            attributes and their corresponding values.
 	 */
 	public void setAttributes(Map<String, String> attributes) {
 		this.attributes = attributes.entrySet().stream()
@@ -440,10 +466,11 @@ public class DataField implements java.io.Serializable {
 	}
 
 	/**
-	 * Removes the attribute with the given name. 
-	 * Nothing happens in case the name doesn't exist.
+	 * Removes the attribute with the given name. Nothing happens in case the name
+	 * doesn't exist.
 	 * 
-	 * @param attributeName The name of the attribute to remove.
+	 * @param attributeName
+	 *            The name of the attribute to remove.
 	 */
 	public void removeAttribute(String attributeName) {
 		this.attributes.remove(attributeName);
@@ -470,7 +497,7 @@ public class DataField implements java.io.Serializable {
 	@Override
 	public String toString() {
 		if (this.Value == null)
-			return null;
+			return "";
 		return this.Value.toString();
 	}
 
@@ -482,7 +509,7 @@ public class DataField implements java.io.Serializable {
 	}
 
 	public static Object convertType(Object o, int targetType) throws ParseException {
-    return DataFieldConverter.convertType(o, targetType);
+		return DataFieldConverter.convertType(o, targetType);
 	}
 
 	public Map<String, Attribute> getAttributes2() {

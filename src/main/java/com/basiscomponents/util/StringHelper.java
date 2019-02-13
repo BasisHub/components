@@ -1,6 +1,8 @@
 package com.basiscomponents.util;
 
 public class StringHelper {
+	private StringHelper() {
+	}
 	/**
 	 * Returns a String with the inverted bytes of the given input String.
 	 * 
