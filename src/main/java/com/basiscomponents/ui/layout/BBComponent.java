@@ -47,7 +47,6 @@ public class BBComponent {
 				this.height = control.getHeight().intValue();
 			}
 		} catch (BBjException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.origMinimumSize = new Dimension((int) (this.width / 2),
@@ -212,7 +211,6 @@ public class BBComponent {
 		try {
 			this.control.setLocation(bx, by);
 		} catch (BBjException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		setX(x);
@@ -267,7 +265,6 @@ public class BBComponent {
 				this.control.setSize(bw, bh);
 			}
 		} catch (BBjException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		setWidth(width);

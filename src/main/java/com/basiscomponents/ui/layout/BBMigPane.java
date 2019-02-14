@@ -3,13 +3,6 @@ package com.basiscomponents.ui.layout;
 import java.awt.Dimension;
 import java.util.List;
 
-import net.miginfocom.layout.AC;
-import net.miginfocom.layout.CC;
-import net.miginfocom.layout.ConstraintParser;
-import net.miginfocom.layout.Grid;
-import net.miginfocom.layout.LC;
-import net.miginfocom.layout.LayoutUtil;
-
 import com.basis.bbj.client.datatypes.BBjVector;
 import com.basis.bbj.client.sysgui.datatypes.BBjColor;
 import com.basis.bbj.client.util.BBjException;
@@ -21,6 +14,13 @@ import com.basis.bbj.proxies.sysgui.BBjPopupMenu;
 import com.basis.bbj.proxies.sysgui.BBjWindow;
 import com.basis.util.common.BBjNumber;
 import com.basis.util.common.BasisNumber;
+
+import net.miginfocom.layout.AC;
+import net.miginfocom.layout.CC;
+import net.miginfocom.layout.ConstraintParser;
+import net.miginfocom.layout.Grid;
+import net.miginfocom.layout.LC;
+import net.miginfocom.layout.LayoutUtil;
 
 /**
  * Manages BBj graphical components with MigLayout
@@ -411,7 +411,7 @@ public class BBMigPane implements BBjControl {
 	 * @throws IllegalArgumentException
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
-	public void layoutChildren() throws ArrayIndexOutOfBoundsException, IllegalArgumentException, BBjException {
+	public void layoutChildren() throws BBjException {
 		// validate if the grid should be recreated
 		validateMigLayoutGrid();
 
@@ -423,7 +423,7 @@ public class BBMigPane implements BBjControl {
 
 		// this will exercise BBComponentWrapper.setBounds to actually place the
 		// components
-		int[] lBounds = new int[] { new Integer(0), new Integer(0), this.container.getWidth(),
+		int[] lBounds = new int[] { Integer.valueOf(0), Integer.valueOf(0), this.container.getWidth(),
 				this.container.getHeight() };
 		this.migGrid.layout(lBounds, getLayoutConstraints().getAlignX(), getLayoutConstraints().getAlignY(),
 				this.debug);
@@ -445,7 +445,7 @@ public class BBMigPane implements BBjControl {
 	 * @throws NumberFormatException
 	 *
 	 */
-	public void createMigLayoutGrid() throws NumberFormatException, BBjException {
+	public void createMigLayoutGrid() throws BBjException {
 		this.migGrid = new Grid(this.containerWrapper, getLayoutConstraints(), getRowConstraints(),
 				getColumnConstraints(), this.containerWrapper.getComponentWrapperToCCMap(), null);
 		this.setLayoutSizes();
@@ -459,7 +459,7 @@ public class BBMigPane implements BBjControl {
 	 * @see Swing MigLayout: maximumLayoutSize(); minimumLayoutSize();
 	 *      preferredLayoutSize();
 	 */
-	private void setLayoutSizes() throws NumberFormatException, BBjException {
+	private void setLayoutSizes() throws BBjException {
 		Dimension d;
 		d = new Dimension(LayoutUtil.getSizeSafe(this.migGrid.getWidth(), LayoutUtil.MIN),
 				LayoutUtil.getSizeSafe(this.migGrid.getHeight(), LayoutUtil.MIN));

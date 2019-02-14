@@ -1,6 +1,7 @@
 package com.basiscomponents.bc;
 
 import java.util.Collection;
+
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
@@ -120,7 +121,7 @@ public interface BusinessComponent {
 	 * The default implementation returns getAttributesRecord().
 	 * @return a DataRow with fields used for filtering.
 	 */
-	default public DataRow getAllowedFilter() {
+	public default DataRow getAllowedFilter() {
 		return getAttributesRecord();
 	}
 }

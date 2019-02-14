@@ -122,8 +122,7 @@ public class BowerJsonBuilder {
 			formatter.format("%s\"private\":\"%s\",\n", getSpaces(2), IsPrivate());
 			formatter.format("%s\"main\":[\n", getSpaces(2));
 
-			String mains[] = getMain();
-			for (String file : mains) {
+			for (String file : getMain()) {
 				formatter.format("%s\"%s\"\n", getSpaces(4), file);
 			}
 			formatter.format("%s],\n", getSpaces(2));
