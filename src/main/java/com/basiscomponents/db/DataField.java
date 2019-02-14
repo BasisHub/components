@@ -11,7 +11,6 @@ import java.sql.Ref;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -261,14 +260,14 @@ public class DataField implements java.io.Serializable {
 				return new java.sql.Date(ms);
 			}
 			if (getClassName() == "java.lang.Integer") {
-				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date((Integer) this.Value);
+				java.util.Date d = com.basis.util.BasisDate.date((Integer) this.Value);
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
 					return null;
 			}
 			if (getClassName() == "java.lang.Double") {
-				java.util.Date d = (java.util.Date) com.basis.util.BasisDate.date(((Double) this.Value).intValue());
+				java.util.Date d = com.basis.util.BasisDate.date(((Double) this.Value).intValue());
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
@@ -367,15 +366,15 @@ public class DataField implements java.io.Serializable {
 			if (this.Value.getClass().equals(java.lang.String.class)) {
 				return ("trueTRUE1".indexOf((String) this.Value) > 0);
 			}
-			;
+
 			if (this.Value.getClass().equals(java.lang.Integer.class)) {
 				return ((Integer) this.Value > 0);
 			}
-			;
+
 			if (this.Value.getClass().equals(java.lang.Double.class)) {
 				return ((Double) this.Value > 0);
 			}
-			;
+
 		}
 		return (Boolean) this.Value;
 	}
@@ -508,7 +507,7 @@ public class DataField implements java.io.Serializable {
 		setValue(null);
 	}
 
-	public static Object convertType(Object o, int targetType) throws ParseException {
+	public static Object convertType(Object o, int targetType) {
 		return DataFieldConverter.convertType(o, targetType);
 	}
 
