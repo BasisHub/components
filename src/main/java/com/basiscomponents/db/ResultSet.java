@@ -24,6 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
@@ -74,6 +76,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private HashMap <String,Integer> rowIndex;
 
 	private SQLResultSet sqlResultSet = null;
+	private static final Logger LOGGER = Logger.getLogger(ResultSet.class.getName());
 
 	public ResultSet() {
 	}
@@ -189,7 +192,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception
 	 */
 	public ResultSet filterBy(String QueryClause, final boolean caseSensitive, final boolean trimmed) throws Exception{
-		System.out.println("WARNING: using experimental method implementation filterBy clause on ResultSet");
+		LOGGER.warning("WARNING: using experimental method implementation filterBy clause on ResultSet");
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 		Iterator<DataRow> it = this.iterator();
 		while (it.hasNext()) {
@@ -293,8 +296,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		try {
 			populate(rs, true);
 		} catch (Exception e) {
-			// Auto-generated catch block
-			e.printStackTrace();
+
+			LOGGER.log(Level.WARNING, "Could not populate ResultSet", e);
 		}
 	}
 
@@ -418,11 +421,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				name = entry.getValue();
 				DataField field = new DataField(rs.getObject(entry.getKey()));
 				type = defaultMetaData? types.get(column - 1) : getColumnType(column - 1);
-//				field.setAttributes(new HashMap<String, String>(fieldAttributes.get(name)));
 				dr.addDataField(name, type, field);
 			}
 
-			if (KeyColumns != null && KeyColumns.size() > 0) {
+			if (KeyColumns != null && !KeyColumns.isEmpty()) {
 				try {
 					buildRowKey(rs, dr);
 				} catch (Exception e) {}
@@ -434,7 +436,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 
 		// Add meta data to the first row only
-		if (DataRows.size() > 0 && fieldAttributes.size() > 0) {
+		if (!DataRows.isEmpty() && fieldAttributes.size() > 0) {
 			DataRow dr = DataRows.get(0);
 			Iterator<String> it = dr.getFieldNames().iterator();
 			while (it.hasNext()) {
@@ -459,8 +461,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				try {
 					this.setColumnType(column, dr.getFieldType(name));
 				} catch (Exception e) {
-					// Auto-generated catch block
-					e.printStackTrace();
+
+					LOGGER.log(Level.WARNING, "Could not set Column type", e);
 				}
 				try {
 					Map<String, String> attrMap = dr.getFieldAttributes(name);
@@ -469,8 +471,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					this.setAttribute(column, attrKey, attrMap.get(attrKey)));
 					
 				} catch (Exception e) {
-					// Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Could not setAttributes", e);
 				}
 			}
 		}
@@ -508,8 +509,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			try {
 				reCreateIndex();
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Index could not be recreated", e);
 			}
 		}
 	}
