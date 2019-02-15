@@ -14,6 +14,8 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.basiscomponents.db.model.Attribute;
@@ -32,7 +34,7 @@ public class DataField implements java.io.Serializable {
 	private Object Value;
 
 	private Map<String, Attribute> attributes = new HashMap<>();
-
+	private static final Logger LOGGER = Logger.getLogger(DataField.class.getName());
 	/**
 	 * Creates the DataField object with the given object as the DataField's value
 	 * 
@@ -103,7 +105,7 @@ public class DataField implements java.io.Serializable {
 		case "java.lang.String":
 			return compareString(getString(), pattern, caseSensitive, trimmed);
 		default:
-			System.err.println("unimplemented: field type " + cn);
+			LOGGER.log(Level.WARNING, "unimplemented: field type " + cn);
 			return false;
 		}
 
@@ -364,7 +366,7 @@ public class DataField implements java.io.Serializable {
 
 		if (this.Value != null) {
 			if (this.Value.getClass().equals(java.lang.String.class)) {
-				return ("trueTRUE1".indexOf((String) this.Value) > 0);
+				return ("trueTRUE1".indexOf((String) this.Value) >= 0);
 			}
 
 			if (this.Value.getClass().equals(java.lang.Integer.class)) {
