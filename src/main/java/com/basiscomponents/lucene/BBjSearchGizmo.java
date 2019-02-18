@@ -101,12 +101,12 @@ public class BBjSearchGizmo {
 		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
 
 		IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-		IndexWriter writer = new IndexWriter(indexdirectory, iwc);
+		try (IndexWriter writer = new IndexWriter(indexdirectory, iwc)) {
 
 		writer.deleteDocuments(new org.apache.lucene.index.Term("id", id2));
 
-		writer.close();
 		indexdirectory.close();
+		}
 	}
 
 	public ArrayList<String> doSearch(String searchTerm, String[] fields) throws IOException, ParseException {
@@ -179,16 +179,11 @@ public class BBjSearchGizmo {
 			FacetsCollector fc = new FacetsCollector();
 			FacetsCollector.search(searcher, query, 10, fc);
 
-			List<FacetResult> results = new ArrayList<FacetResult>();
+			List<FacetResult> results = new ArrayList<>();
 
 			FacetsConfig config = new FacetsConfig();
 			Facets facets = new FastTaxonomyFacetCounts(taxoreader, config, fc);
 			results.add(facets.getTopChildren(3, "color"));
-
-			reader.close();
-			taxoreader.close();
-			indexdirectory.close();
-			indextaxodirectory.close();
 
 			return results;
 		}

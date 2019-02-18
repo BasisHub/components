@@ -429,13 +429,14 @@ public class SqlTableBC implements BusinessComponent {
 					// OFFSET is available since MS SQL Server 2012 (version 11)
 					int dbVersion = Integer
 							.parseInt(conn.getMetaData().getDatabaseProductVersion().replaceAll("(\\d+)\\..*", "$1"));
-					if (dbVersion >= 11)
+					if (dbVersion >= 11) {
 						sql = new StringBuilder("SELECT * FROM (" + sql + ") T ORDER BY (SELECT NULL) OFFSET " + first
 								+ " ROWS FETCH NEXT " + (last - first + 1) + " ROWS ONLY");
-					else
+					}
+					else {
 						throw new UnsupportedOperationException(
 								"Pagination is not supported or not implemented with the " + dbType + " (version "
-										+ dbVersion + ") database.");
+										+ dbVersion + ") database.");}
 					break;
 				default:
 					throw new UnsupportedOperationException(
@@ -523,7 +524,7 @@ public class SqlTableBC implements BusinessComponent {
           }
         }
       } catch (Exception e1) {
-
+				// do nothing
       }
     }
 

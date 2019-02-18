@@ -80,9 +80,9 @@ public class DataFieldTypeConverter {
 
 		case java.sql.Types.DECIMAL:
 			if (classname.equals("java.lang.Double"))
-				return new BigDecimal((double) o);
+				return BigDecimal.valueOf((double) o);
 			if (classname.equals("java.lang.Integer"))
-				return new BigDecimal((int) o);
+				return BigDecimal.valueOf((int) o);
 			if (tmpstr.isEmpty())
 				tmpstr = "0";
 			return new BigDecimal(tmpstr);
@@ -169,14 +169,14 @@ public class DataFieldTypeConverter {
 
 				String tz_offs = "";
 				if (p.contains("+")) {
-					tz_offs = tmpstr.substring(p.indexOf("+"));
-					p = p.substring(0, p.indexOf("+"));
+					tz_offs = tmpstr.substring(p.indexOf('+'));
+					p = p.substring(0, p.indexOf('+'));
 				}
 				p = p.replaceFirst("-", "X");
 				p = p.replaceFirst("-", "X");
 				if (p.contains("-")) {
-					tz_offs = p.substring(p.indexOf("-"));
-					p = p.substring(0, p.indexOf("-") - 1);
+					tz_offs = p.substring(p.indexOf('-'));
+					p = p.substring(0, p.indexOf('-') - 1);
 				}
 				p = p.replaceFirst("X", "-");
 				p = p.replaceFirst("X", "-");
