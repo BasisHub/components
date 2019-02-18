@@ -5,16 +5,16 @@ package com.basiscomponents.ui.layout;
 
 import java.awt.Dimension;
 
-import net.miginfocom.layout.ComponentWrapper;
-import net.miginfocom.layout.ContainerWrapper;
-import net.miginfocom.layout.PlatformDefaults;
-
 import com.basis.bbj.client.sysgui.datatypes.BBjColor;
 import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.BBjSysGui;
 import com.basis.bbj.proxies.sysgui.BBjDrawPanel;
 import com.basis.bbj.proxies.sysgui.BBjWindow;
 import com.basis.util.common.BasisNumber;
+
+import net.miginfocom.layout.ComponentWrapper;
+import net.miginfocom.layout.ContainerWrapper;
+import net.miginfocom.layout.PlatformDefaults;
 
 /**
  * @author rlance
@@ -61,7 +61,6 @@ public class BBComponentWrapper implements ComponentWrapper {
 		try {
 			return this.component.getControl().getScreenX();
 		} catch (BBjException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return 0;
 		}
@@ -72,7 +71,7 @@ public class BBComponentWrapper implements ComponentWrapper {
 		try {
 			return this.component.getControl().getScreenY();
 		} catch (BBjException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 			return 0;
 		}
@@ -119,7 +118,6 @@ public class BBComponentWrapper implements ComponentWrapper {
 		try {
 			return this.component.getControl().isVisible();
 		} catch (BBjException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
@@ -183,7 +181,6 @@ public class BBComponentWrapper implements ComponentWrapper {
 				return null;
 			}
 		} catch (BBjException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -211,8 +208,7 @@ public class BBComponentWrapper implements ComponentWrapper {
 
 	@Override
 	public int[] getVisualPadding() {
-		// TODO Auto-generated method stub
-		return null;
+		return new int[0];
 	}
 
 	@Override
@@ -222,7 +218,6 @@ public class BBComponentWrapper implements ComponentWrapper {
 		try {
 			t = this.component.getControl().getControlType();
 		} catch (BBjException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			t = -1;
 		}
@@ -317,10 +312,6 @@ public class BBComponentWrapper implements ComponentWrapper {
 
 	@Override
 	public int getContentBias() {
-		// Orientation bias = node.getContentBias();
-		// return bias == null ? -1 : bias.ordinal(); // 0 ==
-		// Orientation.HORIZONTAL and Orientation.HORIZONTAL, 1 =
-		// Orientation.VERTICAL and LayoutUtil.VERTICAL
 		return 0;
 	}
 

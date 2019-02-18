@@ -138,7 +138,7 @@ public class JLibResultSetImporter {
 		fieldNameMap = new HashMap<>();
 
 		@SuppressWarnings("unchecked")
-		ArrayList<String> fieldNameList = fieldSelection.getFieldNames();
+		List<String> fieldNameList = fieldSelection.getFieldNames();
 
 		List<String> templatedStringFieldNameList = Arrays
 				.asList(templatedString.getFieldNames().toString().split("\n"));
@@ -299,7 +299,7 @@ public class JLibResultSetImporter {
 				readPerOffset = true;
 
 				// move the file pointer to the offset position
-				pos.read(record, record.length, offsetStart - 1, 5, false);
+				pos.read(record, record.length, offsetStart - 1L, 5, false);
 			}
 
 			while (!complete) {
@@ -570,6 +570,7 @@ public class JLibResultSetImporter {
 	 * 
 	 * @return The Templated String.
 	 */
+	@SuppressWarnings("squid:S4275")
 	public String getTemplatedString() {
 		return this.stringTemplate;
 	}

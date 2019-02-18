@@ -48,16 +48,14 @@ public class PropertyReader {
 	 * @throws IOException
 	 */
 	private Properties getProperties(String filename) {
-		try {
-			FileInputStream fileInput = new FileInputStream(filename);
+		try (FileInputStream fileInput = new FileInputStream(filename)) {
 			Properties properties = new Properties();
 			properties.load(fileInput);
-			fileInput.close();
 			return properties;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new Properties();
 	}
 
 	/**

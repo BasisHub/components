@@ -227,13 +227,13 @@ public class Javascript extends AbstractGenerator{
 
                 // first check if all concerned data types are valid
                 Boolean OK = true;
-                if (!AllowedTypes.contains(m.getReturnType())) {
+                if (!allowedTypes.contains(m.getReturnType())) {
                     OK = false;
                 }
 
                 Iterator<MethodParameter> it2 = m.getParams().iterator();
                 while (it2.hasNext()) {
-                    if (!AllowedTypes.contains(it2.next().getType())) {
+                    if (!allowedTypes.contains(it2.next().getType())) {
                         OK = false;
                         break;
                     }

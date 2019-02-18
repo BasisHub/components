@@ -27,7 +27,7 @@ public class ResultSetJsonMapper {
 		JsonFactory jf = new JsonFactory();
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
 		StringWriter w = new StringWriter();
-		JsonGenerator g = jf.createGenerator(w);
+		try (JsonGenerator g = jf.createGenerator(w)) {
 		g.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
 		// g.useDefaultPrettyPrinter();
 
@@ -334,6 +334,7 @@ public class ResultSetJsonMapper {
 		g.writeEndArray();
 		g.close();
 		return w.toString();
+		}
 	}
 	/**
 	 * @param dr

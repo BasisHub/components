@@ -40,7 +40,7 @@ public class BBjSearchGizmo {
 
 	private Analyzer analyzer;
 
-	public BBjSearchGizmo(String directory) throws IOException {
+	public BBjSearchGizmo(String directory) {
 		this.directoryName = directory;
 		analyzer = new WhitespaceAnalyzer();
 	}
@@ -53,36 +53,32 @@ public class BBjSearchGizmo {
 			e.printStackTrace();
 		}
 
-		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault()
-				.getPath(directoryName));
+		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
 		IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 		IndexWriter writer = new IndexWriter(indexdirectory, iwc);
 		/*
 		 * Document lucene_doc_taxo2= new Document(); lucene_doc_taxo2.add(new
-		 * FacetField("id","2")); lucene_doc_taxo2.add(new
-		 * FacetField("color","red"));
+		 * FacetField("id","2")); lucene_doc_taxo2.add(new FacetField("color","red"));
 		 * writer.addDocument(config.build(taxoWriter, lucene_doc_taxo2));
 		 */
 
-		Document lucene_doc = new Document();
-		lucene_doc.add(new StringField("id", doc.getInternalId(),
-				Field.Store.YES));
+		Document luceneDoc = new Document();
+		luceneDoc.add(new StringField("id", doc.getInternalId(), Field.Store.YES));
 
 		Iterator<BBjSearchGizmoDocField> it = doc.getFields().iterator();
 		while (it.hasNext()) {
 			BBjSearchGizmoDocField f = it.next();
-			TextField lucene_field = new TextField(f.getName(), f.getContent()
-					.toLowerCase(), Field.Store.YES);
-			
-			//this appears to have passed away with some recent Lucene version
+			TextField luceneField = new TextField(f.getName(), f.getContent().toLowerCase(), Field.Store.YES);
+
+			// this appears to have passed away with some recent Lucene version
 			// lucene_field.setBoost(f.getBoost());
-			
-			lucene_doc.add(lucene_field);
+
+			luceneDoc.add(luceneField);
 
 		}
 
 		try {
-			writer.addDocument(lucene_doc);
+			writer.addDocument(luceneDoc);
 		} catch (Exception ex) {
 			writer.close();
 			// taxoWriter.commit();
@@ -98,45 +94,39 @@ public class BBjSearchGizmo {
 		indexdirectory.close();
 	}
 
-	public void removeDocument(String id) throws IOException,
-			LockObtainFailedException, ParseException {
+	public void removeDocument(String id) throws IOException, LockObtainFailedException, ParseException {
 
 		String id2 = new String(java.util.Base64.getEncoder().encode(id.getBytes()));
 
-		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault()
-				.getPath(directoryName));
+		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
 
 		IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-		IndexWriter writer = new IndexWriter(indexdirectory, iwc);
+		try (IndexWriter writer = new IndexWriter(indexdirectory, iwc)) {
 
 		writer.deleteDocuments(new org.apache.lucene.index.Term("id", id2));
 
-		writer.close();
 		indexdirectory.close();
+		}
 	}
 
-	public ArrayList<String> doSearch(String searchTerm, String[] fields)
-			throws IOException, ParseException {
-		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault()
-				.getPath(directoryName));
+	public ArrayList<String> doSearch(String searchTerm, String[] fields) throws IOException, ParseException {
+		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
 		IndexReader reader = DirectoryReader.open(indexdirectory);
 		IndexSearcher searcher = new IndexSearcher(reader);
 
 		if (reader.numDocs() < 1) {
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 
-		TopScoreDocCollector collector = TopScoreDocCollector.create(reader
-				.numDocs());
+		TopScoreDocCollector collector = TopScoreDocCollector.create(reader.numDocs());
 
-		MultiFieldQueryParser queryparser = new MultiFieldQueryParser(fields,
-				analyzer);
+		MultiFieldQueryParser queryparser = new MultiFieldQueryParser(fields, analyzer);
 		queryparser.setAllowLeadingWildcard(true);
 		Query query = queryparser.parse(searchTerm.toLowerCase());
 		searcher.search(query, collector);
 		ScoreDoc[] hits = collector.topDocs().scoreDocs;
 
-		ArrayList<String> result = new ArrayList<String>();
+		ArrayList<String> result = new ArrayList<>();
 
 		for (int i = 0; i < hits.length; ++i) {
 			int docId = hits[i].doc;
@@ -151,10 +141,8 @@ public class BBjSearchGizmo {
 		return result;
 	}
 
-	public ArrayList<String> doFuzzySearch(String searchTerm, String field)
-			throws IOException {
-		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault()
-				.getPath(directoryName));
+	public ArrayList<String> doFuzzySearch(String searchTerm, String field) throws IOException {
+		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
 		IndexReader reader = DirectoryReader.open(indexdirectory);
 		IndexSearcher searcher = new IndexSearcher(reader);
 		TopScoreDocCollector collector = TopScoreDocCollector.create(1000);
@@ -176,36 +164,29 @@ public class BBjSearchGizmo {
 		return result;
 	}
 
-	public List<FacetResult> facetsWithSearch(String searchTerm, String[] fields)
-			throws IOException, ParseException {
-		FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault()
-				.getPath(directoryName));
-		FSDirectory indextaxodirectory = FSDirectory.open(FileSystems
-				.getDefault().getPath(taxoDirectoryName));
-		IndexReader reader = DirectoryReader.open(indexdirectory);
-		TaxonomyReader taxoreader = new DirectoryTaxonomyReader(
-				indextaxodirectory);
-		IndexSearcher searcher = new IndexSearcher(reader);
-		MultiFieldQueryParser queryparser = new MultiFieldQueryParser(fields,
-				analyzer);
-		queryparser.setAllowLeadingWildcard(true);
-		Query query = queryparser.parse(searchTerm.toLowerCase());
+	public List<FacetResult> facetsWithSearch(String searchTerm, String[] fields) throws IOException, ParseException {
 
-		FacetsCollector fc = new FacetsCollector();
-		FacetsCollector.search(searcher, query, 10, fc);
+		try (FSDirectory indexdirectory = FSDirectory.open(FileSystems.getDefault().getPath(directoryName));
+				FSDirectory indextaxodirectory = FSDirectory.open(FileSystems.getDefault().getPath(taxoDirectoryName));
+				IndexReader reader = DirectoryReader.open(indexdirectory);
+				TaxonomyReader taxoreader = new DirectoryTaxonomyReader(indextaxodirectory);) {
 
-		List<FacetResult> results = new ArrayList<FacetResult>();
+			IndexSearcher searcher = new IndexSearcher(reader);
+			MultiFieldQueryParser queryparser = new MultiFieldQueryParser(fields, analyzer);
+			queryparser.setAllowLeadingWildcard(true);
+			Query query = queryparser.parse(searchTerm.toLowerCase());
 
-		FacetsConfig config = new FacetsConfig();
-		Facets facets = new FastTaxonomyFacetCounts(taxoreader, config, fc);
-		results.add(facets.getTopChildren(3, "color"));
+			FacetsCollector fc = new FacetsCollector();
+			FacetsCollector.search(searcher, query, 10, fc);
 
-		reader.close();
-		taxoreader.close();
-		indexdirectory.close();
-		indextaxodirectory.close();
+			List<FacetResult> results = new ArrayList<>();
 
-		return results;
+			FacetsConfig config = new FacetsConfig();
+			Facets facets = new FastTaxonomyFacetCounts(taxoreader, config, fc);
+			results.add(facets.getTopChildren(3, "color"));
+
+			return results;
+		}
 	}
 
 }
