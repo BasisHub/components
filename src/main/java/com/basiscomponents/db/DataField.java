@@ -532,6 +532,8 @@ public class DataField implements java.io.Serializable {
 			oos.writeObject(Value);
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			byte[] thedigest = md.digest(baos.toByteArray());
+			String etag = DatatypeConverter.printHexBinary(thedigest);
+			this.attributes.put("ETAG", Attribute.createString(etag));
 			return DatatypeConverter.printHexBinary(thedigest);
 		} catch (NoSuchAlgorithmException | IOException e) {
 
