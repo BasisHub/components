@@ -41,19 +41,14 @@ public class ResultSetJsonMapperTest {
 
 	@Test
 	public void test() throws Exception {
-		rs.print();
-		String js = rs.toJson();
-		System.out.println(js);
-		ResultSet rs2 = ResultSet.fromJson(js);
-		rs2.print();
-		System.out.println(rs2.getDataRows().get(0).getField("EMBEDDED_RS").getValue().getClass().getName());
-		assertTrue(rs2.get(0).getDataField("EMBEDDED_RS").getValue() instanceof ResultSet);
-		rs2.get(0).getDataField("EMBEDDED_RS").getAttributes()
-				.forEach((x, y) -> System.out.println("[" + x + "]: " + y));
-		ResultSet rs3 = (ResultSet) rs2.get(0).getDataField("EMBEDDED_RS").getValue();
-		rs3.print();
 
-		// assertEquals(rs, rs2);
+		String js = rs.toJson();
+		ResultSet rs2 = ResultSet.fromJson(js);
+
+		assertTrue(rs2.get(0).getDataField("EMBEDDED_RS").getValue() instanceof ResultSet);
+		ResultSet rs3 = (ResultSet) rs2.get(0).getDataField("EMBEDDED_RS").getValue();
+
+
 
 	}
 
