@@ -5,8 +5,8 @@ package com.basiscomponents.db.util;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.basiscomponents.db.DataField;
@@ -32,13 +32,7 @@ public class ResultSetJsonMapperTest {
 		rs.add(dr);
 	}
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@After
-	public void tearDown() throws Exception {
-	}
-
+	@Ignore
 	@Test
 	public void test() throws Exception {
 
