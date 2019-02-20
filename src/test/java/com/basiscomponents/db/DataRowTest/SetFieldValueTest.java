@@ -1,4 +1,4 @@
-package com.basiscomponents.db.DataRowTest;
+package com.basiscomponents.db.datarowtest;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;

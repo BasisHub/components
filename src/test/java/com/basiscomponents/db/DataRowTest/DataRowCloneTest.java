@@ -1,4 +1,4 @@
-package com.basiscomponents.db.DataRowTest;
+package com.basiscomponents.db.datarowtest;
 
 import org.junit.Test;
 
