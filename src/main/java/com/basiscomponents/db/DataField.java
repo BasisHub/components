@@ -49,8 +49,7 @@ public class DataField implements java.io.Serializable {
 	 *            The value object of the DataField to be created
 	 */
 	public DataField(Object value) {
-
-		setValue(value);
+		this.Value = value;
 	}
 
 	/**
@@ -139,6 +138,7 @@ public class DataField implements java.io.Serializable {
 	 *            The object to set as the DataField's value
 	 */
 	public void setValue(Object value) {
+		this.attributes.remove("ETAG");
 		this.Value = value;
 	}
 
@@ -416,6 +416,13 @@ public class DataField implements java.io.Serializable {
 		return (SQLXML) this.Value;
 	}
 
+	public String getEtag() {
+		if (this.attributes.containsKey("ETAG")) {
+			return this.attributes.get("ETAG").getValue();
+		}
+		return createEtag();
+
+	}
 	/**
 	 * Sets the value of the attribute with the given name. Creates the attribute if
 	 * it doesn't exist.
@@ -528,15 +535,14 @@ public class DataField implements java.io.Serializable {
 	public String createEtag() {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ObjectOutputStream oos = new ObjectOutputStream(baos);) {
-
 			oos.writeObject(Value);
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			byte[] thedigest = md.digest(baos.toByteArray());
 			String etag = DatatypeConverter.printHexBinary(thedigest);
 			this.attributes.put("ETAG", Attribute.createString(etag));
+
 			return DatatypeConverter.printHexBinary(thedigest);
 		} catch (NoSuchAlgorithmException | IOException e) {
-
 			e.printStackTrace();
 		}
 		return "";
