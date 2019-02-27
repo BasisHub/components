@@ -348,10 +348,13 @@ public class SqlTableBC implements BusinessComponent {
 		}
 
 		DataRow filterRow = filter.clone();
-		List<DataRowRegexMatcher> regexmatchers = regexes.entrySet().stream()
+		List<DataRowRegexMatcher> regexmatchers = null;
+		if (regexes != null) {
+		regexmatchers = regexes.entrySet().stream()
 				.map(x -> new DataRowRegexMatcher(x.getKey(), x.getValue().getString()))
 				.collect(Collectors.toList());
-
+		}
+		
 		ResultSet retrs = null;
 
 		try (CloseableWrapper<Connection> connw = getConnection()) {
@@ -468,7 +471,7 @@ public class SqlTableBC implements BusinessComponent {
 		// Set the generated meta attributes to the first record
 		if (retrs.size() > 0) {
 			Iterator<DataRow> iterator = retrs.iterator();
-			if (!regexmatchers.isEmpty()) {
+			if (regexmatchers != null && !regexmatchers.isEmpty()) {
 				while (iterator.hasNext()) {
 					DataRow dr = iterator.next();
 					if (!regexmatchers.stream().allMatch(x -> x.matches(dr))) {
