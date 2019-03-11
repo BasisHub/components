@@ -2,6 +2,9 @@ package com.basiscomponents.db;
 
 import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
 
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,19 +13,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.basis.bbj.datatypes.TemplatedString;
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
+import com.basiscomponents.db.exception.DataFieldNotFoundException;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowFromJsonProvider;
 import com.basiscomponents.db.util.DataRowMatcher;
 import com.basiscomponents.db.util.JRDataSourceAdapter;
 import com.basiscomponents.db.util.TemplateParser;
+import com.fasterxml.jackson.core.JsonParseException;
 
 import net.sf.jasperreports.engine.JRDataSource;
 
@@ -34,11 +42,11 @@ public class DataRow implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Map<String, DataField> dataFields = new HashMap<>();
+	private final Map<String, DataField> dataFields = new HashMap<>();
 
-	private Map<String, String> attributes = new HashMap<>();
+	private final Map<String, String> attributes = new HashMap<>();
 
-	private com.basiscomponents.db.ResultSet resultSet; // containing this row
+	private final ResultSet resultSet; // containing this row
 
 	private byte[] rowKey = new byte[0];
 
@@ -277,8 +285,9 @@ public class DataRow implements java.io.Serializable {
 	 *            The SQL type of the field
 	 * @param value
 	 *            The value of the field
+	 * @throws ParseException
 	 */
-	public void setFieldValue(String name, int type, Object value) throws Exception {
+	public void setFieldValue(String name, int type, Object value) throws ParseException {
 
 		DataField field = null;
 
@@ -302,6 +311,18 @@ public class DataRow implements java.io.Serializable {
 		else {
 			field = new DataField(value);
 			addDataField(name, type, field);
+		}
+	}
+
+	public String getEtag() {
+		String allEtags = this.dataFields.entrySet().stream().map(e -> e.getValue().getEtag())
+				.collect(Collectors.joining());
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] thedigest = md.digest(allEtags.getBytes());
+			return DatatypeConverter.printHexBinary(thedigest);
+		} catch (NoSuchAlgorithmException e1) {
+			return "";
 		}
 	}
 
@@ -342,7 +363,7 @@ public class DataRow implements java.io.Serializable {
 	public DataField getField(String name, Boolean silent) {
 		DataField field = this.dataFields.get(name);
 		if (field == null && !(silent))
-			throw new RuntimeException("Field " + name + " does not exist");
+			throw new DataFieldNotFoundException("Field " + name + " does not exist");
 		return field;
 	}
 
@@ -803,7 +824,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             The field name doesn't exist.
 	 */
-	public void removeField(String fieldName) throws Exception {
+	public void removeField(String fieldName) {
 
 		int column = getColumnIndex(fieldName, true);
 		if (column > -1)
@@ -956,7 +977,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @throws Exception
 	 */
-	public void addDataField(String fieldName, DataField dataField) throws Exception {
+	public void addDataField(String fieldName, DataField dataField) {
 		Object o = dataField.getObject(); // default
 		int type;
 
@@ -966,13 +987,13 @@ public class DataRow implements java.io.Serializable {
 				type = java.sql.Types.ARRAY;
 			else
 				type = java.sql.Types.VARBINARY;
-		} else {
+		} else if (typeName != null) {
 			switch (typeName) {
 			case "com.basiscomponents.db.DataRow":
-				type=-974;
+				type = -974;
 				break;
 			case "com.basiscomponents.db.ResultSet":
-				type=-975;
+				type = -975;
 				break;
 			case "java.lang.String":
 				type = java.sql.Types.VARCHAR;
@@ -1041,6 +1062,8 @@ public class DataRow implements java.io.Serializable {
 				type = java.sql.Types.OTHER;
 				break;
 			}
+		} else {
+			type = java.sql.Types.OTHER;
 		}
 		addDataField(fieldName, type, dataField);
 	}
@@ -1086,17 +1109,9 @@ public class DataRow implements java.io.Serializable {
 	@Override
 	public DataRow clone() {
 		DataRow dr = new DataRow();
-		Iterator<String> it = this.resultSet.getColumnNames().iterator();
-		while (it.hasNext()) {
-			String k = it.next();
-			DataField f = this.dataFields.get(k);
-			DataField f1 = f.clone();
-			try {
-				dr.addDataField(k, this.getFieldType(k), f1);
-			} catch (Exception e) {
-				// Auto-generated catch block
-				e.printStackTrace();
-			}
+		for (String k : this.resultSet.getColumnNames()) {
+			DataField f = Optional.ofNullable(this.dataFields.get(k)).map(df -> df.clone()).orElse(null);
+			dr.addDataField(k, this.getFieldType(k), f);
 		}
 		return dr;
 	}
@@ -1202,8 +1217,11 @@ public class DataRow implements java.io.Serializable {
 	 * <b>Note:</b> The DataRow's field values will be overwritten by the values of
 	 * the passed DataRow in case the field's exist in both.
 	 *
-	 * @param dataRow The DataRow object to merge with
-	 * @param fOverwrite set to true to always overwrite fields that already exist, false to skip those
+	 * @param dataRow
+	 *            The DataRow object to merge with
+	 * @param fOverwrite
+	 *            set to true to always overwrite fields that already exist, false
+	 *            to skip those
 	 */
 	public void mergeRecord(DataRow dataRow, Boolean fOverwrite) {
 		BBArrayList<String> names = dataRow.getFieldNames();
@@ -1212,7 +1230,7 @@ public class DataRow implements java.io.Serializable {
 			String f = it.next();
 			try {
 				if (fOverwrite || !contains(f))
-				this.addDataField(f, dataRow.getFieldType(f), dataRow.getDataField(f));
+					this.addDataField(f, dataRow.getFieldType(f), dataRow.getDataField(f));
 			} catch (Exception e) {
 				// Auto-generated catch block
 				e.printStackTrace();
@@ -1227,13 +1245,13 @@ public class DataRow implements java.io.Serializable {
 	 * <b>Note:</b> The DataRow's field values will be overwritten by the values of
 	 * the passed DataRow in case the field's exist in both.
 	 *
-	 * @param dataRow The DataRow object to merge with
+	 * @param dataRow
+	 *            The DataRow object to merge with
 	 */
 	public void mergeRecord(DataRow dataRow) {
 		mergeRecord(dataRow, true);
 	}
-	
-	
+
 	/**
 	 * Creates a DataRow from a String in URL format Sample:
 	 * field1=value1&field2=value2 will result in a DataRow with the two fields
@@ -1314,16 +1332,16 @@ public class DataRow implements java.io.Serializable {
 	public String toJson(String rowIndex) throws Exception {
 		ResultSet rs = new ResultSet();
 		rs.add(this);
-		return rs.toJson(true,rowIndex);
+		return rs.toJson(true, rowIndex);
 	}
-	
+
 	/**
 	 * Returns the DataRow and all of its fields as a JSON String.
 	 *
 	 * @return The DataRow as JSON String
 	 * @throws Exception
 	 */
-	public String toJson(Boolean f_meta) throws Exception {
+	public String toJson(final Boolean f_meta) throws Exception {
 		ResultSet rs = new ResultSet();
 		rs.add(this);
 		return rs.toJson(f_meta);
@@ -1335,12 +1353,12 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow as JSON String
 	 * @throws Exception
 	 */
-	public String toJson(Boolean f_meta, String rowIndex, Boolean f_trimStrings) throws Exception {
+	public String toJson(final Boolean f_meta, final String rowIndex, final Boolean f_trimStrings) throws Exception {
 		ResultSet rs = new ResultSet();
 		rs.add(this);
 		return rs.toJson(f_meta, rowIndex, f_trimStrings);
 	}
-	
+
 	/**
 	 * Initializes and returns a DataRow object based on the values provided in the
 	 * given JSON String.
@@ -1348,11 +1366,14 @@ public class DataRow implements java.io.Serializable {
 	 * @param in
 	 *            The JSON String
 	 * @return the DataRow object created based on the JSOn String's content
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
 	 *
 	 * @throws Exception
 	 *             Gets thrown in case the JSON could not be parsed / is invalid
 	 */
-	public static DataRow fromJson(String j) throws Exception {
+	public static DataRow fromJson(String j) throws JsonParseException, IOException, ParseException {
 		return fromJson(j, null);
 	}
 
@@ -1362,16 +1383,18 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param in
 	 *            The JSON String
-	 * @param ar
+	 * @param meta
 	 *            A DataRow that will be used to determine the field types if not
 	 *            given in the meta section of the JSON String
 	 * @return the DataRow object created based on the JSOn String's content
+	 * @throws ParseException
+	 * @throws IOException
 	 *
 	 * @throws Exception
 	 *             Gets thrown in case the JSON could not be parsed / is invalid
 	 */
-	public static DataRow fromJson(String in, DataRow ar) throws Exception {
-		return DataRowFromJsonProvider.fromJson(in, ar);
+	public static DataRow fromJson(String in, DataRow meta) throws IOException, ParseException {
+		return DataRowFromJsonProvider.fromJson(in, meta);
 	}
 
 	public void setFieldAttributes(String fieldName, Map<String, String> attr) {
@@ -1396,11 +1419,11 @@ public class DataRow implements java.io.Serializable {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns this DataRow as a JRDataSource
 	 * 
-	 * @return JRDataSourceAdapter representing a ResultSet with this record 
+	 * @return JRDataSourceAdapter representing a ResultSet with this record
 	 */
 	public JRDataSource toJRDataSource() {
 		ResultSet rs = new ResultSet();

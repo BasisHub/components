@@ -8,11 +8,12 @@
 
 package com.basiscomponents.bridge.proxygen.Javascript;
 
-import com.basiscomponents.bridge.proxygen.ParseEntity;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+
+import com.basiscomponents.bridge.proxygen.ParseEntity;
 
 /**
  * AbstractGenerator
@@ -21,9 +22,9 @@ import java.util.HashMap;
  *
  * @author Hyyan Abo Fakher &lt;habofakher@basis.com&gt;
  */
-abstract public class AbstractGenerator {
+public abstract class AbstractGenerator {
 
-    public static final String AllowedTypes = "DataRow ResultSet BBjNumber BBjString Boolean Integer Double void";
+    public static final String allowedTypes = "DataRow ResultSet BBjNumber BBjString Boolean Integer Double void";
     private String namespace;
     private HashMap<String, ParseEntity> classes;
     private String output;

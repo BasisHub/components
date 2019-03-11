@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class JLibResultSetImporter {
 	private String fileName;
 	private DataRow filter;
 
-	private HashMap<Integer, String> fieldNameMap;
+	private Map<Integer, String> fieldNameMap;
 
 	private int offsetStart = -1;
 	private int offsetCount = -1;
@@ -70,7 +71,7 @@ public class JLibResultSetImporter {
 	 * @return The field name map
 	 */
 	private HashMap<Integer, String> initFieldNameMap(TemplatedString templatedStr) {
-		HashMap<Integer, String> indexList = new HashMap<Integer, String>();
+		HashMap<Integer, String> indexList = new HashMap<>();
 		List<String> fieldNameList = Arrays.asList(templatedStr.getFieldNames().toString().split("\n"));
 		Iterator<String> it = fieldNameList.iterator();
 		int counter = 0;
@@ -134,10 +135,10 @@ public class JLibResultSetImporter {
 			return;
 		}
 
-		fieldNameMap = new HashMap<Integer, String>();
+		fieldNameMap = new HashMap<>();
 
 		@SuppressWarnings("unchecked")
-		ArrayList<String> fieldNameList = fieldSelection.getFieldNames();
+		List<String> fieldNameList = fieldSelection.getFieldNames();
 
 		List<String> templatedStringFieldNameList = Arrays
 				.asList(templatedString.getFieldNames().toString().split("\n"));
@@ -298,7 +299,7 @@ public class JLibResultSetImporter {
 				readPerOffset = true;
 
 				// move the file pointer to the offset position
-				pos.read(record, record.length, offsetStart - 1, 5, false);
+				pos.read(record, record.length, offsetStart - 1L, 5, false);
 			}
 
 			while (!complete) {
@@ -417,7 +418,7 @@ public class JLibResultSetImporter {
 	 * @throws IndexOutOfBoundsException
 	 * @throws NoSuchFieldException
 	 */
-	private List<Integer> initNumericFieldsIndeces(TemplatedString templatedString, HashMap<Integer, String> fieldMap)
+	private List<Integer> initNumericFieldsIndeces(TemplatedString templatedString, Map<Integer, String> fieldMap)
 			throws NoSuchFieldException {
 		Iterator<Entry<Integer, String>> it = fieldMap.entrySet().iterator();
 		ArrayList<Integer> indexList = new ArrayList<>();
@@ -453,7 +454,7 @@ public class JLibResultSetImporter {
 	 * 
 	 * @throws Exception
 	 */
-	private void initColumnMetadata(ResultSet rs, TemplatedString templatedStr, HashMap<Integer, String> fieldMap)
+	private void initColumnMetadata(ResultSet rs, TemplatedString templatedStr, Map<Integer, String> fieldMap)
 			throws Exception {
 		Iterator<Entry<Integer, String>> it = fieldMap.entrySet().iterator();
 		int columnIndex;
@@ -569,6 +570,7 @@ public class JLibResultSetImporter {
 	 * 
 	 * @return The Templated String.
 	 */
+	@SuppressWarnings("squid:S4275")
 	public String getTemplatedString() {
 		return this.stringTemplate;
 	}

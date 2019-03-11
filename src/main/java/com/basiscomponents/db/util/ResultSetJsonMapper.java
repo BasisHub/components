@@ -18,13 +18,16 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 public class ResultSetJsonMapper {
-	public static String toJson(List<DataRow> dataRows, List<HashMap<String, Object>> metaData, boolean meta, String addIndexColumn, boolean f_trimStrings)
+	private ResultSetJsonMapper() {
+	}
+	public static String toJson(List<DataRow> dataRows, List<HashMap<String, Object>> metaData, boolean meta,
+			String addIndexColumn, boolean f_trimStrings)
 			throws IOException {
 
 		JsonFactory jf = new JsonFactory();
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
 		StringWriter w = new StringWriter();
-		JsonGenerator g = jf.createGenerator(w);
+		try (JsonGenerator g = jf.createGenerator(w)) {
 		g.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
 		// g.useDefaultPrettyPrinter();
 
@@ -262,21 +265,19 @@ public class ResultSetJsonMapper {
 							g.writeFieldName(c);
 							g.writeStartObject();
 
-							Map<String, Attribute> atr;
-							try {
-								atr = dr.getFieldAttributes2(c);
-							} catch (Exception e) {
-								atr = null;
-							}
-							for (String key : hm.keySet()) {
-								if (key.equals("ColumnTypeName") || key.equals("ColumnName")
-										|| (atr != null && atr.containsKey(key))) {
+							final Map<String, Attribute> atr = getFieldAttributes(dr, c);
+							
+
+							for (Entry<String, Object> entry : hm.entrySet()) {
+								if ("ColumnTypeName".equals(entry.getKey()) || "ColumnName".equals(entry.getKey())
+										|| (atr != null && atr.containsKey(entry.getKey()))) {
 									continue;
 								}
 								String value = null;
-								if (hm.get(key) != null)
-									value = hm.get(key).toString();
-								g.writeStringField(key, value);
+								if(entry.getValue()!=null)
+									value= entry.getValue().toString();
+								
+								g.writeStringField(entry.getKey(), value);
 							}
 
 							if (atr != null && !atr.isEmpty()) {
@@ -333,6 +334,21 @@ public class ResultSetJsonMapper {
 		g.writeEndArray();
 		g.close();
 		return w.toString();
+		}
+	}
+	/**
+	 * @param dr
+	 * @param c
+	 * @return
+	 */
+	private static Map<String, Attribute> getFieldAttributes(DataRow dr, String c) {
+		Map<String, Attribute> atr;
+		try {
+			atr = dr.getFieldAttributes2(c);
+		} catch (Exception e) {
+			atr = null;
+		}
+		return atr;
 	}
 
 

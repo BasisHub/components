@@ -1,4 +1,4 @@
-package com.basiscomponents.db.DataRowTest;
+package com.basiscomponents.db.datarowtest;
 
 import static com.basiscomponents.db.util.DataRowProvider.DATEFIELD;
 import static com.basiscomponents.db.util.DataRowProvider.DOUBLEFIELD;

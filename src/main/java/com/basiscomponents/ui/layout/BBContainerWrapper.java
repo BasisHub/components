@@ -8,16 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import net.miginfocom.layout.CC;
-import net.miginfocom.layout.ComponentWrapper;
-import net.miginfocom.layout.ContainerWrapper;
-
 import com.basis.bbj.client.sysgui.datatypes.BBjColor;
 import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.sysgui.BBjControl;
 import com.basis.bbj.proxies.sysgui.BBjDrawPanel;
 import com.basis.bbj.proxies.sysgui.BBjWindow;
 import com.basis.util.common.BasisNumber;
+
+import net.miginfocom.layout.CC;
+import net.miginfocom.layout.ComponentWrapper;
+import net.miginfocom.layout.ContainerWrapper;
 
 /**
  * @author rlance
@@ -32,11 +32,11 @@ public class BBContainerWrapper extends BBComponentWrapper implements
 
 	private static final BBjColor DB_CELL_OUTLINE = new BBjColor(255, 0, 0);
 
-	private List<BBComponentWrapper> componentWrapperList = new ArrayList<BBComponentWrapper>();
-	private Map<BBComponent, BBComponentWrapper> componentToComponentWrapperMap = new WeakHashMap<BBComponent, BBComponentWrapper>();
-	private Map<BBjControl, BBComponentWrapper> controlToComponentWrapperMap = new WeakHashMap<BBjControl, BBComponentWrapper>();
-	private Map<ComponentWrapper, CC> componentWrapperToCCMap = new WeakHashMap<ComponentWrapper, CC>();
-	private Map<BBComponent, Integer> componentToHashcodeMap = new WeakHashMap<BBComponent, Integer>();
+	private List<BBComponentWrapper> componentWrapperList = new ArrayList<>();
+	private Map<BBComponent, BBComponentWrapper> componentToComponentWrapperMap = new WeakHashMap<>();
+	private Map<BBjControl, BBComponentWrapper> controlToComponentWrapperMap = new WeakHashMap<>();
+	private Map<ComponentWrapper, CC> componentWrapperToCCMap = new WeakHashMap<>();
+	private Map<BBComponent, Integer> componentToHashcodeMap = new WeakHashMap<>();
 
 	/**
 	 * Constructor

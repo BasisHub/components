@@ -15,8 +15,8 @@ import com.basiscomponents.db.DataRow;
 
 public class PropertyReader {
 
-	private HashMap<String, LinkedHashMap<BBjVector, BBjVector>> finalMap = new HashMap<String, LinkedHashMap<BBjVector, BBjVector>>();
-	private HashMap<String, BBjVector> finalResultSet = new HashMap<String, BBjVector>();
+	private HashMap<String, LinkedHashMap<BBjVector, BBjVector>> finalMap = new HashMap<>();
+	private HashMap<String, BBjVector> finalResultSet = new HashMap<>();
 	private String filename;
 	private String lang;
 
@@ -48,16 +48,14 @@ public class PropertyReader {
 	 * @throws IOException
 	 */
 	private Properties getProperties(String filename) {
-		try {
-			FileInputStream fileInput = new FileInputStream(filename);
+		try (FileInputStream fileInput = new FileInputStream(filename)) {
 			Properties properties = new Properties();
 			properties.load(fileInput);
-			fileInput.close();
 			return properties;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new Properties();
 	}
 
 	/**

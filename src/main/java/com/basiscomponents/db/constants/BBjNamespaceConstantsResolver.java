@@ -1,7 +1,6 @@
 package com.basiscomponents.db.constants;
 
 import java.util.Iterator;
-import java.util.Map.Entry;
 
 import com.basis.bbj.client.datatypes.BBjVector;
 import com.basis.bbj.client.util.BBjException;
@@ -35,7 +34,6 @@ public class BBjNamespaceConstantsResolver implements ConstantsResolver{
 					out = out.replaceAll("\\[\\["+o+"\\]\\]" ,v);
 				}				
 			} catch (BBjException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return out;

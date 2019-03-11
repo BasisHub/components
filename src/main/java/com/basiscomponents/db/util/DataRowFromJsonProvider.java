@@ -1,286 +1,330 @@
 package com.basiscomponents.db.util;
 
+import java.io.IOException;
 import java.sql.Types;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DataRowFromJsonProvider {
 
-	public static DataRow fromJson(String in, DataRow ar) throws Exception {
+	private static final String COLUMN_TYPE = "ColumnType";
 
-		if (in.length() < 2)
+	public static DataRow fromJson(final String in, final DataRow meta)
+			throws JsonParseException, IOException, ParseException {
+		String input = in;
+		if (input.length() < 2) {
 			return new DataRow();
-
-		if (ar == null)
-			ar = new DataRow();
-		else
-			ar = ar.clone();
-
-		// convert characters below chr(32) to \\uxxxx notation
-		int i = 0;
-		while (i < in.length()) {
-			if (in.charAt(i) < 31) {
-				String hex = String.format("%04x", (int) in.charAt(i));
-				in = in.substring(0, i) + "\\u" + hex + in.substring(i + 1);
-			}
-			i++;
 		}
 
-		if (in.startsWith("{\"datarow\":[") && in.endsWith("]}")) {
-			in = in.substring(11, in.length() - 1);
-		}
-		String intmp = in;
-		JsonNode root = new ObjectMapper().readTree(intmp);
+		input = convertCharsBelowChr32(input);
+		input = removeLeadingDataRow(input);
+		JsonNode root = buildJsonRoot(input);
+		input = wrapInJsonArray(input);
 
-		if (in.startsWith("{") && in.endsWith("}")) {
-			in = "[" + in + "]";
-		}
 		JsonFactory f = new JsonFactory();
-		JsonParser jp = f.createParser(in);
-		jp.nextToken();
-		ObjectMapper objectMapper = new ObjectMapper();
+		try (JsonParser jsonParser = f.createParser(input)) {
+			jsonParser.nextToken();
 
-		List<?> navigation = objectMapper.readValue(jp,
-				objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
+			ObjectMapper objectMapper = new ObjectMapper();
 
-		if (navigation.isEmpty()) {
-			return new DataRow();
+			List<?> navigation = objectMapper.readValue(jsonParser,
+					objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
+
+			if (navigation.isEmpty()) {
+				return new DataRow();
+			}
+
+			DataRow metaRow;
+			if (meta == null) {
+				metaRow = new DataRow();
+			} else {
+				metaRow = meta.clone();
+			}
+			HashMap<?, ?> navigationMap = (HashMap<?, ?>) navigation.get(0);
+
+			createMetaData(metaRow, navigationMap);
+
+			createNonExistingAttributes(root, metaRow, navigationMap);
+
+			DataRow dr = new DataRow();
+			if (!metaRow.isEmpty()) {
+				createDataFields(root, metaRow, navigationMap, dr);
+			} else {
+				handleOldFormat(navigation, dr);
+			}
+			return dr;
 		}
+	}
 
-		HashMap<?, ?> hm = (HashMap<?, ?>) navigation.get(0);
+	private static void createDataFields(JsonNode root, DataRow attributes, HashMap<?, ?> hm, DataRow dr)
+			throws ParseException, JsonParseException, IOException {
+		for (String fieldName : attributes.getFieldNames()) {
+			Object fieldObj = hm.get(fieldName);
+			int fieldType = attributes.getFieldType(fieldName);
+			if (fieldObj == null) {
+				dr.addDataField(fieldName, fieldType, new DataField(null));
+				dr.setFieldAttributes(fieldName, attributes.getFieldAttributes(fieldName));
+				continue;
+			}
+			switch (fieldType) {
+			case -974:
+				// nested DataRow
+				System.out.println("fromJson might have issues");
+				// FIXME: need to parse and create the nested ResultSet as well
+				// this is https://github.com/BasisHub/components/issues/115
 
-		DataRow dr = new DataRow();
+				dr.setFieldValue(fieldName, DataRow.fromJson(root.get(fieldName).toString()));
 
+				break;
+			case -975:
+				// nested ResultSet
+				System.err.println("fromJson might have issues");
+				// FIXME: seems to be working, but attributes are lost
+				// this is https://github.com/BasisHub/components/issues/115
+				dr.setFieldValue(fieldName, ResultSet.fromJson(root.get(fieldName).toString()));
+				break;
+
+			case java.sql.Types.CHAR:
+			case java.sql.Types.VARCHAR:
+			case java.sql.Types.NVARCHAR:
+			case java.sql.Types.NCHAR:
+			case java.sql.Types.LONGVARCHAR:
+			case java.sql.Types.LONGNVARCHAR:
+				// got a JSON object - save it as a JSON String
+				if (fieldObj.getClass().equals(java.util.LinkedHashMap.class)) {
+					dr.addDataField(fieldName, fieldType, new DataField(root.get(fieldName).toString()));
+					dr.setFieldAttribute(fieldName, "StringFormat", "JSON");
+				} else
+					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
+				break;
+			case java.sql.Types.BIGINT:
+			case java.sql.Types.TINYINT:
+			case java.sql.Types.INTEGER:
+			case java.sql.Types.SMALLINT:
+				String tmp = fieldObj.toString();
+				if (tmp.isEmpty())
+					tmp = "0";
+				dr.addDataField(fieldName, fieldType, new DataField(Integer.parseInt(tmp)));
+				break;
+			case java.sql.Types.NUMERIC:
+				dr.addDataField(fieldName, fieldType, new DataField(new java.math.BigDecimal(fieldObj.toString())));
+				break;
+			case java.sql.Types.DOUBLE:
+			case java.sql.Types.FLOAT:
+			case java.sql.Types.DECIMAL:
+			case java.sql.Types.REAL:
+				dr.addDataField(fieldName, fieldType, new DataField(Double.parseDouble(fieldObj.toString())));
+				break;
+			case java.sql.Types.BOOLEAN:
+			case java.sql.Types.BIT:
+				dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
+				break;
+			case java.sql.Types.TIMESTAMP:
+			case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
+			case (int) 11:
+				String tss = fieldObj.toString();
+				if (!tss.contains("T")) {
+					tss += "T00:00:00.0";
+				}
+				java.sql.Timestamp ts = (java.sql.Timestamp) DataField.convertType(tss, fieldType);
+				dr.addDataField(fieldName, fieldType, new DataField(ts));
+				break;
+			case java.sql.Types.DATE:
+			case (int) 9:
+				tss = fieldObj.toString();
+				dr.addDataField(fieldName, fieldType,
+						new DataField((java.sql.Date) DataField.convertType(tss, fieldType)));
+				break;
+			case java.sql.Types.ARRAY:
+			case java.sql.Types.BINARY:
+			case java.sql.Types.BLOB:
+			case java.sql.Types.CLOB:
+			case java.sql.Types.DATALINK:
+			case java.sql.Types.DISTINCT:
+			case java.sql.Types.JAVA_OBJECT:
+			case java.sql.Types.LONGVARBINARY:
+			case java.sql.Types.NCLOB:
+			case java.sql.Types.NULL:
+			case java.sql.Types.OTHER:
+			case java.sql.Types.REF:
+			case java.sql.Types.REF_CURSOR:
+			case java.sql.Types.ROWID:
+			case java.sql.Types.SQLXML:
+			case java.sql.Types.STRUCT:
+			case java.sql.Types.TIME:
+			case java.sql.Types.TIME_WITH_TIMEZONE:
+			case java.sql.Types.VARBINARY:
+			default:
+				break;
+
+			}// switch
+
+			Map<String, String> attr = attributes.getFieldAttributes(fieldName);
+
+			@SuppressWarnings("unchecked")
+			HashMap<String, HashMap> m = (HashMap<String, HashMap>) hm.get("meta");
+			if (m != null && m.containsKey(fieldName)) {
+				attr.putAll((HashMap<String, String>) m.get(fieldName));
+				dr.setFieldAttributes(fieldName, attr);
+			}
+		}
+	}
+
+	private static void handleOldFormat(List<?> navigation, DataRow dr) throws ParseException {
+		// old format - deprecated
+		@SuppressWarnings("unchecked")
+		Iterator<?> it = navigation.iterator();
+		while (it.hasNext()) {
+
+			HashMap<String, ?> field = (HashMap<String, ?>) it.next();
+			String name = (String) field.get("Name");
+			String type = (String) field.get("Type");
+			if (type == null)
+				continue;
+			switch (type) {
+			case "C":
+				String strval = (String) field.get("StringValue");
+				if (strval == null)
+					strval = "";
+				dr.setFieldValue(name, strval);
+				break;
+			case "N":
+				Object o = field.get("NumericValue");
+				Double numval;
+				if (o == null)
+					numval = 0.0;
+				else
+					numval = Double.parseDouble(o.toString());
+				dr.setFieldValue(name, numval);
+				break;
+			case "D":
+				Object d = field.get("DateValue");
+				if (d == null) {
+					dr.setFieldValue(name, Types.DATE, null);
+				} else {
+					dr.setFieldValue(name, Types.DATE, d.toString());
+				}
+				break;
+			case "T":
+				Object t = field.get("TimestampValue");
+				if (t == null)
+					dr.setFieldValue(name, Types.TIMESTAMP, null);
+				else
+					dr.setFieldValue(name, Types.TIMESTAMP, t.toString());
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	private static void createNonExistingAttributes(JsonNode root, DataRow attributes, HashMap<?, ?> hm) {
+		// add all fields to the attributes record that were not part of it before
+		Iterator<?> it2 = hm.keySet().iterator();
+		while (it2.hasNext()) {
+			String fieldName = (String) it2.next();
+			if (!attributes.contains(fieldName) && !fieldName.equals("meta") && root.get(fieldName) != null) {
+				switch (root.get(fieldName).getNodeType().toString()) {
+				case "NUMBER":
+					attributes.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
+					break;
+				case "BOOLEAN":
+					attributes.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
+					break;
+				default:
+					attributes.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
+					break;
+
+				}
+			}
+		}
+	}
+
+	private static void createMetaData(DataRow attributes, HashMap<?, ?> hm) {
 		if (hm.containsKey("meta")) {
 			// new format
-			HashMap meta = (HashMap) hm.get("meta");
+			HashMap<?, ?> meta = (HashMap<?, ?>) hm.get("meta");
 			if (meta == null)
 				meta = new HashMap();
-			
+
 			Iterator<?> it = hm.keySet().iterator();
 			while (it.hasNext()) {
 				String fieldName = (String) it.next();
-				
+
 				@SuppressWarnings("unchecked")
 				HashMap<String, ?> fieldMeta = ((HashMap) meta.get(fieldName));
-				if (!ar.contains(fieldName) && !fieldName.equals("meta")) {
-					String s = "12";
+				if (!attributes.contains(fieldName) && !fieldName.equals("meta")) {
+					String fieldType = "12";
 
 					if (fieldMeta == null) {
 						fieldMeta = new HashMap<>();
 					}
 
-					if (fieldMeta.get("ColumnType") != null)
-						s = (String) fieldMeta.get("ColumnType");
-					if (s != null) {
-						ar.addDataField(fieldName, Integer.parseInt(s), new DataField(null));
+					if (fieldMeta.get(COLUMN_TYPE) != null)
+						fieldType = (String) fieldMeta.get(COLUMN_TYPE);
+					if (fieldType != null) {
+						attributes.addDataField(fieldName, Integer.parseInt(fieldType), new DataField(null));
+
 						Set<String> ks = fieldMeta.keySet();
 						if (ks.size() > 1) {
 							Iterator<String> itm = ks.iterator();
 							while (itm.hasNext()) {
 								String k = itm.next();
-								if (k.equals("ColumnType"))
+								if (k.equals(COLUMN_TYPE))
 									continue;
-								ar.setFieldAttribute((String) fieldName, k, (String) fieldMeta.get(k));
+								attributes.setFieldAttribute((String) fieldName, k, (String) fieldMeta.get(k));
 							}
 						}
 					} // if s!=null
 				}
 			}
 		}
+	}
 
-		// add all fields to the attributes record that were not part of it before
-		Iterator<?> it2 = hm.keySet().iterator();
-		while (it2.hasNext()) {
-			String fieldName = (String) it2.next();
-			if (!ar.contains(fieldName) && !fieldName.equals("meta") && root.get(fieldName) != null) {
-				switch (root.get(fieldName).getNodeType().toString()) {
-				case "NUMBER":
-					ar.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
-					break;
-				case "BOOLEAN":
-					ar.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
-					break;
-				default:
-					ar.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
-					break;
-
-				}
-			}
+	private static String wrapInJsonArray(String input) {
+		if (input.startsWith("{") && input.endsWith("}")) {
+			return "[" + input + "]";
 		}
+		return input;
+	}
 
-		if (!ar.isEmpty()) {
-			BBArrayList<String> names = ar.getFieldNames();
+	private static JsonNode buildJsonRoot(String input) throws IOException {
+		String intmp = input;
+		JsonNode root = new ObjectMapper().readTree(intmp);
+		return root;
+	}
 
-			Iterator<?> it = names.iterator();
-
-			while (it.hasNext()) {
-				String fieldName = (String) it.next();
-
-				Object fieldObj = hm.get(fieldName);
-				int fieldType = ar.getFieldType(fieldName);
-				if (fieldObj == null) {
-					dr.addDataField(fieldName, fieldType, new DataField(null));
-					dr.setFieldAttributes(fieldName, ar.getFieldAttributes(fieldName));
-					continue;
-				}
-				switch (fieldType) {
-				case -974:
-					// nested DataRow
-					System.err.println("fromJson not implemented for nested DataRow!");
-					// FIXME: need to parse and create the nested ResultSet as well
-					// this is https://github.com/BasisHub/components/issues/115
-					dr.setFieldValue(fieldName, new DataRow());
-					break;					
-				case -975:
-					// nested ResultSet
-					System.err.println("fromJson not implemented for nested ResultSet!");
-					// FIXME: need to parse and create the nested ResultSet as well
-					// this is https://github.com/BasisHub/components/issues/115
-					dr.setFieldValue(fieldName, new ResultSet());
-					break;
-				
-				case java.sql.Types.CHAR:
-				case java.sql.Types.VARCHAR:
-				case java.sql.Types.NVARCHAR:
-				case java.sql.Types.NCHAR:
-				case java.sql.Types.LONGVARCHAR:
-				case java.sql.Types.LONGNVARCHAR:
-					// got a JSON object - save it as a JSON String
-					if (fieldObj.getClass().equals(java.util.LinkedHashMap.class)) {
-						dr.addDataField(fieldName, fieldType, new DataField(root.get(fieldName).toString()));
-						dr.setFieldAttribute(fieldName, "StringFormat", "JSON");
-					} else
-						dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
-					break;
-				case java.sql.Types.BIGINT:
-				case java.sql.Types.TINYINT:
-				case java.sql.Types.INTEGER:
-				case java.sql.Types.SMALLINT:
-					String tmp = fieldObj.toString();
-					if (tmp.isEmpty())
-						tmp = "0";
-					dr.addDataField(fieldName, fieldType, new DataField(Integer.parseInt(tmp)));
-					break;
-				case java.sql.Types.NUMERIC:
-					dr.addDataField(fieldName, fieldType, new DataField(new java.math.BigDecimal(fieldObj.toString())));
-					break;
-				case java.sql.Types.DOUBLE:
-				case java.sql.Types.FLOAT:
-				case java.sql.Types.DECIMAL:
-				case java.sql.Types.REAL:
-					dr.addDataField(fieldName, fieldType, new DataField(Double.parseDouble(fieldObj.toString())));
-					break;
-				case java.sql.Types.BOOLEAN:
-				case java.sql.Types.BIT:
-					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
-					break;
-				case java.sql.Types.TIMESTAMP:
-				case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
-				case (int) 11:
-					String tss = fieldObj.toString();
-					if (!tss.contains("T")) {
-						tss+="T00:00:00.0";
-					}
-					java.sql.Timestamp ts = (java.sql.Timestamp) DataField.convertType(tss, fieldType);
-					dr.addDataField(fieldName, fieldType, new DataField(ts));
-					break;
-				case java.sql.Types.DATE:
-				case (int) 9:
-					tss = fieldObj.toString();
-					dr.addDataField(fieldName, fieldType,
-							new DataField((java.sql.Date) DataField.convertType(tss, fieldType)));
-					break;
-				case java.sql.Types.ARRAY:
-				case java.sql.Types.BINARY:
-				case java.sql.Types.BLOB:
-				case java.sql.Types.CLOB:
-				case java.sql.Types.DATALINK:
-				case java.sql.Types.DISTINCT:
-				case java.sql.Types.JAVA_OBJECT:
-				case java.sql.Types.LONGVARBINARY:
-				case java.sql.Types.NCLOB:
-				case java.sql.Types.NULL:
-				case java.sql.Types.OTHER:
-				case java.sql.Types.REF:
-				case java.sql.Types.REF_CURSOR:
-				case java.sql.Types.ROWID:
-				case java.sql.Types.SQLXML:
-				case java.sql.Types.STRUCT:
-				case java.sql.Types.TIME:
-				case java.sql.Types.TIME_WITH_TIMEZONE:
-				case java.sql.Types.VARBINARY:
-				default:
-					break;
-
-				}// switch
-
-				Map<String, String> attr = ar.getFieldAttributes(fieldName);
-				@SuppressWarnings("unchecked")
-				HashMap<String, HashMap> m = (HashMap<String, HashMap>) hm.get("meta");
-				if (m != null && m.containsKey(fieldName)) {
-					attr.putAll((HashMap<String, String>) m.get(fieldName));
-					dr.setFieldAttributes(fieldName, attr);
-				}
-			}
-		} else {
-			// old format - deprecated
-			Iterator<?> it = navigation.iterator();
-			while (it.hasNext()) {
-				@SuppressWarnings("unchecked")
-				HashMap<String, ?> field = (HashMap<String, ?>) it.next();
-				String name = (String) field.get("Name");
-				String type = (String) field.get("Type");
-				if (type == null)
-					continue;
-				switch (type) {
-				case "C":
-					String strval = (String) field.get("StringValue");
-					if (strval == null)
-						strval = "";
-					dr.setFieldValue(name, strval);
-					break;
-				case "N":
-					Object o = field.get("NumericValue");
-					Double numval;
-					if (o == null)
-						numval = 0.0;
-					else
-						numval = Double.parseDouble(o.toString());
-					dr.setFieldValue(name, numval);
-					break;
-				case "D":
-					Object d = field.get("DateValue");
-					if (d == null) {
-						dr.setFieldValue(name, Types.DATE, null);
-					} else {
-						dr.setFieldValue(name, Types.DATE, d.toString());
-					}
-					break;
-				case "T":
-					Object t = field.get("TimestampValue");
-					if (t == null)
-						dr.setFieldValue(name, Types.TIMESTAMP, null);
-					else
-						dr.setFieldValue(name, Types.TIMESTAMP, t.toString());
-					break;
-				default:
-					break;
-				}
-			}
+	private static String removeLeadingDataRow(String input) {
+		if (input.startsWith("{\"datarow\":[") && input.endsWith("]}")) {
+			input = input.substring(11, input.length() - 1);
 		}
-		return dr;
+		return input;
+	}
+
+	// convert characters below chr(32) to \\uxxxx notation
+	private static String convertCharsBelowChr32(String input) {
+		int i = 0;
+
+		while (i < input.length()) {
+			if (input.charAt(i) < 31) {
+				String hex = String.format("%04x", (int) input.charAt(i));
+				input = input.substring(0, i) + "\\u" + hex + input.substring(i + 1);
+			}
+			i++;
+		}
+		return input;
 	}
 }

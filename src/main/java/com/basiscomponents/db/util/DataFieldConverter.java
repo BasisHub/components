@@ -9,6 +9,16 @@ import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.ResultSet;
 
 public class DataFieldConverter {
+	private static final String JAVA_MATH_BIG_DECIMAL = "java.math.BigDecimal";
+	private static final String BBJ_INT = "BBjInt";
+	private static final String BBJ_NUMBER = "BBjNumber";
+	private static final String JAVA_LANG_DOUBLE = "java.lang.Double";
+	private static final String JAVA_LANG_INTEGER = "java.lang.Integer";
+	private static final String JAVA_LANG_BOOLEAN = "java.lang.Boolean";
+	private static final String JAVA_LANG_STRING = "java.lang.String";
+
+	private DataFieldConverter() {
+	}
 	public static Object convertType(Object o, int targetType) {
 
 		if (o == null)
@@ -23,7 +33,7 @@ public class DataFieldConverter {
 		case java.sql.Types.BINARY:
 		case java.sql.Types.VARBINARY:
 		case java.sql.Types.LONGVARBINARY:
-			if (!classname.equals("java.lang.String")) {
+			if (!classname.equals(JAVA_LANG_STRING)) {
 				return o.toString().getBytes();
 			}
 			return ((String) o).getBytes();
@@ -32,30 +42,27 @@ public class DataFieldConverter {
 		case java.sql.Types.LONGVARCHAR:
 			// make Boolean special, for compatibility with BBj IF statements
 			// want true as "1" and false as "0"
-			if (classname.equals("java.lang.Boolean"))
-				if ((Boolean) o)
-					return "1";
-				else
-					return "0";
-			if (classname.equals("java.math.BigDecimal"))
+			if (classname.equals(JAVA_LANG_BOOLEAN))
+				return (Boolean) o ? "1" : "0";
+			if (classname.equals(JAVA_MATH_BIG_DECIMAL))
 				return ((BigDecimal) o).stripTrailingZeros().toPlainString();
-			if (!classname.equals("java.lang.String"))
+			if (!classname.equals(JAVA_LANG_STRING))
 				return o.toString();
 			else
 				return o;
 		case java.sql.Types.BIT:
 		case java.sql.Types.BOOLEAN:
-			if (classname.equals("java.lang.Boolean"))
+			if (classname.equals(JAVA_LANG_BOOLEAN))
 				return o;
-			if (classname.equals("java.lang.String")) {
+			if (classname.equals(JAVA_LANG_STRING)) {
 				String c = o.toString().toLowerCase();
 				return c.equals("true") || c.equals(".t.") || c.equals("1");
 			}
-			if (classname.equals("java.lang.Integer"))
+			if (classname.equals(JAVA_LANG_INTEGER))
 				return (Integer) o > 0;
-			if (classname.equals("java.lang.Double"))
+			if (classname.equals(JAVA_LANG_DOUBLE))
 				return (Double) o > 0;
-			if (classname.contains("BBjNumber") || classname.contains("BBjInt"))
+			if (classname.contains(BBJ_NUMBER) || classname.contains(BBJ_INT))
 				return Double.parseDouble(o.toString()) > 0;
 			break;
 
@@ -63,20 +70,20 @@ public class DataFieldConverter {
 		case java.sql.Types.BIGINT:
 		case java.sql.Types.SMALLINT:
 		case java.sql.Types.INTEGER:
-			if (classname.equals("java.lang.Integer"))
+			if (classname.equals(JAVA_LANG_INTEGER))
 				return o;
-			if (classname.equals("java.lang.Boolean"))
+			if (classname.equals(JAVA_LANG_BOOLEAN))
 				return (Boolean) o ? 1 : 0;
-			if (classname.equals("java.lang.Double"))
+			if (classname.equals(JAVA_LANG_DOUBLE))
 				return ((Double) o).intValue();
 			if (tmpstr.isEmpty())
 				tmpstr = "0";
 			return (Integer.parseInt(tmpstr));
 
 		case java.sql.Types.DECIMAL:
-			if (classname.equals("java.lang.Double"))
+			if (classname.equals(JAVA_LANG_DOUBLE))
 				return BigDecimal.valueOf((double) o);
-			if (classname.equals("java.lang.Integer"))
+			if (classname.equals(JAVA_LANG_INTEGER))
 				return new BigDecimal((int) o);
 			if (tmpstr.isEmpty())
 				tmpstr = "0";
@@ -84,9 +91,9 @@ public class DataFieldConverter {
 
 		case java.sql.Types.REAL:
 		case java.sql.Types.DOUBLE:
-			if (classname.equals("java.lang.Double"))
+			if (classname.equals(JAVA_LANG_DOUBLE))
 				return o;
-			if (classname.equals("java.lang.Boolean"))
+			if (classname.equals(JAVA_LANG_BOOLEAN))
 				return (Boolean) o ? 1.0 : 0.0;
 			if (tmpstr.isEmpty())
 				tmpstr = "0.0";
@@ -108,14 +115,14 @@ public class DataFieldConverter {
 				else
 					return null;
 			}
-			if (classname.equals("java.lang.Integer")) {
+			if (classname.equals(JAVA_LANG_INTEGER)) {
 				java.util.Date d = com.basis.util.BasisDate.date((Integer) o);
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
 					return null;
 			}
-			if (classname.equals("java.lang.Double")) {
+			if (classname.equals(JAVA_LANG_DOUBLE)) {
 				java.util.Date d = com.basis.util.BasisDate.date(((Double) o).intValue());
 				if (d != null)
 					return new java.sql.Date(d.getTime());
@@ -125,7 +132,7 @@ public class DataFieldConverter {
 			if (classname.equals("java.lang.Long")) {
 				return new java.sql.Date((long) o);
 			}
-			if (classname.equals("java.lang.String"))
+			if (classname.equals(JAVA_LANG_STRING))
 				if (tmpstr.isEmpty())
 					return null;
 				else {
@@ -147,7 +154,7 @@ public class DataFieldConverter {
 		case java.sql.Types.TIME:
 			if (classname.equals("java.sql.Time"))
 				return o;
-			if (classname.equals("java.lang.String"))
+			if (classname.equals(JAVA_LANG_STRING))
 				try {
 					return new java.sql.Time(new SimpleDateFormat("HH:mm:ss").parse((String) o).getTime());
 				} catch (ParseException e) {
@@ -157,11 +164,11 @@ public class DataFieldConverter {
 		case java.sql.Types.TIMESTAMP:
 			if (classname.equals("java.sql.Timestamp"))
 				return o;
-			if (classname.equals("java.lang.Integer"))
+			if (classname.equals(JAVA_LANG_INTEGER))
 				return new java.sql.Timestamp(com.basis.util.BasisDate.date((Integer) o).getTime());
-			if (classname.equals("java.lang.Double"))
+			if (classname.equals(JAVA_LANG_DOUBLE))
 				return new java.sql.Timestamp(com.basis.util.BasisDate.date(((Double) o).intValue()).getTime());
-			if (classname.equals("java.lang.String")) {
+			if (classname.equals(JAVA_LANG_STRING)) {
 				String p = ((String) o).replaceFirst("T", " ");
 				if (tmpstr.isEmpty())
 					return null;
@@ -171,17 +178,15 @@ public class DataFieldConverter {
 				}
 				catch (Exception e){
 				}
-				finally {
-				}
+
 				if (p.contains("+")) {
-					String p1 = p.substring(0, p.indexOf("+"));
+					String p1 = p.substring(0, p.indexOf('+'));
 					try {
 						return java.sql.Timestamp.valueOf(p1);	
 					}
 					catch (Exception e){
 					}
-					finally {
-					}
+
 				}
 				System.err.println("ERROR PARSING DATE "+p);
 			}
@@ -214,7 +219,7 @@ public class DataFieldConverter {
 				return 0.0;
 		}
 
-		Double ret = 0.0;
+		Double ret;
 
 		// TODO maybe: make this use reflection and skip the field for the
 		// column type, to honor dynamic type changes??

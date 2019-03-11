@@ -12,7 +12,6 @@ class BBjSearchGizmoDocField {
 
 	public BBjSearchGizmoDocField(String name, String content, float boost,
 			boolean faceting) {
-		// this(name,content,boost);
 		this.setName(name);
 		this.setContent(content);
 		this.setBoost(boost);
