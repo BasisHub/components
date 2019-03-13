@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.basiscomponents.bc.util.CloseableWrapper;
@@ -348,12 +349,13 @@ public class SqlTableBC implements BusinessComponent {
 		}
 
 		DataRow filterRow = filter.clone();
-		List<DataRowRegexMatcher> regexmatchers = null;
-		if (regexes != null) {
-		regexmatchers = regexes.entrySet().stream()
+		List<DataRowRegexMatcher> regexmatchers = Optional.ofNullable(regexes)
+				.orElseGet(HashMap::new)
+				.entrySet()
+				.stream()
 				.map(x -> new DataRowRegexMatcher(x.getKey(), x.getValue().getString()))
 				.collect(Collectors.toList());
-		}
+
 		
 		ResultSet retrs = null;
 
@@ -471,7 +473,7 @@ public class SqlTableBC implements BusinessComponent {
 		// Set the generated meta attributes to the first record
 		if (retrs.size() > 0) {
 			Iterator<DataRow> iterator = retrs.iterator();
-			if (regexmatchers != null && !regexmatchers.isEmpty()) {
+			if (!regexmatchers.isEmpty()) {
 				while (iterator.hasNext()) {
 					DataRow dr = iterator.next();
 					if (!regexmatchers.stream().allMatch(x -> x.matches(dr))) {
