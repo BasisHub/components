@@ -44,8 +44,7 @@ public class ResultSetJsonMapper {
 			}
 			
 			for (String fn : dr.getFieldNames()) {
-
-				if (dr.getField(fn).getValue() == null) {
+				if (dr.getField(fn,true) == null || dr.getField(fn,true).getValue() == null) {
 					g.writeNullField(fn);
 					continue;
 				}
@@ -305,21 +304,23 @@ public class ResultSetJsonMapper {
 					BBArrayList<String> fields = dr.getFieldNames();
 					boolean mWritten = false;
 					for (String fieldname : fields) {
-						Map<String, String> l = dr.getFieldAttributes(fieldname);
-						if (!l.isEmpty()) {
-							if (!mWritten) {
-								g.writeFieldName("meta");
+						if (dr.getField(fieldname,true) != null ) {
+							Map<String, String> l = dr.getFieldAttributes(fieldname);
+							if (!l.isEmpty()) {
+								if (!mWritten) {
+									g.writeFieldName("meta");
+									g.writeStartObject();
+									mWritten = true;
+								}
+								g.writeFieldName(fieldname);
 								g.writeStartObject();
-								mWritten = true;
+								Iterator<String> itks = l.keySet().iterator();
+								while (itks.hasNext()) {
+									String itk = itks.next();
+									g.writeStringField(itk, l.get(itk));
+								}
+								g.writeEndObject();
 							}
-							g.writeFieldName(fieldname);
-							g.writeStartObject();
-							Iterator<String> itks = l.keySet().iterator();
-							while (itks.hasNext()) {
-								String itk = itks.next();
-								g.writeStringField(itk, l.get(itk));
-							}
-							g.writeEndObject();
 						}
 					}
 					if (mWritten)
