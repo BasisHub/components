@@ -23,6 +23,7 @@ To set up the components project in your IDE, you will need some dependencies. T
 - jackson-all-xxx.jar
 - jasperreports-javaflow-xxx.jar
 - lucene-*.jar (caution - BBj 19 ships 5 and 7)
+- xmlbeans-xxx.jar
 
 4. Use https://github.com/BasisHub/components/issues to report and track your issues. We're looking forward to your pull requests!
 
