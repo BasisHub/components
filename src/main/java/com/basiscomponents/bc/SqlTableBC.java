@@ -226,7 +226,8 @@ public class SqlTableBC implements BusinessComponent {
    * @see #setFilter(DataRow)
    */
 	public DataRow getFilter() {
-		regexes.forEach((k, v) -> filter.addDataField(k, v));
+		if (regexes != null)
+			regexes.forEach((k, v) -> filter.addDataField(k, v));
 		return this.filter;
 	}
 
