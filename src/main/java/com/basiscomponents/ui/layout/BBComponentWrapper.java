@@ -212,7 +212,7 @@ public class BBComponentWrapper implements ComponentWrapper {
 		// NULL or int[4]. Setting back to NULL because that worked.
 		// 5 April 2019 - Jerry K.
 		// return new int[0];
-		return NULL;
+		return null;
 	}
 
 	@Override
