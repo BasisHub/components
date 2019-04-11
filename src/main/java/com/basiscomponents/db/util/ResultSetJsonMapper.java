@@ -2,6 +2,7 @@ package com.basiscomponents.db.util;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -168,8 +169,14 @@ public class ResultSetJsonMapper {
 						
 						int offset = tz.getRawOffset();
 
+						// add daylight saving time
+						if (tz.useDaylightTime() && tz.inDaylightTime(new Date())) {
+							offset = offset+tz.getDSTSavings();
+						}
+						
 						int h = (offset/3600000);
 						int m = Math.abs(offset) - Math.abs(h*3600000);
+						
 						
 						StringBuilder sb = new StringBuilder();
 						if (h>=0) 
