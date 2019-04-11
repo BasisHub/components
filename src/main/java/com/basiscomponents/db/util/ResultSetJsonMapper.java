@@ -2,7 +2,6 @@ package com.basiscomponents.db.util;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +16,7 @@ import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+
 
 public class ResultSetJsonMapper {
 	private ResultSetJsonMapper() {
@@ -159,7 +159,8 @@ public class ResultSetJsonMapper {
 						g.writeStringField(fn, "");
 					else {
 						
-						String str_ts = dr.getField(fn).getTimestamp().toString().replaceFirst(" ", "T");
+						java.sql.Timestamp ts = dr.getField(fn).getTimestamp();
+						String str_ts = ts.toString().replaceFirst(" ", "T");
 						
 						// calculate the offset of the timezone
 						// TODO: finish according to https://github.com/BBj-Plugins/BBjGridExWidget/issues/38
@@ -170,7 +171,7 @@ public class ResultSetJsonMapper {
 						int offset = tz.getRawOffset();
 
 						// add daylight saving time
-						if (tz.useDaylightTime() && tz.inDaylightTime(new Date())) {
+						if (tz.useDaylightTime() && tz.inDaylightTime(new java.util.Date(ts.getTime()))) {
 							offset = offset+tz.getDSTSavings();
 						}
 						
