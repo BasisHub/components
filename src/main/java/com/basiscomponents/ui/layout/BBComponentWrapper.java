@@ -208,7 +208,11 @@ public class BBComponentWrapper implements ComponentWrapper {
 
 	@Override
 	public int[] getVisualPadding() {
-		return new int[0];
+		// The comments elsewhere indicate this is supposed to be either
+		// NULL or int[4]. Setting back to NULL because that worked.
+		// 5 April 2019 - Jerry K.
+		// return new int[0];
+		return null;
 	}
 
 	@Override

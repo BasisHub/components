@@ -8,22 +8,7 @@ building
 To set up the components project in your IDE, you will need some dependencies. The simplest way is to grab a current build ob BBj and use the lib folder:
 
 1. download BBj here: http://www.basis.com/bbj-download (the latest development build will be fine for the master branch, or the according  release matching the branch name in this repository)
-
-2. create a Java project (most of us use Eclipse). The Java source root is in src\main\java\ of this repo.
-
-3. Add the following external JAR dependencies from the <bbj>/lib folder:
-- all poi-*.jar files 
-- BBj.jar
-- BBjUtil.jar
-- BBjThinClient.jar
-- BBjFilesystem.jar
-- netty-all-xxx.jar
-- all commons-*.jar
-- gson-xxx.jar
-- jackson-all-xxx.jar
-- jasperreports-javaflow-xxx.jar
-- lucene-*.jar (caution - BBj 19 ships 5 and 7)
-- xmlbeans-xxx.jar
-
-4. Use https://github.com/BasisHub/components/issues to report and track your issues. We're looking forward to your pull requests!
+2. install it to C:/bbj/ or /opt/bbj on linux
+3. Import the Project as Mavan Project. select the Maven profile you want to use (winbbjlib/unixbbjlib) if your bbj installation is on a different part change the pom.xml profile, but make sure not to commit this change.
+5. Use https://github.com/BasisHub/components/issues to report and track your issues. We're looking forward to your pull requests!
 
