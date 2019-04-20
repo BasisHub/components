@@ -1330,9 +1330,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson(String rowIndex) throws Exception {
-		ResultSet rs = new ResultSet();
-		rs.add(this);
-		return rs.toJson(true, rowIndex);
+		return toJson(true, rowIndex, true);
 	}
 
 	/**
@@ -1342,9 +1340,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson(final Boolean f_meta) throws Exception {
-		ResultSet rs = new ResultSet();
-		rs.add(this);
-		return rs.toJson(f_meta);
+		return toJson(f_meta, null, true);
 	}
 
 	/**
@@ -1359,6 +1355,21 @@ public class DataRow implements java.io.Serializable {
 		return rs.toJson(f_meta, rowIndex, f_trimStrings);
 	}
 
+	/**
+	 * Returns the DataRow and all of its fields as a JSON String.
+	 *
+	 * @return The DataRow as JSON String
+	 * @throws Exception
+	 */
+	public String toJsonObject(final Boolean f_meta, final String rowIndex, final Boolean f_trimStrings) throws Exception {
+		String js = toJson(f_meta, rowIndex, f_trimStrings);
+		if (js.startsWith("[")) {
+			js=js.substring(1);
+			js=js.substring(0,js.length()-1);
+		}
+		return js;
+	}	
+	
 	/**
 	 * Initializes and returns a DataRow object based on the values provided in the
 	 * given JSON String.
