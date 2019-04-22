@@ -7,7 +7,7 @@ import com.basis.bbj.client.datatypes.BBjVector;
 import com.basis.bbj.client.sysgui.datatypes.BBjColor;
 import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.BBjSysGui;
-import com.basis.bbj.proxies.CustomObject;
+import com.basis.startup.type.CustomObject;
 import com.basis.bbj.proxies.sysgui.BBjControl;
 import com.basis.bbj.proxies.sysgui.BBjFont;
 import com.basis.bbj.proxies.sysgui.BBjPopupMenu;
