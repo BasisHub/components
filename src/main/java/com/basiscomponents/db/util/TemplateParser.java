@@ -88,7 +88,7 @@ public class TemplateParser {
 				case TemplateInfo.UNSIGNED_INTEGER:
 					sqlType = java.sql.Types.NUMERIC;
 					try {
-						df = new DataField(stringTemplate.getFieldAsNumber(i).toBigDecimal());
+						df = new DataField(stringTemplate.getFieldAsNumber(i).bigDecimalValue());
 					} catch (Exception e) {
 						df = new DataField(new java.math.BigDecimal(0));
 					}
