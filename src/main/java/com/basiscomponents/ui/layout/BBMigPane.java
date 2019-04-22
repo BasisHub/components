@@ -12,7 +12,7 @@ import com.basis.bbj.proxies.sysgui.BBjControl;
 import com.basis.bbj.proxies.sysgui.BBjFont;
 import com.basis.bbj.proxies.sysgui.BBjPopupMenu;
 import com.basis.bbj.proxies.sysgui.BBjWindow;
-import com.basis.util.common.BBjNumber;
+import com.basis.startup.type.BBjNumber;
 import com.basis.util.common.BasisNumber;
 
 import net.miginfocom.layout.AC;
