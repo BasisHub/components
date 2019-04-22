@@ -104,9 +104,9 @@ public class DataFieldTypeConverter {
 			if (classname.equals("java.sql.Date"))
 				return o;
 			if (classname.contains("com.basis.util.common.BasisNumber")
-					|| classname.contains("com.basis.util.common.BBjNumber")) {
+					|| classname.contains("com.basis.startup.type.BBjNumber")) {
 				com.basis.util.common.BasisNumber val = com.basis.util.common.BasisNumber
-						.getBasisNumber((com.basis.util.common.BBjNumber) o);
+						.getBasisNumber((com.basis.startup.type.BBjNumber) o);
 				java.util.Date d = com.basis.util.BasisDate.date(val.intValueExact());
 				if (d != null)
 					return new java.sql.Date(d.getTime());
