@@ -52,7 +52,24 @@ public class ResultSetJsonMapper {
 				int t = dr.getFieldType(fn);
 				switch (t) {
 
-				//a nested ResultSet
+				//an ArrayList
+				case -973:{
+					try {
+						
+						g.writeArrayFieldStart(fn);
+						List l = (List) dr.getField(fn).getObject();
+						Iterator it = l.iterator();
+						while (it.hasNext())
+							g.writeObject(it.next());
+						g.writeEndArray();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				}
+				break;
+				//a nested DataRow
 				case -974:{
 					DataRow drj = (DataRow) dr.getField(fn).getObject();
 					try {

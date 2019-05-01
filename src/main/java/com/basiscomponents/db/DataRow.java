@@ -989,6 +989,10 @@ public class DataRow implements java.io.Serializable {
 				type = java.sql.Types.VARBINARY;
 		} else if (typeName != null) {
 			switch (typeName) {
+			case "com.basis.bbj.client.datatypes.BBjVector": 
+			case "java.util.ArrayList":  
+				type = -973;
+				break;
 			case "com.basiscomponents.db.DataRow":
 				type = -974;
 				break;
