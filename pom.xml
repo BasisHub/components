@@ -153,7 +153,13 @@
 			<scope>system</scope>
 			<systemPath>${jar-directory}/commons-lang3-3.8.1.jar</systemPath>
 		</dependency>
-
+		<dependency>
+			<groupId>com.google</groupId>
+			<artifactId>guava-24.0-jre.jar</artifactId>
+			<version>24.0-jre</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/guava-24.0-jre.jar</systemPath>
+		</dependency>
 		<dependency>
 			<groupId>com.basis.lib</groupId>
 			<artifactId>BBjFilesystem.jar</artifactId>

@@ -1,24 +1,5 @@
 package com.basiscomponents.bc;
 
-import static com.basiscomponents.db.ExpressionMatcher.getPreparedWhereClauseValues;
-
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.basiscomponents.bc.util.CloseableWrapper;
 import com.basiscomponents.bc.util.SqlConnectionHelper;
 import com.basiscomponents.db.DataField;
@@ -26,6 +7,14 @@ import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.util.DataRowRegexMatcher;
 import com.basiscomponents.util.KeyValuePair;
+
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import static com.basiscomponents.db.ExpressionMatcher.getPreparedWhereClauseValues;
 
 /**
  * <h1>SqlTableBC represents a table in a database.</h1>
@@ -357,14 +346,21 @@ public class SqlTableBC implements BusinessComponent {
 				.map(x -> new DataRowRegexMatcher(x.getKey(), x.getValue().getString()))
 				.collect(Collectors.toList());
 
-		
+
 		ResultSet retrs = null;
 
 		try (CloseableWrapper<Connection> connw = getConnection()) {
 			Connection conn = connw.getCloseable();
 			StringBuilder sql;
+            DatabaseMetaData metaData = conn.getMetaData();
+            java.sql.ResultSet indexInfo = metaData.getIndexInfo(null, null, table, true, true);
+            List<String> indexColumns = new ArrayList<>();
 
-			LinkedHashSet<String> fields = new LinkedHashSet<>();
+            while (indexInfo.next()){
+               indexColumns.add( indexInfo.getString("COLUMN_NAME"));
+            }
+            retrs.setIndexColumns(indexColumns);
+            Set<String> fields = new LinkedHashSet<>();
 			if ((this.fieldSelection == null || this.fieldSelection.getFieldNames().isEmpty())
 					&& (scope == null || scope.equals(""))) {
 				fields.add("*");
@@ -488,7 +484,6 @@ public class SqlTableBC implements BusinessComponent {
 					dr.setFieldAttributes(field, attributesRecord.getFieldAttributes(field));
 			}
 		}
-
 
 		return retrs;
 	}
