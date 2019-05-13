@@ -1,11 +1,14 @@
 package com.basiscomponents.db;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.util.HashMap;
+
+import static com.basiscomponents.db.util.ResultSetProvider.createDefaultResultSet;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class ResultSetTest {
 	@Rule
@@ -24,6 +27,14 @@ public class ResultSetTest {
 		assertNotNull(rs);
 		assertTrue(rs.getColumnNames().contains("ISO639-1"));
 		assertTrue(rs.getColumnNames().contains("LANGUAGE"));
+	}
+	@Test
+	public void testOmittedAttributes() throws Exception {
+		ResultSet rs = createDefaultResultSet();
+		rs.get(0).setAttribute("BGCOLOR","Black");
+		HashMap<String, String> attributes = rs.get(0).getAttributes();
+		assertTrue(attributes.containsKey("BGCOLOR"));
+		System.out.println(rs.toJson());
 	}
 
 }
