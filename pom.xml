@@ -198,7 +198,7 @@
 			<artifactId>netty</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/netty-all-4.1.22.Final.jar</systemPath>
+			<systemPath>${jar-directory}/netty-all-4.1.35.Final.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
