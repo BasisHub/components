@@ -272,8 +272,12 @@ public class DataRowFromJsonProvider {
 					attributes.addDataField(fieldName, -974, new DataField(null));
 					break;
 				case "ARRAY":
-					//a nested DataRow
-					attributes.addDataField(fieldName, -975, new DataField(null));					
+					//a nested DataRow or ArrayList / BBjVector
+					String subtype=root2.get(fieldName).get(0).getNodeType().toString();
+					if (subtype == "OBJECT")
+						attributes.addDataField(fieldName, -975, new DataField(null));
+					else
+						attributes.addDataField(fieldName, -973, new DataField(null));
 					break;
 				default:
 					attributes.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
