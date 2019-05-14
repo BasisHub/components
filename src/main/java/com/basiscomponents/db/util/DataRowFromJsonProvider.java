@@ -71,6 +71,12 @@ public class DataRowFromJsonProvider {
 
 	private static void createDataFields(JsonNode root, DataRow attributes, HashMap<?, ?> hm, DataRow dr)
 			throws ParseException, JsonParseException, IOException {
+		
+		JsonNode root2;
+		if (root.isArray())
+			root2 = root.get(0);
+		else
+			root2 = root;
 		for (String fieldName : attributes.getFieldNames()) {
 			Object fieldObj = hm.get(fieldName);
 			int fieldType = attributes.getFieldType(fieldName);
@@ -81,20 +87,14 @@ public class DataRowFromJsonProvider {
 			}
 			switch (fieldType) {
 			case -974:
-				// nested DataRow
-				System.out.println("fromJson might have issues");
-				// FIXME: need to parse and create the nested ResultSet as well
-				// this is https://github.com/BasisHub/components/issues/115
-
-				dr.setFieldValue(fieldName, DataRow.fromJson(root.get(fieldName).toString()));
-
+				String nestedJson = "";
+				nestedJson =root2.get(fieldName).toString();
+				dr.setFieldValue(fieldName, DataRow.fromJson(nestedJson));
 				break;
 			case -975:
-				// nested ResultSet
-				System.err.println("fromJson might have issues");
-				// FIXME: seems to be working, but attributes are lost
-				// this is https://github.com/BasisHub/components/issues/115
-				dr.setFieldValue(fieldName, ResultSet.fromJson(root.get(fieldName).toString()));
+				String nestedJson1 = "";
+				nestedJson1 = root2.get(fieldName).toString();
+				dr.setFieldValue(fieldName, ResultSet.fromJson(nestedJson1));
 				break;
 
 			case java.sql.Types.CHAR:
@@ -105,7 +105,7 @@ public class DataRowFromJsonProvider {
 			case java.sql.Types.LONGNVARCHAR:
 				// got a JSON object - save it as a JSON String
 				if (fieldObj.getClass().equals(java.util.LinkedHashMap.class)) {
-					dr.addDataField(fieldName, fieldType, new DataField(root.get(fieldName).toString()));
+					dr.addDataField(fieldName, fieldType, new DataField(root2.get(fieldName).toString()));
 					dr.setFieldAttribute(fieldName, "StringFormat", "JSON");
 				} else
 					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
@@ -178,6 +178,10 @@ public class DataRowFromJsonProvider {
 			HashMap<String, HashMap> m = (HashMap<String, HashMap>) hm.get("meta");
 			if (m != null && m.containsKey(fieldName)) {
 				attr.putAll((HashMap<String, String>) m.get(fieldName));
+
+				//remove the ColumnType as extra Attribute
+				attr.remove("ColumnType");
+				
 				dr.setFieldAttributes(fieldName, attr);
 			}
 		}
@@ -233,16 +237,31 @@ public class DataRowFromJsonProvider {
 
 	private static void createNonExistingAttributes(JsonNode root, DataRow attributes, HashMap<?, ?> hm) {
 		// add all fields to the attributes record that were not part of it before
+		JsonNode root2;
+		if (root.isArray())
+			root2=root.get(0);
+		else
+			root2=root;
+		
 		Iterator<?> it2 = hm.keySet().iterator();
 		while (it2.hasNext()) {
 			String fieldName = (String) it2.next();
-			if (!attributes.contains(fieldName) && !fieldName.equals("meta") && root.get(fieldName) != null) {
-				switch (root.get(fieldName).getNodeType().toString()) {
+			if (!attributes.contains(fieldName) && !fieldName.equals("meta") && root2.get(fieldName) != null) {
+				String type=root2.get(fieldName).getNodeType().toString();
+				switch (type) {
 				case "NUMBER":
 					attributes.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
 					break;
 				case "BOOLEAN":
 					attributes.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
+					break;
+				case "OBJECT":
+					//a nested DataRow
+					attributes.addDataField(fieldName, -974, new DataField(null));
+					break;
+				case "ARRAY":
+					//a nested DataRow
+					attributes.addDataField(fieldName, -975, new DataField(null));					
 					break;
 				default:
 					attributes.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
@@ -292,6 +311,7 @@ public class DataRowFromJsonProvider {
 				}
 			}
 		}
+
 	}
 
 	private static String wrapInJsonArray(String input) {
