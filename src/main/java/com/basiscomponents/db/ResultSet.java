@@ -1379,7 +1379,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			if (type == -974)
 				typeName ="DataRow"; 
 			else
-				typeName = getSQLTypeName(type);
+				if (type == -973)
+					typeName ="ArrayList"; 
+				else
+					typeName = getSQLTypeName(type);
 		if (typeName == null) {
 			throw new IllegalStateException("Unknown column type " + type);
 		} else {

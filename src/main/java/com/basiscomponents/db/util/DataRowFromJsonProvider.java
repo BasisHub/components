@@ -3,6 +3,7 @@ package com.basiscomponents.db.util;
 import java.io.IOException;
 import java.sql.Types;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -86,6 +87,15 @@ public class DataRowFromJsonProvider {
 				continue;
 			}
 			switch (fieldType) {
+			case -973:
+				// nested ArrayList or BBjVector
+				JsonNode x=root.get(0).get(fieldName);
+				ObjectMapper mapper = new ObjectMapper();
+				ObjectReader reader = mapper.readerFor(new TypeReference<List<Object>>() {});
+				List<String> list = reader.readValue(x);
+				dr.setFieldValue(fieldName, list);
+				break;
+
 			case -974:
 				String nestedJson = "";
 				nestedJson =root2.get(fieldName).toString();
