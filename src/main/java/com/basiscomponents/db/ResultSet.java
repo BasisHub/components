@@ -2086,9 +2086,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			} catch (Exception ex) {
 			}
 		}
-		if (meta == null) {
-			System.err.println("error parsing - meta data missing");
-		}
+//		if (meta == null) {
+//			System.err.println("warning: meta data missing");
+//		}
 		Iterator<JsonElement> it = o.iterator();
 		while (it.hasNext()) {
 			JsonElement el = it.next();
