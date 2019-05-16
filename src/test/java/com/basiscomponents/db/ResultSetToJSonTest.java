@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
 
-public class ResultSetJSonTest {
+public class ResultSetToJSonTest {
 	
 	@Test
 	public void toJSonFieldAsStringNullTest() throws Exception {
