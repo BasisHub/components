@@ -4,9 +4,9 @@ import com.basiscomponents.db.ResultSet;
 
 public class ResultSetProvider {
 
-  public static ResultSet createDefaultResultSet() throws Exception {
+  public static ResultSet createDefaultResultSet(boolean nullAllFields) throws Exception {
     ResultSet result = new ResultSet();
-    result.add(DataRowProvider.buildSampleDataRow(false));
+    result.add(DataRowProvider.buildSampleDataRow(nullAllFields));
     return result;
   }
   
@@ -23,5 +23,11 @@ public class ResultSetProvider {
 	    result.add(DataRowProvider.buildSampleDataRowMinMax());
 	    return result;
 	  }
+  
+  public static ResultSet createStringOnlyResultSet() throws Exception {
+	  ResultSet result = new ResultSet();
+	  result.add(DataRowProvider.buildStringOnlyDataRow());
+	  return result;
+  }
   
 }

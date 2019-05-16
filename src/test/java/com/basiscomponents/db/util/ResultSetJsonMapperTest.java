@@ -27,7 +27,7 @@ public class ResultSetJsonMapperTest {
 	public void setUp() throws Exception {
 		rs = new ResultSet();
 		DataRow dr = DataRowProvider.buildSampleDataRow(false);
-		DataField df = new DataField(ResultSetProvider.createDefaultResultSet());
+		DataField df = new DataField(ResultSetProvider.createDefaultResultSet(false));
 		dr.addDataField("EMBEDDED_RS", df);
 		rs.add(dr);
 	}
