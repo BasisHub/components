@@ -10,11 +10,12 @@ import com.basiscomponents.db.exception.DataFieldNotFoundException;
 import com.google.gson.JsonSyntaxException;
 
 public class ResultSetFromJsonTest {
+	
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
-	public void simpleFromJsonTest() throws Exception {
+	public void getColumnNamesFromJsonTest() throws Exception {
 		String response = "[{\"LANGUAGE\":\"ENG\",\"ISO639-1\":\"en\",\"meta\":{\"LANGUAGE\":{\"ColumnType\":\"12\"},\"ISO639-1\":{\"ColumnType\":\"12\"}}}]";
 		byte[] buffer = new byte[1024];
 
@@ -26,6 +27,17 @@ public class ResultSetFromJsonTest {
 		assertNotNull(rs);
 		assertTrue(rs.getColumnNames().contains("ISO639-1"));
 		assertTrue(rs.getColumnNames().contains("LANGUAGE"));
+	}
+	
+	@Test
+	public void getAttributeFromJsonTest() throws Exception {
+		String response = "[{\"LANGUAGE\":\"ENG\",\"ISO639-1\":\"en\",\"meta\":{\"LANGUAGE\":{\"ColumnType\":\"12\"},\"ISO639-1\":{\"ColumnType\":\"12\"}}}]";
+		ResultSet rs = ResultSet.fromJson(response);
+		assertNotNull(rs);
+		assertTrue("12".equals(rs.getAttribute("LANGUAGE", "ColumnType")));
+		assertTrue("12".equals(rs.getAttribute("ISO639-1", "ColumnType")));
+		assertTrue("".equals(rs.getAttribute("LANGUAGE", "NotAnAttribute")));
+		assertTrue("".equals(rs.getAttribute("ISO639-1", "NotAnAttribute")));
 	}
 
 	@Test
@@ -66,7 +78,7 @@ public class ResultSetFromJsonTest {
 	
 	@Test
 	public void wrongMetaDataCorrectionFromJsonTest4() throws Exception {
-		// The DataField get their attributes by order
+		// The DataFields get their attributes by order
 		String response = "[{\"LANGUAGE\":\"ENG\",\"ISO639-1\":\"en\",\"meta\":{\"\":{\"ColumnType\":\"12\"},\"\":{\"ColumnType\":\"12\"}}}]";
 		ResultSet rs = ResultSet.fromJson(response);
 		String s = rs.toJson();

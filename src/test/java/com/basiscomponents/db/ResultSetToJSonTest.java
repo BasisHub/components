@@ -2,6 +2,8 @@ package com.basiscomponents.db;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -63,6 +65,7 @@ public class ResultSetToJSonTest {
 		// The conversion of "Time" and other types are not implemented yet
 		
 		equalityAsStringDataRowTest(dr0, newDr0, s);
+		equalityAsNumberDataRowTest(dr0, newDr0, s);
 		equalityAsValueDataRowTest(dr0, newDr0, s);
 	}
 	
@@ -81,7 +84,7 @@ public class ResultSetToJSonTest {
 		equalityAsValueDataRowTest(dr0, newDr0, s);
 		
 		// Testing Strings with getFieldAsNumber
-		// Strings containing only numbers can be converted, otherwise there will be a NumberFormatException
+		// Strings containing only numbers (or null) can be converted, otherwise there will be a NumberFormatException
 		
 		assertEquals(s +" STRINGFIELD values differ",dr0.getFieldAsNumber(DataRowProvider.STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.STRINGFIELD));
 		assertEquals(s +" FRT_STRINGFIELD values differ",dr0.getFieldAsNumber(DataRowProvider.FRT_STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.FRT_STRINGFIELD));
@@ -201,14 +204,16 @@ public class ResultSetToJSonTest {
 	public void toJSonFieldValueTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
+		dr0.getFieldValue(DataRowProvider.DATEFIELD);
 		String s = rs0.toJson();
+		System.out.println(s);
 		assertFalse(s.isEmpty());
 		ResultSet rs1 = ResultSet.fromJson(s);
 		DataRow newDr0 = rs1.get(0);
 		
 		// Checking the values of the converted ResultSet
 		// The conversion of "Time" and other types are not implemented yet
-		// The equals method of "Date" doesn't seem to work fine
+		// DataType "Date" is rounded to the first millisec of the day
 		System.out.println(dr0.getFieldValue(DataRowProvider.DATEFIELD));
 		System.out.println(newDr0.getFieldValue(DataRowProvider.DATEFIELD));
 		
@@ -216,7 +221,7 @@ public class ResultSetToJSonTest {
 	}
 	
 	@Test
-	public void multipleDataRowsToJSonTest() throws Exception {
+	public void toJSonmultipleDataRowAsValueTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createMultipleDataRowResultSet();
 		DataRow dr0 = rs0.get(0);
 		DataRow dr1 = rs0.get(1);
@@ -228,8 +233,14 @@ public class ResultSetToJSonTest {
 		DataRow newDr1 = newRs0.get(1);
 		DataRow newDr2 = newRs0.get(2);
 		
+		Date d =(Date) dr0.getFieldValue(DataRowProvider.DATEFIELD);
+		System.out.println(d.getTime());
+		Date newD =(Date) newDr0.getFieldValue(DataRowProvider.DATEFIELD);
+		System.out.println(newD.getTime());
+		
 		// Checking the values of the converted ResultSet
 		// The conversion of "Time" and other types are not implemented yet
+		// DataType "Date" is rounded to the first millisec of the day
 		
 		equalityAsStringDataRowTest(dr0, newDr0, s);
 		equalityAsNumberDataRowTest(dr0, newDr0, s);
