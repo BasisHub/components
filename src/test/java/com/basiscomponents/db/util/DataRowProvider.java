@@ -11,6 +11,8 @@ public class DataRowProvider {
 	public static final String STRINGFIELD = "STRINGFIELD";
 	public static final String SCD_STRINGFIELD = "SCD_STRINGFIELD";
 	public static final String TRD_STRINGFIELD = "TRD_STRINGFIELD";
+	public static final String FRT_STRINGFIELD = "FRT_STRINGFIELD";
+	public static final String FTH_STRINGFIELD = "FTH_STRINGFIELD";
 	public static final String INTFIELD = "INTFIELD";
 	public static final String SCD_INTFIELD = "SCD_INTFIELD";
 	public static final String DOUBLEFIELD = "DOUBLEFIELD";
@@ -33,7 +35,6 @@ public class DataRowProvider {
 	public static DataRow buildSampleDataRow(boolean nullAllFields) {
 		DataRow dr = new DataRow();
 		try {
-			dr.setFieldValue(STRINGFIELD, "42");
 			
 			dr.setFieldValue(INTFIELD, 1);
 			dr.setFieldValue(DOUBLEFIELD, 1.1);
@@ -45,11 +46,10 @@ public class DataRowProvider {
 			
 			dr.setFieldValue(BOOLFIELD, true);
 			dr.setFieldValue(DATEFIELD, new Date(System.currentTimeMillis()));
-			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
+//			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
 			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
 
 			if (nullAllFields) {
-				dr.setFieldValue(STRINGFIELD, null);
 				dr.setFieldValue(INTFIELD, null);
 				dr.setFieldValue(BYTEFIELD, null);
 				dr.setFieldValue(SHORTFIELD, null);
@@ -63,28 +63,24 @@ public class DataRowProvider {
 				dr.setFieldValue(TIMESTAMPFIELD, null);
 			}
 
-			dr.setFieldAttribute(STRINGFIELD, "ISNUMERIC", "0");
 			dr.setFieldAttribute(INTFIELD, "ISNUMERIC", "1");
 			dr.setFieldAttribute(DOUBLEFIELD, "ISNUMERIC", "1");
 			dr.setFieldAttribute(BOOLFIELD, "ISNUMERIC", "0");
 			dr.setFieldAttribute(DATEFIELD, "ISNUMERIC", "0");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "ISNUMERIC", "0");
 
-			dr.setFieldAttribute(STRINGFIELD, "TYPE", "TEXT");
 			dr.setFieldAttribute(INTFIELD, "TYPE", "NUMBER");
 			dr.setFieldAttribute(DOUBLEFIELD, "TYPE", "NUMBER");
 			dr.setFieldAttribute(BOOLFIELD, "TYPE", "TRUTH");
 			dr.setFieldAttribute(DATEFIELD, "TYPE", "MOMENT");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "TYPE", "MOMENT");
 
-			dr.setFieldAttribute(STRINGFIELD, "ONE", "");
 			dr.setFieldAttribute(INTFIELD, "TWO", "");
 			dr.setFieldAttribute(DOUBLEFIELD, "TWO", "");
 			dr.setFieldAttribute(BOOLFIELD, "THREE", "");
 			dr.setFieldAttribute(DATEFIELD, "THREE", "");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "THREE", "");
 			
-			dr.setFieldAttribute(STRINGFIELD, "ColumnType", "12");
 			dr.setFieldAttribute(DOUBLEFIELD, "ColumnType", "8");
 			dr.setFieldAttribute(FLOATFIELD, "ColumnType", "8");
 			dr.setFieldAttribute(BYTEFIELD, "ColumnType", "4");
@@ -94,7 +90,7 @@ public class DataRowProvider {
 			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", "4");
 			dr.setFieldAttribute(BOOLFIELD, "ColumnType", "16");
 			dr.setFieldAttribute(DATEFIELD, "ColumnType", "91");
-			dr.setFieldAttribute(TIMEFIELD, "ColumnType", "92");
+//			dr.setFieldAttribute(TIMEFIELD, "ColumnType", "92");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "ColumnType", "93");
 			
 		} catch (ParseException e) {
@@ -107,7 +103,6 @@ public class DataRowProvider {
 	public static DataRow buildSampleDataRowMinMax() {
 		DataRow dr = new DataRow();
 		try {
-			dr.setFieldValue(STRINGFIELD, "StringValue");
 			
 			dr.setFieldValue(INTFIELD, Integer.MAX_VALUE);
 			dr.setFieldValue(SCD_INTFIELD, Integer.MIN_VALUE);
@@ -126,24 +121,21 @@ public class DataRowProvider {
 			
 			dr.setFieldValue(BOOLFIELD, false);
 			dr.setFieldValue(DATEFIELD, new Date(System.currentTimeMillis()));
-			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()) );
+//			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()) );
 			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
 
-			dr.setFieldAttribute(STRINGFIELD, "ISDIFFERENT", "0");
 			dr.setFieldAttribute(INTFIELD, "ISDIFFERENT", "1");
 			dr.setFieldAttribute(DOUBLEFIELD, "ISDIFFERENT", "1");
 			dr.setFieldAttribute(BOOLFIELD, "ISDIFFERENT", "0");
 			dr.setFieldAttribute(DATEFIELD, "ISDIFFERENT", "0");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "ISDIFFERENT", "0");
 
-			dr.setFieldAttribute(STRINGFIELD, "SOMETYPE", "TEXT");
 			dr.setFieldAttribute(INTFIELD, "SOMETYPE", "NUMBER");
 			dr.setFieldAttribute(DOUBLEFIELD, "SOMETYPE", "NUMBER");
 			dr.setFieldAttribute(BOOLFIELD, "SOMETYPE", "TRUTH");
 			dr.setFieldAttribute(DATEFIELD, "SOMETYPE", "MOMENT");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "SOMETYPE", "MOMENT");
 
-			dr.setFieldAttribute(STRINGFIELD, "ONE", "");
 			dr.setFieldAttribute(INTFIELD, "TWO", "");
 			dr.setFieldAttribute(DOUBLEFIELD, "TWO", "");
 			dr.setFieldAttribute(BOOLFIELD, "THREE", "");
@@ -162,6 +154,8 @@ public class DataRowProvider {
 			dr.setFieldValue(STRINGFIELD, "1337");
 			dr.setFieldValue(SCD_STRINGFIELD, "StringValue");
 			dr.setFieldValue(TRD_STRINGFIELD, "4StringValue2");
+			dr.setFieldValue(FRT_STRINGFIELD, "");
+			dr.setFieldValue(FTH_STRINGFIELD, null);
 		} catch (ParseException e) {
 
 			e.printStackTrace();
