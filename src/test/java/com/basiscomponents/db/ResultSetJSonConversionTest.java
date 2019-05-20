@@ -11,53 +11,86 @@ import org.junit.rules.ExpectedException;
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
 
-public class ResultSetToJSonTest {
+public class ResultSetJSonConversionTest {
 	
-	public void equalityAsStringDataRowTest(DataRow oldDR, DataRow newDR, String Json ) {
+	/**
+	 * This method takes two DataRows and compares their values with the getFieldAsString method from DataRow to evaluate the process of toJson/fromJson
+	 * 
+	 * @param oldDR The initial DataRow before the conversion with toJson/fromJson
+	 * @param newDR The converted DataRow after the conversion with toJson/fromJson
+	 * @param json The Json String converted from the oldDR 
+	 */
+	public void equalityAsStringDataRowTest(DataRow oldDR, DataRow newDR, String json ) {
 		BBArrayList<String> fieldNamesOld = oldDR.getFieldNames();
 		BBArrayList<String> fieldNamesNew = newDR.getFieldNames();
-		assertTrue(Json,fieldNamesOld.size() == fieldNamesNew.size());
+		assertTrue(json,fieldNamesOld.size() == fieldNamesNew.size());
 		for(int i = 0; i < fieldNamesOld.size(); i++) {
-			assertEquals(Json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldAsString",oldDR.getFieldAsString(fieldNamesOld.get(i)), newDR.getFieldAsString(fieldNamesOld.get(i)));
+			assertEquals(json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldAsString",oldDR.getFieldAsString(fieldNamesOld.get(i)), newDR.getFieldAsString(fieldNamesOld.get(i)));
 		}
 	}
 	
-	public void equalityAsNumberDataRowTest(DataRow oldDR, DataRow newDR, String Json) {
+	/**
+	 * This method takes two DataRows and compares their values with the getFieldAsNumber method from DataRow to evaluate the process of toJson/fromJson
+	 * 
+	 * @param oldDR The initial DataRow before the conversion with toJson/fromJson
+	 * @param newDR The converted DataRow after the conversion with toJson/fromJson
+	 * @param json The Json String converted from the oldDR 
+	 */
+	public void equalityAsNumberDataRowTest(DataRow oldDR, DataRow newDR, String json) {
 		BBArrayList<String> fieldNamesOld = oldDR.getFieldNames();
 		BBArrayList<String> fieldNamesNew = newDR.getFieldNames();
-		assertTrue(Json, fieldNamesOld.size() == fieldNamesNew.size());
+		assertTrue(json, fieldNamesOld.size() == fieldNamesNew.size());
 		for(int i = 0; i < fieldNamesOld.size(); i++) {
-			assertEquals(Json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldAsNumber",oldDR.getFieldAsNumber(fieldNamesOld.get(i)), newDR.getFieldAsNumber(fieldNamesOld.get(i)));
+			assertEquals(json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldAsNumber",oldDR.getFieldAsNumber(fieldNamesOld.get(i)), newDR.getFieldAsNumber(fieldNamesOld.get(i)));
 		}
 	}
 	
-	public void equalityAsValueDataRowTest(DataRow oldDR, DataRow newDR, String Json) {
+	/**
+	 * This method takes two DataRows and compares their values with the getFieldValue method from DataRow to evaluate the process of toJson/fromJson
+	 * 
+	 * @param oldDR The initial DataRow before the conversion with toJson/fromJson
+	 * @param newDR The converted DataRow after the conversion with toJson/fromJson
+	 * @param json The Json String converted from the oldDR 
+	 */
+	public void equalityAsValueDataRowTest(DataRow oldDR, DataRow newDR, String json) {
 		BBArrayList<String> fieldNamesOld = oldDR.getFieldNames();
 		BBArrayList<String> fieldNamesNew = newDR.getFieldNames();
-		assertTrue(Json, fieldNamesOld.size() == fieldNamesNew.size());
+		assertTrue(json, fieldNamesOld.size() == fieldNamesNew.size());
 		for(int i = 0; i < fieldNamesOld.size(); i++) {
-			assertEquals(Json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldValue",oldDR.getFieldValue(fieldNamesOld.get(i)), newDR.getFieldValue(fieldNamesOld.get(i)));
+			assertEquals(json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldValue",oldDR.getFieldValue(fieldNamesOld.get(i)), newDR.getFieldValue(fieldNamesOld.get(i)));
 		}
 	}
 	
-	public void equalityAttributesDataRowTest(DataRow oldDR, DataRow newDR, String Json) {
+	/**
+	 * This method takes two DataRows and compares their attributes with the getField and getAttributes methods from DataRow to evaluate the process of toJson/fromJson
+	 * 
+	 * @param oldDR The initial DataRow before the conversion with toJson/fromJson
+	 * @param newDR The converted DataRow after the conversion with toJson/fromJson
+	 * @param json The Json String converted from the oldDR 
+	 */
+	public void equalityAttributesDataRowTest(DataRow oldDR, DataRow newDR, String json) {
 		BBArrayList<String> fieldNamesOld = oldDR.getFieldNames();
 		BBArrayList<String> fieldNamesNew = newDR.getFieldNames();
-		assertTrue(Json, fieldNamesOld.size() == fieldNamesNew.size());
+		assertTrue(json, fieldNamesOld.size() == fieldNamesNew.size());
 		for(int i = 0; i < fieldNamesOld.size(); i++) {
-			assertEquals(Json + "\n" + fieldNamesOld.get(i) + " values differ with function getAttributes",oldDR.getField(fieldNamesOld.get(i)).getAttributes(), newDR.getField(fieldNamesOld.get(i)).getAttributes());
+			assertEquals(json + "\n" + fieldNamesOld.get(i) + " values differ with function getAttributes",oldDR.getField(fieldNamesOld.get(i)).getAttributes(), newDR.getField(fieldNamesOld.get(i)).getAttributes());
 		}
 	}
 	
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-	
+	/**
+	 * A default result set is created and all values are set to null
+	 * The equality methods will check them to contain null before and after the conversion
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonFieldAsStringNullTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(true);
 		DataRow dr0 = rs0.get(0);
 		String s = rs0.toJson();
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet newRs0 = ResultSet.fromJson(s);
 		DataRow newDr0 = newRs0.get(0);
 		
@@ -69,12 +102,20 @@ public class ResultSetToJSonTest {
 		equalityAsValueDataRowTest(dr0, newDr0, s);
 	}
 	
+	/**
+	 * A string-only result set is created 
+	 * Every string is checked to have the right behavior
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonStringTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createStringOnlyResultSet();
 		DataRow dr0 = rs0.get(0);
 		String s = rs0.toJson();
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet newRs0 = ResultSet.fromJson(s);
 		DataRow newDr0 = newRs0.get(0);
 		
@@ -115,12 +156,20 @@ public class ResultSetToJSonTest {
 		}
 	}
 	
+	/**
+	 * A default result set is created 
+	 * The equality method will check them to contain the same attributes as before
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonAttributesTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
 		String s = rs0.toJson();
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet newRs0 = ResultSet.fromJson(s);
 		DataRow newDr0 = newRs0.get(0);
 		
@@ -130,6 +179,12 @@ public class ResultSetToJSonTest {
 		equalityAttributesDataRowTest(dr0, newDr0, s);
 	}
 	
+	/**
+	 * A default result set is created, containing 3 DataRows 
+	 * The equality method will check them to contain the same attributes as before
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonMultipleDataRowAttributesTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createMultipleDataRowResultSet();
@@ -137,7 +192,9 @@ public class ResultSetToJSonTest {
 		DataRow dr1 = rs0.get(1);
 		DataRow dr2 = rs0.get(2);
 		String s = rs0.toJson();
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet newRs0 = ResultSet.fromJson(s);
 		DataRow newDr0 = newRs0.get(0);
 		DataRow newDr1 = newRs0.get(1);
@@ -151,12 +208,20 @@ public class ResultSetToJSonTest {
 		equalityAttributesDataRowTest(dr2, newDr2, s);
 	}
 	
+	/**
+	 * A default ResultSet is created 
+	 * The equality method will check them to contain the same values (with getFieldAsString) as before
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonFieldAsStringTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
 		String s = rs0.toJson();
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet newRs0 = ResultSet.fromJson(s);
 		DataRow newDr0 = newRs0.get(0);
 		
@@ -166,12 +231,20 @@ public class ResultSetToJSonTest {
 		equalityAsStringDataRowTest(dr0, newDr0, s);
 	}
 	
+	/**
+	 * A MinMaxResultSet is created, containing extreme values for the common data types
+	 * The equality method will check them to contain the same values (with getFieldAsString, getFieldAsNumber, getFieldValue) as before
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonFieldAsStringTestMinMax() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSetMinMax();
 		DataRow dr0 = rs0.get(0);
 		String s = rs0.toJson();
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet newRs0 = ResultSet.fromJson(s);
 		DataRow newDr0 = newRs0.get(0);
 	
@@ -185,12 +258,20 @@ public class ResultSetToJSonTest {
 		equalityAsValueDataRowTest(dr0, newDr0, s);
 	}
 	
+	/**
+	 * A default ResultSet is created 
+	 * The equality method will check them to contain the same values (with getFieldAsNumber) as before
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonFieldAsNumberTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
 		String s = rs0.toJson();
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet rs1 = ResultSet.fromJson(s);
 		DataRow newDr0 = rs1.get(0);
 		
@@ -200,26 +281,38 @@ public class ResultSetToJSonTest {
 		equalityAsNumberDataRowTest(dr0, newDr0, s);
 	}
 	
+	/**
+	 * A default ResultSet is created 
+	 * The equality method will check them to contain the same values (with getFieldValue) as before
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonFieldValueTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
 		dr0.getFieldValue(DataRowProvider.DATEFIELD);
 		String s = rs0.toJson();
-		System.out.println(s);
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet rs1 = ResultSet.fromJson(s);
 		DataRow newDr0 = rs1.get(0);
 		
 		// Checking the values of the converted ResultSet
 		// The conversion of "Time" and other types are not implemented yet
-		// DataType "Date" is rounded to the first millisec of the day
-		System.out.println(dr0.getFieldValue(DataRowProvider.DATEFIELD));
-		System.out.println(newDr0.getFieldValue(DataRowProvider.DATEFIELD));
+		// The date has to be rounded to the first milliseconds of the day
+		// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 		
 		equalityAsValueDataRowTest(dr0, newDr0, s);
 	}
 	
+	/**
+	 * A default ResultSet is created, containing 3 DataRows
+	 * The equality method will check them to contain the same values (with getFieldValue) as before
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void toJSonmultipleDataRowAsValueTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createMultipleDataRowResultSet();
@@ -227,20 +320,18 @@ public class ResultSetToJSonTest {
 		DataRow dr1 = rs0.get(1);
 		DataRow dr2 = rs0.get(2);
 		String s = rs0.toJson();
+		
 		assertFalse(s.isEmpty());
+		
 		ResultSet newRs0 = ResultSet.fromJson(s);
 		DataRow newDr0 = newRs0.get(0);
 		DataRow newDr1 = newRs0.get(1);
 		DataRow newDr2 = newRs0.get(2);
 		
-		Date d =(Date) dr0.getFieldValue(DataRowProvider.DATEFIELD);
-		System.out.println(d.getTime());
-		Date newD =(Date) newDr0.getFieldValue(DataRowProvider.DATEFIELD);
-		System.out.println(newD.getTime());
-		
 		// Checking the values of the converted ResultSet
 		// The conversion of "Time" and other types are not implemented yet
-		// DataType "Date" is rounded to the first millisec of the day
+		// The date has to be rounded to the first milliseconds of the day
+		// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 		
 		equalityAsStringDataRowTest(dr0, newDr0, s);
 		equalityAsNumberDataRowTest(dr0, newDr0, s);
@@ -253,8 +344,6 @@ public class ResultSetToJSonTest {
 		equalityAsStringDataRowTest(dr2, newDr2, s);
 		equalityAsNumberDataRowTest(dr2, newDr2, s);
 		equalityAsValueDataRowTest(dr2, newDr2, s);
-		
 	}
-	
 	
 }

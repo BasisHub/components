@@ -47,10 +47,21 @@ public class DataRowProvider {
 			dr.setFieldValue(LONGFIELD, 4);
 			dr.setFieldValue(BIGDECIMALFIELD, 5);
 			
+			// The date has to be rounded to the first milliseconds of the day
+			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(new Date(System.currentTimeMillis()));
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+		    cal.set(Calendar.MINUTE, 0);
+		    cal.set(Calendar.SECOND, 0);
+		    cal.set(Calendar.MILLISECOND, 0);
+			dr.setFieldValue(DATEFIELD, new Date(cal.getTimeInMillis()));
+			
 			dr.setFieldValue(BOOLFIELD, true);
-			dr.setFieldValue(DATEFIELD, new Date(System.currentTimeMillis()));
-//			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
 			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
+			
+//			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
+//			There are types which can't be converted yet, see ResultSetJsonMapper Line 259
 
 			if (nullAllFields) {
 				dr.setFieldValue(INTFIELD, null);
@@ -122,10 +133,21 @@ public class DataRowProvider {
 			dr.setFieldValue(BIGDECIMALFIELD, Double.MAX_VALUE);
 			dr.setFieldValue(SCD_BIGDECIMALFIELD, Double.MIN_VALUE);
 			
+			// The date has to be rounded to the first milliseconds of the day
+			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(new Date(System.currentTimeMillis()));
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+			cal.set(Calendar.MINUTE, 0);
+			cal.set(Calendar.SECOND, 0);
+			cal.set(Calendar.MILLISECOND, 0);
+			dr.setFieldValue(DATEFIELD, new Date(cal.getTimeInMillis()));
+			
 			dr.setFieldValue(BOOLFIELD, false);
-			dr.setFieldValue(DATEFIELD, new Date(System.currentTimeMillis()));
-//			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()) );
 			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
+			
+//			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
+//			There are types which can't be converted yet, see ResultSetJsonMapper Line 259
 
 			dr.setFieldAttribute(INTFIELD, "ISDIFFERENT", "1");
 			dr.setFieldAttribute(DOUBLEFIELD, "ISDIFFERENT", "1");
