@@ -1,5 +1,7 @@
 package com.basiscomponents.db.util;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -20,32 +22,26 @@ public class DataRowProvider {
 	public static final String SCD_INTFIELD = "SCD_INTFIELD";
 	public static final String DOUBLEFIELD = "DOUBLEFIELD";
 	public static final String SCD_DOUBLEFIELD = "SCD_DOUBLEFIELD";
-	public static final String FLOATFIELD = "FLOATFIELD";
-	public static final String SCD_FLOATFIELD = "SCD_FLOATFIELD";
 	public static final String BOOLFIELD = "BOOLFIELD";
 	public static final String DATEFIELD = "DATEFIELD";
 	public static final String TIMESTAMPFIELD = "TIMESTAMPFIELD";
-	public static final String BYTEFIELD = "BYTEFIELD";
-	public static final String SCD_BYTEFIELD = "SCD_BYTEFIELD";
-	public static final String SHORTFIELD = "SHORTFIELD";
-	public static final String SCD_SHORTFIELD = "SCD_SHORTFIELD";
-	public static final String LONGFIELD = "LONGFIELD";
-	public static final String SCD_LONGFIELD = "SCD_LONGFIELD";
-	public static final String BIGDECIMALFIELD = "BIGDECIMALFIELD";
-	public static final String SCD_BIGDECIMALFIELD = "SCD_BIGDECIMALFIELD";
+//	public static final String BYTEFIELD = "BYTEFIELD";
+//	public static final String SCD_BYTEFIELD = "SCD_BYTEFIELD";
+//	public static final String SHORTFIELD = "SHORTFIELD";
+//	public static final String SCD_SHORTFIELD = "SCD_SHORTFIELD";
+//	public static final String LONGFIELD = "LONGFIELD";
+//	public static final String SCD_LONGFIELD = "SCD_LONGFIELD";
+//	public static final String BIGDECIMALFIELD = "BIGDECIMALFIELD";
+//	public static final String SCD_BIGDECIMALFIELD = "SCD_BIGDECIMALFIELD";
 	public static final String TIMEFIELD = "TIMEFIELD";
 
 	public static DataRow buildSampleDataRow(boolean nullAllFields) {
 		DataRow dr = new DataRow();
 		try {
-			
-			dr.setFieldValue(INTFIELD, 1);
-			dr.setFieldValue(DOUBLEFIELD, 1.1);
-			dr.setFieldValue(FLOATFIELD, 2.1);
-			dr.setFieldValue(BYTEFIELD, 2);
-			dr.setFieldValue(SHORTFIELD, 3);
-			dr.setFieldValue(LONGFIELD, 4);
-			dr.setFieldValue(BIGDECIMALFIELD, 5);
+			int myInt = 1;
+			dr.setFieldValue(INTFIELD, myInt);
+			Double myDouble = 1.0;
+			dr.setFieldValue(DOUBLEFIELD, myDouble);
 			
 			// The date has to be rounded to the first milliseconds of the day
 			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
@@ -65,12 +61,11 @@ public class DataRowProvider {
 
 			if (nullAllFields) {
 				dr.setFieldValue(INTFIELD, null);
-				dr.setFieldValue(BYTEFIELD, null);
-				dr.setFieldValue(SHORTFIELD, null);
-				dr.setFieldValue(LONGFIELD, null);
-				dr.setFieldValue(BIGDECIMALFIELD, null);
+//				dr.setFieldValue(BYTEFIELD, null);
+//				dr.setFieldValue(SHORTFIELD, null);
+//				dr.setFieldValue(LONGFIELD, null);
+//				dr.setFieldValue(BIGDECIMALFIELD, null);
 				dr.setFieldValue(DOUBLEFIELD, null);
-				dr.setFieldValue(FLOATFIELD, null);
 				dr.setFieldValue(BOOLFIELD, null);
 				dr.setFieldValue(DATEFIELD, null);
 				dr.setFieldValue(TIMEFIELD, null);
@@ -96,12 +91,11 @@ public class DataRowProvider {
 			dr.setFieldAttribute(TIMESTAMPFIELD, "THREE", "");
 			
 			dr.setFieldAttribute(DOUBLEFIELD, "ColumnType", "8");
-			dr.setFieldAttribute(FLOATFIELD, "ColumnType", "8");
-			dr.setFieldAttribute(BYTEFIELD, "ColumnType", "4");
-			dr.setFieldAttribute(SHORTFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(BYTEFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(SHORTFIELD, "ColumnType", "4");
 			dr.setFieldAttribute(INTFIELD, "ColumnType", "4");
-			dr.setFieldAttribute(LONGFIELD, "ColumnType", "4");
-			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(LONGFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", "4");
 			dr.setFieldAttribute(BOOLFIELD, "ColumnType", "16");
 			dr.setFieldAttribute(DATEFIELD, "ColumnType", "91");
 //			dr.setFieldAttribute(TIMEFIELD, "ColumnType", "92");
@@ -120,18 +114,16 @@ public class DataRowProvider {
 			
 			dr.setFieldValue(INTFIELD, Integer.MAX_VALUE);
 			dr.setFieldValue(SCD_INTFIELD, Integer.MIN_VALUE);
-			dr.setFieldValue(FLOATFIELD, Float.MAX_VALUE);
-			dr.setFieldValue(SCD_FLOATFIELD, Float.MIN_VALUE);
 			dr.setFieldValue(DOUBLEFIELD, Double.MAX_VALUE);
 			dr.setFieldValue(SCD_DOUBLEFIELD, Double.MIN_VALUE);
-			dr.setFieldValue(BYTEFIELD, Byte.MAX_VALUE-1);
-			dr.setFieldValue(SCD_BYTEFIELD, Byte.MIN_VALUE+1);
-			dr.setFieldValue(SHORTFIELD, Short.MAX_VALUE-1);
-			dr.setFieldValue(SCD_SHORTFIELD, Short.MIN_VALUE+1);
-			dr.setFieldValue(LONGFIELD, Integer.MAX_VALUE);
-			dr.setFieldValue(SCD_LONGFIELD, Integer.MIN_VALUE);
-			dr.setFieldValue(BIGDECIMALFIELD, Double.MAX_VALUE);
-			dr.setFieldValue(SCD_BIGDECIMALFIELD, Double.MIN_VALUE);
+//			dr.setFieldValue(BYTEFIELD, Byte.MAX_VALUE);
+//			dr.setFieldValue(SCD_BYTEFIELD, Byte.MIN_VALUE);
+//			dr.setFieldValue(SHORTFIELD, Short.MAX_VALUE);
+//			dr.setFieldValue(SCD_SHORTFIELD, Short.MIN_VALUE);
+//			dr.setFieldValue(LONGFIELD, Integer.MAX_VALUE);
+//			dr.setFieldValue(SCD_LONGFIELD, Integer.MIN_VALUE);
+//			dr.setFieldValue(BIGDECIMALFIELD, new BigDecimal("1238126387123"));
+//			dr.setFieldValue(SCD_BIGDECIMALFIELD, new BigDecimal("-1238126387123"));
 			
 			// The date has to be rounded to the first milliseconds of the day
 			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped

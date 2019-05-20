@@ -174,7 +174,7 @@ public class ResultSetJSonConversionTest {
 		DataRow newDr0 = newRs0.get(0);
 		
 		// Checking the values of the converted ResultSet
-		// The initial ResultSet must have DataRows with DataFields with the attribute "ColumnType", otherwise the fromJSon will add it
+		// The initial ResultSet must have DataRows with DataFields with the attribute "ColumnType", otherwise the fromJSon method will add it
 		
 		equalityAttributesDataRowTest(dr0, newDr0, s);
 	}
@@ -252,6 +252,7 @@ public class ResultSetJSonConversionTest {
 		// The conversion of "Time" and other types are not implemented yet
 		// BYTEFIELD,SHORTFIELD can only be converted if their values are between [Byte.MAX_VALUE-1,Byte.MIN_VALUE+1] or [Short.MAX_VALUE-1,Short.MIN_VALUE+1] otherwise there will be a ClassCastException
 		// LONGFIELD cannot take the Long.MAX_VALUE (NumberFormatException)
+		// FLOATFIELD can only be converted if the value is between [Float.MAX_VALUE-1.0,Float.MIN_VALUE+1.0]
 	
 		equalityAsStringDataRowTest(dr0, newDr0, s);
 		equalityAsNumberDataRowTest(dr0, newDr0, s);
@@ -301,6 +302,7 @@ public class ResultSetJSonConversionTest {
 		
 		// Checking the values of the converted ResultSet
 		// The conversion of "Time" and other types are not implemented yet
+		// Float will be converted to Double
 		// The date has to be rounded to the first milliseconds of the day
 		// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 		
