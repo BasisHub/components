@@ -1,20 +1,20 @@
 package com.basiscomponents.bc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SqlTableBCIsFieldInScopeTest {
 
 	private SqlTableBC sqlTablebc;
 	private HashMap<String, ArrayList<String>> scopes;
 
-	@Before
+	@BeforeAll
 	public void setUp() throws Exception {
 		sqlTablebc = new SqlTableBC("");
 		scopes = new HashMap<>();

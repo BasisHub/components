@@ -1,28 +1,23 @@
 package com.basiscomponents.db.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.basiscomponents.bc.SqlTableBC;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import org.junit.jupiter.api.*;
 
-@Ignore
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@Disabled
 public class FilterTest {
 	private Connection con;
 	private SqlTableBC stb;
 
-	@Before
+	@BeforeEach
 	public void setup() throws ClassNotFoundException, SQLException {
 		Class.forName("com.basis.jdbc.BasisDriver");
 
@@ -32,13 +27,12 @@ public class FilterTest {
 		stb.setTable("CUSTOMER");
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() throws SQLException {
 		con.close();
 	}
 
 	@Test
-
 	public void testNonConditionalFilter() throws Exception {
 		DataRow dr = new DataRow();
 
@@ -47,8 +41,8 @@ public class FilterTest {
 		ResultSet retrieve = stb.retrieve();
 		assertEquals(3, retrieve.getDataRows().size());
 	}
-	@Test
 
+	@Test
 	public void testUnequalParanthesis() throws Exception {
 		DataRow dr = new DataRow();
 		dr.setFieldValue("POST_CODE", "cond:<>87111");
