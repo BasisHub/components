@@ -1,12 +1,11 @@
 package com.basiscomponents.db;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.util.Date;
-
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
@@ -46,18 +45,28 @@ public class ResultSetJSonConversionTest {
 	}
 	
 	/**
-	 * This method takes two DataRows and compares their values with the getFieldValue method from DataRow to evaluate the process of toJson/fromJson
+	 * This method takes two DataRows and compares their values with the
+	 * getFieldValue method from DataRow to evaluate the process of toJson/fromJson
 	 * 
-	 * @param oldDR The initial DataRow before the conversion with toJson/fromJson
-	 * @param newDR The converted DataRow after the conversion with toJson/fromJson
-	 * @param json The Json String converted from the oldDR 
+	 * @param oldDR  The initial DataRow before the conversion with toJson/fromJson
+	 * @param newDR  The converted DataRow after the conversion with toJson/fromJson
+	 * @param json   The Json String converted from the oldDR
+	 * @param nested There are nested DataRows in the oldDR and newDR
 	 */
-	public void equalityAsValueDataRowTest(DataRow oldDR, DataRow newDR, String json) {
+	public void equalityAsValueDataRowTest(DataRow oldDR, DataRow newDR, String json, boolean nested) {
 		BBArrayList<String> fieldNamesOld = oldDR.getFieldNames();
 		BBArrayList<String> fieldNamesNew = newDR.getFieldNames();
 		assertTrue(json, fieldNamesOld.size() == fieldNamesNew.size());
-		for(int i = 0; i < fieldNamesOld.size(); i++) {
-			assertEquals(json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldValue",oldDR.getFieldValue(fieldNamesOld.get(i)), newDR.getFieldValue(fieldNamesOld.get(i)));
+		if (!nested) {
+			for (int i = 0; i < fieldNamesOld.size(); i++) {
+				assertEquals(json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldValue",
+						oldDR.getFieldValue(fieldNamesOld.get(i)), newDR.getFieldValue(fieldNamesOld.get(i)));
+			}
+		} else {
+			for (int i = 0; i < fieldNamesOld.size(); i++) {
+				equalityAsValueDataRowTest((DataRow) oldDR.getFieldValue(fieldNamesOld.get(i)),
+						(DataRow) newDR.getFieldValue(fieldNamesOld.get(i)), json, false);
+			}
 		}
 	}
 	
@@ -99,7 +108,7 @@ public class ResultSetJSonConversionTest {
 		
 		equalityAsStringDataRowTest(dr0, newDr0, s);
 		equalityAsNumberDataRowTest(dr0, newDr0, s);
-		equalityAsValueDataRowTest(dr0, newDr0, s);
+		equalityAsValueDataRowTest(dr0, newDr0, s, false);
 	}
 	
 	/**
@@ -122,7 +131,7 @@ public class ResultSetJSonConversionTest {
 		// Checking the values of the converted ResultSet
 		
 		equalityAsStringDataRowTest(dr0, newDr0, s);
-		equalityAsValueDataRowTest(dr0, newDr0, s);
+		equalityAsValueDataRowTest(dr0, newDr0, s, false);
 		
 		// Testing Strings with getFieldAsNumber
 		// Strings containing only numbers (or null) can be converted, otherwise there will be a NumberFormatException
@@ -233,7 +242,8 @@ public class ResultSetJSonConversionTest {
 	
 	/**
 	 * A MinMaxResultSet is created, containing extreme values for the common data types
-	 * The equality method will check them to contain the same values (with getFieldAsString, getFieldAsNumber, getFieldValue) as before
+	 * The equality method will check them to contain the same values (with getFieldAsString, getFieldAsNumber, getFieldValue)
+	 * and attributes as before
 	 * 
 	 * @throws Exception
 	 */
@@ -250,13 +260,11 @@ public class ResultSetJSonConversionTest {
 	
 		// Checking the values of the converted ResultSet
 		// The conversion of "Time" and other types are not implemented yet
-		// BYTEFIELD,SHORTFIELD can only be converted if their values are between [Byte.MAX_VALUE-1,Byte.MIN_VALUE+1] or [Short.MAX_VALUE-1,Short.MIN_VALUE+1] otherwise there will be a ClassCastException
-		// LONGFIELD cannot take the Long.MAX_VALUE (NumberFormatException)
-		// FLOATFIELD can only be converted if the value is between [Float.MAX_VALUE-1.0,Float.MIN_VALUE+1.0]
 	
 		equalityAsStringDataRowTest(dr0, newDr0, s);
 		equalityAsNumberDataRowTest(dr0, newDr0, s);
-		equalityAsValueDataRowTest(dr0, newDr0, s);
+		equalityAsValueDataRowTest(dr0, newDr0, s, false);
+		equalityAttributesDataRowTest(dr0, newDr0, s);
 	}
 	
 	/**
@@ -292,7 +300,6 @@ public class ResultSetJSonConversionTest {
 	public void toJSonFieldValueTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
-		dr0.getFieldValue(DataRowProvider.DATEFIELD);
 		String s = rs0.toJson();
 		
 		assertFalse(s.isEmpty());
@@ -302,11 +309,13 @@ public class ResultSetJSonConversionTest {
 		
 		// Checking the values of the converted ResultSet
 		// The conversion of "Time" and other types are not implemented yet
+		
 		// Float will be converted to Double
+		
 		// The date has to be rounded to the first milliseconds of the day
 		// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 		
-		equalityAsValueDataRowTest(dr0, newDr0, s);
+		equalityAsValueDataRowTest(dr0, newDr0, s, false);
 	}
 	
 	/**
@@ -332,20 +341,73 @@ public class ResultSetJSonConversionTest {
 		
 		// Checking the values of the converted ResultSet
 		// The conversion of "Time" and other types are not implemented yet
+		
+		// Float will be converted to Double
+		
 		// The date has to be rounded to the first milliseconds of the day
 		// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 		
 		equalityAsStringDataRowTest(dr0, newDr0, s);
 		equalityAsNumberDataRowTest(dr0, newDr0, s);
-		equalityAsValueDataRowTest(dr0, newDr0, s);
+		equalityAsValueDataRowTest(dr0, newDr0, s, false);
 		
 		equalityAsStringDataRowTest(dr1, newDr1, s);
 		equalityAsNumberDataRowTest(dr1, newDr1, s);
-		equalityAsValueDataRowTest(dr1, newDr1, s);
+		equalityAsValueDataRowTest(dr1, newDr1, s, false);
 		
 		equalityAsStringDataRowTest(dr2, newDr2, s);
 		equalityAsNumberDataRowTest(dr2, newDr2, s);
-		equalityAsValueDataRowTest(dr2, newDr2, s);
+		equalityAsValueDataRowTest(dr2, newDr2, s, false);
 	}
 	
+	/**
+	 * A ResultSet with nested DataRows is created. The equality method will check
+	 * them to contain the same values (with getFieldValue, getFieldAsString,
+	 * getFieldAsNumber) as before
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void toJSonNestedDataRowWithDataRowsTest() throws Exception {
+		ResultSet rs0 = ResultSetProvider.createNestedDataRowsResultSet();
+		DataRow dr0 = rs0.get(0);
+		String s = rs0.toJson();
+
+		assertFalse(s.isEmpty());
+
+		ResultSet rs1 = ResultSet.fromJson(s);
+		DataRow newDr0 = rs1.get(0);
+
+		equalityAsStringDataRowTest(dr0, newDr0, s);
+		equalityAsNumberDataRowTest(dr0, newDr0, s);
+		equalityAsValueDataRowTest(dr0, newDr0, s, true);
+	}
+
+	/**
+	 * A ResultSet with nested ResultSets is created. The nested ResultSets are
+	 * extracted and their DataRows are checked through the equality methods
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void toJSonNestedDataRowWithResultSetsTest() throws Exception {
+		ResultSet rs0 = ResultSetProvider.createNestedResultSetsResultSet();
+		DataRow dr0 = rs0.get(0);
+		String s = rs0.toJson();
+
+		assertFalse(s.isEmpty());
+
+		ResultSet rs1 = ResultSet.fromJson(s);
+		DataRow newDr0 = rs1.get(0);
+
+//	 	Converting the nested DataRow with ResutSets to String might have problems 
+//		equalityAsStringDataRowTest(dr0, newDr0, s);
+		equalityAsNumberDataRowTest(dr0, newDr0, s);
+		BBArrayList<String> fieldNames = dr0.getFieldNames();
+		for(int i = 0; i < fieldNames.size(); i++) {
+			equalityAsValueDataRowTest(((ResultSet) dr0.getFieldValue(fieldNames.get(i))).get(0),
+					((ResultSet) newDr0.getFieldValue(fieldNames.get(i))).get(0), s, false);
+		}
+	}
+
 }

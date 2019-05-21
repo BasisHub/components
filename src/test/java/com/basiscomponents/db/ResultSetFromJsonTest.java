@@ -1,12 +1,14 @@
 package com.basiscomponents.db;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.basiscomponents.db.exception.DataFieldNotFoundException;
 import com.google.gson.JsonSyntaxException;
 
 public class ResultSetFromJsonTest {
@@ -30,8 +32,9 @@ public class ResultSetFromJsonTest {
 		assertTrue(rs.getColumnNames().contains("LANGUAGE"));
 		assertTrue(rs.getColumnNames().contains(""));
 		
-		assertTrue("ENG".equals(rs.get(0).getFieldValue("LANGUAGE")));
-		assertTrue("en".equals(rs.get(0).getFieldValue("ISO639-1")));
+		assertEquals("ENG", rs.get(0).getFieldValue("LANGUAGE"));
+		assertEquals("en", rs.get(0).getFieldValue("ISO639-1"));
+		assertEquals("en", rs.get(0).getFieldValue(""));
 	}
 	
 	/**
@@ -48,10 +51,11 @@ public class ResultSetFromJsonTest {
 		assertNotNull(rs);
 		assertTrue(rs.get(0).getDataField("LANGUAGE").getAttributes().size() == 1);
 		assertTrue(rs.get(0).getDataField("ISO639-1").getAttributes().size() == 1);
-		assertTrue("12".equals(rs.getAttribute("LANGUAGE", "ColumnType")));
-		assertTrue("12".equals(rs.getAttribute("ISO639-1", "ColumnType")));
-		assertTrue("".equals(rs.getAttribute("LANGUAGE", "NotAnAttribute")));
-		assertTrue("".equals(rs.getAttribute("ISO639-1", "NotAnAttribute")));
+		
+		assertEquals("12", rs.getAttribute("LANGUAGE", "ColumnType"));
+		assertEquals("12", rs.getAttribute("ISO639-1", "ColumnType"));
+		assertEquals("", rs.getAttribute("LANGUAGE", "NotAnAttribute"));
+		assertEquals("", rs.getAttribute("ISO639-1", "NotAnAttribute"));
 	}
 
 	/**
@@ -139,7 +143,9 @@ public class ResultSetFromJsonTest {
 		assertTrue(rs.get(0).getDataField("LANGUAGE").getAttributes().isEmpty());
 
 		String s = rs.toJson();
-		assertEquals(s, "[{\"LANGUAGE\":\"ENG\",\"ISO639-1\":\"en\",\"meta\":{\"LANGUAGE\":{\"ColumnType\":\"12\"},\"ISO639-1\":{\"ColumnType\":\"12\"}}}]");
+		assertEquals(
+				"[{\"LANGUAGE\":\"ENG\",\"ISO639-1\":\"en\",\"meta\":{\"LANGUAGE\":{\"ColumnType\":\"12\"},\"ISO639-1\":{\"ColumnType\":\"12\"}}}]",
+				s);
 	}
 	
 	/**
@@ -158,7 +164,9 @@ public class ResultSetFromJsonTest {
 		assertTrue(rs.get(0).getDataField("LANGUAGE").getAttributes().isEmpty());
 
 		String s = rs.toJson();
-		assertEquals(s, "[{\"LANGUAGE\":\"ENG\",\"ISO639-1\":\"en\",\"meta\":{\"LANGUAGE\":{\"ColumnType\":\"12\"},\"ISO639-1\":{\"ColumnType\":\"12\"}}}]");
+		assertEquals(
+				"[{\"LANGUAGE\":\"ENG\",\"ISO639-1\":\"en\",\"meta\":{\"LANGUAGE\":{\"ColumnType\":\"12\"},\"ISO639-1\":{\"ColumnType\":\"12\"}}}]",
+				s);
 	}
 	
 	/**
@@ -210,19 +218,14 @@ public class ResultSetFromJsonTest {
 	}
 	
 	/**
-	 * The MetaData is missing 
+	 * The MetaData is missing, which is allowed and shouldn't cause any exceptions
 	 * 
 	 * @throws Exception
 	 */
 	@Test
 	public void metaDataMissingFromJsonTest() throws Exception {
 		String response = "[{\"LANGUAGE\":\"ENG\",\"ISO639-1\":\"en\"}]";
-		try {
 		ResultSet rs = ResultSet.fromJson(response);
-		fail("MetaData is missing");
-		} catch (JsonSyntaxException e) {
-			// Caught correct exception
-		}
 	}
 	
 }

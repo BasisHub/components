@@ -59,8 +59,9 @@ public class ResultSetJsonMapper {
 						g.writeArrayFieldStart(fn);
 						List l = (List) dr.getField(fn).getObject();
 						Iterator it = l.iterator();
-						while (it.hasNext())
+							while (it.hasNext()) {
 							g.writeObject(it.next());
+							}
 						g.writeEndArray();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block

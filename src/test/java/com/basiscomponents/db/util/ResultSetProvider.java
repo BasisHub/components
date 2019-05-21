@@ -30,4 +30,16 @@ public class ResultSetProvider {
 	  return result;
   }
   
+	public static ResultSet createNestedDataRowsResultSet() throws Exception {
+		ResultSet result = new ResultSet();
+		result.add(DataRowProvider.buildNestedDataRowWithDataRows());
+		return result;
+	}
+
+	public static ResultSet createNestedResultSetsResultSet() throws Exception {
+		ResultSet result = new ResultSet();
+		result.add(DataRowProvider.buildNestedDataRowWithResultSets());
+		return result;
+	}
+
 }

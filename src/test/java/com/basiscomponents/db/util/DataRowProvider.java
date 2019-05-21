@@ -1,14 +1,9 @@
 package com.basiscomponents.db.util;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Calendar;
-
-import org.apache.commons.lang3.time.DateUtils;
 
 import com.basiscomponents.db.DataRow;
 
@@ -25,6 +20,13 @@ public class DataRowProvider {
 	public static final String BOOLFIELD = "BOOLFIELD";
 	public static final String DATEFIELD = "DATEFIELD";
 	public static final String TIMESTAMPFIELD = "TIMESTAMPFIELD";
+	public static final String TIMEFIELD = "TIMEFIELD";
+	
+	public static final String NESTEDDATAROW1 = "NESTEDDATAROW1";
+	public static final String NESTEDDATAROW2 = "NESTEDDATAROW2";
+	public static final String NESTEDRESULTSET1 = "NESTEDRESULTSET1";
+	public static final String NESTEDRESULTSET2 = "NESTEDRESULTSET2";
+
 //	public static final String BYTEFIELD = "BYTEFIELD";
 //	public static final String SCD_BYTEFIELD = "SCD_BYTEFIELD";
 //	public static final String SHORTFIELD = "SHORTFIELD";
@@ -33,7 +35,6 @@ public class DataRowProvider {
 //	public static final String SCD_LONGFIELD = "SCD_LONGFIELD";
 //	public static final String BIGDECIMALFIELD = "BIGDECIMALFIELD";
 //	public static final String SCD_BIGDECIMALFIELD = "SCD_BIGDECIMALFIELD";
-	public static final String TIMEFIELD = "TIMEFIELD";
 
 	public static DataRow buildSampleDataRow(boolean nullAllFields) {
 		DataRow dr = new DataRow();
@@ -42,8 +43,9 @@ public class DataRowProvider {
 			dr.setFieldValue(INTFIELD, myInt);
 			Double myDouble = 1.0;
 			dr.setFieldValue(DOUBLEFIELD, myDouble);
+			// Float will be casted to double
 			
-			// The date has to be rounded to the first milliseconds of the day
+			// The date has to be rounded to the first millisecond of the day
 			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(new Date(System.currentTimeMillis()));
@@ -56,20 +58,21 @@ public class DataRowProvider {
 			dr.setFieldValue(BOOLFIELD, true);
 			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
 			
-//			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
-//			There are types which can't be converted yet, see ResultSetJsonMapper Line 259
+			// dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
+			// There are types which can't be converted yet, see ResultSetJsonMapper Line 259
 
 			if (nullAllFields) {
 				dr.setFieldValue(INTFIELD, null);
-//				dr.setFieldValue(BYTEFIELD, null);
-//				dr.setFieldValue(SHORTFIELD, null);
-//				dr.setFieldValue(LONGFIELD, null);
-//				dr.setFieldValue(BIGDECIMALFIELD, null);
 				dr.setFieldValue(DOUBLEFIELD, null);
 				dr.setFieldValue(BOOLFIELD, null);
 				dr.setFieldValue(DATEFIELD, null);
 				dr.setFieldValue(TIMEFIELD, null);
 				dr.setFieldValue(TIMESTAMPFIELD, null);
+				
+//				dr.setFieldValue(BYTEFIELD, null);
+//				dr.setFieldValue(SHORTFIELD, null);
+//				dr.setFieldValue(LONGFIELD, null);
+//				dr.setFieldValue(BIGDECIMALFIELD, null);
 			}
 
 			dr.setFieldAttribute(INTFIELD, "ISNUMERIC", "1");
@@ -91,15 +94,16 @@ public class DataRowProvider {
 			dr.setFieldAttribute(TIMESTAMPFIELD, "THREE", "");
 			
 			dr.setFieldAttribute(DOUBLEFIELD, "ColumnType", "8");
-//			dr.setFieldAttribute(BYTEFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(SHORTFIELD, "ColumnType", "4");
 			dr.setFieldAttribute(INTFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(LONGFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", "4");
 			dr.setFieldAttribute(BOOLFIELD, "ColumnType", "16");
 			dr.setFieldAttribute(DATEFIELD, "ColumnType", "91");
-//			dr.setFieldAttribute(TIMEFIELD, "ColumnType", "92");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "ColumnType", "93");
+			
+//			dr.setFieldAttribute(BYTEFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(SHORTFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(LONGFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(TIMEFIELD, "ColumnType", "92");
 			
 		} catch (ParseException e) {
 
@@ -116,6 +120,7 @@ public class DataRowProvider {
 			dr.setFieldValue(SCD_INTFIELD, Integer.MIN_VALUE);
 			dr.setFieldValue(DOUBLEFIELD, Double.MAX_VALUE);
 			dr.setFieldValue(SCD_DOUBLEFIELD, Double.MIN_VALUE);
+			
 //			dr.setFieldValue(BYTEFIELD, Byte.MAX_VALUE);
 //			dr.setFieldValue(SCD_BYTEFIELD, Byte.MIN_VALUE);
 //			dr.setFieldValue(SHORTFIELD, Short.MAX_VALUE);
@@ -125,7 +130,7 @@ public class DataRowProvider {
 //			dr.setFieldValue(BIGDECIMALFIELD, new BigDecimal("1238126387123"));
 //			dr.setFieldValue(SCD_BIGDECIMALFIELD, new BigDecimal("-1238126387123"));
 			
-			// The date has to be rounded to the first milliseconds of the day
+			// The date has to be rounded to the first millisecond of the day
 			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(new Date(System.currentTimeMillis()));
@@ -138,8 +143,8 @@ public class DataRowProvider {
 			dr.setFieldValue(BOOLFIELD, false);
 			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
 			
-//			dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
-//			There are types which can't be converted yet, see ResultSetJsonMapper Line 259
+			// dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
+			// There are types which can't be converted yet, see ResultSetJsonMapper Line 259
 
 			dr.setFieldAttribute(INTFIELD, "ISDIFFERENT", "1");
 			dr.setFieldAttribute(DOUBLEFIELD, "ISDIFFERENT", "1");
@@ -158,6 +163,20 @@ public class DataRowProvider {
 			dr.setFieldAttribute(BOOLFIELD, "THREE", "");
 			dr.setFieldAttribute(DATEFIELD, "THREE", "");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "THREE", "");
+			
+			dr.setFieldAttribute(DOUBLEFIELD, "ColumnType", "8");
+			dr.setFieldAttribute(SCD_DOUBLEFIELD, "ColumnType", "8");
+			dr.setFieldAttribute(INTFIELD, "ColumnType", "4");
+			dr.setFieldAttribute(SCD_INTFIELD, "ColumnType", "4");
+			dr.setFieldAttribute(BOOLFIELD, "ColumnType", "16");
+			dr.setFieldAttribute(DATEFIELD, "ColumnType", "91");
+			dr.setFieldAttribute(TIMESTAMPFIELD, "ColumnType", "93");
+			
+//			dr.setFieldAttribute(BYTEFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(SHORTFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(LONGFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", "4");
+//			dr.setFieldAttribute(TIMEFIELD, "ColumnType", "92");
 		} catch (ParseException e) {
 
 			e.printStackTrace();
@@ -180,4 +199,32 @@ public class DataRowProvider {
 		return dr;
 	}
 	
+	public static DataRow buildNestedDataRowWithDataRows() {
+		DataRow dr = new DataRow();
+		try {
+			dr.setFieldValue(NESTEDDATAROW1, buildSampleDataRow(false));
+			dr.setFieldValue(NESTEDDATAROW2, buildSampleDataRowMinMax());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dr;
+
+	}
+
+	public static DataRow buildNestedDataRowWithResultSets() {
+		DataRow dr = new DataRow();
+		try {
+			dr.setFieldValue(NESTEDRESULTSET1, ResultSetProvider.createDefaultResultSet(false));
+			dr.setFieldValue(NESTEDRESULTSET2, ResultSetProvider.createMultipleDataRowResultSet());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dr;
+
+	}
+
 }
