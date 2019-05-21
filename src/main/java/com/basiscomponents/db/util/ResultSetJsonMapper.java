@@ -124,6 +124,7 @@ public class ResultSetJsonMapper {
 				String s = value.getString().trim();
 				if (s.isEmpty()) {
 					s = "{}";
+
 				}
 				jsonGenerator.writeRawValue(s);
 			} else {
