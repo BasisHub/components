@@ -3,15 +3,14 @@
  */
 package com.basiscomponents.db.util;
 
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author damore
@@ -23,7 +22,7 @@ public class ResultSetJsonMapperTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		rs = new ResultSet();
 		DataRow dr = DataRowProvider.buildSampleDataRow(false);
@@ -32,7 +31,7 @@ public class ResultSetJsonMapperTest {
 		rs.add(dr);
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void test() throws Exception {
 

@@ -1,14 +1,13 @@
 package com.basiscomponents.db.datarowtest;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.util.DataRowProvider;
+import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 
-import org.junit.Test;
-
-import com.basiscomponents.db.DataRow;
-import com.basiscomponents.db.util.DataRowProvider;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DataRowMatchesTest {
 	@Test
