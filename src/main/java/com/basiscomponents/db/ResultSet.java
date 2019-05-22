@@ -2069,16 +2069,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			meta = o.get(0).getAsJsonObject().getAsJsonObject("meta");
 			try {
 				metaRow = DataRow.fromJson(o.get(0).toString());
-				metaRow.clear();
+				//metaRow.clear();
 			} catch (Exception ex) {
 			}
 		}
 		if (meta == null) {
 			System.err.println("error parsing - meta data missing");
 		}
-		Iterator<JsonElement> it = o.iterator();
-		while (it.hasNext()) {
-			JsonElement el = it.next();
+		for (JsonElement el:o) {
 			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
 				el.getAsJsonObject().add("meta", meta);
 

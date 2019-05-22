@@ -46,7 +46,9 @@ public class ResultSetJsonMapper {
                     dataFieldToJson(dr.getField(fn, true), fn, dr.getFieldType(fn), meta, addIndexColumn, f_trimStrings, jsonGenerator);
 
                 } // while on fields
-
+                if (writeDataRowAttributes){
+                    writeDataRowAttributes(dr.getAttributes(), jsonGenerator);
+                }
                 if (meta) {
                     metaDone = writeMeta(rs, addIndexColumn, jsonGenerator, metaDone, dr);
                 }
@@ -59,6 +61,16 @@ public class ResultSetJsonMapper {
             jsonGenerator.close();
             return writer.toString();
         }
+    }
+
+    private static void writeDataRowAttributes(HashMap<String, String> attributes, JsonGenerator jsonGenerator) throws IOException {
+        jsonGenerator.writeFieldName("ATTRIBUTES");
+        jsonGenerator.writeStartObject();
+        for (Entry<String, String> entry : attributes.entrySet()) {
+            System.out.println(entry);
+            jsonGenerator.writeObjectField(entry.getKey(), entry.getValue());
+        }
+        jsonGenerator.writeEndObject();
     }
 
     private static void dataFieldToJson(DataField value, String fieldName, int fieldType, boolean meta, String addIndexColumn, boolean f_trimStrings, JsonGenerator jsonGenerator) throws IOException {
@@ -301,12 +313,12 @@ public class ResultSetJsonMapper {
                     jsonGenerator.writeFieldName(c);
                     jsonGenerator.writeStartObject();
 
-                    final Map<String, Attribute> atr = getFieldAttributes(dr, c);
+                    final Map<String, Attribute> atr = getFieldAttributes(dr, c).orElseGet(HashMap::new);
 
 
                     for (Entry<String, Object> entry : hm.entrySet()) {
                         if ("ColumnTypeName".equals(entry.getKey()) || "ColumnName".equals(entry.getKey())
-                                || (atr != null && atr.containsKey(entry.getKey()))) {
+                                || atr.containsKey(entry.getKey())) {
                             continue;
                         }
                         String value = null;
@@ -369,14 +381,14 @@ public class ResultSetJsonMapper {
      * @param c
      * @return
      */
-    private static Map<String, Attribute> getFieldAttributes(DataRow dr, String c) {
+    private static Optional<Map<String, Attribute>> getFieldAttributes(DataRow dr, String c) {
         Map<String, Attribute> atr;
         try {
             atr = dr.getFieldAttributes2(c);
         } catch (Exception e) {
             atr = null;
         }
-        return atr;
+        return Optional.of(atr);
     }
 
 
