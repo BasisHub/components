@@ -1,11 +1,11 @@
 package com.basiscomponents.db.util;
 
+import com.basiscomponents.db.DataRow;
+
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Calendar;
-
-import com.basiscomponents.db.DataRow;
 
 public class DataRowProvider {
 	public static final String STRINGFIELD = "STRINGFIELD";
@@ -28,6 +28,7 @@ public class DataRowProvider {
 	public static final String NESTEDDATAROW2 = "NESTEDDATAROW2";
 	public static final String NESTEDRESULTSET1 = "NESTEDRESULTSET1";
 	public static final String NESTEDRESULTSET2 = "NESTEDRESULTSET2";
+	public static final String STRINGFIELD_VALUE ="1337";
 
 //	public static final String BYTEFIELD = "BYTEFIELD";
 //	public static final String SCD_BYTEFIELD = "SCD_BYTEFIELD";
@@ -189,7 +190,7 @@ public class DataRowProvider {
 	public static DataRow buildStringOnlyDataRow() {
 		DataRow dr = new DataRow();
 		try {
-			dr.setFieldValue(STRINGFIELD, "1337");
+			dr.setFieldValue(STRINGFIELD, STRINGFIELD_VALUE);
 			dr.setFieldValue(SCD_STRINGFIELD, "StringValue");
 			dr.setFieldValue(TRD_STRINGFIELD, "4StringValue2");
 			dr.setFieldValue(FRT_STRINGFIELD, "");

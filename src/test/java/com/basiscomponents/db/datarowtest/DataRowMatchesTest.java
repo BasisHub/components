@@ -12,15 +12,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class DataRowMatchesTest {
 	@Test
 	public void testPositive() throws ParseException {
-		DataRow dataRow = DataRowProvider.buildSampleDataRow(false);
+		DataRow dataRow = DataRowProvider.buildStringOnlyDataRow();
 		DataRow filter = new DataRow();
-		filter.setFieldValue(DataRowProvider.STRINGFIELD, "Value");
+		filter.setFieldValue(DataRowProvider.STRINGFIELD, DataRowProvider.STRINGFIELD_VALUE);
 		assertTrue(dataRow.matches(filter));
 	}
 
 	@Test
 	public void testNegative() throws ParseException {
-		DataRow dataRow = DataRowProvider.buildSampleDataRow(false);
+		DataRow dataRow = DataRowProvider.buildStringOnlyDataRow();
 		DataRow filter = new DataRow();
 		filter.setFieldValue(DataRowProvider.STRINGFIELD, "This is not the value, you are looking for");
 		assertFalse(dataRow.matches(filter));
@@ -28,7 +28,7 @@ public class DataRowMatchesTest {
 
 	@Test
 	public void testNonExistingFields() throws ParseException {
-		DataRow dataRow = DataRowProvider.buildSampleDataRow(false);
+		DataRow dataRow = DataRowProvider.buildStringOnlyDataRow();
 		DataRow filter = new DataRow();
 		filter.setFieldValue("Not a field in existance", "should not be compared");
 		assertTrue(dataRow.matches(filter));// not sure if it should behave like this
@@ -36,9 +36,9 @@ public class DataRowMatchesTest {
 
 	@Test
 	public void testRegex() throws ParseException {
-		DataRow dataRow = DataRowProvider.buildSampleDataRow(false);
+		DataRow dataRow = DataRowProvider.buildStringOnlyDataRow();
 		DataRow filter = new DataRow();
 		filter.setFieldValue(DataRowProvider.STRINGFIELD, "regex:[A-Z][a-z]*");
-		assertTrue(dataRow.matches(filter));
+		assertFalse(dataRow.matches(filter));
 	}
 }
