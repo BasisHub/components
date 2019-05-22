@@ -1,21 +1,22 @@
 package com.basiscomponents.bc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.junit.Before;
-import org.junit.Test;
-
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SqlTableBCIsFieldInScopeTest {
 
 	private SqlTableBC sqlTablebc;
 	private HashMap<String, ArrayList<String>> scopes;
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeAll
+	public  void setUp() throws Exception {
 		sqlTablebc = new SqlTableBC("");
 		scopes = new HashMap<>();
 		ArrayList<String> scopeD = new ArrayList<>();
@@ -49,6 +50,7 @@ public class SqlTableBCIsFieldInScopeTest {
 
 		sqlTablebc.setScope("F");
 		assertTrue(sqlTablebc.isFieldInScope("FIELD_5"));
+		sqlTablebc.setScope("D");
 	}
 
 	@Test

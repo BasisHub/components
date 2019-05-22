@@ -1,15 +1,13 @@
 package com.basiscomponents.db.datarowtest;
 
-import static com.basiscomponents.db.util.DataRowProvider.DATEFIELD;
-import static com.basiscomponents.db.util.DataRowProvider.DOUBLEFIELD;
-import static com.basiscomponents.db.util.DataRowProvider.STRINGFIELD;
-import static com.basiscomponents.db.util.DataRowProvider.TIMESTAMPFIELD;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.util.DataRowProvider;
+import org.junit.jupiter.api.Test;
+
+import static com.basiscomponents.db.util.DataRowProvider.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GetFieldsHavingTest {
 
