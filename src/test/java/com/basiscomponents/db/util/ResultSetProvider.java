@@ -42,4 +42,10 @@ public class ResultSetProvider {
 		return result;
 	}
 
+	public static ResultSet createNestedResultSetsWithMultipleDataRowsResultSet() throws Exception {
+		ResultSet result = new ResultSet();
+		result.add(DataRowProvider.buildNestedDataRowWithMultipleDataRowsResultSet());
+		return result;
+	}
+
 }
