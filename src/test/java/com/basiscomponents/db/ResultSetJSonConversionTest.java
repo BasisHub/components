@@ -21,7 +21,8 @@ public class ResultSetJSonConversionTest {
         BBArrayList<String> fieldNamesNew = newDR.getFieldNames();
         assertTrue(fieldNamesOld.size() == fieldNamesNew.size(), json);
         for (int i = 0; i < fieldNamesOld.size(); i++) {
-            assertEquals(json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldAsString", oldDR.getFieldAsString(fieldNamesOld.get(i)), newDR.getFieldAsString(fieldNamesOld.get(i)));
+            String fieldname = fieldNamesOld.get(i);
+            assertEquals( oldDR.getFieldAsString(fieldname), newDR.getFieldAsString(fieldname), ()->json + "\n" + fieldname + " values differ with function getFieldAsString");
         }
     }
 
