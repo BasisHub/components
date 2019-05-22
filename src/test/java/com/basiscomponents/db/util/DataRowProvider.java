@@ -13,6 +13,8 @@ public class DataRowProvider {
 	public static final String TRD_STRINGFIELD = "TRD_STRINGFIELD";
 	public static final String FRT_STRINGFIELD = "FRT_STRINGFIELD";
 	public static final String FTH_STRINGFIELD = "FTH_STRINGFIELD";
+	public static final String STH_STRINGFIELD = "STH_STRINGFIELD";
+	public static final String SVT_STRINGFIELD = "SVT_STRINGFIELD";
 	public static final String INTFIELD = "INTFIELD";
 	public static final String SCD_INTFIELD = "SCD_INTFIELD";
 	public static final String DOUBLEFIELD = "DOUBLEFIELD";
@@ -192,6 +194,8 @@ public class DataRowProvider {
 			dr.setFieldValue(TRD_STRINGFIELD, "4StringValue2");
 			dr.setFieldValue(FRT_STRINGFIELD, "");
 			dr.setFieldValue(FTH_STRINGFIELD, null);
+			dr.setFieldValue(STH_STRINGFIELD, "-1");
+			dr.setFieldValue(SVT_STRINGFIELD, "1.0");
 		} catch (ParseException e) {
 
 			e.printStackTrace();
@@ -217,7 +221,20 @@ public class DataRowProvider {
 		DataRow dr = new DataRow();
 		try {
 			dr.setFieldValue(NESTEDRESULTSET1, ResultSetProvider.createDefaultResultSet(false));
-			dr.setFieldValue(NESTEDRESULTSET2, ResultSetProvider.createMultipleDataRowResultSet());
+			dr.setFieldValue(NESTEDRESULTSET2, ResultSetProvider.createDefaultResultSetMinMax());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dr;
+
+	}
+
+	public static DataRow buildNestedDataRowWithMultipleDataRowsResultSet() {
+		DataRow dr = new DataRow();
+		try {
+			dr.setFieldValue(NESTEDRESULTSET1, ResultSetProvider.createMultipleDataRowResultSet());
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {

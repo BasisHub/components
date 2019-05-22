@@ -1,9 +1,17 @@
 package com.basiscomponents.db;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+
+
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
-import org.junit.jupiter.api.Test;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +29,8 @@ public class ResultSetJSonConversionTest {
         BBArrayList<String> fieldNamesNew = newDR.getFieldNames();
         assertTrue(fieldNamesOld.size() == fieldNamesNew.size(), json);
         for (int i = 0; i < fieldNamesOld.size(); i++) {
-            assertEquals(json + "\n" + fieldNamesOld.get(i) + " values differ with function getFieldAsString", oldDR.getFieldAsString(fieldNamesOld.get(i)), newDR.getFieldAsString(fieldNamesOld.get(i)));
+            String fieldname = fieldNamesOld.get(i);
+            assertEquals( oldDR.getFieldAsString(fieldname), newDR.getFieldAsString(fieldname), ()->json + "\n" + fieldname + " values differ with function getFieldAsString");
         }
     }
 
@@ -145,27 +154,19 @@ public class ResultSetJSonConversionTest {
         assertEquals( dr0.getFieldAsNumber(DataRowProvider.FRT_STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.FRT_STRINGFIELD),s + " FRT_STRINGFIELD values differ");
         assertEquals( dr0.getFieldAsNumber(DataRowProvider.FTH_STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.FTH_STRINGFIELD),s + " FTH_STRINGField values difer");
 
-        //So kann man das mit JUnit 5 schreiben
-        assertThrows(NumberFormatException.class, ()->dr0.getFieldAsNumber(DataRowProvider.SCD_STRINGFIELD));
+		assertEquals(dr0.getFieldAsNumber(DataRowProvider.STH_STRINGFIELD),
+				newDr0.getFieldAsNumber(DataRowProvider.STH_STRINGFIELD), s + " STH_STRINGField values difer");
+		assertEquals(dr0.getFieldAsNumber(DataRowProvider.SVT_STRINGFIELD),
+				newDr0.getFieldAsNumber(DataRowProvider.SVT_STRINGFIELD), s + " SVT_STRINGField values difer");
 
-        try {
-            newDr0.getFieldAsNumber(DataRowProvider.SCD_STRINGFIELD);
-            fail("This String cannot be converted into a number!");
-        } catch (NumberFormatException e) {
-            // Caught correct exception
-        }
-        try {
-            dr0.getFieldAsNumber(DataRowProvider.TRD_STRINGFIELD);
-            fail("This String cannot be converted into a number!");
-        } catch (NumberFormatException e) {
-            // Caught correct exception
-        }
-        try {
-            newDr0.getFieldAsNumber(DataRowProvider.TRD_STRINGFIELD);
-            fail("This String cannot be converted into a number!");
-        } catch (NumberFormatException e) {
-            // Caught correct exception
-        }
+		assertThrows(NumberFormatException.class, () -> dr0.getFieldAsNumber(DataRowProvider.SCD_STRINGFIELD),
+				"This String cannot be converted into a number!");
+		assertThrows(NumberFormatException.class, () -> newDr0.getFieldAsNumber(DataRowProvider.SCD_STRINGFIELD),
+				"This String cannot be converted into a number!");
+		assertThrows(NumberFormatException.class, () -> dr0.getFieldAsNumber(DataRowProvider.TRD_STRINGFIELD),
+				"This String cannot be converted into a number!");
+		assertThrows(NumberFormatException.class, () -> newDr0.getFieldAsNumber(DataRowProvider.TRD_STRINGFIELD),
+				"This String cannot be converted into a number!");
     }
 
     /**

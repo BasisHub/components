@@ -1,25 +1,28 @@
 package com.basiscomponents.db;
 
-import com.basiscomponents.db.util.ResultSetProvider;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import com.basiscomponents.db.util.ResultSetProvider;
 
 public class ResultSetToJsonTest {
 
 	/**
-	 * A default ResultSet is created 
-	 * The equality method will check them to contain the same values (with getFieldAsString) as before
+	 * A StringOnlyResultSet is created. The toJsonString is checked to be correct.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void toJSonFieldAsStringTest() throws Exception {
-		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
+	public void toJSonStringOnlyResultSetTest() throws Exception {
+		ResultSet rs0 = ResultSetProvider.createStringOnlyResultSet();
 		DataRow dr0 = rs0.get(0);
 		String s = rs0.toJson();
-		System.out.println(s);
 		
 		assertFalse(s.isEmpty());
+		assertEquals(
+				"[{\"STRINGFIELD\":\"1337\",\"SCD_STRINGFIELD\":\"StringValue\",\"TRD_STRINGFIELD\":\"4StringValue2\",\"FRT_STRINGFIELD\":\"\",\"FTH_STRINGFIELD\":null,\"STH_STRINGFIELD\":\"-1\",\"SVT_STRINGFIELD\":\"1.0\",\"meta\":{\"STRINGFIELD\":{\"ColumnType\":\"12\"},\"SCD_STRINGFIELD\":{\"ColumnType\":\"12\"},\"TRD_STRINGFIELD\":{\"ColumnType\":\"12\"},\"FRT_STRINGFIELD\":{\"ColumnType\":\"12\"},\"FTH_STRINGFIELD\":{\"ColumnType\":\"12\"},\"STH_STRINGFIELD\":{\"ColumnType\":\"12\"},\"SVT_STRINGFIELD\":{\"ColumnType\":\"12\"}}}]",
+				s);
 	}
 }

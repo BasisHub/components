@@ -1,22 +1,13 @@
 package com.basiscomponents.db;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+@Disabled
 public class DataFieldEtagTest {
 
-	@BeforeAll
-	public void setUp() throws Exception {
-	}
 
-	@AfterAll
-	public void tearDown() throws Exception {
-	}
-	@Ignore
 	@Test
 	public void test() {
 		DataField s1 = new DataField("String1");

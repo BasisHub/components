@@ -4,6 +4,10 @@ import com.basiscomponents.db.ResultSet;
 
 public class ResultSetProvider {
 
+	public static ResultSet createDefaultResultSet() throws Exception {
+		return createDefaultResultSet(false);
+	}
+
   public static ResultSet createDefaultResultSet(boolean nullAllFields) throws Exception {
     ResultSet result = new ResultSet();
     result.add(DataRowProvider.buildSampleDataRow(nullAllFields));
@@ -39,6 +43,12 @@ public class ResultSetProvider {
 	public static ResultSet createNestedResultSetsResultSet() throws Exception {
 		ResultSet result = new ResultSet();
 		result.add(DataRowProvider.buildNestedDataRowWithResultSets());
+		return result;
+	}
+
+	public static ResultSet createNestedResultSetsWithMultipleDataRowsResultSet() throws Exception {
+		ResultSet result = new ResultSet();
+		result.add(DataRowProvider.buildNestedDataRowWithMultipleDataRowsResultSet());
 		return result;
 	}
 
