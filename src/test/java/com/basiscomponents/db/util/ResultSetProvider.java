@@ -4,6 +4,10 @@ import com.basiscomponents.db.ResultSet;
 
 public class ResultSetProvider {
 
+	public static ResultSet createDefaultResultSet() throws Exception {
+		return createDefaultResultSet(false);
+	}
+
   public static ResultSet createDefaultResultSet(boolean nullAllFields) throws Exception {
     ResultSet result = new ResultSet();
     result.add(DataRowProvider.buildSampleDataRow(nullAllFields));
