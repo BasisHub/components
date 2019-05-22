@@ -1,32 +1,5 @@
 package com.basiscomponents.db;
 
-import static com.basiscomponents.util.StringHelper.invert;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Date;
-import java.sql.NClob;
-import java.sql.Ref;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
@@ -39,8 +12,19 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
-
 import net.sf.jasperreports.engine.JRDataSource;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Date;
+import java.sql.*;
+import java.text.ParseException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.basiscomponents.util.StringHelper.invert;
 
 /**
  * The ResultSet class is a container class for DataRow objects.
@@ -1444,7 +1428,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * for the column at the specified index.
 	 * 
 	 * @param column The column index.
-	 * @param name The value of the TableName property to set.
+	 * @param tableName The value of the TableName property to set.
 	 */
 	public void setTableName(int column, String tableName) {
 		this.MetaData.get(column).put("TableName", tableName);
@@ -1506,7 +1490,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * </ul>
 	 * 
 	 * @param column The column index.
-	 * @param flag The value of the Nullable property to set..
 	 * 
 	 * @throws Exception Gets thrown in case the Nullable flag is not equal any of the above mentioned types.
 	 */
@@ -1916,6 +1899,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return field.getClob();
 	}
 
+	public ArrayList<HashMap<String, Object>> getMetaData() {
+		return new ArrayList<>(MetaData);
+	}
+
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as NClob.
@@ -2028,10 +2015,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return toJson(f_meta, addIndexColumn, true);
 	}
 	
-	public String toJson(Boolean f_meta, String addIndexColumn, Boolean f_trimStrings) throws Exception {
+	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings) throws Exception {
 		if (addIndexColumn!=null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta, addIndexColumn, f_trimStrings);
+		return ResultSetJsonMapper.toJson(this,meta , addIndexColumn, trimStrings, false);
 	}
 	
 	/**
