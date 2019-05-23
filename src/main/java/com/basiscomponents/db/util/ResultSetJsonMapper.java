@@ -16,6 +16,9 @@ import java.util.Map.Entry;
 
 
 public class ResultSetJsonMapper {
+
+    public static final String ATTRIBUTES = "_attributes";
+
     private ResultSetJsonMapper() {
     }
 
@@ -64,7 +67,7 @@ public class ResultSetJsonMapper {
     }
 
     private static void writeDataRowAttributes(HashMap<String, String> attributes, JsonGenerator jsonGenerator) throws IOException {
-        jsonGenerator.writeFieldName("ATTRIBUTES");
+        jsonGenerator.writeFieldName(ATTRIBUTES);
         jsonGenerator.writeStartObject();
         for (Entry<String, String> entry : attributes.entrySet()) {
             System.out.println(entry);

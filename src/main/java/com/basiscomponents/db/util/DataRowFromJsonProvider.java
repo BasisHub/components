@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.google.gson.JsonElement;
 
 import java.io.IOException;
 import java.sql.Types;
@@ -19,8 +20,10 @@ import java.util.*;
 public class DataRowFromJsonProvider {
 
 	private static final String COLUMN_TYPE = "ColumnType";
-
-	public static DataRow fromJson(final String in, final DataRow meta)
+	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
+		return fromJson(in,meta,null);
+	}
+	public static DataRow fromJson(final String in, final DataRow meta, JsonElement attributes)
 			throws IOException, ParseException {
 		String input = in;
 		if (input.length() < 2) {
@@ -40,7 +43,7 @@ public class DataRowFromJsonProvider {
 
 			List<?> navigation = objectMapper.readValue(jsonParser,
 					objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-
+			navigation.stream().map(x->"navigation" +x).forEach(System.out::println);
 			if (navigation.isEmpty()) {
 				return new DataRow();
 			}
@@ -62,6 +65,9 @@ public class DataRowFromJsonProvider {
 				createDataFields(root, metaRow, navigationMap, dr);
 			} else {
 				handleOldFormat(navigation, dr);
+			}
+			if (attributes!=null){
+				attributes.getAsJsonObject().entrySet().stream().forEach(entry->dr.setAttribute(entry.getKey(),entry.getValue().getAsString()));
 			}
 			return dr;
 		}

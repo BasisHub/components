@@ -155,7 +155,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * CAUTION: this method is experimental!!
 	 * 
-	 * @param QueryClause: the query
+	 * @param queryClause: the query
 	 * @return ResultSet: the records that match the query clause
 	 * @throws Exception
 	 */
@@ -2076,11 +2076,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (meta == null) {
 			System.err.println("error parsing - meta data missing");
 		}
+
 		for (JsonElement el:o) {
 			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
 				el.getAsJsonObject().add("meta", meta);
-
-			rs.add(DataRow.fromJson(el.toString(), metaRow));
+			if(el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)!=null){
+				rs.add(DataRow.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
+			}else{
+				rs.add(DataRow.fromJson(el.toString(), metaRow));
+			}
 		}
 		return rs;
 	}
@@ -2473,7 +2477,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @see #sumByGroup(String, String, String, int, int)
 	 * 
 	 * @param fieldname The name of the field.
-	 * @param labelname The label name.
 	 * @param sumfieldname The field name whose value should be summed
 	 *
 	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the sum

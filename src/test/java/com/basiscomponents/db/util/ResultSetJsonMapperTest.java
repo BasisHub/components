@@ -48,6 +48,7 @@ public class ResultSetJsonMapperTest {
 		String json= ResultSetJsonMapper.toJson(rs,true,null,true,true);
 		System.out.println(json);
 		ResultSet rs2 = ResultSet.fromJson(json);
+		assertEquals(rs.getDataRows().size(), rs2.getDataRows().size());
 		assertEquals("VALUE",rs2.get(0).getAttribute("ATTRIBUTE"));
 	}
 
