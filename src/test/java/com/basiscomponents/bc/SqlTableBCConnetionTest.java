@@ -16,6 +16,8 @@ import com.basiscomponents.db.ResultSet;
 
 public class SqlTableBCConnetionTest {
 
+	private String sql;
+
 	/**
 	 * Loading the h2-Driver and creating the test databases.
 	 * 
@@ -55,13 +57,14 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTablBCConnectionSimpleTableTest()
-			throws Exception {
+	public void SqlTablBCConnectionSimpleTableTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
 			// Insert new data
-			String sql = "insert into REGISTRATION VALUES ('Freeman', 34)";
+			sql = "DELETE FROM REGISTRATION";
+			stmt.execute(sql);
+			sql = "insert into REGISTRATION VALUES ('Freeman', 34)";
 			stmt.executeUpdate(sql);
 
 			// Set table and get its data with normal retrieve()
@@ -86,13 +89,14 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTablBCWriteSqlTest()
-			throws Exception {
+	public void SqlTablBCWriteSqlTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
 			// Insert new data
-			String sql = "insert into REGISTRATION VALUES ('Simpson', 42)";
+			sql = "DELETE FROM REGISTRATION";
+			stmt.execute(sql);
+			sql = "insert into REGISTRATION VALUES ('Simpson', 42)";
 			stmt.executeUpdate(sql);
 
 			// Collect data from the SqlTableBC
@@ -101,10 +105,58 @@ public class SqlTableBCConnetionTest {
 			ResultSet rs = sqlTable.retrieve(sql, null);
 
 			assertTrue(rs.getColumnCount() == 2);
+			assertTrue(rs.getColumnNames().contains("FIRST"));
 			assertTrue(rs.getColumnNames().contains("AGE"));
 
 			assertEquals("Simpson", rs.get(0).getFieldValue("FIRST"));
 			assertEquals(42, rs.get(0).getFieldValue("AGE"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A SQL Statement is
+	 * created and the SqlTableBC is queried with retrieve(String sql, DataRow dr).
+	 * The resulting ResultSet is checked to contain the right data.
+	 * 
+	 * @throws Exception
+	 */
+//	@Test
+	public void SqlTablBCWriteSqlTest2() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Insert new data
+			sql = "DELETE FROM REGISTRATION;";
+			stmt.execute(sql);
+			sql = "DELETE FROM TREES;";
+			stmt.execute(sql);
+			sql = "insert into REGISTRATION VALUES ('Simpson', 42)";
+			stmt.executeUpdate(sql);
+			sql = "insert into REGISTRATION VALUES ('Jasper', 33)";
+			stmt.executeUpdate(sql);
+			sql = "insert into TREES VALUES ('tree1', 155, 144.32)";
+			stmt.executeUpdate(sql);
+			sql = "insert into TREES VALUES ('tree2', 132, 1004.53)";
+			stmt.executeUpdate(sql);
+
+			// Collect data from the SqlTableBC
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sql = "SELECT * FROM REGISTRATION, TREES";
+			ResultSet rs = sqlTable.retrieve(sql, null);
+
+			assertTrue(rs.getColumnCount() == 5);
+			System.out.println(rs.getColumnNames());
+			assertTrue(rs.getColumnNames().contains("FIRST"));
+			assertTrue(rs.getColumnNames().contains("AGE"));
+			assertTrue(rs.getColumnNames().contains("NAME"));
+			assertTrue(rs.getColumnNames().contains("RINGS"));
+			assertTrue(rs.getColumnNames().contains("HEIGHT"));
+
+			System.out.println(rs.toJson());
+			assertEquals("Simpson", rs.get(0).getFieldValue("FIRST"));
+			assertEquals(42, rs.get(0).getFieldValue("AGE"));
+			assertEquals("Jasper", rs.get(1).getFieldValue("FIRST"));
+			assertEquals(33, rs.get(2).getFieldValue("AGE"));
 		}
 	}
 
