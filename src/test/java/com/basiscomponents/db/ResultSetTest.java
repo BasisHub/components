@@ -31,7 +31,6 @@ public class ResultSetTest {
 		rs.get(0).setAttribute("BGCOLOR","Black");
 		HashMap<String, String> attributes = rs.get(0).getAttributes();
 		assertTrue(attributes.containsKey("BGCOLOR"));
-		System.out.println(rs.toJson());
 	}
 
 }

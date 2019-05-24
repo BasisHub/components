@@ -43,7 +43,6 @@ public class DataRowFromJsonProvider {
 
 			List<?> navigation = objectMapper.readValue(jsonParser,
 					objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-			navigation.stream().map(x->"navigation" +x).forEach(System.out::println);
 			if (navigation.isEmpty()) {
 				return new DataRow();
 			}

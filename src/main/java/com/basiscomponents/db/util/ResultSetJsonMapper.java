@@ -70,7 +70,6 @@ public class ResultSetJsonMapper {
         jsonGenerator.writeFieldName(ATTRIBUTES);
         jsonGenerator.writeStartObject();
         for (Entry<String, String> entry : attributes.entrySet()) {
-            System.out.println(entry);
             jsonGenerator.writeObjectField(entry.getKey(), entry.getValue());
         }
         jsonGenerator.writeEndObject();
