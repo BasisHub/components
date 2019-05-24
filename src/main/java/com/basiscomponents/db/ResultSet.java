@@ -2014,13 +2014,33 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public String toJson(Boolean f_meta, String addIndexColumn) throws Exception {
 		return toJson(f_meta, addIndexColumn, true);
 	}
-	
+
+	/**
+	 *
+	 * @param meta if MetaData should be printed
+	 * @param addIndexColumn The Index column which is generated (@Code{null} if it doesn't exist)
+	 * @param trimStrings if Strings should be trimmed
+	 * @return The Json String containing this ResultSet
+	 * @throws Exception
+	 */
 	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings) throws Exception {
 		if (addIndexColumn!=null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this,meta , addIndexColumn, trimStrings, false);
+		return toJson(meta , addIndexColumn, trimStrings, false);
 	}
-	
+	/**
+	 *
+	 * @param meta if MetaData should be printed
+	 * @param addIndexColumn The Index column which is generated (@Code{null} if it doesn't exist)
+	 * @param trimStrings if Strings should be trimmed
+	 * @return The Json String containing this ResultSet
+	 * @throws Exception
+	 */
+	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes) throws Exception {
+		if (addIndexColumn!=null)
+			createIndex();
+		return ResultSetJsonMapper.toJson(this,meta , addIndexColumn, trimStrings, writeDataRowAttributes);
+	}
 	/**
 	 * Returns this ResultSet as a JRDataSource
 	 * 
