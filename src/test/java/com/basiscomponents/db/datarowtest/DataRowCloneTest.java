@@ -1,10 +1,9 @@
 package com.basiscomponents.db.datarowtest;
 
-import org.junit.Test;
-
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import org.junit.jupiter.api.Test;
 
 public class DataRowCloneTest {
 

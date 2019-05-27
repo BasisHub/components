@@ -1,15 +1,5 @@
 package com.basiscomponents.db.util;
 
-import java.io.IOException;
-import java.sql.Types;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
@@ -20,13 +10,21 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.google.gson.JsonElement;
+
+import java.io.IOException;
+import java.sql.Types;
+import java.text.ParseException;
+import java.util.*;
 
 public class DataRowFromJsonProvider {
 
 	private static final String COLUMN_TYPE = "ColumnType";
-
-	public static DataRow fromJson(final String in, final DataRow meta)
-			throws JsonParseException, IOException, ParseException {
+	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
+		return fromJson(in,meta,null);
+	}
+	public static DataRow fromJson(final String in, final DataRow meta, JsonElement attributes)
+			throws IOException, ParseException {
 		String input = in;
 		if (input.length() < 2) {
 			return new DataRow();
@@ -45,7 +43,6 @@ public class DataRowFromJsonProvider {
 
 			List<?> navigation = objectMapper.readValue(jsonParser,
 					objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-
 			if (navigation.isEmpty()) {
 				return new DataRow();
 			}
@@ -67,6 +64,9 @@ public class DataRowFromJsonProvider {
 				createDataFields(root, metaRow, navigationMap, dr);
 			} else {
 				handleOldFormat(navigation, dr);
+			}
+			if (attributes!=null){
+				attributes.getAsJsonObject().entrySet().stream().forEach(entry->dr.setAttribute(entry.getKey(),entry.getValue().getAsString()));
 			}
 			return dr;
 		}
