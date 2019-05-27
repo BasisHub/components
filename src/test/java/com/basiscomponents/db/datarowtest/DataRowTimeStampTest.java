@@ -1,4 +1,4 @@
-package com.basiscomponents.db.DataRowTest;
+package com.basiscomponents.db.datarowtest;
 
 import com.basiscomponents.db.DataRow;
 import org.junit.jupiter.api.Test;
