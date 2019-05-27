@@ -1,32 +1,5 @@
 package com.basiscomponents.db;
 
-import static com.basiscomponents.util.StringHelper.invert;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Date;
-import java.sql.NClob;
-import java.sql.Ref;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
@@ -39,8 +12,19 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
-
 import net.sf.jasperreports.engine.JRDataSource;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Date;
+import java.sql.*;
+import java.text.ParseException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.basiscomponents.util.StringHelper.invert;
 
 /**
  * The ResultSet class is a container class for DataRow objects.
@@ -171,7 +155,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * CAUTION: this method is experimental!!
 	 * 
-	 * @param QueryClause: the query
+	 * @param queryClause: the query
 	 * @return ResultSet: the records that match the query clause
 	 * @throws Exception
 	 */
@@ -1444,7 +1428,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * for the column at the specified index.
 	 * 
 	 * @param column The column index.
-	 * @param name The value of the TableName property to set.
+	 * @param tableName The value of the TableName property to set.
 	 */
 	public void setTableName(int column, String tableName) {
 		this.MetaData.get(column).put("TableName", tableName);
@@ -1506,7 +1490,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * </ul>
 	 * 
 	 * @param column The column index.
-	 * @param flag The value of the Nullable property to set..
 	 * 
 	 * @throws Exception Gets thrown in case the Nullable flag is not equal any of the above mentioned types.
 	 */
@@ -1916,6 +1899,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return field.getClob();
 	}
 
+	public ArrayList<HashMap<String, Object>> getMetaData() {
+		return new ArrayList<>(MetaData);
+	}
+
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as NClob.
@@ -2027,13 +2014,33 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public String toJson(Boolean f_meta, String addIndexColumn) throws Exception {
 		return toJson(f_meta, addIndexColumn, true);
 	}
-	
-	public String toJson(Boolean f_meta, String addIndexColumn, Boolean f_trimStrings) throws Exception {
+
+	/**
+	 *
+	 * @param meta if MetaData should be printed
+	 * @param addIndexColumn The Index column which is generated (@Code{null} if it doesn't exist)
+	 * @param trimStrings if Strings should be trimmed
+	 * @return The Json String containing this ResultSet
+	 * @throws Exception
+	 */
+	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings) throws Exception {
 		if (addIndexColumn!=null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this.DataRows, this.MetaData, f_meta, addIndexColumn, f_trimStrings);
+		return toJson(meta , addIndexColumn, trimStrings, false);
 	}
-	
+	/**
+	 *
+	 * @param meta if MetaData should be printed
+	 * @param addIndexColumn The Index column which is generated (@Code{null} if it doesn't exist)
+	 * @param trimStrings if Strings should be trimmed
+	 * @return The Json String containing this ResultSet
+	 * @throws Exception
+	 */
+	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes) throws Exception {
+		if (addIndexColumn!=null)
+			createIndex();
+		return ResultSetJsonMapper.toJson(this,meta , addIndexColumn, trimStrings, writeDataRowAttributes);
+	}
 	/**
 	 * Returns this ResultSet as a JRDataSource
 	 * 
@@ -2082,20 +2089,22 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			meta = o.get(0).getAsJsonObject().getAsJsonObject("meta");
 			try {
 				metaRow = DataRow.fromJson(o.get(0).toString());
-				metaRow.clear();
+				//metaRow.clear();
 			} catch (Exception ex) {
 			}
 		}
 		if (meta == null) {
 			System.err.println("error parsing - meta data missing");
 		}
-		Iterator<JsonElement> it = o.iterator();
-		while (it.hasNext()) {
-			JsonElement el = it.next();
+
+		for (JsonElement el:o) {
 			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
 				el.getAsJsonObject().add("meta", meta);
-
-			rs.add(DataRow.fromJson(el.toString(), metaRow));
+			if(el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)!=null){
+				rs.add(DataRow.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
+			}else{
+				rs.add(DataRow.fromJson(el.toString(), metaRow));
+			}
 		}
 		return rs;
 	}
@@ -2488,7 +2497,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @see #sumByGroup(String, String, String, int, int)
 	 * 
 	 * @param fieldname The name of the field.
-	 * @param labelname The label name.
 	 * @param sumfieldname The field name whose value should be summed
 	 *
 	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the sum

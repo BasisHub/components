@@ -1,13 +1,13 @@
 package com.basiscomponents.db;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+@Disabled
 public class DataFieldEtagTest {
 
-	@Ignore
+
 	@Test
 	public void test() {
 		DataField s1 = new DataField("String1");

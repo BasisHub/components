@@ -8,8 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
+
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResultSetJSonConversionTest {
 
@@ -149,6 +153,7 @@ public class ResultSetJSonConversionTest {
         assertEquals( dr0.getFieldAsNumber(DataRowProvider.STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.STRINGFIELD),s + " STRINGFIELD values differ");
         assertEquals( dr0.getFieldAsNumber(DataRowProvider.FRT_STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.FRT_STRINGFIELD),s + " FRT_STRINGFIELD values differ");
         assertEquals( dr0.getFieldAsNumber(DataRowProvider.FTH_STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.FTH_STRINGFIELD),s + " FTH_STRINGField values difer");
+
 		assertEquals(dr0.getFieldAsNumber(DataRowProvider.STH_STRINGFIELD),
 				newDr0.getFieldAsNumber(DataRowProvider.STH_STRINGFIELD), s + " STH_STRINGField values difer");
 		assertEquals(dr0.getFieldAsNumber(DataRowProvider.SVT_STRINGFIELD),
