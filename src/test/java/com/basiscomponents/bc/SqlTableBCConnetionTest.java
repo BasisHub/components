@@ -82,8 +82,9 @@ public class SqlTableBCConnetionTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
-	 * switched to REGISTRATION and its values are queried with retrieve(). The
-	 * resulting ResultSet is checked to contain the right data.
+	 * switched to BOOLTABLE and its values are queried with retrieve(). The
+	 * resulting ResultSet is checked to contain the right data, which are boolean
+	 * types.
 	 * 
 	 * @throws Exception
 	 */
