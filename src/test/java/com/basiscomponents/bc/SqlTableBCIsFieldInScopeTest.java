@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -18,7 +17,7 @@ public class SqlTableBCIsFieldInScopeTest {
 	private HashMap<String, ArrayList<String>> scopes;
 
 	@BeforeAll
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		sqlTablebc = new SqlTableBC("");
 		scopes = new HashMap<>();

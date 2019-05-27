@@ -2093,6 +2093,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			} catch (Exception ex) {
 			}
 		}
+
 		if (meta == null) {
 			System.err.println("error parsing - meta data missing");
 		}
