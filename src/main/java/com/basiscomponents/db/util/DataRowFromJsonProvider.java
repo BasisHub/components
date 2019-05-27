@@ -192,7 +192,7 @@ public class DataRowFromJsonProvider {
 				attr.putAll((HashMap<String, String>) m.get(fieldName));
 
 				//remove the ColumnType as extra Attribute
-				attr.remove("ColumnType");
+				//attr.remove("ColumnType");
 				
 				dr.setFieldAttributes(fieldName, attr);
 			}
