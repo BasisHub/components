@@ -18,6 +18,6 @@ public class SqlTableBCFilterTest {
 		bc.setFilter(filter);
 		DataRow filter2 = bc.getFilter();
 		assertTrue(filter2.equals(filter), "Filter must stay the same" );
-	}
+	} 
 
 }

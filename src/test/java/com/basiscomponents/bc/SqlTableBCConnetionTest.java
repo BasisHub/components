@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -44,7 +45,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws IllegalAccessException
 	 */
 	@Test
-	public void SqlTablBCConnectionSimpleTest()
+	public void SqlTableBCConnectionSimpleTest()
 			throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");) {
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -59,7 +60,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTablBCGetDataSimpleTest() throws Exception {
+	public void SqlTableBCGetDataSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
@@ -89,7 +90,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTablBCGetDataBoolTest() throws Exception {
+	public void SqlTableBCGetDataBoolTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
@@ -111,9 +112,106 @@ public class SqlTableBCConnetionTest {
 	}
 
 	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
+	 * switched to BOOLTABLE and its values are queried with retrieve(). The
+	 * resulting ResultSet is checked to contain the right data, which are normal
+	 * sized integer types.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void SqlTableBCGetDataStandartIntegerTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("INTTABLE");
+			rs = sqlTable.retrieve();
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 5);
+			assertTrue(rs.getColumnNames().contains("INTTYPE"));
+			assertTrue(rs.getColumnNames().contains("INTEGERTYPE"));
+			assertTrue(rs.getColumnNames().contains("MEDIUMINTTYPE"));
+			assertTrue(rs.getColumnNames().contains("INT4TYPE"));
+			assertTrue(rs.getColumnNames().contains("SIGNEDTYPE"));
+
+			assertEquals(1, rs.get(0).getFieldValue("INTTYPE"));
+			assertEquals(-1, rs.get(0).getFieldValue("INTEGERTYPE"));
+			assertEquals(0, rs.get(0).getFieldValue("MEDIUMINTTYPE"));
+			assertEquals(-2147483648, rs.get(0).getFieldValue("INT4TYPE"));
+			assertEquals(2147483647, rs.get(0).getFieldValue("SIGNEDTYPE"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
+	 * switched to BOOLTABLE and its values are queried with retrieve(). The
+	 * resulting ResultSet is checked to contain the right data, which are special
+	 * sized integer types.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void SqlTableBCGetDataSpecialIntegerTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("SPECIALINTTABLE");
+			rs = sqlTable.retrieve();
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 3);
+			assertTrue(rs.getColumnNames().contains("TINYINTTYPE"));
+			assertTrue(rs.getColumnNames().contains("SMALLINTTYPE"));
+			assertTrue(rs.getColumnNames().contains("BIGINTTYPE"));
+
+			java.lang.Long l = Long.parseLong("9223372036854775807");
+			assertEquals((byte) 127, rs.get(0).getFieldValue("TINYINTTYPE"));
+			assertEquals((short) 32767, rs.get(0).getFieldValue("SMALLINTTYPE"));
+			assertEquals(l, rs.get(0).getFieldValue("BIGINTTYPE"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
+	 * switched to BOOLTABLE and its values are queried with retrieve(). The
+	 * resulting ResultSet is checked to contain the right data, which are double
+	 * and float types.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void SqlTableBCGetDataDoubleTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("DOUBLETABLE");
+			rs = sqlTable.retrieve();
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 4);
+			assertTrue(rs.getColumnNames().contains("DOUBLETYPE"));
+			assertTrue(rs.getColumnNames().contains("FLOATASDOUBLETYPE"));
+			assertTrue(rs.getColumnNames().contains("REALTYPE"));
+			assertTrue(rs.getColumnNames().contains("FLOATASFLOATTYPE"));
+
+			assertEquals(127.43324344, rs.get(0).getFieldValue("DOUBLETYPE"));
+			assertEquals(32767.534344, rs.get(0).getFieldValue("FLOATASDOUBLETYPE"));
+			assertEquals((float) 1.23, rs.get(0).getFieldValue("REALTYPE"));
+			assertEquals((float) 1.23, rs.get(0).getFieldValue("FLOATASFLOATTYPE"));
+		}
+	}
+
+	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. A SQL Statement is
-	 * created and the SqlTableBC is queried with retrieve(String sql, DataRow dr).
-	 * The resulting ResultSet is checked to contain the right data.
+	 * created and the SqlTableBC is queried with retrieve(String sql, null). The
+	 * resulting ResultSet is checked to contain the right data.
 	 * 
 	 * @throws Exception
 	 */
@@ -142,13 +240,13 @@ public class SqlTableBCConnetionTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. A SQL Statement is
-	 * created and the SqlTableBC is queried with retrieve(String sql, DataRow dr).
-	 * The resulting ResultSet is checked to contain the right data.
+	 * created and the SqlTableBC is queried with retrieve(String sql, null). The
+	 * resulting ResultSet is checked to contain the right data.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTablBCGetDataWithSQLTest2() throws Exception {
+	public void SqlTableBCGetDataWithSQLTest2() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
@@ -196,14 +294,14 @@ public class SqlTableBCConnetionTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. A SQL Statement is
-	 * created and the SqlTableBC is queried with retrieve(String sql, DataRow dr).
-	 * The UNION, UNION ALL and INTERSECT operator are used in this case. The
-	 * resulting ResultSet is checked to contain the right data.
+	 * created and the SqlTableBC is queried with retrieve(String sql, null). The
+	 * UNION, UNION ALL and INTERSECT operator are used in this case. The resulting
+	 * ResultSet is checked to contain the right data.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTablBCGetDataWithSQLUnionIntersectTest() throws Exception {
+	public void SqlTableBCGetDataWithSQLUnionIntersectTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
@@ -262,14 +360,14 @@ public class SqlTableBCConnetionTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. A SQL Statement is
-	 * created and the SqlTableBC is queried with retrieve(String sql, DataRow dr).
-	 * The WHERE operator is used in this case. The resulting ResultSet is checked
-	 * to contain the right data.
+	 * created and the SqlTableBC is queried with retrieve(String sql, null). The
+	 * WHERE operator is used in this case. The resulting ResultSet is checked to
+	 * contain the right data.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTablBCGetDataWithSQLWhereTest() throws Exception {
+	public void SqlTableBCGetDataWithSQLWhereTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
@@ -292,14 +390,14 @@ public class SqlTableBCConnetionTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. A SQL Statement is
-	 * created and the SqlTableBC is queried with retrieve(String sql, DataRow dr).
-	 * The GROUP BY and ORDER BY operators are used in this case. The resulting
+	 * created and the SqlTableBC is queried with retrieve(String sql, null). The
+	 * GROUP BY and ORDER BY operators are used in this case. The resulting
 	 * ResultSet is checked to contain the right data.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTablBCGetDataWithSQLGroupByOrderByTest() throws Exception {
+	public void SqlTableBCGetDataWithSQLGroupByOrderByTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
@@ -355,16 +453,40 @@ public class SqlTableBCConnetionTest {
 	public static void cleanUp() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 				Statement stmt = con.createStatement();) {
-			String sql = "DROP TABLE REGISTRATION";
-			stmt.executeUpdate(sql);
-			sql = "DROP TABLE REGISTRATION2";
-			stmt.executeUpdate(sql);
-			sql = "DROP TABLE TREES";
-			stmt.executeUpdate(sql);
-			sql = "DROP TABLE FULLREGISTRATION";
-			stmt.executeUpdate(sql);
-			sql = "DROP TABLE CUSTOMERS";
-			stmt.executeUpdate(sql);
+
+			// Get tableNames
+			String sql = "SHOW TABLES;";
+			stmt.execute(sql);
+			java.sql.ResultSet rs = stmt.getResultSet();
+			ArrayList<String> tableNames = new ArrayList<String>();
+			while (rs.next()) {
+				tableNames.add(rs.getString("TABLE_NAME"));
+			}
+
+			// Drop all tables
+			for (int i = 0; i < tableNames.size(); i++) {
+				sql = "DROP TABLE " + tableNames.get(i);
+				stmt.executeUpdate(sql);
+			}
+		}
+
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Get tableNames
+			String sql = "SHOW TABLES;";
+			stmt.execute(sql);
+			java.sql.ResultSet rs = stmt.getResultSet();
+			ArrayList<String> tableNames = new ArrayList<String>();
+			while (rs.next()) {
+				tableNames.add(rs.getString("TABLE_NAME"));
+			}
+
+			// Drop all tables
+			for (int i = 0; i < tableNames.size(); i++) {
+				sql = "DROP TABLE " + tableNames.get(i);
+				stmt.executeUpdate(sql);
+			}
 		}
 	}
 

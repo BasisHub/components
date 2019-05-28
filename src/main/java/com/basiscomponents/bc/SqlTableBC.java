@@ -930,7 +930,7 @@ public class SqlTableBC implements BusinessComponent {
 
       while (sqlMetaData.next()) {
         primaryKeys.add(sqlMetaData.getString(COLUMN_NAME));
-      }
+			}
 
       prepareMetadata(meta);
       sqlMetaData.close();
