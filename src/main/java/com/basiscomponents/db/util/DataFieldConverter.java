@@ -199,7 +199,7 @@ public class DataFieldConverter {
 
 				}
 				if (p.contains("-")) {
-					String p1 = p.substring(0, p.indexOf('-'));
+					String p1 = p.substring(0, p.lastIndexOf('-'));
 					try {
 						return java.sql.Timestamp.valueOf(p1);
 					}
