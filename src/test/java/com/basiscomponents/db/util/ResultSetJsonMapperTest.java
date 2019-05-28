@@ -7,7 +7,6 @@ import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +31,6 @@ public class ResultSetJsonMapperTest {
 		rs.add(dr);
 	}
 
-	@Disabled
 	@Test
 	public void test() throws Exception {
 		String js = rs.toJson();

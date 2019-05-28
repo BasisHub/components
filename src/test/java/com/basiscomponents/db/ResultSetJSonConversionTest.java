@@ -1,17 +1,9 @@
 package com.basiscomponents.db;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
-
-
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
-
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -378,8 +370,13 @@ public class ResultSetJSonConversionTest {
         String s = rs0.toJson();
 
         assertFalse(s.isEmpty());
+        try {
+            ResultSet rs1 = ResultSet.fromJson(s);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
 
-        ResultSet rs1 = ResultSet.fromJson(s);
         DataRow newDr0 = rs1.get(0);
 
         equalityAsStringDataRowTest(dr0, newDr0, s);
