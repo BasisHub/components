@@ -372,16 +372,18 @@ public class ResultSetJSonConversionTest {
         assertFalse(s.isEmpty());
         try {
             ResultSet rs1 = ResultSet.fromJson(s);
+            DataRow newDr0 = rs1.get(0);
+
+            equalityAsStringDataRowTest(dr0, newDr0, s);
+            equalityAsNumberDataRowTest(dr0, newDr0, s);
+            equalityAsValueDataRowTest(dr0, newDr0, s, true);
         }catch (Exception e){
             e.printStackTrace();
             throw e;
         }
 
-        DataRow newDr0 = rs1.get(0);
 
-        equalityAsStringDataRowTest(dr0, newDr0, s);
-        equalityAsNumberDataRowTest(dr0, newDr0, s);
-        equalityAsValueDataRowTest(dr0, newDr0, s, true);
+
     }
 
     /**
