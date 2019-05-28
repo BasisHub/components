@@ -1,12 +1,12 @@
 package com.basiscomponents.bc;
 
 
-import com.basiscomponents.db.DataField;
-import com.basiscomponents.db.DataRow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
 
 public class SqlTableBCFilterTest {
 
@@ -18,6 +18,6 @@ public class SqlTableBCFilterTest {
 		bc.setFilter(filter);
 		DataRow filter2 = bc.getFilter();
 		assertTrue(filter2.equals(filter), "Filter must stay the same" );
-	} 
+	}
 
 }

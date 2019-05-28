@@ -1,5 +1,6 @@
 package com.basiscomponents.bc;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.Connection;
@@ -83,6 +84,45 @@ public class SqlTableBCWriteRemoveTest {
 			sqlTable.write(dr);
 			rs = sqlTable.retrieve();
 			assertEquals(3, rs.size());
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
+	 * created with retrieve() and a DataRow is taken. Afterwards a column of the
+	 * same table is renamed. The DataRow is written into the SqlTableBC, but the
+	 * column, which does not match is dropped.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void SqlTableBCWriteChangeColumnsTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("TREES");
+			rs = sqlTable.retrieve();
+			DataRow dr = rs.get(0);
+
+			// The table is modified
+			sql = "ALTER TABLE TREES RENAME COLUMN NAME TO NAMESPACE";
+			stmt.executeUpdate(sql);
+
+			// The unmodified DataRow is written into the SqlTableBC and the results are
+			// checked
+			sqlTable.write(dr);
+			rs = sqlTable.retrieve();
+			assertTrue(rs.getColumnCount() == 3);
+			assertTrue(rs.getColumnNames().contains("NAMESPACE"));
+			assertTrue(rs.getColumnNames().contains("RINGS"));
+			assertTrue(rs.getColumnNames().contains("HEIGHT"));
+			assertEquals(3, rs.size());
+			
+			assertEquals("tree1", rs.get(0).getFieldValue("NAMESPACE"));
+			assertEquals("tree2", rs.get(1).getFieldValue("NAMESPACE"));
+			assertEquals(null, rs.get(2).getFieldValue("NAMESPACE"));
 		}
 	}
 
