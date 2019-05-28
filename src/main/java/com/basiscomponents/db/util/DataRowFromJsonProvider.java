@@ -151,7 +151,7 @@ public class DataRowFromJsonProvider {
 				if (!tss.contains("T")) {
 					tss += "T00:00:00.0";
 				}
-				java.sql.Timestamp ts = (java.sql.Timestamp) DataField.convertType(tss, 11);
+				java.sql.Timestamp ts = (java.sql.Timestamp) DataField.convertType(tss, fieldType);
 				dr.addDataField(fieldName, fieldType, new DataField(ts));
 				break;
 			case java.sql.Types.DATE:

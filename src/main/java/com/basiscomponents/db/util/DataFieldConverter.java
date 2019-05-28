@@ -198,6 +198,15 @@ public class DataFieldConverter {
 					}
 
 				}
+				if (p.contains("-")) {
+					String p1 = p.substring(0, p.indexOf('-'));
+					try {
+						return java.sql.Timestamp.valueOf(p1);
+					}
+					catch (Exception e){
+					}
+
+				}
 				System.err.println("ERROR PARSING DATE "+p);
 			}
 
