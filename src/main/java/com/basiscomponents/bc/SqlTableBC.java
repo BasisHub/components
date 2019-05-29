@@ -543,7 +543,7 @@ public class SqlTableBC implements BusinessComponent {
   // TODO reduce CC of this Method
   public DataRow write(DataRow r) throws Exception {
     ResultSet errors = validateWrite(r);
-    checkWriteError(errors);
+		checkWriteError(errors);
 
     boolean pkPresent = isPrimaryKeyPresent(r);
 
@@ -743,7 +743,7 @@ public class SqlTableBC implements BusinessComponent {
   public void remove(DataRow r) throws Exception {
     ResultSet errors = validateRemove(r);
     if (errors.size() > 0) {
-      StringBuilder errMsg = new StringBuilder();
+			StringBuilder errMsg = new StringBuilder();
       for (int i = 0; i < errors.size(); i++) {
         DataRow dr = errors.get(i);
         if (dr.getFieldAsString("TYPE").equals(ERROR))

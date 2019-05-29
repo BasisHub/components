@@ -54,6 +54,37 @@ public class SqlTableBCConnetionTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
+	 * switched to REGISTRATION and its values are queried with retrieve(0,0). The
+	 * resulting ResultSet is checked to contain the right data.
+	 * 
+	 * @throws Exception
+	 */
+//	@Test
+	// This test cannot work at the moment, because pagination is not implemented
+	// yet for H2DataBases.
+	public void SqlTableBCGetDataSimpleParameterTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
+			rs = sqlTable.retrieve(0, 0);
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 3);
+			assertTrue(rs.getColumnNames().contains("FIRST"));
+			assertTrue(rs.getColumnNames().contains("AGE"));
+			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
+
+			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
+			assertEquals(62, rs.get(0).getFieldValue("AGE"));
+			assertEquals(0, rs.get(0).getFieldValue("CUSTOMERID"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
 	 * switched to REGISTRATION and its values are queried with retrieve(). The
 	 * resulting ResultSet is checked to contain the right data.
 	 * 
@@ -66,7 +97,7 @@ public class SqlTableBCConnetionTest {
 
 			// Set table and get its data with normal retrieve()
 			SqlTableBC sqlTable = new SqlTableBC(con);
-			sqlTable.setTable("REGISTRATION");
+			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
 			rs = sqlTable.retrieve();
 
 			// Checking the ColumnNames and results
@@ -77,7 +108,7 @@ public class SqlTableBCConnetionTest {
 
 			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
 			assertEquals(62, rs.get(0).getFieldValue("AGE"));
-			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
+			assertEquals(0, rs.get(0).getFieldValue("CUSTOMERID"));
 		}
 	}
 
