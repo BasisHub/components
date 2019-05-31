@@ -39,7 +39,7 @@ public class H2DataBaseProvider {
 			sql.add("insert into TREES VALUES ('tree1', 155, 144.32)");
 			sql.add("insert into TREES VALUES ('tree2', 132, 1004.53)");
 
-			sql.add("CREATE TABLE IF NOT EXISTS CUSTOMERS (name CHAR(50), customerID INTEGER, country VARCHAR(255))");
+			sql.add("CREATE TABLE IF NOT EXISTS CUSTOMERS (name CHAR(50), customerID INTEGER, country VARCHAR(255), PRIMARY KEY(customerID))");
 			sql.add("insert into CUSTOMERS VALUES ('Freeman', 1, 'USA')");
 			sql.add("insert into CUSTOMERS VALUES ('Jasper', 2, 'England')");
 			sql.add("insert into CUSTOMERS VALUES ('Simpson', 3, 'USA')");

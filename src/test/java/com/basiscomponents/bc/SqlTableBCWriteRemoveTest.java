@@ -177,7 +177,7 @@ public class SqlTableBCWriteRemoveTest {
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
 	 * created with retrieve() and a DataRow is taken. This DataRow is written into
-	 * the SqlTableBC.
+	 * the SqlTableBC. This concept is tested with many types.
 	 * 
 	 * @throws Exception
 	 */
@@ -323,13 +323,13 @@ public class SqlTableBCWriteRemoveTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
-	 * created with retrieve() and a DataRow is taken. This DataRow is written into
-	 * the SqlTableBC.
+	 * created with retrieve() and a DataRow is taken. The DataRow is filled with
+	 * wrong values. This DataRow is written into the SqlTableBC.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCWriteIntTooBigTest() throws Exception {
+	public void SqlTableBCWriteWrongValuesTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
@@ -341,6 +341,11 @@ public class SqlTableBCWriteRemoveTest {
 
 //			dr.setFieldValue("CUSTOMERID", Integer.MAX_VALUE);
 //			sqlTable.write(dr);
+//			rs = sqlTable.retrieve();
+
+//			DataRow myDr = new DataRow();
+//			myDr.setFieldValue("FIRST", 342);
+//			sqlTable.write(myDr);
 //			rs = sqlTable.retrieve();
 
 			dr.setFieldValue("FIRST",
