@@ -3,6 +3,7 @@ package com.basiscomponents.bc;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -204,6 +205,15 @@ public class SqlTableBCConnetionTest {
 			assertEquals((byte) 127, rs.get(0).getFieldValue("TINYINTTYPE"));
 			assertEquals((short) 32767, rs.get(0).getFieldValue("SMALLINTTYPE"));
 			assertEquals(l, rs.get(0).getFieldValue("BIGINTTYPE"));
+
+			sqlTable.setTable("BIGDECIMALTABLE");
+			rs = sqlTable.retrieve();
+
+			assertTrue(rs.getColumnCount() == 1);
+			assertTrue(rs.getColumnNames().contains("BIGDECIMALTYPE"));
+
+			java.math.BigDecimal bd = new BigDecimal("64543");
+			assertEquals(bd, rs.get(0).getFieldValue("BIGDECIMALTYPE"));
 		}
 	}
 

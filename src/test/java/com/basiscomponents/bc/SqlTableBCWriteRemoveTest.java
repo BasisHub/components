@@ -159,6 +159,66 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals("Jasper", rs.get(2).getFieldValue("FIRST"));
 			assertEquals("Alfred", rs.get(3).getFieldValue("FIRST"));
 			assertEquals("Alfred", rs.get(4).getFieldValue("FIRST"));
+
+			sqlTable.setTable("BOOLTABLE");
+			rs = sqlTable.retrieve();
+			DataRow dr1 = rs.get(0);
+			dataRowCount = rs.size();
+
+			sqlTable.write(dr1);
+			rs = sqlTable.retrieve();
+			assertEquals(dataRowCount + 1, rs.size());
+			assertEquals(true, rs.get(1).getFieldValue("BOOLTYPE"));
+			assertEquals(false, rs.get(1).getFieldValue("BOOLEANTYPE"));
+			assertEquals(true, rs.get(1).getFieldValue("BITTYPE"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
+	 * created with retrieve() and a DataRow is taken. This DataRow is written into
+	 * the SqlTableBC.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void SqlTableBCWriteManyTypesTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("BOOLTABLE");
+			rs = sqlTable.retrieve();
+			DataRow dr = rs.get(0);
+			dataRowCount = rs.size();
+
+			sqlTable.write(dr);
+			rs = sqlTable.retrieve();
+			assertEquals(dataRowCount + 1, rs.size());
+			assertEquals(true, rs.get(1).getFieldValue("BOOLTYPE"));
+			assertEquals(false, rs.get(1).getFieldValue("BOOLEANTYPE"));
+			assertEquals(true, rs.get(1).getFieldValue("BITTYPE"));
+
+			sqlTable.setTable("TIMETABLE");
+			rs = sqlTable.retrieve();
+			DataRow dr1 = rs.get(0);
+			dataRowCount = rs.size();
+
+			sqlTable.write(dr1);
+			rs = sqlTable.retrieve();
+			assertEquals(dataRowCount + 1, rs.size());
+			assertEquals(rs.get(0).getFieldValue("DATETYPE"), rs.get(1).getFieldValue("DATETYPE"));
+			assertEquals(rs.get(0).getFieldValue("TIMESTAMPTYPE"), rs.get(1).getFieldValue("TIMESTAMPTYPE"));
+
+			sqlTable.setTable("BIGDECIMALTABLE");
+			rs = sqlTable.retrieve();
+			DataRow dr2 = rs.get(0);
+			dataRowCount = rs.size();
+
+			sqlTable.write(dr2);
+			rs = sqlTable.retrieve();
+			assertEquals(dataRowCount + 1, rs.size());
+			assertEquals(rs.get(0).getFieldValue("BIGDECIMALTYPE"), rs.get(1).getFieldValue("BIGDECIMALTYPE"));
 		}
 	}
 
@@ -258,6 +318,38 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals("tree1", rs.get(0).getFieldValue("NAMESPACE"));
 			assertEquals("tree2", rs.get(1).getFieldValue("NAMESPACE"));
 			assertEquals(null, rs.get(2).getFieldValue("NAMESPACE"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
+	 * created with retrieve() and a DataRow is taken. This DataRow is written into
+	 * the SqlTableBC.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void SqlTableBCWriteIntTooBigTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("FULLREGISTRATION");
+			rs = sqlTable.retrieve();
+			DataRow dr = rs.get(0);
+			dataRowCount = rs.size();
+
+//			dr.setFieldValue("CUSTOMERID", Integer.MAX_VALUE);
+//			sqlTable.write(dr);
+//			rs = sqlTable.retrieve();
+
+			dr.setFieldValue("FIRST",
+					"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+			assertThrows(SQLException.class, () -> {
+				sqlTable.write(dr);
+			});
+			rs = sqlTable.retrieve();
+			assertEquals(dataRowCount, rs.size());
 		}
 	}
 
