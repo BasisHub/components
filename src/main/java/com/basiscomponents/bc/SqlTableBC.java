@@ -1,8 +1,13 @@
 package com.basiscomponents.bc;
 
-import static com.basiscomponents.db.ExpressionMatcher.getPreparedWhereClauseValues;
+import com.basiscomponents.bc.util.CloseableWrapper;
+import com.basiscomponents.bc.util.SqlConnectionHelper;
+import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.util.DataRowRegexMatcher;
+import com.basiscomponents.util.KeyValuePair;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -19,13 +24,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.basiscomponents.bc.util.CloseableWrapper;
-import com.basiscomponents.bc.util.SqlConnectionHelper;
-import com.basiscomponents.db.DataField;
-import com.basiscomponents.db.DataRow;
-import com.basiscomponents.db.ResultSet;
-import com.basiscomponents.db.util.DataRowRegexMatcher;
-import com.basiscomponents.util.KeyValuePair;
+import static com.basiscomponents.bc.util.Constants.*;
+import static com.basiscomponents.bc.util.SQLHelper.*;
 
 /**
  * <h1>SqlTableBC represents a table in a database.</h1>
@@ -47,19 +47,7 @@ import com.basiscomponents.util.KeyValuePair;
  */
 public class SqlTableBC implements BusinessComponent {
 
-  private static final String AND = " AND ";
-
-  private static final String WHERE = " WHERE ";
-
-  private static final String ERROR = "ERROR";
-
-  private static final String BASIS_DBMS = "BASIS DBMS";
-  
-  private static final String MYSQL_DBMS = "MYSQL";
-
-  private static final String COLUMN_NAME = "COLUMN_NAME";
-
-	private final SqlConnectionHelper connectionHelper;
+  private final SqlConnectionHelper connectionHelper;
 
   private String table;
   private String scope = "";
@@ -396,7 +384,7 @@ public class SqlTableBC implements BusinessComponent {
 
 			if (customStatementUsed) {
 				sql = new StringBuilder("SELECT " + sqlfields + " FROM (" + retrieveSql + ") ");
-				if (MYSQL_DBMS.equals(dbType))
+				if (com.basiscomponents.bc.util.Constants.MYSQL_DBMS.equals(dbType))
 					sql.append(" as s ");
 			} else
 				sql = new StringBuilder("SELECT " + sqlfields + " FROM " + dbQuoteString + table + dbQuoteString);
@@ -496,7 +484,7 @@ public class SqlTableBC implements BusinessComponent {
   /**
    * {@inheritDoc}
    */
-  public ResultSet validateWrite(DataRow dr) {
+  public  ResultSet validateWrite(DataRow dr) {
 
 		if (dr == null || dr.getColumnCount() == 0) {
 			return new ResultSet();
@@ -543,8 +531,7 @@ public class SqlTableBC implements BusinessComponent {
   // TODO reduce CC of this Method
   public DataRow write(DataRow r) throws Exception {
     ResultSet errors = validateWrite(r);
-    checkWriteError(errors);
-
+    checkErrors(errors);
     boolean pkPresent = isPrimaryKeyPresent(r);
 
     try (CloseableWrapper<Connection> connw = getConnection()) {
@@ -705,7 +692,7 @@ public class SqlTableBC implements BusinessComponent {
     return pkPresent;
   }
 
-  private void checkWriteError(ResultSet errors) throws SQLException {
+  private static void checkErrors(ResultSet errors) throws SQLException {
     if (errors.size() > 0) {
       StringBuilder errMsg = new StringBuilder();
       for (int i = 0; i < errors.size(); i++) {
@@ -733,6 +720,7 @@ public class SqlTableBC implements BusinessComponent {
   /**
    * {@inheritDoc}
    */
+  // TODO To be implemented
   public ResultSet validateRemove(DataRow dr) {
     return new ResultSet();
   }
@@ -742,27 +730,16 @@ public class SqlTableBC implements BusinessComponent {
    */
   public void remove(DataRow r) throws Exception {
     ResultSet errors = validateRemove(r);
-    if (errors.size() > 0) {
-      StringBuilder errMsg = new StringBuilder();
-      for (int i = 0; i < errors.size(); i++) {
-        DataRow dr = errors.get(i);
-        if (dr.getFieldAsString("TYPE").equals(ERROR))
-          errMsg.append("\n" + dr.getFieldAsString("TYPE") + " on column "
-              + dr.getFieldAsString("FIELD_NAME") + ": " + dr.getFieldAsString("MESSAGE"));
-      }
-      if (errMsg.length() > 0) {
-        throw new SQLException(errMsg.substring(1));
-      }
-    }
+	  checkErrors(errors);
 
-    if (primaryKeys == null || primaryKeys.isEmpty()) {
-      throw new SQLException("No primary key definition for table \"" + table + "\"");
-    } else if (!r.getFieldNames().containsAll(primaryKeys)) {
-      throw new SQLException("Missing primary column for table \"" + table + "\"");
-    }
+	  if (primaryKeys == null || primaryKeys.isEmpty()) {
+		  throw new SQLException("No primary key definition for table \"" + table + "\"");
+	  } else if (!r.getFieldNames().containsAll(primaryKeys)) {
+		  throw new SQLException("Missing primary column for table \"" + table + "\"");
+	  }
 
-    StringBuilder sql =
-        new StringBuilder("DELETE FROM " + dbQuoteString + table + dbQuoteString + " ");
+	  StringBuilder sql =
+			  new StringBuilder("DELETE FROM " + dbQuoteString + table + dbQuoteString + " ");
 
     StringBuilder wh = new StringBuilder("");
     for (String pkfieldname : primaryKeys) {
@@ -778,7 +755,8 @@ public class SqlTableBC implements BusinessComponent {
 
   }
 
-  /**
+
+	/**
    * {@inheritDoc}
    */
   public DataRow getAttributesRecord() {
@@ -1003,118 +981,12 @@ public class SqlTableBC implements BusinessComponent {
     }
   }
 
-  /**
-   * Sets values in a prepared statement using a DataRow.
-   *
-   * @param prep the prepared statement.
-   * @param dr a DataRow containing the values for the prepared statement.
-   * @param fields an ArrayList with field names. If not null and not empty, this list will be used
-   *        to get a portion of values from the DataRow dr. Otherwise all fields from dr will be set
-   *        in the prepared statement.
-   * @throws SQLException is thrown when a value cannot be set.
-   */
-  private static void setSqlParams(PreparedStatement prep, DataRow dr, List<String> fields,
-      boolean isBasisDBMS) throws Exception {
-    if (prep == null || dr == null) {
-      return;
-    }
 
-    if (fields == null) {
-      fields = dr.getFieldNames();
-    }
 
-    int index = 1;
-    for (String field : fields) {
-      Integer type;
-      DataField o;
 
-      try {
-        type = dr.getFieldType(field);
-        o = dr.getField(field);
-      } catch (Exception e) {
-        // Should never occur. This loop iterates over the DataRow fields. This ensures
-        // that all
-        // fields exists in the DataRow.
-        e.printStackTrace();
-        index++;
-        continue;
-      }
-
-      if (o.getValue() == null) {
-        if (isBasisDBMS && type == Types.CHAR) {
-          prep.setString(index, "");
-        } else {
-          prep.setNull(index, type);
-        }
-        index++;
-        continue;
-      } else if (o.getValue() instanceof String && ((String) o.getValue()).startsWith("cond:")) {
-        DataRow drv = getPreparedWhereClauseValues(((String) o.getValue()).substring(5), type);
-        for (String expField : drv.getFieldNames()) {
-          prep.setObject(index, drv.getFieldValue(expField));
-          index++;
-        }
-        continue;
-      }
-      setPreparedStatementType(prep, isBasisDBMS, index, type, o);
-      index++;
-    }
-  }
-
-  private static void setPreparedStatementType(PreparedStatement prep, boolean isBasisDBMS,
-      int index, Integer type, DataField o) throws SQLException {
-    switch (type) {
-      case Types.NUMERIC:
-        if (isBasisDBMS && o.getValue() == null)
-          prep.setBigDecimal(index, new BigDecimal(0));
-        else
-          prep.setBigDecimal(index, o.getBigDecimal());
-        break;
-      case Types.INTEGER:
-        if (isBasisDBMS && o.getValue() == null)
-          prep.setInt(index, 0);
-        else
-          prep.setInt(index, o.getInt());
-        break;
-      case Types.DOUBLE:
-        prep.setDouble(index, o.getDouble());
-        break;
-      case Types.LONGNVARCHAR:
-      case Types.CHAR:
-      case Types.VARCHAR:
-        if (isBasisDBMS && o.getValue() == null)
-          prep.setString(index, "");
-        else
-          prep.setString(index, o.getString());
-        break;
-      case Types.BIT:
-      case Types.BOOLEAN:
-        prep.setBoolean(index, o.getBoolean());
-        break;
-      case Types.DATE:
-        prep.setDate(index, o.getDate());
-        break;
-      case Types.TIMESTAMP:
-        prep.setTimestamp(index, o.getTimestamp());
-        break;
-      case Types.OTHER:
-        /// this is an auto-generated key. set as string and hope for the best
-        if (isBasisDBMS && o.getValue() == null)
-          prep.setString(index, "");
-        else
-          prep.setString(index, o.getString());
-        break;
-      default:
-        System.err.println(
-            "WARNING: using prep.setObject(object) will fail if there is no equivalent SQL type for the given object");
-        prep.setObject(index, o.getValue());
-    }
-
-  }
 
   private PreparedStatement createMetadataStatement(Connection conn) throws SQLException {
     PreparedStatement stmt;
-
     if (retrieveSql != null && !retrieveSql.equals("")) {
     	
       switch (dbType) {
@@ -1148,23 +1020,4 @@ public class SqlTableBC implements BusinessComponent {
     return stmt;
   }
 
-  private void setParameters(DataRow params, PreparedStatement prep) {
-    int i = 1;
-    for (String p : params.getFieldNames()) {
-      try {
-        prep.setObject(i, params.getFieldValue(p));
-      } catch (SQLException e) {
-        // Should never occur. This loop iterates over the DataRow fields. This ensures
-        // that all
-        // fields exists in the DataRow.
-      }
-      i++;
-    }
-  }
-
-  private static boolean isChartype(int type) {
-    return type == Types.CHAR || type == Types.VARCHAR || type == Types.LONGVARCHAR
-        || type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR
-        || type == Types.CLOB;
-  }
 }
