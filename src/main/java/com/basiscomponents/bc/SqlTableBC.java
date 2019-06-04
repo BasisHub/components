@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -120,7 +119,7 @@ public class SqlTableBC implements BusinessComponent {
    * be returned.<br>
    * Otherwise a new connection, using the database URL, will be created.
    *
-   * @return a {@link java.sql.Connection} to the database.
+   * @return a {@link Connection} to the database.
    * @throws SQLException thrown if connection cannot be established.
    */
   private CloseableWrapper<Connection> getConnection() throws SQLException {
@@ -344,118 +343,10 @@ public class SqlTableBC implements BusinessComponent {
 		final ResultSet retrs;
 
 		try (CloseableWrapper<Connection> connw = getConnection()) {
-			Connection conn = connw.getCloseable();
-			StringBuilder sql;
-
-			LinkedHashSet<String> fields = new LinkedHashSet<>();
-			if ((this.fieldSelection == null || this.fieldSelection.getFieldNames().isEmpty())
-					&& (scope == null || scope.equals(""))) {
-				fields.add("*");
-			}
-
-			if (scope != null) {
-				for (char s : scope.toCharArray()) {
-					String localScope = String.valueOf(s);
-					if (scopes.containsKey(localScope))
-						fields.addAll(scopes.get(localScope));
-				}
-			}
-
-			if (fieldSelection != null) {
-				fields.addAll(fieldSelection.getFieldNames());
-			}
-
-			boolean customStatementUsed = (retrieveSql != null && !retrieveSql.equals(""));
-
-			StringBuilder sqlfields = new StringBuilder("");
-			if (fields.contains("*"))
-				sqlfields.append("*");
-			else {
-				for (String field : fields) {
-					sqlfields.append("," + dbQuoteString + field + dbQuoteString);
-				}
-				sqlfields = new StringBuilder(sqlfields.substring(1));
-			}
-
-			if (customStatementUsed) {
-				sql = new StringBuilder("SELECT " + sqlfields + " FROM (" + retrieveSql + ") ");
-				if (com.basiscomponents.bc.util.Constants.MYSQL_DBMS.equals(dbType))
-					sql.append(" as s ");
-			} else
-				sql = new StringBuilder("SELECT " + sqlfields + " FROM " + dbQuoteString + table + dbQuoteString);
-
-			if (filterRow != null && !filterRow.getFieldNames().isEmpty()) {
-				StringBuilder wh = new StringBuilder("");
-				for (String f : filterRow.getFieldNames()) {
-
-					if (filterRow.getFieldAsString(f).startsWith("cond:")) {
-						wh.append(" AND (" + com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f,
-								filterRow.getFieldAsString(f).substring(5)) + ")");
-					} else {
-						String ff = f;
-						if (!customStatementUsed)
-							ff = getMapping(f);
-						if (filterRow.getField(f).getValue() == null) {
-							wh.append(AND + dbQuoteString + ff + dbQuoteString + " IS NULL");
-							filterRow.removeField(f);
-						} else
-							wh.append(AND + dbQuoteString + ff + dbQuoteString + "=?");
-					}
-				}
-				if (wh.length() > 0)
-					sql.append(WHERE + wh.substring(5));
-			}
-
-			if (first >= 0 && last >= first) {
-				switch (dbType) {
-				case BASIS_DBMS:
-					sql.append(" LIMIT " + (first + 1) + "," + (last - first + 1));
-					break;
-				case MYSQL_DBMS:
-					sql.append(" LIMIT " + first + "," + (last - first + 1));
-					break;
-				case "MICROSOFT SQL SERVER":
-					// OFFSET is available since MS SQL Server 2012 (version 11)
-					int dbVersion = Integer
-							.parseInt(conn.getMetaData().getDatabaseProductVersion().replaceAll("(\\d+)\\..*", "$1"));
-					if (dbVersion >= 11) {
-						sql = new StringBuilder("SELECT * FROM (" + sql + ") T ORDER BY (SELECT NULL) OFFSET " + first
-								+ " ROWS FETCH NEXT " + (last - first + 1) + " ROWS ONLY");
-					}
-					else {
-						throw new UnsupportedOperationException(
-								"Pagination is not supported or not implemented with the " + dbType + " (version "
-										+ dbVersion + ") database.");}
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							"Pagination is not supported or not implemented with the " + dbType + " database.");
-				}
-			}
-
-			sqlStatement = sql.toString();
-
-			try (PreparedStatement prep = conn.prepareStatement(sqlStatement)) {
-				DataRow params = new DataRow();
-				if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
-					params = retrieveParams.clone();
-				}
-				if (filterRow != null && filterRow.getColumnCount() > 0) {
-					params.mergeRecord(filterRow);
-				}
-				if (params.getColumnCount() > 0) {
-					setSqlParams(prep, params, params.getFieldNames(), BASIS_DBMS.equals(dbType));
-				}
-
-				try (java.sql.ResultSet rs = prep.executeQuery()) {
-					retrs = new ResultSet();
-					retrs.populate(rs, true);
-				}
-			}
+			retrs = retrieveDataRows(first, last, filterRow, connw);
 		}
 
 		// Set the generated meta attributes to the first record
-
 		if (retrs.size() > 0) {
 			Iterator<DataRow> iterator = retrs.iterator();
 			if (!regexmatchers.isEmpty()) {
@@ -476,7 +367,120 @@ public class SqlTableBC implements BusinessComponent {
 		return retrs;
 	}
 
-	private static void checkFilter(com.basiscomponents.db.DataRow filter) {
+	private ResultSet retrieveDataRows(int first, int last, final DataRow filterRow, final CloseableWrapper<Connection> connw) throws Exception {
+		ResultSet retrs;
+		Connection conn = connw.getCloseable();
+		StringBuilder sql;
+
+		java.util.LinkedHashSet<String> fields = new java.util.LinkedHashSet<>();
+		if ((this.fieldSelection == null || this.fieldSelection.getFieldNames().isEmpty())
+				&& (scope == null || scope.equals(""))) {
+			fields.add("*");
+		}
+
+		if (scope != null) {
+			for (char s : scope.toCharArray()) {
+				String localScope = String.valueOf(s);
+				if (scopes.containsKey(localScope))
+					fields.addAll(scopes.get(localScope));
+			}
+		}
+
+		if (fieldSelection != null) {
+			fields.addAll(fieldSelection.getFieldNames());
+		}
+
+		boolean customStatementUsed = (retrieveSql != null && !retrieveSql.equals(""));
+
+		StringBuilder sqlfields = new StringBuilder("");
+		if (fields.contains("*"))
+			sqlfields.append("*");
+		else {
+			for (String field : fields) {
+				sqlfields.append("," + dbQuoteString + field + dbQuoteString);
+			}
+			sqlfields = new StringBuilder(sqlfields.substring(1));
+		}
+
+		if (customStatementUsed) {
+			sql = new StringBuilder("SELECT " + sqlfields + " FROM (" + retrieveSql + ") ");
+			if (com.basiscomponents.bc.util.Constants.MYSQL_DBMS.equals(dbType))
+				sql.append(" as s ");
+		} else
+			sql = new StringBuilder("SELECT " + sqlfields + " FROM " + dbQuoteString + table + dbQuoteString);
+
+		if (filterRow != null && !filterRow.getFieldNames().isEmpty()) {
+			StringBuilder wh = new StringBuilder("");
+			for (String f : filterRow.getFieldNames()) {
+
+				if (filterRow.getFieldAsString(f).startsWith("cond:")) {
+					wh.append(" AND (" + com.basiscomponents.db.ExpressionMatcher.generatePreparedWhereClause(f,
+							filterRow.getFieldAsString(f).substring(5)) + ")");
+				} else {
+					String ff = f;
+					if (!customStatementUsed)
+						ff = getMapping(f);
+					if (filterRow.getField(f).getValue() == null) {
+						wh.append(AND + dbQuoteString + ff + dbQuoteString + " IS NULL");
+						filterRow.removeField(f);
+					} else
+						wh.append(AND + dbQuoteString + ff + dbQuoteString + "=?");
+				}
+			}
+			if (wh.length() > 0)
+				sql.append(WHERE + wh.substring(5));
+		}
+
+		if (first >= 0 && last >= first) {
+			switch (dbType) {
+			case BASIS_DBMS:
+				sql.append(" LIMIT " + (first + 1) + "," + (last - first + 1));
+				break;
+			case MYSQL_DBMS:
+				sql.append(" LIMIT " + first + "," + (last - first + 1));
+				break;
+			case "MICROSOFT SQL SERVER":
+				// OFFSET is available since MS SQL Server 2012 (version 11)
+				int dbVersion = Integer
+						.parseInt(conn.getMetaData().getDatabaseProductVersion().replaceAll("(\\d+)\\..*", "$1"));
+				if (dbVersion >= 11) {
+					sql = new StringBuilder("SELECT * FROM (" + sql + ") T ORDER BY (SELECT NULL) OFFSET " + first
+							+ " ROWS FETCH NEXT " + (last - first + 1) + " ROWS ONLY");
+				}
+				else {
+					throw new UnsupportedOperationException(
+							"Pagination is not supported or not implemented with the " + dbType + " (version "
+									+ dbVersion + ") database.");}
+				break;
+			default:
+				throw new UnsupportedOperationException(
+						"Pagination is not supported or not implemented with the " + dbType + " database.");
+			}
+		}
+
+		sqlStatement = sql.toString();
+
+		try (java.sql.PreparedStatement prep = conn.prepareStatement(sqlStatement)) {
+			DataRow params = new DataRow();
+			if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
+				params = retrieveParams.clone();
+			}
+			if (filterRow != null && filterRow.getColumnCount() > 0) {
+				params.mergeRecord(filterRow);
+			}
+			if (params.getColumnCount() > 0) {
+				setSqlParams(prep, params, params.getFieldNames(), BASIS_DBMS.equals(dbType));
+			}
+
+			try (java.sql.ResultSet rs = prep.executeQuery()) {
+				retrs = new ResultSet();
+				retrs.populate(rs, true);
+			}
+		}
+		return retrs;
+	}
+
+	private static void checkFilter(DataRow filter) {
 		if (filter.contains("%SEARCH")) {
 			throw new UnsupportedOperationException("Full text search not implemented yet!");
 		}
