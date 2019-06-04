@@ -1,9 +1,13 @@
 package com.basiscomponents.bc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -11,11 +15,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
+import com.basiscomponents.db.ResultSet;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SqlTableBCScopeTest {
 
 	private SqlTableBC tableBc;
 	private HashMap<String, ArrayList<String>> scopes;
+	private ResultSet rs;
 
 	/**
 	 * Loading the h2-Driver and creating the test databases.
@@ -82,6 +89,42 @@ public class SqlTableBCScopeTest {
 		assertFalse(tableBc.isFieldInScope(null));
 	}
 
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
+	 * switched to REGISTRATION and its values are queried with a scope.
+	 * 
+	 * @throws Exception
+	 */
+//	@Test
+	public void SqlTableBCScopeSimpleTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Set table
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("CUSTOMERS");
+
+			// Setting up the scope
+			scopes = new HashMap<>();
+			ArrayList<String> myScope = new ArrayList<>();
+			myScope.add("NAME");
+			myScope.add("CUSTOMERID");
+			scopes.put("myScope", myScope);
+			tableBc.setScopeDef(scopes);
+			tableBc.setScope("myScope");
+
+			rs = sqlTable.retrieve();
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 4);
+			assertTrue(rs.getColumnNames().contains("NAME"));
+			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
+
+			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
+			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
+
+		}
+	}
 
 	/**
 	 * Cleans up the databases.
