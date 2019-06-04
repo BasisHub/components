@@ -313,8 +313,8 @@ public class SqlTableBC implements BusinessComponent {
    *
    * @param scopes the HashMap with the scope definitions
    */
-  public void setScopeDef(HashMap<String, ArrayList<String>> scopes) {
-    this.scopes = scopes;
+  public void setScopeDef(final HashMap<String, ArrayList<String>> scopes) {
+    this.scopes = new HashMap<>(scopes);
   }
 
   /**
@@ -328,14 +328,9 @@ public class SqlTableBC implements BusinessComponent {
    * {@inheritDoc}
    */
   // TODO Still too complex
-	public ResultSet retrieve(int first, int last) throws Exception {
-		if (first >= 0 && last < first) {
-			throw new IllegalArgumentException("Invalid range: last could not be lower than first!");
-		}
-
-		if (filter.contains("%SEARCH")) {
-			throw new UnsupportedOperationException("Full text search not implemented yet!");
-		}
+	public ResultSet retrieve(final int first, final int last) throws Exception {
+		checkIndeces(first, last);
+		checkFilter(filter);
 
 		DataRow filterRow = filter.clone();
 		List<DataRowRegexMatcher> regexmatchers = Optional.ofNullable(regexes)
@@ -346,7 +341,7 @@ public class SqlTableBC implements BusinessComponent {
 				.collect(Collectors.toList());
 
 		
-		ResultSet retrs = null;
+		final ResultSet retrs;
 
 		try (CloseableWrapper<Connection> connw = getConnection()) {
 			Connection conn = connw.getCloseable();
@@ -460,6 +455,7 @@ public class SqlTableBC implements BusinessComponent {
 		}
 
 		// Set the generated meta attributes to the first record
+
 		if (retrs.size() > 0) {
 			Iterator<DataRow> iterator = retrs.iterator();
 			if (!regexmatchers.isEmpty()) {
@@ -477,11 +473,22 @@ public class SqlTableBC implements BusinessComponent {
 			}
 		}
 
-
 		return retrs;
 	}
 
-  /**
+	private static void checkFilter(com.basiscomponents.db.DataRow filter) {
+		if (filter.contains("%SEARCH")) {
+			throw new UnsupportedOperationException("Full text search not implemented yet!");
+		}
+	}
+
+	private static void checkIndeces(int first, int last) {
+		if (first >= 0 && last < first) {
+			throw new IllegalArgumentException("Invalid range: last could not be lower than first!");
+		}
+	}
+
+	/**
    * {@inheritDoc}
    */
   public  ResultSet validateWrite(DataRow dr) {
