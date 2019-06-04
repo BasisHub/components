@@ -1,14 +1,13 @@
 package com.basiscomponents.bc;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -365,23 +364,6 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");
-				Statement stmt = con.createStatement();) {
-
-			// Get tableNames
-			String sql = "SHOW TABLES;";
-			stmt.execute(sql);
-			java.sql.ResultSet rs = stmt.getResultSet();
-			ArrayList<String> tableNames = new ArrayList<String>();
-			while (rs.next()) {
-				tableNames.add(rs.getString("TABLE_NAME"));
-			}
-
-			// Drop all tables
-			for (int i = 0; i < tableNames.size(); i++) {
-				sql = "DROP TABLE " + tableNames.get(i);
-				stmt.executeUpdate(sql);
-			}
-		}
+		H2DataBaseProvider.dropAllTables();
 	}
 }

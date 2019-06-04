@@ -9,12 +9,53 @@ import java.util.ArrayList;
 public class H2DataBaseProvider {
 
 	private static ArrayList<String> sql = new ArrayList<String>();
+	private static final int AMOUNT_OF_TESTDATABASES = 4;
 
+	/**
+	 * Creates a H2DataBase with the sql statements listed in the sql ArrayList of
+	 * this class.
+	 * 
+	 * @param stmt The statement of the DataBase to fill.
+	 * @throws SQLException
+	 */
 	private static void createDataBase(Statement stmt) throws SQLException {
+		try {
 		for (int i = 0; i < sql.size(); i++) {
 			stmt.executeUpdate(sql.get(i));
 		}
 		sql.clear();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("WARNING: Tables are dropped through exception in creating!");
+			dropAllTables();
+		}
+	}
+
+	/**
+	 * Drops all tables of the test DataBases.
+	 * 
+	 */
+	public static void dropAllTables() throws SQLException {
+		for(int currentDataBase = 1; currentDataBase < AMOUNT_OF_TESTDATABASES+1; currentDataBase++) {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test" + currentDataBase, "sa", "sa");
+				Statement stmt = con.createStatement();) {
+
+			// Get tableNames
+			String sql = "SHOW TABLES;";
+			stmt.execute(sql);
+			java.sql.ResultSet rs = stmt.getResultSet();
+			ArrayList<String> tableNames = new ArrayList<String>();
+			while (rs.next()) {
+				tableNames.add(rs.getString("TABLE_NAME"));
+			}
+
+			// Drop all tables
+			for (int i = 0; i < tableNames.size(); i++) {
+				sql = "DROP TABLE " + tableNames.get(i);
+				stmt.executeUpdate(sql);
+			}
+		}
+		}
 	}
 
 	public static void createTestDataBaseForSQLRetrieve() throws SQLException {
@@ -50,27 +91,6 @@ public class H2DataBaseProvider {
 			sql.add("insert into CUSTOMERS VALUES ('Flint', 8, 'USA')");
 
 			createDataBase(stmt);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-					Statement stmt = con.createStatement();) {
-
-				// Get tableNames
-				String sql = "SHOW TABLES;";
-				stmt.execute(sql);
-				java.sql.ResultSet rs = stmt.getResultSet();
-				ArrayList<String> tableNames = new ArrayList<String>();
-				while (rs.next()) {
-					tableNames.add(rs.getString("TABLE_NAME"));
-				}
-
-				// Drop all tables
-				for (int i = 0; i < tableNames.size(); i++) {
-					sql = "DROP TABLE " + tableNames.get(i);
-					stmt.executeUpdate(sql);
-				}
-			}
 		}
 	}
 
@@ -99,27 +119,6 @@ public class H2DataBaseProvider {
 			sql.add("insert into BIGDECIMALTABLE VALUES (64543)");
 
 			createDataBase(stmt);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-					Statement stmt = con.createStatement();) {
-
-				// Get tableNames
-				String sql = "SHOW TABLES;";
-				stmt.execute(sql);
-				java.sql.ResultSet rs = stmt.getResultSet();
-				ArrayList<String> tableNames = new ArrayList<String>();
-				while (rs.next()) {
-					tableNames.add(rs.getString("TABLE_NAME"));
-				}
-
-				// Drop all tables
-				for (int i = 0; i < tableNames.size(); i++) {
-					sql = "DROP TABLE " + tableNames.get(i);
-					stmt.executeUpdate(sql);
-				}
-			}
 		}
 	}
 
@@ -155,27 +154,45 @@ public class H2DataBaseProvider {
 			sql.add("insert into TREES VALUES ('tree2', 132, 1004.53)");
 
 			createDataBase(stmt);
+		}
+	}
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-					Statement stmt = con.createStatement();) {
+	public static void createTestDataBaseForFilteringScoping() throws SQLException {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
+				Statement stmt = con.createStatement();) {
 
-				// Get tableNames
-				String sql = "SHOW TABLES;";
-				stmt.execute(sql);
-				java.sql.ResultSet rs = stmt.getResultSet();
-				ArrayList<String> tableNames = new ArrayList<String>();
-				while (rs.next()) {
-					tableNames.add(rs.getString("TABLE_NAME"));
-				}
+			sql.add("CREATE TABLE IF NOT EXISTS FULLREGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Alfred', 62, 0)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Simpson', 42, 1)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Jasper', 33, 2)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Alfred', 62, 3)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Freeman', 18, 4)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Freeman', 18, 5)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Caesaaar', 18, 6)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Peter', 18, 3)");
 
-				// Drop all tables
-				for (int i = 0; i < tableNames.size(); i++) {
-					sql = "DROP TABLE " + tableNames.get(i);
-					stmt.executeUpdate(sql);
-				}
-			}
+			sql.add("CREATE TABLE IF NOT EXISTS TREES (name CHAR(50), rings INT, height DOUBLE, high BOOL)");
+			sql.add("insert into TREES VALUES ('tree1', 155, 144.32, true)");
+			sql.add("insert into TREES VALUES ('tree2', -10, 5434535464.53, false)");
+			sql.add("insert into TREES VALUES ('Manfred', 0, 544504.53, true)");
+			sql.add("insert into TREES VALUES ('Dirk', -3455, 1454.53, false)");
+			sql.add("insert into TREES VALUES ('Heinz', 0, 10.53, true)");
+			sql.add("insert into TREES VALUES ('Otto', 135432, 1004.53, false)");
+			sql.add("insert into TREES VALUES ('Wilhelm', 13452, 5004.53, true)");
+			sql.add("insert into TREES VALUES ('Eduard', 13259, 100004.53, false)");
+
+			sql.add("CREATE TABLE IF NOT EXISTS CUSTOMERS (name CHAR(50), customerID INTEGER, country VARCHAR(255), age INTEGER, PRIMARY KEY(customerID))");
+			sql.add("insert into CUSTOMERS VALUES ('Freeman', 1, 'USA', 62)");
+			sql.add("insert into CUSTOMERS VALUES ('Jasper', 2, 'England', 63)");
+			sql.add("insert into CUSTOMERS VALUES ('Simpson', 3, 'USA', 64)");
+			sql.add("insert into CUSTOMERS VALUES ('Alfred', 4, 'England', 65)");
+			sql.add("insert into CUSTOMERS VALUES ('Jenkins', 5, 'Australia', 66)");
+			sql.add("insert into CUSTOMERS VALUES ('Caesar', 6, 'England', 67)");
+			sql.add("insert into CUSTOMERS VALUES ('Peter', 7, 'USA', 68)");
+			sql.add("insert into CUSTOMERS VALUES ('Flint', 8, 'USA', 69)");
+			sql.add("insert into CUSTOMERS VALUES ('Jasper', 9, 'England', 63)");
+
+			createDataBase(stmt);
 		}
 	}
 }

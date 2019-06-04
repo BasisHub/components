@@ -675,7 +675,7 @@ public class SqlTableBC implements BusinessComponent {
           filterRow.setFieldValue(f, ret.getFieldType(f), ret.getField(f).getValue());
         }
         this.setFilter(filterRow);
-        ResultSet retrs = this.retrieve(0, 1);
+				ResultSet retrs = this.retrieve(0, 1);
         if (retrs.size() == 1)
           ret = retrs.getItem(0);
         else {
