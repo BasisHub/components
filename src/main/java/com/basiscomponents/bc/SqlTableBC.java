@@ -92,7 +92,7 @@ public class SqlTableBC implements BusinessComponent {
    * @param url database URL to the database.
    */
   public SqlTableBC(String url) {
-    this.connectionHelper = new SqlConnectionHelper(url);
+		this.connectionHelper = new SqlConnectionHelper(url);
   }
 
   /**

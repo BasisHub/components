@@ -27,7 +27,7 @@ public class H2DataBaseProvider {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("WARNING: Tables are dropped through exception in creating!");
-			dropAllTables();
+			dropAllTestTables();
 		}
 	}
 
@@ -35,8 +35,8 @@ public class H2DataBaseProvider {
 	 * Drops all tables of the test DataBases.
 	 * 
 	 */
-	public static void dropAllTables() throws SQLException {
-		for(int currentDataBase = 1; currentDataBase < AMOUNT_OF_TESTDATABASES+1; currentDataBase++) {
+	public static void dropAllTestTables() throws SQLException {
+		for (int currentDataBase = 1; currentDataBase <= AMOUNT_OF_TESTDATABASES; currentDataBase++) {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test" + currentDataBase, "sa", "sa");
 				Statement stmt = con.createStatement();) {
 

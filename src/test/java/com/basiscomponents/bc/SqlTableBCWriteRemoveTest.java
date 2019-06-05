@@ -340,22 +340,27 @@ public class SqlTableBCWriteRemoveTest {
 			DataRow dr = rs.get(0);
 			dataRowCount = rs.size();
 
-//			dr.setFieldValue("CUSTOMERID", Integer.MAX_VALUE);
-//			sqlTable.write(dr);
-//			rs = sqlTable.retrieve();
+			// A string containing only numbers can be converted to INTEGER
+			DataRow myDr = new DataRow();
+			myDr.setFieldValue("AGE", "89");
+			sqlTable.write(myDr);
 
-//			DataRow myDr = new DataRow();
-//			myDr.setFieldValue("FIRST", 342);
-//			sqlTable.write(myDr);
-//			rs = sqlTable.retrieve();
+			// Any other string cannot be converted to INTEGER
+			DataRow myDr1 = new DataRow();
+			myDr1.setFieldValue("AGE", "NotANumber");
+			assertThrows(Exception.class, () -> {
+				sqlTable.write(myDr1);
+			});
 
+			// A string cannot be inserted into the DataBase if the range is not high enough
+			// for it
 			dr.setFieldValue("FIRST",
 					"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 			assertThrows(SQLException.class, () -> {
 				sqlTable.write(dr);
 			});
 			rs = sqlTable.retrieve();
-			assertEquals(dataRowCount, rs.size());
+			assertEquals(dataRowCount + 1, rs.size());
 		}
 	}
 
@@ -366,6 +371,6 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
-		H2DataBaseProvider.dropAllTables();
+		H2DataBaseProvider.dropAllTestTables();
 	}
 }

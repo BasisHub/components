@@ -34,9 +34,9 @@ public class SqlTableBCLeftoversTest {
 	}
 
 	/**
-	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
-	 * created with retrieve() and a DataRow is taken. This DataRow is written into
-	 * the SqlTableBC.
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A write, remove and
+	 * retrieve statement are executed. Their sql statements are queried and checked
+	 * to be correct.
 	 * 
 	 * @throws Exception
 	 */
@@ -77,6 +77,6 @@ public class SqlTableBCLeftoversTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
-		H2DataBaseProvider.dropAllTables();
+		H2DataBaseProvider.dropAllTestTables();
 	}
 }

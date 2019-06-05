@@ -206,6 +206,6 @@ public class SqlTableBCFilterTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
-		H2DataBaseProvider.dropAllTables();
+		H2DataBaseProvider.dropAllTestTables();
 	}
 }

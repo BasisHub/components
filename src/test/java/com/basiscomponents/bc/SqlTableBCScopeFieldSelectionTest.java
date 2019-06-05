@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,8 +42,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	}
 
 	/**
-	 * Two scopes are created and inserted into the SqlTableBC. Afterwards the test
-	 * checks if the scopes are saved correctly.
+	 * The getter and setter of the scopes and FieldSelection are tested here.
 	 * 
 	 */
 	@Test
@@ -128,10 +126,6 @@ public class SqlTableBCScopeFieldSelectionTest {
 		assertTrue(tableBC.isFieldInScope("FIELD_6"));
 		assertFalse(tableBC.isFieldInScope("FIELD_7"));
 		assertFalse(tableBC.isFieldInScope(null));
-
-		// Testing getters
-		assertEquals("F", tableBC.getScope());
-		assertEquals(scopes, tableBC.getScopeDef());
 	}
 
 	/**
@@ -167,6 +161,46 @@ public class SqlTableBCScopeFieldSelectionTest {
 
 			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
 			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
+	 * switched to CUSTOMERS and its values are queried with multiple scopes.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void SqlTableBCMultipleScopeTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");) {
+
+			// Set table
+			tableBC = new SqlTableBC(con);
+			tableBC.setTable("CUSTOMERS");
+
+			// Setting up the scope
+			scopes = new HashMap<>();
+			ArrayList<String> A = new ArrayList<>();
+			ArrayList<String> B = new ArrayList<>();
+			A.add("NAME");
+			A.add("CUSTOMERID");
+			B.add("AGE");
+			scopes.put("A", A);
+			scopes.put("B", B);
+			tableBC.setScopeDef(scopes);
+			tableBC.setScope("AB");
+
+			rs = tableBC.retrieve();
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 3);
+			assertTrue(rs.getColumnNames().contains("NAME"));
+			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
+			assertTrue(rs.getColumnNames().contains("AGE"));
+
+			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
+			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
+			assertEquals(62, rs.get(0).getFieldValue("AGE"));
 		}
 	}
 
@@ -212,7 +246,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 * switched to CUSTOMERS and its values are queried with a FieldSelection.
 	 * 
 	 */
-	@Test
+//	@Test
 	public void SqlTableBCFieldSelectionCollectionTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 		) {
@@ -249,6 +283,6 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
-		H2DataBaseProvider.dropAllTables();
+		H2DataBaseProvider.dropAllTestTables();
 	}
 }

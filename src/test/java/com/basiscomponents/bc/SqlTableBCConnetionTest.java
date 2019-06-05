@@ -112,6 +112,38 @@ public class SqlTableBCConnetionTest {
 	}
 
 	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A mapping is set up.
+	 * The active table is switched to REGISTRATION and its values are queried with
+	 * retrieve(). The resulting ResultSet is checked to contain the right data.
+	 * 
+	 * @throws Exception
+	 */
+//	@Test To be continued
+	public void SqlTableBCGetDataWithMappingTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");) {
+
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
+
+			sqlTable.addMapping("NAME", "FIRST");
+
+			rs = sqlTable.retrieve();
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 3);
+			assertTrue(rs.getColumnNames().contains("FIRST"));
+			assertTrue(rs.getColumnNames().contains("AGE"));
+			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
+
+			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
+			assertEquals(62, rs.get(0).getFieldValue("AGE"));
+			assertEquals(0, rs.get(0).getFieldValue("CUSTOMERID"));
+		}
+	}
+
+	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
 	 * switched to BOOLTABLE and its values are queried with retrieve(). The
 	 * resulting ResultSet is checked to contain the right data, which are boolean
@@ -490,7 +522,7 @@ public class SqlTableBCConnetionTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
-		H2DataBaseProvider.dropAllTables();
+		H2DataBaseProvider.dropAllTestTables();
 	}
 
 }
