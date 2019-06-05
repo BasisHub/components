@@ -209,7 +209,7 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals(rs.get(0).getFieldValue("DATETYPE"), rs.get(1).getFieldValue("DATETYPE"));
 			assertEquals(rs.get(0).getFieldValue("TIMESTAMPTYPE"), rs.get(1).getFieldValue("TIMESTAMPTYPE"));
 
-			sqlTable.setTable("BIGDECIMALTABLE");
+			sqlTable.setTable("SPECIALINTTABLE");
 			rs = sqlTable.retrieve();
 			DataRow dr2 = rs.get(0);
 			dataRowCount = rs.size();
@@ -218,6 +218,8 @@ public class SqlTableBCWriteRemoveTest {
 			rs = sqlTable.retrieve();
 			assertEquals(dataRowCount + 1, rs.size());
 			assertEquals(rs.get(0).getFieldValue("BIGDECIMALTYPE"), rs.get(1).getFieldValue("BIGDECIMALTYPE"));
+			assertEquals(rs.get(0).getFieldValue("SMALLINTTYPE"), rs.get(1).getFieldValue("SMALLINTTYPE"));
+			assertEquals(rs.get(0).getFieldValue("BIGINTTYPE"), rs.get(1).getFieldValue("BIGINTTYPE"));
 		}
 	}
 

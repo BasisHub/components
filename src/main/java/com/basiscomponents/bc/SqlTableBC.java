@@ -994,7 +994,7 @@ public class SqlTableBC implements BusinessComponent {
         try {
           if (metaColumns.getString(i) != null) {
             metaData.setFieldAttribute(columnName, metaColumns.getMetaData().getColumnName(i),
-                metaColumns.getString(i));
+								metaColumns.getString(i));
           }
         } catch (Exception e) {
           // do nothing

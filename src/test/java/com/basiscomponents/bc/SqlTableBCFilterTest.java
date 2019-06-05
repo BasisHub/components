@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -62,7 +61,7 @@ public class SqlTableBCFilterTest {
 	@Test
 	public void SqlTableBCFilterSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 			SqlTableBC tableBC = new SqlTableBC(con);
 			tableBC.setTable("CUSTOMERS");
 
@@ -89,7 +88,7 @@ public class SqlTableBCFilterTest {
 	@Test
 	public void SqlTableBCFilterWithMoreValuesTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 			SqlTableBC tableBC = new SqlTableBC(con);
 			tableBC.setTable("CUSTOMERS");
 
@@ -118,7 +117,7 @@ public class SqlTableBCFilterTest {
 	@Test
 	public void SqlTableBCFilterCompareTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 			SqlTableBC tableBC = new SqlTableBC(con);
 			tableBC.setTable("CUSTOMERS");
 
@@ -176,7 +175,7 @@ public class SqlTableBCFilterTest {
 	}
 
 	/**
-	 * A filter with regexes is created and used for the retrieve().
+	 * A filter with regexes is created and used for the retrieve(). XXX
 	 * 
 	 * @throws Exception
 	 * 
@@ -184,13 +183,13 @@ public class SqlTableBCFilterTest {
 //	@Test
 	public void SqlTableBCRegexSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 			SqlTableBC tableBC = new SqlTableBC(con);
 			tableBC.setTable("CUSTOMERS");
 
 			// Setting the filter
 			filter = new DataRow();
-			filter.addDataField("NAME", new DataField("regex:[A-Z]"));
+			filter.addDataField("NAME", new DataField("regex:(J)([a-z]*)"));
 			tableBC.setFilter(filter);
 
 			rs = tableBC.retrieve();

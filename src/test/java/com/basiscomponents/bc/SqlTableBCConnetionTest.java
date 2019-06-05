@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -64,7 +63,7 @@ public class SqlTableBCConnetionTest {
 	// yet for H2DataBases.
 	public void SqlTableBCGetDataSimpleParameterTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			// Set table and get its data with normal retrieve()
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -93,7 +92,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			// Set table and get its data with normal retrieve()
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -123,7 +122,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataBoolTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			// Set table and get its data with normal retrieve()
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -153,7 +152,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataStandartIntegerTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			// Set table and get its data with normal retrieve()
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -187,7 +186,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataSpecialIntegerTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			// Set table and get its data with normal retrieve()
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -227,7 +226,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataDoubleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			// Set table and get its data with normal retrieve()
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -258,7 +257,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataWithSQLSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			SqlTableBC sqlTable = new SqlTableBC(con);
 
@@ -288,7 +287,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataWithSQLTest2() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			SqlTableBC sqlTable = new SqlTableBC(con);
 
@@ -343,7 +342,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataWithSQLUnionIntersectTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			SqlTableBC sqlTable = new SqlTableBC(con);
 
@@ -409,7 +408,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataWithSQLWhereTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			// Collect data from the SqlTableBC
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -439,7 +438,7 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void SqlTableBCGetDataWithSQLGroupByOrderByTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-				Statement stmt = con.createStatement();) {
+		) {
 
 			SqlTableBC sqlTable = new SqlTableBC(con);
 

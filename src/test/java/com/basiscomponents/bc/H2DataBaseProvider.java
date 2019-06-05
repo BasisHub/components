@@ -131,7 +131,7 @@ public class H2DataBaseProvider {
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Simpson', 42, 1)");
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Freeman', 22, 2)");
 
-			sql.add("CREATE TABLE IF NOT EXISTS FULLREGISTRATION (first VARCHAR(10), age SMALLINT, customerID INTEGER)");
+			sql.add("CREATE TABLE IF NOT EXISTS FULLREGISTRATION (first VARCHAR(10), age INTEGER, customerID INTEGER)");
 			sql.add("insert into FULLREGISTRATION VALUES ('Alfred', 62, 1)");
 			sql.add("insert into FULLREGISTRATION VALUES ('Simpson', 42, 0)");
 			sql.add("insert into FULLREGISTRATION VALUES ('Jasper', 33, 1)");
@@ -143,8 +143,8 @@ public class H2DataBaseProvider {
 			sql.add("CREATE TABLE IF NOT EXISTS TIMETABLE (dateType DATE, timeStampType TIMESTAMP)");
 			sql.add("insert into TIMETABLE VALUES ('1999-05-05',  '1999-05-05 01:23:45.67')");
 
-			sql.add("CREATE TABLE IF NOT EXISTS BIGDECIMALTABLE (bigDecimalType NUMERIC)");
-			sql.add("insert into BIGDECIMALTABLE VALUES (64543)");
+			sql.add("CREATE TABLE IF NOT EXISTS SPECIALINTTABLE (smallintType SMALLINT, bigintType BIGINT, bigDecimalType NUMERIC)");
+			sql.add("insert into SPECIALINTTABLE VALUES (34, 35543543435, 64543)");
 
 			sql.add("CREATE TABLE IF NOT EXISTS DOUBLETABLE (doubleType DOUBLE, floatAsDoubleType FLOAT, realType REAL, floatAsFloatType FLOAT(20))");
 			sql.add("insert into DOUBLETABLE VALUES (127.43324344, 32767.534344, 1.23, 1.23)");
