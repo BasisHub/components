@@ -27,7 +27,7 @@ public class SQLHelper {
 
 		int index = 1;
 		for (String field : fields) {
-			Integer type;
+			int type;
 			com.basiscomponents.db.DataField o;
 
 			try {
@@ -126,8 +126,17 @@ public class SQLHelper {
 		}
 	}
 	public static boolean isChartype(int type) {
-		return type == java.sql.Types.CHAR || type == java.sql.Types.VARCHAR || type == java.sql.Types.LONGVARCHAR
-				|| type == java.sql.Types.NCHAR || type == java.sql.Types.NVARCHAR || type == java.sql.Types.LONGNVARCHAR
-				|| type == java.sql.Types.CLOB;
+		switch (type){
+			case java.sql.Types.CHAR:
+			case java.sql.Types.VARCHAR:
+			case java.sql.Types.LONGVARCHAR:
+			case java.sql.Types.NCHAR:
+			case java.sql.Types.NVARCHAR:
+			case java.sql.Types.LONGNVARCHAR:
+			case java.sql.Types.CLOB:
+				return true;
+			default:
+				return false;
+		}
 	}
 }

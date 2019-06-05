@@ -227,7 +227,7 @@ public class SqlTableBC implements BusinessComponent {
 		} else {
 			DataRow f = filter.clone();
 			Map<String, DataField> rgxs = f.getFieldNames().stream()
-					.map(x -> new KeyValuePair<String, DataField>(x, filter.getField(x)))
+					.map(x -> new KeyValuePair<>(x, filter.getField(x)))
 					.filter(x -> x.getValue().getString().startsWith("regex:"))
 					// .peek(x -> System.out.println(x.getValue().getString()))
 					.collect(Collectors.toMap(KeyValuePair::getKey, KeyValuePair::getValue));
