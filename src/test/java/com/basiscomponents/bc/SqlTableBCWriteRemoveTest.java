@@ -45,7 +45,7 @@ public class SqlTableBCWriteRemoveTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCRemoveSimpleTest()
+	public void sqlTableBCRemoveSimpleTest()
 			throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
@@ -75,7 +75,7 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 //	@Test
 	// validateRemove is not implemented yet
-	public void SqlTableBCRemoveNegativeTest() throws Exception {
+	public void sqlTableBCRemoveNegativeTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
@@ -108,7 +108,7 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@Test
 	// validateRemove is not implemented yet
-	public void SqlTableBCRemoveNegativeTest2() throws Exception {
+	public void sqlTableBCRemoveNegativeTest2() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
@@ -140,7 +140,7 @@ public class SqlTableBCWriteRemoveTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCWriteSimpleTest() throws Exception {
+	public void sqlTableBCWriteSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
@@ -181,7 +181,7 @@ public class SqlTableBCWriteRemoveTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCWriteManyTypesTest() throws Exception {
+	public void sqlTableBCWriteManyTypesTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
@@ -230,7 +230,7 @@ public class SqlTableBCWriteRemoveTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCWriteNegativeTest() throws Exception {
+	public void sqlTableBCWriteNegativeTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
@@ -265,7 +265,7 @@ public class SqlTableBCWriteRemoveTest {
 	// This test cannot work at the moment, because pagination is required
 	// for writing into the a SqlTableBc with a PrimaryKey,
 	// which is not implemented yet for the H2DataBases.
-	public void SqlTableBCWriteWithPrimaryKeyTest() throws Exception {
+	public void sqlTableBCWriteWithPrimaryKeyTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
@@ -291,7 +291,7 @@ public class SqlTableBCWriteRemoveTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCWriteChangeColumnsTest() throws Exception {
+	public void sqlTableBCWriteChangeColumnsTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");
 				Statement stmt = con.createStatement();) {
 
@@ -330,7 +330,7 @@ public class SqlTableBCWriteRemoveTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCWriteWrongValuesTest() throws Exception {
+	public void sqlTableBCWriteWrongValuesTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()

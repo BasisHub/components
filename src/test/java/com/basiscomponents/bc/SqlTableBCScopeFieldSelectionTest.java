@@ -46,7 +46,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 * 
 	 */
 	@Test
-	public void SqlTableBCScopeFieldSelectionGetNSet() {
+	public void sqlTableBCScopeFieldSelectionGetNSet() {
 
 		tableBC = new SqlTableBC("");
 		scopes = new HashMap<>();
@@ -84,7 +84,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 * 
 	 */
 	@Test
-	public void SqlTableBCScopeIsPresent() {
+	public void sqlTableBCScopeIsPresent() {
 
 		tableBC = new SqlTableBC("");
 		scopes = new HashMap<>();
@@ -135,7 +135,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCScopeSimpleTest() throws Exception {
+	public void sqlTableBCScopeSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 		) {
 
@@ -171,7 +171,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCMultipleScopeTest() throws Exception {
+	public void sqlTableBCMultipleScopeTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");) {
 
 			// Set table
@@ -210,7 +210,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 * 
 	 */
 	@Test
-	public void SqlTableBCFieldSelectionSimpleTest() throws Exception {
+	public void sqlTableBCFieldSelectionSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 		) {
 
@@ -247,7 +247,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 * 
 	 */
 //	@Test
-	public void SqlTableBCFieldSelectionCollectionTest() throws Exception {
+	public void sqlTableBCFieldSelectionCollectionTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 		) {
 

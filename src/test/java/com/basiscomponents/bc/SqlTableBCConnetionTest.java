@@ -44,7 +44,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws IllegalAccessException
 	 */
 	@Test
-	public void SqlTableBCConnectionSimpleTest()
+	public void sqlTableBCConnectionSimpleTest()
 			throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");) {
 			SqlTableBC sqlTable = new SqlTableBC(con);
@@ -61,7 +61,7 @@ public class SqlTableBCConnetionTest {
 //	@Test
 	// This test cannot work at the moment, because pagination is not implemented
 	// yet for H2DataBases.
-	public void SqlTableBCGetDataSimpleParameterTest() throws Exception {
+	public void sqlTableBCGetDataSimpleParameterTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
 		) {
 
@@ -90,7 +90,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataSimpleTest() throws Exception {
+	public void sqlTableBCGetDataSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
 		) {
 
@@ -119,7 +119,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 //	@Test To be continued
-	public void SqlTableBCGetDataWithMappingTest() throws Exception {
+	public void sqlTableBCGetDataWithMappingTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");) {
 
 
@@ -152,7 +152,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataBoolTest() throws Exception {
+	public void sqlTableBCGetDataBoolTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
 		) {
 
@@ -182,7 +182,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataStandartIntegerTest() throws Exception {
+	public void sqlTableBCGetDataStandartIntegerTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
 		) {
 
@@ -216,7 +216,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataSpecialIntegerTest() throws Exception {
+	public void sqlTableBCGetDataSpecialIntegerTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
 		) {
 
@@ -256,7 +256,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataDoubleTest() throws Exception {
+	public void sqlTableBCGetDataDoubleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
 		) {
 
@@ -287,7 +287,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataWithSQLSimpleTest() throws Exception {
+	public void sqlTableBCGetDataWithSQLSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 		) {
 
@@ -317,7 +317,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataWithSQLTest2() throws Exception {
+	public void sqlTableBCGetDataWithSQLTest2() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 		) {
 
@@ -372,7 +372,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataWithSQLUnionIntersectTest() throws Exception {
+	public void sqlTableBCGetDataWithSQLUnionIntersectTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 		) {
 
@@ -438,7 +438,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataWithSQLWhereTest() throws Exception {
+	public void sqlTableBCGetDataWithSQLWhereTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 		) {
 
@@ -468,7 +468,7 @@ public class SqlTableBCConnetionTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void SqlTableBCGetDataWithSQLGroupByOrderByTest() throws Exception {
+	public void sqlTableBCGetDataWithSQLGroupByOrderByTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
 		) {
 

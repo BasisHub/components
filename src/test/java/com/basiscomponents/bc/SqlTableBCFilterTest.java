@@ -42,7 +42,7 @@ public class SqlTableBCFilterTest {
 	 * 
 	 */
 	@Test
-	public void SqlTableBCFilterStaysTest() {
+	public void sqlTableBCFilterStaysTest() {
 		filter = new DataRow();
 		filter.addDataField("Regex", new DataField("regex:[A-Z]"));
 		filter.addDataField("Age", new DataField("25"));
@@ -59,7 +59,7 @@ public class SqlTableBCFilterTest {
 	 * 
 	 */
 	@Test
-	public void SqlTableBCFilterSimpleTest() throws Exception {
+	public void sqlTableBCFilterSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 		) {
 			SqlTableBC tableBC = new SqlTableBC(con);
@@ -86,7 +86,7 @@ public class SqlTableBCFilterTest {
 	 * 
 	 */
 	@Test
-	public void SqlTableBCFilterWithMoreValuesTest() throws Exception {
+	public void sqlTableBCFilterWithMoreValuesTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 		) {
 			SqlTableBC tableBC = new SqlTableBC(con);
@@ -115,7 +115,7 @@ public class SqlTableBCFilterTest {
 	 * 
 	 */
 	@Test
-	public void SqlTableBCFilterCompareTest() throws Exception {
+	public void sqlTableBCFilterCompareTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 		) {
 			SqlTableBC tableBC = new SqlTableBC(con);
@@ -181,7 +181,7 @@ public class SqlTableBCFilterTest {
 	 * 
 	 */
 //	@Test
-	public void SqlTableBCRegexSimpleTest() throws Exception {
+	public void sqlTableBCRegexSimpleTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 		) {
 			SqlTableBC tableBC = new SqlTableBC(con);

@@ -42,7 +42,7 @@ public class SqlTableBCLeftoversTest {
 	 */
 	@Test
 //	There is something weird with the write Statement, it does not ever fill types in VALUES (So does Remove)
-	public void SqlTableBCGetLastSQLStatementTest() throws Exception {
+	public void sqlTableBCGetLastSQLStatementTest() throws Exception {
 		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
