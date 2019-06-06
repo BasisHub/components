@@ -1,10 +1,14 @@
 package com.basiscomponents.db;
 
-import com.google.gson.JsonSyntaxException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.google.gson.JsonSyntaxException;
 
 public class ResultSetFromJsonTest {
 
@@ -25,7 +29,7 @@ public class ResultSetFromJsonTest {
         assertTrue(rs.getColumnNames().contains("LANGUAGE"));
         assertTrue(rs.getColumnNames().contains(""));
 
-        assertEquals("ENG", rs.get(0).getFieldValue("LANGUAGE"));
+		assertEquals("ENG", rs.get(0).getFieldValue("LANGUAGE"));
         assertEquals("en", rs.get(0).getFieldValue("ISO639-1"));
         assertEquals("en", rs.get(0).getFieldValue(""));
     }

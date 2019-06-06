@@ -1,11 +1,11 @@
 package com.basiscomponents.db.util;
 
-import com.basiscomponents.db.DataRow;
-
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Calendar;
+
+import com.basiscomponents.db.DataRow;
 
 public class DataRowProvider {
 	public static final String STRINGFIELD = "STRINGFIELD";
