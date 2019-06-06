@@ -1,4 +1,0 @@
-2019-06-06 15:28:51 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLDataException: Datenumwandlungsfehler beim Umwandeln von "'NotANumber' (FULLREGISTRATION: ""AGE"" INTEGER)"
-Data conversion error converting "'NotANumber' (FULLREGISTRATION: ""AGE"" INTEGER)"; SQL statement:
-INSERT INTO "FULLREGISTRATION" ("AGE") VALUES(?) -- (?1) [22018-199]
