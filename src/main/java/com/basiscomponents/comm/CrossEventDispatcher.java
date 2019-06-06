@@ -1,16 +1,16 @@
 package com.basiscomponents.comm;
 
+import com.basis.bbj.proxies.BBjAPI;
+import com.basis.bbj.proxies.BBjNamespace;
+import com.basis.bbj.proxies.BBjSessionInfo;
+import com.basis.startup.type.BBjException;
+import com.basis.startup.type.BBjVector;
+
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.basis.bbj.client.datatypes.BBjVector;
-import com.basis.bbj.client.util.BBjException;
-import com.basis.bbj.proxies.BBjAPI;
-import com.basis.bbj.proxies.BBjNamespace;
-import com.basis.bbj.proxies.BBjSessionInfo;
 
 
 public class CrossEventDispatcher  {

@@ -1,7 +1,7 @@
 package com.basiscomponents.db.util;
 
-import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.datatypes.TemplatedString;
+import com.basis.startup.type.BBjException;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
@@ -88,7 +88,7 @@ public class TemplateParser {
 				case TemplateInfo.UNSIGNED_INTEGER:
 					sqlType = java.sql.Types.NUMERIC;
 					try {
-						df = new DataField(stringTemplate.getFieldAsNumber(i).bigDecimalValue());
+						df = new DataField(stringTemplate.getFieldAsNumber(i).toBigDecimal());
 					} catch (Exception e) {
 						df = new DataField(new java.math.BigDecimal(0));
 					}

@@ -1,5 +1,8 @@
 package com.basiscomponents.bl;
 
+import com.basis.startup.type.BBjVector;
+import com.basiscomponents.db.DataRow;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,9 +12,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import com.basis.bbj.client.datatypes.BBjVector;
-import com.basiscomponents.db.DataRow;
 
 public class PropertyReader {
 

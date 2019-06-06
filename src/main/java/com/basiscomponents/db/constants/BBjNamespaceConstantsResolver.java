@@ -1,10 +1,10 @@
 package com.basiscomponents.db.constants;
 
-import java.util.Iterator;
-
-import com.basis.bbj.client.datatypes.BBjVector;
-import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.BBjNamespace;
+import com.basis.startup.type.BBjException;
+import com.basis.startup.type.BBjVector;
+
+import java.util.Iterator;
 
 public class BBjNamespaceConstantsResolver implements ConstantsResolver{
 

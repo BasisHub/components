@@ -3,21 +3,20 @@
  */
 package com.basiscomponents.ui.layout;
 
+import com.basis.bbj.proxies.sysgui.BBjControl;
+import com.basis.bbj.proxies.sysgui.BBjDrawPanel;
+import com.basis.bbj.proxies.sysgui.BBjWindow;
+import com.basis.startup.type.BBjException;
+import com.basis.startup.type.sysgui.BBjColor;
+import com.basis.util.common.BasisNumber;
+import net.miginfocom.layout.CC;
+import net.miginfocom.layout.ComponentWrapper;
+import net.miginfocom.layout.ContainerWrapper;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import com.basis.bbj.client.sysgui.datatypes.BBjColor;
-import com.basis.bbj.client.util.BBjException;
-import com.basis.bbj.proxies.sysgui.BBjControl;
-import com.basis.bbj.proxies.sysgui.BBjDrawPanel;
-import com.basis.bbj.proxies.sysgui.BBjWindow;
-import com.basis.util.common.BasisNumber;
-
-import net.miginfocom.layout.CC;
-import net.miginfocom.layout.ComponentWrapper;
-import net.miginfocom.layout.ContainerWrapper;
 
 /**
  * @author rlance
