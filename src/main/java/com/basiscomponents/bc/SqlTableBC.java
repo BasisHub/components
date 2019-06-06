@@ -92,7 +92,7 @@ public class SqlTableBC implements BusinessComponent {
    * @param url database URL to the database.
    */
   public SqlTableBC(String url) {
-    this.connectionHelper = new SqlConnectionHelper(url);
+		this.connectionHelper = new SqlConnectionHelper(url);
   }
 
   /**
@@ -543,7 +543,7 @@ public class SqlTableBC implements BusinessComponent {
   // TODO reduce CC of this Method
   public DataRow write(DataRow r) throws Exception {
     ResultSet errors = validateWrite(r);
-    checkWriteError(errors);
+		checkWriteError(errors);
 
     boolean pkPresent = isPrimaryKeyPresent(r);
 
@@ -675,7 +675,7 @@ public class SqlTableBC implements BusinessComponent {
           filterRow.setFieldValue(f, ret.getFieldType(f), ret.getField(f).getValue());
         }
         this.setFilter(filterRow);
-        ResultSet retrs = this.retrieve(0, 1);
+				ResultSet retrs = this.retrieve(0, 1);
         if (retrs.size() == 1)
           ret = retrs.getItem(0);
         else {
@@ -743,7 +743,7 @@ public class SqlTableBC implements BusinessComponent {
   public void remove(DataRow r) throws Exception {
     ResultSet errors = validateRemove(r);
     if (errors.size() > 0) {
-      StringBuilder errMsg = new StringBuilder();
+			StringBuilder errMsg = new StringBuilder();
       for (int i = 0; i < errors.size(); i++) {
         DataRow dr = errors.get(i);
         if (dr.getFieldAsString("TYPE").equals(ERROR))
@@ -930,7 +930,7 @@ public class SqlTableBC implements BusinessComponent {
 
       while (sqlMetaData.next()) {
         primaryKeys.add(sqlMetaData.getString(COLUMN_NAME));
-      }
+			}
 
       prepareMetadata(meta);
       sqlMetaData.close();
@@ -994,7 +994,7 @@ public class SqlTableBC implements BusinessComponent {
         try {
           if (metaColumns.getString(i) != null) {
             metaData.setFieldAttribute(columnName, metaColumns.getMetaData().getColumnName(i),
-                metaColumns.getString(i));
+								metaColumns.getString(i));
           }
         } catch (Exception e) {
           // do nothing
@@ -1105,7 +1105,7 @@ public class SqlTableBC implements BusinessComponent {
           prep.setString(index, o.getString());
         break;
       default:
-        System.err.println(
+			System.err.println(
             "WARNING: using prep.setObject(object) will fail if there is no equivalent SQL type for the given object");
         prep.setObject(index, o.getValue());
     }
