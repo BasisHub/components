@@ -67,6 +67,37 @@ public class SqlTableBCWriteRemoveTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
+	 * created with retrieve() and a DataRow is taken. A mapping is added to the
+	 * current table. This DataRow is removed from the SqlTableBC.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	// A DataRow is removed by its PRIMARY KEY anyway
+	public void sqlTableBCRemoveWithMappingTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
+			rs = sqlTable.retrieve();
+			dataRowCount = rs.size();
+
+			sqlTable.addMapping("NAME", "FIRST");
+			DataRow dr = rs.get(0);
+			dr.removeField("FIRST");
+			dr.setFieldValue("NAME", "Alfred");
+			sqlTable.remove(dr);
+
+			rs = sqlTable.retrieve();
+			assertEquals(dataRowCount - 1, rs.size());
+			assertEquals("Simpson", rs.get(0).getFieldValue("FIRST"));
+			assertEquals("Simpson", rs.get(1).getFieldValue("FIRST"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
 	 * created with retrieve() and a DataRow is taken. This DataRow is modified, so
 	 * it does not exists in the SqlTableBC anymore. This DataRow cannot be removed
 	 * from the table PRIMARYKEY_REGISTRATION.
@@ -170,6 +201,39 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals(true, rs.get(1).getFieldValue("BOOLTYPE"));
 			assertEquals(false, rs.get(1).getFieldValue("BOOLEANTYPE"));
 			assertEquals(true, rs.get(1).getFieldValue("BITTYPE"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A ResultSet is
+	 * created with retrieve() and a DataRow is taken. A mapping is added to the
+	 * current table. This DataRow is written into the SqlTableBC.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void sqlTableBCWriteWithMappingTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
+
+			// Set table and get its data with normal retrieve()
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sqlTable.setTable("FULLREGISTRATION");
+			rs = sqlTable.retrieve();
+			DataRow dr = rs.get(0);
+			dataRowCount = rs.size();
+
+			sqlTable.addMapping("NAME", "FIRST");
+			dr.removeField("FIRST");
+			dr.setFieldValue("NAME", "Alfred");
+
+			sqlTable.write(dr);
+			rs = sqlTable.retrieve();
+			assertEquals(dataRowCount + 1, rs.size());
+			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
+			assertEquals("Simpson", rs.get(1).getFieldValue("FIRST"));
+			assertEquals("Jasper", rs.get(2).getFieldValue("FIRST"));
+			assertEquals("Alfred", rs.get(3).getFieldValue("FIRST"));
+			assertEquals("Alfred", rs.get(4).getFieldValue("FIRST"));
 		}
 	}
 

@@ -112,38 +112,6 @@ public class SqlTableBCConnetionTest {
 	}
 
 	/**
-	 * Creates a SqlTableBC with a connection to a h2-DataBase. A mapping is set up.
-	 * The active table is switched to REGISTRATION and its values are queried with
-	 * retrieve(). The resulting ResultSet is checked to contain the right data.
-	 * 
-	 * @throws Exception
-	 */
-//	@Test To be continued
-	public void sqlTableBCGetDataWithMappingTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");) {
-
-
-			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
-			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
-
-			sqlTable.addMapping("NAME", "FIRST");
-
-			rs = sqlTable.retrieve();
-
-			// Checking the ColumnNames and results
-			assertTrue(rs.getColumnCount() == 3);
-			assertTrue(rs.getColumnNames().contains("FIRST"));
-			assertTrue(rs.getColumnNames().contains("AGE"));
-			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
-
-			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
-			assertEquals(62, rs.get(0).getFieldValue("AGE"));
-			assertEquals(0, rs.get(0).getFieldValue("CUSTOMERID"));
-		}
-	}
-
-	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
 	 * switched to BOOLTABLE and its values are queried with retrieve(). The
 	 * resulting ResultSet is checked to contain the right data, which are boolean
@@ -498,7 +466,7 @@ public class SqlTableBCConnetionTest {
 			rs = sqlTable.retrieve(sql, null);
 
 			// Checking the ColumnNames
-			assertTrue(rs.getColumnCount() == 3);
+			assertTrue(rs.getColumnCount() == 4);
 			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
 			assertTrue(rs.getColumnNames().contains("COUNTRY"));
 			assertTrue(rs.getColumnNames().contains("NAME"));
@@ -512,6 +480,64 @@ public class SqlTableBCConnetionTest {
 			assertEquals("USA", rs.get(5).getFieldValue("COUNTRY"));
 			assertEquals("USA", rs.get(6).getFieldValue("COUNTRY"));
 			assertEquals("USA", rs.get(7).getFieldValue("COUNTRY"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A SQL Statement is
+	 * created and the SqlTableBC is queried with retrieve(String sql, null). The
+	 * JOIN operator is used in this case. The resulting ResultSet is checked to
+	 * contain the right data.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void sqlTableBCGetDataWithSQLJoinTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");) {
+
+			// Collect data from the SqlTableBC
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sql = "SELECT CUSTOMERS.NAME,FULLREGISTRATION.FIRST,CUSTOMERS.COUNTRY FROM FULLREGISTRATION INNER JOIN CUSTOMERS ON FULLREGISTRATION.EMPLOYEEID=CUSTOMERS.EMPLOYEEID";
+			rs = sqlTable.retrieve(sql, null);
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 3);
+			assertTrue(rs.getColumnNames().contains("NAME"));
+			assertTrue(rs.getColumnNames().contains("FIRST"));
+			assertTrue(rs.getColumnNames().contains("COUNTRY"));
+
+			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
+			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
+			assertEquals("USA", rs.get(0).getFieldValue("COUNTRY"));
+		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. A SQL Statement is
+	 * created and the SqlTableBC is queried with retrieve(String sql, null). The
+	 * JOIN operator is used in this case. The resulting ResultSet is checked to
+	 * contain the right data.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void sqlTableBCGetDataWithSQLLeftJoinTest() throws Exception {
+		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");) {
+
+			// Collect data from the SqlTableBC
+			SqlTableBC sqlTable = new SqlTableBC(con);
+			sql = "SELECT CUSTOMERS.NAME,FULLREGISTRATION.FIRST,CUSTOMERS.COUNTRY FROM FULLREGISTRATION LEFT JOIN CUSTOMERS ON FULLREGISTRATION.EMPLOYEEID=CUSTOMERS.EMPLOYEEID";
+			rs = sqlTable.retrieve(sql, null);
+
+			// Checking the ColumnNames and results
+			assertTrue(rs.getColumnCount() == 3);
+			assertTrue(rs.getColumnNames().contains("NAME"));
+			assertTrue(rs.getColumnNames().contains("FIRST"));
+			assertTrue(rs.getColumnNames().contains("COUNTRY"));
+
+			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
+			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
+			assertEquals("USA", rs.get(0).getFieldValue("COUNTRY"));
 		}
 	}
 

@@ -70,25 +70,28 @@ public class H2DataBaseProvider {
 			sql.add("insert into REGISTRATION2 VALUES ('Jasper', 33, 1)");
 			sql.add("insert into REGISTRATION2 VALUES ('Alfred', 62, 1)");
 
-			sql.add("CREATE TABLE IF NOT EXISTS FULLREGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER)");
-			sql.add("insert into FULLREGISTRATION VALUES ('Alfred', 62, 1)");
-			sql.add("insert into FULLREGISTRATION VALUES ('Simpson', 42, 0)");
-			sql.add("insert into FULLREGISTRATION VALUES ('Jasper', 33, 1)");
-			sql.add("insert into FULLREGISTRATION VALUES ('Alfred', 62, 1)");
+			sql.add("CREATE TABLE IF NOT EXISTS FULLREGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER, employeeID INTEGER)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Alfred', 62, 1, 1)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Simpson', 42, 0, 2)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Jasper', 33, 1, 3)");
+			sql.add("insert into FULLREGISTRATION VALUES ('Alfred', 62, 1, 4)");
 
 			sql.add("CREATE TABLE IF NOT EXISTS TREES (name CHAR(5), rings INT, height DOUBLE)");
 			sql.add("insert into TREES VALUES ('tree1', 155, 144.32)");
 			sql.add("insert into TREES VALUES ('tree2', 132, 1004.53)");
 
-			sql.add("CREATE TABLE IF NOT EXISTS CUSTOMERS (name CHAR(50), customerID INTEGER, country VARCHAR(255), PRIMARY KEY(customerID))");
-			sql.add("insert into CUSTOMERS VALUES ('Freeman', 1, 'USA')");
-			sql.add("insert into CUSTOMERS VALUES ('Jasper', 2, 'England')");
-			sql.add("insert into CUSTOMERS VALUES ('Simpson', 3, 'USA')");
-			sql.add("insert into CUSTOMERS VALUES ('Alfred', 4, 'England')");
-			sql.add("insert into CUSTOMERS VALUES ('Jenkins', 5, 'Australia')");
-			sql.add("insert into CUSTOMERS VALUES ('Caesar', 6, 'England')");
-			sql.add("insert into CUSTOMERS VALUES ('Peter', 7, 'USA')");
-			sql.add("insert into CUSTOMERS VALUES ('Flint', 8, 'USA')");
+			sql.add("CREATE TABLE IF NOT EXISTS CUSTOMERS (name CHAR(50), customerID INTEGER, country VARCHAR(255), employeeID INTEGER, PRIMARY KEY(customerID))");
+			sql.add("insert into CUSTOMERS VALUES ('Freeman', 1, 'USA', 1)");
+			sql.add("insert into CUSTOMERS VALUES ('Jasper', 2, 'England', 1)");
+			sql.add("insert into CUSTOMERS VALUES ('Simpson', 3, 'USA', 1)");
+			sql.add("insert into CUSTOMERS VALUES ('Alfred', 4, 'England', 1)");
+			sql.add("insert into CUSTOMERS VALUES ('Jenkins', 5, 'Australia', 2)");
+			sql.add("insert into CUSTOMERS VALUES ('Caesar', 6, 'England', 2)");
+			sql.add("insert into CUSTOMERS VALUES ('Peter', 7, 'USA', 2)");
+			sql.add("insert into CUSTOMERS VALUES ('Flint', 8, 'USA', 3)");
+
+//			sql.add("CREATE TABLE IF NOT EXISTS ORDERS (orderID INTEGER, orderDate DATE, customerID INTEGER, employeeID INTEGER, PRIMARY KEY(orderID))");
+//			sql.add("insert into ORDERS VALUES (1, '1999-05-05', 2,  ")
 
 			createDataBase(stmt);
 		}
@@ -129,7 +132,8 @@ public class H2DataBaseProvider {
 			sql.add("CREATE TABLE IF NOT EXISTS PRIMARYKEY_REGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER, PRIMARY KEY (customerID))");
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Alfred', 62, 0)");
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Simpson', 42, 1)");
-			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Freeman', 22, 2)");
+			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Simpson', 42, 2)");
+			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Freeman', 22, 3)");
 
 			sql.add("CREATE TABLE IF NOT EXISTS FULLREGISTRATION (first VARCHAR(10), age INTEGER, customerID INTEGER)");
 			sql.add("insert into FULLREGISTRATION VALUES ('Alfred', 62, 1)");
