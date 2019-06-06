@@ -1,15 +1,11 @@
 package com.basiscomponents.db;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
-
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResultSetJSonConversionTest {
 
@@ -149,6 +145,7 @@ public class ResultSetJSonConversionTest {
         assertEquals( dr0.getFieldAsNumber(DataRowProvider.STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.STRINGFIELD),s + " STRINGFIELD values differ");
         assertEquals( dr0.getFieldAsNumber(DataRowProvider.FRT_STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.FRT_STRINGFIELD),s + " FRT_STRINGFIELD values differ");
         assertEquals( dr0.getFieldAsNumber(DataRowProvider.FTH_STRINGFIELD), newDr0.getFieldAsNumber(DataRowProvider.FTH_STRINGFIELD),s + " FTH_STRINGField values difer");
+
 		assertEquals(dr0.getFieldAsNumber(DataRowProvider.STH_STRINGFIELD),
 				newDr0.getFieldAsNumber(DataRowProvider.STH_STRINGFIELD), s + " STH_STRINGField values difer");
 		assertEquals(dr0.getFieldAsNumber(DataRowProvider.SVT_STRINGFIELD),
@@ -373,13 +370,20 @@ public class ResultSetJSonConversionTest {
         String s = rs0.toJson();
 
         assertFalse(s.isEmpty());
+        try {
+            ResultSet rs1 = ResultSet.fromJson(s);
+            DataRow newDr0 = rs1.get(0);
 
-        ResultSet rs1 = ResultSet.fromJson(s);
-        DataRow newDr0 = rs1.get(0);
+            equalityAsStringDataRowTest(dr0, newDr0, s);
+            equalityAsNumberDataRowTest(dr0, newDr0, s);
+            equalityAsValueDataRowTest(dr0, newDr0, s, true);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
 
-        equalityAsStringDataRowTest(dr0, newDr0, s);
-        equalityAsNumberDataRowTest(dr0, newDr0, s);
-        equalityAsValueDataRowTest(dr0, newDr0, s, true);
+
+
     }
 
     /**

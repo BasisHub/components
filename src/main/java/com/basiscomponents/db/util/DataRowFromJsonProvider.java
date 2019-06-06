@@ -1,15 +1,5 @@
 package com.basiscomponents.db.util;
 
-import java.io.IOException;
-import java.sql.Types;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
@@ -20,13 +10,21 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.google.gson.JsonElement;
+
+import java.io.IOException;
+import java.sql.Types;
+import java.text.ParseException;
+import java.util.*;
 
 public class DataRowFromJsonProvider {
 
 	private static final String COLUMN_TYPE = "ColumnType";
-
-	public static DataRow fromJson(final String in, final DataRow meta)
-			throws JsonParseException, IOException, ParseException {
+	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
+		return fromJson(in,meta,null);
+	}
+	public static DataRow fromJson(final String in, final DataRow meta, JsonElement attributes)
+			throws IOException, ParseException {
 		String input = in;
 		if (input.length() < 2) {
 			return new DataRow();
@@ -45,7 +43,6 @@ public class DataRowFromJsonProvider {
 
 			List<?> navigation = objectMapper.readValue(jsonParser,
 					objectMapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-
 			if (navigation.isEmpty()) {
 				return new DataRow();
 			}
@@ -68,12 +65,21 @@ public class DataRowFromJsonProvider {
 			} else {
 				handleOldFormat(navigation, dr);
 			}
+			if (attributes!=null){
+				attributes.getAsJsonObject().entrySet().stream().forEach(entry->dr.setAttribute(entry.getKey(),entry.getValue().getAsString()));
+			}
 			return dr;
 		}
 	}
 
 	private static void createDataFields(JsonNode root, DataRow attributes, HashMap<?, ?> hm, DataRow dr)
 			throws ParseException, JsonParseException, IOException {
+		
+		JsonNode root2;
+		if (root.isArray())
+			root2 = root.get(0);
+		else
+			root2 = root;
 		for (String fieldName : attributes.getFieldNames()) {
 			Object fieldObj = hm.get(fieldName);
 			int fieldType = attributes.getFieldType(fieldName);
@@ -93,20 +99,14 @@ public class DataRowFromJsonProvider {
 				break;
 
 			case -974:
-				// nested DataRow
-				System.out.println("fromJson might have issues");
-				// FIXME: need to parse and create the nested ResultSet as well
-				// this is https://github.com/BasisHub/components/issues/115
-
-				dr.setFieldValue(fieldName, DataRow.fromJson(root.get(fieldName).toString()));
-
+				String nestedJson = "";
+				nestedJson =root2.get(fieldName).toString();
+				dr.setFieldValue(fieldName, DataRow.fromJson(nestedJson));
 				break;
 			case -975:
-				// nested ResultSet
-				System.err.println("fromJson might have issues");
-				// FIXME: seems to be working, but attributes are lost
-				// this is https://github.com/BasisHub/components/issues/115
-				dr.setFieldValue(fieldName, ResultSet.fromJson(root.get(fieldName).toString()));
+				String nestedJson1 = "";
+				nestedJson1 = root2.get(fieldName).toString();
+				dr.setFieldValue(fieldName, ResultSet.fromJson(nestedJson1));
 				break;
 
 			case java.sql.Types.CHAR:
@@ -117,7 +117,7 @@ public class DataRowFromJsonProvider {
 			case java.sql.Types.LONGNVARCHAR:
 				// got a JSON object - save it as a JSON String
 				if (fieldObj.getClass().equals(java.util.LinkedHashMap.class)) {
-					dr.addDataField(fieldName, fieldType, new DataField(root.get(fieldName).toString()));
+					dr.addDataField(fieldName, fieldType, new DataField(root2.get(fieldName).toString()));
 					dr.setFieldAttribute(fieldName, "StringFormat", "JSON");
 				} else
 					dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
@@ -190,6 +190,10 @@ public class DataRowFromJsonProvider {
 			HashMap<String, HashMap> m = (HashMap<String, HashMap>) hm.get("meta");
 			if (m != null && m.containsKey(fieldName)) {
 				attr.putAll((HashMap<String, String>) m.get(fieldName));
+
+				//remove the ColumnType as extra Attribute
+				//attr.remove("ColumnType");
+				
 				dr.setFieldAttributes(fieldName, attr);
 			}
 		}
@@ -245,16 +249,35 @@ public class DataRowFromJsonProvider {
 
 	private static void createNonExistingAttributes(JsonNode root, DataRow attributes, HashMap<?, ?> hm) {
 		// add all fields to the attributes record that were not part of it before
+		JsonNode root2;
+		if (root.isArray())
+			root2=root.get(0);
+		else
+			root2=root;
+		
 		Iterator<?> it2 = hm.keySet().iterator();
 		while (it2.hasNext()) {
 			String fieldName = (String) it2.next();
-			if (!attributes.contains(fieldName) && !fieldName.equals("meta") && root.get(fieldName) != null) {
-				switch (root.get(fieldName).getNodeType().toString()) {
+			if (!attributes.contains(fieldName) && !fieldName.equals("meta") && root2.get(fieldName) != null) {
+				String type=root2.get(fieldName).getNodeType().toString();
+				switch (type) {
 				case "NUMBER":
 					attributes.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
 					break;
 				case "BOOLEAN":
 					attributes.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
+					break;
+				case "OBJECT":
+					//a nested DataRow
+					attributes.addDataField(fieldName, -974, new DataField(null));
+					break;
+				case "ARRAY":
+					//a nested DataRow or ArrayList / BBjVector
+					String subtype=root2.get(fieldName).get(0).getNodeType().toString();
+					if (subtype == "OBJECT")
+						attributes.addDataField(fieldName, -975, new DataField(null));
+					else
+						attributes.addDataField(fieldName, -973, new DataField(null));
 					break;
 				default:
 					attributes.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));

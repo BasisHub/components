@@ -1,12 +1,12 @@
 package com.basiscomponents.db.util;
 
+import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.ResultSet;
+
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
-import com.basiscomponents.db.DataField;
-import com.basiscomponents.db.ResultSet;
 
 public class DataFieldConverter {
 	private static final String JAVA_MATH_BIG_DECIMAL = "java.math.BigDecimal";
@@ -137,14 +137,24 @@ public class DataFieldConverter {
 					return null;
 				else {
 					try {
-						if (tmpstr.indexOf('.') != -1)
-							return new java.sql.Date(
-									new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S").parse((String) o).getTime());
-						else if (tmpstr.indexOf(':') != -1)
-							return new java.sql.Date(
-									new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String) o).getTime());
-						else
-							return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse(tmpstr).getTime());
+						StringBuilder format;
+						format=new StringBuilder("yyyy-MM-dd");
+						if(tmpstr.contains("T")){
+							format.append("'T'");
+						}else{
+							format.append(' ');
+						}
+						if(tmpstr.contains(":")){
+							format.append("HH:mm:ss");
+						}
+						if (tmpstr.contains(".")){
+							format.append(".SSS");
+						}
+						if(tmpstr.matches("\\d{4}-\\d{2}-\\d{2}[T\\s]+.*-\\d{2}:\\d{2}")){
+							format.append('X');
+						}
+						return new java.sql.Date(new SimpleDateFormat(format.toString()).parse(tmpstr).getTime());
+
 					} catch (ParseException e) {
 						throw new IllegalStateException("Date [" + o + "] could not be parsed", e);
 					}
@@ -183,6 +193,15 @@ public class DataFieldConverter {
 					String p1 = p.substring(0, p.indexOf('+'));
 					try {
 						return java.sql.Timestamp.valueOf(p1);	
+					}
+					catch (Exception e){
+					}
+
+				}
+				if (p.contains("-")) {
+					String p1 = p.substring(0, p.lastIndexOf('-'));
+					try {
+						return java.sql.Timestamp.valueOf(p1);
 					}
 					catch (Exception e){
 					}
