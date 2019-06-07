@@ -147,7 +147,7 @@
 
 		<dependency>
 			<groupId>org.apache</groupId>
-			<artifactId>commons-lang.jar</artifactId>
+			<artifactId>commons-lang3-3.8.1.jar</artifactId>
 			<version>3.8.1</version>
 			<scope>system</scope>
 			<systemPath>${jar-directory}/commons-lang3-3.8.1.jar</systemPath>
