@@ -3,18 +3,17 @@
  */
 package com.basiscomponents.ui.layout;
 
-import java.awt.Dimension;
-
-import com.basis.bbj.client.sysgui.datatypes.BBjColor;
-import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.BBjSysGui;
 import com.basis.bbj.proxies.sysgui.BBjDrawPanel;
 import com.basis.bbj.proxies.sysgui.BBjWindow;
+import com.basis.startup.type.BBjException;
+import com.basis.startup.type.sysgui.BBjColor;
 import com.basis.util.common.BasisNumber;
-
 import net.miginfocom.layout.ComponentWrapper;
 import net.miginfocom.layout.ContainerWrapper;
 import net.miginfocom.layout.PlatformDefaults;
+
+import java.awt.*;
 
 /**
  * @author rlance

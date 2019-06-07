@@ -1,5 +1,16 @@
 package com.basiscomponents.db.importer;
 
+import com.basis.bbj.datatypes.TemplatedString;
+import com.basis.filesystem.ConnectionMgr;
+import com.basis.filesystem.FilePosition;
+import com.basis.filesystem.Filesystem;
+import com.basis.filesystem.FilesystemEOFException;
+import com.basis.filesystem.FilesystemException;
+import com.basis.filesystem.util.KeyDescription;
+import com.basis.startup.type.BBjException;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,17 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.basis.bbj.client.util.BBjException;
-import com.basis.bbj.datatypes.TemplatedString;
-import com.basis.filesystem.ConnectionMgr;
-import com.basis.filesystem.FilePosition;
-import com.basis.filesystem.Filesystem;
-import com.basis.filesystem.FilesystemEOFException;
-import com.basis.filesystem.FilesystemException;
-import com.basis.filesystem.util.KeyDescription;
-import com.basiscomponents.db.DataRow;
-import com.basiscomponents.db.ResultSet;
 
 /**
  * Imports the data of a Data File into a com.basiscomponents.db.ResultSet
