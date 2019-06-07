@@ -24,6 +24,13 @@ package com.basiscomponents.comm;
  *  OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.basis.bbj.proxies.BBjAPI;
+import com.basis.bbj.proxies.BBjNamespace;
+import com.basis.startup.type.BBjException;
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.server.WebSocketServer;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -37,14 +44,6 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-
-import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.WebSocketServer;
-
-import com.basis.bbj.client.util.BBjException;
-import com.basis.bbj.proxies.BBjAPI;
-import com.basis.bbj.proxies.BBjNamespace;
 
 /**
  * A simple WebSocketServer implementation. Keeps track of a "chatroom".

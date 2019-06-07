@@ -587,7 +587,7 @@ public class DataRow implements java.io.Serializable {
 	 * Returns the value of the DisplaySize property from the metadata for the field
 	 * with the given name.
 	 *
-	 * @param name
+	 * @param fieldName
 	 *            The name of the field.
 	 *
 	 * @return The value of the DisplaySize property for the field name.
@@ -604,7 +604,7 @@ public class DataRow implements java.io.Serializable {
 	 * Returns the value of the CatalogName property from the metadata for the field
 	 * with the given name or an empty string in case the property isn't set.
 	 *
-	 * @param name
+	 * @param fieldName
 	 *            The name of the field.
 	 *
 	 * @return The value of the CatalogName property for the field name.
@@ -621,7 +621,7 @@ public class DataRow implements java.io.Serializable {
 	 * Returns the value of the ClassName property from the metadata for the field
 	 * with the given name or an empty string in case the property isn't set.
 	 *
-	 * @param name
+	 * @param fieldName
 	 *            The name of the field.
 	 *
 	 * @return The value of the ClassName property for the field name.
@@ -1380,8 +1380,8 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 *             Gets thrown in case the JSON could not be parsed / is invalid
 	 */
-	public static DataRow fromJson(String j) throws JsonParseException, IOException, ParseException {
-		return fromJson(j, null);
+	public static DataRow fromJson(String in) throws JsonParseException, IOException, ParseException {
+		return fromJson(in, null);
 	}
 
 	/**

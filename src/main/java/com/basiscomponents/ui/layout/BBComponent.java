@@ -3,14 +3,14 @@
  */
 package com.basiscomponents.ui.layout;
 
-import java.awt.Dimension;
-
-import com.basis.bbj.client.util.BBjException;
 import com.basis.bbj.proxies.sysgui.BBjControl;
 import com.basis.bbj.proxies.sysgui.BBjFont;
 import com.basis.bbj.proxies.sysgui.BBjListButton;
 import com.basis.bbj.proxies.sysgui.BBjListEdit;
+import com.basis.startup.type.BBjException;
 import com.basis.util.common.BasisNumber;
+
+import java.awt.*;
 
 /**
  * @author rlance

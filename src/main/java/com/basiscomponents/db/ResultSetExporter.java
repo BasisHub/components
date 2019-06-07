@@ -1,5 +1,12 @@
 package com.basiscomponents.db;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -8,13 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 
 /**
  * Provides static methods to export a {@link com.basiscomponents.db.ResultSet
@@ -652,17 +652,17 @@ public class ResultSetExporter {
 					columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
 					if (currentRow.contains(currentFieldName)) {
 						if (numericTypes.contains(columnType)) {
-							cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+							cell.setCellType(CellType.NUMERIC);
 							cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
 						} else if (columnType == java.sql.Types.BOOLEAN) {
-							cell.setCellType(XSSFCell.CELL_TYPE_BOOLEAN);
+							cell.setCellType(CellType.BOOLEAN);
 							cell.setCellValue(currentRow.getField(currentFieldName).getBoolean());
 						} else if (columnType == java.sql.Types.BINARY || columnType == java.sql.Types.LONGVARBINARY
 								|| columnType == java.sql.Types.VARBINARY) {
-							cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+							cell.setCellType(CellType.STRING);
 							cell.setCellValue(new String(currentRow.getField(currentFieldName).getBytes()));
 						} else {
-							cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+							cell.setCellType(CellType.STRING);
 							cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
 						}
 					}

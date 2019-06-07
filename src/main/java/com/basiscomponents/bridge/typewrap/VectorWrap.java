@@ -1,15 +1,15 @@
 package com.basiscomponents.bridge.typewrap;
 
-import java.util.Iterator;
-import java.util.List;
-
-import com.basis.bbj.client.datatypes.BBjVector;
-import org.apache.commons.lang3.StringEscapeUtils;
+import com.basis.startup.type.BBjVector;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang3.StringEscapeUtils;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class VectorWrap extends BBjVector {
 
