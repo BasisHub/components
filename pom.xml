@@ -196,7 +196,7 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>6.8.0</version>
+			<version>6.6.0</version>
 			<scope>system</scope>
 			<systemPath>${jar-directory}/jasperreports-javaflow-6.8.0.jar</systemPath>
 		</dependency>
