@@ -160,7 +160,7 @@
 			<artifactId>poi.jar</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/poi-3.15.jar</systemPath>
+			<systemPath>${jar-directory}/poi-4.1.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -168,7 +168,7 @@
 			<artifactId>poi-excelant.jar</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/poi-excelant-3.15.jar</systemPath>
+			<systemPath>${jar-directory}/poi-excelant-4.1.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -176,7 +176,7 @@
 			<artifactId>poi-ooxml.jar</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/poi-ooxml-3.15.jar</systemPath>
+			<systemPath>${jar-directory}/poi-ooxml-4.1.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -196,9 +196,9 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>6.6.0</version>
+			<version>6.8.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/jasperreports-javaflow-6.6.0.jar</systemPath>
+			<systemPath>${jar-directory}/jasperreports-javaflow-6.8.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
