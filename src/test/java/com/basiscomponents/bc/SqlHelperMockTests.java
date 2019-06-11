@@ -1,5 +1,7 @@
 package com.basiscomponents.bc;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -24,11 +26,7 @@ public class SqlHelperMockTests {
 	/*
 	 * These tests check the functionality of the listed methods:
 	 * 
-	 * -setSqlParams(java.sql.PreparedStatement prep, com.basiscomponents.db.DataRow
-	 * dr, java.util.List<String> fields,boolean isBasisDBMS)
-	 * 
-	 * -setPreparedStatementType(java.sql.PreparedStatement prep, boolean
-	 * isBasisDBMS, int index, Integer type, com.basiscomponents.db.DataField o)
+	 * setSqlParams,setPreparedStatementType
 	 * 
 	 */
 
@@ -223,4 +221,89 @@ public class SqlHelperMockTests {
 		verify(ps, times(1)).setBoolean(ArgumentMatchers.eq(1), ArgumentMatchers.eq(true));
 		verify(ps, times(1)).setString(ArgumentMatchers.eq(2), ArgumentMatchers.eq("Hi"));
 	}
+
+	/**
+	 * Checks the PreparedStatement to be filled with the correct values in the
+	 * right order.
+	 * 
+	 * @throws Exception
+	 */
+//	@Test
+	public void sqlHelperIsBasisDataBaseTest() throws Exception {
+
+		// Preparing objects for the method "setSqlParams"
+		DataRow dr = new DataRow();
+		dr.setFieldValue("IntField", null);
+		dr.setFieldAttribute("IntField", "ColumnType", "4");
+		String s = null;
+		dr.setFieldValue("StringField", s);
+		BigDecimal bd = null;
+		dr.setFieldValue("BigDecimalField", bd);
+//		dr.setFieldValue("NullField", null);
+		java.sql.PreparedStatement ps = mock(java.sql.PreparedStatement.class);
+
+		// Perform the method
+		SQLHelper.setSqlParams(ps, dr, null, true);
+
+		// Verify the Mock
+		verify(ps, times(1)).setInt(ArgumentMatchers.eq(1), ArgumentMatchers.eq(0));
+		verify(ps, times(1)).setString(ArgumentMatchers.eq(2), ArgumentMatchers.eq(""));
+		verify(ps, times(1)).setBigDecimal(ArgumentMatchers.eq(3), ArgumentMatchers.eq(new java.math.BigDecimal(0)));
+//		verify(ps, times(1)).setString(ArgumentMatchers.eq(4), ArgumentMatchers.eq(""));
+	}
+
+	/*
+	 * These tests check the functionality of the listed methods:
+	 * 
+	 * setParameters, isCharType
+	 * 
+	 */
+
+	/**
+	 * Checks the PreparedStatement to be filled with the correct values in the
+	 * right order.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void setParametersTest() throws Exception {
+
+		// Preparing objects for the method "setSqlParams"
+		DataRow dr = new DataRow();
+		dr.setFieldValue("BoolField", true);
+		dr.setFieldValue("IntField", 3);
+		dr.setFieldValue("StringField", "Hi");
+		java.sql.PreparedStatement ps = mock(java.sql.PreparedStatement.class);
+
+		// Perform the method
+		SQLHelper.setParameters(dr, ps);
+
+		// Verify the Mock
+		verify(ps, times(1)).setObject(ArgumentMatchers.eq(1), ArgumentMatchers.eq(true));
+		verify(ps, times(1)).setObject(ArgumentMatchers.eq(2), ArgumentMatchers.eq(3));
+		verify(ps, times(1)).setObject(ArgumentMatchers.eq(3), ArgumentMatchers.eq("Hi"));
+	}
+
+	/**
+	 * Checks the simple functionality of isCharType
+	 * 
+	 */
+	@Test
+	public void isChartypeTest() {
+		boolean test = true;
+		test = SQLHelper.isChartype(java.sql.Types.CHAR) && test;
+		test = SQLHelper.isChartype(java.sql.Types.VARCHAR) && test;
+		test = SQLHelper.isChartype(java.sql.Types.LONGVARCHAR) && test;
+		test = SQLHelper.isChartype(java.sql.Types.NCHAR) && test;
+		test = SQLHelper.isChartype(java.sql.Types.NVARCHAR) && test;
+		test = SQLHelper.isChartype(java.sql.Types.NVARCHAR) && test;
+		test = SQLHelper.isChartype(java.sql.Types.CLOB) && test;
+
+		assertTrue(test);
+
+		test = SQLHelper.isChartype(java.sql.Types.INTEGER) && test;
+
+		assertFalse(test);
+	}
+
 }

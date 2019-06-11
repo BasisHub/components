@@ -74,7 +74,7 @@ public class SQLHelper {
 			case java.sql.Types.INTEGER:
 				if (isBasisDBMS && o.getValue() == null)
 					prep.setInt(index, 0);
-				else
+			else
 					prep.setInt(index, o.getInt());
 				break;
 			case java.sql.Types.DOUBLE:
