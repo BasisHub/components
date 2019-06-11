@@ -61,13 +61,6 @@
 	</profiles>
 
 	<dependencies>
-                <dependency>
-                        <groupId>com.basis.lib</groupId>
-                        <artifactId>BBjStartup.jar</artifactId>
-                        <scope>system</scope>
-                        <version>1.0</version>
-                        <systemPath>${jar-directory}/BBjStartup.jar</systemPath>
-                </dependency>
 		<dependency>
 			<groupId>com.basis.lib</groupId>
 			<artifactId>BBj.jar</artifactId>
