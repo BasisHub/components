@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchers;
 import com.basiscomponents.bc.util.SQLHelper;
 import com.basiscomponents.db.DataRow;
 
-public class SqlHelperMockTests {
+public class SqlHelperTest {
 
 	/*
 	 * These tests check the functionality of the listed methods:
@@ -229,6 +229,8 @@ public class SqlHelperMockTests {
 	 * @throws Exception
 	 */
 //	@Test
+	// There is a strange interaction with the isBasisDatabase boolean
+	// Could be a bug
 	public void sqlHelperIsBasisDataBaseTest() throws Exception {
 
 		// Preparing objects for the method "setSqlParams"

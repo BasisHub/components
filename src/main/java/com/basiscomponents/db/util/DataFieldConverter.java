@@ -1,12 +1,12 @@
 package com.basiscomponents.db.util;
 
-import com.basiscomponents.db.DataField;
-import com.basiscomponents.db.ResultSet;
-
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
+import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.ResultSet;
 
 public class DataFieldConverter {
 	private static final String JAVA_MATH_BIG_DECIMAL = "java.math.BigDecimal";

@@ -43,6 +43,7 @@ public class SQLHelper {
 			}
 
 			if (o.getValue() == null) {
+				// If the o.getValue() is null you will never get to setPreparedStatement
 				if (isBasisDBMS && type == java.sql.Types.CHAR) {
 					prep.setString(index, "");
 				} else {

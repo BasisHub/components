@@ -1,12 +1,14 @@
 package com.basiscomponents.bc;
 
-import com.basiscomponents.bc.util.CloseableWrapper;
-import com.basiscomponents.bc.util.SqlConnectionHelper;
-import com.basiscomponents.db.DataField;
-import com.basiscomponents.db.DataRow;
-import com.basiscomponents.db.ResultSet;
-import com.basiscomponents.db.util.DataRowRegexMatcher;
-import com.basiscomponents.util.KeyValuePair;
+import static com.basiscomponents.bc.util.Constants.AND;
+import static com.basiscomponents.bc.util.Constants.BASIS_DBMS;
+import static com.basiscomponents.bc.util.Constants.COLUMN_NAME;
+import static com.basiscomponents.bc.util.Constants.ERROR;
+import static com.basiscomponents.bc.util.Constants.MYSQL_DBMS;
+import static com.basiscomponents.bc.util.Constants.WHERE;
+import static com.basiscomponents.bc.util.SQLHelper.isChartype;
+import static com.basiscomponents.bc.util.SQLHelper.setParameters;
+import static com.basiscomponents.bc.util.SQLHelper.setSqlParams;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -23,8 +25,13 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.basiscomponents.bc.util.Constants.*;
-import static com.basiscomponents.bc.util.SQLHelper.*;
+import com.basiscomponents.bc.util.CloseableWrapper;
+import com.basiscomponents.bc.util.SqlConnectionHelper;
+import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.util.DataRowRegexMatcher;
+import com.basiscomponents.util.KeyValuePair;
 
 /**
  * <h1>SqlTableBC represents a table in a database.</h1>
