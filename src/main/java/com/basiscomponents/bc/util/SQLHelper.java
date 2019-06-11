@@ -1,8 +1,8 @@
 package com.basiscomponents.bc.util;
 
-import java.sql.SQLException;
-
 import static com.basiscomponents.db.ExpressionMatcher.getPreparedWhereClauseValues;
+
+import java.sql.SQLException;
 
 public class SQLHelper {
 	/**
@@ -79,7 +79,7 @@ public class SQLHelper {
 				break;
 			case java.sql.Types.DOUBLE:
 				prep.setDouble(index, o.getDouble());
-				break;
+			break;
 			case java.sql.Types.LONGNVARCHAR:
 			case java.sql.Types.CHAR:
 			case java.sql.Types.VARCHAR:

@@ -1,19 +1,20 @@
 package com.basiscomponents.bc;
 
 
-import com.basiscomponents.db.DataField;
-import com.basiscomponents.db.DataRow;
-import com.basiscomponents.db.ResultSet;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
 
 public class SqlTableBCFilterTest {
 
