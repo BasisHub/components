@@ -183,31 +183,24 @@ public class DataFieldConverter {
 				if (tmpstr.isEmpty())
 					return null;
 				
-				try {
-					return java.sql.Timestamp.valueOf(p);	
-				}
-				catch (Exception e){
-				}
+				// split off timezone
+				// TODO: detect timezone by offset and adjust the timestamp accordingly
+				// TODO: find a better performing implementation
 
+				String tz_offs = "";
 				if (p.contains("+")) {
-					String p1 = p.substring(0, p.indexOf('+'));
-					try {
-						return java.sql.Timestamp.valueOf(p1);	
-					}
-					catch (Exception e){
-					}
-
+					tz_offs = tmpstr.substring(p.indexOf('+'));
+					p = p.substring(0, p.indexOf('+'));
 				}
+				p = p.replaceFirst("-", "X");
+				p = p.replaceFirst("-", "X");
 				if (p.contains("-")) {
-					String p1 = p.substring(0, p.lastIndexOf('-'));
-					try {
-						return java.sql.Timestamp.valueOf(p1);
-					}
-					catch (Exception e){
-					}
-
+					tz_offs = p.substring(p.indexOf('-'));
+					p = p.substring(0, p.indexOf('-') - 1);
 				}
-				System.err.println("ERROR PARSING DATE "+p);
+				p = p.replaceFirst("X", "-");
+				p = p.replaceFirst("X", "-");
+				return java.sql.Timestamp.valueOf(p);
 			}
 
 			break;
