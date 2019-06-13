@@ -12,4 +12,4 @@ target/
 .settings/
 /bin/
 .idea
-src/test/testH2DataBases
+src/test/testH2DataBase/
