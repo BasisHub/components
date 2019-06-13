@@ -1,6 +1,7 @@
 package com.basiscomponents.db;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -13,15 +14,32 @@ public class DataFieldConverterTest {
 
 	private DataField df = new DataField(0);
 
+	@Test
+	public void dataFieldConverterSpecialCasesTest() {
+
+		// Value is null, the targetType can be any number
+		df.setValue(null);
+		assertEquals(null, DataFieldConverter.convertType(df.getValue(), 42));
+
+		// Value is a DataField
+//		df.setValue(5);
+//		assertEquals(5, DataFieldConverter.convertType(df, java.sql.Types.INTEGER));
+		
+		// TargetType does not exist
+		df.setValue(5);
+		assertEquals(5, DataFieldConverter.convertType(df.getValue(), 42));
+
+	}
+
 	/**
 	 * Tries to convert Integer into every other supported type.
 	 * 
 	 */
 	@Test
-	public void DataFieldConverterIntegerTest() {
-		df.setValue(5);
+	public void dataFieldConverterIntegerTest() {
 
 		// Int to Int
+		df.setValue(5);
 		assertEquals(5, DataFieldConverter.convertType(df.getValue(), java.sql.Types.TINYINT));
 		assertEquals(5, DataFieldConverter.convertType(df.getValue(), java.sql.Types.SMALLINT));
 		assertEquals(5, DataFieldConverter.convertType(df.getValue(), java.sql.Types.INTEGER));
@@ -58,7 +76,7 @@ public class DataFieldConverterTest {
 	 * 
 	 */
 	@Test
-	public void DataFieldConverterBooleanTest() {
+	public void dataFieldConverterBooleanTest() {
 
 		// Bool to Int
 		df.setValue(true);
@@ -109,7 +127,7 @@ public class DataFieldConverterTest {
 	 * 
 	 */
 	@Test
-	public void DataFieldConverterDoubleTest() {
+	public void dataFieldConverterDoubleTest() {
 
 		// Double to Int
 		df.setValue(4.2);
@@ -130,6 +148,21 @@ public class DataFieldConverterTest {
 		df.setValue(4.2);
 		assertEquals(4.2, DataFieldConverter.convertType(df.getValue(), java.sql.Types.REAL));
 		assertEquals(4.2, DataFieldConverter.convertType(df.getValue(), java.sql.Types.DOUBLE));
+
+		// Double to String
+		assertEquals("4.2", DataFieldConverter.convertType(df.getValue(), java.sql.Types.CHAR));
+		assertEquals("4.2", DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
+		assertEquals("4.2", DataFieldConverter.convertType(df.getValue(), java.sql.Types.LONGVARCHAR));
+
+		// Double to Decimal
+		assertEquals(new BigDecimal("4.2"), DataFieldConverter.convertType(df.getValue(), java.sql.Types.DECIMAL));
+
+		// Double to Date
+
+		// Double to Time
+
+		// Double to Timestamp
+
 	}
 
 	/**
@@ -137,9 +170,65 @@ public class DataFieldConverterTest {
 	 * 
 	 */
 	@Test
-	public void DataFieldConverterStringTest() {
+	public void dataFieldConverterStringTest() {
+
+		// String to Int
+		df.setValue("Hi");
+		assertThrows(NumberFormatException.class,
+				() -> DataFieldConverter.convertType(df.getValue(), java.sql.Types.TINYINT));
+		assertThrows(NumberFormatException.class,
+				() -> DataFieldConverter.convertType(df.getValue(), java.sql.Types.SMALLINT));
+		assertThrows(NumberFormatException.class,
+				() -> DataFieldConverter.convertType(df.getValue(), java.sql.Types.INTEGER));
+		assertThrows(NumberFormatException.class,
+				() -> DataFieldConverter.convertType(df.getValue(), java.sql.Types.BIGINT));
+
+		df.setValue("42");
+		assertEquals(42, DataFieldConverter.convertType(df.getValue(), java.sql.Types.TINYINT));
+		assertEquals(42, DataFieldConverter.convertType(df.getValue(), java.sql.Types.SMALLINT));
+		assertEquals(42, DataFieldConverter.convertType(df.getValue(), java.sql.Types.INTEGER));
+		assertEquals(42, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BIGINT));
+
+		// String to bool
+		df.setValue("true");
+		assertEquals(true, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BOOLEAN));
+		assertEquals(true, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BIT));
+		df.setValue(".t.");
+		assertEquals(true, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BOOLEAN));
+		assertEquals(true, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BIT));
+		df.setValue("1");
+		assertEquals(true, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BOOLEAN));
+		assertEquals(true, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BIT));
+
+		df.setValue("false");
+		assertEquals(false, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BOOLEAN));
+		assertEquals(false, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BIT));
+		df.setValue("anythingElse");
+		assertEquals(false, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BOOLEAN));
+		assertEquals(false, DataFieldConverter.convertType(df.getValue(), java.sql.Types.BIT));
+
+		// String to Double
+		df.setValue("Hi");
+		assertThrows(NumberFormatException.class,
+				() -> DataFieldConverter.convertType(df.getValue(), java.sql.Types.REAL));
+		assertThrows(NumberFormatException.class,
+				() -> DataFieldConverter.convertType(df.getValue(), java.sql.Types.DOUBLE));
+
+		df.setValue("42.1337");
+		assertEquals(42.1337, DataFieldConverter.convertType(df.getValue(), java.sql.Types.REAL));
+		assertEquals(42.1337, DataFieldConverter.convertType(df.getValue(), java.sql.Types.DOUBLE));
+
+		// String to String
 		df.setValue("Hi");
 		assertEquals("Hi", DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
+		assertEquals("Hi", DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
+		assertEquals("Hi", DataFieldConverter.convertType(df.getValue(), java.sql.Types.LONGVARCHAR));
+
+		// String to Decimal
+		df.setValue("5465643.5443");
+		assertEquals(new BigDecimal("5465643.5443"),
+				DataFieldConverter.convertType(df.getValue(), java.sql.Types.DECIMAL));
+
 	}
 
 	/**
@@ -147,9 +236,24 @@ public class DataFieldConverterTest {
 	 * 
 	 */
 	@Test
-	public void DataFieldConverterDateTest() {
+	public void dataFieldConverterDateTest() {
 		Date date = new Date(System.currentTimeMillis());
 		df.setValue(date);
+
+		// Date to String
+		assertEquals(date.toString(), DataFieldConverter.convertType(df.getValue(), java.sql.Types.CHAR));
+		assertEquals(date.toString(), DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
+		assertEquals(date.toString(), DataFieldConverter.convertType(df.getValue(), java.sql.Types.LONGVARCHAR));
+
+		// Date to Date
 		assertEquals(date, DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
 	}
+
+//	@Test
+//	public void fieldToNumberTest() {
+//			
+//		df.setValue("5");
+//		
+//		System.out.println(DataFieldConverter.fieldToNumber(null, df, 1, java.sql.Types.VARCHAR));
+//	}
 }
