@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import org.junit.jupiter.api.Test;
 
@@ -65,9 +66,12 @@ public class DataFieldConverterTest {
 		assertEquals(new BigDecimal(5), DataFieldConverter.convertType(df.getValue(), java.sql.Types.DECIMAL));
 
 		// Int to Date
-//		assertEquals(new Date(5), DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
+		assertEquals(new Date(com.basis.util.BasisDate.date(5).getTime()),
+				DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
 
 		// Int to Timestamp
+		assertEquals(new Timestamp(com.basis.util.BasisDate.date(5).getTime()),
+				DataFieldConverter.convertType(df.getValue(), java.sql.Types.TIMESTAMP));
 
 	}
 
@@ -249,11 +253,14 @@ public class DataFieldConverterTest {
 		assertEquals(date, DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
 	}
 
-//	@Test
-//	public void fieldToNumberTest() {
-//			
-//		df.setValue("5");
-//		
-//		System.out.println(DataFieldConverter.fieldToNumber(null, df, 1, java.sql.Types.VARCHAR));
-//	}
+	@Test
+	public void fieldToNumberTest() {
+
+		df.setValue("5");
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(null, df, 1, java.sql.Types.VARCHAR));
+		df.setValue(5);
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(null, df, 1, java.sql.Types.VARCHAR));
+		df.setValue(5.0);
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(null, df, 1, java.sql.Types.VARCHAR));
+	}
 }
