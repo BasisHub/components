@@ -358,5 +358,16 @@ public class DataFieldConverterTest {
 		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.INTEGER));
 		df.setValue(5.0);
 		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.DOUBLE));
+		df.setValue(new Float(5));
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.REAL));
+		Time t;
+		try {
+			t = new Time(new SimpleDateFormat("HH:mm:ss").parse("23:59:59").getTime());
+			df.setValue(t);
+			assertEquals(Double.valueOf(23.999722222222225),
+					DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.TIME));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 }
