@@ -88,7 +88,7 @@ public class DataFieldConverter {
 			if (classname.equals(JAVA_LANG_DOUBLE))
 				return BigDecimal.valueOf((double) o);
 			if (classname.equals(JAVA_LANG_INTEGER))
-				return new BigDecimal((int) o);
+				return BigDecimal.valueOf((int) o);
 			if (tmpstr.isEmpty())
 				tmpstr = "0";
 			return new BigDecimal(tmpstr);
