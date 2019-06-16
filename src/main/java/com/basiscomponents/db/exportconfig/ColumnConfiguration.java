@@ -1,7 +1,8 @@
 package com.basiscomponents.db.exportconfig;
 
 /**
- * Provides the attributes and methods needed to manage a particular column in a spread sheet.
+ * Provides the attributes and methods needed to manage a particular column in a
+ * spread sheet.
  */
 public class ColumnConfiguration {
 	private String header = null;
@@ -15,12 +16,13 @@ public class ColumnConfiguration {
 	public ColumnConfiguration(String header) {
 		this.header = header;
 	}
-	
+
 	/**
 	 * Protected Constructor to be used by Builder class only
 	 */
-	protected ColumnConfiguration() {}
-	
+	protected ColumnConfiguration() {
+	}
+
 	public String getHeader() {
 		return header;
 	}
