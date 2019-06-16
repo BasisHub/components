@@ -565,6 +565,36 @@ public class ResultSetExporter {
 	 *            the field name.
 	 * @param sheetName
 	 *            A custom name for the sheet
+	 * @param attributesRecord
+	 *            attributesRecord the attributes record for formatting
+	 * @param sheetConfig
+	 * 			  Object containing customized configurations
+	 * 
+	 * @throws Exception
+	 *             Gets thrown in case the ResultSet could not be read or output
+	 *             stream can not be written
+	 */
+	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader, boolean useLabelIfPresent,
+			String sheetName, DataRow attributesRecord) throws Exception {
+		
+		writeXLSX(rs, out, writeHeader, useLabelIfPresent, sheetName, attributesRecord, null);		
+	}
+
+	/**
+	 * Writes the content of the given ResultSet into an output stream.
+	 * 
+	 * @param resultSet
+	 *            The ResultSet to export.
+	 * @param out
+	 *            The output stream in which to write the ResultSet's content.
+	 * @param writeHeader
+	 *            The boolean value indicating whether writing the column headers or
+	 *            not.
+	 * @param useLabelIfPresent
+	 *            if the attributes record contains labels, use the label instead of
+	 *            the field name.
+	 * @param sheetName
+	 *            A custom name for the sheet
 	 * @param DataRow
 	 *            attributesRecord the attributes record for formatting
 	 * 
@@ -574,7 +604,7 @@ public class ResultSetExporter {
 	 */
 	@SuppressWarnings("deprecation")
 	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader, boolean useLabelIfPresent,
-			String sheetName, DataRow AttributesRecord) throws Exception {
+			String sheetName, DataRow AttributesRecord, SheetConfiguration sheetConfig) throws Exception {
 
 		try (Workbook wb = new SXSSFWorkbook(400)) {
 			Sheet sheet = wb.createSheet(sheetName);
@@ -597,7 +627,14 @@ public class ResultSetExporter {
 				return;
 			}
 
-			List<String> fieldnames = rs.getColumnNames();
+			List<String> fieldnames;
+			if (sheetConfig == null) {
+				fieldnames = rs.getColumnNames();
+			}
+			else {
+				sheet = sheetConfig.getConfiguredSheet(sheet);
+				fieldnames = sheetConfig.getColumnNamesOrdered();
+			}
 			Iterator<DataRow> it = rs.iterator();
 			Iterator<String> fieldNameIterator;
 
