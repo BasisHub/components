@@ -7,6 +7,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import com.basiscomponents.db.exportconfig.SheetConfiguration;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -489,6 +491,39 @@ public class ResultSetExporter {
 		else
 			ar = new DataRow();
 		writeXLSX(rs, outputFile, writeHeader, false, "Sheet", ar);
+	}
+	
+	/**
+	 * Writes the content of the given ResultSet as XLSX into the specified File.
+	 * 
+	 * @param resultSet
+	 *            The ResultSet to export.
+	 * @param outputFile
+	 *            The File in which to write the ResultSet's content.
+	 * @param writeHeader
+	 *            The boolean value indicating whether writing the column headers or
+	 *            not.
+	 * @param sheetConfig
+	 *            Object containing customized configurations
+	 * 
+	 * @throws Exception
+	 *             Gets thrown in case the ResultSet could not be converted to a
+	 *             XLSX File
+	 */
+	public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader, SheetConfiguration sheetConfig) throws Exception {
+		DataRow ar;
+		if (rs.size() > 0)
+			ar = rs.get(0);
+		else
+			ar = new DataRow();
+		if (outputFile != null) {
+			try (FileOutputStream os = new FileOutputStream(outputFile)) {
+
+				writeXLSX(rs, new FileOutputStream(outputFile), writeHeader, false, "Sheet", ar, sheetConfig);
+
+				os.flush();
+			}
+		}
 	}
 
 	/**
