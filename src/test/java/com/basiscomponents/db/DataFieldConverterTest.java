@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -79,7 +80,6 @@ public class DataFieldConverterTest {
 		// TargetType does not exist
 		df.setValue(5);
 		assertEquals(5, DataFieldConverter.convertType(df.getValue(), 42));
-
 	}
 
 	/**
@@ -295,8 +295,13 @@ public class DataFieldConverterTest {
 				DataFieldConverter.convertType(df.getValue(), java.sql.Types.DECIMAL));
 
 		// String to Date
-		df.setValue("1999-05-05");
-//		System.out.println(DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
+		df.setValue("1999-05-05 23:59:59.999");
+		Long l = new Long("925941599999");
+		assertEquals(new Date(l), DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
+
+		df.setValue("Hi");
+		assertThrows(IllegalStateException.class,
+				() -> DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
 
 		// String to Time
 		df.setValue("23:59:59");
@@ -349,17 +354,40 @@ public class DataFieldConverterTest {
 	public void fieldToNumberTest() {
 
 		ResultSet rs = mock(ResultSet.class);
+
+		// FieldValue is null
+		df.setValue(null);
+		assertEquals(Double.valueOf(0.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.VARCHAR));
+		assertEquals(Double.valueOf(-1d), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.DATE));
+		assertEquals(Double.valueOf(-1d), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.TIMESTAMP));
+		assertEquals(Double.valueOf(-1d),
+				DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.TIMESTAMP_WITH_TIMEZONE));
+
 		when(rs.isSigned(1)).thenReturn(false);
+
+		// String
 		df.setValue("5");
 		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.VARCHAR));
 		df.setValue("");
 		assertEquals(Double.valueOf(0.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.VARCHAR));
+
+		// Numbers
 		df.setValue(5);
 		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.INTEGER));
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.TINYINT));
+		df.setValue(new Short("5"));
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.SMALLINT));
 		df.setValue(5.0);
 		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.DOUBLE));
 		df.setValue(new Float(5));
 		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.REAL));
+		df.setValue(new BigDecimal("5"));
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.DECIMAL));
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.NUMERIC));
+		df.setValue(new BigInteger("5"));
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.BIGINT));
+
+		// Time
 		Time t;
 		try {
 			t = new Time(new SimpleDateFormat("HH:mm:ss").parse("23:59:59").getTime());
@@ -369,5 +397,26 @@ public class DataFieldConverterTest {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+
+		// Boolean
+		df.setValue(true);
+		assertEquals(Double.valueOf(1.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.BIT));
+		assertEquals(Double.valueOf(1.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.BOOLEAN));
+		df.setValue(false);
+		assertEquals(Double.valueOf(0.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.BIT));
+		assertEquals(Double.valueOf(0.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.BOOLEAN));
+
+		// Special cases
+		when(rs.isSigned(1)).thenReturn(true);
+		df.setValue(5);
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.INTEGER));
+		assertEquals(null, DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.OTHER));
+		df.setValue(new Long("5"));
+		assertEquals(Double.valueOf(5.0), DataFieldConverter.fieldToNumber(rs, df, 1, java.sql.Types.BIGINT));
+		DataField dfMock = mock(DataField.class);
+		when(dfMock.getDate()).thenReturn(null);
+		when(dfMock.getValue()).thenReturn(5);
+		assertEquals(Double.valueOf(-1.0), DataFieldConverter.fieldToNumber(rs, dfMock, 1, java.sql.Types.TIMESTAMP));
+
 	}
 }
