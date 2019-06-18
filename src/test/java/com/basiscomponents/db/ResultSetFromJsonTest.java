@@ -31,7 +31,7 @@ public class ResultSetFromJsonTest {
 
 		assertEquals("ENG", rs.get(0).getFieldValue("LANGUAGE"));
         assertEquals("en", rs.get(0).getFieldValue("ISO639-1"));
-        assertEquals("en", rs.get(0).getFieldValue(""));
+		assertEquals("en", rs.get(0).getFieldValue(""));
     }
 
     /**
