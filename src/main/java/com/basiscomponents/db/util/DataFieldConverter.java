@@ -1,12 +1,12 @@
 package com.basiscomponents.db.util;
 
+import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.ResultSet;
+
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
-import com.basiscomponents.db.DataField;
-import com.basiscomponents.db.ResultSet;
 
 public class DataFieldConverter {
 	private static final String JAVA_MATH_BIG_DECIMAL = "java.math.BigDecimal";
@@ -196,7 +196,7 @@ public class DataFieldConverter {
 				p = p.replaceFirst("-", "X");
 				if (p.contains("-")) {
 					tz_offs = p.substring(p.indexOf('-'));
-					p = p.substring(0, p.indexOf('-') - 1);
+					p = p.substring(0, p.indexOf('-'));
 				}
 				p = p.replaceFirst("X", "-");
 				p = p.replaceFirst("X", "-");
