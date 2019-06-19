@@ -278,7 +278,7 @@ public class DataRowFromJsonProvider {
 				case "ARRAY":
 					//a nested DataRow or ArrayList / BBjVector
 					String subtype=root2.get(fieldName).get(0).getNodeType().toString();
-					if (subtype == "OBJECT")
+					if ("OBJECT".equals(subtype))
 						attributes.addDataField(fieldName, -975, new DataField(null));
 					else
 						attributes.addDataField(fieldName, -973, new DataField(null));
@@ -340,10 +340,9 @@ public class DataRowFromJsonProvider {
 		return input;
 	}
 
-	private static JsonNode buildJsonRoot(String input) throws IOException {
-		String intmp = input;
-		JsonNode root = new ObjectMapper().readTree(intmp);
-		return root;
+	private static JsonNode buildJsonRoot(final String input) throws IOException {
+		return new ObjectMapper().readTree(input);
+
 	}
 
 	private static String removeLeadingDataRow(String input) {
