@@ -1,11 +1,11 @@
 package com.basiscomponents.db;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;	
+import org.apache.poi.ss.usermodel.Row;	
+import org.apache.poi.ss.usermodel.Sheet;	
+import org.apache.poi.ss.usermodel.Workbook;	
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;	
+import org.apache.poi.xssf.usermodel.XSSFCell;
 
 import com.basiscomponents.db.config.export.SheetConfiguration;
 
@@ -591,6 +591,7 @@ public class ResultSetExporter {
 	 * @throws Exception Gets thrown in case the ResultSet could not be read or
 	 *                   output stream can not be written
 	 */
+	@SuppressWarnings("deprecation")
 	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader, boolean useLabelIfPresent,
 			String sheetName, DataRow AttributesRecord, SheetConfiguration sheetConfig) throws Exception {
 
@@ -676,17 +677,17 @@ public class ResultSetExporter {
 					columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
 					if (currentRow.contains(currentFieldName)) {
 						if (numericTypes.contains(columnType)) {
-							cell.setCellType(CellType.NUMERIC);
+							cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
 							cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
 						} else if (columnType == java.sql.Types.BOOLEAN) {
-							cell.setCellType(CellType.BOOLEAN);
+							cell.setCellType(XSSFCell.CELL_TYPE_BOOLEAN);
 							cell.setCellValue(currentRow.getField(currentFieldName).getBoolean());
 						} else if (columnType == java.sql.Types.BINARY || columnType == java.sql.Types.LONGVARBINARY
 								|| columnType == java.sql.Types.VARBINARY) {
-							cell.setCellType(CellType.STRING);
+							cell.setCellType(XSSFCell.CELL_TYPE_STRING);
 							cell.setCellValue(new String(currentRow.getField(currentFieldName).getBytes()));
 						} else {
-							cell.setCellType(CellType.STRING);
+							cell.setCellType(XSSFCell.CELL_TYPE_STRING);
 							cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
 						}
 					}
