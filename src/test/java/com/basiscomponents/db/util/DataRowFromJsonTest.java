@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.ParseException;
 
 import org.junit.jupiter.api.Test;
@@ -92,8 +94,8 @@ public class DataRowFromJsonTest {
 	}
 
 	/**
-	 * A conversion of a Json-String to a nested DataRow. A version with and without
-	 * MetaData is tested.
+	 * A conversion of a Json-String with a nested DataRow. A version with and
+	 * without MetaData is tested.
 	 * 
 	 * @throws IOException
 	 * @throws ParseException
@@ -127,7 +129,7 @@ public class DataRowFromJsonTest {
 	}
 
 	/**
-	 * A conversion of a Json-String to a nested ResultSet. A version with and
+	 * A conversion of a Json-String with a nested ResultSet. A version with and
 	 * without MetaData is tested.
 	 * 
 	 * @throws IOException
@@ -161,6 +163,40 @@ public class DataRowFromJsonTest {
 	}
 
 	/**
+	 * A conversion of a Json-String with a nested ArrayList. A version with and
+	 * without MetaData is tested.
+	 * 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+//	@Test
+//	public void dataRowFromJsonNestedArrayListTest() throws IOException, ParseException {
+//
+//		// Without MetaData
+//		json = "{\"name\":\"John\", \"resultset\":[{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}]}";
+//		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+//		assertEquals("John", dr.getFieldValue("name"));
+//
+//		// Checking the nested ResultSet
+//		ResultSet rsNested = (ResultSet) dr.getFieldValue("resultset");
+//		assertEquals("John", rsNested.get(0).getFieldValue("name"));
+//		assertEquals(42.1337, rsNested.get(0).getFieldValue("double"));
+//		assertEquals(false, rsNested.get(0).getFieldValue("truth"));
+//
+//		// With MetaData
+//		json = "{\"name\":\"John\", \"arraylist\":[{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}], \"meta\":{\"name\":{\"ColumnType\":\""
+//				+ java.sql.Types.VARCHAR + "\"}, \"arraylist\":{\"ColumnType\":\"-973\"}}}";
+//		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
+//		assertEquals("John", dr1.getFieldValue("name"));
+//
+//		// Checking the nested ResultSet
+//		ResultSet rsNested1 = (ResultSet) dr1.getFieldValue("resultset");
+//		assertEquals("John", rsNested1.get(0).getFieldValue("name"));
+//		assertEquals(42.1337, rsNested1.get(0).getFieldValue("double"));
+//		assertEquals(false, rsNested1.get(0).getFieldValue("truth"));
+//	}
+
+	/**
 	 * A conversion of a Json-String to a DataRow with many types.
 	 * 
 	 * @throws IOException
@@ -168,19 +204,36 @@ public class DataRowFromJsonTest {
 	 */
 	@Test
 	public void dataRowFromJsonManyTypesMetaTest() throws IOException, ParseException {
-//		meta.setFieldValue("", value);
-		json = "{\"truth\": true, \"age\": 31, \"Decimal\": 23456.434, \"city\":\"New York\", \"Number\": 42.0, \"meta\":{\"truth\":{\"ColumnType\":\""
-				+ java.sql.Types.BOOLEAN + "\"},\"age\":{\"ColumnType\":\"" + java.sql.Types.INTEGER
-				+ "\"}, \"Decimal\":{\"ColumnType\":\"" + java.sql.Types.NUMERIC + "\"}}}";
+		
+		StringBuilder sb = new StringBuilder("");
+		sb.append(
+				"{\"truth\": true, \"age\": 31, \"Decimal\": 23456.434, \"city\":\"New York\", \"Number\": 42.0, \"date\":\"1999-05-05 23:59:59.999\", \"timestamp1\":\"1999-05-05T23:59:59.999\", \"timestamp2\":\"1999-05-05\",");
+		sb.append(" \"meta\":{\"truth\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.BOOLEAN);
+		sb.append("\"},\"age\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.INTEGER);
+		sb.append("\"}, \"Decimal\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.NUMERIC);
+		sb.append("\"}, \"timestamp1\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.TIMESTAMP);
+		sb.append("\"}, \"timestamp2\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.TIMESTAMP);
+		sb.append("\"}, \"date\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.DATE + "\"}}}");
+		json = sb.toString();
 		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+
 		assertEquals(true, dr.getFieldValue("truth"));
 		assertEquals(31, dr.getFieldValue("age"));
 		assertEquals("New York", dr.getFieldValue("city"));
 		assertEquals(42.0, dr.getFieldValue("Number"));
 		assertEquals(new BigDecimal("23456.434"), dr.getFieldValue("Decimal"));
 
-		// Date
-//		Long l = new Long("925941599999");
-//		assertEquals(new Date(l), dr.getFieldValue("date"));
+		// Date and Time
+		Long l = new Long("925941599999");
+		assertEquals(new Date(l), dr.getFieldValue("date"));
+		assertEquals(new Timestamp(l), dr.getFieldValue("timestamp1"));
+		l = new Long("925855200000");
+		assertEquals(new Timestamp(l), dr.getFieldValue("timestamp2"));
 	}
 }
