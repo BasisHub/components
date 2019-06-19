@@ -116,8 +116,10 @@ public class DataRowFromJsonTest {
 		assertEquals(false, drNested.getFieldValue("truth"));
 
 		// With MetaData
-		json = "{\"name\":\"John\", \"datarow\":{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}, \"meta\":{\"name\":{\"ColumnType\":\""
-				+ java.sql.Types.VARCHAR + "\"}, \"datarow\":{\"ColumnType\":\"-974\"}}}";
+		StringBuilder sb = new StringBuilder("");
+		sb.append("{\"name\":\"John\", \"datarow\":{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}, \"meta\":{\"name\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR);
+		sb.append("\"}, \"datarow\":{\"ColumnType\":\"-974\"}}}");
 		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
 		assertEquals("John", dr1.getFieldValue("name"));
 
@@ -150,8 +152,11 @@ public class DataRowFromJsonTest {
 		assertEquals(false, rsNested.get(0).getFieldValue("truth"));
 
 		// With MetaData
-		json = "{\"name\":\"John\", \"resultset\":[{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}], \"meta\":{\"name\":{\"ColumnType\":\""
-				+ java.sql.Types.VARCHAR + "\"}, \"resultset\":{\"ColumnType\":\"-975\"}}}";
+		StringBuilder sb = new StringBuilder("");
+		sb.append("{\"name\":\"John\", \"resultset\":[{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}], \"meta\":{\"name\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR);
+		sb.append("\"}, \"resultset\":{\"ColumnType\":\"-975\"}}}");
+		json = sb.toString();
 		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
 		assertEquals("John", dr1.getFieldValue("name"));
 
