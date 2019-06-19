@@ -1,4 +1,6 @@
-package com.basiscomponents.db.exportconfig;
+package com.basiscomponents.db.config.export;
+
+import javax.naming.directory.InvalidAttributeValueException;
 
 /**
  * Builder pattern implementation for class ColumnConfiguration
@@ -42,9 +44,9 @@ public class ColumnConfigurationBuilder {
 	 * @throws Exception when build() is called without setting a mandatory
 	 *                   parameter
 	 */
-	public ColumnConfiguration build() throws Exception {
+	public ColumnConfiguration build() throws InvalidAttributeValueException {
 		if (columnConfiguration.getHeader() == null) {
-			throw new Exception("Header found null. Builder must set attribute header");
+			throw new InvalidAttributeValueException("Header found null. Builder must set attribute header");
 		}
 		return columnConfiguration;
 	}

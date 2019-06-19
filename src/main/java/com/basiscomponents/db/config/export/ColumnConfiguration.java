@@ -1,4 +1,4 @@
-package com.basiscomponents.db.exportconfig;
+package com.basiscomponents.db.config.export;
 
 /**
  * Provides the attributes and methods needed to manage a particular column in a

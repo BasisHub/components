@@ -7,7 +7,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import com.basiscomponents.db.exportconfig.SheetConfiguration;
+import com.basiscomponents.db.config.export.SheetConfiguration;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -591,7 +591,6 @@ public class ResultSetExporter {
 	 * @throws Exception Gets thrown in case the ResultSet could not be read or
 	 *                   output stream can not be written
 	 */
-	@SuppressWarnings("deprecation")
 	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader, boolean useLabelIfPresent,
 			String sheetName, DataRow AttributesRecord, SheetConfiguration sheetConfig) throws Exception {
 

@@ -1,4 +1,4 @@
-package com.basiscomponents.db.exportconfig;
+package com.basiscomponents.db.config.export;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public class SheetConfiguration {
 	 * @param colConfigBuilder: ColumnConfigurationBuilder object containing column
 	 *                          customizations
 	 * @param index:            position of the new column with 0-based indexing
-	 * @throws Exception in case any parameter found invalid
+	 * @throws Exception in case of invalid index or any parameter found invalid
 	 */
 	public void insertColumn(String header, ColumnConfigurationBuilder colConfigBuilder, int index) throws Exception {
 		insertNewColumn(header, colConfigBuilder, index);
@@ -94,10 +94,11 @@ public class SheetConfiguration {
 	 * Removes the column at the given position
 	 * 
 	 * @param index: position of the new column with 0-based indexing
-	 * @throws Exception in case any parameter found invalid
+	 * @throws IndexOutOfBoundsException in case of invalid index
 	 */
-	public void removeColumn(int index) throws Exception {
-		validateIndex(index);
+	public void removeColumn(int index) throws IndexOutOfBoundsException {
+		if (!validateIndex(index))
+			throw new IndexOutOfBoundsException("Invalid index provided");
 
 		columnConfigs.remove(index);
 	}
@@ -113,11 +114,12 @@ public class SheetConfiguration {
 	 * Retrieves the column at the given position
 	 * 
 	 * @param index: position of the new column with 0-based indexing
-	 * @throws Exception in case any parameter found invalid
+	 * @throws IndexOutOfBoundsException in case of invalid index
 	 * @return ColumnConfiguration
 	 */
-	public ColumnConfiguration getColumn(int index) throws Exception {
-		validateIndex(index);
+	public ColumnConfiguration getColumn(int index) throws IndexOutOfBoundsException {
+		if (!validateIndex(index))
+			throw new IndexOutOfBoundsException("Invalid index provided");
 
 		return columnConfigs.get(index);
 	}
@@ -161,12 +163,13 @@ public class SheetConfiguration {
 	 * @param colConfigBuilder: ColumnConfigurationBuilder object containing column
 	 *                          customizations
 	 * @param index:            position of the new column with 0-based indexing
-	 * @throws Exception in case any parameter found invalid
+	 * @throws Exception in case of invalid index or any parameter found invalid
 	 */
 	private void insertNewColumn(String header, ColumnConfigurationBuilder colConfigBuilder, int index)
 			throws Exception {
 
-		validateIndex(index);
+		if (!validateIndex(index))
+			throw new IndexOutOfBoundsException("Invalid index provided");
 		ColumnConfiguration colConfig = colConfigBuilder.setHeader(header).build();
 
 		columnConfigs.add(index, colConfig);
@@ -176,11 +179,9 @@ public class SheetConfiguration {
 	 * Checks if the index provided as parameter is valid
 	 * 
 	 * @param index: provided index
-	 * @throws IndexOutOfBoundsException
+	 * @return boolean whether the requested index is within valid range
 	 */
-	private void validateIndex(int index) throws IndexOutOfBoundsException {
-		if (index < 0 || index > columnConfigs.size()) {
-			throw new IndexOutOfBoundsException("Invalid index provided");
-		}
+	private boolean validateIndex(int index) {
+		return index >= 0 && index <= columnConfigs.size();
 	}
 }
