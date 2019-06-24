@@ -1,8 +1,9 @@
 package com.basiscomponents.db.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
+import com.fasterxml.jackson.core.JsonParseException;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -10,11 +11,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 
-import org.junit.jupiter.api.Test;
-
-import com.basiscomponents.db.DataRow;
-import com.basiscomponents.db.ResultSet;
-import com.fasterxml.jackson.core.JsonParseException;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DataRowFromJsonTest {
 
@@ -223,11 +220,16 @@ public class DataRowFromJsonTest {
 		assertEquals(new BigDecimal("23456.434"), dr.getFieldValue("Decimal"));
 
 		// Date and Time
-		Long l = new Long("925941599999");
-		assertEquals(new Date(l), dr.getFieldValue("date"));
-		assertEquals(new Timestamp(l), dr.getFieldValue("timestamp1"));
-		l = new Long("925855200000");
-		assertEquals(new Timestamp(l), dr.getFieldValue("timestamp2"));
+
+		Date expected = new Date(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse("1999-05-05 23:59:59.999").getTime());
+		assertEquals(expected, dr.getFieldValue("date"));
+		assertEquals(new Timestamp(expected.getTime()), dr.getFieldValue("timestamp1"));
+		Timestamp ts = new Timestamp(expected.getTime());
+		ts.setNanos(0);
+		ts.setSeconds(0);
+		ts.setMinutes(0);
+		ts.setHours(0);
+		assertEquals(ts, dr.getFieldValue("timestamp2"));
 	}
 
 	/**

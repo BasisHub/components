@@ -1,11 +1,7 @@
 package com.basiscomponents.db;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.basiscomponents.db.util.DataFieldConverter;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -15,9 +11,9 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import org.junit.jupiter.api.Test;
-
-import com.basiscomponents.db.util.DataFieldConverter;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DataFieldConverterTest {
 
@@ -222,7 +218,7 @@ public class DataFieldConverterTest {
 	 * 
 	 */
 	@Test
-	public void dataFieldConverterStringTest() {
+	public void dataFieldConverterStringTest() throws java.text.ParseException {
 
 		// String to Int
 		df.setValue("");
@@ -296,8 +292,8 @@ public class DataFieldConverterTest {
 
 		// String to Date
 		df.setValue("1999-05-05 23:59:59.999");
-		Long l = new Long("925941599999");
-		assertEquals(new Date(l), DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
+		Date expected = new Date(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse("1999-05-05 23:59:59.999").getTime());
+		assertEquals(expected, DataFieldConverter.convertType(df.getValue(), java.sql.Types.DATE));
 
 		df.setValue("Hi");
 		assertThrows(IllegalStateException.class,
