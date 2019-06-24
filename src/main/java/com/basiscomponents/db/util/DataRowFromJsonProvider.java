@@ -1,5 +1,14 @@
 package com.basiscomponents.db.util;
 
+import java.io.IOException;
+import java.sql.Types;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
@@ -11,11 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.gson.JsonElement;
-
-import java.io.IOException;
-import java.sql.Types;
-import java.text.ParseException;
-import java.util.*;
 
 public class DataRowFromJsonProvider {
 
@@ -274,7 +278,7 @@ public class DataRowFromJsonProvider {
 				case "ARRAY":
 					//a nested DataRow or ArrayList / BBjVector
 					String subtype=root2.get(fieldName).get(0).getNodeType().toString();
-					if (subtype == "OBJECT")
+					if ("OBJECT".equals(subtype))
 						attributes.addDataField(fieldName, -975, new DataField(null));
 					else
 						attributes.addDataField(fieldName, -973, new DataField(null));
@@ -336,10 +340,9 @@ public class DataRowFromJsonProvider {
 		return input;
 	}
 
-	private static JsonNode buildJsonRoot(String input) throws IOException {
-		String intmp = input;
-		JsonNode root = new ObjectMapper().readTree(intmp);
-		return root;
+	private static JsonNode buildJsonRoot(final String input) throws IOException {
+		return new ObjectMapper().readTree(input);
+
 	}
 
 	private static String removeLeadingDataRow(String input) {

@@ -27,6 +27,10 @@ public class DataFieldConverter {
 		String classname = o.getClass().getName();
 		String tmpstr = o.toString();
 
+		if (classname.contains("DataField")) {
+			throw new IllegalArgumentException("Setting a DataField into a DataField is not supported");
+		}
+
 		switch (targetType) {
 		// NOOP types first
 
@@ -84,7 +88,7 @@ public class DataFieldConverter {
 			if (classname.equals(JAVA_LANG_DOUBLE))
 				return BigDecimal.valueOf((double) o);
 			if (classname.equals(JAVA_LANG_INTEGER))
-				return new BigDecimal((int) o);
+				return BigDecimal.valueOf((int) o);
 			if (tmpstr.isEmpty())
 				tmpstr = "0";
 			return new BigDecimal(tmpstr);
@@ -205,9 +209,6 @@ public class DataFieldConverter {
 
 			break;
 		default:
-			if (classname.contains("DataField")) {
-				throw new IllegalArgumentException("Setting a DataField into a DataField is not supported");
-			}
 
 			String typeName = ResultSet.getSQLTypeName(targetType);
 			if (typeName != null) {
@@ -263,10 +264,10 @@ public class DataFieldConverter {
 				ret=field.getShort().doubleValue();
 			else
 				if (!resultSet.isSigned(column)) {
-					ret = field.getLong().doubleValue();
+				ret = field.getLong().doubleValue();
 				} else {
 					ret = field.getInt().doubleValue();
-				}
+			}
 			break;
 		case java.sql.Types.BIGINT:
 			/*

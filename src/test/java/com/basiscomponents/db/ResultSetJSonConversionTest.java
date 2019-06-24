@@ -1,11 +1,15 @@
 package com.basiscomponents.db;
 
 
-import com.basiscomponents.db.util.DataRowProvider;
-import com.basiscomponents.db.util.ResultSetProvider;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.basiscomponents.db.util.DataRowProvider;
+import com.basiscomponents.db.util.ResultSetProvider;
 
 public class ResultSetJSonConversionTest {
 
@@ -24,7 +28,7 @@ public class ResultSetJSonConversionTest {
             String fieldname = fieldNamesOld.get(i);
             assertEquals( oldDR.getFieldAsString(fieldname), newDR.getFieldAsString(fieldname), ()->json + "\n" + fieldname + " values differ with function getFieldAsString");
         }
-    }
+	}
 
     /**
      * This method takes two DataRows and compares their values with the getFieldAsNumber method from DataRow to evaluate the process of toJson/fromJson
