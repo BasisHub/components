@@ -5,10 +5,10 @@ import com.basis.bbj.proxies.sysgui.BBjControl;
 import com.basis.bbj.proxies.sysgui.BBjFont;
 import com.basis.bbj.proxies.sysgui.BBjPopupMenu;
 import com.basis.bbj.proxies.sysgui.BBjWindow;
-import com.basis.startup.type.BBjCustomObject;
 import com.basis.startup.type.BBjException;
 import com.basis.startup.type.BBjNumber;
 import com.basis.startup.type.BBjVector;
+import com.basis.startup.type.CustomObject;
 import com.basis.startup.type.sysgui.BBjColor;
 import com.basis.util.common.BasisNumber;
 import net.miginfocom.layout.AC;
@@ -740,7 +740,7 @@ public class BBMigPane implements BBjControl {
 	}
 
 	@Override
-	public void setCallback(int arg0, BBjCustomObject arg1, String arg2) throws BBjException {
+	public void setCallback(int arg0, CustomObject arg1, String arg2) throws BBjException {
 		// TODO Auto-generated method stub
 	}
 
