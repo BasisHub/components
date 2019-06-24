@@ -58,7 +58,9 @@ public class DataRowFromJsonTest {
 		assertTrue(dr1.isEmpty());
 
 		// Violating the format should result in a JsonParseException
+		// TODO More complex violations of the JsonFormat, missing brackets
 		assertThrows(JsonParseException.class, () -> DataRowFromJsonProvider.fromJson("Hi", new DataRow()));
+
 
 		// Empty String as an Integer
 		sb = new StringBuilder("");

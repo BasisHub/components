@@ -1,10 +1,12 @@
-package com.basiscomponents.db;
+package com.basiscomponents.db.resultSetJsonTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.util.ResultSetProvider;
 
 public class ResultSetToJsonTest {

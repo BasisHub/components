@@ -16,10 +16,11 @@ import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
-public class SqlTableBCFilterTest {
+public class SqlTableBCH2FilterTest {
 
 	private ResultSet rs;
 	private DataRow filter;
+	private static Connection conToFilterScope;
 
 	/**
 	 * Loading the h2-Driver and creating the test databases.
@@ -34,6 +35,7 @@ public class SqlTableBCFilterTest {
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForFilteringScoping();
+		conToFilterScope = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
 	}
 
 	/**
@@ -60,9 +62,8 @@ public class SqlTableBCFilterTest {
 	 */
 	@Test
 	public void sqlTableBCFilterSimpleTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-		) {
-			SqlTableBC tableBC = new SqlTableBC(con);
+
+			SqlTableBC tableBC = new SqlTableBC(conToFilterScope);
 			tableBC.setTable("CUSTOMERS");
 
 			// Setting the filter
@@ -76,7 +77,6 @@ public class SqlTableBCFilterTest {
 			assertEquals("England", rs.get(1).getFieldValue("COUNTRY"));
 			assertEquals("England", rs.get(2).getFieldValue("COUNTRY"));
 			assertEquals("England", rs.get(3).getFieldValue("COUNTRY"));
-		}
 	}
 
 	/**
@@ -87,9 +87,8 @@ public class SqlTableBCFilterTest {
 	 */
 	@Test
 	public void sqlTableBCFilterWithMoreValuesTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-		) {
-			SqlTableBC tableBC = new SqlTableBC(con);
+
+			SqlTableBC tableBC = new SqlTableBC(conToFilterScope);
 			tableBC.setTable("CUSTOMERS");
 
 			// Setting the filter
@@ -105,7 +104,6 @@ public class SqlTableBCFilterTest {
 			assertEquals("England", rs.get(1).getFieldValue("COUNTRY"));
 			assertEquals("Jasper", rs.get(0).getFieldValue("NAME"));
 			assertEquals("Jasper", rs.get(1).getFieldValue("NAME"));
-		}
 	}
 
 	/**
@@ -116,9 +114,8 @@ public class SqlTableBCFilterTest {
 	 */
 	@Test
 	public void sqlTableBCFilterCompareTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-		) {
-			SqlTableBC tableBC = new SqlTableBC(con);
+
+			SqlTableBC tableBC = new SqlTableBC(conToFilterScope);
 			tableBC.setTable("CUSTOMERS");
 
 			// Setting the filter to >63 and use it
@@ -170,8 +167,6 @@ public class SqlTableBCFilterTest {
 			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
 			assertEquals(2, rs.get(1).getFieldValue("CUSTOMERID"));
 			assertEquals(9, rs.get(2).getFieldValue("CUSTOMERID"));
-
-		}
 	}
 
 	/**
@@ -182,9 +177,8 @@ public class SqlTableBCFilterTest {
 	 */
 //	@Test
 	public void sqlTableBCRegexSimpleTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-		) {
-			SqlTableBC tableBC = new SqlTableBC(con);
+
+			SqlTableBC tableBC = new SqlTableBC(conToFilterScope);
 			tableBC.setTable("CUSTOMERS");
 
 			// Setting the filter
@@ -196,7 +190,6 @@ public class SqlTableBCFilterTest {
 			assertEquals(2, rs.size());
 			assertEquals("Jasper", rs.get(0).getFieldValue("NAME"));
 			assertEquals("Jasper", rs.get(1).getFieldValue("NAME"));
-		}
 	}
 
 	/**
@@ -206,6 +199,7 @@ public class SqlTableBCFilterTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
+		conToFilterScope.close();
 		H2DataBaseProvider.dropAllTestTables();
 	}
 }

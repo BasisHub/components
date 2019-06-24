@@ -16,11 +16,13 @@ import org.junit.jupiter.api.Test;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
-public class SqlTableBCWriteRemoveTest {
+public class SqlTableBCH2WriteRemoveTest {
 
 	private String sql;
 	private ResultSet rs;
 	private int dataRowCount;
+	private static Connection conToWriteRemove;
+	private static Statement stmt;
 
 	/**
 	 * Loading the h2-Driver and creating the test databases.
@@ -35,6 +37,8 @@ public class SqlTableBCWriteRemoveTest {
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForWriteRemove();
+		conToWriteRemove = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");
+		stmt = conToWriteRemove.createStatement();
 	}
 
 	/**
@@ -47,10 +51,9 @@ public class SqlTableBCWriteRemoveTest {
 	@Test
 	public void sqlTableBCRemoveSimpleTest()
 			throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
 			rs = sqlTable.retrieve();
 			dataRowCount = rs.size();
@@ -62,7 +65,6 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals(dataRowCount - 1, rs.size());
 			assertEquals("Simpson", rs.get(0).getFieldValue("FIRST"));
 			assertEquals("Freeman", rs.get(1).getFieldValue("FIRST"));
-		}
 	}
 
 	/**
@@ -75,10 +77,9 @@ public class SqlTableBCWriteRemoveTest {
 	@Test
 	// A DataRow is removed by its PRIMARY KEY anyway
 	public void sqlTableBCRemoveWithMappingTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
 			rs = sqlTable.retrieve();
 			dataRowCount = rs.size();
@@ -93,7 +94,6 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals(dataRowCount - 1, rs.size());
 			assertEquals("Simpson", rs.get(0).getFieldValue("FIRST"));
 			assertEquals("Simpson", rs.get(1).getFieldValue("FIRST"));
-		}
 	}
 
 	/**
@@ -107,10 +107,9 @@ public class SqlTableBCWriteRemoveTest {
 //	@Test
 	// validateRemove is not implemented yet
 	public void sqlTableBCRemoveNegativeTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
 			rs = sqlTable.retrieve();
 			dataRowCount = rs.size();
@@ -128,7 +127,6 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals(dataRowCount, rs.size());
 			assertEquals("Simpson", rs.get(0).getFieldValue("FIRST"));
 			assertEquals("Freeman", rs.get(1).getFieldValue("FIRST"));
-		}
 	}
 
 	/**
@@ -140,10 +138,9 @@ public class SqlTableBCWriteRemoveTest {
 	@Test
 	// validateRemove is not implemented yet
 	public void sqlTableBCRemoveNegativeTest2() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
 			rs = sqlTable.retrieve();
 			dataRowCount = rs.size();
@@ -160,7 +157,6 @@ public class SqlTableBCWriteRemoveTest {
 
 			rs = sqlTable.retrieve();
 			assertEquals(dataRowCount, rs.size());
-		}
 	}
 
 	/**
@@ -172,10 +168,9 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@Test
 	public void sqlTableBCWriteSimpleTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("FULLREGISTRATION");
 			rs = sqlTable.retrieve();
 			DataRow dr = rs.get(0);
@@ -201,7 +196,6 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals(true, rs.get(1).getFieldValue("BOOLTYPE"));
 			assertEquals(false, rs.get(1).getFieldValue("BOOLEANTYPE"));
 			assertEquals(true, rs.get(1).getFieldValue("BITTYPE"));
-		}
 	}
 
 	/**
@@ -213,10 +207,9 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@Test
 	public void sqlTableBCWriteWithMappingTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("FULLREGISTRATION");
 			rs = sqlTable.retrieve();
 			DataRow dr = rs.get(0);
@@ -234,7 +227,6 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals("Jasper", rs.get(2).getFieldValue("FIRST"));
 			assertEquals("Alfred", rs.get(3).getFieldValue("FIRST"));
 			assertEquals("Alfred", rs.get(4).getFieldValue("FIRST"));
-		}
 	}
 
 	/**
@@ -246,10 +238,9 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@Test
 	public void sqlTableBCWriteManyTypesTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("BOOLTABLE");
 			rs = sqlTable.retrieve();
 			DataRow dr = rs.get(0);
@@ -284,7 +275,6 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals(rs.get(0).getFieldValue("BIGDECIMALTYPE"), rs.get(1).getFieldValue("BIGDECIMALTYPE"));
 			assertEquals(rs.get(0).getFieldValue("SMALLINTTYPE"), rs.get(1).getFieldValue("SMALLINTTYPE"));
 			assertEquals(rs.get(0).getFieldValue("BIGINTTYPE"), rs.get(1).getFieldValue("BIGINTTYPE"));
-		}
 	}
 
 	/**
@@ -295,10 +285,9 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@Test
 	public void sqlTableBCWriteNegativeTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("FULLREGISTRATION");
 			rs = sqlTable.retrieve();
 			dataRowCount = rs.size();
@@ -315,7 +304,6 @@ public class SqlTableBCWriteRemoveTest {
 
 			rs = sqlTable.retrieve();
 			assertEquals(dataRowCount, rs.size());
-		}
 	}
 
 	/**
@@ -330,10 +318,9 @@ public class SqlTableBCWriteRemoveTest {
 	// for writing into the a SqlTableBc with a PrimaryKey,
 	// which is not implemented yet for the H2DataBases.
 	public void sqlTableBCWriteWithPrimaryKeyTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
 			rs = sqlTable.retrieve();
 			DataRow dr = rs.get(0);
@@ -343,7 +330,6 @@ public class SqlTableBCWriteRemoveTest {
 			sqlTable.write(dr);
 			rs = sqlTable.retrieve();
 			assertEquals(dataRowCount + 1, rs.size());
-		}
 	}
 
 	/**
@@ -356,11 +342,9 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@Test
 	public void sqlTableBCWriteChangeColumnsTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");
-				Statement stmt = con.createStatement();) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("TREES");
 			rs = sqlTable.retrieve();
 			DataRow dr = rs.get(0);
@@ -383,7 +367,6 @@ public class SqlTableBCWriteRemoveTest {
 			assertEquals("tree1", rs.get(0).getFieldValue("NAMESPACE"));
 			assertEquals("tree2", rs.get(1).getFieldValue("NAMESPACE"));
 			assertEquals(null, rs.get(2).getFieldValue("NAMESPACE"));
-		}
 	}
 
 	/**
@@ -395,10 +378,9 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@Test
 	public void sqlTableBCWriteWrongValuesTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToWriteRemove);
 			sqlTable.setTable("FULLREGISTRATION");
 			rs = sqlTable.retrieve();
 			DataRow dr = rs.get(0);
@@ -425,7 +407,6 @@ public class SqlTableBCWriteRemoveTest {
 			});
 			rs = sqlTable.retrieve();
 			assertEquals(dataRowCount + 1, rs.size());
-		}
 	}
 
 	/**
@@ -435,6 +416,7 @@ public class SqlTableBCWriteRemoveTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
+		conToWriteRemove.close();
 		H2DataBaseProvider.dropAllTestTables();
 	}
 }

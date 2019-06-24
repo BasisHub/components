@@ -13,10 +13,11 @@ import org.junit.jupiter.api.Test;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
-public class SqlTableBCLeftoversTest {
+public class SqlTableBCH2LeftoversTest {
 
 	private ResultSet rs;
 	private SqlTableBC tableBC;
+	private static Connection conToWrite;
 
 	/**
 	 * Loading the h2-Driver and creating the test databases.
@@ -31,6 +32,7 @@ public class SqlTableBCLeftoversTest {
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForWriteRemove();
+		conToWrite = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");
 	}
 
 	/**
@@ -43,10 +45,9 @@ public class SqlTableBCLeftoversTest {
 	@Test
 //	There is something weird with the write Statement, it does not ever fill types in VALUES (So does Remove)
 	public void sqlTableBCGetLastSQLStatementTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");) {
 
 			// Set table and get its data with normal retrieve()
-			tableBC = new SqlTableBC(con);
+			tableBC = new SqlTableBC(conToWrite);
 			tableBC.setTable("FULLREGISTRATION");
 			rs = tableBC.retrieve();
 			DataRow dr = rs.get(0);
@@ -67,7 +68,6 @@ public class SqlTableBCLeftoversTest {
 			tableBC.remove(dr1);
 			assertEquals("DELETE FROM \"PRIMARYKEY_REGISTRATION\"  WHERE \"CUSTOMERID\"=?",
 					tableBC.getLastSqlStatement());
-		}
 	}
 
 	/**

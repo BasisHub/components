@@ -1,4 +1,4 @@
-package com.basiscomponents.db;
+package com.basiscomponents.db.resultSetJsonTest;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.basiscomponents.db.BBArrayList;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
 
