@@ -111,6 +111,36 @@ public class SqlTableBCH2ConnetionTest {
 
 	/**
 	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
+	 * switched to REGISTRATION and its values are queried with retrieve(). The
+	 * resulting ResultSet is checked to contain the right data.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void sqlTableBCGetSpecialStringTest() throws Exception {
+
+		// Set table and get its data with normal retrieve()
+		SqlTableBC sqlTable = new SqlTableBC(conToNormalRetrieve);
+		sqlTable.setTable("SPECIALREGISTRATION");
+		rs = sqlTable.retrieve();
+
+		// Checking the ColumnNames and results
+		assertTrue(rs.getColumnCount() == 4);
+		assertTrue(rs.getColumnNames().contains("FIRST"));
+		assertTrue(rs.getColumnNames().contains("AGE"));
+		assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
+		assertTrue(rs.getColumnNames().contains("EMPLOYEEID"));
+
+		assertEquals("Älfred", rs.get(0).getFieldValue("FIRST"));
+		assertEquals("Ölfred", rs.get(1).getFieldValue("FIRST"));
+		assertEquals("Ülfred", rs.get(2).getFieldValue("FIRST"));
+		assertEquals("Êlfred", rs.get(3).getFieldValue("FIRST"));
+		assertEquals("Élfred", rs.get(4).getFieldValue("FIRST"));
+		assertEquals("Èlfred", rs.get(5).getFieldValue("FIRST"));
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
 	 * switched to BOOLTABLE and its values are queried with retrieve(). The
 	 * resulting ResultSet is checked to contain the right data, which are boolean
 	 * types.

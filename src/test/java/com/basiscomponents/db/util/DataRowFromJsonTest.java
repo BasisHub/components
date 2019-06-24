@@ -60,6 +60,8 @@ public class DataRowFromJsonTest {
 		// Violating the format should result in a JsonParseException
 		// TODO More complex violations of the JsonFormat, missing brackets
 		assertThrows(JsonParseException.class, () -> DataRowFromJsonProvider.fromJson("Hi", new DataRow()));
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson("{\"name\":\"John\", \"city\":\"New York\"", new DataRow()));
 
 
 		// Empty String as an Integer
@@ -192,6 +194,40 @@ public class DataRowFromJsonTest {
 	}
 
 	/**
+	 * A conversion of a Json-String to a DataRow with many special characters.
+	 * 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+//	@Test
+	public void dataRowFromJsonSpecialCharactersTest() throws IOException, ParseException {
+		
+		sb = new StringBuilder("");
+		sb.append(
+				"{\"truth\": true, \"age\": 31, \"Decimal\": 23456.434, \"city\":\"New York\", \"Number\": 42.0, \"date\":\"1999-05-05 23:59:59.999\", \"timestamp1\":\"1999-05-05T23:59:59.999\", \"timestamp2\":\"1999-05-05\",");
+		sb.append(" \"meta\":{\"truth\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.BOOLEAN);
+		sb.append("\"},\"age\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.INTEGER);
+		sb.append("\"}, \"Decimal\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.NUMERIC);
+		sb.append("\"}, \"timestamp1\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.TIMESTAMP);
+		sb.append("\"}, \"timestamp2\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.TIMESTAMP);
+		sb.append("\"}, \"date\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.DATE + "\"}}}");
+		json = sb.toString();
+		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+
+		assertEquals(true, dr.getFieldValue("truth"));
+		assertEquals(31, dr.getFieldValue("age"));
+		assertEquals("New York", dr.getFieldValue("city"));
+		assertEquals(42.0, dr.getFieldValue("Number"));
+		assertEquals(new BigDecimal("23456.434"), dr.getFieldValue("Decimal"));
+	}
+
+	/**
 	 * A conversion of a Json-String to a DataRow with many types.
 	 * 
 	 * @throws IOException
@@ -199,7 +235,7 @@ public class DataRowFromJsonTest {
 	 */
 	@Test
 	public void dataRowFromJsonManyTypesMetaTest() throws IOException, ParseException {
-		
+
 		sb = new StringBuilder("");
 		sb.append(
 				"{\"truth\": true, \"age\": 31, \"Decimal\": 23456.434, \"city\":\"New York\", \"Number\": 42.0, \"date\":\"1999-05-05 23:59:59.999\", \"timestamp1\":\"1999-05-05T23:59:59.999\", \"timestamp2\":\"1999-05-05\",");

@@ -90,9 +90,6 @@ public class H2DataBaseProvider {
 			sql.add("insert into CUSTOMERS VALUES ('Peter', 7, 'USA', 2)");
 			sql.add("insert into CUSTOMERS VALUES ('Flint', 8, 'USA', 3)");
 
-//			sql.add("CREATE TABLE IF NOT EXISTS ORDERS (orderID INTEGER, orderDate DATE, customerID INTEGER, employeeID INTEGER, PRIMARY KEY(orderID))");
-//			sql.add("insert into ORDERS VALUES (1, '1999-05-05', 2,  ")
-
 			createDataBase(stmt);
 		}
 	}
@@ -105,6 +102,14 @@ public class H2DataBaseProvider {
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Alfred', 62, 0)");
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Simpson', 42, 1)");
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Freeman', 22, 2)");
+
+			sql.add("CREATE TABLE IF NOT EXISTS SPECIALREGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER, employeeID INTEGER)");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('Älfred', 62, 1, 4)");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('Ölfred', 62, 1, 4)");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('Ülfred', 62, 1, 4)");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('Êlfred', 62, 1, 4)");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('Élfred', 62, 1, 4)");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('Èlfred', 62, 1, 4)");
 
 			sql.add("CREATE TABLE IF NOT EXISTS BOOLTABLE (boolType BOOL, booleanType BOOLEAN, bitType BIT)");
 			sql.add("insert into BOOLTABLE VALUES (true, false, true)");
