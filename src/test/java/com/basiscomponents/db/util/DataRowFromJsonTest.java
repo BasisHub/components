@@ -21,6 +21,7 @@ public class DataRowFromJsonTest {
 	private String json;
 	private DataRow dr;
 	private DataRow dr1;
+	private StringBuilder sb;
 
 	/**
 	 * A simple conversion of a Json-String to a DataRow, by using the full format.
@@ -58,6 +59,27 @@ public class DataRowFromJsonTest {
 
 		// Violating the format should result in a JsonParseException
 		assertThrows(JsonParseException.class, () -> DataRowFromJsonProvider.fromJson("Hi", new DataRow()));
+
+		// Empty String as an Integer
+		sb = new StringBuilder("");
+		sb.append("{\"int\": \"\", \"meta\":{\"int\":{\"ColumnType\":\"" + java.sql.Types.INTEGER + "\"}}}");
+		json = sb.toString();
+		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		assertEquals(0, dr1.getFieldValue("int"));
+
+		// Nulling a DataField
+		sb = new StringBuilder("");
+		sb.append("{\"int\": null, \"meta\":{\"int\":{\"ColumnType\":\"" + java.sql.Types.INTEGER + "\"}}}");
+		json = sb.toString();
+		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		assertEquals(null, dr1.getFieldValue("int"));
+
+		// Convert characters below chr(32)
+		char c = 27;
+		String s = "" + c;
+		json = "{\"char\":\"" + c + "\"}";
+		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		assertEquals(s, dr.getFieldValue("char"));
 	}
 
 	/**
@@ -116,7 +138,7 @@ public class DataRowFromJsonTest {
 		assertEquals(false, drNested.getFieldValue("truth"));
 
 		// With MetaData
-		StringBuilder sb = new StringBuilder("");
+		sb = new StringBuilder("");
 		sb.append("{\"name\":\"John\", \"datarow\":{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}, \"meta\":{\"name\":{\"ColumnType\":\"");
 		sb.append(java.sql.Types.VARCHAR);
 		sb.append("\"}, \"datarow\":{\"ColumnType\":\"-974\"}}}");
@@ -152,7 +174,7 @@ public class DataRowFromJsonTest {
 		assertEquals(false, rsNested.get(0).getFieldValue("truth"));
 
 		// With MetaData
-		StringBuilder sb = new StringBuilder("");
+		sb = new StringBuilder("");
 		sb.append("{\"name\":\"John\", \"resultset\":[{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}], \"meta\":{\"name\":{\"ColumnType\":\"");
 		sb.append(java.sql.Types.VARCHAR);
 		sb.append("\"}, \"resultset\":{\"ColumnType\":\"-975\"}}}");
@@ -168,40 +190,6 @@ public class DataRowFromJsonTest {
 	}
 
 	/**
-	 * A conversion of a Json-String with a nested ArrayList. A version with and
-	 * without MetaData is tested.
-	 * 
-	 * @throws IOException
-	 * @throws ParseException
-	 */
-//	@Test
-//	public void dataRowFromJsonNestedArrayListTest() throws IOException, ParseException {
-//
-//		// Without MetaData
-//		json = "{\"name\":\"John\", \"resultset\":[{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}]}";
-//		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
-//		assertEquals("John", dr.getFieldValue("name"));
-//
-//		// Checking the nested ResultSet
-//		ResultSet rsNested = (ResultSet) dr.getFieldValue("resultset");
-//		assertEquals("John", rsNested.get(0).getFieldValue("name"));
-//		assertEquals(42.1337, rsNested.get(0).getFieldValue("double"));
-//		assertEquals(false, rsNested.get(0).getFieldValue("truth"));
-//
-//		// With MetaData
-//		json = "{\"name\":\"John\", \"arraylist\":[{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}], \"meta\":{\"name\":{\"ColumnType\":\""
-//				+ java.sql.Types.VARCHAR + "\"}, \"arraylist\":{\"ColumnType\":\"-973\"}}}";
-//		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
-//		assertEquals("John", dr1.getFieldValue("name"));
-//
-//		// Checking the nested ResultSet
-//		ResultSet rsNested1 = (ResultSet) dr1.getFieldValue("resultset");
-//		assertEquals("John", rsNested1.get(0).getFieldValue("name"));
-//		assertEquals(42.1337, rsNested1.get(0).getFieldValue("double"));
-//		assertEquals(false, rsNested1.get(0).getFieldValue("truth"));
-//	}
-
-	/**
 	 * A conversion of a Json-String to a DataRow with many types.
 	 * 
 	 * @throws IOException
@@ -210,7 +198,7 @@ public class DataRowFromJsonTest {
 	@Test
 	public void dataRowFromJsonManyTypesMetaTest() throws IOException, ParseException {
 		
-		StringBuilder sb = new StringBuilder("");
+		sb = new StringBuilder("");
 		sb.append(
 				"{\"truth\": true, \"age\": 31, \"Decimal\": 23456.434, \"city\":\"New York\", \"Number\": 42.0, \"date\":\"1999-05-05 23:59:59.999\", \"timestamp1\":\"1999-05-05T23:59:59.999\", \"timestamp2\":\"1999-05-05\",");
 		sb.append(" \"meta\":{\"truth\":{\"ColumnType\":\"");
@@ -240,5 +228,25 @@ public class DataRowFromJsonTest {
 		assertEquals(new Timestamp(l), dr.getFieldValue("timestamp1"));
 		l = new Long("925855200000");
 		assertEquals(new Timestamp(l), dr.getFieldValue("timestamp2"));
+	}
+
+	/**
+	 * A conversion of a Json-String to a DataRow. The age DataField has more than
+	 * one attribute.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void dataRowFromJsonAttributesTest() throws Exception {
+
+		sb = new StringBuilder("");
+		sb.append("{\"age\": 31, \"meta\":{\"age\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.INTEGER + "\", \"dataBase\":\"myDataBase\"}}}");
+		json = sb.toString();
+		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+
+		String s = String.format("%d", java.sql.Types.INTEGER);
+		assertEquals(s, dr.getFieldAttribute("age", "ColumnType"));
+		assertEquals("myDataBase", dr.getFieldAttribute("age", "dataBase"));
 	}
 }
