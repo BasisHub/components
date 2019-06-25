@@ -7,6 +7,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import com.basiscomponents.db.config.export.SheetConfiguration;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -63,17 +65,14 @@ public class ResultSetExporter {
 	 * fw.close();
 	 * </pre>
 	 * 
-	 * @param resultSet
-	 *            The ResultSet object whose content will be written in XML format.
-	 * @param rootTagName
-	 *            The name of the XML Root Tag to use.
-	 * @param entityName
-	 *            The name of the XML tag to use for each DataRow of the ResultSet.
-	 * @param writer
-	 *            The Writer object used to write the XML.
+	 * @param resultSet   The ResultSet object whose content will be written in XML
+	 *                    format.
+	 * @param rootTagName The name of the XML Root Tag to use.
+	 * @param entityName  The name of the XML tag to use for each DataRow of the
+	 *                    ResultSet.
+	 * @param writer      The Writer object used to write the XML.
 	 * 
-	 * @throws Exception
-	 *             Gets thrown in case the XML could not be written.
+	 * @throws Exception Gets thrown in case the XML could not be written.
 	 */
 	public static void writeXML(ResultSet resultSet, String rootTagName, String entityName, Writer writer)
 			throws Exception {
@@ -155,8 +154,7 @@ public class ResultSetExporter {
 	 * program!&amp;#60;/p&amp;#62;<br>
 	 * <br>
 	 * 
-	 * @param s
-	 *            The String whose special characters should be replaced
+	 * @param s The String whose special characters should be replaced
 	 * 
 	 * @return The String with the escaped characters
 	 */
@@ -204,14 +202,11 @@ public class ResultSetExporter {
 	 * fw.close();
 	 * </pre>
 	 * 
-	 * @param resultSet
-	 *            The ResultSet object whose content will be written as HTML
-	 *            &lt;table&gt;
-	 * @param writer
-	 *            The Writer object used to write the HTML
+	 * @param resultSet The ResultSet object whose content will be written as HTML
+	 *                  &lt;table&gt;
+	 * @param writer    The Writer object used to write the HTML
 	 * 
-	 * @throws Exception
-	 *             Gets thrown in case the HTML could not be written
+	 * @throws Exception Gets thrown in case the HTML could not be written
 	 */
 	public static void writeHTML(ResultSet resultSet, Writer writer) throws Exception {
 		ResultSetExporter.writeHTML(resultSet, writer, null);
@@ -246,13 +241,10 @@ public class ResultSetExporter {
 	 * fw.close();
 	 * </pre>
 	 * 
-	 * @param resultSet
-	 *            The ResultSet to export.
-	 * @param writer
-	 *            A java.io.Writer Instance.
-	 * @param links
-	 *            A HashMap with field name / URL pattern pairs, like
-	 *            http://xyz/a/{key}/gy.
+	 * @param resultSet The ResultSet to export.
+	 * @param writer    A java.io.Writer Instance.
+	 * @param links     A HashMap with field name / URL pattern pairs, like
+	 *                  http://xyz/a/{key}/gy.
 	 * @throws Exception
 	 */
 	public static void writeHTML(ResultSet resultSet, Writer writer, HashMap<String, String> links) throws Exception {
@@ -358,10 +350,8 @@ public class ResultSetExporter {
 	 * fw.close();
 	 * </pre>
 	 * 
-	 * @param resultSet
-	 *            The ResultSet to export.
-	 * @param writer
-	 *            A java.io.Writer Instance.
+	 * @param resultSet The ResultSet to export.
+	 * @param writer    A java.io.Writer Instance.
 	 * @throws Exception
 	 */
 	public static void writeTXT(ResultSet resultSet, Writer writer) throws Exception {
@@ -439,13 +429,10 @@ public class ResultSetExporter {
 	 * fw.close();
 	 * </pre>
 	 * 
-	 * @param resultSet
-	 *            The ResultSet object to write as JSON.
-	 * @param writer
-	 *            The Writer used to write the JSON String.
-	 * @throws Exception
-	 *             Gets thrown in case the ResultSet could not be converted to a
-	 *             JSON String.
+	 * @param resultSet The ResultSet object to write as JSON.
+	 * @param writer    The Writer used to write the JSON String.
+	 * @throws Exception Gets thrown in case the ResultSet could not be converted to
+	 *                   a JSON String.
 	 */
 	public static void writeJSON(ResultSet resultSet, Writer writer) throws Exception {
 		writer.write(resultSet.toJson());
@@ -453,15 +440,12 @@ public class ResultSetExporter {
 
 	/**
 	 * 
-	 * @param resultSet
-	 *            The ResultSet object to write as JSON.
-	 * @param writer
-	 *            The Writer used to write the JSON String.
-	 * @param fMeta
-	 *            A Boolean indicating whether to write out the meta data object
-	 * @throws Exception
-	 *             Gets thrown in case the ResultSet could not be converted to a
-	 *             JSON String.
+	 * @param resultSet The ResultSet object to write as JSON.
+	 * @param writer    The Writer used to write the JSON String.
+	 * @param fMeta     A Boolean indicating whether to write out the meta data
+	 *                  object
+	 * @throws Exception Gets thrown in case the ResultSet could not be converted to
+	 *                   a JSON String.
 	 */
 	public static void writeJSON(ResultSet resultSet, Writer writer, Boolean fMeta) throws Exception {
 		writer.write(resultSet.toJson(fMeta));
@@ -470,17 +454,13 @@ public class ResultSetExporter {
 	/**
 	 * Writes the content of the given ResultSet as XLSX into the specified File.
 	 * 
-	 * @param resultSet
-	 *            The ResultSet to export.
-	 * @param outputFile
-	 *            The File in which to write the ResultSet's content.
-	 * @param writeHeader
-	 *            The boolean value indicating whether writing the column headers or
-	 *            not.
+	 * @param resultSet   The ResultSet to export.
+	 * @param outputFile  The File in which to write the ResultSet's content.
+	 * @param writeHeader The boolean value indicating whether writing the column
+	 *                    headers or not.
 	 * 
-	 * @throws Exception
-	 *             Gets thrown in case the ResultSet could not be converted to a
-	 *             XLSX File
+	 * @throws Exception Gets thrown in case the ResultSet could not be converted to
+	 *                   a XLSX File
 	 */
 	public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader) throws Exception {
 		DataRow ar;
@@ -494,24 +474,47 @@ public class ResultSetExporter {
 	/**
 	 * Writes the content of the given ResultSet as XLSX into the specified File.
 	 * 
-	 * @param resultSet
-	 *            The ResultSet to export.
-	 * @param outputFile
-	 *            The File in which to write the ResultSet's content.
-	 * @param writeHeader
-	 *            The boolean value indicating whether writing the column headers or
-	 *            not.
-	 * @param useLabelIfPresent
-	 *            if the attributes record contains labels, use the label instead of
-	 *            the field name.
-	 * @param sheetName
-	 *            A custom name for the sheet
-	 * @param DataRow
-	 *            attributesRecord the attributes record for formatting
+	 * @param resultSet   The ResultSet to export.
+	 * @param outputFile  The File in which to write the ResultSet's content.
+	 * @param writeHeader The boolean value indicating whether writing the column
+	 *                    headers or not.
+	 * @param sheetConfig Object containing customized configurations
 	 * 
-	 * @throws Exception
-	 *             Gets thrown in case the ResultSet could not be converted to a
-	 *             XLSX File
+	 * @throws Exception Gets thrown in case the ResultSet could not be converted to
+	 *                   a XLSX File
+	 */
+	public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader, SheetConfiguration sheetConfig)
+			throws Exception {
+		DataRow ar;
+		if (rs.size() > 0)
+			ar = rs.get(0);
+		else
+			ar = new DataRow();
+		if (outputFile != null) {
+			try (FileOutputStream os = new FileOutputStream(outputFile)) {
+
+				writeXLSX(rs, new FileOutputStream(outputFile), writeHeader, false, "Sheet", ar, sheetConfig);
+
+				os.flush();
+			}
+		}
+	}
+
+	/**
+	 * Writes the content of the given ResultSet as XLSX into the specified File.
+	 * 
+	 * @param resultSet         The ResultSet to export.
+	 * @param outputFile        The File in which to write the ResultSet's content.
+	 * @param writeHeader       The boolean value indicating whether writing the
+	 *                          column headers or not.
+	 * @param useLabelIfPresent if the attributes record contains labels, use the
+	 *                          label instead of the field name.
+	 * @param sheetName         A custom name for the sheet
+	 * @param DataRow           attributesRecord the attributes record for
+	 *                          formatting
+	 * 
+	 * @throws Exception Gets thrown in case the ResultSet could not be converted to
+	 *                   a XLSX File
 	 */
 	public static void writeXLSX(ResultSet rs, File outputFile, boolean writeHeader, boolean useLabelIfPresent,
 			String sheetName, DataRow AttributesRecord) throws Exception {
@@ -529,17 +532,14 @@ public class ResultSetExporter {
 	/**
 	 * Writes the content of the given ResultSet into an output stream.
 	 * 
-	 * @param resultSet
-	 *            The ResultSet to export.
-	 * @param out
-	 *            The output stream in which to write the ResultSet's content.
-	 * @param writeHeader
-	 *            The boolean value indicating whether writing the column headers or
-	 *            not.
+	 * @param resultSet   The ResultSet to export.
+	 * @param out         The output stream in which to write the ResultSet's
+	 *                    content.
+	 * @param writeHeader The boolean value indicating whether writing the column
+	 *                    headers or not.
 	 * 
-	 * @throws Exception
-	 *             Gets thrown in case the ResultSet could not be read or output
-	 *             stream can not be written
+	 * @throws Exception Gets thrown in case the ResultSet could not be read or
+	 *                   output stream can not be written
 	 */
 	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader) throws Exception {
 		DataRow ar;
@@ -553,28 +553,46 @@ public class ResultSetExporter {
 	/**
 	 * Writes the content of the given ResultSet into an output stream.
 	 * 
-	 * @param resultSet
-	 *            The ResultSet to export.
-	 * @param out
-	 *            The output stream in which to write the ResultSet's content.
-	 * @param writeHeader
-	 *            The boolean value indicating whether writing the column headers or
-	 *            not.
-	 * @param useLabelIfPresent
-	 *            if the attributes record contains labels, use the label instead of
-	 *            the field name.
-	 * @param sheetName
-	 *            A custom name for the sheet
-	 * @param DataRow
-	 *            attributesRecord the attributes record for formatting
+	 * @param resultSet         The ResultSet to export.
+	 * @param out               The output stream in which to write the ResultSet's
+	 *                          content.
+	 * @param writeHeader       The boolean value indicating whether writing the
+	 *                          column headers or not.
+	 * @param useLabelIfPresent if the attributes record contains labels, use the
+	 *                          label instead of the field name.
+	 * @param sheetName         A custom name for the sheet
+	 * @param attributesRecord  attributesRecord the attributes record for
+	 *                          formatting
+	 * @param sheetConfig       Object containing customized configurations
 	 * 
-	 * @throws Exception
-	 *             Gets thrown in case the ResultSet could not be read or output
-	 *             stream can not be written
+	 * @throws Exception Gets thrown in case the ResultSet could not be read or
+	 *                   output stream can not be written
 	 */
-	@SuppressWarnings("deprecation")
 	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader, boolean useLabelIfPresent,
-			String sheetName, DataRow AttributesRecord) throws Exception {
+			String sheetName, DataRow attributesRecord) throws Exception {
+
+		writeXLSX(rs, out, writeHeader, useLabelIfPresent, sheetName, attributesRecord, null);
+	}
+
+	/**
+	 * Writes the content of the given ResultSet into an output stream.
+	 * 
+	 * @param resultSet         The ResultSet to export.
+	 * @param out               The output stream in which to write the ResultSet's
+	 *                          content.
+	 * @param writeHeader       The boolean value indicating whether writing the
+	 *                          column headers or not.
+	 * @param useLabelIfPresent if the attributes record contains labels, use the
+	 *                          label instead of the field name.
+	 * @param sheetName         A custom name for the sheet
+	 * @param DataRow           attributesRecord the attributes record for
+	 *                          formatting
+	 * 
+	 * @throws Exception Gets thrown in case the ResultSet could not be read or
+	 *                   output stream can not be written
+	 */
+	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader, boolean useLabelIfPresent,
+			String sheetName, DataRow AttributesRecord, SheetConfiguration sheetConfig) throws Exception {
 
 		try (Workbook wb = new SXSSFWorkbook(400)) {
 			Sheet sheet = wb.createSheet(sheetName);
@@ -597,7 +615,13 @@ public class ResultSetExporter {
 				return;
 			}
 
-			List<String> fieldnames = rs.getColumnNames();
+			List<String> fieldnames;
+			if (sheetConfig == null) {
+				fieldnames = rs.getColumnNames();
+			} else {
+				sheet = sheetConfig.getConfiguredSheet(sheet);
+				fieldnames = sheetConfig.getColumnNamesOrdered();
+			}
 			Iterator<DataRow> it = rs.iterator();
 			Iterator<String> fieldNameIterator;
 
