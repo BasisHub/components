@@ -6,10 +6,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import com.basiscomponents.constantsForTesting.SpecialCharacterConstants;
+import com.basiscomponents.constantsForTesting.TestDataBaseConstants;
+
 public class H2DataBaseProvider {
 
 	private static ArrayList<String> sql = new ArrayList<String>();
-	private static final int AMOUNT_OF_TESTDATABASES = 4;
 
 	/**
 	 * Creates a H2DataBase with the sql statements listed in the sql ArrayList of
@@ -36,8 +38,11 @@ public class H2DataBaseProvider {
 	 * 
 	 */
 	public static void dropAllTestTables() throws SQLException {
-		for (int currentDataBase = 1; currentDataBase <= AMOUNT_OF_TESTDATABASES; currentDataBase++) {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test" + currentDataBase, "sa", "sa");
+		ArrayList<String> connections = TestDataBaseConstants.getAllTestConnections();
+		for (int currentDataBase = 0; currentDataBase < connections.size(); currentDataBase++) {
+			try (Connection con = DriverManager.getConnection(
+					connections.get(currentDataBase),
+					TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
 				Statement stmt = con.createStatement();) {
 
 			// Get tableNames
@@ -60,7 +65,8 @@ public class H2DataBaseProvider {
 
 	public static void createTestDataBaseForSQLRetrieve() throws SQLException {
 		try (
-		Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
+				Connection con = DriverManager.getConnection(TestDataBaseConstants.CON_TO_SQL_RETRIEVE_DB,
+						TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
 		Statement stmt = con.createStatement();
 		) {
 			sql.add("CREATE TABLE IF NOT EXISTS REGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER)");
@@ -95,7 +101,8 @@ public class H2DataBaseProvider {
 	}
 
 	public static void createTestDataBaseForNormalRetrieve() throws SQLException {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
+		try (Connection con = DriverManager.getConnection(TestDataBaseConstants.CON_TO_NORMAL_RETRIEVE_DB,
+				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
 				Statement stmt = con.createStatement();) {
 
 			sql.add("CREATE TABLE IF NOT EXISTS PRIMARYKEY_REGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER, PRIMARY KEY (customerID))");
@@ -103,13 +110,15 @@ public class H2DataBaseProvider {
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Simpson', 42, 1)");
 			sql.add("insert into PRIMARYKEY_REGISTRATION VALUES ('Freeman', 22, 2)");
 
-			sql.add("CREATE TABLE IF NOT EXISTS SPECIALREGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER, employeeID INTEGER)");
-			sql.add("insert into SPECIALREGISTRATION VALUES ('Älfred', 62, 1, 4)");
-			sql.add("insert into SPECIALREGISTRATION VALUES ('Ölfred', 62, 1, 4)");
-			sql.add("insert into SPECIALREGISTRATION VALUES ('Ülfred', 62, 1, 4)");
-			sql.add("insert into SPECIALREGISTRATION VALUES ('Êlfred', 62, 1, 4)");
-			sql.add("insert into SPECIALREGISTRATION VALUES ('Élfred', 62, 1, 4)");
-			sql.add("insert into SPECIALREGISTRATION VALUES ('Èlfred', 62, 1, 4)");
+			sql.add("CREATE TABLE IF NOT EXISTS SPECIALREGISTRATION (first VARCHAR(255))");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('" + SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS
+					+ "')");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('" + SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS
+					+ "')");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('"
+					+ SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS + "')");
+			sql.add("insert into SPECIALREGISTRATION VALUES ('" + SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS
+					+ "')");
 
 			sql.add("CREATE TABLE IF NOT EXISTS BOOLTABLE (boolType BOOL, booleanType BOOLEAN, bitType BIT)");
 			sql.add("insert into BOOLTABLE VALUES (true, false, true)");
@@ -131,7 +140,8 @@ public class H2DataBaseProvider {
 	}
 
 	public static void createTestDataBaseForWriteRemove() throws SQLException {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");
+		try (Connection con = DriverManager.getConnection(TestDataBaseConstants.CON_TO_WRITE_REMOVE_DB,
+				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
 				Statement stmt = con.createStatement();) {
 
 			sql.add("CREATE TABLE IF NOT EXISTS PRIMARYKEY_REGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER, PRIMARY KEY (customerID))");
@@ -167,7 +177,8 @@ public class H2DataBaseProvider {
 	}
 
 	public static void createTestDataBaseForFilteringScoping() throws SQLException {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
+		try (Connection con = DriverManager.getConnection(TestDataBaseConstants.CON_TO_FILTER_SCOPE_DB,
+				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
 				Statement stmt = con.createStatement();) {
 
 			sql.add("CREATE TABLE IF NOT EXISTS FULLREGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER)");

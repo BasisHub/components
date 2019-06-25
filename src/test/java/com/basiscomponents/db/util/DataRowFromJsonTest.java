@@ -12,9 +12,11 @@ import java.text.ParseException;
 
 import org.junit.jupiter.api.Test;
 
+import com.basiscomponents.constantsForTesting.SpecialCharacterConstants;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 public class DataRowFromJsonTest {
 
@@ -41,6 +43,53 @@ public class DataRowFromJsonTest {
 	}
 
 	/**
+	 * Violating the format to cause the right exceptions.
+	 * 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	@Test
+	public void dataRowFromJsonFromatViolationTest() throws IOException, ParseException {
+
+		// Violating the format should result in a JsonParseException
+		assertThrows(JsonParseException.class, () -> DataRowFromJsonProvider.fromJson("Hi", new DataRow()));
+
+		// Missing { brackets
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson("{\"name\":\"John\", \"city\":\"New York\"", new DataRow()));
+		assertThrows(MismatchedInputException.class,
+				() -> DataRowFromJsonProvider.fromJson("\"name\":\"John\", \"city\":\"New York\"}", new DataRow()));
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": 31, \"meta\":{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}",
+						new DataRow()));
+
+		// Missing meta annotation
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": 31, :{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
+						new DataRow()));
+
+		// Missing : colon
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": 31, meta{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
+						new DataRow()));
+
+		// Missing " quote
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": 31, meta:{\"age:{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
+						new DataRow()));
+
+		// Missing data
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": , meta:{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
+						new DataRow()));
+	}
+
+	/**
 	 * Checking some special cases considering the conversion from Json to DataRow.
 	 * 
 	 * @throws IOException
@@ -56,13 +105,6 @@ public class DataRowFromJsonTest {
 		// An empty Json String
 		dr1 = DataRowFromJsonProvider.fromJson("{}", new DataRow());
 		assertTrue(dr1.isEmpty());
-
-		// Violating the format should result in a JsonParseException
-		// TODO More complex violations of the JsonFormat, missing brackets
-		assertThrows(JsonParseException.class, () -> DataRowFromJsonProvider.fromJson("Hi", new DataRow()));
-		assertThrows(JsonParseException.class,
-				() -> DataRowFromJsonProvider.fromJson("{\"name\":\"John\", \"city\":\"New York\"", new DataRow()));
-
 
 		// Empty String as an Integer
 		sb = new StringBuilder("");
@@ -199,32 +241,33 @@ public class DataRowFromJsonTest {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-//	@Test
+	@Test
 	public void dataRowFromJsonSpecialCharactersTest() throws IOException, ParseException {
 		
 		sb = new StringBuilder("");
-		sb.append(
-				"{\"truth\": true, \"age\": 31, \"Decimal\": 23456.434, \"city\":\"New York\", \"Number\": 42.0, \"date\":\"1999-05-05 23:59:59.999\", \"timestamp1\":\"1999-05-05T23:59:59.999\", \"timestamp2\":\"1999-05-05\",");
-		sb.append(" \"meta\":{\"truth\":{\"ColumnType\":\"");
-		sb.append(java.sql.Types.BOOLEAN);
-		sb.append("\"},\"age\":{\"ColumnType\":\"");
-		sb.append(java.sql.Types.INTEGER);
-		sb.append("\"}, \"Decimal\":{\"ColumnType\":\"");
-		sb.append(java.sql.Types.NUMERIC);
-		sb.append("\"}, \"timestamp1\":{\"ColumnType\":\"");
-		sb.append(java.sql.Types.TIMESTAMP);
-		sb.append("\"}, \"timestamp2\":{\"ColumnType\":\"");
-		sb.append(java.sql.Types.TIMESTAMP);
-		sb.append("\"}, \"date\":{\"ColumnType\":\"");
-		sb.append(java.sql.Types.DATE + "\"}}}");
+		sb.append("{\"name1\":\"");
+		sb.append(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS);
+		sb.append("\", \"name2\":\"");
+		sb.append(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS);
+		sb.append("\", \"name3\":\"");
+		sb.append(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS);
+		sb.append("\", \"name4\":\"");
+		sb.append(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS);
+		sb.append("\", \"meta\":{\"name1\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR);
+		sb.append("\"}, \"name2\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR);
+		sb.append("\"}, \"name3\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR);
+		sb.append("\"}, \"name4\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR + "\"}}}");
 		json = sb.toString();
 		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
 
-		assertEquals(true, dr.getFieldValue("truth"));
-		assertEquals(31, dr.getFieldValue("age"));
-		assertEquals("New York", dr.getFieldValue("city"));
-		assertEquals(42.0, dr.getFieldValue("Number"));
-		assertEquals(new BigDecimal("23456.434"), dr.getFieldValue("Decimal"));
+		assertEquals(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS, dr.getFieldValue("name1"));
+		assertEquals(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS, dr.getFieldValue("name2"));
+		assertEquals(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS, dr.getFieldValue("name3"));
+		assertEquals(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS, dr.getFieldValue("name4"));
 	}
 
 	/**

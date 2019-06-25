@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.basiscomponents.constantsForTesting.TestDataBaseConstants;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
@@ -32,7 +33,8 @@ public class SqlTableBCH2LeftoversTest {
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForWriteRemove();
-		conToWrite = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test3", "sa", "sa");
+		conToWrite = DriverManager.getConnection(TestDataBaseConstants.CON_TO_WRITE_REMOVE_DB,
+				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
 	}
 
 	/**

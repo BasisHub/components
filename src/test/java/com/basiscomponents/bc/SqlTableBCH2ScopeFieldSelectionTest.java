@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import com.basiscomponents.constantsForTesting.TestDataBaseConstants;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -40,7 +41,8 @@ public class SqlTableBCH2ScopeFieldSelectionTest {
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForFilteringScoping();
-		conToFilterScope = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
+		conToFilterScope = DriverManager.getConnection(TestDataBaseConstants.CON_TO_FILTER_SCOPE_DB,
+				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
 	}
 
 	/**

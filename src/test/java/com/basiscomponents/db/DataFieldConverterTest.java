@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 
 import org.junit.jupiter.api.Test;
 
+import com.basiscomponents.constantsForTesting.SpecialCharacterConstants;
 import com.basiscomponents.db.util.DataFieldConverter;
 
 public class DataFieldConverterTest {
@@ -60,7 +61,6 @@ public class DataFieldConverterTest {
 			df.setValue(t);
 			assertEquals(t, DataFieldConverter.convertType(df.getValue(), java.sql.Types.TIME));
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -283,8 +283,20 @@ public class DataFieldConverterTest {
 		// String to String
 		df.setValue("Hi");
 		assertEquals("Hi", DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
-		assertEquals("Hi", DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
 		assertEquals("Hi", DataFieldConverter.convertType(df.getValue(), java.sql.Types.LONGVARCHAR));
+
+		df.setValue(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS);
+		assertEquals(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS,
+				DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
+		df.setValue(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS);
+		assertEquals(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS,
+				DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
+		df.setValue(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS);
+		assertEquals(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS,
+				DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
+		df.setValue(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS);
+		assertEquals(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS,
+				DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
 
 		// String to Decimal
 		df.setValue("");

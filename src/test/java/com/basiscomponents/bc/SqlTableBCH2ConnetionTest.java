@@ -12,6 +12,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.basiscomponents.constantsForTesting.SpecialCharacterConstants;
+import com.basiscomponents.constantsForTesting.TestDataBaseConstants;
 import com.basiscomponents.db.ResultSet;
 
 public class SqlTableBCH2ConnetionTest {
@@ -35,8 +37,10 @@ public class SqlTableBCH2ConnetionTest {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForSQLRetrieve();
 		H2DataBaseProvider.createTestDataBaseForNormalRetrieve();
-		conToSQLRetrieve = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-		conToNormalRetrieve = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
+		conToSQLRetrieve = DriverManager.getConnection(TestDataBaseConstants.CON_TO_SQL_RETRIEVE_DB,
+				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
+		conToNormalRetrieve = DriverManager.getConnection(TestDataBaseConstants.CON_TO_NORMAL_RETRIEVE_DB,
+				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
 	}
 
 	/**
@@ -125,18 +129,17 @@ public class SqlTableBCH2ConnetionTest {
 		rs = sqlTable.retrieve();
 
 		// Checking the ColumnNames and results
-		assertTrue(rs.getColumnCount() == 4);
+		assertTrue(rs.getColumnCount() == 1);
 		assertTrue(rs.getColumnNames().contains("FIRST"));
-		assertTrue(rs.getColumnNames().contains("AGE"));
-		assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
-		assertTrue(rs.getColumnNames().contains("EMPLOYEEID"));
 
-		assertEquals("Älfred", rs.get(0).getFieldValue("FIRST"));
-		assertEquals("Ölfred", rs.get(1).getFieldValue("FIRST"));
-		assertEquals("Ülfred", rs.get(2).getFieldValue("FIRST"));
-		assertEquals("Êlfred", rs.get(3).getFieldValue("FIRST"));
-		assertEquals("Élfred", rs.get(4).getFieldValue("FIRST"));
-		assertEquals("Èlfred", rs.get(5).getFieldValue("FIRST"));
+		assertEquals(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS, rs.get(0).getFieldValue("FIRST"),
+				"There is something wrong with the german special characters");
+		assertEquals(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS, rs.get(1).getFieldValue("FIRST"),
+				"There is something wrong with the special characters");
+		assertEquals(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS, rs.get(2).getFieldValue("FIRST"),
+				"There is something wrong with the mathematical instructions");
+		assertEquals(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS, rs.get(3).getFieldValue("FIRST"),
+				"There is something wrong with the french special characters");
 	}
 
 	/**
