@@ -10,6 +10,7 @@ com.basiscomponents.bridge.typewrap
 com.basiscomponents.comm
 com.basiscomponents.configuration
 com.basiscomponents.db
+com.basiscomponents.db.config.export
 com.basiscomponents.db.constants
 com.basiscomponents.db.exception
 com.basiscomponents.db.importer
