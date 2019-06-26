@@ -1,5 +1,7 @@
 package com.basiscomponents.bc;
 
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_WRITE_REMOVE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.USERNAME_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.Connection;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.basiscomponents.constants.TestDataBaseConstants;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
@@ -33,8 +34,7 @@ public class SqlTableBCH2LeftoversTest {
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForWriteRemove();
-		conToWrite = DriverManager.getConnection(TestDataBaseConstants.CON_TO_WRITE_REMOVE_DB,
-				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
+		conToWrite = DriverManager.getConnection(CON_TO_WRITE_REMOVE_DB, USERNAME_PASSWORD, USERNAME_PASSWORD);
 	}
 
 	/**

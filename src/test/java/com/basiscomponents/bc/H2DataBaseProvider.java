@@ -1,5 +1,11 @@
 package com.basiscomponents.bc;
 
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_FILTER_SCOPE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_NORMAL_RETRIEVE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_SQL_RETRIEVE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_WRITE_REMOVE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.USERNAME_PASSWORD;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -42,7 +48,7 @@ public class H2DataBaseProvider {
 		for (int currentDataBase = 0; currentDataBase < connections.size(); currentDataBase++) {
 			try (Connection con = DriverManager.getConnection(
 					connections.get(currentDataBase),
-					TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
+					USERNAME_PASSWORD, USERNAME_PASSWORD);
 				Statement stmt = con.createStatement();) {
 
 			// Get tableNames
@@ -65,8 +71,8 @@ public class H2DataBaseProvider {
 
 	public static void createTestDataBaseForSQLRetrieve() throws SQLException {
 		try (
-				Connection con = DriverManager.getConnection(TestDataBaseConstants.CON_TO_SQL_RETRIEVE_DB,
-						TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
+				Connection con = DriverManager.getConnection(CON_TO_SQL_RETRIEVE_DB, USERNAME_PASSWORD,
+						USERNAME_PASSWORD);
 		Statement stmt = con.createStatement();
 		) {
 			sql.add("CREATE TABLE IF NOT EXISTS REGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER)");
@@ -101,8 +107,8 @@ public class H2DataBaseProvider {
 	}
 
 	public static void createTestDataBaseForNormalRetrieve() throws SQLException {
-		try (Connection con = DriverManager.getConnection(TestDataBaseConstants.CON_TO_NORMAL_RETRIEVE_DB,
-				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
+		try (Connection con = DriverManager.getConnection(CON_TO_NORMAL_RETRIEVE_DB, USERNAME_PASSWORD,
+				USERNAME_PASSWORD);
 				Statement stmt = con.createStatement();) {
 
 			sql.add("CREATE TABLE IF NOT EXISTS PRIMARYKEY_REGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER, PRIMARY KEY (customerID))");
@@ -140,8 +146,7 @@ public class H2DataBaseProvider {
 	}
 
 	public static void createTestDataBaseForWriteRemove() throws SQLException {
-		try (Connection con = DriverManager.getConnection(TestDataBaseConstants.CON_TO_WRITE_REMOVE_DB,
-				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
+		try (Connection con = DriverManager.getConnection(CON_TO_WRITE_REMOVE_DB, USERNAME_PASSWORD, USERNAME_PASSWORD);
 				Statement stmt = con.createStatement();) {
 
 			sql.add("CREATE TABLE IF NOT EXISTS PRIMARYKEY_REGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER, PRIMARY KEY (customerID))");
@@ -177,8 +182,7 @@ public class H2DataBaseProvider {
 	}
 
 	public static void createTestDataBaseForFilteringScoping() throws SQLException {
-		try (Connection con = DriverManager.getConnection(TestDataBaseConstants.CON_TO_FILTER_SCOPE_DB,
-				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
+		try (Connection con = DriverManager.getConnection(CON_TO_FILTER_SCOPE_DB, USERNAME_PASSWORD, USERNAME_PASSWORD);
 				Statement stmt = con.createStatement();) {
 
 			sql.add("CREATE TABLE IF NOT EXISTS FULLREGISTRATION (first VARCHAR(255), age INTEGER, customerID INTEGER)");

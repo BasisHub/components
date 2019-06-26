@@ -1,5 +1,9 @@
 package com.basiscomponents.db.util;
 
+import static com.basiscomponents.constants.SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS;
+import static com.basiscomponents.constants.SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS;
+import static com.basiscomponents.constants.SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS;
+import static com.basiscomponents.constants.SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,7 +18,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.basiscomponents.constants.SpecialCharacterConstants;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -248,13 +251,13 @@ public class DataRowFromJsonTest {
 		
 		sb = new StringBuilder("");
 		sb.append("{\"name1\":\"");
-		sb.append(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS);
+		sb.append(FRENCH_SPECIAL_CHARACTERS);
 		sb.append("\", \"name2\":\"");
-		sb.append(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS);
+		sb.append(GERMAN_SPECIAL_CHARACTERS);
 		sb.append("\", \"name3\":\"");
-		sb.append(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS);
+		sb.append(MATHEMATICAL_SPECIAL_CHARACTERS);
 		sb.append("\", \"name4\":\"");
-		sb.append(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS);
+		sb.append(STANDARD_SPECIAL_CHARACTERS);
 		sb.append("\", \"meta\":{\"name1\":{\"ColumnType\":\"");
 		sb.append(java.sql.Types.VARCHAR);
 		sb.append("\"}, \"name2\":{\"ColumnType\":\"");
@@ -266,10 +269,10 @@ public class DataRowFromJsonTest {
 		json = sb.toString();
 		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
 
-		assertEquals(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS, dr.getFieldValue("name1"));
-		assertEquals(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS, dr.getFieldValue("name2"));
-		assertEquals(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS, dr.getFieldValue("name3"));
-		assertEquals(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS, dr.getFieldValue("name4"));
+		assertEquals(FRENCH_SPECIAL_CHARACTERS, dr.getFieldValue("name1"));
+		assertEquals(GERMAN_SPECIAL_CHARACTERS, dr.getFieldValue("name2"));
+		assertEquals(MATHEMATICAL_SPECIAL_CHARACTERS, dr.getFieldValue("name3"));
+		assertEquals(STANDARD_SPECIAL_CHARACTERS, dr.getFieldValue("name4"));
 	}
 
 	/**

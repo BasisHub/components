@@ -1,5 +1,9 @@
 package com.basiscomponents.db;
 
+import static com.basiscomponents.constants.SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS;
+import static com.basiscomponents.constants.SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS;
+import static com.basiscomponents.constants.SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS;
+import static com.basiscomponents.constants.SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,7 +21,6 @@ import java.text.SimpleDateFormat;
 
 import org.junit.jupiter.api.Test;
 
-import com.basiscomponents.constants.SpecialCharacterConstants;
 import com.basiscomponents.db.util.DataFieldConverter;
 
 public class DataFieldConverterTest {
@@ -285,17 +288,17 @@ public class DataFieldConverterTest {
 		assertEquals("Hi", DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
 		assertEquals("Hi", DataFieldConverter.convertType(df.getValue(), java.sql.Types.LONGVARCHAR));
 
-		df.setValue(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS);
-		assertEquals(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS,
+		df.setValue(GERMAN_SPECIAL_CHARACTERS);
+		assertEquals(GERMAN_SPECIAL_CHARACTERS,
 				DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
-		df.setValue(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS);
-		assertEquals(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS,
+		df.setValue(FRENCH_SPECIAL_CHARACTERS);
+		assertEquals(FRENCH_SPECIAL_CHARACTERS,
 				DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
-		df.setValue(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS);
-		assertEquals(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS,
+		df.setValue(MATHEMATICAL_SPECIAL_CHARACTERS);
+		assertEquals(MATHEMATICAL_SPECIAL_CHARACTERS,
 				DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
-		df.setValue(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS);
-		assertEquals(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS,
+		df.setValue(STANDARD_SPECIAL_CHARACTERS);
+		assertEquals(STANDARD_SPECIAL_CHARACTERS,
 				DataFieldConverter.convertType(df.getValue(), java.sql.Types.VARCHAR));
 
 		// String to Decimal
