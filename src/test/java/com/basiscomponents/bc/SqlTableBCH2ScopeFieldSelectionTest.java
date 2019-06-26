@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import com.basiscomponents.constantsForTesting.TestDataBaseConstants;
+import com.basiscomponents.constants.TestDataBaseConstants;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

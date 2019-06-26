@@ -9,10 +9,12 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.basiscomponents.constantsForTesting.SpecialCharacterConstants;
+import com.basiscomponents.constants.SpecialCharacterConstants;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -309,6 +311,44 @@ public class DataRowFromJsonTest {
 		assertEquals(new Timestamp(l), dr.getFieldValue("timestamp1"));
 		l = new Long("925855200000");
 		assertEquals(new Timestamp(l), dr.getFieldValue("timestamp2"));
+	}
+
+	/**
+	 * A conversion of a Json-String to a DataRow. There is a DataRow used to inject
+	 * the attributes.
+	 * 
+	 * @throws Exception
+	 */
+//	@Test
+	public void dataRowFromJsonNestedArrayListTest() throws Exception {
+
+		// Single List
+		sb = new StringBuilder("");
+		sb.append("{\"list\":[\"hello\", \"world\"], \"meta\":{\"list\":{\"ColumnType\":\"-973\"}}}");
+		json = sb.toString();
+		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+
+		List<String> l = new ArrayList<String>();
+		l.add("hello");
+		l.add("world");
+		assertEquals(l, dr.getFieldValue("list"));
+
+		// Multiple Lists
+		sb = new StringBuilder("");
+		sb.append(
+				"{\"list1\":[\"hello\", \"world\"], \"list2\":[\"bye\", \"world\"], \"meta\":{\"list1\":{\"ColumnType\":\"-973\"}, \"list2\":{\"ColumnType\":\"-973\"}}}");
+		json = sb.toString();
+		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+
+		List<String> l1 = new ArrayList<String>();
+		l1.add("hello");
+		l1.add("world");
+		List<String> l2 = new ArrayList<String>();
+		l2.add("bye");
+		l2.add("world");
+		assertEquals(l1, dr.getFieldValue("list1"));
+		assertEquals(l2, dr.getFieldValue("list2"));
+
 	}
 
 	/**

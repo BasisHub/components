@@ -12,7 +12,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.basiscomponents.constantsForTesting.TestDataBaseConstants;
+import com.basiscomponents.constants.TestDataBaseConstants;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;

@@ -36,6 +36,7 @@ public class DataRowFromJsonProvider {
 
 		input = convertCharsBelowChr32(input);
 		input = removeLeadingDataRow(input);
+//		input = wrapInJsonArray(input);
 		JsonNode root = buildJsonRoot(input);
 		input = wrapInJsonArray(input);
 
@@ -95,7 +96,8 @@ public class DataRowFromJsonProvider {
 			switch (fieldType) {
 			case -973:
 				// nested ArrayList or BBjVector
-				JsonNode x=root.get(0).get(fieldName);
+				JsonNode x = root.get(0).get(fieldName);
+//				JsonNode x = root.get(fieldName);
 				ObjectMapper mapper = new ObjectMapper();
 				ObjectReader reader = mapper.readerFor(new TypeReference<List<Object>>() {});
 				List<String> list = reader.readValue(x);

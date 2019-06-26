@@ -6,8 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import com.basiscomponents.constantsForTesting.SpecialCharacterConstants;
-import com.basiscomponents.constantsForTesting.TestDataBaseConstants;
+import com.basiscomponents.constants.SpecialCharacterConstants;
+import com.basiscomponents.constants.TestDataBaseConstants;
 
 public class H2DataBaseProvider {
 

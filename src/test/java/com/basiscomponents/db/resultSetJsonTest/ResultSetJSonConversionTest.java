@@ -30,7 +30,7 @@ public class ResultSetJSonConversionTest {
         for (int i = 0; i < fieldNamesOld.size(); i++) {
             String fieldname = fieldNamesOld.get(i);
             assertEquals( oldDR.getFieldAsString(fieldname), newDR.getFieldAsString(fieldname), ()->json + "\n" + fieldname + " values differ with function getFieldAsString");
-        }
+		}
 	}
 
     /**
@@ -46,7 +46,7 @@ public class ResultSetJSonConversionTest {
         assertTrue(fieldNamesOld.size() == fieldNamesNew.size(), json);
         for (int i = 0; i < fieldNamesOld.size(); i++) {
             String fieldName= fieldNamesOld.get(i);
-            assertEquals(
+			assertEquals(
                     oldDR.getFieldAsNumber(fieldName),
                     newDR.getFieldAsNumber(fieldName),
                     () -> json + "\n" + fieldName + " values differ with function getFieldAsNumber");

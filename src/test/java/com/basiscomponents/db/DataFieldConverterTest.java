@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 
 import org.junit.jupiter.api.Test;
 
-import com.basiscomponents.constantsForTesting.SpecialCharacterConstants;
+import com.basiscomponents.constants.SpecialCharacterConstants;
 import com.basiscomponents.db.util.DataFieldConverter;
 
 public class DataFieldConverterTest {

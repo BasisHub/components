@@ -1,5 +1,8 @@
 package com.basiscomponents.bc;
 
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_NORMAL_RETRIEVE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_SQL_RETRIEVE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.USERNAME_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,8 +15,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.basiscomponents.constantsForTesting.SpecialCharacterConstants;
-import com.basiscomponents.constantsForTesting.TestDataBaseConstants;
+import com.basiscomponents.constants.SpecialCharacterConstants;
 import com.basiscomponents.db.ResultSet;
 
 public class SqlTableBCH2ConnetionTest {
@@ -37,10 +39,10 @@ public class SqlTableBCH2ConnetionTest {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForSQLRetrieve();
 		H2DataBaseProvider.createTestDataBaseForNormalRetrieve();
-		conToSQLRetrieve = DriverManager.getConnection(TestDataBaseConstants.CON_TO_SQL_RETRIEVE_DB,
-				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
-		conToNormalRetrieve = DriverManager.getConnection(TestDataBaseConstants.CON_TO_NORMAL_RETRIEVE_DB,
-				TestDataBaseConstants.USERNAME_PASSWORD, TestDataBaseConstants.USERNAME_PASSWORD);
+		conToSQLRetrieve = DriverManager.getConnection(CON_TO_SQL_RETRIEVE_DB,
+				USERNAME_PASSWORD, USERNAME_PASSWORD);
+		conToNormalRetrieve = DriverManager.getConnection(CON_TO_NORMAL_RETRIEVE_DB, USERNAME_PASSWORD,
+				USERNAME_PASSWORD);
 	}
 
 	/**
@@ -550,6 +552,8 @@ public class SqlTableBCH2ConnetionTest {
 	public static void cleanUp() throws Exception {
 		conToSQLRetrieve.close();
 		conToNormalRetrieve.close();
+		assertTrue(conToSQLRetrieve.isClosed());
+		assertTrue(conToNormalRetrieve.isClosed());
 		H2DataBaseProvider.dropAllTestTables();
 	}
 
