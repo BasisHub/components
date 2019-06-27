@@ -3,7 +3,9 @@ package com.basiscomponents.db.util;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import com.basiscomponents.constants.SpecialCharacterConstants;
 import com.basiscomponents.db.DataRow;
@@ -28,6 +30,9 @@ public class DataRowProvider {
 	public static final String DATEFIELD = "DATEFIELD";
 	public static final String TIMESTAMPFIELD = "TIMESTAMPFIELD";
 	public static final String TIMEFIELD = "TIMEFIELD";
+	public static final String LISTFIELD = "LISTFIELD";
+	public static final String LONGFIELD = "LONGFIELD";
+	public static final String SCD_LONGFIELD = "SCD_LONGFIELD";
 	
 	public static final String NESTEDDATAROW1 = "NESTEDDATAROW1";
 	public static final String NESTEDDATAROW2 = "NESTEDDATAROW2";
@@ -38,6 +43,20 @@ public class DataRowProvider {
 	public static DataRow buildSampleDataRow(boolean nullAllFields) {
 		DataRow dr = new DataRow();
 		try {
+
+			// Adding attributes to the DataRow
+			dr.setAttribute("hello", "world");
+			dr.setAttribute("bye", "world");
+
+			// Adding a rowkey
+			dr.addToRowKey("1fdssdf79g79df");
+
+			// Adding Data into the DataRow
+			List l = new ArrayList<String>();
+			l.add("hello");
+			l.add("world");
+			dr.setFieldValue(LISTFIELD, l);
+
 			int myInt = 1;
 			dr.setFieldValue(INTFIELD, myInt);
 			Double myDouble = 1.0;
@@ -92,6 +111,7 @@ public class DataRowProvider {
 			dr.setFieldAttribute(BOOLFIELD, "ColumnType", "16");
 			dr.setFieldAttribute(DATEFIELD, "ColumnType", "91");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "ColumnType", "93");
+			dr.setFieldAttribute(LISTFIELD, "ColumnType", "-973");
 			
 		} catch (ParseException e) {
 
@@ -189,7 +209,6 @@ public class DataRowProvider {
 			e.printStackTrace();
 		}
 		return dr;
-
 	}
 
 	public static DataRow buildNestedDataRowWithResultSets() {
@@ -203,7 +222,6 @@ public class DataRowProvider {
 			e.printStackTrace();
 		}
 		return dr;
-
 	}
 
 	public static DataRow buildNestedDataRowWithMultipleDataRowsResultSet() {
@@ -216,7 +234,23 @@ public class DataRowProvider {
 			e.printStackTrace();
 		}
 		return dr;
+	}
 
+	public static DataRow buildToJsonOnlyDataRow() {
+		DataRow dr = new DataRow();
+		try {
+			// Values Set
+			Long myLong = new Long("66547657568678");
+			dr.setFieldValue(LONGFIELD, myLong);
+//			Long nullLong = null;
+//			dr.setFieldValue(SCD_LONGFIELD, nullLong);
+			// Attributes Set
+			dr.setFieldAttribute(LONGFIELD, "ColumnType", Integer.toString(java.sql.Types.BIGINT));
+//			dr.setFieldAttribute(SCD_LONGFIELD, "ColumnType", Integer.toString(java.sql.Types.BIGINT));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dr;
 	}
 
 }

@@ -36,9 +36,9 @@ public class DataRowFromJsonProvider {
 
 		input = convertCharsBelowChr32(input);
 		input = removeLeadingDataRow(input);
-//		input = wrapInJsonArray(input);
-		JsonNode root = buildJsonRoot(input);
 		input = wrapInJsonArray(input);
+		JsonNode root = buildJsonRoot(input);
+//		input = wrapInJsonArray(input);
 
 		JsonFactory f = new JsonFactory();
 		try (JsonParser jsonParser = f.createParser(input)) {
