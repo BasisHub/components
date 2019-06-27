@@ -1,5 +1,6 @@
 package com.basiscomponents.db.util;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -33,6 +34,9 @@ public class DataRowProvider {
 	public static final String LISTFIELD = "LISTFIELD";
 	public static final String LONGFIELD = "LONGFIELD";
 	public static final String SCD_LONGFIELD = "SCD_LONGFIELD";
+	public static final String BIGDECIMALFIELD = "BIGDECIMALFIELD";
+	public static final String SCD_BIGDECIMALFIELD = "SCD_BIGDECIMALFIELD";
+	public static final String FLOATFIELD = "FLOATFIELD";
 	
 	public static final String NESTEDDATAROW1 = "NESTEDDATAROW1";
 	public static final String NESTEDDATAROW2 = "NESTEDDATAROW2";
@@ -242,11 +246,17 @@ public class DataRowProvider {
 			// Values Set
 			Long myLong = new Long("66547657568678");
 			dr.setFieldValue(LONGFIELD, myLong);
-//			Long nullLong = null;
-//			dr.setFieldValue(SCD_LONGFIELD, nullLong);
+			BigDecimal myDecimal = new BigDecimal("546445464354");
+			dr.setFieldValue(BIGDECIMALFIELD, myDecimal);
+			BigDecimal myDeci = new BigDecimal("2345465476565");
+			dr.setFieldValue(SCD_BIGDECIMALFIELD, myDeci);
+			Float myFloat = new Float("4.2");
+			dr.setFieldValue(FLOATFIELD, myFloat);
 			// Attributes Set
 			dr.setFieldAttribute(LONGFIELD, "ColumnType", Integer.toString(java.sql.Types.BIGINT));
-//			dr.setFieldAttribute(SCD_LONGFIELD, "ColumnType", Integer.toString(java.sql.Types.BIGINT));
+			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", Integer.toString(java.sql.Types.DECIMAL));
+			dr.setFieldAttribute(SCD_BIGDECIMALFIELD, "ColumnType", Integer.toString(java.sql.Types.DECIMAL));
+			dr.setFieldAttribute(FLOATFIELD, "ColumnType", Integer.toString(java.sql.Types.REAL));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

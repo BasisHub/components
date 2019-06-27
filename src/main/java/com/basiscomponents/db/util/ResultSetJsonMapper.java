@@ -68,6 +68,7 @@ public class ResultSetJsonMapper {
 
             jsonGenerator.writeEndArray();
 		}
+
             return writer.toString();
     }
 
