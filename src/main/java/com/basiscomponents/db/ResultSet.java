@@ -123,7 +123,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (!"ASC".equalsIgnoreCase(direction) && !"DESC".equalsIgnoreCase(direction)) {
 			direction = "ASC";
 		}
-		java.util.Comparator<DataRow> comparator = new DataRowComparator(fieldName);
+		java.util.Comparator<DataRow> comparator = new DataFieldComparator(fieldName);
 		if ("DESC".equalsIgnoreCase(direction)) {
 			comparator = comparator.reversed();
 		}	
@@ -244,7 +244,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				if (metadata.contains(filterFieldName)) {
 					DataField filterField = simpleFilterCondition.getField(filterFieldName);
 					if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
-						comparatorMap.put(filterFieldName, new DataRowComparator(filterFieldName));
+						comparatorMap.put(filterFieldName, new DataFieldComparator(filterFieldName));
 						matcherMap.put(filterFieldName, new ExpressionMatcher(filterField.getString().substring(5),
 								metadata.getFieldType(filterFieldName), filterFieldName));
 					}

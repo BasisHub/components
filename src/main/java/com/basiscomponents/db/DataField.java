@@ -1,5 +1,10 @@
 package com.basiscomponents.db;
 
+import com.basiscomponents.db.model.Attribute;
+import com.basiscomponents.db.util.DataFieldConverter;
+import com.google.gson.annotations.Expose;
+
+import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -22,12 +27,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import javax.xml.bind.DatatypeConverter;
-
-import com.basiscomponents.db.model.Attribute;
-import com.basiscomponents.db.util.DataFieldConverter;
-import com.google.gson.annotations.Expose;
 
 /**
  * The DataField class is an object container class which provides multiple cast
@@ -80,7 +79,7 @@ public class DataField implements java.io.Serializable {
 	 * current DataField object, <code>false</code> otherwise. The method does only
 	 * compare the value object of both DataField objects, not the attributes.
 	 * 
-	 * @param dataField
+	 * @param pattern
 	 *            The DataField object to compare with.
 	 * @return equal The boolean value indicating whether the given DataField object
 	 *         equals this DataField object.
@@ -94,7 +93,7 @@ public class DataField implements java.io.Serializable {
 	 * current DataField object, <code>false</code> otherwise. The method does only
 	 * compare the value object of both DataField objects, not the attributes.
 	 * 
-	 * @param dataField
+	 * @param pattern
 	 *            The DataField object to compare with.
 	 * @return equal The boolean value indicating whether the given DataField object
 	 *         equals this DataField object.

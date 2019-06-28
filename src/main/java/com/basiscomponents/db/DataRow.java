@@ -1,7 +1,21 @@
 package com.basiscomponents.db;
 
-import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
+import com.basis.bbj.datatypes.TemplatedString;
+import com.basis.util.common.BasisNumber;
+import com.basis.util.common.TemplateInfo;
+import com.basiscomponents.db.constants.ConstantsResolver;
+import com.basiscomponents.db.exception.DataFieldNotFoundException;
+import com.basiscomponents.db.model.Attribute;
+import com.basiscomponents.db.util.DataFieldConverter;
+import com.basiscomponents.db.util.DataRowFromJsonProvider;
+import com.basiscomponents.db.util.DataRowMatcher;
+import com.basiscomponents.db.util.JRDataSourceAdapter;
+import com.basiscomponents.db.util.TemplateParser;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.google.gson.JsonElement;
+import net.sf.jasperreports.engine.JRDataSource;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -17,23 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.DatatypeConverter;
-
-import com.basis.bbj.datatypes.TemplatedString;
-import com.basis.util.common.BasisNumber;
-import com.basis.util.common.TemplateInfo;
-import com.basiscomponents.db.constants.ConstantsResolver;
-import com.basiscomponents.db.exception.DataFieldNotFoundException;
-import com.basiscomponents.db.model.Attribute;
-import com.basiscomponents.db.util.DataFieldConverter;
-import com.basiscomponents.db.util.DataRowFromJsonProvider;
-import com.basiscomponents.db.util.DataRowMatcher;
-import com.basiscomponents.db.util.JRDataSourceAdapter;
-import com.basiscomponents.db.util.TemplateParser;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.google.gson.JsonElement;
-
-import net.sf.jasperreports.engine.JRDataSource;
+import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
+import static com.basiscomponents.db.util.SqlTypeNames.isNumericType;
 
 /**
  * A DataRow is a container object with key/value pairs. Each key being a String
@@ -1513,10 +1512,8 @@ public class DataRow implements java.io.Serializable {
 	 */
 	public DataRow resolveConstants(ConstantsResolver cr, boolean removeUnsetFields) {
 		DataRow n = this.clone();
-		@SuppressWarnings("rawtypes")
-		Iterator it = n.getFieldNames().iterator();
-		while (it.hasNext()) {
-			String f = (String) it.next();
+
+		for (String f:n.getFieldNames()) {
 			try {
 				if (n.getFieldType(f) == 12) {
 					n.setFieldValue(f, cr.resolveConstants(n.getField(f).getString()));
@@ -1548,17 +1545,7 @@ public class DataRow implements java.io.Serializable {
 	 * clear()} method which sets the DataRow's value to <code>null</code>
 	 */
 	public void clear() {
-
-		Iterator<String> it = this.getFieldNames().iterator();
-		while (it.hasNext()) {
-			try {
-				this.getField(it.next()).clear();
-			} catch (Exception e) {
-				// Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
+		this.getFieldNames().forEach(x->this.getField(x).clear());
 	}
 
 	/**
@@ -1698,9 +1685,9 @@ public class DataRow implements java.io.Serializable {
 
 		if (dr == null)
 			dr = this;
-		Iterator<String> it = dr.getFieldNames().iterator();
-		while (it.hasNext()) {
-			String fieldName = it.next();
+
+		for (String fieldName: dr.getFieldNames()) {
+
 			if (!this.contains(fieldName))
 				continue;
 
@@ -1733,20 +1720,7 @@ public class DataRow implements java.io.Serializable {
 		if (!templateChanged) {
 			return template;
 		}
-		ArrayList<Integer> numericTypeCodeList = new ArrayList<>();
-		numericTypeCodeList.add(java.sql.Types.BIGINT);
-		numericTypeCodeList.add(java.sql.Types.TINYINT);
-		numericTypeCodeList.add(java.sql.Types.INTEGER);
-		numericTypeCodeList.add(java.sql.Types.SMALLINT);
-		numericTypeCodeList.add(java.sql.Types.NUMERIC);
-		numericTypeCodeList.add(java.sql.Types.DOUBLE);
-		numericTypeCodeList.add(java.sql.Types.FLOAT);
-		numericTypeCodeList.add(java.sql.Types.DECIMAL);
-		numericTypeCodeList.add(java.sql.Types.REAL);
-		numericTypeCodeList.add(java.sql.Types.BOOLEAN);
-		numericTypeCodeList.add(java.sql.Types.BIT);
-		numericTypeCodeList.add(java.sql.Types.DATE);
-		numericTypeCodeList.add(9); // Basis DATE
+
 
 		StringBuilder templatedString = new StringBuilder();
 
@@ -1760,7 +1734,7 @@ public class DataRow implements java.io.Serializable {
 
 			templatedString.append(resultSet.getColumnName(index) + ":");
 
-			if (!numericTypeCodeList.contains(sqlType)) {
+			if (!isNumericType(sqlType)) {
 				templatedString.append("C");
 
 				if (sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE

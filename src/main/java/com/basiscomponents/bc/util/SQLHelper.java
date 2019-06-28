@@ -1,8 +1,8 @@
 package com.basiscomponents.bc.util;
 
-import static com.basiscomponents.db.ExpressionMatcher.getPreparedWhereClauseValues;
-
 import java.sql.SQLException;
+
+import static com.basiscomponents.db.ExpressionMatcher.getPreparedWhereClauseValues;
 
 public class SQLHelper {
 	/**
@@ -16,7 +16,7 @@ public class SQLHelper {
 	 * @throws SQLException is thrown when a value cannot be set.
 	 */
 	public static void setSqlParams(java.sql.PreparedStatement prep, com.basiscomponents.db.DataRow dr, java.util.List<String> fields,
-	                                 boolean isBasisDBMS) throws Exception {
+	                                 boolean isBasisDBMS) throws java.sql.SQLException, java.text.ParseException {
 		if (prep == null || dr == null) {
 			return;
 		}

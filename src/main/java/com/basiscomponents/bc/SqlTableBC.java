@@ -1,14 +1,14 @@
 package com.basiscomponents.bc;
 
-import static com.basiscomponents.bc.util.Constants.AND;
-import static com.basiscomponents.bc.util.Constants.BASIS_DBMS;
-import static com.basiscomponents.bc.util.Constants.COLUMN_NAME;
-import static com.basiscomponents.bc.util.Constants.ERROR;
-import static com.basiscomponents.bc.util.Constants.MYSQL_DBMS;
-import static com.basiscomponents.bc.util.Constants.WHERE;
-import static com.basiscomponents.bc.util.SQLHelper.isChartype;
-import static com.basiscomponents.bc.util.SQLHelper.setParameters;
-import static com.basiscomponents.bc.util.SQLHelper.setSqlParams;
+import com.basiscomponents.bc.config.DatabaseConfiguration;
+import com.basiscomponents.bc.util.CloseableWrapper;
+import com.basiscomponents.bc.util.DataRowWriter;
+import com.basiscomponents.bc.util.SqlConnectionHelper;
+import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.util.DataRowRegexMatcher;
+import com.basiscomponents.util.KeyValuePair;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -25,13 +25,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.basiscomponents.bc.util.CloseableWrapper;
-import com.basiscomponents.bc.util.SqlConnectionHelper;
-import com.basiscomponents.db.DataField;
-import com.basiscomponents.db.DataRow;
-import com.basiscomponents.db.ResultSet;
-import com.basiscomponents.db.util.DataRowRegexMatcher;
-import com.basiscomponents.util.KeyValuePair;
+import static com.basiscomponents.bc.util.Constants.*;
+import static com.basiscomponents.bc.util.SQLHelper.*;
 
 /**
  * <h1>SqlTableBC represents a table in a database.</h1>
@@ -58,22 +53,18 @@ public class SqlTableBC implements BusinessComponent {
 	private String table;
 	private String scope = "";
 	private HashMap<String, ArrayList<String>> scopes;
-	private ArrayList<String> primaryKeys;
-	private ArrayList<String> autoIncrementKeys;
+
 	private DataRow attributesRecord;
 	private DataRow allowedFilter;
 	private DataRow metaData;
 	private String retrieveSql;
-	private String sqlStatement;
+
 	private DataRow retrieveParams;
-	private Map<String, String> mapping = new HashMap<>();
 
 	private DataRow filter = new DataRow();
 	private DataRow fieldSelection;
 
-	private String dbType;
-	private String dbQuoteString = "";
-
+	private DatabaseConfiguration dbconfig = new DatabaseConfiguration();
 	private Boolean truncateFieldValues = false;
 
 	private Map<String, DataField> regexes;
@@ -149,8 +140,6 @@ public class SqlTableBC implements BusinessComponent {
 	 */
 	public void setTable(String table) {
 		this.table = table;
-		this.primaryKeys = new ArrayList<>();
-		this.autoIncrementKeys = new ArrayList<>();
 		this.attributesRecord = new DataRow();
 		createAttributesRecord();
 	}
@@ -209,8 +198,8 @@ public class SqlTableBC implements BusinessComponent {
 	 *
 	 * @return the database specific quote string character.
 	 */
-	public String getDBQuoteString() {
-		return dbQuoteString;
+	public String getDbQuoteString() {
+		return dbconfig.getDbQuoteString();
 	}
 
 	/**
@@ -405,17 +394,17 @@ public class SqlTableBC implements BusinessComponent {
 			sqlfields.append("*");
 		else {
 			for (String field : fields) {
-				sqlfields.append("," + dbQuoteString + field + dbQuoteString);
+				sqlfields.append("," + dbconfig.getDbQuoteString() + field + dbconfig.getDbQuoteString());
 			}
 			sqlfields = new StringBuilder(sqlfields.substring(1));
 		}
 
 		if (customStatementUsed) {
 			sql = new StringBuilder("SELECT " + sqlfields + " FROM (" + retrieveSql + ") ");
-			if (com.basiscomponents.bc.util.Constants.MYSQL_DBMS.equals(dbType))
+			if (com.basiscomponents.bc.util.Constants.MYSQL_DBMS.equals(dbconfig.getDbType()))
 				sql.append(" as s ");
 		} else
-			sql = new StringBuilder("SELECT " + sqlfields + " FROM " + dbQuoteString + table + dbQuoteString);
+			sql = new StringBuilder("SELECT " + sqlfields + " FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString());
 
 		if (filterRow != null && !filterRow.getFieldNames().isEmpty()) {
 			StringBuilder wh = new StringBuilder("");
@@ -429,10 +418,10 @@ public class SqlTableBC implements BusinessComponent {
 					if (!customStatementUsed)
 						ff = getMapping(f);
 					if (filterRow.getField(f).getValue() == null) {
-						wh.append(AND + dbQuoteString + ff + dbQuoteString + " IS NULL");
+						wh.append(AND + dbconfig.getDbQuoteString() + ff + dbconfig.getDbQuoteString() + " IS NULL");
 						filterRow.removeField(f);
 					} else
-						wh.append(AND + dbQuoteString + ff + dbQuoteString + "=?");
+						wh.append(AND + dbconfig.getDbQuoteString() + ff + dbconfig.getDbQuoteString() + "=?");
 				}
 			}
 			if (wh.length() > 0)
@@ -440,7 +429,7 @@ public class SqlTableBC implements BusinessComponent {
 		}
 
 		if (first >= 0 && last >= first) {
-			switch (dbType) {
+			switch (dbconfig.getDbType()) {
 				case BASIS_DBMS:
 					sql.append(" LIMIT " + (first + 1) + "," + (last - first + 1));
 					break;
@@ -456,19 +445,17 @@ public class SqlTableBC implements BusinessComponent {
 								+ " ROWS FETCH NEXT " + (last - first + 1) + " ROWS ONLY");
 					} else {
 						throw new UnsupportedOperationException(
-								"Pagination is not supported or not implemented with the " + dbType + " (version "
+								"Pagination is not supported or not implemented with the " + dbconfig.getDbType() + " (version "
 										+ dbVersion + ") database.");
 					}
 					break;
 				default:
 					throw new UnsupportedOperationException(
-							"Pagination is not supported or not implemented with the " + dbType + " database.");
+							"Pagination is not supported or not implemented with the " + dbconfig.getDbType() + " database.");
 			}
 		}
-
-		sqlStatement = sql.toString();
-
-		try (java.sql.PreparedStatement prep = conn.prepareStatement(sqlStatement)) {
+		dbconfig.setSqlStatement(sql.toString());
+		try (java.sql.PreparedStatement prep = conn.prepareStatement(dbconfig.getSqlStatement())) {
 			DataRow params = new DataRow();
 			if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
 				params = retrieveParams.clone();
@@ -477,7 +464,7 @@ public class SqlTableBC implements BusinessComponent {
 				params.mergeRecord(filterRow);
 			}
 			if (params.getColumnCount() > 0) {
-				setSqlParams(prep, params, params.getFieldNames(), BASIS_DBMS.equals(dbType));
+				setSqlParams(prep, params, params.getFieldNames(), BASIS_DBMS.equals(dbconfig.getDbType()));
 			}
 
 			try (java.sql.ResultSet rs = prep.executeQuery()) {
@@ -511,7 +498,7 @@ public class SqlTableBC implements BusinessComponent {
 		ResultSet rs = new ResultSet();
 		for (String fieldName : dr.getFieldNames()) {
 			fieldName = getMapping(fieldName);
-			if (!metaData.contains(fieldName) || primaryKeys.contains(fieldName))
+			if (!metaData.contains(fieldName) || dbconfig.containsPrimaryKey(fieldName))
 				continue;
 
 			try {
@@ -544,172 +531,43 @@ public class SqlTableBC implements BusinessComponent {
 		return rs;
 	}
 
+
 	/**
 	 * {@inheritDoc}
 	 */
-	// TODO reduce CC of this Method
-	public DataRow write(DataRow r) throws Exception {
-		ResultSet errors = validateWrite(r);
+	public DataRow write(DataRow dr) throws Exception {
+		ResultSet errors = validateWrite(dr);
 		checkErrors(errors);
-		boolean pkPresent = isPrimaryKeyPresent(r);
-
-		try (CloseableWrapper<Connection> connw = getConnection()) {
-			Connection conn = connw.getCloseable();
-			// Read table field names from the table (not from getAttributesRecord()).
-			// The field may differ if a custom retrieve sql statement is used.
-			DatabaseMetaData meta = conn.getMetaData();
-			java.sql.ResultSet rs = meta.getColumns(null, null, table, null);
-			List<String> tableFields = new ArrayList<>();
-			while (rs.next()) {
-				tableFields.add(rs.getString(COLUMN_NAME));
-			}
-
-			StringBuilder sql = new StringBuilder();
-			int affectedRows = 0;
-			DataRow ret = r.clone();
-			PreparedStatement prep;
-
-			// update (Try an update an check affected rows. If there are no (0) affected
-			// rows, then make an
-			// insert.)
-			if (pkPresent) {
-				sql = new StringBuilder("UPDATE " + dbQuoteString + table + dbQuoteString + " SET ");
-
-				List<String> fields = new ArrayList<>();
-
-				StringBuilder update = new StringBuilder();
-				for (String field : r.getFieldNames()) {
-					String field2 = getMapping(field);
-					if (primaryKeys.contains(field))
-						continue;
-					if (tableFields.contains(field2)) {
-						fields.add(field);
-						update.append("," + dbQuoteString + field2 + dbQuoteString + "=?");
-					}
-				}
-
-				if (update.length() > 0) {
-					// if the fields are _only_ fields that are part of the primary key
-					// (e.g. a table with PK being a compount, not having fields outside the PK)
-					// then update would be "" and this portion would fail
-
-					sql.append(update.substring(1));
-
-					StringBuilder wh = new StringBuilder();
-					for (String pkfield : primaryKeys) {
-						wh.append(AND + dbQuoteString + getMapping(pkfield) + dbQuoteString + "=?");
-						fields.add(pkfield);
-					}
-					sql.append(WHERE + wh.substring(5));
-
-					prep = conn.prepareStatement(sql.toString());
-					setSqlParams(prep, r, fields, BASIS_DBMS.equals(dbType));
-
-					affectedRows = prep.executeUpdate();
-					prep.close();
-				} else {
-					/// so now we have to do a SELECT to see if the record is there, as we can't
-					/// check with
-					/// update
-					sql = new StringBuilder(
-							"SELECT COUNT(*) AS C FROM " + dbQuoteString + table + dbQuoteString);
-					StringBuilder wh = new StringBuilder("");
-					for (String pkfield : primaryKeys) {
-						wh.append(AND + dbQuoteString + getMapping(pkfield) + dbQuoteString + "=?");
-						fields.add(pkfield);
-					}
-					if (wh.length() > 0) {
-						sql.append(WHERE + wh.substring(5));
-					}
-					prep = conn.prepareStatement(sql.toString());
-					setSqlParams(prep, r, fields, BASIS_DBMS.equals(dbType));
-					java.sql.ResultSet jrs = prep.executeQuery();
-					ResultSet retrs = new ResultSet();
-					retrs.populate(jrs, true);
-					affectedRows = retrs.get(0).getFieldAsNumber("C").intValue();
-					prep.close();
-				}
-			}
-
-			// insert
-			Boolean inserted = false;
-			if (!pkPresent || affectedRows == 0) {
-				sql = new StringBuilder("INSERT INTO " + dbQuoteString + table + dbQuoteString + " (");
-
-				List<String> fields = new ArrayList<>();
-				StringBuilder keys = new StringBuilder("");
-				StringBuilder values = new StringBuilder("");
-				for (String field : r.getFieldNames()) {
-					String field2 = getMapping(field);
-					if (tableFields.contains(field2)) {
-						fields.add(field);
-						keys.append("," + dbQuoteString + field2 + dbQuoteString);
-						values.append(",?");
-					}
-				}
-				sql.append(keys.substring(1) + ") VALUES(" + values.substring(1) + ")");
-
-				prep = conn.prepareStatement(sql.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
-				setSqlParams(prep, r, fields, BASIS_DBMS.equals(dbType));
-
-				affectedRows = prep.executeUpdate();
-				inserted = affectedRows > 0;
-
-				// get generated keys
-				if (affectedRows > 0) {
-					try (java.sql.ResultSet gkeys = prep.getGeneratedKeys()) {
-						if (gkeys.next()) {
-							for (int i = 0; i < gkeys.getMetaData().getColumnCount(); i++) {
-								String name = autoIncrementKeys.get(i);
-								ret.setFieldValue(name, gkeys.getObject(i + 1));
-							}
-							pkPresent = isPkPresent(pkPresent, ret);
-						}
-					}
-				}
-
-				prep.close();
-			}
-
-			sqlStatement = sql.toString();
-
-			// reload from the database
-			if (pkPresent) {
-				DataRow oldfilter = this.filter;
-				DataRow filterRow = new DataRow();
-				for (String f : primaryKeys) {
-					filterRow.setFieldValue(f, ret.getFieldType(f), ret.getField(f).getValue());
-				}
-				this.setFilter(filterRow);
-				ResultSet retrs = this.retrieve(0, 1);
-				if (retrs.size() == 1)
-					ret = retrs.getItem(0);
-				else {
-					System.err.println("could not read written record - got more than 1 record back!");
-					System.err.println("filter = " + filterRow);
-				}
-
-				this.setFilter(oldfilter);
-			}
-
-			if (inserted) {
-				ret.setAttribute("CREATED", inserted.toString());
-			}
-			return ret;
-
-		}
+		return DataRowWriter.write(dr, table, dbconfig, connectionHelper, this::reRetrieve);
 	}
 
-	private boolean isPkPresent(boolean pkPresent, DataRow ret) {
-		if (primaryKeys != null && !primaryKeys.isEmpty()) {
-			ArrayList<String> list = new ArrayList<>();
-			for (String field : ret.getFieldNames()) {
-				list.add(getMapping(field));
+	private DataRow reRetrieve(DataRow dr) {
+		try {
+			DataRow oldfilter = this.getFilter();
+			DataRow filterRow = new DataRow();
+			for (String f : dbconfig.getPrimaryKeys()) {
+				filterRow.setFieldValue(f, dr.getFieldType(f), dr.getField(f).getValue());
 			}
-			pkPresent = list.containsAll(primaryKeys);
+			this.setFilter(filterRow);
+			ResultSet retrs = this.retrieve(0, 1);
+			if (retrs.size() == 1)
+				dr = retrs.getItem(0);
+			else {
+				System.err.println("could not read written record - got more than 1 record back!");
+				System.err.println("filter = " + filterRow);
+			}
+
+			this.setFilter(oldfilter);
+		} catch (java.text.ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		return pkPresent;
+		return dr;
 	}
+
+	// TODO reduce CC of this Method
+
 
 	private static void checkErrors(ResultSet errors) throws SQLException {
 		if (errors.size() > 0) {
@@ -727,16 +585,6 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 	/**
-	 * @param r
-	 * @return
-	 */
-	private boolean isPrimaryKeyPresent(DataRow r) {
-		boolean pkPresent = false;
-		pkPresent = isPkPresent(pkPresent, r);
-		return pkPresent;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	// TODO To be implemented
@@ -751,24 +599,24 @@ public class SqlTableBC implements BusinessComponent {
 		ResultSet errors = validateRemove(r);
 		checkErrors(errors);
 
-		if (primaryKeys == null || primaryKeys.isEmpty()) {
+		if (dbconfig.isPrimaryKeysEmpty()) {
 			throw new SQLException("No primary key definition for table \"" + table + "\"");
-		} else if (!r.getFieldNames().containsAll(primaryKeys)) {
+		} else if (!r.getFieldNames().containsAll(dbconfig.getPrimaryKeys())) {
 			throw new SQLException("Missing primary column for table \"" + table + "\"");
 		}
 
 		StringBuilder sql =
-				new StringBuilder("DELETE FROM " + dbQuoteString + table + dbQuoteString + " ");
+				new StringBuilder("DELETE FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString() + " ");
 
 		StringBuilder wh = new StringBuilder("");
-		for (String pkfieldname : primaryKeys) {
-			wh.append(AND + dbQuoteString + getMapping(pkfieldname) + dbQuoteString + "=?");
+		for (String pkfieldname : dbconfig.getPrimaryKeys()) {
+			wh.append(AND + dbconfig.getDbQuoteString() + getMapping(pkfieldname) + dbconfig.getDbQuoteString() + "=?");
 		}
 		sql.append(WHERE + wh.substring(5));
-		sqlStatement = sql.toString();
+		dbconfig.setSqlStatement(sql.toString());
 		try (CloseableWrapper<Connection> connw = getConnection();
-		     PreparedStatement prep = connw.getCloseable().prepareStatement(sqlStatement)) {
-			setSqlParams(prep, r, primaryKeys, BASIS_DBMS.equals(dbType));
+		     PreparedStatement prep = connw.getCloseable().prepareStatement(dbconfig.getSqlStatement())) {
+			setSqlParams(prep, r, dbconfig.getPrimaryKeys(), BASIS_DBMS.equals(dbconfig.getDbType()));
 			prep.execute();
 		}
 
@@ -826,7 +674,7 @@ public class SqlTableBC implements BusinessComponent {
 	 * @param dbFieldName the table field name
 	 */
 	public void addMapping(String bcFieldName, String dbFieldName) {
-		mapping.put(bcFieldName, dbFieldName);
+		dbconfig.addMapping(bcFieldName, dbFieldName);
 	}
 
 	/**
@@ -838,8 +686,8 @@ public class SqlTableBC implements BusinessComponent {
 	 * @return a HashMap with field mappings. Where key is the alias name and value is the table field
 	 * name.
 	 */
-	public HashMap<String, String> getMappings() {
-		return new HashMap<>(mapping);
+	public Map<String, String> getMappings() {
+		return dbconfig.getMappings();
 	}
 
 	/**
@@ -850,10 +698,7 @@ public class SqlTableBC implements BusinessComponent {
 	 * @return the table field name.
 	 */
 	public String getMapping(String bcFieldName) {
-		String dbFieldName = mapping.get(bcFieldName);
-		if (dbFieldName == null)
-			return bcFieldName;
-		return dbFieldName;
+		return dbconfig.getMapping(bcFieldName);
 	}
 
 	/**
@@ -878,7 +723,7 @@ public class SqlTableBC implements BusinessComponent {
 	 * @return the last executed sql statement.
 	 */
 	public String getLastSqlStatement() {
-		return sqlStatement;
+		return dbconfig.getSqlStatement();
 	}
 
 	/**
@@ -919,13 +764,13 @@ public class SqlTableBC implements BusinessComponent {
 		try (CloseableWrapper<Connection> connw = getConnection()) {
 			Connection conn = connw.getCloseable();
 			DatabaseMetaData meta = conn.getMetaData();
-			this.dbType = meta.getDatabaseProductName().toUpperCase();
-			this.dbQuoteString = meta.getIdentifierQuoteString();
+			this.dbconfig.setDbType(meta.getDatabaseProductName().toUpperCase());
+			this.dbconfig.setDbQuoteString(meta.getIdentifierQuoteString());
 			this.metaData = new DataRow();
 			java.sql.ResultSet sqlMetaData = meta.getPrimaryKeys(null, null, table);
 
 			while (sqlMetaData.next()) {
-				primaryKeys.add(sqlMetaData.getString(COLUMN_NAME));
+				dbconfig.addPrimaryKey(sqlMetaData.getString(COLUMN_NAME));
 			}
 
 			prepareMetadata(meta);
@@ -952,7 +797,7 @@ public class SqlTableBC implements BusinessComponent {
 					if (metaData.getFieldAttributes(field).containsKey("REMARKS"))
 						attributesRecord.setFieldAttribute(field, "REMARKS",
 								metaData.getFieldAttribute(field, "REMARKS"));
-					if (primaryKeys.contains(getMapping(field)))
+					if (dbconfig.containsPrimaryKey(getMapping(field)))
 						attributesRecord.setFieldAttribute(field, "EDITABLE", "2");
 				} catch (Exception ex) {
 					// do nothing
@@ -976,7 +821,7 @@ public class SqlTableBC implements BusinessComponent {
 				String name = metaColumns.getString(COLUMN_NAME);
 				String autoIncrement = metaColumns.getString("IS_AUTOINCREMENT");
 				if ("YES".equals(autoIncrement))
-					autoIncrementKeys.add(name);
+					dbconfig.addAutoIncrementKey(name);
 			}
 
 			String columnName = metaColumns.getString(COLUMN_NAME);
@@ -1004,7 +849,7 @@ public class SqlTableBC implements BusinessComponent {
 		PreparedStatement stmt;
 		if (retrieveSql != null && !retrieveSql.equals("")) {
 
-			switch (dbType) {
+			switch (dbconfig.getDbType()) {
 				case BASIS_DBMS:
 					stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
 					break;
@@ -1018,18 +863,18 @@ public class SqlTableBC implements BusinessComponent {
 			}
 			if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
 				try {
-					setSqlParams(stmt, retrieveParams, null, BASIS_DBMS.equals(dbType));
+					setSqlParams(stmt, retrieveParams, null, BASIS_DBMS.equals(dbconfig.getDbType()));
 				} catch (Exception e) {
 					// do nothing
 				}
 			}
 		} else {
-			if (BASIS_DBMS.equals(dbType)) {
+			if (BASIS_DBMS.equals(dbconfig.getDbType())) {
 				stmt =
-						conn.prepareStatement("SELECT TOP 1 * FROM " + dbQuoteString + table + dbQuoteString);
+						conn.prepareStatement("SELECT TOP 1 * FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString());
 			} else {
 				stmt = conn.prepareStatement(
-						"SELECT * FROM " + dbQuoteString + table + dbQuoteString + " WHERE 1=0");
+						"SELECT * FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString() + " WHERE 1=0");
 			}
 		}
 		return stmt;
