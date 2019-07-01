@@ -1,14 +1,5 @@
 package com.basiscomponents.db.util;
 
-import java.io.IOException;
-import java.sql.Types;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
@@ -20,6 +11,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.gson.JsonElement;
+
+import java.io.IOException;
+import java.sql.Types;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DataRowFromJsonProvider {
 
@@ -36,8 +36,9 @@ public class DataRowFromJsonProvider {
 
 		input = convertCharsBelowChr32(input);
 		input = removeLeadingDataRow(input);
-		JsonNode root = buildJsonRoot(input);
 		input = wrapInJsonArray(input);
+		JsonNode root = buildJsonRoot(input);
+//		input = wrapInJsonArray(input);
 
 		JsonFactory f = new JsonFactory();
 		try (JsonParser jsonParser = f.createParser(input)) {
@@ -95,7 +96,8 @@ public class DataRowFromJsonProvider {
 			switch (fieldType) {
 			case -973:
 				// nested ArrayList or BBjVector
-				JsonNode x=root.get(0).get(fieldName);
+				JsonNode x = root.get(0).get(fieldName);
+//				JsonNode x = root.get(fieldName);
 				ObjectMapper mapper = new ObjectMapper();
 				ObjectReader reader = mapper.readerFor(new TypeReference<List<Object>>() {});
 				List<String> list = reader.readValue(x);

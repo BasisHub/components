@@ -1,8 +1,10 @@
 package com.basiscomponents.db.util;
 
+
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -10,7 +12,10 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
+import static com.basiscomponents.constants.SpecialCharacterConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DataRowFromJsonTest {
@@ -38,6 +43,53 @@ public class DataRowFromJsonTest {
 	}
 
 	/**
+	 * Violating the format to cause the right exceptions.
+	 * 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	@Test
+	public void dataRowFromJsonFromatViolationTest() throws IOException, ParseException {
+
+		// Violating the format should result in a JsonParseException
+		assertThrows(JsonParseException.class, () -> DataRowFromJsonProvider.fromJson("Hi", new DataRow()));
+
+		// Missing { brackets
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson("{\"name\":\"John\", \"city\":\"New York\"", new DataRow()));
+		assertThrows(MismatchedInputException.class,
+				() -> DataRowFromJsonProvider.fromJson("\"name\":\"John\", \"city\":\"New York\"}", new DataRow()));
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": 31, \"meta\":{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}",
+						new DataRow()));
+
+		// Missing meta annotation
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": 31, :{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
+						new DataRow()));
+
+		// Missing : colon
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": 31, meta{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
+						new DataRow()));
+
+		// Missing " quote
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": 31, meta:{\"age:{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
+						new DataRow()));
+
+		// Missing data
+		assertThrows(JsonParseException.class,
+				() -> DataRowFromJsonProvider.fromJson(
+						"{\"age\": , meta:{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
+						new DataRow()));
+	}
+
+	/**
 	 * Checking some special cases considering the conversion from Json to DataRow.
 	 * 
 	 * @throws IOException
@@ -53,9 +105,6 @@ public class DataRowFromJsonTest {
 		// An empty Json String
 		dr1 = DataRowFromJsonProvider.fromJson("{}", new DataRow());
 		assertTrue(dr1.isEmpty());
-
-		// Violating the format should result in a JsonParseException
-		assertThrows(JsonParseException.class, () -> DataRowFromJsonProvider.fromJson("Hi", new DataRow()));
 
 		// Empty String as an Integer
 		sb = new StringBuilder("");
@@ -187,6 +236,41 @@ public class DataRowFromJsonTest {
 	}
 
 	/**
+	 * A conversion of a Json-String to a DataRow with many special characters.
+	 * 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	@Test
+	public void dataRowFromJsonSpecialCharactersTest() throws IOException, ParseException {
+		
+		sb = new StringBuilder("");
+		sb.append("{\"name1\":\"");
+		sb.append(FRENCH_SPECIAL_CHARACTERS);
+		sb.append("\", \"name2\":\"");
+		sb.append(GERMAN_SPECIAL_CHARACTERS);
+		sb.append("\", \"name3\":\"");
+		sb.append(MATHEMATICAL_SPECIAL_CHARACTERS);
+		sb.append("\", \"name4\":\"");
+		sb.append(STANDARD_SPECIAL_CHARACTERS);
+		sb.append("\", \"meta\":{\"name1\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR);
+		sb.append("\"}, \"name2\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR);
+		sb.append("\"}, \"name3\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR);
+		sb.append("\"}, \"name4\":{\"ColumnType\":\"");
+		sb.append(java.sql.Types.VARCHAR + "\"}}}");
+		json = sb.toString();
+		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+
+		assertEquals(FRENCH_SPECIAL_CHARACTERS, dr.getFieldValue("name1"));
+		assertEquals(GERMAN_SPECIAL_CHARACTERS, dr.getFieldValue("name2"));
+		assertEquals(MATHEMATICAL_SPECIAL_CHARACTERS, dr.getFieldValue("name3"));
+		assertEquals(STANDARD_SPECIAL_CHARACTERS, dr.getFieldValue("name4"));
+	}
+
+	/**
 	 * A conversion of a Json-String to a DataRow with many types.
 	 * 
 	 * @throws IOException
@@ -194,7 +278,7 @@ public class DataRowFromJsonTest {
 	 */
 	@Test
 	public void dataRowFromJsonManyTypesMetaTest() throws IOException, ParseException {
-		
+
 		sb = new StringBuilder("");
 		sb.append(
 				"{\"truth\": true, \"age\": 31, \"Decimal\": 23456.434, \"city\":\"New York\", \"Number\": 42.0, \"date\":\"1999-05-05 23:59:59.999\", \"timestamp1\":\"1999-05-05T23:59:59.999\", \"timestamp2\":\"1999-05-05\",");
@@ -230,6 +314,44 @@ public class DataRowFromJsonTest {
 		ts.setMinutes(0);
 		ts.setHours(0);
 		assertEquals(ts, dr.getFieldValue("timestamp2"));
+	}
+
+	/**
+	 * A conversion of a Json-String to a DataRow. There is a DataRow used to inject
+	 * the attributes.
+	 * 
+	 * @throws Exception
+	 */
+//	@Test
+	public void dataRowFromJsonNestedArrayListTest() throws Exception {
+
+		// Single List
+		sb = new StringBuilder("");
+		sb.append("{\"list\":[\"hello\", \"world\"], \"meta\":{\"list\":{\"ColumnType\":\"-973\"}}}");
+		json = sb.toString();
+		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+
+		List<String> l = new ArrayList<String>();
+		l.add("hello");
+		l.add("world");
+		assertEquals(l, dr.getFieldValue("list"));
+
+		// Multiple Lists
+		sb = new StringBuilder("");
+		sb.append(
+				"{\"list1\":[\"hello\", \"world\"], \"list2\":[\"bye\", \"world\"], \"meta\":{\"list1\":{\"ColumnType\":\"-973\"}, \"list2\":{\"ColumnType\":\"-973\"}}}");
+		json = sb.toString();
+		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+
+		List<String> l1 = new ArrayList<String>();
+		l1.add("hello");
+		l1.add("world");
+		List<String> l2 = new ArrayList<String>();
+		l2.add("bye");
+		l2.add("world");
+		assertEquals(l1, dr.getFieldValue("list1"));
+		assertEquals(l2, dr.getFieldValue("list2"));
+
 	}
 
 	/**

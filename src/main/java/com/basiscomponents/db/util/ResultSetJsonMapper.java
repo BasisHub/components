@@ -1,5 +1,16 @@
 package com.basiscomponents.db.util;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.TimeZone;
+
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
@@ -8,11 +19,6 @@ import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.*;
-import java.util.Map.Entry;
 
 
 public class ResultSetJsonMapper {
@@ -61,9 +67,9 @@ public class ResultSetJsonMapper {
             } // while on rows
 
             jsonGenerator.writeEndArray();
-            jsonGenerator.close();
+		}
+
             return writer.toString();
-        }
     }
 
     private static void writeDataRowAttributes(HashMap<String, String> attributes, JsonGenerator jsonGenerator) throws IOException {
@@ -72,19 +78,19 @@ public class ResultSetJsonMapper {
         for (Entry<String, String> entry : attributes.entrySet()) {
             jsonGenerator.writeObjectField(entry.getKey(), entry.getValue());
         }
-        jsonGenerator.writeEndObject();
+		jsonGenerator.writeEndObject();
     }
 
     private static void dataFieldToJson(DataField value, String fieldName, int fieldType, boolean meta, String addIndexColumn, boolean f_trimStrings, JsonGenerator jsonGenerator) throws IOException {
         if (value == null || value.getValue() == null) {
             jsonGenerator.writeNullField(fieldName);
             return;
-        }
+		}
 
         switch (fieldType) {
 
             //an ArrayList
-            case -973: {
+		case -973:
                 try {
 
                     jsonGenerator.writeArrayFieldStart(fieldName);
@@ -94,14 +100,11 @@ public class ResultSetJsonMapper {
                         jsonGenerator.writeObject(it.next());
                     jsonGenerator.writeEndArray();
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
-            }
             break;
             //a nested DataRow
-            case -974: {
+		case -974:
                 DataRow drj = (DataRow) value.getObject();
                 try {
                     jsonGenerator.writeFieldName(fieldName);
@@ -111,22 +114,18 @@ public class ResultSetJsonMapper {
                     }
                     jsonGenerator.writeRawValue(jstr);
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-            }
             break;
             //a nested ResultSet
-            case -975: {
+		case -975:
                 ResultSet rs = (ResultSet) value.getObject();
                 try {
                     jsonGenerator.writeFieldName(fieldName);
                     jsonGenerator.writeRawValue(rs.toJson(meta, addIndexColumn));
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-            }
             break;
             case java.sql.Types.CHAR:
             case java.sql.Types.VARCHAR:
@@ -151,7 +150,7 @@ public class ResultSetJsonMapper {
                 }
                 break;
             case java.sql.Types.BIGINT:
-                if (value == null || value.getLong() == null)
+			if (value.getLong() == null)
                     jsonGenerator.writeNumberField(fieldName, 0);
                 else
                     jsonGenerator.writeNumberField(fieldName, value.getLong().longValue());
@@ -160,7 +159,7 @@ public class ResultSetJsonMapper {
             case java.sql.Types.TINYINT:
             case java.sql.Types.INTEGER:
             case java.sql.Types.SMALLINT:
-                if (value == null || value.getInt() == null)
+			if (value.getInt() == null)
                     jsonGenerator.writeNumberField(fieldName, 0);
                 else
                     jsonGenerator.writeNumberField(fieldName, value.getInt().intValue());
@@ -171,7 +170,7 @@ public class ResultSetJsonMapper {
                 break;
 
             case java.sql.Types.DECIMAL:
-                if (value == null || value.getBigDecimal() == null)
+			if (value.getBigDecimal() == null)
                     jsonGenerator.writeNumberField(fieldName, 0);
                 else
                     jsonGenerator.writeNumberField(fieldName, value.getBigDecimal());
@@ -179,14 +178,14 @@ public class ResultSetJsonMapper {
 
             case java.sql.Types.DOUBLE:
             case java.sql.Types.FLOAT:
-                if (value == null || value.getDouble() == null)
+			if (value.getDouble() == null)
                     jsonGenerator.writeNumberField(fieldName, 0.0);
                 else
                     jsonGenerator.writeNumberField(fieldName, value.getDouble().doubleValue());
                 break;
 
             case java.sql.Types.REAL:
-                if (value == null || value.getFloat() == null)
+			if (value.getFloat() == null)
                     jsonGenerator.writeNumberField(fieldName, 0.0);
                 else
                     jsonGenerator.writeNumberField(fieldName, value.getFloat().floatValue());
@@ -194,7 +193,7 @@ public class ResultSetJsonMapper {
 
             case java.sql.Types.BOOLEAN:
             case java.sql.Types.BIT:
-                if (value == null || value.getBoolean() == null)
+			if (value.getBoolean() == null)
                     jsonGenerator.writeStringField(fieldName, "");
                 else
                     jsonGenerator.writeBooleanField(fieldName, value.getBoolean());
@@ -204,7 +203,7 @@ public class ResultSetJsonMapper {
             case java.sql.Types.TIMESTAMP:
             case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
             case 11:
-                if (value == null || value.getTimestamp() == null)
+			if (value.getTimestamp() == null)
                     jsonGenerator.writeStringField(fieldName, "");
                 else {
 
@@ -257,7 +256,7 @@ public class ResultSetJsonMapper {
                 break;
             case java.sql.Types.DATE:
             case 9:
-                if (value == null || value.getDate() == null)
+			if (value.getDate() == null)
                     jsonGenerator.writeStringField(fieldName, "");
                 else {
                     jsonGenerator.writeStringField(fieldName, value.getDate().toString() + "T00:00:00");

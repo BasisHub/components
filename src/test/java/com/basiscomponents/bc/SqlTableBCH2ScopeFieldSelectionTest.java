@@ -1,5 +1,7 @@
 package com.basiscomponents.bc;
 
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_FILTER_SCOPE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.USERNAME_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,11 +22,12 @@ import org.junit.jupiter.api.TestInstance;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class SqlTableBCScopeFieldSelectionTest {
+public class SqlTableBCH2ScopeFieldSelectionTest {
 
 	private SqlTableBC tableBC;
 	private HashMap<String, ArrayList<String>> scopes;
 	private ResultSet rs;
+	private static Connection conToFilterScope;
 
 	/**
 	 * Loading the h2-Driver and creating the test databases.
@@ -39,6 +42,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForFilteringScoping();
+		conToFilterScope = DriverManager.getConnection(CON_TO_FILTER_SCOPE_DB, USERNAME_PASSWORD, USERNAME_PASSWORD);
 	}
 
 	/**
@@ -136,32 +140,29 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 */
 	@Test
 	public void sqlTableBCScopeSimpleTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-		) {
 
-			// Set table
-			tableBC = new SqlTableBC(con);
-			tableBC.setTable("CUSTOMERS");
+		// Set table
+		tableBC = new SqlTableBC(conToFilterScope);
+		tableBC.setTable("CUSTOMERS");
 
-			// Setting up the scope
-			scopes = new HashMap<>();
-			ArrayList<String> myScope = new ArrayList<>();
-			myScope.add("NAME");
-			myScope.add("CUSTOMERID");
-			scopes.put("A", myScope);
-			tableBC.setScopeDef(scopes);
-			tableBC.setScope("A");
+		// Setting up the scope
+		scopes = new HashMap<>();
+		ArrayList<String> myScope = new ArrayList<>();
+		myScope.add("NAME");
+		myScope.add("CUSTOMERID");
+		scopes.put("A", myScope);
+		tableBC.setScopeDef(scopes);
+		tableBC.setScope("A");
 
-			rs = tableBC.retrieve();
+		rs = tableBC.retrieve();
 
-			// Checking the ColumnNames and results
-			assertTrue(rs.getColumnCount() == 2);
-			assertTrue(rs.getColumnNames().contains("NAME"));
-			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
+		// Checking the ColumnNames and results
+		assertTrue(rs.getColumnCount() == 2);
+		assertTrue(rs.getColumnNames().contains("NAME"));
+		assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
 
-			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
-			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
-		}
+		assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
+		assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
 	}
 
 	/**
@@ -172,36 +173,34 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 */
 	@Test
 	public void sqlTableBCMultipleScopeTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");) {
 
-			// Set table
-			tableBC = new SqlTableBC(con);
-			tableBC.setTable("CUSTOMERS");
+		// Set table
+		tableBC = new SqlTableBC(conToFilterScope);
+		tableBC.setTable("CUSTOMERS");
 
-			// Setting up the scope
-			scopes = new HashMap<>();
-			ArrayList<String> A = new ArrayList<>();
-			ArrayList<String> B = new ArrayList<>();
-			A.add("NAME");
-			A.add("CUSTOMERID");
-			B.add("AGE");
-			scopes.put("A", A);
-			scopes.put("B", B);
-			tableBC.setScopeDef(scopes);
-			tableBC.setScope("AB");
+		// Setting up the scope
+		scopes = new HashMap<>();
+		ArrayList<String> A = new ArrayList<>();
+		ArrayList<String> B = new ArrayList<>();
+		A.add("NAME");
+		A.add("CUSTOMERID");
+		B.add("AGE");
+		scopes.put("A", A);
+		scopes.put("B", B);
+		tableBC.setScopeDef(scopes);
+		tableBC.setScope("AB");
 
-			rs = tableBC.retrieve();
+		rs = tableBC.retrieve();
 
-			// Checking the ColumnNames and results
-			assertTrue(rs.getColumnCount() == 3);
-			assertTrue(rs.getColumnNames().contains("NAME"));
-			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
-			assertTrue(rs.getColumnNames().contains("AGE"));
+		// Checking the ColumnNames and results
+		assertTrue(rs.getColumnCount() == 3);
+		assertTrue(rs.getColumnNames().contains("NAME"));
+		assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
+		assertTrue(rs.getColumnNames().contains("AGE"));
 
-			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
-			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
-			assertEquals(62, rs.get(0).getFieldValue("AGE"));
-		}
+		assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
+		assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
+		assertEquals(62, rs.get(0).getFieldValue("AGE"));
 	}
 
 	/**
@@ -211,34 +210,31 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 */
 	@Test
 	public void sqlTableBCFieldSelectionSimpleTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-		) {
 
-			// Set table
-			tableBC = new SqlTableBC(con);
-			tableBC.setTable("CUSTOMERS");
+		// Set table
+		tableBC = new SqlTableBC(conToFilterScope);
+		tableBC.setTable("CUSTOMERS");
 
-			// Setting up the FieldSelection
-			try {
-				DataRow dr = new DataRow();
-				dr.setFieldValue("NAME", "");
-				dr.setFieldValue("CUSTOMERID", "");
+		// Setting up the FieldSelection
+		try {
+			DataRow dr = new DataRow();
+			dr.setFieldValue("NAME", "");
+			dr.setFieldValue("CUSTOMERID", "");
 
-				tableBC.setFieldSelection(dr);
+			tableBC.setFieldSelection(dr);
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
 
-			rs = tableBC.retrieve();
+		rs = tableBC.retrieve();
 
-			// Checking the ColumnNames and results
-			assertTrue(rs.getColumnCount() == 2);
-			assertTrue(rs.getColumnNames().contains("NAME"));
-			assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
+		// Checking the ColumnNames and results
+		assertTrue(rs.getColumnCount() == 2);
+		assertTrue(rs.getColumnNames().contains("NAME"));
+		assertTrue(rs.getColumnNames().contains("CUSTOMERID"));
 
-			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
-			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
-		}
+		assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
+		assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
 	}
 
 	/**
@@ -248,32 +244,29 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 */
 //	@Test
 	public void sqlTableBCFieldSelectionCollectionTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test4", "sa", "sa");
-		) {
 
-			// Set table
-			tableBC = new SqlTableBC(con);
-			tableBC.setTable("CUSTOMERS");
+		// Set table
+		tableBC = new SqlTableBC(conToFilterScope);
+		tableBC.setTable("CUSTOMERS");
 
-			// Setting up the FieldSelection
-			Collection<String> collec = new ArrayList<String>();
-			collec.add("NAME");
-			collec.add("COUNTRY");
-			collec.add("AGE");
-			tableBC.setFieldSelection(collec);
+		// Setting up the FieldSelection
+		Collection<String> collec = new ArrayList<String>();
+		collec.add("NAME");
+		collec.add("COUNTRY");
+		collec.add("AGE");
+		tableBC.setFieldSelection(collec);
 
-			rs = tableBC.retrieve();
+		rs = tableBC.retrieve();
 
-			// Checking the ColumnNames and results
-			assertTrue(rs.getColumnCount() == 3);
-			assertTrue(rs.getColumnNames().contains("NAME"));
-			assertTrue(rs.getColumnNames().contains("COUNTRY"));
-			assertTrue(rs.getColumnNames().contains("AGE"));
+		// Checking the ColumnNames and results
+		assertTrue(rs.getColumnCount() == 3);
+		assertTrue(rs.getColumnNames().contains("NAME"));
+		assertTrue(rs.getColumnNames().contains("COUNTRY"));
+		assertTrue(rs.getColumnNames().contains("AGE"));
 
-			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
-			assertEquals("USA", rs.get(0).getFieldValue("COUNTRY"));
-			assertEquals(62, rs.get(0).getFieldValue("AGE"));
-		}
+		assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
+		assertEquals("USA", rs.get(0).getFieldValue("COUNTRY"));
+		assertEquals(62, rs.get(0).getFieldValue("AGE"));
 	}
 
 	/**
@@ -283,6 +276,7 @@ public class SqlTableBCScopeFieldSelectionTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
+		conToFilterScope.close();
 		H2DataBaseProvider.dropAllTestTables();
 	}
 }

@@ -1,4 +1,4 @@
-package com.basiscomponents.db;
+package com.basiscomponents.db.resultSetJsonTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.basiscomponents.db.ResultSet;
 import com.google.gson.JsonSyntaxException;
 
 public class ResultSetFromJsonTest {
@@ -32,7 +33,7 @@ public class ResultSetFromJsonTest {
 		assertEquals("ENG", rs.get(0).getFieldValue("LANGUAGE"));
         assertEquals("en", rs.get(0).getFieldValue("ISO639-1"));
 		assertEquals("en", rs.get(0).getFieldValue(""));
-    }
+	}
 
     /**
      * Checking the attributes and their values of the DataFields

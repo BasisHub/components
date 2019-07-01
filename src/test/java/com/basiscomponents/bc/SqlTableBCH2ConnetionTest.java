@@ -1,5 +1,8 @@
 package com.basiscomponents.bc;
 
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_NORMAL_RETRIEVE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.CON_TO_SQL_RETRIEVE_DB;
+import static com.basiscomponents.constants.TestDataBaseConstants.USERNAME_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,12 +15,15 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.basiscomponents.constants.SpecialCharacterConstants;
 import com.basiscomponents.db.ResultSet;
 
-public class SqlTableBCConnetionTest {
+public class SqlTableBCH2ConnetionTest {
 
 	private String sql;
 	private ResultSet rs;
+	private static Connection conToSQLRetrieve;
+	private static Connection conToNormalRetrieve;
 
 	/**
 	 * Loading the h2-Driver and creating the test databases.
@@ -33,6 +39,10 @@ public class SqlTableBCConnetionTest {
 		Class.forName("org.h2.Driver").newInstance();
 		H2DataBaseProvider.createTestDataBaseForSQLRetrieve();
 		H2DataBaseProvider.createTestDataBaseForNormalRetrieve();
+		conToSQLRetrieve = DriverManager.getConnection(CON_TO_SQL_RETRIEVE_DB,
+				USERNAME_PASSWORD, USERNAME_PASSWORD);
+		conToNormalRetrieve = DriverManager.getConnection(CON_TO_NORMAL_RETRIEVE_DB, USERNAME_PASSWORD,
+				USERNAME_PASSWORD);
 	}
 
 	/**
@@ -46,9 +56,8 @@ public class SqlTableBCConnetionTest {
 	@Test
 	public void sqlTableBCConnectionSimpleTest()
 			throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");) {
-			SqlTableBC sqlTable = new SqlTableBC(con);
-		}
+		SqlTableBC sqlTable = new SqlTableBC(conToSQLRetrieve);
+
 	}
 
 	/**
@@ -61,12 +70,11 @@ public class SqlTableBCConnetionTest {
 //	@Test
 	// This test cannot work at the moment, because pagination is not implemented
 	// yet for H2DataBases.
+	// TODO write database name in test title
 	public void sqlTableBCGetDataSimpleParameterTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-		) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToNormalRetrieve);
 			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
 			rs = sqlTable.retrieve(0, 0);
 
@@ -79,7 +87,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
 			assertEquals(62, rs.get(0).getFieldValue("AGE"));
 			assertEquals(0, rs.get(0).getFieldValue("CUSTOMERID"));
-		}
 	}
 
 	/**
@@ -91,11 +98,9 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataSimpleTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-		) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToNormalRetrieve);
 			sqlTable.setTable("PRIMARYKEY_REGISTRATION");
 			rs = sqlTable.retrieve();
 
@@ -108,7 +113,35 @@ public class SqlTableBCConnetionTest {
 			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
 			assertEquals(62, rs.get(0).getFieldValue("AGE"));
 			assertEquals(0, rs.get(0).getFieldValue("CUSTOMERID"));
-		}
+	}
+
+	/**
+	 * Creates a SqlTableBC with a connection to a h2-DataBase. The active table is
+	 * switched to REGISTRATION and its values are queried with retrieve(). The
+	 * resulting ResultSet is checked to contain the right data.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void sqlTableBCGetSpecialStringTest() throws Exception {
+
+		// Set table and get its data with normal retrieve()
+		SqlTableBC sqlTable = new SqlTableBC(conToNormalRetrieve);
+		sqlTable.setTable("SPECIALREGISTRATION");
+		rs = sqlTable.retrieve();
+
+		// Checking the ColumnNames and results
+		assertTrue(rs.getColumnCount() == 1);
+		assertTrue(rs.getColumnNames().contains("FIRST"));
+
+		assertEquals(SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS, rs.get(0).getFieldValue("FIRST"),
+				"There is something wrong with the german special characters");
+		assertEquals(SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS, rs.get(1).getFieldValue("FIRST"),
+				"There is something wrong with the special characters");
+		assertEquals(SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS, rs.get(2).getFieldValue("FIRST"),
+				"There is something wrong with the mathematical instructions");
+		assertEquals(SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS, rs.get(3).getFieldValue("FIRST"),
+				"There is something wrong with the french special characters");
 	}
 
 	/**
@@ -121,11 +154,9 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataBoolTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-		) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+		SqlTableBC sqlTable = new SqlTableBC(conToNormalRetrieve);
 			sqlTable.setTable("BOOLTABLE");
 			rs = sqlTable.retrieve();
 
@@ -138,7 +169,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals(true, rs.get(0).getFieldValue("BOOLTYPE"));
 			assertEquals(false, rs.get(0).getFieldValue("BOOLEANTYPE"));
 			assertEquals(true, rs.get(0).getFieldValue("BITTYPE"));
-		}
 	}
 
 	/**
@@ -151,11 +181,9 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataStandartIntegerTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-		) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToNormalRetrieve);
 			sqlTable.setTable("INTTABLE");
 			rs = sqlTable.retrieve();
 
@@ -172,7 +200,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals(0, rs.get(0).getFieldValue("MEDIUMINTTYPE"));
 			assertEquals(-2147483648, rs.get(0).getFieldValue("INT4TYPE"));
 			assertEquals(2147483647, rs.get(0).getFieldValue("SIGNEDTYPE"));
-		}
 	}
 
 	/**
@@ -185,11 +212,9 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataSpecialIntegerTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-		) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToNormalRetrieve);
 			sqlTable.setTable("SPECIALINTTABLE");
 			rs = sqlTable.retrieve();
 
@@ -212,7 +237,6 @@ public class SqlTableBCConnetionTest {
 
 			java.math.BigDecimal bd = new BigDecimal("64543");
 			assertEquals(bd, rs.get(0).getFieldValue("BIGDECIMALTYPE"));
-		}
 	}
 
 	/**
@@ -225,11 +249,9 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataDoubleTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test2", "sa", "sa");
-		) {
 
 			// Set table and get its data with normal retrieve()
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToNormalRetrieve);
 			sqlTable.setTable("DOUBLETABLE");
 			rs = sqlTable.retrieve();
 
@@ -244,7 +266,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals(32767.534344, rs.get(0).getFieldValue("FLOATASDOUBLETYPE"));
 			assertEquals((float) 1.23, rs.get(0).getFieldValue("REALTYPE"));
 			assertEquals((float) 1.23, rs.get(0).getFieldValue("FLOATASFLOATTYPE"));
-		}
 	}
 
 	/**
@@ -256,10 +277,8 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataWithSQLSimpleTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-		) {
 
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToSQLRetrieve);
 
 			// Collect data from the SqlTableBC
 			sql = "SELECT * FROM REGISTRATION";
@@ -274,7 +293,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
 			assertEquals(62, rs.get(0).getFieldValue("AGE"));
 			assertEquals(1, rs.get(0).getFieldValue("CUSTOMERID"));
-		}
 	}
 
 	/**
@@ -286,10 +304,8 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataWithSQLTest2() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-		) {
 
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToSQLRetrieve);
 
 			// Collect data from the SqlTableBC
 			sql = "SELECT * FROM REGISTRATION, TREES";
@@ -328,7 +344,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals("tree2", rs.get(3).getFieldValue("NAME"));
 			assertEquals(132, rs.get(3).getFieldValue("RINGS"));
 			assertEquals(1004.53, rs.get(3).getFieldValue("HEIGHT"));
-		}
 	}
 
 	/**
@@ -341,10 +356,8 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataWithSQLUnionIntersectTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-		) {
 
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToSQLRetrieve);
 
 			// 1.
 			// Checking the UNION operator
@@ -394,7 +407,6 @@ public class SqlTableBCConnetionTest {
 
 			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
 			assertEquals(62, rs.get(0).getFieldValue("AGE"));
-		}
 	}
 
 	/**
@@ -407,11 +419,9 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataWithSQLWhereTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-		) {
 
 			// Collect data from the SqlTableBC
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToSQLRetrieve);
 			sql = "SELECT * FROM REGISTRATION WHERE FIRST = 'Alfred' UNION ALL SELECT * FROM REGISTRATION2 WHERE FIRST = 'Alfred'";
 			rs = sqlTable.retrieve(sql, null);
 
@@ -424,7 +434,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals(62, rs.get(0).getFieldValue("AGE"));
 			assertEquals("Alfred", rs.get(1).getFieldValue("FIRST"));
 			assertEquals(62, rs.get(1).getFieldValue("AGE"));
-		}
 	}
 
 	/**
@@ -437,10 +446,8 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataWithSQLGroupByOrderByTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");
-		) {
 
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToSQLRetrieve);
 
 			// 1.
 			// Checking the GROUP BY operator
@@ -480,7 +487,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals("USA", rs.get(5).getFieldValue("COUNTRY"));
 			assertEquals("USA", rs.get(6).getFieldValue("COUNTRY"));
 			assertEquals("USA", rs.get(7).getFieldValue("COUNTRY"));
-		}
 	}
 
 	/**
@@ -493,10 +499,9 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataWithSQLJoinTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");) {
 
 			// Collect data from the SqlTableBC
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToSQLRetrieve);
 			sql = "SELECT CUSTOMERS.NAME,FULLREGISTRATION.FIRST,CUSTOMERS.COUNTRY FROM FULLREGISTRATION INNER JOIN CUSTOMERS ON FULLREGISTRATION.EMPLOYEEID=CUSTOMERS.EMPLOYEEID";
 			rs = sqlTable.retrieve(sql, null);
 
@@ -509,7 +514,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
 			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
 			assertEquals("USA", rs.get(0).getFieldValue("COUNTRY"));
-		}
 	}
 
 	/**
@@ -522,10 +526,9 @@ public class SqlTableBCConnetionTest {
 	 */
 	@Test
 	public void sqlTableBCGetDataWithSQLLeftJoinTest() throws Exception {
-		try (Connection con = DriverManager.getConnection("jdbc:h2:./src/test/testH2DataBases/test1", "sa", "sa");) {
 
 			// Collect data from the SqlTableBC
-			SqlTableBC sqlTable = new SqlTableBC(con);
+			SqlTableBC sqlTable = new SqlTableBC(conToSQLRetrieve);
 			sql = "SELECT CUSTOMERS.NAME,FULLREGISTRATION.FIRST,CUSTOMERS.COUNTRY FROM FULLREGISTRATION LEFT JOIN CUSTOMERS ON FULLREGISTRATION.EMPLOYEEID=CUSTOMERS.EMPLOYEEID";
 			rs = sqlTable.retrieve(sql, null);
 
@@ -538,7 +541,6 @@ public class SqlTableBCConnetionTest {
 			assertEquals("Freeman", rs.get(0).getFieldValue("NAME"));
 			assertEquals("Alfred", rs.get(0).getFieldValue("FIRST"));
 			assertEquals("USA", rs.get(0).getFieldValue("COUNTRY"));
-		}
 	}
 
 	/**
@@ -548,6 +550,10 @@ public class SqlTableBCConnetionTest {
 	 */
 	@AfterAll
 	public static void cleanUp() throws Exception {
+		conToSQLRetrieve.close();
+		conToNormalRetrieve.close();
+		assertTrue(conToSQLRetrieve.isClosed());
+		assertTrue(conToNormalRetrieve.isClosed());
 		H2DataBaseProvider.dropAllTestTables();
 	}
 
