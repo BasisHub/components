@@ -1327,7 +1327,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow as JSON String
 	 * @throws Exception
 	 */
-	public String toJson() throws Exception {
+	public String toJson()  {
 		return toJson(true);
 	}
 
@@ -1337,7 +1337,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow as JSON String
 	 * @throws Exception
 	 */
-	public String toJson(String rowIndex) throws Exception {
+	public String toJson(String rowIndex) {
 		return toJson(true, rowIndex, true);
 	}
 
@@ -1347,7 +1347,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow as JSON String
 	 * @throws Exception
 	 */
-	public String toJson(final Boolean f_meta) throws Exception {
+	public String toJson(final Boolean f_meta)  {
 		return toJson(f_meta, null, true);
 	}
 
@@ -1357,10 +1357,11 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow as JSON String
 	 * @throws Exception
 	 */
-	public String toJson(final Boolean f_meta, final String rowIndex, final Boolean f_trimStrings) throws Exception {
-		ResultSet rs = new ResultSet();
-		rs.add(this);
-		return rs.toJson(f_meta, rowIndex, f_trimStrings);
+	public String toJson(final Boolean f_meta, final String rowIndex, final Boolean f_trimStrings)  {
+//		ResultSet rs = new ResultSet();
+//		rs.add(this);
+//		return rs.toJson(f_meta, rowIndex, f_trimStrings);
+		return dataFields.entrySet().stream().map((entry) -> entry.getValue().toJson(entry.getKey(),getFieldType(entry.getKey()),rowIndex,f_trimStrings)).collect(Collectors.joining(",","{","}"));
 	}
 
 	/**

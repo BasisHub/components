@@ -1,18 +1,15 @@
 package com.basiscomponents.db.resultSetJsonTest;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
-
 import com.basiscomponents.db.BBArrayList;
+import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResultSetJSonConversionTest {
 
@@ -370,6 +367,7 @@ public class ResultSetJSonConversionTest {
 
         assertFalse(s.isEmpty());
 
+        System.out.println(s);
         ResultSet rs1 = ResultSet.fromJson(s);
         DataRow newDr0 = rs1.get(0);
 
@@ -481,6 +479,18 @@ public class ResultSetJSonConversionTest {
             equalityAsValueDataRowTest(((ResultSet) dr0.getFieldValue(fieldNames.get(i))).get(0),
                     ((ResultSet) newDr0.getFieldValue(fieldNames.get(i))).get(0), s, false);
         }
+    }
+    @Test
+    public void mostbasicone() throws Exception {
+    	ResultSet rs = new ResultSet();
+		DataRow dr = new DataRow();
+	    DataField df = new DataField("Hallo");
+	    dr.addDataField("Welt", df);
+	    rs.add(dr);
+
+	    assertEquals("[{Welt:Hallo}]",rs.toJson());
+	    assertEquals("{Welt:Hallo}",dr.toJson());
+	    assertEquals("Welt:Hallo",df.toJson("Welt", java.sql.Types.VARCHAR,null, true ));
     }
 
 }

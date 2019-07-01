@@ -515,6 +515,11 @@ public class DataField implements java.io.Serializable {
 			return "";
 		return this.Value.toString();
 	}
+	public String toJson(String fieldname, int fieldType, String indexColumn, boolean trimStrings){
+
+			return com.basiscomponents.db.util.DataFieldJsonMapper.dataFieldToJson(this,fieldname,fieldType,indexColumn,trimStrings);
+
+	}
 
 	/**
 	 * Sets the DataField's value to <code>null</code>

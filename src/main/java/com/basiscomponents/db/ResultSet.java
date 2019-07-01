@@ -1,6 +1,18 @@
 package com.basiscomponents.db;
 
-import static com.basiscomponents.util.StringHelper.invert;
+import com.basis.util.common.BasisNumber;
+import com.basis.util.common.Template;
+import com.basis.util.common.TemplateInfo;
+import com.basiscomponents.db.sql.SQLResultSet;
+import com.basiscomponents.db.util.BBTemplateProvider;
+import com.basiscomponents.db.util.JRDataSourceAdapter;
+import com.basiscomponents.db.util.ResultSetJsonMapper;
+import com.basiscomponents.db.util.SqlTypeNames;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
+import net.sf.jasperreports.engine.JRDataSource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -27,20 +39,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.basis.util.common.BasisNumber;
-import com.basis.util.common.Template;
-import com.basis.util.common.TemplateInfo;
-import com.basiscomponents.db.sql.SQLResultSet;
-import com.basiscomponents.db.util.BBTemplateProvider;
-import com.basiscomponents.db.util.JRDataSourceAdapter;
-import com.basiscomponents.db.util.ResultSetJsonMapper;
-import com.basiscomponents.db.util.SqlTypeNames;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.Expose;
-
-import net.sf.jasperreports.engine.JRDataSource;
+import static com.basiscomponents.util.StringHelper.invert;
 
 /**
  * The ResultSet class is a container class for DataRow objects.
@@ -2039,7 +2038,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return The Json String containing this ResultSet
 	 * @throws Exception
 	 */
-	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings) throws Exception {
+	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings)  {
 		if (addIndexColumn!=null)
 			createIndex();
 		return toJson(meta , addIndexColumn, trimStrings, false);
@@ -2052,7 +2051,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @return The Json String containing this ResultSet
 	 * @throws Exception
 	 */
-	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes) throws Exception {
+	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes)  {
 		if (addIndexColumn!=null)
 			createIndex();
 		return ResultSetJsonMapper.toJson(this,meta , addIndexColumn, trimStrings, writeDataRowAttributes);
@@ -2855,7 +2854,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		return isIndexed;
 	}
 	
-	public void createIndex() throws ParseException {
+	public void createIndex()  {
 		if (!isIndexed()) {
 			rowIndex = new HashMap<>();
 			Iterator<DataRow> it = iterator();
