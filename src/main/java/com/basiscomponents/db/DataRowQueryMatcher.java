@@ -6,7 +6,7 @@ public class DataRowQueryMatcher {
 	
 	
 	private static String resolveTerm(String term, final DataRow dataRow, final boolean caseSensitive,
-			final boolean trimmed) throws Exception {
+			final boolean trimmed) throws InvalidAlgorithmParameterException {
 		if (term.trim().isEmpty())
 			return "";
 		
@@ -29,7 +29,7 @@ public class DataRowQueryMatcher {
 		
 		String[] exp_parts = term.split("=");
 		if (exp_parts.length != 2)
-			throw new InvalidAlgorithmParameterException("invalid expression: "+term); 
+			throw new InvalidAlgorithmParameterException("invalid expression: "+term);
 		DataField dataField = dataRow.getField(exp_parts[0]);
 		if (dataField.equals(exp_parts[1], caseSensitive, trimmed))
 			return "1";
@@ -47,7 +47,7 @@ public class DataRowQueryMatcher {
 	 * @return Boolean if the datarow matches the statement
 	 * @throws Exception
 	 */
-	public static Boolean matches(String statement, DataRow datarow, final boolean caseSensitive, final boolean trimmed) throws Exception {
+	public static Boolean matches(String statement, DataRow datarow, final boolean caseSensitive, final boolean trimmed) throws InvalidAlgorithmParameterException {
 
 		statement = statement.replaceAll("\\s"," ");
 		while (statement.contains("  "))

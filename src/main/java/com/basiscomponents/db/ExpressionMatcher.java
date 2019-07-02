@@ -17,7 +17,7 @@ public class ExpressionMatcher {
 	private DataRow drCompare;
 
 
-	public ExpressionMatcher(String condition, int type, String fieldName) throws Exception {
+	public ExpressionMatcher(String condition, int type, String fieldName) throws ParseException {
 		String[] orConditions = condition.split("(?<!\\\\)\\|");
 		if (orConditions.length > 1) {
 			orCombined = true;
@@ -85,7 +85,7 @@ public class ExpressionMatcher {
 	}
 
 
-	public boolean match(Comparator<DataRow> comp, DataRow dr, String fieldName) throws Exception {
+	public boolean match(Comparator<DataRow> comp, DataRow dr, String fieldName) {
 		if (matcherList.size() > 0) {
 			ExpressionMatcher matcher = matcherList.get(0);
 			boolean ret = matcher.match(comp, dr, fieldName);

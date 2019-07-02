@@ -11,12 +11,14 @@ import com.basiscomponents.db.util.SqlTypeNames;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import net.sf.jasperreports.engine.JRDataSource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -36,10 +38,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.basiscomponents.util.StringHelper.invert;
+import static java.util.logging.Level.WARNING;
 
 /**
  * The ResultSet class is a container class for DataRow objects.
@@ -72,7 +74,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private DataRow currentDataRow;
 
 	private Boolean isIndexed = false;
-	private HashMap <String,Integer> rowIndex;
+	private HashMap<String, Integer> rowIndex;
 
 	private SQLResultSet sqlResultSet = null;
 	private static final Logger LOGGER = Logger.getLogger(ResultSet.class.getName());
@@ -83,8 +85,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public ResultSet() {
 		//nothing to do here
 	}
+
 	private ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<DataRow> dataRows,
-			List<String> keyColumns) {
+	                  List<String> keyColumns) {
 		this.MetaData = new ArrayList<>(metaData);
 		this.ColumnNames = new ArrayList<>(columnNames);
 		this.DataRows = new ArrayList<>(dataRows);
@@ -104,6 +107,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * creates a clone of the ResultSet
+	 *
 	 * @param fDeepClone set to true to also clone all the DataRows contained, false will only clone the container but both will continue to reference the same DataRows
 	 * @return
 	 */
@@ -120,6 +124,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * re-orders a result set according to an ORDER BY clause like in SQL ORDER BY:
 	 * e.g. (ORDER BY) NAME, FIRST_NAME DESC, ZIP
 	 * NOTE: Only ASC and DESC are allowed!
+	 *
 	 * @param orderByClause: order by clause
 	 * @return the ordered result set
 	 * @throws Exception
@@ -134,7 +139,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * Re-orders the ResultSet based on the given field name and the given sort direction.
 	 * The sort direction can only be ASC(=Ascending) or DESC(=Descending). If any value is passed which is not "ASC" or "DESC",
 	 * the methods defaults to the ascending sorting.
-	 * 
+	 *
 	 * @param fieldName The field name on which to sort the ResultSet
 	 * @param direction The sort direction("ASC" or "DESC")
 	 */
@@ -145,13 +150,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		java.util.Comparator<DataRow> comparator = new DataFieldComparator(fieldName);
 		if ("DESC".equalsIgnoreCase(direction)) {
 			comparator = comparator.reversed();
-		}	
+		}
 		DataRows.sort(comparator);
 	}
 
 	/**
 	 * Re-order the ResultSet using the given Comparator object.
-	 * 
+	 *
 	 * @param comparator The comparator used to re-order the ResultSet.
 	 */
 	public void orderByColumn(java.util.Comparator<DataRow> comparator) {
@@ -171,30 +176,30 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Applies the queryClause to a ResultSet and returns a new ResultSet that only contains
 	 * records that match the clause. The clause syntax is similar to an SQL WHERE clause.
-	 * 
+	 * <p>
 	 * CAUTION: this method is experimental!!
-	 * 
+	 *
 	 * @param queryClause: the query
 	 * @return ResultSet: the records that match the query clause
 	 * @throws Exception
 	 */
-	public ResultSet filterBy(String queryClause) throws Exception {
+	public ResultSet filterBy(String queryClause) throws InvalidAlgorithmParameterException {
 		return filterBy(queryClause, true, false); // this was the default behavior
 	}
 
 	/**
 	 * Applies the queryClause to a ResultSet and returns a new ResultSet that only contains
 	 * records that match the clause. The clause syntax is similar to an SQL WHERE clause.
-	 * 
+	 * <p>
 	 * CAUTION: this method is experimental!!
-	 * 
-	 * @param QueryClause: the query
+	 *
+	 * @param QueryClause:  the query
 	 * @param caseSensitive whether the filter query should be case sensitive or not
-	 * @param trimmed {@code true} if the query paramters should get trimmed
+	 * @param trimmed       {@code true} if the query paramters should get trimmed
 	 * @return ResultSet: the records that match the query clause
 	 * @throws Exception
 	 */
-	public ResultSet filterBy(String QueryClause, final boolean caseSensitive, final boolean trimmed) throws Exception{
+	public ResultSet filterBy(String QueryClause, final boolean caseSensitive, final boolean trimmed) throws InvalidAlgorithmParameterException {
 		LOGGER.warning("WARNING: using experimental method implementation filterBy clause on ResultSet");
 		ResultSet r = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 		Iterator<DataRow> it = this.iterator();
@@ -209,14 +214,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Search for DataRow(s) containing a specific value(s)
 	 * Returns a new ResultSet with the DataRow(s) found in the current instance.
-	 * 
+	 * <p>
 	 * If the type of field in simpleFilterCondition is 12 (String) and the value starts with "regex:" then a regular search will be applied
-	 * 
+	 *
 	 * @param simpleFilterCondition A DataRow with the vlaues to search for.
-	 * 
 	 * @return a ResultSet with the DataRows found in the current instance.
 	 */
-	public ResultSet filterBy(DataRow simpleFilterCondition) throws Exception {
+	public ResultSet filterBy(DataRow simpleFilterCondition) throws ParseException {
 		ResultSet resultSet = new ResultSet(this.MetaData, this.ColumnNames, this.KeyColumns);
 		if (size() == 0) {
 			return resultSet;
@@ -238,12 +242,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		private HashMap<String, Comparator<DataRow>> comparatorMap = new HashMap<>();
 		private HashMap<String, ExpressionMatcher> matcherMap = new HashMap<>();
 
-		SimpleFilterHelper(DataRow simpleFilterCondition, DataRow metadata) throws Exception {
+		SimpleFilterHelper(DataRow simpleFilterCondition, DataRow metadata) throws ParseException {
 			this.simpleFilterCondition = simpleFilterCondition;
 			prepareFilterMaps(metadata);
 		}
 
-		private boolean matches(DataRow dataRow) throws Exception {
+		private boolean matches(DataRow dataRow) {
 			Iterator<String> filterFieldsIterator = simpleFilterCondition.getFieldNames().iterator();
 			boolean match = true;
 			while (match && filterFieldsIterator.hasNext()) {
@@ -255,7 +259,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			return match;
 		}
 
-		private void prepareFilterMaps(DataRow metadata) throws Exception {
+		private void prepareFilterMaps(DataRow metadata) throws ParseException {
 			// Check for "cond:" filters. If found, then create new ExpressionMatcher
 			// object's per field.
 
@@ -272,7 +276,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 		}
 
-		private boolean matchesCondition(DataRow dataRow, String filterFieldKey, DataField cond) throws Exception {
+		private boolean matchesCondition(DataRow dataRow, String filterFieldKey, DataField cond) {
 			boolean match = true;
 			if (dataRow.getFieldType(filterFieldKey) == 12 && cond.getString().startsWith("regex:")) {
 				match = dataRow.getFieldAsString(filterFieldKey).matches(cond.getString().substring(6));
@@ -291,7 +295,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Initializes the ResultSet using the metadata and Data from the given java.sql.ResultSet.
-	 * 
+	 *
 	 * @param rs The java.sql.ResultSet used to initialize the ResultSet object.
 	 */
 	public ResultSet(java.sql.ResultSet rs) {
@@ -300,28 +304,28 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			populate(rs, true);
 		} catch (Exception e) {
 
-			LOGGER.log(Level.WARNING, "Could not populate ResultSet", e);
+			LOGGER.log(WARNING, "Could not populate ResultSet", e);
 		}
 	}
 
 	/**
 	 * Iterates over the given {@code java.sql.ResultSet} object and adds a DataRow
 	 * object for each record of it to this ResultSet.
-	 * 
+	 * <p>
 	 * If the defaultMetaData flag is set to true, the ResultSet will use the
 	 * metadata from the given java.sql.ResultSet object. If it is set to false, no
 	 * metadata will be created. If the resultSet already has some metadata defined,
 	 * it will not be removed.
-	 * 
+	 * <p>
 	 * In case the field selection list has been set, this method will only create
 	 * DataRow object's with the fields from the field selection list.
-	 * 
+	 *
 	 * @param rs
 	 * @param defaultMetaData
 	 * @throws Exception
 	 */
 	// NOTE: java.sql.ResultSet is 1-based, ours is 0-based
-	public void populate(java.sql.ResultSet rs, Boolean defaultMetaData) throws Exception {
+	public void populate(java.sql.ResultSet rs, Boolean defaultMetaData) throws SQLException {
 		java.sql.ResultSetMetaData rsmd = rs.getMetaData();
 		int cc = rsmd.getColumnCount();
 		String name;
@@ -364,14 +368,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				colMap.put("Searchable", rsmd.isSearchable(column));
 				colMap.put("Signed", rsmd.isSigned(column));
 				colMap.put("AutoIncrement", rsmd.isAutoIncrement(column));
-				
+
 				//hack for MySQL for JOINed / calculated fields
 				colMap.put("CaseSensitive", false);
 				try {
 					colMap.put("CaseSensitive", rsmd.isCaseSensitive(column));
+				} catch (Exception e) {
+				} finally {
 				}
-				catch (Exception e) {} finally {};
-				
+				;
+
 				this.MetaData.add(colMap);
 			}
 		} else {
@@ -395,8 +401,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 			if (KeyColumns != null && KeyColumns.contains(name)) {
 				attribute.put("EDITABLE", "2");
-			}
-			else {
+			} else {
 				if (this.isAutoIncrement(column) || !this.isWritable(column) || !this.isDefinitelyWritable(column))
 					attribute.put("EDITABLE", "0");
 				else
@@ -423,14 +428,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				HashMap.Entry<Integer, String> entry = it.next();
 				name = entry.getValue();
 				DataField field = new DataField(rs.getObject(entry.getKey()));
-				type = defaultMetaData? types.get(column - 1) : getColumnType(column - 1);
+				type = defaultMetaData ? types.get(column - 1) : getColumnType(column - 1);
 				dr.addDataField(name, type, field);
 			}
 
 			if (KeyColumns != null && !KeyColumns.isEmpty()) {
 				try {
 					buildRowKey(rs, dr);
-				} catch (Exception e) {}
+				} catch (Exception e) {
+				}
 			}
 
 			dr.setRowID(rowId);
@@ -451,7 +457,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Merges the fields of the given DataRow to all DataRows present in this ResultSet object.
-	 * 
+	 *
 	 * @param dr The DataRow whose field will be merged into the DataRows from this ResultSet.
 	 */
 	private void mergeDataRowFields(DataRow dr) {
@@ -465,16 +471,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					this.setColumnType(column, dr.getFieldType(name));
 				} catch (Exception e) {
 
-					LOGGER.log(Level.WARNING, "Could not set Column type", e);
+					LOGGER.log(WARNING, "Could not set Column type", e);
 				}
 				try {
 					Map<String, String> attrMap = dr.getFieldAttributes(name);
-				
-					attrMap.keySet().forEach(attrKey->
-					this.setAttribute(column, attrKey, attrMap.get(attrKey)));
-					
+
+					attrMap.keySet().forEach(attrKey ->
+							this.setAttribute(column, attrKey, attrMap.get(attrKey)));
+
 				} catch (Exception e) {
-					LOGGER.log(Level.WARNING, "Could not setAttributes", e);
+					LOGGER.log(WARNING, "Could not setAttributes", e);
 				}
 			}
 		}
@@ -482,7 +488,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Adds the given DataRow object to the ResultSet.
-	 * 
+	 *
 	 * @param dr The DataRow to add.
 	 */
 	public void add(DataRow dr) {
@@ -495,22 +501,22 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			// workaround if there are true duplicate rows
 			if (rowIndex.containsKey(idx)) {
 				idx += '-';
-				idx += (size()-1);
+				idx += (size() - 1);
 			}
 
 			dr.setRowKey(idx);
-			rowIndex.put(idx, size()-1);
+			rowIndex.put(idx, size() - 1);
 		}
 	}
 
 	/**
 	 * Inserts the given DataRow object at the specified index in the ResultSet.
-	 * 
+	 *
 	 * @param row The index were to insert the DataRow.
-	 * @param dr The DataRow to insert.
+	 * @param dr  The DataRow to insert.
 	 */
 	public void add(int row, DataRow dr) {
-		if (row>=size())
+		if (row >= size())
 			add(dr);
 		else {
 			this.DataRows.add(row, dr);
@@ -518,14 +524,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			try {
 				reCreateIndex();
 			} catch (ParseException e) {
-				LOGGER.log(Level.WARNING, "Index could not be recreated", e);
+				LOGGER.log(WARNING, "Index could not be recreated", e);
 			}
 		}
 	}
 
 	/**
 	 * Adds the given DataRow object to the ResultSet.
-	 * 
+	 *
 	 * @param dr The DataRow to add.
 	 */
 	public void addItem(DataRow dr) {
@@ -534,9 +540,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Inserts the given DataRow object at the specified index in the ResultSet.
-	 * 
+	 *
 	 * @param row The index were to insert the DataRow.
-	 * @param dr The DataRow to insert.
+	 * @param dr  The DataRow to insert.
 	 */
 	public void insertItem(int row, DataRow dr) {
 		add(row, dr);
@@ -544,9 +550,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Adds a column with the specified name to the list of columns.
-	 * 
+	 *
 	 * @param name The name of the column.
-	 * 
 	 * @return the index of the newly added column.
 	 */
 	public int addColumn(String name) {
@@ -559,10 +564,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Adds a column with the given name and the given metadata to the list of columns.
-	 * 
-	 * @param name The name of the column.
+	 *
+	 * @param name   The name of the column.
 	 * @param colMap The metadata for the column.
-	 * 
 	 * @return the index of the newly added column.
 	 */
 	public int addColumn(String name, HashMap<String, Object> colMap) {
@@ -574,8 +578,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Sets the given metadata to the column with the specified name.
-	 * 
-	 * @param name The name of the column.
+	 *
+	 * @param name   The name of the column.
 	 * @param colMap The metadata to set.
 	 */
 	public void setColumnMetaData(String name, HashMap<String, Object> colMap) {
@@ -586,9 +590,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the metadata of the column with the specified name.
-	 * 
+	 *
 	 * @param name The name of the column.
-	 * 
 	 * @return the column's metadata.
 	 */
 	public HashMap<String, Object> getColumnMetaData(String name) {
@@ -602,9 +605,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the index of the column with the specified name, or -1
 	 * in case no column exists for the given name.
-	 * 
+	 *
 	 * @param name The name of the column.
-	 * 
 	 * @return the column's index or -1 if the column doesn't exist.
 	 */
 	public int getColumnIndex(String name) {
@@ -613,7 +615,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns a list with all column names.
-	 * 
+	 *
 	 * @return the list with all column names.
 	 */
 	public ArrayList<String> getColumnNames() {
@@ -622,7 +624,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns a list with all key columns.
-	 * 
+	 *
 	 * @return the list with the key columns.
 	 */
 	public ArrayList<String> getKeyColumns() {
@@ -638,7 +640,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Sets the given column name as key column.
-	 * 
+	 *
 	 * @param name the name of the key column to add.
 	 */
 	public void addKeyColumn(String name) {
@@ -659,8 +661,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
-	 * @param template
-	 *            the template definition string
+	 * @param template the template definition string
 	 */
 	public void setKeyTemplate(String template) {
 		this.KeyTemplateString = template;
@@ -668,7 +669,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the row key of the current DataRow object.
-	 * 
+	 *
 	 * @return key data as a string for the current row
 	 */
 	public String getRowKey() {
@@ -682,25 +683,25 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		DataRow dr = get(row);
 		return dr.getRowKey();
 	}
-	
+
 	/**
-	 * 
 	 * returns the zero-based index of a row in the ResultSet
 	 * if the ResultSet is indexed and the DataRow contains a rowKey, then the rowKey is used
 	 * for finding the record in the index. Else the routine iterates
 	 * the ResultSet and performs an .equals on each DataRow to see if there is a match
-	 * based on the field contents. 
+	 * based on the field contents.
+	 *
 	 * @param row - the row for which the index is desired
 	 * @return - the index of the DataRow in the ResultSet, or -1 if no match is found
 	 */
 	public int indexOf(DataRow row) {
-		if (isIndexed && row.getRowKey().length()>0) {
+		if (isIndexed && row.getRowKey().length() > 0) {
 			return rowIndex.get(row.getRowKey());
-		}else {
+		} else {
 			Iterator<DataRow> it = this.iterator();
-			int idx=0;
+			int idx = 0;
 			while (it.hasNext()) {
-				
+
 				DataRow r = it.next();
 				if (r.equals(row))
 					return idx;
@@ -719,28 +720,27 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the DataRow with the given row key.
-	 * 
+	 *
 	 * @param rowkey The index of the DataRow.
-	 * 
 	 * @return The DataRow at the specified index.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public DataRow get(String rowkey) throws Exception {
-		if (!isIndexed) 
+		if (!isIndexed)
 			throw new Exception("ResultSet is not indexed!");
-		
+
 		if (!rowIndex.containsKey(rowkey))
 			throw new Exception("Entry not found");
-		
-		
+
+
 		int row = rowIndex.get(rowkey);
 		return this.DataRows.get(row);
-	}	
+	}
+
 	/**
 	 * Returns the DataRow at the given index.
-	 * 
+	 *
 	 * @param row The index of the DataRow.
-	 * 
 	 * @return The DataRow at the specified index.
 	 */
 	public DataRow get(int row) {
@@ -749,9 +749,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the DataRow at the given index.
-	 * 
+	 *
 	 * @param row The index of the DataRow.
-	 * 
 	 * @return The DataRow at the specified index.
 	 */
 	public DataRow getItem(int row) {
@@ -760,9 +759,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Sets the DataRow at the given index.
-	 * 
+	 *
 	 * @param row The index of the DataRow.
-	 * @param dr The DataRow to set.
+	 * @param dr  The DataRow to set.
 	 */
 	public void set(int row, DataRow dr) {
 		this.DataRows.set(row, dr);
@@ -770,9 +769,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Sets the DataRow at the given index.
-	 * 
+	 *
 	 * @param row The index of the DataRow.
-	 * @param dr The DataRow to set.
+	 * @param dr  The DataRow to set.
 	 */
 	public void setItem(int row, DataRow dr) {
 		set(row, dr);
@@ -780,7 +779,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the current DataRow.
-	 * 
+	 *
 	 * @return the current DataRow object.
 	 */
 	public int getRow() {
@@ -789,7 +788,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns true if the ResultSet doesn't contain any DataRow, false otherwise.
-	 * 
+	 *
 	 * @return true if the ResultSet doesn't have any DataRows, false otherwise.
 	 */
 	public Boolean isEmpty() {
@@ -799,29 +798,27 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Removes the DataRowspecified by key, and shifts any
 	 * subsequent DataRows to the left.
-	 * 
+	 *
 	 * @param rowkey The key of the DataRow to remove.
-	 * 
 	 * @return The DataRow that was removed.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public DataRow remove(String rowkey) throws Exception {
-		if (!isIndexed) 
+		if (!isIndexed)
 			throw new Exception("ResultSet is not indexed!");
-		
+
 		if (!rowIndex.containsKey(rowkey))
 			throw new Exception("Entry not found");
-		
-		int row = rowIndex.get(rowkey);		
+
+		int row = rowIndex.get(rowkey);
 		return remove(row);
 	}
-	
+
 	/**
 	 * Removes the DataRow at the specified index, and shifts any
 	 * subsequent DataRows to the left.
-	 * 
+	 *
 	 * @param row The index of the DataRow to remove.
-	 * 
 	 * @return The DataRow that was removed.
 	 */
 	public DataRow remove(int row) {
@@ -842,9 +839,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Removes the DataRow at the specified index, and shifts any
 	 * subsequent DataRows to the left.
-	 * 
+	 *
 	 * @param row The index of the DataRow to remove.
-	 * 
 	 * @return The DataRow that was removed.
 	 */
 	public DataRow removeItem(int row) {
@@ -853,7 +849,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Removes the column at the given index.
-	 * 
+	 *
 	 * @param column The column index
 	 */
 	public void removeColumn(int column) {
@@ -863,7 +859,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the number of DataRows stored in the ResultSet.
-	 * 
+	 *
 	 * @return The number of DataRow objects stored in the ResultSet.
 	 */
 	public int size() {
@@ -890,7 +886,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Moves the cursor to the first DataRow element of this ResultSet.
 	 * Returns true if the cursor was successfully moved at the first element, false otherwise.
-	 * 
+	 *
 	 * @return true if the cursor was successfully moved to the first element, false otherwise.
 	 */
 	public Boolean first() {
@@ -906,7 +902,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Moves the cursor to the last DataRow element of this ResultSet.
 	 * Returns true if the cursor was successfully moved at the last element, false otherwise.
-	 * 
+	 *
 	 * @return true if the cursor was successfully moved to the last element, false otherwise.
 	 */
 	public Boolean last() {
@@ -922,7 +918,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Moves the cursor to the DataRow element at the specified index.
 	 * Returns true if the cursor was successfully moved to the specified index, false otherwise.
-	 * 
+	 *
 	 * @return true if the cursor was successfully moved to the specified index, false otherwise.
 	 */
 	public boolean absolute(int row) {
@@ -938,7 +934,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Moves the cursor to the next DataRow element. Returns true
 	 * if the cursor was moved successfully, false otherwise.
-	 * 
+	 *
 	 * @return true if the cursor was moved successfully, false otherwise.
 	 */
 	public boolean next() {
@@ -953,7 +949,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the number of columns.
-	 * 
+	 *
 	 * @return the number of columns.
 	 */
 	// MetaData get methods (0-based)
@@ -964,9 +960,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the CatalogName property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the CatalogName property of the column.
 	 */
 	public String getCatalogName(int column) {
@@ -979,9 +974,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the ColumnClassName property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the ColumnClassName property of the column.
 	 */
 	public String getColumnClassName(int column) {
@@ -994,27 +988,25 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the ColumnDisplaySize property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the ColumnDisplaySize property of the column.
 	 */
 	public int getColumnDisplaySize(int column) {
 		Integer size = (Integer) this.MetaData.get(column).get("ColumnDisplaySize");
-		
+
 		if (size == null)
 			size = 10;
-			// 	guessing a useful default
-		
+		// 	guessing a useful default
+
 		return size.intValue();
 	}
 
 	/**
 	 * Returns the value of the ColumnLabel property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the ColumnLabel property of the column.
 	 */
 	public String getColumnLabel(int column) {
@@ -1027,9 +1019,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the ColumnName property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the ColumnName property of the column.
 	 */
 	public String getColumnName(int column) {
@@ -1042,22 +1033,20 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the ColumnType property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns 0 in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the ColumnType property of the column.
 	 */
 	public int getColumnType(int column) {
 		Integer type;
-		
+
 		// FIXME this separate handling shouldn't be necessary but
 		// in when a new DataRow gets added, the ResultSet inherits the attributes from the DataRow
 		// in mergeDataRowFields -> so that is the place where we need to put a real fix!
-		
+
 		if ((this.MetaData.get(column).get("ColumnType")).getClass().equals(java.lang.String.class)) {
-			type= Integer.parseInt((String) this.MetaData.get(column).get("ColumnType"));
-		}
-		else
+			type = Integer.parseInt((String) this.MetaData.get(column).get("ColumnType"));
+		} else
 			type = (Integer) this.MetaData.get(column).get("ColumnType");
 		if (type == null)
 			type = 0;
@@ -1067,9 +1056,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the ColumnTypeName property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the ColumnTypeName property of the column.
 	 */
 	public String getColumnTypeName(int column) {
@@ -1082,9 +1070,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the Precision property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the Precision property of the column.
 	 */
 	public int getPrecision(int column) {
@@ -1097,9 +1084,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the Scale property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the Scale property of the column.
 	 */
 	public int getScale(int column) {
@@ -1112,9 +1098,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the SchemaName property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the SchemaName property of the column.
 	 */
 	public String getSchemaName(int column) {
@@ -1127,9 +1112,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the TableName property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the TableName property of the column.
 	 */
 	public String getTableName(int column) {
@@ -1142,9 +1126,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the AutoIncrement property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the AutoIncrement property of the column.
 	 */
 	public Boolean isAutoIncrement(int column) {
@@ -1157,9 +1140,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the CaseSensitive property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the CaseSensitive property of the column.
 	 */
 	public Boolean isCaseSensitive(int column) {
@@ -1172,9 +1154,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the Currency property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the Currency property of the column.
 	 */
 	public Boolean isCurrency(int column) {
@@ -1187,9 +1168,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the DefinitelyWritable property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the DefinitelyWritable property of the column.
 	 */
 	public Boolean isDefinitelyWritable(int column) {
@@ -1202,9 +1182,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the Nullable property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the Nullable property of the column.
 	 */
 	public int isNullable(int column) {
@@ -1217,9 +1196,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the ReadOnly property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the ReadOnly property of the column.
 	 */
 	public Boolean isReadOnly(int column) {
@@ -1232,9 +1210,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the Searchable property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the Searchable property of the column.
 	 */
 	public Boolean isSearchable(int column) {
@@ -1247,9 +1224,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the Signed property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the Signed property of the column.
 	 */
 	public Boolean isSigned(int column) {
@@ -1262,9 +1238,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the value of the Writable property from the ResultSet's metadata,
 	 * for the column at the specified index. Returns an empty String in case the property isn't set.
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @return The value of the Writable property of the column.
 	 */
 	public Boolean isWritable(int column) {
@@ -1277,10 +1252,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the attribute with the given name, for the column at the specified index.
 	 * Returns an empty String in case the specified attribute name doesn't exist.
-	 * 
+	 *
 	 * @param column The column's index
-	 * @param name The attribute's name
-	 * 
+	 * @param name   The attribute's name
 	 * @return The attribute's value, or empty String in case the attribute doesn't exist.
 	 */
 	public String getAttribute(int column, String name) {
@@ -1294,14 +1268,11 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * Returns the attribute with the given name, for the column at the specified
 	 * index. Returns an empty String in case the specified attribute name doesn't
 	 * exist.
-	 * 
-	 * @param columnName
-	 *            The column's name
-	 * @param attributeName
-	 *            The attribute's name
-	 * 
+	 *
+	 * @param columnName    The column's name
+	 * @param attributeName The attribute's name
 	 * @return The attribute's value, or empty String in case the attribute doesn't
-	 *         exist.
+	 * exist.
 	 */
 	public String getAttribute(String columnName, String attributeName) {
 		return getAttribute(getColumnIndex(columnName), attributeName);
@@ -1310,8 +1281,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the CatalogName property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
-	 * @param column The column index.
+	 *
+	 * @param column      The column index.
 	 * @param catalogName The value of the CatalogName property to set.
 	 */
 	// MetaData set methods (0-based)
@@ -1322,8 +1293,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the ColumnClassName property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
-	 * @param column The column index.
+	 *
+	 * @param column    The column index.
 	 * @param className The value of the ClassName property to set.
 	 */
 	public void setColumnClassName(int column, String className) {
@@ -1333,8 +1304,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the ColumnDisplaySize property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
-	 * @param column The column index.
+	 *
+	 * @param column      The column index.
 	 * @param displaySize The value of the ColumnDisplaySize property to set.
 	 */
 	public void setColumnDisplaySize(int column, int displaySize) {
@@ -1344,9 +1315,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the ColumnLabel property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param label The value of the ColumnLabel property to set.
+	 * @param label  The value of the ColumnLabel property to set.
 	 */
 	public void setColumnLabel(int column, String label) {
 		this.MetaData.get(column).put("ColumnLabel", label);
@@ -1355,9 +1326,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the ColumnName property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param name The value of the ColumnName property to set.
+	 * @param name   The value of the ColumnName property to set.
 	 */
 	public void setColumnName(int column, String name) {
 		if (name.isEmpty()) {
@@ -1369,23 +1340,21 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the ColumnType property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param type The value of the ColumnType property to set.
+	 * @param type   The value of the ColumnType property to set.
 	 */
 	public void setColumnType(int column, int type) {
-		
+
 		String typeName;
 		if (type == -975)
-			typeName ="ResultSet"; 
+			typeName = "ResultSet";
+		else if (type == -974)
+			typeName = "DataRow";
+		else if (type == -973)
+			typeName = "ArrayList";
 		else
-			if (type == -974)
-				typeName ="DataRow"; 
-			else
-				if (type == -973)
-					typeName ="ArrayList"; 
-				else
-					typeName = getSQLTypeName(type);
+			typeName = getSQLTypeName(type);
 		if (typeName == null) {
 			throw new IllegalStateException("Unknown column type " + type);
 		} else {
@@ -1397,8 +1366,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the ColumnTypeName property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
-	 * @param column The column index.
+	 *
+	 * @param column   The column index.
 	 * @param typeName The value of the ColumnTypeName property to set.
 	 */
 	public void setColumnTypeName(int column, String typeName) {
@@ -1408,8 +1377,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the Precision property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
-	 * @param column The column index.
+	 *
+	 * @param column    The column index.
 	 * @param precision The value of the Precision property to set.
 	 */
 	public void setPrecision(int column, int precision) throws Exception {
@@ -1421,9 +1390,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the Scale property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param scale The value of the Scale property to set.
+	 * @param scale  The value of the Scale property to set.
 	 */
 	public void setScale(int column, int scale) throws Exception {
 		if (scale > getPrecision(column))
@@ -1434,8 +1403,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the SchemaName property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
-	 * @param column The column index.
+	 *
+	 * @param column     The column index.
 	 * @param schemaName The value of the SchemaName property to set.
 	 */
 	public void setSchemaName(int column, String schemaName) {
@@ -1445,8 +1414,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the TableName property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
-	 * @param column The column index.
+	 *
+	 * @param column    The column index.
 	 * @param tableName The value of the TableName property to set.
 	 */
 	public void setTableName(int column, String tableName) {
@@ -1456,9 +1425,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the AutoIncrement property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param flag The value of the AutoIncrement property to set.
+	 * @param flag   The value of the AutoIncrement property to set.
 	 */
 	public void setAutoIncrement(int column, Boolean flag) {
 		this.MetaData.get(column).put("AutoIncrement", flag);
@@ -1467,9 +1436,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the CaseInsensitive property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param flag The value of the CaseInsensitive property to set.
+	 * @param flag   The value of the CaseInsensitive property to set.
 	 */
 	public void setCaseSensitive(int column, Boolean flag) {
 		this.MetaData.get(column).put("CaseSensitive", flag);
@@ -1478,9 +1447,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the Currency property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param flag The value of the Currency property to set.
+	 * @param flag   The value of the Currency property to set.
 	 */
 	public void setCurrency(int column, Boolean flag) {
 		this.MetaData.get(column).put("Currency", flag);
@@ -1489,9 +1458,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the DefinitelyWritable property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param flag The value of the DefinitelyWritable property to set.
+	 * @param flag   The value of the DefinitelyWritable property to set.
 	 */
 	public void setDefinitelyWritable(int column, Boolean flag) {
 		this.MetaData.get(column).put("DefinitelyWritable", flag);
@@ -1503,13 +1472,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * <br><br>
 	 * <b>Note: </b>The Nullable flag can only be one of the following values, else an Exception is thrown.
 	 * <ul>
-	 *     <li>{@link java.sql.ResultSetMetaData#columnNoNulls java.sql.ResultSetMetaData.columnNoNulls}</li>
-	 *     <li>{@link java.sql.ResultSetMetaData#columnNullable java.sql.ResultSetMetaData.columnNullable}</li>
-	 *     <li>{@link java.sql.ResultSetMetaData#columnNullableUnknown java.sql.ResultSetMetaData.columnNullableUnknown}</li>
+	 * <li>{@link java.sql.ResultSetMetaData#columnNoNulls java.sql.ResultSetMetaData.columnNoNulls}</li>
+	 * <li>{@link java.sql.ResultSetMetaData#columnNullable java.sql.ResultSetMetaData.columnNullable}</li>
+	 * <li>{@link java.sql.ResultSetMetaData#columnNullableUnknown java.sql.ResultSetMetaData.columnNullableUnknown}</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param column The column index.
-	 * 
 	 * @throws Exception Gets thrown in case the Nullable flag is not equal any of the above mentioned types.
 	 */
 	public void setNullable(int column, int nullable) throws Exception {
@@ -1523,9 +1491,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the ReadOnly property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param flag The value of the ReadOnly property to set.
+	 * @param flag   The value of the ReadOnly property to set.
 	 */
 	public void setReadOnly(int column, Boolean flag) {
 		this.MetaData.get(column).put("ReadOnly", flag);
@@ -1534,9 +1502,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the Searchable property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param flag The value of the Searchable property to set.
+	 * @param flag   The value of the Searchable property to set.
 	 */
 	public void setSearchable(int column, Boolean flag) {
 		this.MetaData.get(column).put("Searchable", flag);
@@ -1545,9 +1513,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the Signed property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param flag The value of the Signed property to set.
+	 * @param flag   The value of the Signed property to set.
 	 */
 	public void setSigned(int column, Boolean flag) {
 		this.MetaData.get(column).put("Signed", flag);
@@ -1556,9 +1524,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the value of the Writable property of the ResultSet's metadata to the given value,
 	 * for the column at the specified index.
-	 * 
+	 *
 	 * @param column The column index.
-	 * @param flag The value of the Writable property to set.
+	 * @param flag   The value of the Writable property to set.
 	 */
 	public void setWritable(int column, Boolean flag) {
 		this.MetaData.get(column).put("Writable", flag);
@@ -1567,10 +1535,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Sets the attribute with the specified name and value to the column at the specified index.
 	 * Overwrites the value of the attribute with the given one in case an attribute with the given name does already exist.
-	 * 
+	 *
 	 * @param column The column's index.
-	 * @param name The name of the attribute.
-	 * @param value The value of the attribute.
+	 * @param name   The name of the attribute.
+	 * @param value  The value of the attribute.
 	 */
 	public void setAttribute(int column, String name, String value) {
 		this.MetaData.get(column).put(name, value);
@@ -1580,13 +1548,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * Sets the attribute with the specified name and value to the column at the
 	 * specified index. Overwrites the value of the attribute with the given one in
 	 * case an attribute with the given name does already exist.
-	 * 
-	 * @param columnName
-	 *            The column's name.
-	 * @param name
-	 *            The name of the attribute.
-	 * @param value
-	 *            The value of the attribute.
+	 *
+	 * @param columnName The column's name.
+	 * @param name       The name of the attribute.
+	 * @param value      The value of the attribute.
 	 */
 	public void setAttribute(String columnName, String name, String value) {
 		this.setAttribute(getColumnIndex(columnName), name, value);
@@ -1595,9 +1560,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns the DataField object of the current DataRow for the specified column index.
 	 * The method converts the column index to the field name and calls the {@link DataRow#getField(String) DataRow#getField(String)} method)
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return the DataField object of the current DataRow for the given column index.
 	 */
 	public DataField getField(int column) {
@@ -1617,31 +1581,28 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Checks a DataField for null
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return true if the field is null
 	 */
 	public boolean isNull(int column) {
 		DataField field = getField(column);
-		return (field==null);
+		return (field == null);
 	}
-	
-	
+
+
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as String.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getString()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as String.
+	 * @see com.basiscomponents.db.DataField#getString()
 	 */
 	// column get methods (0-based)
 	public String getString(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getString();
 	}
@@ -1649,16 +1610,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as NString.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getString()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as String.
+	 * @see com.basiscomponents.db.DataField#getString()
 	 */
 	public String getNString(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getString();
 	}
@@ -1666,16 +1625,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Integer.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getInt()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Integer.
+	 * @see com.basiscomponents.db.DataField#getInt()
 	 */
 	public Integer getInt(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getInt();
 	}
@@ -1683,16 +1640,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Byte.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getByte()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Byte.
+	 * @see com.basiscomponents.db.DataField#getByte()
 	 */
 	public Byte getByte(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getByte();
 	}
@@ -1700,16 +1655,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Short.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getShort()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Short.
+	 * @see com.basiscomponents.db.DataField#getShort()
 	 */
 	public Short getShort(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getShort();
 	}
@@ -1717,16 +1670,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Long.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getLong()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Long.
+	 * @see com.basiscomponents.db.DataField#getLong()
 	 */
 	public Long getLong(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getLong();
 	}
@@ -1734,16 +1685,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as BigDecimal.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getBigDecimal()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as BigDecimal.
+	 * @see com.basiscomponents.db.DataField#getBigDecimal()
 	 */
 	public BigDecimal getBigDecimal(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getBigDecimal();
 	}
@@ -1751,16 +1700,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Double.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getDouble()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Double.
+	 * @see com.basiscomponents.db.DataField#getDouble()
 	 */
 	public Double getDouble(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getDouble();
 	}
@@ -1768,16 +1715,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Float.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getFloat()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Float.
+	 * @see com.basiscomponents.db.DataField#getFloat()
 	 */
 	public Float getFloat(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getFloat();
 	}
@@ -1785,16 +1730,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Boolean.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getBoolean()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Boolean.
+	 * @see com.basiscomponents.db.DataField#getBoolean()
 	 */
 	public Boolean getBoolean(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getBoolean();
 	}
@@ -1802,16 +1745,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Date.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getDate()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Date.
+	 * @see com.basiscomponents.db.DataField#getDate()
 	 */
 	public Date getDate(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getDate();
 	}
@@ -1819,16 +1760,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Time.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getTime()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Time.
+	 * @see com.basiscomponents.db.DataField#getTime()
 	 */
 	public Time getTime(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getTime();
 	}
@@ -1836,16 +1775,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Timestamp.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getTimestamp()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Timestamp.
+	 * @see com.basiscomponents.db.DataField#getTimestamp()
 	 */
 	public Timestamp getTimestamp(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getTimestamp();
 	}
@@ -1853,16 +1790,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Byte array.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getBytes()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Byte array.
+	 * @see com.basiscomponents.db.DataField#getBytes()
 	 */
 	public byte[] getBytes(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getBytes();
 	}
@@ -1870,16 +1805,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Array.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getArray()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Array.
+	 * @see com.basiscomponents.db.DataField#getArray()
 	 */
 	public Array getArray(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getArray();
 	}
@@ -1887,16 +1820,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Blob.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getBlob()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Blob.
+	 * @see com.basiscomponents.db.DataField#getBlob()
 	 */
 	public Blob getBlob(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getBlob();
 	}
@@ -1904,16 +1835,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Clob.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getClob()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Clob.
+	 * @see com.basiscomponents.db.DataField#getClob()
 	 */
 	public Clob getClob(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getClob();
 	}
@@ -1925,16 +1854,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as NClob.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getNClob()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as NClob.
+	 * @see com.basiscomponents.db.DataField#getNClob()
 	 */
 	public Clob getNClob(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getNClob();
 	}
@@ -1942,16 +1869,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getObject()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value object.
+	 * @see com.basiscomponents.db.DataField#getObject()
 	 */
 	public Object getObject(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getObject();
 	}
@@ -1959,16 +1884,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as Ref.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getRef()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as Ref.
+	 * @see com.basiscomponents.db.DataField#getRef()
 	 */
 	public Ref getRef(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getRef();
 	}
@@ -1976,16 +1899,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Retrieves the DataField object of the current DataRow for the specified column index,
 	 * and returns the DataField's value object as URL.
-	 * 
-	 * @see com.basiscomponents.db.DataField#getURL()
-	 * 
+	 *
 	 * @param column The column's index.
-	 * 
 	 * @return The DataField's value as URL.
+	 * @see com.basiscomponents.db.DataField#getURL()
 	 */
 	public URL getURL(int column) {
 		DataField field = getField(column);
-		if (field==null)
+		if (field == null)
 			return null;
 		return field.getURL();
 	}
@@ -1994,7 +1915,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * Sets the list of field names to be imported into the ResultSet when calling the
 	 * {@link #populate(java.sql.ResultSet, Boolean) populate(java.sql.ResultSet, Boolean)}
 	 * method. The populate method will only import the field names from the given list into the ResultSet.
-	 * 
+	 *
 	 * @param fieldSelection The list of column names to import into the ResultSet when calling the populate method.
 	 */
 	public void setFieldSelection(List<String> fieldSelection) {
@@ -2003,66 +1924,63 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns a JSON String with the ResultSet's content.
-	 * 
+	 *
 	 * @return The JSON String with the ResultSet's content.
-	 * 
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
-	public String toJson() throws Exception {
-			return toJson(true,null, true);
+	public String toJson() throws ParseException, IOException {
+		return toJson(true, null, true);
 	}
 
 	/**
 	 * Returns a JSON String with the ResultSet's content.
-	 * 
+	 *
 	 * @return The JSON String with the ResultSet's content.
-	 * 
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
-	public String toJson(Boolean f_meta) throws Exception {
+	public String toJson(Boolean f_meta) throws ParseException, IOException {
 		return toJson(f_meta, null, true);
 	}
 
 	/**
 	 * Returns a JSON String with the ResultSet's content.
-	 * 
+	 *
 	 * @return The JSON String with the ResultSet's content.
-	 * 
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
-	public String toJson(Boolean f_meta, String addIndexColumn) throws Exception {
+	public String toJson(Boolean f_meta, String addIndexColumn) throws ParseException, IOException {
 		return toJson(f_meta, addIndexColumn, true);
 	}
 
 	/**
-	 *
-	 * @param meta if MetaData should be printed
+	 * @param meta           if MetaData should be printed
 	 * @param addIndexColumn The Index column which is generated (@Code{null} if it doesn't exist)
-	 * @param trimStrings if Strings should be trimmed
+	 * @param trimStrings    if Strings should be trimmed
 	 * @return The Json String containing this ResultSet
 	 * @throws Exception
 	 */
-	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings) throws Exception {
-		if (addIndexColumn!=null)
+	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings) throws ParseException, IOException {
+		if (addIndexColumn != null)
 			createIndex();
-		return toJson(meta , addIndexColumn, trimStrings, false);
+		return toJson(meta, addIndexColumn, trimStrings, false);
 	}
+
 	/**
-	 *
-	 * @param meta if MetaData should be printed
+	 * @param meta           if MetaData should be printed
 	 * @param addIndexColumn The Index column which is generated (@Code{null} if it doesn't exist)
-	 * @param trimStrings if Strings should be trimmed
+	 * @param trimStrings    if Strings should be trimmed
 	 * @return The Json String containing this ResultSet
 	 * @throws Exception
 	 */
-	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes) throws Exception {
-		if (addIndexColumn!=null)
+	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes) throws ParseException, IOException {
+		if (addIndexColumn != null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this,meta , addIndexColumn, trimStrings, writeDataRowAttributes);
+		return ResultSetJsonMapper.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes);
 	}
+
 	/**
 	 * Returns this ResultSet as a JRDataSource
-	 * 
+	 *
 	 * @return JRDataSourceAdapter representing this ResultSet
 	 */
 	public JRDataSource toJRDataSource() {
@@ -2071,9 +1989,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the name of the given java.sql.Type value, or null in case the given type is unknown.
-	 * 
+	 *
 	 * @param sqlType The SQL Type value.
-	 * 
 	 * @return sqlTypeName The name of the given SQL Type value.
 	 */
 	public static String getSQLTypeName(int sqlType) {
@@ -2082,18 +1999,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns a ResultSet object created by parsing the given JSON String.
-	 * 
-	 * @param js
-	 *            The JSON String used to create the ResultSet object.
-	 * 
+	 *
+	 * @param js The JSON String used to create the ResultSet object.
 	 * @return The ResultSet object created from the values provided in the given
-	 *         JSON String.
+	 * JSON String.
 	 * @throws ParseException
 	 * @throws IOException
-	 * @throws JsonParseException
-	 *
-	 *             throws an exception if can not parse the json string to a
-	 *             DataRow.
+	 * @throws JsonParseException throws an exception if can not parse the json string to a
+	 *                            DataRow.
 	 */
 	public static ResultSet fromJson(final String js) throws JsonParseException, IOException, ParseException {
 		String cleanString = js.trim();
@@ -2114,15 +2027,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 
 		if (meta == null) {
-			System.err.println("error parsing - meta data missing");
+			LOGGER.log(WARNING, "error parsing - meta data missing");
 		}
 
-		for (JsonElement el:o) {
+		for (JsonElement el : o) {
 			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
 				el.getAsJsonObject().add("meta", meta);
-			if(el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)!=null){
-				rs.add(DataRow.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
-			}else{
+			if (el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES) != null) {
+				rs.add(DataRow.fromJson(el.toString(), metaRow, el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
+			} else {
 				rs.add(DataRow.fromJson(el.toString(), metaRow));
 			}
 		}
@@ -2131,7 +2044,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the java.sql.ResultSet object of this com.basiscomponents.db.ResultSet object.
-	 * 
+	 *
 	 * @return The java.sql.ResultSet object.
 	 */
 	public java.sql.ResultSet getSQLResultSet() {
@@ -2143,16 +2056,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns this ResultSet as com.google.gson.JsonArray object.
-	 * 
+	 *
 	 * @return This ResultSet as com.google.gson.JsonArray object.
 	 */
 	public Object toJsonElement() {
 		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
 		try {
 			return parser.parse(this.toJson()).getAsJsonArray();
-		} catch (Exception e) {
-			// Auto-generated catch block
-			e.printStackTrace();
+		} catch (JsonSyntaxException | ParseException | IOException e) {
+			LOGGER.log(WARNING, "could not parse this ResultSet to json", e);
 		}
 		return null;
 	}
@@ -2198,10 +2110,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the number of DataRows stored in this ResultSet.
-	 * 
-	 * @see com.basiscomponents.db.ResultSet#size()
-	 * 
+	 *
 	 * @return The number of DataRow objects in this ResultSet.
+	 * @see com.basiscomponents.db.ResultSet#size()
 	 */
 	public int count() {
 		return this.DataRows.size();
@@ -2209,30 +2120,26 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * Returns the sum of all fields with the specified name, by iterating over all DataRow objects of this ResultSet.
-	 * 
+	 *
 	 * @param fieldname The name of the DataRow field whose value to sum
-	 * 
 	 * @return the sum of all numeric fields with the specified name.
-	 * 
 	 * @throws Exception Gets thrown in case the specified field value can't be retrieved as number
 	 */
-	public Double sum(String fieldname) throws Exception {
-		Iterator<DataRow> it = iterator();
-		Double s = 0.0;
-		while (it.hasNext()) {
-			DataRow dr = it.next();
-			s += dr.getFieldAsNumber(fieldname);
-		}
-		return s;
-	};
+	public Double sum(String fieldname) {
+		return this.DataRows
+				.stream()
+				.map(dr -> dr.getFieldAsNumber(fieldname))
+				.reduce((x, y) -> x + y)
+				.orElse(.0);
+	}
+
+	;
 
 	/**
 	 * Returns the min value of all fields with the specified name, by iterating over all DataRow objects of this ResultSet.
-	 * 
+	 *
 	 * @param fieldname The name of the DataRow field.
-	 * 
 	 * @return the min value of all numeric fields with the specified name.
-	 * 
 	 * @throws Exception Gets thrown in case the specified field value can't be retrieved as number
 	 */
 	public Double min(String fieldname) throws Exception {
@@ -2248,15 +2155,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			}
 		}
 		return s;
-	};
+	}
+
+	;
 
 	/**
 	 * Returns the max value of all fields with the specified name, by iterating over all DataRow objects of this ResultSet.
-	 * 
+	 *
 	 * @param fieldname The name of the DataRow field.
-	 * 
 	 * @return the max value of all numeric fields with the specified name.
-	 * 
 	 * @throws Exception Gets thrown in case the specified field value can't be retrieved as number
 	 */
 	public Double max(String fieldname) throws Exception {
@@ -2272,28 +2179,28 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			}
 		}
 		return s;
-	};
+	}
+
+	;
 
 	/**
 	 * Returns the average value of all fields with the specified name, by iterating over all DataRow objects of this ResultSet.
-	 * 
+	 *
 	 * @param fieldname The name of the DataRow field.
-	 * 
 	 * @return the average value of all numeric fields with the specified name.
-	 * 
 	 * @throws Exception Gets thrown in case the specified field value can't be retrieved as number
 	 */
 	public Double avg(String fieldname) throws Exception {
 		return sum(fieldname) / count();
-	};
+	}
+
+	;
 
 	/**
 	 * Returns the median value of all fields with the specified name, by iterating over all DataRow objects of this ResultSet.
-	 * 
+	 *
 	 * @param fieldname The name of the DataRow field.
-	 * 
 	 * @return the median value of all numeric fields with the specified name.
-	 * 
 	 * @throws Exception Gets thrown in case the specified field value can't be retrieved as number
 	 */
 	public Double median(String fieldname) throws Exception {
@@ -2320,17 +2227,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * The number of field occurrences in all DataRows of this ResultSet will be set as field value in the returned DataRow.
 	 * In addition, while iterating over the DataRow objects, the method retrieves the field value for the given label name and sets it
 	 * as attribute of the returned DataRow object.
-
+	 *
 	 * @param fieldname The name of the field.
 	 * @param labelname The label name.
-	 * 
+	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the number
+	 * of occurrences as field values.
+	 * @throws Exception
 	 * @see #countByGroup(String)
 	 * @see #countByGroup(String, String, int, int)
-	 *
-	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the number
-	 * 		   of occurrences as field values.
-	 * 
-	 * @throws Exception
 	 */
 	public DataRow countByGroup(String fieldname, String labelname) throws Exception {
 		return this.countByGroup(fieldname, labelname, NO_SORT, 0);
@@ -2339,21 +2243,17 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Returns a DataRow which contains all field values of the DataRows defined in this ResultSet for the given field name.
 	 * The number of field occurrences in all DataRows of this ResultSet will be set as field value in the returned DataRow.
-	 * 
+	 *
+	 * @param fieldname The name of the field.
+	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the number
+	 * of occurrences as field values.
+	 * @throws Exception
 	 * @see #countByGroup(String, String)
 	 * @see #countByGroup(String, String, int, int)
-	 * 
-	 * @param fieldname The name of the field.
-	 *
-	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the number
-	 * 		   of occurrences as field values.
-	 * 
-	 * @throws Exception
 	 */
 	public DataRow countByGroup(String fieldname) throws Exception {
 		return this.countByGroup(fieldname, fieldname, NO_SORT, 0);
 	}
-
 
 
 	/**
@@ -2367,27 +2267,24 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * <br><br>
 	 * The only allowed values for the sorting are:
 	 * <ul>
-	 *     <li>ResultSet.NO_SORT (default)</li>
-	 *     <li>ResultSet.SORT_ON_GROUPFIELD</li>
-	 *     <li>ResultSet.SORT_ON_GROUPLABEL</li>
-	 *     <li>ResultSet.SORT_ON_RESULT</li>
-	 *     <li>ResultSet.SORT_ON_GROUPFIELD_DESC</li>
-	 *     <li>ResultSet.SORT_ON_GROUPLABEL_DESC</li>
-	 *     <li>ResultSet.SORT_ON_RESULT_DESC</li>
+	 * <li>ResultSet.NO_SORT (default)</li>
+	 * <li>ResultSet.SORT_ON_GROUPFIELD</li>
+	 * <li>ResultSet.SORT_ON_GROUPLABEL</li>
+	 * <li>ResultSet.SORT_ON_RESULT</li>
+	 * <li>ResultSet.SORT_ON_GROUPFIELD_DESC</li>
+	 * <li>ResultSet.SORT_ON_GROUPLABEL_DESC</li>
+	 * <li>ResultSet.SORT_ON_RESULT_DESC</li>
 	 * </ul>
-	 * 
-	 * @see #countByGroup(String)
-	 * @see #countByGroup(String, String)
-	 * 
+	 *
 	 * @param fieldname The name of the field.
 	 * @param labelname The label name.
-	 * @param sort The sorting code.
-	 * @param top The maximal number of field's of the new DataRow object.
-	 *
+	 * @param sort      The sorting code.
+	 * @param top       The maximal number of field's of the new DataRow object.
 	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the number
-	 * 		   of occurrences as field values.
-	 * 
+	 * of occurrences as field values.
 	 * @throws Exception
+	 * @see #countByGroup(String)
+	 * @see #countByGroup(String, String)
 	 */
 	public DataRow countByGroup(String fieldname, String labelname, int sort, int top) throws Exception {
 
@@ -2443,20 +2340,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * Sorts the given DataRow object based on the sort code.
 	 * The valid sort codes are:
 	 * <ul>
-	 *     <li>ResultSet.NO_SORT (default)</li>
-	 *     <li>ResultSet.SORT_ON_GROUPFIELD</li>
-	 *     <li>ResultSet.SORT_ON_GROUPLABEL</li>
-	 *     <li>ResultSet.SORT_ON_RESULT</li>
-	 *     <li>ResultSet.SORT_ON_GROUPFIELD_DESC</li>
-	 *     <li>ResultSet.SORT_ON_GROUPLABEL_DESC</li>
-	 *     <li>ResultSet.SORT_ON_RESULT_DESC</li>
+	 * <li>ResultSet.NO_SORT (default)</li>
+	 * <li>ResultSet.SORT_ON_GROUPFIELD</li>
+	 * <li>ResultSet.SORT_ON_GROUPLABEL</li>
+	 * <li>ResultSet.SORT_ON_RESULT</li>
+	 * <li>ResultSet.SORT_ON_GROUPFIELD_DESC</li>
+	 * <li>ResultSet.SORT_ON_GROUPLABEL_DESC</li>
+	 * <li>ResultSet.SORT_ON_RESULT_DESC</li>
 	 * </ul>
-	 * 
-	 * @param dr The DataRow whose values to sort.
+	 *
+	 * @param dr   The DataRow whose values to sort.
 	 * @param sort The sort code defining how to sort the fields.
-	 * 
 	 * @return The re-ordered DataRow object.
-	 * 
 	 * @throws Exception
 	 */
 	private static DataRow sortDataRow(DataRow dr, int sort) throws Exception {
@@ -2471,31 +2366,31 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			String k = it.next();
 			String tmp = "";
 			switch (sort) {
-			case SORT_ON_GROUPFIELD:
-				tm.put(k, k);
-				break;
-			case SORT_ON_GROUPLABEL:
-				tm.put(dr.getFieldAttribute(k, "label") + k, k);
-				break;
-			case SORT_ON_RESULT:
-				tmp = dr.getFieldAsNumber(k).toString();
-				while (tmp.length() < 30)
-					tmp = '0' + tmp;
-				tm.put(tmp + k, k);
-				// FIXME this is clumsy. Mind the decimals when filling up!
-				break;
-			case SORT_ON_GROUPFIELD_DESC:
-				tm.put(invert(k), k);
-				break;
-			case SORT_ON_GROUPLABEL_DESC:
-				tm.put(invert(dr.getFieldAttribute(k, "label") + k), k);
-				break;
-			case SORT_ON_RESULT_DESC:
-				tmp = dr.getFieldAsNumber(k).toString();
-				while (tmp.length() < 30)
-					tmp = '0' + tmp;
-				tm.put(invert(tmp + k), k);
-				break;
+				case SORT_ON_GROUPFIELD:
+					tm.put(k, k);
+					break;
+				case SORT_ON_GROUPLABEL:
+					tm.put(dr.getFieldAttribute(k, "label") + k, k);
+					break;
+				case SORT_ON_RESULT:
+					tmp = dr.getFieldAsNumber(k).toString();
+					while (tmp.length() < 30)
+						tmp = '0' + tmp;
+					tm.put(tmp + k, k);
+					// FIXME this is clumsy. Mind the decimals when filling up!
+					break;
+				case SORT_ON_GROUPFIELD_DESC:
+					tm.put(invert(k), k);
+					break;
+				case SORT_ON_GROUPLABEL_DESC:
+					tm.put(invert(dr.getFieldAttribute(k, "label") + k), k);
+					break;
+				case SORT_ON_RESULT_DESC:
+					tmp = dr.getFieldAsNumber(k).toString();
+					while (tmp.length() < 30)
+						tmp = '0' + tmp;
+					tm.put(invert(tmp + k), k);
+					break;
 			}
 		}
 		Iterator<String> it2 = tm.keySet().iterator();
@@ -2513,16 +2408,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * Sums the value of the field with the given field name(sumfieldname) and sets it as field value to the DataRow.
 	 * In addition, while iterating over the DataRow objects, the method retrieves the field value for the given label name and sets it
 	 * as attribute of the returned DataRow object.
-	 * 
-	 * @see #sumByGroup(String, String, String, int, int)
-	 * 
-	 * @param fieldname The name of the field.
-	 * @param sumfieldname The field name whose value should be summed
 	 *
+	 * @param fieldname    The name of the field.
+	 * @param sumfieldname The field name whose value should be summed
 	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the sum
-	 * 		   of the values of the field with the given name as field values.
-	 * 
+	 * of the values of the field with the given name as field values.
 	 * @throws Exception
+	 * @see #sumByGroup(String, String, String, int, int)
 	 */
 	public DataRow sumByGroup(String fieldname, String sumfieldname) throws Exception {
 		return this.sumByGroup(fieldname, fieldname, sumfieldname, NO_SORT, 0);
@@ -2539,27 +2431,24 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * <br><br>
 	 * The only allowed values for the sorting are:
 	 * <ul>
-	 *     <li>ResultSet.NO_SORT (default)</li>
-	 *     <li>ResultSet.SORT_ON_GROUPFIELD</li>
-	 *     <li>ResultSet.SORT_ON_GROUPLABEL</li>
-	 *     <li>ResultSet.SORT_ON_RESULT</li>
-	 *     <li>ResultSet.SORT_ON_GROUPFIELD_DESC</li>
-	 *     <li>ResultSet.SORT_ON_GROUPLABEL_DESC</li>
-	 *     <li>ResultSet.SORT_ON_RESULT_DESC</li>
+	 * <li>ResultSet.NO_SORT (default)</li>
+	 * <li>ResultSet.SORT_ON_GROUPFIELD</li>
+	 * <li>ResultSet.SORT_ON_GROUPLABEL</li>
+	 * <li>ResultSet.SORT_ON_RESULT</li>
+	 * <li>ResultSet.SORT_ON_GROUPFIELD_DESC</li>
+	 * <li>ResultSet.SORT_ON_GROUPLABEL_DESC</li>
+	 * <li>ResultSet.SORT_ON_RESULT_DESC</li>
 	 * </ul>
-	 * 
-	 * @see #sumByGroup(String, String)
-	 * 
-	 * @param fieldname The name of the field.
-	 * @param labelname The label name.
-	 * @param sumfieldname The field name whose value should be summed
-	 * @param sort The sort code.
-	 * @param top The maximal number of field's of the new DataRow object.
 	 *
+	 * @param fieldname    The name of the field.
+	 * @param labelname    The label name.
+	 * @param sumfieldname The field name whose value should be summed
+	 * @param sort         The sort code.
+	 * @param top          The maximal number of field's of the new DataRow object.
 	 * @return A DataRow object with the field values from the DataRows defined in this ResultSet as field names and with the sum
-	 * 		   of the values of the field with the given name as field values.
-	 * 
+	 * of the values of the field with the given name as field values.
 	 * @throws Exception
+	 * @see #sumByGroup(String, String)
 	 */
 	public DataRow sumByGroup(String fieldname, String labelname, String sumfieldname, int sort, int top)
 			throws Exception {
@@ -2629,132 +2518,132 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				Integer colType = getColumnType(col);
 				col++; // java.sql.ResultSet 1-based
 				switch (colType) {
-				case java.sql.Types.NULL: // C(1)
-					KeyTemplate.setString(colName, "");
-					break;
-				case java.sql.Types.CHAR: // C(n)
-				case java.sql.Types.VARCHAR: // C(n*)
-				case java.sql.Types.LONGVARCHAR: // C(n*)
-					stringVal = rs.getString(col);
-					if (stringVal != null)
-						KeyTemplate.setString(colName, stringVal);
-					break;
-				case java.sql.Types.NCHAR: // C(n)
-				case java.sql.Types.NVARCHAR: // C(n+=10)
-				case java.sql.Types.LONGNVARCHAR: // C(n+=10)
-					stringVal = rs.getNString(col);
-					if (stringVal != null)
-						KeyTemplate.setString(colName, stringVal);
-					break;
-				case java.sql.Types.INTEGER: // I(4)/U(4)
-					KeyTemplate.setInt(colName, rs.getInt(col));
-					break;
-				case java.sql.Types.TINYINT: // I(1)/U(1)
-					KeyTemplate.setInt(colName, rs.getInt(col));
-					break;
-				case java.sql.Types.SMALLINT: // I(2)/U(2)
-					KeyTemplate.setInt(colName, rs.getShort(col));
-					break;
-				case java.sql.Types.BIGINT: // I(8)/U(8)
-					KeyTemplate.setLong(colName, rs.getLong(col));
-					break;
-				case java.sql.Types.DECIMAL: // N(n*)/N(n*=)
-				case java.sql.Types.NUMERIC: // N(n*)/N(n*=)
-					java.math.BigDecimal decVal = rs.getBigDecimal(col);
-					if (decVal != null) {
-						decVal = decVal.setScale(15, java.math.BigDecimal.ROUND_HALF_EVEN);
-						KeyTemplate.setBasisNumber(colName, new BasisNumber(decVal));
-					}
-					break;
-				case java.sql.Types.DOUBLE: // Y
-				case java.sql.Types.FLOAT: // F
-					KeyTemplate.setDouble(colName, rs.getDouble(col));
-					break;
-				case java.sql.Types.REAL: // B
-					KeyTemplate.setFloat(colName, rs.getFloat(col));
-					break;
-				case java.sql.Types.DATE: // I(4) Julian
-					java.sql.Date dateVal = rs.getDate(col);
-					if (dateVal == null)
-						KeyTemplate.setInt(colName, -1);
-					else
-						KeyTemplate.setInt(colName, com.basis.util.BasisDate.jul(dateVal));
-					break;
-				case java.sql.Types.TIME: // C(23)
-					java.sql.Time time = rs.getTime(col);
-					if (time != null)
-						KeyTemplate.setString(colName, time.toString());
-					break;
-				case java.sql.Types.TIMESTAMP: // C(23)
-					java.sql.Timestamp timestamp = rs.getTimestamp(col);
-					if (timestamp != null)
-						KeyTemplate.setString(colName, timestamp.toString());
-					break;
-				case java.sql.Types.BINARY: // O(n)
-				case java.sql.Types.VARBINARY: // O(n)
-				case java.sql.Types.LONGVARBINARY: // O(n)
-					bytes = rs.getBytes(col);
-					if (bytes != null)
-						KeyTemplate.setBytes(colName, bytes);
-					break;
-				case java.sql.Types.BLOB: // O(n)
-					Blob blob = rs.getBlob(col);
-					if (blob != null) {
-						int len = (int) blob.length();
-						KeyTemplate.setBytes(colName, blob.getBytes(1, len));
-					}
-					break;
-				case java.sql.Types.BIT: // N(1)
-				case java.sql.Types.BOOLEAN: // N(1)
-					KeyTemplate.setBasisNumber(colName, rs.getBoolean(col) ? BasisNumber.ONE : BasisNumber.ZERO);
-					break;
-				case java.sql.Types.CLOB: // C(n+=10)
-					Clob clob = rs.getClob(col);
-					if (clob != null) {
-						int len = (int) clob.length();
-						KeyTemplate.setString(colName, clob.getSubString(1, len));
-					}
-					break;
-				case java.sql.Types.NCLOB: // C(n+=10)
-					NClob nclob = rs.getNClob(col);
-					if (nclob != null) {
-						int len = (int) nclob.length();
-						KeyTemplate.setString(colName, nclob.getSubString(1, len));
-					}
-					break;
-				case java.sql.Types.DATALINK: // C(n*)
-					java.net.URL url = rs.getURL(col);
-					if (url != null)
-						KeyTemplate.setString(colName, url.toString());
-					break;
-				case java.sql.Types.ARRAY: // O(n)
-					java.sql.Array array = rs.getArray(col);
-					if (array != null) {
-						// TODO
-					}
-					break;
-				case java.sql.Types.JAVA_OBJECT: // O(n)
-				case java.sql.Types.OTHER: // O(n)
-					java.lang.Object object = rs.getObject(col);
-					if (object != null) {
-						// TODO
-					}
-					break;
-				case java.sql.Types.REF: // O(n)
-					java.sql.Ref ref = rs.getRef(col);
-					if (ref != null) {
-						// TODO
-					}
-					break;
-				case java.sql.Types.DISTINCT: // O(n)
-				case java.sql.Types.STRUCT: // O(n)
-				case java.sql.Types.ROWID: // O(n)
-				case java.sql.Types.SQLXML: // O(n)
-				default: // O(n)
-					bytes = rs.getBytes(col);
-					if (bytes != null)
-						KeyTemplate.setBytes(colName, bytes);
-					break;
+					case java.sql.Types.NULL: // C(1)
+						KeyTemplate.setString(colName, "");
+						break;
+					case java.sql.Types.CHAR: // C(n)
+					case java.sql.Types.VARCHAR: // C(n*)
+					case java.sql.Types.LONGVARCHAR: // C(n*)
+						stringVal = rs.getString(col);
+						if (stringVal != null)
+							KeyTemplate.setString(colName, stringVal);
+						break;
+					case java.sql.Types.NCHAR: // C(n)
+					case java.sql.Types.NVARCHAR: // C(n+=10)
+					case java.sql.Types.LONGNVARCHAR: // C(n+=10)
+						stringVal = rs.getNString(col);
+						if (stringVal != null)
+							KeyTemplate.setString(colName, stringVal);
+						break;
+					case java.sql.Types.INTEGER: // I(4)/U(4)
+						KeyTemplate.setInt(colName, rs.getInt(col));
+						break;
+					case java.sql.Types.TINYINT: // I(1)/U(1)
+						KeyTemplate.setInt(colName, rs.getInt(col));
+						break;
+					case java.sql.Types.SMALLINT: // I(2)/U(2)
+						KeyTemplate.setInt(colName, rs.getShort(col));
+						break;
+					case java.sql.Types.BIGINT: // I(8)/U(8)
+						KeyTemplate.setLong(colName, rs.getLong(col));
+						break;
+					case java.sql.Types.DECIMAL: // N(n*)/N(n*=)
+					case java.sql.Types.NUMERIC: // N(n*)/N(n*=)
+						java.math.BigDecimal decVal = rs.getBigDecimal(col);
+						if (decVal != null) {
+							decVal = decVal.setScale(15, java.math.BigDecimal.ROUND_HALF_EVEN);
+							KeyTemplate.setBasisNumber(colName, new BasisNumber(decVal));
+						}
+						break;
+					case java.sql.Types.DOUBLE: // Y
+					case java.sql.Types.FLOAT: // F
+						KeyTemplate.setDouble(colName, rs.getDouble(col));
+						break;
+					case java.sql.Types.REAL: // B
+						KeyTemplate.setFloat(colName, rs.getFloat(col));
+						break;
+					case java.sql.Types.DATE: // I(4) Julian
+						java.sql.Date dateVal = rs.getDate(col);
+						if (dateVal == null)
+							KeyTemplate.setInt(colName, -1);
+						else
+							KeyTemplate.setInt(colName, com.basis.util.BasisDate.jul(dateVal));
+						break;
+					case java.sql.Types.TIME: // C(23)
+						java.sql.Time time = rs.getTime(col);
+						if (time != null)
+							KeyTemplate.setString(colName, time.toString());
+						break;
+					case java.sql.Types.TIMESTAMP: // C(23)
+						java.sql.Timestamp timestamp = rs.getTimestamp(col);
+						if (timestamp != null)
+							KeyTemplate.setString(colName, timestamp.toString());
+						break;
+					case java.sql.Types.BINARY: // O(n)
+					case java.sql.Types.VARBINARY: // O(n)
+					case java.sql.Types.LONGVARBINARY: // O(n)
+						bytes = rs.getBytes(col);
+						if (bytes != null)
+							KeyTemplate.setBytes(colName, bytes);
+						break;
+					case java.sql.Types.BLOB: // O(n)
+						Blob blob = rs.getBlob(col);
+						if (blob != null) {
+							int len = (int) blob.length();
+							KeyTemplate.setBytes(colName, blob.getBytes(1, len));
+						}
+						break;
+					case java.sql.Types.BIT: // N(1)
+					case java.sql.Types.BOOLEAN: // N(1)
+						KeyTemplate.setBasisNumber(colName, rs.getBoolean(col) ? BasisNumber.ONE : BasisNumber.ZERO);
+						break;
+					case java.sql.Types.CLOB: // C(n+=10)
+						Clob clob = rs.getClob(col);
+						if (clob != null) {
+							int len = (int) clob.length();
+							KeyTemplate.setString(colName, clob.getSubString(1, len));
+						}
+						break;
+					case java.sql.Types.NCLOB: // C(n+=10)
+						NClob nclob = rs.getNClob(col);
+						if (nclob != null) {
+							int len = (int) nclob.length();
+							KeyTemplate.setString(colName, nclob.getSubString(1, len));
+						}
+						break;
+					case java.sql.Types.DATALINK: // C(n*)
+						java.net.URL url = rs.getURL(col);
+						if (url != null)
+							KeyTemplate.setString(colName, url.toString());
+						break;
+					case java.sql.Types.ARRAY: // O(n)
+						java.sql.Array array = rs.getArray(col);
+						if (array != null) {
+							// TODO
+						}
+						break;
+					case java.sql.Types.JAVA_OBJECT: // O(n)
+					case java.sql.Types.OTHER: // O(n)
+						java.lang.Object object = rs.getObject(col);
+						if (object != null) {
+							// TODO
+						}
+						break;
+					case java.sql.Types.REF: // O(n)
+						java.sql.Ref ref = rs.getRef(col);
+						if (ref != null) {
+							// TODO
+						}
+						break;
+					case java.sql.Types.DISTINCT: // O(n)
+					case java.sql.Types.STRUCT: // O(n)
+					case java.sql.Types.ROWID: // O(n)
+					case java.sql.Types.SQLXML: // O(n)
+					default: // O(n)
+						bytes = rs.getBytes(col);
+						if (bytes != null)
+							KeyTemplate.setBytes(colName, bytes);
+						break;
 				}
 			}
 			dr.addBytesToRowKey(KeyTemplate.getBytes());
@@ -2774,8 +2663,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Creates and returns BB template definition based on the key columns
 	 *
-	 * @param extendedInfo
-	 *            Adds more information to template if true
+	 * @param extendedInfo Adds more information to template if true
 	 * @return String Key template definition
 	 */
 	private String getBBKeyTemplate(Boolean extendedInfo) {
@@ -2787,7 +2675,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				String tmplCol = getBBTemplateColumn(colName, -1, extendedInfo);
 				// key template segments are always fixed length, so..
 				if (!tmplCol.isEmpty() && (tmplCol.contains("*") || tmplCol.contains("+"))) {
-					tmplCol = tmplCol.substring(0, java.lang.Math.max(tmplCol.indexOf("*"),tmplCol.indexOf("+")));
+					tmplCol = tmplCol.substring(0, java.lang.Math.max(tmplCol.indexOf("*"), tmplCol.indexOf("+")));
 					tmplCol = tmplCol.concat(")");
 				}
 				s.append(tmplCol);
@@ -2810,8 +2698,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * Creates and returns BB template definition based on ResultSetMeatData,
 	 * analog SQLTMPL().
 	 *
-	 * @param extendedInfo
-	 *            Adds more information to template if true
+	 * @param extendedInfo Adds more information to template if true
 	 * @return String Template definition
 	 */
 	public String getBBTemplate(Boolean extendedInfo) {
@@ -2821,12 +2708,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Creates and returns BB template definition for named column
 	 *
-	 * @param colName
-	 *            Name of affected column
-	 * @param cols
-	 *            Total columns (used in checking if at end of record)
-	 * @param extendedInfo
-	 *            Adds more information to template if true
+	 * @param colName      Name of affected column
+	 * @param cols         Total columns (used in checking if at end of record)
+	 * @param extendedInfo Adds more information to template if true
 	 * @return String Column template definition
 	 */
 	private String getBBTemplateColumn(String colName, int cols, Boolean extendedInfo) {
@@ -2837,35 +2721,33 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	/**
 	 * Creates and returns BB template definition for indexed column
 	 *
-	 * @param col
-	 *            Zero-based index of affected column
-	 * @param cols
-	 *            Total columns (used in checking if at end of record)
-	 * @param extendedInfo
-	 *            Adds more information to template if true
+	 * @param col          Zero-based index of affected column
+	 * @param cols         Total columns (used in checking if at end of record)
+	 * @param extendedInfo Adds more information to template if true
 	 * @return String Column template definition
 	 */
 	private String getBBTemplateColumn(int col, int cols, Boolean extendedInfo) {
 		return BBTemplateProvider.createBBTemplateColumn(this, col, cols, extendedInfo);
 	}
-	
+
 	/**
 	 * isIndexed: check if the ResultSet has an internal index row
 	 * that would allow access by a key instead of the numeric integer index
+	 *
 	 * @return
 	 */
 	public Boolean isIndexed() {
 		return isIndexed;
 	}
-	
+
 	public void createIndex() throws ParseException {
 		if (!isIndexed()) {
 			rowIndex = new HashMap<>();
 			Iterator<DataRow> it = iterator();
-			int i=0;
+			int i = 0;
 			while (it.hasNext()) {
 				DataRow r = it.next();
-				String idx = r.getRowKey(); 
+				String idx = r.getRowKey();
 				if (idx.isEmpty()) {
 					//TODO: if the ResultSet has a primary index, like from JDBC, use these fields only!					
 					idx = java.util.UUID.nameUUIDFromBytes(r.toString().getBytes()).toString();
@@ -2875,7 +2757,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 						idx += '-';
 						idx += i;
 					}
-					
+
 					r.setRowKey(idx);
 				}
 				rowIndex.put(idx, i);
@@ -2884,16 +2766,16 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			isIndexed = true;
 		}
 	}
-	
+
 	private void reCreateIndex() throws ParseException {
 		if (isIndexed) {
-		// re-create index since the row numbers change
-		// this might be improved later if necessary
-			isIndexed=false;
+			// re-create index since the row numbers change
+			// this might be improved later if necessary
+			isIndexed = false;
 			createIndex();
-		}	
+		}
 	}
-	
+
 
 	/**
 	 * Prints the ResultSet's content to the standard output stream.
@@ -2905,29 +2787,28 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		this.DataRows.stream().forEach(System.out::println);
 		System.out.println("-------------------ResultSet End-------------------------");
 	}
-	
+
 	/**
-	 * 
-	 * @param rs2: the resultset to merge in
+	 * @param rs2:         the resultset to merge in
 	 * @param onFieldName: the field name to use to identify matches
-	 * @param fOverwrite: set to true if you want to overwrite fields that exist in both
+	 * @param fOverwrite:  set to true if you want to overwrite fields that exist in both
 	 */
 	public void merge(ResultSet rs2, String onFieldName, boolean fOverwrite) {
 		Iterator<DataRow> it = rs2.iterator();
 		while (it.hasNext()) {
 			DataRow rec = it.next();
-			Object o=rec.getField(onFieldName).getObject();
-			
+			Object o = rec.getField(onFieldName).getObject();
+
 			Iterator<DataRow> myIt = iterator();
-			while (myIt.hasNext()){
+			while (myIt.hasNext()) {
 				DataRow myRec = myIt.next();
-				Object myO=myRec.getField(onFieldName).getObject();
+				Object myO = myRec.getField(onFieldName).getObject();
 				if (myO.equals(o)) {
 					myRec.mergeRecord(rec, fOverwrite);
 					break;
 				}
 			}
-			
+
 		}
 		//optimization potential: always search in the smaller ResultSet
 	}
