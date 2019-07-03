@@ -39,7 +39,7 @@ public class DataRowQueryMatcher {
 			return "0";
 	}
 
-	public static Boolean matches(String statement, DataRow datarow) throws Exception {
+	public static Boolean matches(String statement, DataRow datarow) throws InvalidAlgorithmParameterException {
 		return matches(statement, datarow, true, false);
 	}
 
