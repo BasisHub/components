@@ -1,10 +1,5 @@
 package com.basiscomponents.db;
 
-import com.basiscomponents.db.model.Attribute;
-import com.basiscomponents.db.util.DataFieldConverter;
-import com.google.gson.annotations.Expose;
-
-import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -27,6 +22,13 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import javax.xml.bind.DatatypeConverter;
+
+import com.basiscomponents.db.model.Attribute;
+import com.basiscomponents.db.util.DataFieldConverter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.gson.annotations.Expose;
 
 /**
  * The DataField class is an object container class which provides multiple cast
@@ -180,7 +182,7 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Integer</code> object.
 	 */
 	public Integer getInt() {
-		return (Integer) this.Value;
+		return ((Number) this.Value).intValue();
 	}
 
 	/**
@@ -189,7 +191,7 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Byte</code> object.
 	 */
 	public Byte getByte() {
-		return (Byte) this.Value;
+		return ((Number) this.Value).byteValue();
 	}
 
 	/**
@@ -198,7 +200,7 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Short</code> object.
 	 */
 	public Short getShort() {
-		return (Short) this.Value;
+		return ((Number) this.Value).shortValue();
 	}
 
 	/**
@@ -207,13 +209,13 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Long</code> object.
 	 */
 	public Long getLong() {
-		if (this.Value != null && getClassName() == "java.lang.Integer") {
+		if (this.Value != null && getClassName().equals("java.lang.Integer")) {
 			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
 			return Integer.toUnsignedLong((Integer) this.Value);
 		}
-		return (Long) this.Value;
+		return ((Number) this.Value).longValue();
 	}
 
 	/**
@@ -223,11 +225,11 @@ public class DataField implements java.io.Serializable {
 	 *         object.
 	 */
 	public BigDecimal getBigDecimal() {
-		if (this.Value != null && getClassName() == "java.lang.Double") {
+		if (this.Value != null && getClassName().equals("java.lang.Double")) {
 			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
-			return new BigDecimal((Double) this.Value);
+			return BigDecimal.valueOf((Double) this.Value);
 		}
 		return (BigDecimal) this.Value;
 	}
@@ -238,7 +240,7 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Double</code> object.
 	 */
 	public Double getDouble() {
-		return (Double) this.Value;
+		return ((Number) this.Value).doubleValue();
 	}
 
 	/**
@@ -247,14 +249,14 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Float</code> object.
 	 */
 	public Float getFloat() {
-		if (this.Value != null && getClassName() == "java.lang.Double") {
+		if (this.Value != null && getClassName().equals("java.lang.Double")) {
 			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
 			return new Float((Double) this.Value);
 		}
 
-		return (Float) this.Value;
+		return ((Number) this.Value).floatValue();
 	}
 
 	/**
@@ -264,25 +266,25 @@ public class DataField implements java.io.Serializable {
 	 */
 	public Date getDate() {
 		if (this.Value != null) {
-			if (getClassName() == "java.sql.Timestamp") {
+			if (getClassName().equals("java.sql.Timestamp")) {
 				long ms = ((java.sql.Timestamp) this.Value).getTime();
 				return new java.sql.Date(ms);
 			}
-			if (getClassName() == "java.lang.Integer") {
+			if (getClassName().equals("java.lang.Integer")) {
 				java.util.Date d = com.basis.util.BasisDate.date((Integer) this.Value);
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
 					return null;
 			}
-			if (getClassName() == "java.lang.Double") {
+			if (getClassName().equals("java.lang.Double")) {
 				java.util.Date d = com.basis.util.BasisDate.date(((Double) this.Value).intValue());
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
 					return null;
 			}
-			if (getClassName() == "java.lang.String") {
+			if (getClassName().equals("java.lang.String")) {
 				String s = (String) this.Value;
 				if (s.isEmpty() || s.equals("-1"))
 					return null;
@@ -307,11 +309,11 @@ public class DataField implements java.io.Serializable {
 	 *         object.
 	 */
 	public Timestamp getTimestamp() {
-		if (this.Value != null && getClassName() == "java.sql.Date") {
+		if (this.Value != null && getClassName().equals("java.sql.Date")) {
 			long ms = ((java.sql.Date) this.Value).getTime();
 			return new java.sql.Timestamp(ms);
 		}
-		if (this.Value != null && getClassName() == "java.lang.String") {
+		if (this.Value != null && getClassName().equals("java.lang.String")) {
 			String s = (String) this.Value;
 			if (s.isEmpty())
 				return null;
@@ -515,9 +517,12 @@ public class DataField implements java.io.Serializable {
 			return "";
 		return this.Value.toString();
 	}
-	public String toJson(String fieldname, int fieldType, String indexColumn, boolean trimStrings){
 
-			return com.basiscomponents.db.util.DataFieldJsonMapper.dataFieldToJson(this,fieldname,fieldType,indexColumn,trimStrings);
+	public void toJson(String fieldname, int fieldType, String indexColumn, boolean trimStrings, JsonGenerator jg)
+			throws IOException {
+
+		com.basiscomponents.db.util.DataFieldJsonMapper.dataFieldToJson(this, fieldname, fieldType, indexColumn,
+				trimStrings, jg);
 
 	}
 

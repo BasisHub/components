@@ -1,18 +1,6 @@
 package com.basiscomponents.db;
 
-import com.basis.util.common.BasisNumber;
-import com.basis.util.common.Template;
-import com.basis.util.common.TemplateInfo;
-import com.basiscomponents.db.sql.SQLResultSet;
-import com.basiscomponents.db.util.BBTemplateProvider;
-import com.basiscomponents.db.util.JRDataSourceAdapter;
-import com.basiscomponents.db.util.ResultSetJsonMapper;
-import com.basiscomponents.db.util.SqlTypeNames;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.Expose;
-import net.sf.jasperreports.engine.JRDataSource;
+import static com.basiscomponents.util.StringHelper.invert;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -38,8 +26,22 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-import static com.basiscomponents.util.StringHelper.invert;
+import com.basis.util.common.BasisNumber;
+import com.basis.util.common.Template;
+import com.basis.util.common.TemplateInfo;
+import com.basiscomponents.db.sql.SQLResultSet;
+import com.basiscomponents.db.util.BBTemplateProvider;
+import com.basiscomponents.db.util.JRDataSourceAdapter;
+import com.basiscomponents.db.util.MetaDataJsonMapper;
+import com.basiscomponents.db.util.SqlTypeNames;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
+
+import net.sf.jasperreports.engine.JRDataSource;
 
 /**
  * The ResultSet class is a container class for DataRow objects.
@@ -2052,9 +2054,18 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception
 	 */
 	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes)  {
+
 		if (addIndexColumn!=null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this,meta , addIndexColumn, trimStrings, writeDataRowAttributes);
+
+		// This bool is used to determine that the written DataRow is the first one, to
+		// add the MetaData of the ResultSet
+		boolean isFirstRow = true;
+
+		return this.getDataRows()
+				   .stream()
+				   .map(DataRow -> DataRow.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes, isFirstRow))
+		   		   .collect(Collectors.joining(",", "[", "]"));
 	}
 	/**
 	 * Returns this ResultSet as a JRDataSource
@@ -2116,8 +2127,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		for (JsonElement el:o) {
 			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
 				el.getAsJsonObject().add("meta", meta);
-			if(el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)!=null){
-				rs.add(DataRow.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
+			if(el.getAsJsonObject().get(MetaDataJsonMapper.ATTRIBUTES)!=null){
+				rs.add(DataRow.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(MetaDataJsonMapper.ATTRIBUTES)));
 			}else{
 				rs.add(DataRow.fromJson(el.toString(), metaRow));
 			}

@@ -70,7 +70,7 @@ public class DataRowProvider {
 			// The date has to be rounded to the first millisecond of the day
 			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 			Calendar cal = Calendar.getInstance();
-			cal.setTime(new Date(System.currentTimeMillis()));
+			cal.setTime(new Date(0));
 			cal.set(Calendar.HOUR_OF_DAY, 0);
 		    cal.set(Calendar.MINUTE, 0);
 		    cal.set(Calendar.SECOND, 0);
@@ -78,7 +78,7 @@ public class DataRowProvider {
 			dr.setFieldValue(DATEFIELD, new Date(cal.getTimeInMillis()));
 			
 			dr.setFieldValue(BOOLFIELD, true);
-			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
+			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(0));
 			
 			// dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
 			// There are types which can't be converted yet, see ResultSetJsonMapper Line 259
@@ -136,7 +136,7 @@ public class DataRowProvider {
 			// The date has to be rounded to the first millisecond of the day
 			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
 			Calendar cal = Calendar.getInstance();
-			cal.setTime(new Date(System.currentTimeMillis()));
+			cal.setTime(new Date(0));
 			cal.set(Calendar.HOUR_OF_DAY, 0);
 			cal.set(Calendar.MINUTE, 0);
 			cal.set(Calendar.SECOND, 0);
@@ -144,7 +144,7 @@ public class DataRowProvider {
 			dr.setFieldValue(DATEFIELD, new Date(cal.getTimeInMillis()));
 			
 			dr.setFieldValue(BOOLFIELD, false);
-			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(System.currentTimeMillis()));
+			dr.setFieldValue(TIMESTAMPFIELD, new Timestamp(0));
 			
 			// dr.setFieldValue(TIMEFIELD, new Time(System.currentTimeMillis()));
 			// There are types which can't be converted yet, see ResultSetJsonMapper Line 259
@@ -244,7 +244,7 @@ public class DataRowProvider {
 		DataRow dr = new DataRow();
 		try {
 			// Values Set
-			Long myLong = new Long("66547657568678");
+			long myLong = Long.valueOf("66547657568678");
 			dr.setFieldValue(LONGFIELD, myLong);
 			BigDecimal myDecimal = new BigDecimal("546445464354");
 			dr.setFieldValue(BIGDECIMALFIELD, myDecimal);

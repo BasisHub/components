@@ -1,22 +1,10 @@
 package com.basiscomponents.db;
 
-import com.basis.bbj.datatypes.TemplatedString;
-import com.basis.util.common.BasisNumber;
-import com.basis.util.common.TemplateInfo;
-import com.basiscomponents.db.constants.ConstantsResolver;
-import com.basiscomponents.db.exception.DataFieldNotFoundException;
-import com.basiscomponents.db.model.Attribute;
-import com.basiscomponents.db.util.DataFieldConverter;
-import com.basiscomponents.db.util.DataRowFromJsonProvider;
-import com.basiscomponents.db.util.DataRowMatcher;
-import com.basiscomponents.db.util.JRDataSourceAdapter;
-import com.basiscomponents.db.util.TemplateParser;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.google.gson.JsonElement;
-import net.sf.jasperreports.engine.JRDataSource;
+import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
+import static com.basiscomponents.db.util.SqlTypeNames.isNumericType;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -31,8 +19,27 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
-import static com.basiscomponents.db.util.SqlTypeNames.isNumericType;
+import javax.xml.bind.DatatypeConverter;
+
+import com.basis.bbj.datatypes.TemplatedString;
+import com.basis.util.common.BasisNumber;
+import com.basis.util.common.TemplateInfo;
+import com.basiscomponents.db.constants.ConstantsResolver;
+import com.basiscomponents.db.exception.DataFieldNotFoundException;
+import com.basiscomponents.db.model.Attribute;
+import com.basiscomponents.db.util.DataFieldConverter;
+import com.basiscomponents.db.util.DataRowFromJsonProvider;
+import com.basiscomponents.db.util.DataRowMatcher;
+import com.basiscomponents.db.util.JRDataSourceAdapter;
+import com.basiscomponents.db.util.MetaDataJsonMapper;
+import com.basiscomponents.db.util.TemplateParser;
+import com.basiscomponents.json.ComponentsCharacterEscapes;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.google.gson.JsonElement;
+
+import net.sf.jasperreports.engine.JRDataSource;
 
 /**
  * A DataRow is a container object with key/value pairs. Each key being a String
@@ -1328,7 +1335,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson()  {
-		return toJson(true);
+		return toJson(resultSet, true, null, true, false, true);
 	}
 
 	/**
@@ -1338,7 +1345,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson(String rowIndex) {
-		return toJson(true, rowIndex, true);
+		return toJson(resultSet, true, rowIndex, true, false, true);
 	}
 
 	/**
@@ -1348,21 +1355,62 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson(final Boolean f_meta)  {
-		return toJson(f_meta, null, true);
+		return toJson(resultSet, f_meta, null, true, false, true);
 	}
 
 	/**
 	 * Returns the DataRow and all of its fields as a JSON String.
 	 *
 	 * @return The DataRow as JSON String
-	 * @throws Exception
 	 */
-	public String toJson(final Boolean f_meta, final String rowIndex, final Boolean f_trimStrings)  {
-//		ResultSet rs = new ResultSet();
-//		rs.add(this);
-//		return rs.toJson(f_meta, rowIndex, f_trimStrings);
-		return dataFields.entrySet().stream().map((entry) -> entry.getValue().toJson(entry.getKey(),getFieldType(entry.getKey()),rowIndex,f_trimStrings)).collect(Collectors.joining(",","{","}"));
+	public String toJson(ResultSet rs, final Boolean writeMeta, final String rowIndex, final Boolean trimStrings,
+			Boolean writeDataRowAttributes, boolean isFirstRow) {
+		
+		JsonFactory jf = new JsonFactory();
+		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
+		StringWriter writer = new StringWriter();
+
+		try (JsonGenerator jsonGenerator = jf.createGenerator(writer)) {
+			jsonGenerator.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+
+			jsonGenerator.writeStartObject();
+
+			// DataFields are written
+			for (String fieldName : getFieldNames()) {
+				dataFields.get(fieldName).toJson(fieldName, getFieldType(fieldName), rowIndex,
+						trimStrings,
+						jsonGenerator);
+			}
+			
+			// DataRow attributes may be written
+			if (writeDataRowAttributes) {
+				MetaDataJsonMapper.writeDataRowAttributes((HashMap) attributes, jsonGenerator);
+			}
+
+			// MetaData may be written
+			if (writeMeta) {
+				if (isFirstRow) {
+					MetaDataJsonMapper.writeResultSetMetaData(rs, rowIndex, jsonGenerator, this);
+				} else {
+					MetaDataJsonMapper.writeDataRowMetaData(this, jsonGenerator);
+				}
+			}
+
+			jsonGenerator.writeEndObject();
+			
+		} catch (java.io.IOException e) {
+			e.printStackTrace();
+			return "";
+		}
+
+		isFirstRow = false;
+
+		return writer.toString();
 	}
+
+//	dataFields
+//	.entrySet().stream().map(entry -> entry.getValue().toJson(entry.getKey(),
+//			getFieldType(entry.getKey()), rowIndex, f_trimStrings, jsonGenerator));
 
 	/**
 	 * Returns the DataRow and all of its fields as a JSON String.
@@ -1371,7 +1419,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJsonObject(final Boolean f_meta, final String rowIndex, final Boolean f_trimStrings) throws Exception {
-		String js = toJson(f_meta, rowIndex, f_trimStrings);
+		String js = toJson(resultSet, f_meta, rowIndex, f_trimStrings, false, true);
 		if (js.startsWith("[")) {
 			js=js.substring(1);
 			js=js.substring(0,js.length()-1);
