@@ -15,10 +15,10 @@ import java.util.Properties;
 
 public class PropertyReader {
 
-	private HashMap<String, LinkedHashMap<BBjVector, BBjVector>> finalMap = new HashMap<>();
-	private HashMap<String, BBjVector> finalResultSet = new HashMap<>();
-	private String filename;
-	private String lang;
+	private final HashMap<String, LinkedHashMap<BBjVector, BBjVector>> finalMap = new HashMap<>();
+	private final HashMap<String, BBjVector> finalResultSet = new HashMap<>();
+	private final String filename;
+	private final String lang;
 
 	private static final String PROPERTIES = ".properties";
 
@@ -222,7 +222,7 @@ public class PropertyReader {
 	 * Reloads the property file and all its content to rebuild the map with all
 	 * the attributes
 	 */
-	public void reload() {
+	public final void reload() {
 		Properties properties = getProperties(filename + PROPERTIES);
 		Properties desiredproperties = null;
 		if (!lang.isEmpty()) {
@@ -273,16 +273,6 @@ public class PropertyReader {
 			return (BBjVector) rs.clone();
 		}
 		return null;
-	}
-
-	public static void main(String[] args) {
-		PropertyReader r = new PropertyReader(
-				"/GitHub/Concordia/webfleet/app/i18n/attributeListProperties",
-				"fr");
-		System.out.println(r.getAttributes("AUTREINT"));
-		System.out.println(r.getResultSet("AUTREINT"));
-		System.out.println(r.getAttribute("AUTREINT", "04"));
-		System.out.println(r.getAttribute("AUTREINT", 4));
 	}
 
 }
