@@ -114,7 +114,7 @@ public class BBMigPane implements BBjControl {
 	/**
 	 * @throws BBjException
 	 */
-	private void construct() throws BBjException {
+	private final void construct() throws BBjException {
 		// defaults
 		if (getLayoutConstraints() == null)
 			setLayoutConstraints(new LC());

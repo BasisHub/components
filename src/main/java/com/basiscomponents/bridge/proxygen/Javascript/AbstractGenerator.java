@@ -8,12 +8,12 @@
 
 package com.basiscomponents.bridge.proxygen.Javascript;
 
+import com.basiscomponents.bridge.proxygen.ParseEntity;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-
-import com.basiscomponents.bridge.proxygen.ParseEntity;
 
 /**
  * AbstractGenerator
@@ -39,7 +39,7 @@ public abstract class AbstractGenerator {
      * @param bbjSrc
      */
     public AbstractGenerator(String bbjSrc) {
-        this.setBBjSrc(bbjSrc);
+        this.bbjSrc = bbjSrc;
     }
     
     /** 

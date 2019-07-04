@@ -60,7 +60,7 @@ public class DataRow implements java.io.Serializable {
 	 * Instantiates a new DataRow object.
 	 */
 	public DataRow() {
-		this.resultSet = new com.basiscomponents.db.ResultSet();
+		this.resultSet = new ResultSet();
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class DataRow implements java.io.Serializable {
 	 *            The ResultSet whose column metadata will be used for this new
 	 *            DataRow
 	 */
-	public DataRow(com.basiscomponents.db.ResultSet resultSet) {
+	public DataRow(ResultSet resultSet) {
 		this.resultSet = resultSet;
 	}
 
@@ -94,7 +94,7 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @return dataRow The newly instantiated DataRow object.
 	 */
-	public static DataRow newInstance(com.basiscomponents.db.ResultSet resultSet) {
+	public static DataRow newInstance(ResultSet resultSet) {
 		return new DataRow(resultSet);
 	}
 
@@ -108,7 +108,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws ParseException
 	 */
 	public DataRow(Map<String, Object> map) throws ParseException {
-		this.resultSet = new com.basiscomponents.db.ResultSet();
+		this.resultSet = new ResultSet();
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
 			setFieldValue(entry.getKey(), entry.getValue());
 		}

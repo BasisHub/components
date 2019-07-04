@@ -13,7 +13,7 @@ public class MethodParameter {
 		return type;
 	}
 
-	public void setType(String type) {
+	public final void setType(String type) {
 		if (type.trim().equals("BBjVector"))
 			type = "ResultSet";
 		if (type.trim().equals("BBjString"))
@@ -30,7 +30,7 @@ public class MethodParameter {
 		return name;
 	}
 
-	public void setName(String name) {
+	public final void setName(String name) {
 		if (name.endsWith("!"))
 			name = name.substring(0, name.length() - 1);
 		if (name.endsWith("$"))
