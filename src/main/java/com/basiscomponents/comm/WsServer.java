@@ -34,7 +34,6 @@ import org.java_websocket.server.WebSocketServer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -50,18 +49,18 @@ import java.util.Iterator;
  */
 public class WsServer extends WebSocketServer {
 	
-	private HashMap<String,ArrayList<WebSocket>> ConList;
-	private CrossEventDispatcher EDispatcher;
+	private final HashMap<String,ArrayList<WebSocket>> conList;
+	private CrossEventDispatcher eventDispatcher;
 	public static Boolean DEBUG = false;  
 
-	public WsServer( int port ) throws UnknownHostException {
+	public WsServer( int port ) {
 		super( new InetSocketAddress( port ) );
-		ConList = new HashMap<>();
+		conList = new HashMap<>();
 	}
 
 	public WsServer( InetSocketAddress address ) {
 		super( address );
-		ConList = new HashMap<>();
+		conList = new HashMap<>();
 	}
 
 	@Override
@@ -76,20 +75,20 @@ public class WsServer extends WebSocketServer {
 	private void registerConnection(WebSocket conn) {
 		String tag = getTag(conn.getResourceDescriptor());
 		ArrayList<WebSocket> al;
-		al = ConList.get(tag);
+		al = conList.get(tag);
 		if (al==null) {
 			al = new ArrayList<>();
-			ConList.put(tag, al);
+			conList.put(tag, al);
 		}
 		al.add(conn);
 
 		if (DEBUG)
-			System.out.println("registered: "+ConList);
+			System.out.println("registered: "+ conList);
 
 	}
 	
 	public void setEventDispatcher(CrossEventDispatcher ed) {
-		this.EDispatcher = ed;
+		this.eventDispatcher = ed;
 	}
 
 	@Override
@@ -110,9 +109,9 @@ public class WsServer extends WebSocketServer {
 		if (DEBUG)
 			System.out.println( "received message for "+tag +": "+ message );
 		
-		if (this.EDispatcher != null) {
+		if (this.eventDispatcher != null) {
 			try {
-				this.EDispatcher.postPriorityCustomEvent(tag, message);
+				this.eventDispatcher.postPriorityCustomEvent(tag, message);
 				
 				if (DEBUG)
 					System.out.println( "successfully passed message to EventDispatcher" );
@@ -132,15 +131,14 @@ public class WsServer extends WebSocketServer {
 		if (DEBUG)
 			System.out.println( "received message for "+tag +": "+ message.toString() );
 		
-		if (this.EDispatcher != null) {
+		if (this.eventDispatcher != null) {
 			try {
-				this.EDispatcher.postPriorityCustomEvent(tag, message.toString());
+				this.eventDispatcher.postPriorityCustomEvent(tag, message.toString());
 				
 				if (DEBUG)
 					System.out.println( "successfully passed message to EventDispatcher" );
 				
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -154,7 +152,7 @@ public class WsServer extends WebSocketServer {
 
 		
 		ArrayList<WebSocket> al;
-		al = ConList.get(tag);
+		al = conList.get(tag);
 		if (al!=null) {
 			Iterator<WebSocket> it = al.iterator();
 			while (it.hasNext()) {
@@ -171,28 +169,6 @@ public class WsServer extends WebSocketServer {
 		
 	}
 
-
-//	public static void main( String[] args ) throws InterruptedException , IOException {
-//		WebSocketImpl.DEBUG = false;
-//		int port = 8887; // 843 flash policy port
-//		try {
-//			port = Integer.parseInt( args[ 0 ] );
-//		} catch ( Exception ex ) {
-//		}
-//		WsServer s = new WsServer( port );
-//		s.start();
-//		System.out.println( "ChatServer started on port: " + s.getPort() );
-//
-//		BufferedReader sysin = new BufferedReader( new InputStreamReader( System.in ) );
-//		while ( true ) {
-//			String in = sysin.readLine();
-//			s.broadcast( in );
-//			if( in.equals( "exit" ) ) {
-//				s.stop(1000);
-//				break;
-//			}
-//		}
-//	}
 	
 	@Override
 	public void onError( WebSocket conn, Exception ex ) {
@@ -222,8 +198,7 @@ public class WsServer extends WebSocketServer {
 	public static Object getInstance(BBjAPI api, int port ) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException, KeyManagementException  {
 		BBjNamespace ns = api.getGlobalNamespace();
 		try {
-			Object ed = ns.getValue("bdi98273bv98723bv9e72bv9e72bv9e7bv92e7b2e");
-			return ed;
+			return ns.getValue("bdi98273bv98723bv9e72bv9e72bv9e7bv92e7b2e");
 		} catch (BBjException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -237,29 +212,6 @@ public class WsServer extends WebSocketServer {
 		} catch (BBjException e) {
 			e.printStackTrace();
 		}
-		
-//		// load up the key store
-//		String STORETYPE = "JKS";
-//		String KEYSTORE = "d:/github/Java-WebSocket/src/main/example/keystore.jks";
-//		String STOREPASSWORD = "storepassword";
-//		String KEYPASSWORD = "keypassword";
-//
-//		KeyStore ks = KeyStore.getInstance( STORETYPE );
-//		File kf = new File( KEYSTORE );
-//		ks.load( new FileInputStream( kf ), STOREPASSWORD.toCharArray() );
-//
-//		KeyManagerFactory kmf = KeyManagerFactory.getInstance( "SunX509" );
-//		kmf.init( ks, KEYPASSWORD.toCharArray() );
-//		TrustManagerFactory tmf = TrustManagerFactory.getInstance( "SunX509" );
-//		tmf.init( ks );
-//
-//		SSLContext sslContext = null;
-//		sslContext = SSLContext.getInstance( "TLS" );
-//		sslContext.init( kmf.getKeyManagers(), tmf.getTrustManagers(), null );
-//
-//		ed.setWebSocketFactory( new DefaultSSLWebSocketServerFactory( sslContext ) );
-		
-		
 		ed.start();
 		return ed;
 	}

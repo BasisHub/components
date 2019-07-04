@@ -62,7 +62,7 @@ public class CrossEventDispatcher  {
 		return tag;
 	}
 	
-	public void postPriorityCustomEvent(String tag, String payload) throws Exception {
+	public void postPriorityCustomEvent(String tag, String payload)  {
 		if (DEBUG)
 			System.out.println("postPriorityCustomEvent");
 		

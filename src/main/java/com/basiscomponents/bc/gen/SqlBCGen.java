@@ -15,12 +15,12 @@ import java.sql.SQLException;
 
 public class SqlBCGen {
 
-	private static String Tpl;
+	private static String tpl;
 
 	public static void gen(String Driver, String Url, String User, String Password, String packageName,
 			String outputDir) throws FileNotFoundException {
 
-		if (Tpl == null) {
+		if (tpl == null) {
 			SqlBCGen.loadTpl(SqlBCGen.class.getResourceAsStream("/com/basiscomponents/bc/gen/TableBC.txt"));
 		}
 
@@ -59,7 +59,7 @@ public class SqlBCGen {
 			e.printStackTrace();
 		}
 
-		SqlBCGen.Tpl = out.toString();
+		SqlBCGen.tpl = out.toString();
 	}
 
 	private static void genClass(String tableName, String packageName, String outputDir) throws FileNotFoundException {
@@ -71,7 +71,7 @@ public class SqlBCGen {
 		}
 
 		System.out.println("generating: " + tableName);
-		String tmp = SqlBCGen.Tpl;
+		String tmp = SqlBCGen.tpl;
 		tmp = tmp.replace("[[class]]", className);
 		tmp = tmp.replace("[[package]]", packageName);
 		tmp = tmp.replace("[[table]]", tableName);
