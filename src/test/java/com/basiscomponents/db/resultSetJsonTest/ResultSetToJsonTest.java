@@ -106,9 +106,9 @@ public class ResultSetToJsonTest {
 		ResultSet rs0 = ResultSetProvider.createMultipleDataRowResultSet();
 		String s = rs0.toJson();
 
-		System.out.println(s);
-		System.out.println(
-				"[{\"LISTFIELD\":[\"hello\",\"world\"],\"INTFIELD\":1,\"DOUBLEFIELD\":1.0,\"DATEFIELD\":\"1970-01-01T00:00:00\",\"BOOLFIELD\":true,\"TIMESTAMPFIELD\":\"1970-01-01T01:00:00.0+01:00\",\"meta\":{\"LISTFIELD\":{\"ColumnType\":\"-973\"},\"INTFIELD\":{\"ColumnType\":\"4\",\"TYPE\":\"NUMBER\",\"TWO\":\"\",\"ISNUMERIC\":\"1\"},\"DOUBLEFIELD\":{\"ColumnType\":\"8\",\"TYPE\":\"NUMBER\",\"TWO\":\"\",\"ISNUMERIC\":\"1\"},\"DATEFIELD\":{\"ColumnType\":\"91\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"BOOLFIELD\":{\"ColumnType\":\"16\",\"TYPE\":\"TRUTH\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"TIMESTAMPFIELD\":{\"ColumnType\":\"93\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"}}},{\"LISTFIELD\":[\"hello\",\"world\"],\"INTFIELD\":1,\"DOUBLEFIELD\":1.0,\"DATEFIELD\":\"1970-01-01T00:00:00\",\"BOOLFIELD\":true,\"TIMESTAMPFIELD\":\"1970-01-01T01:00:00.0+01:00\",\"meta\":{\"LISTFIELD\":{\"ColumnType\":\"-973\"},\"INTFIELD\":{\"ColumnType\":\"4\",\"TWO\":\"\",\"TYPE\":\"NUMBER\",\"ISNUMERIC\":\"1\"},\"DOUBLEFIELD\":{\"ColumnType\":\"8\",\"TWO\":\"\",\"TYPE\":\"NUMBER\",\"ISNUMERIC\":\"1\"},\"DATEFIELD\":{\"ColumnType\":\"91\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"BOOLFIELD\":{\"ColumnType\":\"16\",\"TYPE\":\"TRUTH\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"TIMESTAMPFIELD\":{\"ColumnType\":\"93\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"}}},{\"LISTFIELD\":[\"hello\",\"world\"],\"INTFIELD\":1,\"DOUBLEFIELD\":1.0,\"DATEFIELD\":\"1970-01-01T00:00:00\",\"BOOLFIELD\":true,\"TIMESTAMPFIELD\":\"1970-01-01T01:00:00.0+01:00\",\"meta\":{\"LISTFIELD\":{\"ColumnType\":\"-973\"},\"INTFIELD\":{\"ColumnType\":\"4\",\"TWO\":\"\",\"TYPE\":\"NUMBER\",\"ISNUMERIC\":\"1\"},\"DOUBLEFIELD\":{\"ColumnType\":\"8\",\"TWO\":\"\",\"TYPE\":\"NUMBER\",\"ISNUMERIC\":\"1\"},\"DATEFIELD\":{\"ColumnType\":\"91\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"BOOLFIELD\":{\"ColumnType\":\"16\",\"TYPE\":\"TRUTH\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"TIMESTAMPFIELD\":{\"ColumnType\":\"93\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"}}}]");
+//		System.out.println(s);
+//		System.out.println(
+//				"[{\"LISTFIELD\":[\"hello\",\"world\"],\"INTFIELD\":1,\"DOUBLEFIELD\":1.0,\"DATEFIELD\":\"1970-01-01T00:00:00\",\"BOOLFIELD\":true,\"TIMESTAMPFIELD\":\"1970-01-01T01:00:00.0+01:00\",\"meta\":{\"LISTFIELD\":{\"ColumnType\":\"-973\"},\"INTFIELD\":{\"ColumnType\":\"4\",\"TYPE\":\"NUMBER\",\"TWO\":\"\",\"ISNUMERIC\":\"1\"},\"DOUBLEFIELD\":{\"ColumnType\":\"8\",\"TYPE\":\"NUMBER\",\"TWO\":\"\",\"ISNUMERIC\":\"1\"},\"DATEFIELD\":{\"ColumnType\":\"91\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"BOOLFIELD\":{\"ColumnType\":\"16\",\"TYPE\":\"TRUTH\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"TIMESTAMPFIELD\":{\"ColumnType\":\"93\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"}}},{\"LISTFIELD\":[\"hello\",\"world\"],\"INTFIELD\":1,\"DOUBLEFIELD\":1.0,\"DATEFIELD\":\"1970-01-01T00:00:00\",\"BOOLFIELD\":true,\"TIMESTAMPFIELD\":\"1970-01-01T01:00:00.0+01:00\",\"meta\":{\"LISTFIELD\":{\"ColumnType\":\"-973\"},\"INTFIELD\":{\"ColumnType\":\"4\",\"TWO\":\"\",\"TYPE\":\"NUMBER\",\"ISNUMERIC\":\"1\"},\"DOUBLEFIELD\":{\"ColumnType\":\"8\",\"TWO\":\"\",\"TYPE\":\"NUMBER\",\"ISNUMERIC\":\"1\"},\"DATEFIELD\":{\"ColumnType\":\"91\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"BOOLFIELD\":{\"ColumnType\":\"16\",\"TYPE\":\"TRUTH\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"TIMESTAMPFIELD\":{\"ColumnType\":\"93\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"}}},{\"LISTFIELD\":[\"hello\",\"world\"],\"INTFIELD\":1,\"DOUBLEFIELD\":1.0,\"DATEFIELD\":\"1970-01-01T00:00:00\",\"BOOLFIELD\":true,\"TIMESTAMPFIELD\":\"1970-01-01T01:00:00.0+01:00\",\"meta\":{\"LISTFIELD\":{\"ColumnType\":\"-973\"},\"INTFIELD\":{\"ColumnType\":\"4\",\"TWO\":\"\",\"TYPE\":\"NUMBER\",\"ISNUMERIC\":\"1\"},\"DOUBLEFIELD\":{\"ColumnType\":\"8\",\"TWO\":\"\",\"TYPE\":\"NUMBER\",\"ISNUMERIC\":\"1\"},\"DATEFIELD\":{\"ColumnType\":\"91\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"BOOLFIELD\":{\"ColumnType\":\"16\",\"TYPE\":\"TRUTH\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"},\"TIMESTAMPFIELD\":{\"ColumnType\":\"93\",\"TYPE\":\"MOMENT\",\"ISNUMERIC\":\"0\",\"THREE\":\"\"}}}]");
 
 		assertFalse(s.isEmpty());
 		assertEquals(
@@ -168,6 +168,9 @@ public class ResultSetToJsonTest {
 				s);
 	}
 
+	/*
+	 * This test should evolve with the implementation.
+	 */
 	@Test
 	public void mostBasicOne() throws Exception {
 		ResultSet rs = new ResultSet();
@@ -198,7 +201,21 @@ public class ResultSetToJsonTest {
 
 		rs.add(DataRowProvider.buildSampleDataRow(false));
 		rs.add(DataRowProvider.buildSampleDataRow(false));
-//		System.out.println(rs.toJson(true));
+		rs.toJson();
+	}
 
+	/*
+	 * The types byte, short and long couldn't be converted because of a bug in the
+	 * datafield which made wrong casts, leading to a ClassCastExcpetion. This was
+	 * corrected now, so this test shouldn't cause any trouble.
+	 */
+	@Test
+	public void numberTypesTest() throws Exception {
+		ResultSet rs = new ResultSet();
+		DataRow dr = DataRowProvider.buildNumberTypesDataRow2();
+		rs.add(dr);
+
+		assertEquals(rs.toJson(),
+				"[{\"BYTEFIELD\":5,\"SHORTFIELD\":42,\"LONGFIELD\":66547657568678,\"meta\":{\"BYTEFIELD\":{\"ColumnType\":\"-6\"},\"SHORTFIELD\":{\"ColumnType\":\"5\"},\"LONGFIELD\":{\"ColumnType\":\"-5\"}}}]");
 	}
 }

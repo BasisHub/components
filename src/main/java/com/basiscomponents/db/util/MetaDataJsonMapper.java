@@ -131,7 +131,6 @@ public class MetaDataJsonMapper {
 		
 	public static void writeDataRowMetaData(DataRow dr, JsonGenerator jsonGenerator) {
 		
-		System.out.println(true);
 		try {
 			BBArrayList<String> fields = dr.getFieldNames();
 			boolean mWritten = false;

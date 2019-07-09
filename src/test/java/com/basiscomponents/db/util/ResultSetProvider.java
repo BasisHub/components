@@ -54,7 +54,7 @@ public class ResultSetProvider {
 
 	public static ResultSet createToJsonOnlyResultSet() throws Exception {
 		ResultSet result = new ResultSet();
-		result.add(DataRowProvider.buildToJsonOnlyDataRow());
+		result.add(DataRowProvider.buildNumberTypesDataRow());
 		return result;
 	}
 

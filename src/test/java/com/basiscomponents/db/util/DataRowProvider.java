@@ -37,6 +37,8 @@ public class DataRowProvider {
 	public static final String BIGDECIMALFIELD = "BIGDECIMALFIELD";
 	public static final String SCD_BIGDECIMALFIELD = "SCD_BIGDECIMALFIELD";
 	public static final String FLOATFIELD = "FLOATFIELD";
+	public static final String SHORTFIELD = "SHORTFIELD";
+	public static final String BYTEFIELD = "BYTEFIELD";
 	
 	public static final String NESTEDDATAROW1 = "NESTEDDATAROW1";
 	public static final String NESTEDDATAROW2 = "NESTEDDATAROW2";
@@ -240,7 +242,7 @@ public class DataRowProvider {
 		return dr;
 	}
 
-	public static DataRow buildToJsonOnlyDataRow() {
+	public static DataRow buildNumberTypesDataRow() {
 		DataRow dr = new DataRow();
 		try {
 			// Values Set
@@ -257,6 +259,26 @@ public class DataRowProvider {
 			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", Integer.toString(java.sql.Types.DECIMAL));
 			dr.setFieldAttribute(SCD_BIGDECIMALFIELD, "ColumnType", Integer.toString(java.sql.Types.DECIMAL));
 			dr.setFieldAttribute(FLOATFIELD, "ColumnType", Integer.toString(java.sql.Types.REAL));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dr;
+	}
+
+	public static DataRow buildNumberTypesDataRow2() {
+		DataRow dr = new DataRow();
+		try {
+			// Values Set
+			byte myByte = Byte.valueOf("5");
+			dr.setFieldValue(BYTEFIELD, myByte);
+			short myShort = Short.valueOf("42");
+			dr.setFieldValue(SHORTFIELD, myShort);
+			long myLong = Long.valueOf("66547657568678");
+			dr.setFieldValue(LONGFIELD, myLong);
+			// Attributes Set
+			dr.setFieldAttribute(BYTEFIELD, "ColumnType", Integer.toString(java.sql.Types.TINYINT));
+			dr.setFieldAttribute(SHORTFIELD, "ColumnType", Integer.toString(java.sql.Types.SMALLINT));
+			dr.setFieldAttribute(LONGFIELD, "ColumnType", Integer.toString(java.sql.Types.BIGINT));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
