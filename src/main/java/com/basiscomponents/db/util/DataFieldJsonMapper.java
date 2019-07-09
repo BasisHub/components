@@ -71,7 +71,10 @@ public class DataFieldJsonMapper {
 					com.basiscomponents.db.DataRow drj = (com.basiscomponents.db.DataRow) value.getObject();
 					try {
 						jg.writeFieldName(fieldName);
-						String jstr = drj.toJson(new ResultSet(), true, null, f_trimStrings, false, false);
+				ResultSet rs = new ResultSet();
+				rs.add(drj);
+				rs.setIsCurrentConvertedDataRowFirst(true);
+				String jstr = drj.toJson(rs, true, null, f_trimStrings, false);
 						jg.writeRawValue(jstr);
 					} catch (Exception e) {
 						e.printStackTrace();

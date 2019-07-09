@@ -1335,7 +1335,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson()  {
-		return toJson(resultSet, true, null, true, false, true);
+		return toJson(resultSet, true, null, true, false);
 	}
 
 	/**
@@ -1345,7 +1345,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson(String rowIndex) {
-		return toJson(resultSet, true, rowIndex, true, false, true);
+		return toJson(resultSet, true, rowIndex, true, false);
 	}
 
 	/**
@@ -1355,7 +1355,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson(final Boolean f_meta)  {
-		return toJson(resultSet, f_meta, null, true, false, true);
+		return toJson(resultSet, f_meta, null, true, false);
 	}
 
 	/**
@@ -1364,7 +1364,7 @@ public class DataRow implements java.io.Serializable {
 	 * @return The DataRow as JSON String
 	 */
 	public String toJson(ResultSet rs, final Boolean writeMeta, final String rowIndex, final Boolean trimStrings,
-			Boolean writeDataRowAttributes, boolean isFirstRow) {
+			Boolean writeDataRowAttributes) {
 		
 		JsonFactory jf = new JsonFactory();
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
@@ -1382,6 +1382,11 @@ public class DataRow implements java.io.Serializable {
 						jsonGenerator);
 			}
 			
+			// IndexColumn may be written
+//			if (rowIndex != null) {
+//				jsonGenerator.writeStringField(rowIndex, this.getRowKey());
+//			}
+
 			// DataRow attributes may be written
 			if (writeDataRowAttributes) {
 				MetaDataJsonMapper.writeDataRowAttributes((HashMap) attributes, jsonGenerator);
@@ -1389,8 +1394,9 @@ public class DataRow implements java.io.Serializable {
 
 			// MetaData may be written
 			if (writeMeta) {
-				if (isFirstRow) {
+				if (rs.getIsCurrentConvertedDataRowFirst()) {
 					MetaDataJsonMapper.writeResultSetMetaData(rs, rowIndex, jsonGenerator, this);
+					rs.setIsCurrentConvertedDataRowFirst(false);
 				} else {
 					MetaDataJsonMapper.writeDataRowMetaData(this, jsonGenerator);
 				}
@@ -1402,8 +1408,6 @@ public class DataRow implements java.io.Serializable {
 			e.printStackTrace();
 			return "";
 		}
-
-		isFirstRow = false;
 
 		return writer.toString();
 	}
@@ -1419,7 +1423,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJsonObject(final Boolean f_meta, final String rowIndex, final Boolean f_trimStrings) throws Exception {
-		String js = toJson(resultSet, f_meta, rowIndex, f_trimStrings, false, true);
+		String js = toJson(resultSet, f_meta, rowIndex, f_trimStrings, false);
 		if (js.startsWith("[")) {
 			js=js.substring(1);
 			js=js.substring(0,js.length()-1);

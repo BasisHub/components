@@ -66,6 +66,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private ArrayList<DataRow> DataRows = new ArrayList<>();
 	private ArrayList<String> FieldSelection;
 
+	private Boolean isCurrentConvertedDataRowFirst = false;
+
 	private ArrayList<String> KeyColumns = new ArrayList<>();
 	private String KeyTemplateString = "";
 	private Template KeyTemplate = null;
@@ -2058,13 +2060,15 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (addIndexColumn!=null)
 			createIndex();
 
-		// This bool is used to determine that the written DataRow is the first one, to
-		// add the MetaData of the ResultSet
-		boolean isFirstRow = true;
+		// The bool isCurrentConvertedDataRowFirst is used to determine that the written DataRow is the first one, to
+		// add the MetaData of the ResultSet. If no MetaData is written at all, the variable should not be changed.
+		if (meta) {
+			this.isCurrentConvertedDataRowFirst = true;
+		}
 
 		return this.getDataRows()
 				   .stream()
-				   .map(DataRow -> DataRow.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes, isFirstRow))
+				   .map(DataRow -> DataRow.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes))
 		   		   .collect(Collectors.joining(",", "[", "]"));
 	}
 	/**
@@ -2937,6 +2941,14 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			
 		}
 		//optimization potential: always search in the smaller ResultSet
+	}
+
+	public boolean getIsCurrentConvertedDataRowFirst() {
+		return this.isCurrentConvertedDataRowFirst;
+	}
+
+	public void setIsCurrentConvertedDataRowFirst(boolean b) {
+		this.isCurrentConvertedDataRowFirst = b;
 	}
 
 }
