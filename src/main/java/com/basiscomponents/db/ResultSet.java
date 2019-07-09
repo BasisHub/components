@@ -66,8 +66,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private ArrayList<DataRow> DataRows = new ArrayList<>();
 	private ArrayList<String> FieldSelection;
 
-	private Boolean isCurrentConvertedDataRowFirst = false;
-
 	private ArrayList<String> KeyColumns = new ArrayList<>();
 	private String KeyTemplateString = "";
 	private Template KeyTemplate = null;
@@ -2063,7 +2061,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		// The bool isCurrentConvertedDataRowFirst is used to determine that the written DataRow is the first one, to
 		// add the MetaData of the ResultSet. If no MetaData is written at all, the variable should not be changed.
 		if (meta) {
-			this.isCurrentConvertedDataRowFirst = true;
+			this.DataRows.get(0).setIsFirstRow(true);
 		}
 
 		return this.getDataRows()
@@ -2876,7 +2874,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			int i=0;
 			while (it.hasNext()) {
 				DataRow r = it.next();
-				String idx = r.getRowKey(); 
+				String idx = r.getRowKey();
 				if (idx.isEmpty()) {
 					//TODO: if the ResultSet has a primary index, like from JDBC, use these fields only!					
 					idx = java.util.UUID.nameUUIDFromBytes(r.toString().getBytes()).toString();
@@ -2942,13 +2940,4 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 		//optimization potential: always search in the smaller ResultSet
 	}
-
-	public boolean getIsCurrentConvertedDataRowFirst() {
-		return this.isCurrentConvertedDataRowFirst;
-	}
-
-	public void setIsCurrentConvertedDataRowFirst(boolean b) {
-		this.isCurrentConvertedDataRowFirst = b;
-	}
-
 }

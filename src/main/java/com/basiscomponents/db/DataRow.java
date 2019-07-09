@@ -63,6 +63,8 @@ public class DataRow implements java.io.Serializable {
 
 	private boolean templateChanged;
 
+	private boolean isFirstRow = false;
+
 	/**
 	 * Instantiates a new DataRow object.
 	 */
@@ -1383,9 +1385,9 @@ public class DataRow implements java.io.Serializable {
 			}
 			
 			// IndexColumn may be written
-//			if (rowIndex != null) {
-//				jsonGenerator.writeStringField(rowIndex, this.getRowKey());
-//			}
+			if (rowIndex != null) {
+				jsonGenerator.writeStringField(rowIndex, this.getRowKey());
+			}
 
 			// DataRow attributes may be written
 			if (writeDataRowAttributes) {
@@ -1394,9 +1396,9 @@ public class DataRow implements java.io.Serializable {
 
 			// MetaData may be written
 			if (writeMeta) {
-				if (rs.getIsCurrentConvertedDataRowFirst()) {
+				if (isFirstRow) {
 					MetaDataJsonMapper.writeResultSetMetaData(rs, rowIndex, jsonGenerator, this);
-					rs.setIsCurrentConvertedDataRowFirst(false);
+					isFirstRow = false;
 				} else {
 					MetaDataJsonMapper.writeDataRowMetaData(this, jsonGenerator);
 				}
@@ -1996,6 +1998,10 @@ public class DataRow implements java.io.Serializable {
 				}
 			});
 		}
+	}
+
+	public void setIsFirstRow(boolean b) {
+		this.isFirstRow = b;
 	}
 
 }

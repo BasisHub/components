@@ -269,6 +269,8 @@ public class DataRowProvider {
 		DataRow dr = new DataRow();
 		try {
 			// Values Set
+			int myInt = 5;
+			dr.setFieldValue(INTFIELD, myInt);
 			byte myByte = Byte.valueOf("5");
 			dr.setFieldValue(BYTEFIELD, myByte);
 			short myShort = Short.valueOf("42");

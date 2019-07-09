@@ -125,9 +125,8 @@ public class MetaDataJsonMapper {
 					jsonGenerator.writeEndObject();
 				}
 			}
-			jsonGenerator.writeEndObject();
-		}
-
+		jsonGenerator.writeEndObject();
+	}
 		
 	public static void writeDataRowMetaData(DataRow dr, JsonGenerator jsonGenerator) {
 		
@@ -152,8 +151,9 @@ public class MetaDataJsonMapper {
 					}
 				}
 			}
-			if (mWritten)
+			if (mWritten) {
 				jsonGenerator.writeEndObject();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
