@@ -1337,6 +1337,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson()  {
+		isFirstRow = true;
 		return toJson(resultSet, true, null, true, false);
 	}
 
@@ -1347,6 +1348,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson(String rowIndex) {
+		isFirstRow = true;
 		return toJson(resultSet, true, rowIndex, true, false);
 	}
 
@@ -1357,6 +1359,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String toJson(final Boolean f_meta)  {
+		isFirstRow = true;
 		return toJson(resultSet, f_meta, null, true, false);
 	}
 

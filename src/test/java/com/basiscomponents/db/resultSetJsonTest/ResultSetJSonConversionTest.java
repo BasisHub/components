@@ -9,13 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.basiscomponents.db.BBArrayList;
-import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.util.DataRowProvider;
 import com.basiscomponents.db.util.ResultSetProvider;
 
 public class ResultSetJSonConversionTest {
+
+	String s;
 
     /**
      * This method takes two DataRows and compares their values with the getFieldAsString method from DataRow to evaluate the process of toJson/fromJson
@@ -111,7 +112,7 @@ public class ResultSetJSonConversionTest {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
 		String rk = dr0.getRowKey();
-		String s = rs0.toJson(false, "Index");
+		s = rs0.toJson(false, "Index");
 
 		assertFalse(s.isEmpty());
 
@@ -136,7 +137,7 @@ public class ResultSetJSonConversionTest {
 		// The attributes are converted toJson
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
-		String s = rs0.toJson(false, null, false, true);
+		s = rs0.toJson(false, null, false, true);
 
 		assertFalse(s.isEmpty());
 
@@ -173,7 +174,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonFieldAsStringNullTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createDefaultResultSet(true);
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -198,7 +199,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonStringTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createStringOnlyResultSet();
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -242,7 +243,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonAttributesTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -267,7 +268,7 @@ public class ResultSetJSonConversionTest {
         DataRow dr0 = rs0.get(0);
         DataRow dr1 = rs0.get(1);
         DataRow dr2 = rs0.get(2);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -294,7 +295,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonFieldAsStringTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
         DataRow dr0 = rs0.get(0);
-		String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -318,7 +319,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonFieldAsStringTestMinMax() throws Exception {
         ResultSet rs0 = ResultSetProvider.createDefaultResultSetMinMax();
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -344,7 +345,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonFieldAsNumberTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -367,11 +368,10 @@ public class ResultSetJSonConversionTest {
     public void toJSonFieldValueTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
-        System.out.println(s);
         ResultSet rs1 = ResultSet.fromJson(s);
         DataRow newDr0 = rs1.get(0);
 
@@ -398,7 +398,7 @@ public class ResultSetJSonConversionTest {
         DataRow dr0 = rs0.get(0);
         DataRow dr1 = rs0.get(1);
         DataRow dr2 = rs0.get(2);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -439,7 +439,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonNestedDataRowWithDataRowsTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createNestedDataRowsResultSet();
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
         try {
@@ -453,9 +453,6 @@ public class ResultSetJSonConversionTest {
             e.printStackTrace();
             throw e;
         }
-
-
-
     }
 
     /**
@@ -468,7 +465,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonNestedDataRowWithResultSetsTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createNestedResultSetsResultSet();
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 
@@ -484,17 +481,27 @@ public class ResultSetJSonConversionTest {
                     ((ResultSet) newDr0.getFieldValue(fieldNames.get(i))).get(0), s, false);
         }
     }
-    @Test
-    public void mostbasicone() throws Exception {
-    	ResultSet rs = new ResultSet();
-		DataRow dr = new DataRow();
-	    DataField df = new DataField("Hallo");
-	    dr.addDataField("Welt", df);
-	    rs.add(dr);
 
-//	    assertEquals("[{Welt:Hallo}]",rs.toJson());
-//	    assertEquals("{Welt:Hallo}",dr.toJson());
-//	    assertEquals("Welt:Hallo",df.toJson("Welt", java.sql.Types.VARCHAR,null, true ));
+	/**
+	 * In this test, the ability of the toJson and fromJson functionality to handle
+	 * the basic number types BYTE, SHORT, INTEGER, LONG is tested.
+	 * 
+	 * @throws Exception
+	 */
+//    @Test
+	public void toJsonNumberTypesTest() throws Exception {
+    	ResultSet rs = ResultSetProvider.createNumberTypesResultSet2();
+    	DataRow dr = rs.get(0);
+		s = rs.toJson();
+    	
+		assertFalse(s.isEmpty());
+
+		ResultSet rs1 = ResultSet.fromJson(s);
+		DataRow newDr = rs1.get(0);
+
+		this.equalityAsNumberDataRowTest(dr, newDr, s);
+		this.equalityAsStringDataRowTest(dr, newDr, s);
+		this.equalityAsValueDataRowTest(dr, newDr, s, false);
     }
 
 }

@@ -52,9 +52,15 @@ public class ResultSetProvider {
 		return result;
 	}
 
-	public static ResultSet createToJsonOnlyResultSet() throws Exception {
+	public static ResultSet createNumberTypesResultSet() throws Exception {
 		ResultSet result = new ResultSet();
 		result.add(DataRowProvider.buildNumberTypesDataRow());
+		return result;
+	}
+
+	public static ResultSet createNumberTypesResultSet2() {
+		ResultSet result = new ResultSet();
+		result.add(DataRowProvider.buildNumberTypesDataRow2());
 		return result;
 	}
 

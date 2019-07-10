@@ -19,7 +19,7 @@ public class ResultSetToJsonTest {
 	 */
 	@Test
 	public void toJSonToJsonOnlyResultSetTest() throws Exception {
-		ResultSet rs0 = ResultSetProvider.createToJsonOnlyResultSet();
+		ResultSet rs0 = ResultSetProvider.createNumberTypesResultSet();
 		String s = rs0.toJson();
 
 		assertFalse(s.isEmpty());
@@ -219,7 +219,7 @@ public class ResultSetToJsonTest {
 		DataRow dr = DataRowProvider.buildNumberTypesDataRow2();
 		rs.add(dr);
 
-//		assertEquals(rs.toJson(),
-//				"[{\"BYTEFIELD\":5,\"SHORTFIELD\":42,\"LONGFIELD\":66547657568678,\"meta\":{\"BYTEFIELD\":{\"ColumnType\":\"-6\"},\"SHORTFIELD\":{\"ColumnType\":\"5\"},\"LONGFIELD\":{\"ColumnType\":\"-5\"}}}]");
+		assertEquals(rs.toJson(),
+				"[{\"INTFIELD\":5,\"BYTEFIELD\":5,\"SHORTFIELD\":42,\"LONGFIELD\":66547657568678,\"meta\":{\"INTFIELD\":{\"ColumnType\":\"4\"},\"BYTEFIELD\":{\"ColumnType\":\"-6\"},\"SHORTFIELD\":{\"ColumnType\":\"5\"},\"LONGFIELD\":{\"ColumnType\":\"-5\"}}}]");
 	}
 }
