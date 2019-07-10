@@ -129,7 +129,7 @@ public class DataFieldJsonMapper {
 
 				case java.sql.Types.DECIMAL:
 					jg.writeNumberField(fieldName, value.getBigDecimal());
-					break;
+			break;
 
 				case java.sql.Types.DOUBLE:
 				case java.sql.Types.FLOAT:

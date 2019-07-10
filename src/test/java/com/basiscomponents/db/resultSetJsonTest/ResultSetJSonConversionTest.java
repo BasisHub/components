@@ -112,7 +112,7 @@ public class ResultSetJSonConversionTest {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
 		DataRow dr0 = rs0.get(0);
 		String rk = dr0.getRowKey();
-		s = rs0.toJson(false, "Index");
+		s = rs0.toJson(true, "Index");
 
 		assertFalse(s.isEmpty());
 
@@ -123,6 +123,7 @@ public class ResultSetJSonConversionTest {
 
 		assertTrue(newDr0.contains("Index"));
 		assertEquals(rk, newDr0.getFieldValue("Index"));
+		assertEquals("12", newDr0.getFieldAttribute("Index", "ColumnType"));
 	}
 
 	/**

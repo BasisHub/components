@@ -19,49 +19,6 @@ public class MetaDataJsonMapper {
 	private MetaDataJsonMapper() {
 	}
 
-//	public static String toJson(ResultSet rs, boolean meta, String addIndexColumn, boolean f_trimStrings,
-//			boolean writeDataRowAttributes) throws IOException {
-//
-//		JsonFactory jf = new JsonFactory();
-//		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
-//		StringWriter writer = new StringWriter();
-//		try (JsonGenerator jsonGenerator = jf.createGenerator(writer)) {
-//			jsonGenerator.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
-//			// g.useDefaultPrettyPrinter();
-//
-//			jsonGenerator.writeStartArray();
-//
-//			boolean metaDone = !meta;
-//
-//			for (DataRow dr : rs.getDataRows()) {
-//				jsonGenerator.writeStartObject();
-//
-//				if (addIndexColumn != null) {
-//					jsonGenerator.writeStringField(addIndexColumn, dr.getRowKey());
-//				}
-//
-//				for (String fn : dr.getFieldNames()) {
-//					dataFieldToJson(dr.getField(fn, true), fn, dr.getFieldType(fn), meta, addIndexColumn, f_trimStrings,
-//							jsonGenerator);
-//
-//				} // while on fields
-//				if (writeDataRowAttributes) {
-//					writeDataRowAttributes(dr.getAttributes(), jsonGenerator);
-//				}
-//				if (meta) {
-//					metaDone = writeMeta(rs, addIndexColumn, jsonGenerator, metaDone, dr);
-//				}
-//
-//				jsonGenerator.writeEndObject();
-//
-//			} // while on rows
-//
-//			jsonGenerator.writeEndArray();
-//		}
-//
-//		return writer.toString();
-//	}
-
 	public static void writeDataRowAttributes(HashMap<String, String> attributes, JsonGenerator jsonGenerator)
 			throws IOException {
 		jsonGenerator.writeFieldName(ATTRIBUTES);

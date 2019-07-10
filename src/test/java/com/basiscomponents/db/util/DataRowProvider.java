@@ -280,6 +280,7 @@ public class DataRowProvider {
 			// Attributes Set
 			dr.setFieldAttribute(BYTEFIELD, "ColumnType", Integer.toString(java.sql.Types.TINYINT));
 			dr.setFieldAttribute(SHORTFIELD, "ColumnType", Integer.toString(java.sql.Types.SMALLINT));
+			dr.setFieldAttribute(INTFIELD, "ColumnType", Integer.toString(java.sql.Types.INTEGER));
 			dr.setFieldAttribute(LONGFIELD, "ColumnType", Integer.toString(java.sql.Types.BIGINT));
 		} catch (Exception e) {
 			e.printStackTrace();
