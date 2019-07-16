@@ -1,13 +1,13 @@
 package com.basiscomponents.db.resultSetJsonTest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.text.ParseException;
-
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.util.DataFieldJsonMapper;
+
+import java.text.ParseException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DataRowAndFieldToJsonTest {
 
