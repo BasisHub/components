@@ -487,6 +487,8 @@ public class ResultSetJSonConversionTest {
 	 * In this test, the ability of the toJson and fromJson functionality to handle
 	 * the basic number types BYTE, SHORT, INTEGER, LONG is tested.
 	 * 
+	 * The fromJson method can't handle longs..
+	 * 
 	 * @throws Exception
 	 */
 //    @Test

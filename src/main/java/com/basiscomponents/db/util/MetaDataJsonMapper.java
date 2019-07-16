@@ -64,7 +64,7 @@ public class MetaDataJsonMapper {
 						jsonGenerator.writeStringField(entry.getKey(), value);
 					}
 
-					if (atr != null && !atr.isEmpty()) {
+				if (atr != null && !atr.isEmpty()) {
 						for (Entry<String, Attribute> entry : atr.entrySet()) {
 							String k = entry.getKey();
 							Attribute v = entry.getValue();

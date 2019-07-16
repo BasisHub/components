@@ -111,7 +111,7 @@ public class DataFieldJsonMapper {
 						if (f_trimStrings)
 							s = s.trim();
 						jg.writeStringField(fieldName, s);
-					}
+			}
 					break;
 				case java.sql.Types.BIGINT:
 					jg.writeNumberField(fieldName, value.getLong().longValue());

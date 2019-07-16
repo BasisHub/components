@@ -1417,10 +1417,6 @@ public class DataRow implements java.io.Serializable {
 		return writer.toString();
 	}
 
-//	dataFields
-//	.entrySet().stream().map(entry -> entry.getValue().toJson(entry.getKey(),
-//			getFieldType(entry.getKey()), rowIndex, f_trimStrings, jsonGenerator));
-
 	/**
 	 * Returns the DataRow and all of its fields as a JSON String.
 	 *

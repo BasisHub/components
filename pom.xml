@@ -184,6 +184,22 @@
 			<scope>system</scope>
 			<systemPath>${jar-directory}/poi-ooxml-4.1.0.jar</systemPath>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.basis.lib</groupId>
+			<artifactId>poi-ooxml-schemas.jar</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/poi-ooxml-schemas-4.1.0.jar</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.basis.lib</groupId>
+			<artifactId>poi-scratchpad.jar</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${jar-directory}/poi-scratchpad-4.1.0.jar</systemPath>
+		</dependency>
 
 		<dependency>
 			<groupId>com.basis</groupId>
