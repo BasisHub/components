@@ -147,10 +147,10 @@
 
 		<dependency>
 			<groupId>org.apache</groupId>
-			<artifactId>commons-lang3-3.8.1.jar</artifactId>
+			<artifactId>commons-lang3-3.9.jar</artifactId>
 			<version>3.8.1</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/commons-lang3-3.8.1.jar</systemPath>
+			<systemPath>${jar-directory}/commons-lang3-3.9.jar</systemPath>
 		</dependency>
 
 		<dependency>
