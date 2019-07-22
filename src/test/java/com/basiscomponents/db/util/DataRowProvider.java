@@ -1,10 +1,14 @@
 package com.basiscomponents.db.util;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
+import com.basiscomponents.constants.SpecialCharacterConstants;
 import com.basiscomponents.db.DataRow;
 
 public class DataRowProvider {
@@ -15,6 +19,10 @@ public class DataRowProvider {
 	public static final String FTH_STRINGFIELD = "FTH_STRINGFIELD";
 	public static final String STH_STRINGFIELD = "STH_STRINGFIELD";
 	public static final String SVT_STRINGFIELD = "SVT_STRINGFIELD";
+	public static final String EGT_STRINGFIELD = "EGT_STRINGFIELD";
+	public static final String NTH_STRINGFIELD = "NTH_STRINGFIELD";
+	public static final String TTH_STRINGFIELD = "TTH_STRINGFIELD";
+	public static final String ELT_STRINGFIELD = "ELT_STRINGFIELD";
 	public static final String INTFIELD = "INTFIELD";
 	public static final String SCD_INTFIELD = "SCD_INTFIELD";
 	public static final String DOUBLEFIELD = "DOUBLEFIELD";
@@ -23,6 +31,12 @@ public class DataRowProvider {
 	public static final String DATEFIELD = "DATEFIELD";
 	public static final String TIMESTAMPFIELD = "TIMESTAMPFIELD";
 	public static final String TIMEFIELD = "TIMEFIELD";
+	public static final String LISTFIELD = "LISTFIELD";
+	public static final String LONGFIELD = "LONGFIELD";
+	public static final String SCD_LONGFIELD = "SCD_LONGFIELD";
+	public static final String BIGDECIMALFIELD = "BIGDECIMALFIELD";
+	public static final String SCD_BIGDECIMALFIELD = "SCD_BIGDECIMALFIELD";
+	public static final String FLOATFIELD = "FLOATFIELD";
 	
 	public static final String NESTEDDATAROW1 = "NESTEDDATAROW1";
 	public static final String NESTEDDATAROW2 = "NESTEDDATAROW2";
@@ -30,18 +44,23 @@ public class DataRowProvider {
 	public static final String NESTEDRESULTSET2 = "NESTEDRESULTSET2";
 	public static final String STRINGFIELD_VALUE ="1337";
 
-//	public static final String BYTEFIELD = "BYTEFIELD";
-//	public static final String SCD_BYTEFIELD = "SCD_BYTEFIELD";
-//	public static final String SHORTFIELD = "SHORTFIELD";
-//	public static final String SCD_SHORTFIELD = "SCD_SHORTFIELD";
-//	public static final String LONGFIELD = "LONGFIELD";
-//	public static final String SCD_LONGFIELD = "SCD_LONGFIELD";
-//	public static final String BIGDECIMALFIELD = "BIGDECIMALFIELD";
-//	public static final String SCD_BIGDECIMALFIELD = "SCD_BIGDECIMALFIELD";
-
 	public static DataRow buildSampleDataRow(boolean nullAllFields) {
 		DataRow dr = new DataRow();
 		try {
+
+			// Adding attributes to the DataRow
+			dr.setAttribute("hello", "world");
+			dr.setAttribute("bye", "world");
+
+			// Adding a rowkey
+			dr.addToRowKey("1fdssdf79g79df");
+
+			// Adding Data into the DataRow
+			List l = new ArrayList<String>();
+			l.add("hello");
+			l.add("world");
+			dr.setFieldValue(LISTFIELD, l);
+
 			int myInt = 1;
 			dr.setFieldValue(INTFIELD, myInt);
 			Double myDouble = 1.0;
@@ -71,11 +90,6 @@ public class DataRowProvider {
 				dr.setFieldValue(DATEFIELD, null);
 				dr.setFieldValue(TIMEFIELD, null);
 				dr.setFieldValue(TIMESTAMPFIELD, null);
-				
-//				dr.setFieldValue(BYTEFIELD, null);
-//				dr.setFieldValue(SHORTFIELD, null);
-//				dr.setFieldValue(LONGFIELD, null);
-//				dr.setFieldValue(BIGDECIMALFIELD, null);
 			}
 
 			dr.setFieldAttribute(INTFIELD, "ISNUMERIC", "1");
@@ -101,12 +115,7 @@ public class DataRowProvider {
 			dr.setFieldAttribute(BOOLFIELD, "ColumnType", "16");
 			dr.setFieldAttribute(DATEFIELD, "ColumnType", "91");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "ColumnType", "93");
-			
-//			dr.setFieldAttribute(BYTEFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(SHORTFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(LONGFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(TIMEFIELD, "ColumnType", "92");
+			dr.setFieldAttribute(LISTFIELD, "ColumnType", "-973");
 			
 		} catch (ParseException e) {
 
@@ -123,15 +132,6 @@ public class DataRowProvider {
 			dr.setFieldValue(SCD_INTFIELD, Integer.MIN_VALUE);
 			dr.setFieldValue(DOUBLEFIELD, Double.MAX_VALUE);
 			dr.setFieldValue(SCD_DOUBLEFIELD, Double.MIN_VALUE);
-			
-//			dr.setFieldValue(BYTEFIELD, Byte.MAX_VALUE);
-//			dr.setFieldValue(SCD_BYTEFIELD, Byte.MIN_VALUE);
-//			dr.setFieldValue(SHORTFIELD, Short.MAX_VALUE);
-//			dr.setFieldValue(SCD_SHORTFIELD, Short.MIN_VALUE);
-//			dr.setFieldValue(LONGFIELD, Integer.MAX_VALUE);
-//			dr.setFieldValue(SCD_LONGFIELD, Integer.MIN_VALUE);
-//			dr.setFieldValue(BIGDECIMALFIELD, new BigDecimal("1238126387123"));
-//			dr.setFieldValue(SCD_BIGDECIMALFIELD, new BigDecimal("-1238126387123"));
 			
 			// The date has to be rounded to the first millisecond of the day
 			// Reason: In conversion the hours, minutes, seconds and milliseconds are dropped
@@ -174,12 +174,6 @@ public class DataRowProvider {
 			dr.setFieldAttribute(BOOLFIELD, "ColumnType", "16");
 			dr.setFieldAttribute(DATEFIELD, "ColumnType", "91");
 			dr.setFieldAttribute(TIMESTAMPFIELD, "ColumnType", "93");
-			
-//			dr.setFieldAttribute(BYTEFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(SHORTFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(LONGFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", "4");
-//			dr.setFieldAttribute(TIMEFIELD, "ColumnType", "92");
 		} catch (ParseException e) {
 
 			e.printStackTrace();
@@ -197,6 +191,10 @@ public class DataRowProvider {
 			dr.setFieldValue(FTH_STRINGFIELD, null);
 			dr.setFieldValue(STH_STRINGFIELD, "-1");
 			dr.setFieldValue(SVT_STRINGFIELD, "1.0");
+			dr.setFieldValue(EGT_STRINGFIELD, SpecialCharacterConstants.GERMAN_SPECIAL_CHARACTERS);
+			dr.setFieldValue(NTH_STRINGFIELD, SpecialCharacterConstants.FRENCH_SPECIAL_CHARACTERS);
+			dr.setFieldValue(TTH_STRINGFIELD, SpecialCharacterConstants.STANDARD_SPECIAL_CHARACTERS);
+			dr.setFieldValue(ELT_STRINGFIELD, SpecialCharacterConstants.MATHEMATICAL_SPECIAL_CHARACTERS);
 		} catch (ParseException e) {
 
 			e.printStackTrace();
@@ -215,7 +213,6 @@ public class DataRowProvider {
 			e.printStackTrace();
 		}
 		return dr;
-
 	}
 
 	public static DataRow buildNestedDataRowWithResultSets() {
@@ -229,7 +226,6 @@ public class DataRowProvider {
 			e.printStackTrace();
 		}
 		return dr;
-
 	}
 
 	public static DataRow buildNestedDataRowWithMultipleDataRowsResultSet() {
@@ -242,7 +238,29 @@ public class DataRowProvider {
 			e.printStackTrace();
 		}
 		return dr;
+	}
 
+	public static DataRow buildToJsonOnlyDataRow() {
+		DataRow dr = new DataRow();
+		try {
+			// Values Set
+			Long myLong = new Long("66547657568678");
+			dr.setFieldValue(LONGFIELD, myLong);
+			BigDecimal myDecimal = new BigDecimal("546445464354");
+			dr.setFieldValue(BIGDECIMALFIELD, myDecimal);
+			BigDecimal myDeci = new BigDecimal("2345465476565");
+			dr.setFieldValue(SCD_BIGDECIMALFIELD, myDeci);
+			Float myFloat = new Float("4.2");
+			dr.setFieldValue(FLOATFIELD, myFloat);
+			// Attributes Set
+			dr.setFieldAttribute(LONGFIELD, "ColumnType", Integer.toString(java.sql.Types.BIGINT));
+			dr.setFieldAttribute(BIGDECIMALFIELD, "ColumnType", Integer.toString(java.sql.Types.DECIMAL));
+			dr.setFieldAttribute(SCD_BIGDECIMALFIELD, "ColumnType", Integer.toString(java.sql.Types.DECIMAL));
+			dr.setFieldAttribute(FLOATFIELD, "ColumnType", Integer.toString(java.sql.Types.REAL));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dr;
 	}
 
 }

@@ -12,7 +12,7 @@ public class ResultSetProvider {
     ResultSet result = new ResultSet();
     result.add(DataRowProvider.buildSampleDataRow(nullAllFields));
     return result;
-  }
+	}
   
   public static ResultSet createMultipleDataRowResultSet() throws Exception {
 	    ResultSet result = new ResultSet();
@@ -49,6 +49,12 @@ public class ResultSetProvider {
 	public static ResultSet createNestedResultSetsWithMultipleDataRowsResultSet() throws Exception {
 		ResultSet result = new ResultSet();
 		result.add(DataRowProvider.buildNestedDataRowWithMultipleDataRowsResultSet());
+		return result;
+	}
+
+	public static ResultSet createToJsonOnlyResultSet() throws Exception {
+		ResultSet result = new ResultSet();
+		result.add(DataRowProvider.buildToJsonOnlyDataRow());
 		return result;
 	}
 

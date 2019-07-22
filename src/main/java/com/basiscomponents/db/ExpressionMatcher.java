@@ -207,7 +207,7 @@ public class ExpressionMatcher {
 	}
 
 
-	public static DataRow getPreparedWhereClauseValues(String condition, int fieldType) throws Exception {
+	public static DataRow getPreparedWhereClauseValues(String condition, int fieldType) throws ParseException {
 		DataRow dr = new DataRow();
 		String cond = condition.replace("<>", "!");
 		String[] conditions = cond.split("(?<!\\\\)[\\|&]");

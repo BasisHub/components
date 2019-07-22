@@ -1,5 +1,32 @@
 package com.basiscomponents.db;
 
+import static com.basiscomponents.util.StringHelper.invert;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
@@ -12,19 +39,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+
 import net.sf.jasperreports.engine.JRDataSource;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Date;
-import java.sql.*;
-import java.text.ParseException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static com.basiscomponents.util.StringHelper.invert;
 
 /**
  * The ResultSet class is a container class for DataRow objects.
@@ -123,7 +139,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		if (!"ASC".equalsIgnoreCase(direction) && !"DESC".equalsIgnoreCase(direction)) {
 			direction = "ASC";
 		}
-		java.util.Comparator<DataRow> comparator = new DataRowComparator(fieldName);
+		java.util.Comparator<DataRow> comparator = new DataFieldComparator(fieldName);
 		if ("DESC".equalsIgnoreCase(direction)) {
 			comparator = comparator.reversed();
 		}	
@@ -244,7 +260,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				if (metadata.contains(filterFieldName)) {
 					DataField filterField = simpleFilterCondition.getField(filterFieldName);
 					if (filterField.getValue() != null && filterField.getString().startsWith("cond:")) {
-						comparatorMap.put(filterFieldName, new DataRowComparator(filterFieldName));
+						comparatorMap.put(filterFieldName, new DataFieldComparator(filterFieldName));
 						matcherMap.put(filterFieldName, new ExpressionMatcher(filterField.getString().substring(5),
 								metadata.getFieldType(filterFieldName), filterFieldName));
 					}

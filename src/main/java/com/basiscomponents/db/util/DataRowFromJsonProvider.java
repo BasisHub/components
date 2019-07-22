@@ -15,7 +15,11 @@ import com.google.gson.JsonElement;
 import java.io.IOException;
 import java.sql.Types;
 import java.text.ParseException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DataRowFromJsonProvider {
 
@@ -32,8 +36,9 @@ public class DataRowFromJsonProvider {
 
 		input = convertCharsBelowChr32(input);
 		input = removeLeadingDataRow(input);
-		JsonNode root = buildJsonRoot(input);
 		input = wrapInJsonArray(input);
+		JsonNode root = buildJsonRoot(input);
+//		input = wrapInJsonArray(input);
 
 		JsonFactory f = new JsonFactory();
 		try (JsonParser jsonParser = f.createParser(input)) {
@@ -91,7 +96,8 @@ public class DataRowFromJsonProvider {
 			switch (fieldType) {
 			case -973:
 				// nested ArrayList or BBjVector
-				JsonNode x=root.get(0).get(fieldName);
+				JsonNode x = root.get(0).get(fieldName);
+//				JsonNode x = root.get(fieldName);
 				ObjectMapper mapper = new ObjectMapper();
 				ObjectReader reader = mapper.readerFor(new TypeReference<List<Object>>() {});
 				List<String> list = reader.readValue(x);
@@ -274,7 +280,7 @@ public class DataRowFromJsonProvider {
 				case "ARRAY":
 					//a nested DataRow or ArrayList / BBjVector
 					String subtype=root2.get(fieldName).get(0).getNodeType().toString();
-					if (subtype == "OBJECT")
+					if ("OBJECT".equals(subtype))
 						attributes.addDataField(fieldName, -975, new DataField(null));
 					else
 						attributes.addDataField(fieldName, -973, new DataField(null));
@@ -336,10 +342,9 @@ public class DataRowFromJsonProvider {
 		return input;
 	}
 
-	private static JsonNode buildJsonRoot(String input) throws IOException {
-		String intmp = input;
-		JsonNode root = new ObjectMapper().readTree(intmp);
-		return root;
+	private static JsonNode buildJsonRoot(final String input) throws IOException {
+		return new ObjectMapper().readTree(input);
+
 	}
 
 	private static String removeLeadingDataRow(String input) {

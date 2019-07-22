@@ -1,11 +1,18 @@
-package com.basiscomponents.db;
+package com.basiscomponents.db.resultSetJsonTest;
 
 
-import com.basiscomponents.db.util.DataRowProvider;
-import com.basiscomponents.db.util.ResultSetProvider;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.basiscomponents.db.BBArrayList;
+import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.util.DataRowProvider;
+import com.basiscomponents.db.util.ResultSetProvider;
 
 public class ResultSetJSonConversionTest {
 
@@ -17,14 +24,14 @@ public class ResultSetJSonConversionTest {
      * @param json  The Json String converted from the oldDR
      */
     public void equalityAsStringDataRowTest(DataRow oldDR, DataRow newDR, String json) {
-        BBArrayList<String> fieldNamesOld = oldDR.getFieldNames();
+		BBArrayList<String> fieldNamesOld = oldDR.getFieldNames();
         BBArrayList<String> fieldNamesNew = newDR.getFieldNames();
         assertTrue(fieldNamesOld.size() == fieldNamesNew.size(), json);
         for (int i = 0; i < fieldNamesOld.size(); i++) {
             String fieldname = fieldNamesOld.get(i);
             assertEquals( oldDR.getFieldAsString(fieldname), newDR.getFieldAsString(fieldname), ()->json + "\n" + fieldname + " values differ with function getFieldAsString");
-        }
-    }
+		}
+	}
 
     /**
      * This method takes two DataRows and compares their values with the getFieldAsNumber method from DataRow to evaluate the process of toJson/fromJson
@@ -39,7 +46,7 @@ public class ResultSetJSonConversionTest {
         assertTrue(fieldNamesOld.size() == fieldNamesNew.size(), json);
         for (int i = 0; i < fieldNamesOld.size(); i++) {
             String fieldName= fieldNamesOld.get(i);
-            assertEquals(
+			assertEquals(
                     oldDR.getFieldAsNumber(fieldName),
                     newDR.getFieldAsNumber(fieldName),
                     () -> json + "\n" + fieldName + " values differ with function getFieldAsNumber");
@@ -93,11 +100,74 @@ public class ResultSetJSonConversionTest {
     }
 
     /**
-     * A default result set is created and all values are set to null
-     * The equality methods will check them to contain null before and after the conversion
-     *
-     * @throws Exception
-     */
+	 * A default result set is created and an index column is added with the
+	 * addIndexColumn feature of toJson.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void toJSonAddIndexColumnTest() throws Exception {
+		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
+		DataRow dr0 = rs0.get(0);
+		String rk = dr0.getRowKey();
+		String s = rs0.toJson(false, "Index");
+
+		assertFalse(s.isEmpty());
+
+		ResultSet newRs0 = ResultSet.fromJson(s);
+		DataRow newDr0 = newRs0.get(0);
+
+		// Checking the values of the converted ResultSet
+
+		assertTrue(newDr0.contains("Index"));
+		assertEquals(rk, newDr0.getFieldValue("Index"));
+	}
+
+	/**
+	 * A default result set is created and the feature from ResultSetMapper.toJson
+	 * is checked to work correctly.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void toJSonWriteDataRowAttributesTest() throws Exception {
+
+		// The attributes are converted toJson
+		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
+		DataRow dr0 = rs0.get(0);
+		String s = rs0.toJson(false, null, false, true);
+
+		assertFalse(s.isEmpty());
+
+		ResultSet newRs0 = ResultSet.fromJson(s);
+		DataRow newDr0 = newRs0.get(0);
+
+		// Checking the values of the converted ResultSet
+
+		assertEquals("world", newDr0.getAttribute("hello"));
+		assertEquals("world", newDr0.getAttribute("bye"));
+
+		// The attributes are not converted toJson
+		rs0 = ResultSetProvider.createDefaultResultSet(false);
+		dr0 = rs0.get(0);
+		s = rs0.toJson(false, null, false, false);
+
+		assertFalse(s.isEmpty());
+
+		newRs0 = ResultSet.fromJson(s);
+		newDr0 = newRs0.get(0);
+
+		// Checking the values of the converted ResultSet
+
+		assertTrue(newDr0.getAttributes().isEmpty());
+	}
+
+	/**
+	 * A default result set is created and all values are set to null The equality
+	 * methods will check them to contain null before and after the conversion
+	 *
+	 * @throws Exception
+	 */
     @Test
     public void toJSonFieldAsStringNullTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createDefaultResultSet(true);
@@ -223,7 +293,7 @@ public class ResultSetJSonConversionTest {
     public void toJSonFieldAsStringTest() throws Exception {
         ResultSet rs0 = ResultSetProvider.createDefaultResultSet(false);
         DataRow dr0 = rs0.get(0);
-        String s = rs0.toJson();
+		String s = rs0.toJson();
 
         assertFalse(s.isEmpty());
 

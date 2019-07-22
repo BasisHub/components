@@ -1,13 +1,31 @@
 package com.basiscomponents.db.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SqlTypeNames {
 	private SqlTypeNames() {
 	}
 	private static final Map<Integer, String> typeNameMap = new HashMap<>();
+	private static final List<Integer> numericTypeCodeList = new ArrayList<>();
+
 	static {
+		numericTypeCodeList.add(java.sql.Types.BIGINT);
+		numericTypeCodeList.add(java.sql.Types.TINYINT);
+		numericTypeCodeList.add(java.sql.Types.INTEGER);
+		numericTypeCodeList.add(java.sql.Types.SMALLINT);
+		numericTypeCodeList.add(java.sql.Types.NUMERIC);
+		numericTypeCodeList.add(java.sql.Types.DOUBLE);
+		numericTypeCodeList.add(java.sql.Types.FLOAT);
+		numericTypeCodeList.add(java.sql.Types.DECIMAL);
+		numericTypeCodeList.add(java.sql.Types.REAL);
+		numericTypeCodeList.add(java.sql.Types.BOOLEAN);
+		numericTypeCodeList.add(java.sql.Types.BIT);
+		numericTypeCodeList.add(java.sql.Types.DATE);
+		numericTypeCodeList.add(9); // Basis DATE
+
 		typeNameMap.put(java.sql.Types.ARRAY, "ARRAY");
 		typeNameMap.put(java.sql.Types.BIGINT, "BIGINT");
 		typeNameMap.put(java.sql.Types.BINARY, "BINARY");
@@ -51,7 +69,12 @@ public class SqlTypeNames {
 		typeNameMap.put(11, "BASIS TIMESTAMP");
 	}
 
+
 	public static String get(int sqlType) {
 		return typeNameMap.get(sqlType);
+	}
+
+	public static boolean isNumericType(int type){
+		return numericTypeCodeList.contains(type);
 	}
 }

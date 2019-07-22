@@ -1,13 +1,13 @@
 package com.basiscomponents.db;
 
 /**
- * This is not a DataRowComparator, it's a DataFieldComparator
+ * This is not a DataFieldComparator, it's a DataFieldComparator
  */
-public class DataRowComparator implements java.util.Comparator<DataRow> {
+public class DataFieldComparator implements java.util.Comparator<DataRow> {
 
 	private String fieldName;
 
-	public DataRowComparator(String fieldName) {
+	public DataFieldComparator(String fieldName) {
 		this.fieldName = fieldName;
 	}
 

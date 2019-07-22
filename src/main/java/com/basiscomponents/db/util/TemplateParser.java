@@ -19,7 +19,7 @@ public class TemplateParser {
 			String fieldName;
 			byte fieldType;
 			int fieldSize;
-			String dType = "";
+			String dType = ""; 
 
 			int value;
 			int sqlType;
