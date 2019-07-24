@@ -16,10 +16,6 @@ public class BasisTreeView {
 	private BasisTreeView() {
 	}
 
-	public static void main(String[] args) throws Exception {
-		ResultSet rs = getDataSystemAsResultSet("C:\\AMD", "exe");
-	}
-
 	public static ResultSet getDataSystemAsResultSet(String syspath, String filter) throws Exception {
 
 		if (filter == null) {
