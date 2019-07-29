@@ -693,7 +693,6 @@ public class ResultSetExporter {
 					cellIndex++;
 				}
 			}
-
 			wb.write(out);
 
 		}

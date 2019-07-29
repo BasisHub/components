@@ -2055,6 +2055,10 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 */
 	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes)  {
 
+		if (this.isEmpty()) {
+			return "[]";
+		}
+
 		if (addIndexColumn!=null)
 			createIndex();
 

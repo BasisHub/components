@@ -42,6 +42,20 @@ public class SheetConfiguration {
 	/**
 	 * Appends a new column to the back of the list of columns
 	 * 
+	 * @param header: label of the new column to be added
+	 * @param width:  width of the new column in number of characters
+	 * @param hidden: if the column should be hidden or not
+	 * @throws Exception in case any parameter found invalid
+	 */
+	public void addColumn(String header, int width, boolean hidden) throws Exception {
+		ColumnConfigurationBuilder colConfigBuilder = new ColumnConfigurationBuilder().setHeader(header)
+				.setWidth(width).setIsHidden(hidden);
+		insertNewColumn(header, colConfigBuilder, columnConfigs.size());
+	}
+
+	/**
+	 * Appends a new column to the back of the list of columns
+	 * 
 	 * @param header:           label of the new column to be added
 	 * @param colConfigBuilder: ColumnConfigurationBuilder object containing column
 	 *                          customizations
@@ -74,6 +88,21 @@ public class SheetConfiguration {
 	public void insertColumn(String header, int width, int index) throws Exception {
 		ColumnConfigurationBuilder colConfigBuilder = new ColumnConfigurationBuilder().setHeader(header)
 				.setWidth(width);
+		insertNewColumn(header, colConfigBuilder, index);
+	}
+
+	/**
+	 * Inserts a new column in position to the list of columns
+	 * 
+	 * @param header: label of the new column to be added
+	 * @param index:  position of the new column with 0-based indexing
+	 * @param width:  width of the new column in number of characters
+	 * @param hidden: if the column should be hidden or not
+	 * @throws Exception in case any parameter found invalid
+	 */
+	public void insertColumn(String header, int width, boolean hidden, int index) throws Exception {
+		ColumnConfigurationBuilder colConfigBuilder = new ColumnConfigurationBuilder().setHeader(header)
+				.setWidth(width).setIsHidden(hidden);
 		insertNewColumn(header, colConfigBuilder, index);
 	}
 
@@ -150,6 +179,7 @@ public class SheetConfiguration {
 				continue; // Keeping default column width in case of negative width
 
 			sheet.setColumnWidth(index, width);
+			sheet.setColumnHidden(index, columnConfigs.get(index).getIsHidden());
 		}
 
 		return sheet;

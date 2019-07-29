@@ -7,6 +7,7 @@ package com.basiscomponents.db.config.export;
 public class ColumnConfiguration {
 	private String header = null;
 	private int width = -1; // Negative value to indicate default column width
+	private boolean isHidden = false;
 
 	public ColumnConfiguration(String header, int width) {
 		this.header = header;
@@ -37,5 +38,13 @@ public class ColumnConfiguration {
 
 	public void setWidth(int width) {
 		this.width = width;
+	}
+
+	public boolean getIsHidden() {
+		return this.isHidden;
+	}
+
+	public void setIsHidden(boolean hidden) {
+		this.isHidden = hidden;
 	}
 }

@@ -1,4 +1,4 @@
-package com.basiscomponents.treeview;
+package com.basiscomponents.db.importer;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,9 +11,9 @@ import javax.swing.filechooser.FileSystemView;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 
-public class BasisTreeView {
+public class FileSystemScanner {
 
-	private BasisTreeView() {
+	private FileSystemScanner() {
 	}
 
 	public static ResultSet getDataSystemAsResultSet(String syspath, String filter) throws Exception {
@@ -27,7 +27,6 @@ public class BasisTreeView {
 
 		createDataRowsFromDir(new File(syspath), rs, fsv, filter);
 
-		System.out.println(rs.toJson());
 		return rs;
 	}
 
@@ -35,7 +34,7 @@ public class BasisTreeView {
 			throws ParseException, IOException {
 
 		List<File> childs = Arrays.asList(fsv.getFiles(dir, true));
-		
+
 		// A file has to be written
 		if (childs.isEmpty()) {
 			if (!filter.isEmpty()) {
@@ -61,3 +60,4 @@ public class BasisTreeView {
 		}
 	}
 }
+

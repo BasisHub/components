@@ -3,6 +3,8 @@ package com.basiscomponents.db.resultSetJsonTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import org.junit.jupiter.api.Test;
+
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.util.DataRowProvider;
@@ -10,12 +12,19 @@ import com.basiscomponents.db.util.ResultSetProvider;
 
 public class ResultSetToJsonTest {
 
+	@Test
+	public void anotherTest() throws Exception {
+		ResultSet rs = new ResultSet();
+		String s = rs.toJson();
+		System.out.println(s);
+	}
+
 	/**
 	 * A result set is created. The toJsonString is checked to be correct.
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonToJsonOnlyResultSetTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createNumberTypesResultSet();
 		String s = rs0.toJson();
@@ -31,7 +40,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonStringOnlyResultSetTest() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createStringOnlyResultSet();
 		String s = rs0.toJson();
@@ -47,7 +56,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonDefaultResultSet() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet();
 		String s = rs0.toJson();
@@ -67,7 +76,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonDefaultNullResultSet() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSet(true);
 		String s = rs0.toJson();
@@ -83,7 +92,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonMinMaxResultSet() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createDefaultResultSetMinMax();
 		String s = rs0.toJson();
@@ -99,7 +108,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonMultipleDataRowResultSet() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createMultipleDataRowResultSet();
 		String s = rs0.toJson();
@@ -119,7 +128,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonNestedDataRowsResultSet() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createNestedDataRowsResultSet();
 		String s = rs0.toJson();
@@ -139,7 +148,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonNestedResultSetsResultSet() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createNestedResultSetsResultSet();
 		String s = rs0.toJson();
@@ -155,7 +164,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void toJSonNestedResultSetWithMultipleDataRowsResultSet() throws Exception {
 		ResultSet rs0 = ResultSetProvider.createNestedResultSetsWithMultipleDataRowsResultSet();
 		String s = rs0.toJson();
@@ -171,7 +180,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void mostBasicOne() throws Exception {
 		ResultSet rs = new ResultSet();
 		DataRow dr = new DataRow();
@@ -211,7 +220,7 @@ public class ResultSetToJsonTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void numberTypesTest() throws Exception {
 		ResultSet rs = new ResultSet();
 		DataRow dr = DataRowProvider.buildNumberTypesDataRow2();

@@ -38,6 +38,17 @@ public class ColumnConfigurationBuilder {
 	}
 
 	/**
+	 * Sets hidden status
+	 * 
+	 * @param hidden: if the column should be hidden or not
+	 * @return ColumnConfigurationBuilder object to allow chaining
+	 */
+	public ColumnConfigurationBuilder setIsHidden(boolean hidden) {
+		this.columnConfiguration.setIsHidden(hidden);
+		return this;
+	}
+
+	/**
 	 * Builds the ColumnConfiguration object
 	 * 
 	 * @return ColumnConfiguration constructed
