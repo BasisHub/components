@@ -16,6 +16,17 @@ public class FileSystemScanner {
 	private FileSystemScanner() {
 	}
 
+	/**
+	 * This method returns the given path as an ResultSet. For every file in the
+	 * path, a DataRow is created in the ResultSet which represents it with the
+	 * file's path and size.
+	 * 
+	 * @param syspath : The directory which should be represented. Empty directories
+	 *                are not converted. Only files will be represented.
+	 * @param filter  : A String which is used to filter the file names.
+	 * @return A ResultSet with every file as one DataRow
+	 * @throws Exception
+	 */
 	public static ResultSet getDataSystemAsResultSet(String syspath, String filter) throws Exception {
 
 		if (filter == null) {
@@ -38,7 +49,7 @@ public class FileSystemScanner {
 		// A file has to be written
 		if (childs.isEmpty()) {
 			if (!filter.isEmpty()) {
-				if (dir.getAbsolutePath().contains(filter)) {
+				if (dir.getName().contains(filter)) {
 					DataRow dr = new DataRow();
 					dr.setFieldValue("filepath", dir.getAbsolutePath());
 					dr.setFieldValue("size", dir.length());
