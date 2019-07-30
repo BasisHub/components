@@ -19,7 +19,8 @@ public class FileSystemScanner {
 	/**
 	 * This method returns the given path as an ResultSet. For every file in the
 	 * path, a DataRow is created in the ResultSet which represents it with the
-	 * file's path and size.
+	 * file's path and size. Furthermore this method was specially created for the
+	 * TreeDataMode of the GridExWidget.
 	 * 
 	 * @param syspath : The directory which should be represented. Empty directories
 	 *                are not converted. Only files will be represented.

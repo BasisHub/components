@@ -9,9 +9,9 @@ import com.basiscomponents.db.ResultSet;
 
 public class FileSystemViewTest {
 
-	ResultSet data;
-	public String path;
-	public long size;
+	private ResultSet data;
+	private String path;
+	private long size;
 
 	/**
 	 * There is a test directory which was specially created for this test. The
@@ -21,10 +21,11 @@ public class FileSystemViewTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void FileSystemViewComplexTest() throws Exception {
+	public void fileSystemViewComplexTest() throws Exception {
 
-		data = FileSystemScanner.getDataSystemAsResultSet("./src/test/testDirForFileSystemScanner", "");
-		
+		data = FileSystemScanner.getDataSystemAsResultSet("./src/test/testDirForFileSystemScanner/Tests 'n' Secrets",
+				"");
+
 		path = (String) data.get(0).getFieldValue("filepath");
 		assertTrue(path.endsWith("SecretDoc.txt"));
 		size = (long) data.get(0).getFieldValue("size");
@@ -63,9 +64,10 @@ public class FileSystemViewTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void FileSystemScannerFilterTest() throws Exception {
+	public void fileSystemScannerFilterTest() throws Exception {
 
-		data = FileSystemScanner.getDataSystemAsResultSet("./src/test/testDirForFileSystemScanner", "test");
+		data = FileSystemScanner.getDataSystemAsResultSet("./src/test/testDirForFileSystemScanner/Tests 'n' Secrets",
+				"test");
 
 		path = (String) data.get(0).getFieldValue("filepath");
 		assertTrue(path.endsWith("testDoc1.txt"));
@@ -82,7 +84,8 @@ public class FileSystemViewTest {
 		size = (long) data.get(2).getFieldValue("size");
 		assertEquals(22220, size);
 
-		data = FileSystemScanner.getDataSystemAsResultSet("./src/test/testDirForFileSystemScanner", "Secret");
+		data = FileSystemScanner.getDataSystemAsResultSet("./src/test/testDirForFileSystemScanner/Tests 'n' Secrets",
+				"Secret");
 
 		path = (String) data.get(0).getFieldValue("filepath");
 		assertTrue(path.endsWith("SecretDoc.txt"));
@@ -99,4 +102,21 @@ public class FileSystemViewTest {
 		size = (long) data.get(2).getFieldValue("size");
 		assertEquals(0, size);
 	}
+
+	@Test
+	public void fileSystemViewEmptyDirTest() throws Exception {
+
+		data = FileSystemScanner.getDataSystemAsResultSet("./src/test/testDirForFileSystemScanner/Empty Dirs", "");
+
+		path = (String) data.get(0).getFieldValue("filepath");
+		assertTrue(path.endsWith("Empty Dir 1"));
+		size = (long) data.get(0).getFieldValue("size");
+		assertEquals(0, size);
+
+		path = (String) data.get(1).getFieldValue("filepath");
+		assertTrue(path.endsWith("Empty Dir 2"));
+		size = (long) data.get(1).getFieldValue("size");
+		assertEquals(0, size);
+	}
+
 }
