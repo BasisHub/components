@@ -21,12 +21,48 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DataRowFromJsonProvider {
+public class DataRowFromJsonMapper {
 
 	private static final String COLUMN_TYPE = "ColumnType";
-	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
-		return fromJson(in,meta,null);
+
+	/**
+	 * Initializes and returns a DataRow object based on the values provided in the
+	 * given JSON String.
+	 *
+	 * @param in
+	 *            The JSON String
+	 * @return the DataRow object created based on the JSOn String's content
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
+	 *
+	 * @throws Exception
+	 *             Gets thrown in case the JSON could not be parsed / is invalid
+	 */
+	public static DataRow fromJson(final String in) throws IOException, ParseException {
+		return fromJson(in, null, null);
 	}
+
+	/**
+	 * Initializes and returns a DataRow object based on the values provided in the
+	 * given JSON String.
+	 *
+	 * @param in
+	 *            The JSON String
+	 * @param meta
+	 *            A DataRow that will be used to determine the field types if not
+	 *            given in the meta section of the JSON String
+	 * @return the DataRow object created based on the JSOn String's content
+	 * @throws ParseException
+	 * @throws IOException
+	 *
+	 * @throws Exception
+	 *             Gets thrown in case the JSON could not be parsed / is invalid
+	 */
+	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
+		return fromJson(in, meta, null);
+	}
+
 	public static DataRow fromJson(final String in, final DataRow meta, JsonElement attributes)
 			throws IOException, ParseException {
 		String input = in;
@@ -70,8 +106,9 @@ public class DataRowFromJsonProvider {
 			} else {
 				handleOldFormat(navigation, dr);
 			}
-			if (attributes!=null){
-				attributes.getAsJsonObject().entrySet().stream().forEach(entry->dr.setAttribute(entry.getKey(),entry.getValue().getAsString()));
+			if (attributes != null) {
+				attributes.getAsJsonObject().entrySet().stream()
+						.forEach(entry -> dr.setAttribute(entry.getKey(), entry.getValue().getAsString()));
 			}
 			return dr;
 		}
@@ -79,7 +116,7 @@ public class DataRowFromJsonProvider {
 
 	private static void createDataFields(JsonNode root, DataRow attributes, HashMap<?, ?> hm, DataRow dr)
 			throws ParseException, JsonParseException, IOException {
-		
+
 		JsonNode root2;
 		if (root.isArray())
 			root2 = root.get(0);
@@ -99,15 +136,16 @@ public class DataRowFromJsonProvider {
 				JsonNode x = root.get(0).get(fieldName);
 //				JsonNode x = root.get(fieldName);
 				ObjectMapper mapper = new ObjectMapper();
-				ObjectReader reader = mapper.readerFor(new TypeReference<List<Object>>() {});
+				ObjectReader reader = mapper.readerFor(new TypeReference<List<Object>>() {
+				});
 				List<String> list = reader.readValue(x);
 				dr.setFieldValue(fieldName, list);
 				break;
 
 			case -974:
 				String nestedJson = "";
-				nestedJson =root2.get(fieldName).toString();
-				dr.setFieldValue(fieldName, DataRow.fromJson(nestedJson));
+				nestedJson = root2.get(fieldName).toString();
+				dr.setFieldValue(fieldName, DataRowFromJsonMapper.fromJson(nestedJson));
 				break;
 			case -975:
 				String nestedJson1 = "";
@@ -197,9 +235,9 @@ public class DataRowFromJsonProvider {
 			if (m != null && m.containsKey(fieldName)) {
 				attr.putAll((HashMap<String, String>) m.get(fieldName));
 
-				//remove the ColumnType as extra Attribute
-				//attr.remove("ColumnType");
-				
+				// remove the ColumnType as extra Attribute
+				// attr.remove("ColumnType");
+
 				dr.setFieldAttributes(fieldName, attr);
 			}
 		}
@@ -257,15 +295,15 @@ public class DataRowFromJsonProvider {
 		// add all fields to the attributes record that were not part of it before
 		JsonNode root2;
 		if (root.isArray())
-			root2=root.get(0);
+			root2 = root.get(0);
 		else
-			root2=root;
-		
+			root2 = root;
+
 		Iterator<?> it2 = hm.keySet().iterator();
 		while (it2.hasNext()) {
 			String fieldName = (String) it2.next();
 			if (!attributes.contains(fieldName) && !fieldName.equals("meta") && root2.get(fieldName) != null) {
-				String type=root2.get(fieldName).getNodeType().toString();
+				String type = root2.get(fieldName).getNodeType().toString();
 				switch (type) {
 				case "NUMBER":
 					attributes.addDataField(fieldName, java.sql.Types.DOUBLE, new DataField(null));
@@ -274,12 +312,12 @@ public class DataRowFromJsonProvider {
 					attributes.addDataField(fieldName, java.sql.Types.BOOLEAN, new DataField(null));
 					break;
 				case "OBJECT":
-					//a nested DataRow
+					// a nested DataRow
 					attributes.addDataField(fieldName, -974, new DataField(null));
 					break;
 				case "ARRAY":
-					//a nested DataRow or ArrayList / BBjVector
-					String subtype=root2.get(fieldName).get(0).getNodeType().toString();
+					// a nested DataRow or ArrayList / BBjVector
+					String subtype = root2.get(fieldName).get(0).getNodeType().toString();
 					if ("OBJECT".equals(subtype))
 						attributes.addDataField(fieldName, -975, new DataField(null));
 					else

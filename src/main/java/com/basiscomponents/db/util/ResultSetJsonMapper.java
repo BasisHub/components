@@ -61,7 +61,7 @@ public class ResultSetJsonMapper {
 		if (o.size() > 0) {
 			meta = o.get(0).getAsJsonObject().getAsJsonObject("meta");
 			try {
-				metaRow = DataRow.fromJson(o.get(0).toString());
+				metaRow = DataRowFromJsonMapper.fromJson(o.get(0).toString());
 				//metaRow.clear();
 			} catch (Exception ex) {
 			}
@@ -75,9 +75,9 @@ public class ResultSetJsonMapper {
 			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
 				el.getAsJsonObject().add("meta", meta);
 			if(el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)!=null){
-				rs.add(DataRow.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
+				rs.add(DataRowFromJsonMapper.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
 			}else{
-				rs.add(DataRow.fromJson(el.toString(), metaRow));
+				rs.add(DataRowFromJsonMapper.fromJson(el.toString(), metaRow));
 			}
 		}
 		return rs;

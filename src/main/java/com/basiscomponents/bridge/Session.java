@@ -16,6 +16,7 @@ import java.util.Set;
 
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.util.DataRowFromJsonMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -269,13 +270,13 @@ public class Session {
 					DataRow dr;
 					try {
 						if (meta != null && metaelement != null){
-							dr = DataRow.fromJson(nextelement.toString());
+							dr = DataRowFromJsonMapper.fromJson(nextelement.toString());
 							rs.add(dr);
 						}
 						else
 						{	
 							nextelement.getAsJsonObject().add("meta", metaelement);
-							dr = DataRow.fromJson(nextelement.toString());
+							dr = DataRowFromJsonMapper.fromJson(nextelement.toString());
 							rs.add(dr);
 						}
 						
