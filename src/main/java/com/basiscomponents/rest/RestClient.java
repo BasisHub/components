@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.Base64;
 
 import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.util.ResultSetJsonMapper;
 
 public class RestClient {
 	
@@ -59,7 +60,7 @@ public class RestClient {
 		}
 
 		conn.disconnect();
-		ResultSet rs = ResultSet.fromJson(sb.toString());
+		ResultSet rs = ResultSetJsonMapper.fromJson(sb.toString());
 		
 		return rs;
 	}

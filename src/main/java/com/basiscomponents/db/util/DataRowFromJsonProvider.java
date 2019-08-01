@@ -112,7 +112,7 @@ public class DataRowFromJsonProvider {
 			case -975:
 				String nestedJson1 = "";
 				nestedJson1 = root2.get(fieldName).toString();
-				dr.setFieldValue(fieldName, ResultSet.fromJson(nestedJson1));
+				dr.setFieldValue(fieldName, ResultSetJsonMapper.fromJson(nestedJson1));
 				break;
 
 			case java.sql.Types.CHAR:

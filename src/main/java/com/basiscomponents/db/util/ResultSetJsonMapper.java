@@ -2,6 +2,7 @@ package com.basiscomponents.db.util;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +20,9 @@ import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 
 public class ResultSetJsonMapper {
@@ -28,6 +32,56 @@ public class ResultSetJsonMapper {
     private ResultSetJsonMapper() {
     }
 
+    
+    /**
+	 * Returns a ResultSet object created by processing the given JSON String.
+	 * 
+	 * @param js
+	 *            The JSON String used to create the ResultSet object.
+	 * 
+	 * @return The ResultSet object created from the values provided in the given
+	 *         JSON String.
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
+	 *
+	 *             throws an exception if can not parse the json string to a
+	 *             DataRow.
+	 */
+	public static ResultSet fromJson(final String js) throws JsonParseException, IOException, ParseException {
+		String cleanString = js.trim();
+		ResultSet rs = new ResultSet();
+		
+		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
+		com.google.gson.JsonArray o = parser.parse(cleanString).getAsJsonArray();
+
+		// Check if first row contains meta data. If so then use it as template row.
+		JsonObject meta = null;
+		DataRow metaRow = null;
+		if (o.size() > 0) {
+			meta = o.get(0).getAsJsonObject().getAsJsonObject("meta");
+			try {
+				metaRow = DataRow.fromJson(o.get(0).toString());
+				//metaRow.clear();
+			} catch (Exception ex) {
+			}
+		}
+
+		if (meta == null) {
+			System.err.println("error parsing - meta data missing");
+		}
+
+		for (JsonElement el:o) {
+			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
+				el.getAsJsonObject().add("meta", meta);
+			if(el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)!=null){
+				rs.add(DataRow.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
+			}else{
+				rs.add(DataRow.fromJson(el.toString(), metaRow));
+			}
+		}
+		return rs;
+	}
 
     public static String toJson(ResultSet rs, boolean meta,
                                 String addIndexColumn, boolean f_trimStrings, boolean writeDataRowAttributes)

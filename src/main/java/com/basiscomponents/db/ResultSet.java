@@ -2078,55 +2078,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
-	 * Returns a ResultSet object created by parsing the given JSON String.
-	 * 
-	 * @param js
-	 *            The JSON String used to create the ResultSet object.
-	 * 
-	 * @return The ResultSet object created from the values provided in the given
-	 *         JSON String.
-	 * @throws ParseException
-	 * @throws IOException
-	 * @throws JsonParseException
-	 *
-	 *             throws an exception if can not parse the json string to a
-	 *             DataRow.
-	 */
-	public static ResultSet fromJson(final String js) throws JsonParseException, IOException, ParseException {
-		String cleanString = js.trim();
-		ResultSet rs = new ResultSet();
-		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
-		com.google.gson.JsonArray o = parser.parse(cleanString).getAsJsonArray();
-
-		// Check if first row contains meta data. If so then use it as template row.
-		JsonObject meta = null;
-		DataRow metaRow = null;
-		if (o.size() > 0) {
-			meta = o.get(0).getAsJsonObject().getAsJsonObject("meta");
-			try {
-				metaRow = DataRow.fromJson(o.get(0).toString());
-				//metaRow.clear();
-			} catch (Exception ex) {
-			}
-		}
-
-		if (meta == null) {
-			System.err.println("error parsing - meta data missing");
-		}
-
-		for (JsonElement el:o) {
-			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
-				el.getAsJsonObject().add("meta", meta);
-			if(el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)!=null){
-				rs.add(DataRow.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
-			}else{
-				rs.add(DataRow.fromJson(el.toString(), metaRow));
-			}
-		}
-		return rs;
-	}
-
-	/**
 	 * Returns the java.sql.ResultSet object of this com.basiscomponents.db.ResultSet object.
 	 * 
 	 * @return The java.sql.ResultSet object.
