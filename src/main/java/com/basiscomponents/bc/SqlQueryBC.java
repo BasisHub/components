@@ -190,7 +190,7 @@ public class SqlQueryBC {
 
 		public static void traceRetrieve(String string) {
 			if (TracingConfiguration.isTraceLastRetrieve()) {
-				lastExecute = string;
+				lastRetrieve = string;
 			}
 		}
 

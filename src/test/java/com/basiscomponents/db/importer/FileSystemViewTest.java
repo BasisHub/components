@@ -103,6 +103,12 @@ public class FileSystemViewTest {
 		assertEquals(0, size);
 	}
 
+	/**
+	 * The tests tries to scan empty directories with the FileSystemScanner. A test
+	 * directory with empty dirs was specially created for this test.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void fileSystemViewEmptyDirTest() throws Exception {
 
