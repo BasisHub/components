@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DataFieldConverter {
 	private static final String JAVA_MATH_BIG_DECIMAL = "java.math.BigDecimal";
@@ -113,21 +114,21 @@ public class DataFieldConverter {
 					|| classname.contains("com.basis.startup.type.BBjNumber")) {
 				com.basis.util.common.BasisNumber val = com.basis.util.common.BasisNumber
 						.getBasisNumber((com.basis.startup.type.BBjNumber) o);
-				java.util.Date d = com.basis.util.BasisDate.date(val.intValueExact());
+				Date d = com.basis.util.BasisDate.date(val.intValueExact());
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
 					return null;
 			}
 			if (classname.equals(JAVA_LANG_INTEGER)) {
-				java.util.Date d = com.basis.util.BasisDate.date((Integer) o);
+				Date d = com.basis.util.BasisDate.date((Integer) o);
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
 					return null;
 			}
 			if (classname.equals(JAVA_LANG_DOUBLE)) {
-				java.util.Date d = com.basis.util.BasisDate.date(((Double) o).intValue());
+				Date d = com.basis.util.BasisDate.date(((Double) o).intValue());
 				if (d != null)
 					return new java.sql.Date(d.getTime());
 				else
@@ -142,7 +143,7 @@ public class DataFieldConverter {
 				else {
 					try {
 						StringBuilder format;
-						format=new StringBuilder("yyyy-MM-dd");
+						format = new StringBuilder("yyyy-MM-dd");
 						if(tmpstr.contains("T")){
 							format.append("'T'");
 						}else{
@@ -157,7 +158,11 @@ public class DataFieldConverter {
 						if(tmpstr.matches("\\d{4}-\\d{2}-\\d{2}[T\\s]+.*-\\d{2}:\\d{2}")){
 							format.append('X');
 						}
-						return new java.sql.Date(new SimpleDateFormat(format.toString()).parse(tmpstr).getTime());
+						String formatString = format.toString().trim();
+						final SimpleDateFormat sdf = new SimpleDateFormat(formatString);
+						final Date date = sdf.parse(tmpstr);
+						long time = date.getTime();
+						return new java.sql.Date(time);
 
 					} catch (ParseException e) {
 						throw new IllegalStateException("Date [" + o + "] could not be parsed", e);
@@ -303,7 +308,7 @@ public class DataFieldConverter {
 			if (field.getDate() == null)
 				ret = -1.0;
 			else {
-				Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(field.getDate().getTime()));
+				Integer ret2 = com.basis.util.BasisDate.jul(new Date(field.getDate().getTime()));
 				ret = ret2.doubleValue();
 			}
 			break;
