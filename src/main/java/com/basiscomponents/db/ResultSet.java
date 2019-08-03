@@ -2078,6 +2078,24 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 
 	/**
+	 * Returns a ResultSet object created by parsing the given JSON String.
+	 * 
+	 * @param js
+	 *            The JSON String used to create the ResultSet object.
+	 * 
+	 * @return The ResultSet object created from the values provided in the given
+	 *         JSON String.
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JsonParseException
+	 *
+	 *             throws an exception if can not parse the json string to a
+	 *             DataRow.
+	 */
+	public static ResultSet fromJson(final String js) throws JsonParseException, IOException, ParseException {
+		return ResultSetJsonMapper.fromJson(js);
+	}
+	/**
 	 * Returns the java.sql.ResultSet object of this com.basiscomponents.db.ResultSet object.
 	 * 
 	 * @return The java.sql.ResultSet object.

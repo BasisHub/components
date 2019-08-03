@@ -54,12 +54,12 @@ public class ResultSetJsonMapper {
 		try {
 			metaRow = DataRowJsonMapper.metaDataFromJson(cleanString);
 			rows = splitJsonArray(cleanString);
+			for (String rowJson : rows) {
+				rs.add(DataRowJsonMapper.fromJson(rowJson, metaRow));
+			}
 		} catch (Exception ex) {
 			System.err.println("Error encountered while parsing meta data: " + ex.getMessage());
-		}
-
-		for (String rowJson : rows) {
-			rs.add(DataRowJsonMapper.fromJson(rowJson, metaRow));
+			ex.printStackTrace();
 		}
 
 		return rs;
@@ -433,13 +433,13 @@ public class ResultSetJsonMapper {
 
 	private static ArrayList<String> splitJsonArray(String json) throws ParseException {
 		if (json.startsWith("[") && json.endsWith("]")) {
-			json = json.substring(1, json.length() - 1);
+			json = json.substring(1, json.length()-1);
 		}
 
 		ArrayList<String> rowList = new ArrayList<String>();
-		int braceCount = 0, objStartIndex = 1;
+		int braceCount = 0, objStartIndex = 0;
 
-		for (int currIndex = 1; currIndex < json.length() - 1; currIndex++) {
+		for (int currIndex = 0; currIndex < json.length(); currIndex++) {
 			switch (json.charAt(currIndex)) {
 			case ',':
 				if (braceCount == 0 && currIndex - 1 > objStartIndex) {

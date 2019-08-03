@@ -114,8 +114,8 @@ public class DataRow implements java.io.Serializable {
 		}
 	}
 
-	public static DataRow fromJson(String in, DataRow meta, JsonElement attributes) throws IOException, ParseException {
-		return DataRowJsonMapper.fromJson(in, meta, attributes);
+	public static DataRow fromJson(String in, DataRow meta) throws IOException, ParseException {
+		return DataRowJsonMapper.fromJson(in, meta);
 	}
 
 	/**

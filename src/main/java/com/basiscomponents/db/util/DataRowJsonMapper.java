@@ -40,7 +40,7 @@ public class DataRowJsonMapper {
 	 *                            is invalid
 	 */
 	public static DataRow fromJson(final String in) throws IOException, ParseException {
-		return fromJson(in, null, null);
+		return fromJson(in, null);
 	}
 
 	/**
@@ -57,11 +57,7 @@ public class DataRowJsonMapper {
 	 * @throws Exception      Gets thrown in case the JSON could not be parsed / is
 	 *                        invalid
 	 */
-	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
-		return fromJson(in, meta, null);
-	}
-
-	public static DataRow fromJson(final String in, final DataRow meta, JsonElement attributes)
+	public static DataRow fromJson(final String in, final DataRow meta) 
 			throws IOException, ParseException {
 		String input = in;
 		if (input.length() < 2) {
@@ -104,9 +100,12 @@ public class DataRowJsonMapper {
 			} else {
 				handleOldFormat(navigation, dr);
 			}
-			if (attributes != null) {
-				attributes.getAsJsonObject().entrySet().stream()
-						.forEach(entry -> dr.setAttribute(entry.getKey(), entry.getValue().getAsString()));
+			if (root.has(ResultSetJsonMapper.ATTRIBUTES)) {
+				Iterator<Map.Entry<String, JsonNode>> elements = root.get(ResultSetJsonMapper.ATTRIBUTES).fields();
+				while (elements.hasNext()) {
+					Map.Entry<String, JsonNode> entry = elements.next();
+					dr.setAttribute(entry.getKey(), entry.getValue().asText());
+				}
 			}
 			return dr;
 		}
@@ -115,8 +114,9 @@ public class DataRowJsonMapper {
 	/**
 	 * Parses and returns a DataRow object that contains meta data
 	 *
-	 * @param in   The JSON String of the first row
-	 * @return the DataRow object containing meta data created by parsing the first row
+	 * @param in The JSON String of the first row
+	 * @return the DataRow object containing meta data created by parsing the first
+	 *         row
 	 * @throws ParseException
 	 * @throws IOException
 	 *
