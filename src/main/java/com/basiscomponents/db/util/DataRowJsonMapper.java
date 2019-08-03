@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.sql.Types;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DataRowFromJsonMapper {
+public class DataRowJsonMapper {
 
 	private static final String COLUMN_TYPE = "ColumnType";
 
@@ -29,15 +30,14 @@ public class DataRowFromJsonMapper {
 	 * Initializes and returns a DataRow object based on the values provided in the
 	 * given JSON String.
 	 *
-	 * @param in
-	 *            The JSON String
+	 * @param in The JSON String
 	 * @return the DataRow object created based on the JSOn String's content
 	 * @throws ParseException
 	 * @throws IOException
 	 * @throws JsonParseException
 	 *
-	 * @throws Exception
-	 *             Gets thrown in case the JSON could not be parsed / is invalid
+	 * @throws Exception          Gets thrown in case the JSON could not be parsed /
+	 *                            is invalid
 	 */
 	public static DataRow fromJson(final String in) throws IOException, ParseException {
 		return fromJson(in, null, null);
@@ -47,17 +47,15 @@ public class DataRowFromJsonMapper {
 	 * Initializes and returns a DataRow object based on the values provided in the
 	 * given JSON String.
 	 *
-	 * @param in
-	 *            The JSON String
-	 * @param meta
-	 *            A DataRow that will be used to determine the field types if not
-	 *            given in the meta section of the JSON String
+	 * @param in   The JSON String
+	 * @param meta A DataRow that will be used to determine the field types if not
+	 *             given in the meta section of the JSON String
 	 * @return the DataRow object created based on the JSOn String's content
 	 * @throws ParseException
 	 * @throws IOException
 	 *
-	 * @throws Exception
-	 *             Gets thrown in case the JSON could not be parsed / is invalid
+	 * @throws Exception      Gets thrown in case the JSON could not be parsed / is
+	 *                        invalid
 	 */
 	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
 		return fromJson(in, meta, null);
@@ -114,6 +112,30 @@ public class DataRowFromJsonMapper {
 		}
 	}
 
+	/**
+	 * Parses and returns a DataRow object that contains meta data
+	 *
+	 * @param in   The JSON String of the first row
+	 * @return the DataRow object containing meta data created by parsing the first row
+	 * @throws ParseException
+	 * @throws IOException
+	 *
+	 */
+	public static DataRow metaDataFromJson(final String js) throws IOException, ParseException {
+		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
+		com.google.gson.JsonArray o = parser.parse(js).getAsJsonArray();
+		JsonObject meta = null;
+		DataRow metaRow = null;
+		if (o.size() > 0) {
+			meta = o.get(0).getAsJsonObject().getAsJsonObject("meta");
+			metaRow = DataRowJsonMapper.fromJson(o.get(0).toString());
+			// metaRow.clear();
+		} else {
+			throw new ParseException("Meta data could not be parsed", 0);
+		}
+		return metaRow;
+	}
+
 	private static void createDataFields(JsonNode root, DataRow attributes, HashMap<?, ?> hm, DataRow dr)
 			throws ParseException, JsonParseException, IOException {
 
@@ -145,7 +167,7 @@ public class DataRowFromJsonMapper {
 			case -974:
 				String nestedJson = "";
 				nestedJson = root2.get(fieldName).toString();
-				dr.setFieldValue(fieldName, DataRowFromJsonMapper.fromJson(nestedJson));
+				dr.setFieldValue(fieldName, DataRowJsonMapper.fromJson(nestedJson));
 				break;
 			case -975:
 				String nestedJson1 = "";

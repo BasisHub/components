@@ -7,7 +7,7 @@ import com.basiscomponents.db.constants.ConstantsResolver;
 import com.basiscomponents.db.exception.DataFieldNotFoundException;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
-import com.basiscomponents.db.util.DataRowFromJsonMapper;
+import com.basiscomponents.db.util.DataRowJsonMapper;
 import com.basiscomponents.db.util.DataRowMatcher;
 import com.basiscomponents.db.util.JRDataSourceAdapter;
 import com.basiscomponents.db.util.TemplateParser;
@@ -115,7 +115,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public static DataRow fromJson(String in, DataRow meta, JsonElement attributes) throws IOException, ParseException {
-		return DataRowFromJsonMapper.fromJson(in, meta, attributes);
+		return DataRowJsonMapper.fromJson(in, meta, attributes);
 	}
 
 	/**

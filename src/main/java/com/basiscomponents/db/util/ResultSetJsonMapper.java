@@ -3,6 +3,7 @@ package com.basiscomponents.db.util;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,23 +22,18 @@ import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
 
 public class ResultSetJsonMapper {
 
-    public static final String ATTRIBUTES = "_attributes";
+	public static final String ATTRIBUTES = "_attributes";
 
-    private ResultSetJsonMapper() {
-    }
+	private ResultSetJsonMapper() {
+	}
 
-    
-    /**
+	/**
 	 * Returns a ResultSet object created by processing the given JSON String.
 	 * 
-	 * @param js
-	 *            The JSON String used to create the ResultSet object.
+	 * @param js The JSON String used to create the ResultSet object.
 	 * 
 	 * @return The ResultSet object created from the values provided in the given
 	 *         JSON String.
@@ -45,406 +41,428 @@ public class ResultSetJsonMapper {
 	 * @throws IOException
 	 * @throws JsonParseException
 	 *
-	 *             throws an exception if can not parse the json string to a
-	 *             DataRow.
+	 *                            throws an exception if can not parse the json
+	 *                            string to a DataRow.
 	 */
 	public static ResultSet fromJson(final String js) throws JsonParseException, IOException, ParseException {
 		String cleanString = js.trim();
 		ResultSet rs = new ResultSet();
-		
-		com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
-		com.google.gson.JsonArray o = parser.parse(cleanString).getAsJsonArray();
 
 		// Check if first row contains meta data. If so then use it as template row.
-		JsonObject meta = null;
 		DataRow metaRow = null;
-		if (o.size() > 0) {
-			meta = o.get(0).getAsJsonObject().getAsJsonObject("meta");
-			try {
-				metaRow = DataRowFromJsonMapper.fromJson(o.get(0).toString());
-				//metaRow.clear();
-			} catch (Exception ex) {
-			}
+		ArrayList<String> rows = null;
+		try {
+			metaRow = DataRowJsonMapper.metaDataFromJson(cleanString);
+			rows = splitJsonArray(cleanString);
+		} catch (Exception ex) {
+			System.err.println("Error encountered while parsing meta data: " + ex.getMessage());
 		}
 
-		if (meta == null) {
-			System.err.println("error parsing - meta data missing");
+		for (String rowJson : rows) {
+			rs.add(DataRowJsonMapper.fromJson(rowJson, metaRow));
 		}
 
-		for (JsonElement el:o) {
-			if (el.getAsJsonObject().getAsJsonObject("meta") == null)
-				el.getAsJsonObject().add("meta", meta);
-			if(el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)!=null){
-				rs.add(DataRowFromJsonMapper.fromJson(el.toString(), metaRow,el.getAsJsonObject().get(ResultSetJsonMapper.ATTRIBUTES)));
-			}else{
-				rs.add(DataRowFromJsonMapper.fromJson(el.toString(), metaRow));
-			}
-		}
 		return rs;
 	}
 
-    public static String toJson(ResultSet rs, boolean meta,
-                                String addIndexColumn, boolean f_trimStrings, boolean writeDataRowAttributes)
-            throws IOException {
+	public static String toJson(ResultSet rs, boolean meta, String addIndexColumn, boolean f_trimStrings,
+			boolean writeDataRowAttributes) throws IOException {
 
-        JsonFactory jf = new JsonFactory();
-        jf.setCharacterEscapes(new ComponentsCharacterEscapes());
-        StringWriter writer = new StringWriter();
-        try (JsonGenerator jsonGenerator = jf.createGenerator(writer)) {
-            jsonGenerator.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
-            // g.useDefaultPrettyPrinter();
+		JsonFactory jf = new JsonFactory();
+		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
+		StringWriter writer = new StringWriter();
+		try (JsonGenerator jsonGenerator = jf.createGenerator(writer)) {
+			jsonGenerator.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+			// g.useDefaultPrettyPrinter();
 
-            jsonGenerator.writeStartArray();
+			jsonGenerator.writeStartArray();
 
-            boolean metaDone = !meta;
+			boolean metaDone = !meta;
 
-            for (DataRow dr : rs.getDataRows()) {
-                jsonGenerator.writeStartObject();
+			for (DataRow dr : rs.getDataRows()) {
+				jsonGenerator.writeStartObject();
 
-                if (addIndexColumn != null) {
-                    jsonGenerator.writeStringField(addIndexColumn, dr.getRowKey());
-                }
+				if (addIndexColumn != null) {
+					jsonGenerator.writeStringField(addIndexColumn, dr.getRowKey());
+				}
 
-                for (String fn : dr.getFieldNames()) {
-                    dataFieldToJson(dr.getField(fn, true), fn, dr.getFieldType(fn), meta, addIndexColumn, f_trimStrings, jsonGenerator);
+				for (String fn : dr.getFieldNames()) {
+					dataFieldToJson(dr.getField(fn, true), fn, dr.getFieldType(fn), meta, addIndexColumn, f_trimStrings,
+							jsonGenerator);
 
-                } // while on fields
-                if (writeDataRowAttributes){
-                    writeDataRowAttributes(dr.getAttributes(), jsonGenerator);
-                }
-                if (meta) {
-                    metaDone = writeMeta(rs, addIndexColumn, jsonGenerator, metaDone, dr);
-                }
+				} // while on fields
+				if (writeDataRowAttributes) {
+					writeDataRowAttributes(dr.getAttributes(), jsonGenerator);
+				}
+				if (meta) {
+					metaDone = writeMeta(rs, addIndexColumn, jsonGenerator, metaDone, dr);
+				}
 
-                jsonGenerator.writeEndObject();
+				jsonGenerator.writeEndObject();
 
-            } // while on rows
+			} // while on rows
 
-            jsonGenerator.writeEndArray();
+			jsonGenerator.writeEndArray();
 		}
 
-            return writer.toString();
-    }
+		return writer.toString();
+	}
 
-    private static void writeDataRowAttributes(HashMap<String, String> attributes, JsonGenerator jsonGenerator) throws IOException {
-        jsonGenerator.writeFieldName(ATTRIBUTES);
-        jsonGenerator.writeStartObject();
-        for (Entry<String, String> entry : attributes.entrySet()) {
-            jsonGenerator.writeObjectField(entry.getKey(), entry.getValue());
-        }
+	private static void writeDataRowAttributes(HashMap<String, String> attributes, JsonGenerator jsonGenerator)
+			throws IOException {
+		jsonGenerator.writeFieldName(ATTRIBUTES);
+		jsonGenerator.writeStartObject();
+		for (Entry<String, String> entry : attributes.entrySet()) {
+			jsonGenerator.writeObjectField(entry.getKey(), entry.getValue());
+		}
 		jsonGenerator.writeEndObject();
-    }
+	}
 
-    private static void dataFieldToJson(DataField value, String fieldName, int fieldType, boolean meta, String addIndexColumn, boolean f_trimStrings, JsonGenerator jsonGenerator) throws IOException {
-        if (value == null || value.getValue() == null) {
-            jsonGenerator.writeNullField(fieldName);
-            return;
+	private static void dataFieldToJson(DataField value, String fieldName, int fieldType, boolean meta,
+			String addIndexColumn, boolean f_trimStrings, JsonGenerator jsonGenerator) throws IOException {
+		if (value == null || value.getValue() == null) {
+			jsonGenerator.writeNullField(fieldName);
+			return;
 		}
 
-        switch (fieldType) {
+		switch (fieldType) {
 
-            //an ArrayList
+		// an ArrayList
 		case -973:
-                try {
+			try {
 
-                    jsonGenerator.writeArrayFieldStart(fieldName);
-                    List l = (List) value.getObject();
-                    Iterator it = l.iterator();
-                    while (it.hasNext())
-                        jsonGenerator.writeObject(it.next());
-                    jsonGenerator.writeEndArray();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            break;
-            //a nested DataRow
+				jsonGenerator.writeArrayFieldStart(fieldName);
+				List l = (List) value.getObject();
+				Iterator it = l.iterator();
+				while (it.hasNext())
+					jsonGenerator.writeObject(it.next());
+				jsonGenerator.writeEndArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			break;
+		// a nested DataRow
 		case -974:
-                DataRow drj = (DataRow) value.getObject();
-                try {
-                    jsonGenerator.writeFieldName(fieldName);
-                    String jstr = drj.toJson(meta);
-                    if (jstr.startsWith("[")) {
-                        jstr = jstr.substring(1, jstr.length() - 1);
-                    }
-                    jsonGenerator.writeRawValue(jstr);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            break;
-            //a nested ResultSet
+			DataRow drj = (DataRow) value.getObject();
+			try {
+				jsonGenerator.writeFieldName(fieldName);
+				String jstr = drj.toJson(meta);
+				if (jstr.startsWith("[")) {
+					jstr = jstr.substring(1, jstr.length() - 1);
+				}
+				jsonGenerator.writeRawValue(jstr);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			break;
+		// a nested ResultSet
 		case -975:
-                ResultSet rs = (ResultSet) value.getObject();
-                try {
-                    jsonGenerator.writeFieldName(fieldName);
-                    jsonGenerator.writeRawValue(rs.toJson(meta, addIndexColumn));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            break;
-            case java.sql.Types.CHAR:
-            case java.sql.Types.VARCHAR:
-            case java.sql.Types.NVARCHAR:
-            case java.sql.Types.NCHAR:
-            case java.sql.Types.LONGVARCHAR:
-            case java.sql.Types.LONGNVARCHAR:
-                String tmp = value.getAttribute("StringFormat");
-                if (tmp != null && tmp.equalsIgnoreCase("JSON")) {
-                    jsonGenerator.writeFieldName(fieldName);
-                    String s = value.getString().trim();
-                    if (s.isEmpty()) {
-                        s = "{}";
+			ResultSet rs = (ResultSet) value.getObject();
+			try {
+				jsonGenerator.writeFieldName(fieldName);
+				jsonGenerator.writeRawValue(rs.toJson(meta, addIndexColumn));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			break;
+		case java.sql.Types.CHAR:
+		case java.sql.Types.VARCHAR:
+		case java.sql.Types.NVARCHAR:
+		case java.sql.Types.NCHAR:
+		case java.sql.Types.LONGVARCHAR:
+		case java.sql.Types.LONGNVARCHAR:
+			String tmp = value.getAttribute("StringFormat");
+			if (tmp != null && tmp.equalsIgnoreCase("JSON")) {
+				jsonGenerator.writeFieldName(fieldName);
+				String s = value.getString().trim();
+				if (s.isEmpty()) {
+					s = "{}";
 
-                    }
-                    jsonGenerator.writeRawValue(s);
-                } else {
-                    String s = value.getString();
-                    if (f_trimStrings)
-                        s = s.trim();
-                    jsonGenerator.writeStringField(fieldName, s);
-                }
-                break;
-            case java.sql.Types.BIGINT:
+				}
+				jsonGenerator.writeRawValue(s);
+			} else {
+				String s = value.getString();
+				if (f_trimStrings)
+					s = s.trim();
+				jsonGenerator.writeStringField(fieldName, s);
+			}
+			break;
+		case java.sql.Types.BIGINT:
 			if (value.getLong() == null)
-                    jsonGenerator.writeNumberField(fieldName, 0);
-                else
-                    jsonGenerator.writeNumberField(fieldName, value.getLong().longValue());
-                break;
+				jsonGenerator.writeNumberField(fieldName, 0);
+			else
+				jsonGenerator.writeNumberField(fieldName, value.getLong().longValue());
+			break;
 
-            case java.sql.Types.TINYINT:
-            case java.sql.Types.INTEGER:
-            case java.sql.Types.SMALLINT:
+		case java.sql.Types.TINYINT:
+		case java.sql.Types.INTEGER:
+		case java.sql.Types.SMALLINT:
 			if (value.getInt() == null)
-                    jsonGenerator.writeNumberField(fieldName, 0);
-                else
-                    jsonGenerator.writeNumberField(fieldName, value.getInt().intValue());
-                break;
+				jsonGenerator.writeNumberField(fieldName, 0);
+			else
+				jsonGenerator.writeNumberField(fieldName, value.getInt().intValue());
+			break;
 
-            case java.sql.Types.NUMERIC:
-                jsonGenerator.writeNumberField(fieldName, value.getBigDecimal().stripTrailingZeros());
-                break;
+		case java.sql.Types.NUMERIC:
+			jsonGenerator.writeNumberField(fieldName, value.getBigDecimal().stripTrailingZeros());
+			break;
 
-            case java.sql.Types.DECIMAL:
+		case java.sql.Types.DECIMAL:
 			if (value.getBigDecimal() == null)
-                    jsonGenerator.writeNumberField(fieldName, 0);
-                else
-                    jsonGenerator.writeNumberField(fieldName, value.getBigDecimal());
-                break;
+				jsonGenerator.writeNumberField(fieldName, 0);
+			else
+				jsonGenerator.writeNumberField(fieldName, value.getBigDecimal());
+			break;
 
-            case java.sql.Types.DOUBLE:
-            case java.sql.Types.FLOAT:
+		case java.sql.Types.DOUBLE:
+		case java.sql.Types.FLOAT:
 			if (value.getDouble() == null)
-                    jsonGenerator.writeNumberField(fieldName, 0.0);
-                else
-                    jsonGenerator.writeNumberField(fieldName, value.getDouble().doubleValue());
-                break;
+				jsonGenerator.writeNumberField(fieldName, 0.0);
+			else
+				jsonGenerator.writeNumberField(fieldName, value.getDouble().doubleValue());
+			break;
 
-            case java.sql.Types.REAL:
+		case java.sql.Types.REAL:
 			if (value.getFloat() == null)
-                    jsonGenerator.writeNumberField(fieldName, 0.0);
-                else
-                    jsonGenerator.writeNumberField(fieldName, value.getFloat().floatValue());
-                break;
+				jsonGenerator.writeNumberField(fieldName, 0.0);
+			else
+				jsonGenerator.writeNumberField(fieldName, value.getFloat().floatValue());
+			break;
 
-            case java.sql.Types.BOOLEAN:
-            case java.sql.Types.BIT:
+		case java.sql.Types.BOOLEAN:
+		case java.sql.Types.BIT:
 			if (value.getBoolean() == null)
-                    jsonGenerator.writeStringField(fieldName, "");
-                else
-                    jsonGenerator.writeBooleanField(fieldName, value.getBoolean());
+				jsonGenerator.writeStringField(fieldName, "");
+			else
+				jsonGenerator.writeBooleanField(fieldName, value.getBoolean());
 
-                break;
+			break;
 
-            case java.sql.Types.TIMESTAMP:
-            case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
-            case 11:
+		case java.sql.Types.TIMESTAMP:
+		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
+		case 11:
 			if (value.getTimestamp() == null)
-                    jsonGenerator.writeStringField(fieldName, "");
-                else {
+				jsonGenerator.writeStringField(fieldName, "");
+			else {
 
-                    java.sql.Timestamp ts = value.getTimestamp();
-                    String str_ts = ts.toString().replaceFirst(" ", "T");
+				java.sql.Timestamp ts = value.getTimestamp();
+				String str_ts = ts.toString().replaceFirst(" ", "T");
 
-                    // calculate the offset of the timezone
-                    // TODO: finish according to https://github.com/BBj-Plugins/BBjGridExWidget/issues/38
-                    // potentially externalize into a static utility method and add unit tests.
+				// calculate the offset of the timezone
+				// TODO: finish according to
+				// https://github.com/BBj-Plugins/BBjGridExWidget/issues/38
+				// potentially externalize into a static utility method and add unit tests.
 
-                    TimeZone tz = TimeZone.getDefault();
+				TimeZone tz = TimeZone.getDefault();
 
-                    int offset = tz.getRawOffset();
+				int offset = tz.getRawOffset();
 
-                    // add daylight saving time
-                    if (tz.useDaylightTime() && tz.inDaylightTime(new Date(ts.getTime()))) {
-                        offset = offset + tz.getDSTSavings();
-                    }
+				// add daylight saving time
+				if (tz.useDaylightTime() && tz.inDaylightTime(new Date(ts.getTime()))) {
+					offset = offset + tz.getDSTSavings();
+				}
 
-                    int h = (offset / 3600000);
-                    int m = Math.abs(offset) - Math.abs(h * 3600000);
+				int h = (offset / 3600000);
+				int m = Math.abs(offset) - Math.abs(h * 3600000);
 
+				StringBuilder sb = new StringBuilder();
+				if (h >= 0)
+					sb.append('+');
+				else {
+					sb.append('-');
+					h *= -1;
+				}
 
-                    StringBuilder sb = new StringBuilder();
-                    if (h >= 0)
-                        sb.append('+');
-                    else {
-                        sb.append('-');
-                        h *= -1;
-                    }
+				if (h < 10)
+					sb.append('0');
 
-                    if (h < 10)
-                        sb.append('0');
+				sb.append(h);
+				sb.append(':');
+				if (m == 0)
+					sb.append("00");
+				else {
+					if (m < 10)
+						sb.append('0');
+					sb.append(m);
+				}
+				str_ts += sb.toString();
 
-                    sb.append(h);
-                    sb.append(':');
-                    if (m == 0)
-                        sb.append("00");
-                    else {
-                        if (m < 10)
-                            sb.append('0');
-                        sb.append(m);
-                    }
-                    str_ts += sb.toString();
+				// -------------end timezone handling -------------------
 
-                    //-------------end timezone handling -------------------
-
-                    jsonGenerator.writeStringField(fieldName, str_ts);
-                }
-                break;
-            case java.sql.Types.DATE:
-            case 9:
+				jsonGenerator.writeStringField(fieldName, str_ts);
+			}
+			break;
+		case java.sql.Types.DATE:
+		case 9:
 			if (value.getDate() == null)
-                    jsonGenerator.writeStringField(fieldName, "");
-                else {
-                    jsonGenerator.writeStringField(fieldName, value.getDate().toString() + "T00:00:00");
-                    // adding T00:00:00 for JavaScript to understand the correct order of day and month
-                    // see https://github.com/BBj-Plugins/BBjGridExWidget/issues/89
-                }
-                break;
+				jsonGenerator.writeStringField(fieldName, "");
+			else {
+				jsonGenerator.writeStringField(fieldName, value.getDate().toString() + "T00:00:00");
+				// adding T00:00:00 for JavaScript to understand the correct order of day and
+				// month
+				// see https://github.com/BBj-Plugins/BBjGridExWidget/issues/89
+			}
+			break;
 
-            case java.sql.Types.ARRAY:
-            case java.sql.Types.BINARY:
-            case java.sql.Types.BLOB:
-            case java.sql.Types.CLOB:
-            case java.sql.Types.DATALINK:
+		case java.sql.Types.ARRAY:
+		case java.sql.Types.BINARY:
+		case java.sql.Types.BLOB:
+		case java.sql.Types.CLOB:
+		case java.sql.Types.DATALINK:
 
-            case java.sql.Types.DISTINCT:
-            case java.sql.Types.JAVA_OBJECT:
-            case java.sql.Types.LONGVARBINARY:
-            case java.sql.Types.NCLOB:
-            case java.sql.Types.NULL:
-            case java.sql.Types.OTHER:
-            case java.sql.Types.REF:
-            case java.sql.Types.REF_CURSOR:
-            case java.sql.Types.ROWID:
-            case java.sql.Types.SQLXML:
-            case java.sql.Types.STRUCT:
-            case java.sql.Types.TIME:
-            case java.sql.Types.TIME_WITH_TIMEZONE:
-            case java.sql.Types.VARBINARY:
+		case java.sql.Types.DISTINCT:
+		case java.sql.Types.JAVA_OBJECT:
+		case java.sql.Types.LONGVARBINARY:
+		case java.sql.Types.NCLOB:
+		case java.sql.Types.NULL:
+		case java.sql.Types.OTHER:
+		case java.sql.Types.REF:
+		case java.sql.Types.REF_CURSOR:
+		case java.sql.Types.ROWID:
+		case java.sql.Types.SQLXML:
+		case java.sql.Types.STRUCT:
+		case java.sql.Types.TIME:
+		case java.sql.Types.TIME_WITH_TIMEZONE:
+		case java.sql.Types.VARBINARY:
 
-            default:
-                // this is a noop - TODO
-                System.err.println("unknown column type: " + fieldType);
-                break;
+		default:
+			// this is a noop - TODO
+			System.err.println("unknown column type: " + fieldType);
+			break;
 
-        }// switch
-    }
+		}// switch
+	}
 
-    private static boolean writeMeta(ResultSet resultSet, String indexColumn, JsonGenerator jsonGenerator, boolean metaDone, DataRow dr) throws IOException {
-        if (!metaDone) {
-            jsonGenerator.writeFieldName("meta");
+	private static boolean writeMeta(ResultSet resultSet, String indexColumn, JsonGenerator jsonGenerator,
+			boolean metaDone, DataRow dr) throws IOException {
+		if (!metaDone) {
+			jsonGenerator.writeFieldName("meta");
 
-            jsonGenerator.writeStartObject();
+			jsonGenerator.writeStartObject();
 
-            if (indexColumn != null) {
-                jsonGenerator.writeFieldName(indexColumn);
-                jsonGenerator.writeStartObject();
-                jsonGenerator.writeStringField("ColumnType", "12");
-                jsonGenerator.writeEndObject();
-            }
+			if (indexColumn != null) {
+				jsonGenerator.writeFieldName(indexColumn);
+				jsonGenerator.writeStartObject();
+				jsonGenerator.writeStringField("ColumnType", "12");
+				jsonGenerator.writeEndObject();
+			}
 
-            for (HashMap<String, Object> hm : resultSet.getMetaData()) {
+			for (HashMap<String, Object> hm : resultSet.getMetaData()) {
 
-                String c = (String) hm.get("ColumnName");
-                if (c != null) {
-                    jsonGenerator.writeFieldName(c);
-                    jsonGenerator.writeStartObject();
+				String c = (String) hm.get("ColumnName");
+				if (c != null) {
+					jsonGenerator.writeFieldName(c);
+					jsonGenerator.writeStartObject();
 
-                    final Map<String, Attribute> atr = getFieldAttributes(dr, c).orElseGet(HashMap::new);
+					final Map<String, Attribute> atr = getFieldAttributes(dr, c).orElseGet(HashMap::new);
 
+					for (Entry<String, Object> entry : hm.entrySet()) {
+						if ("ColumnTypeName".equals(entry.getKey()) || "ColumnName".equals(entry.getKey())
+								|| atr.containsKey(entry.getKey())) {
+							continue;
+						}
+						String value = null;
+						if (entry.getValue() != null)
+							value = entry.getValue().toString();
 
-                    for (Entry<String, Object> entry : hm.entrySet()) {
-                        if ("ColumnTypeName".equals(entry.getKey()) || "ColumnName".equals(entry.getKey())
-                                || atr.containsKey(entry.getKey())) {
-                            continue;
-                        }
-                        String value = null;
-                        if (entry.getValue() != null)
-                            value = entry.getValue().toString();
+						jsonGenerator.writeStringField(entry.getKey(), value);
+					}
 
-                        jsonGenerator.writeStringField(entry.getKey(), value);
-                    }
+					if (atr != null && !atr.isEmpty()) {
+						for (Entry<String, Attribute> entry : atr.entrySet()) {
+							String k = entry.getKey();
+							Attribute v = entry.getValue();
+							if (v.getType() == String.class) {
+								jsonGenerator.writeStringField(k, v.getValue());
+							} else if (v.getType() == int.class) {
+								jsonGenerator.writeNumber(v.getIntValue());
+							} else if (v.getType() == double.class) {
+								jsonGenerator.writeNumber(v.getDoubleValue());
+							} else if (v.getType() == boolean.class) {
+								jsonGenerator.writeBoolean(v.getBooleanValue());
+							}
+						}
+					}
+					jsonGenerator.writeEndObject();
+				}
+			}
+			jsonGenerator.writeEndObject();
 
-                    if (atr != null && !atr.isEmpty()) {
-                        for (Entry<String, Attribute> entry : atr.entrySet()) {
-                            String k = entry.getKey();
-                            Attribute v = entry.getValue();
-                            if (v.getType() == String.class) {
-                                jsonGenerator.writeStringField(k, v.getValue());
-                            } else if (v.getType() == int.class) {
-                                jsonGenerator.writeNumber(v.getIntValue());
-                            } else if (v.getType() == double.class) {
-                                jsonGenerator.writeNumber(v.getDoubleValue());
-                            } else if (v.getType() == boolean.class) {
-                                jsonGenerator.writeBoolean(v.getBooleanValue());
-                            }
-                        }
-                    }
-                    jsonGenerator.writeEndObject();
-                }
-            }
-            jsonGenerator.writeEndObject();
+			metaDone = true;
+		} else {
+			BBArrayList<String> fields = dr.getFieldNames();
+			boolean mWritten = false;
+			for (String fieldname : fields) {
+				if (dr.getField(fieldname, true) != null) {
+					Map<String, String> fieldAttributes = dr.getFieldAttributes(fieldname);
+					if (!fieldAttributes.isEmpty()) {
+						if (!mWritten) {
+							jsonGenerator.writeFieldName("meta");
+							jsonGenerator.writeStartObject();
+							mWritten = true;
+						}
+						jsonGenerator.writeFieldName(fieldname);
+						jsonGenerator.writeStartObject();
+						for (String itk : fieldAttributes.keySet()) {
+							jsonGenerator.writeStringField(itk, fieldAttributes.get(itk));
+						}
+						jsonGenerator.writeEndObject();
+					}
+				}
+			}
+			if (mWritten)
+				jsonGenerator.writeEndObject();
+		}
+		return metaDone;
+	}
 
-            metaDone = true;
-        } else {
-            BBArrayList<String> fields = dr.getFieldNames();
-            boolean mWritten = false;
-            for (String fieldname : fields) {
-                if (dr.getField(fieldname, true) != null) {
-                    Map<String, String> fieldAttributes = dr.getFieldAttributes(fieldname);
-                    if (!fieldAttributes.isEmpty()) {
-                        if (!mWritten) {
-                            jsonGenerator.writeFieldName("meta");
-                            jsonGenerator.writeStartObject();
-                            mWritten = true;
-                        }
-                        jsonGenerator.writeFieldName(fieldname);
-                        jsonGenerator.writeStartObject();
-                        for (String itk : fieldAttributes.keySet()) {
-                            jsonGenerator.writeStringField(itk, fieldAttributes.get(itk));
-                        }
-                        jsonGenerator.writeEndObject();
-                    }
-                }
-            }
-            if (mWritten)
-                jsonGenerator.writeEndObject();
-        }
-        return metaDone;
-    }
+	/**
+	 * @param dr
+	 * @param c
+	 * @return
+	 */
+	private static Optional<Map<String, Attribute>> getFieldAttributes(DataRow dr, String c) {
+		Map<String, Attribute> atr;
+		try {
+			atr = dr.getFieldAttributes2(c);
+		} catch (Exception e) {
+			atr = null;
+		}
+		return Optional.of(atr);
+	}
 
-    /**
-     * @param dr
-     * @param c
-     * @return
-     */
-    private static Optional<Map<String, Attribute>> getFieldAttributes(DataRow dr, String c) {
-        Map<String, Attribute> atr;
-        try {
-            atr = dr.getFieldAttributes2(c);
-        } catch (Exception e) {
-            atr = null;
-        }
-        return Optional.of(atr);
-    }
+	private static ArrayList<String> splitJsonArray(String json) throws ParseException {
+		if (json.startsWith("[") && json.endsWith("]")) {
+			json = json.substring(1, json.length() - 1);
+		}
 
+		ArrayList<String> rowList = new ArrayList<String>();
+		int braceCount = 0, objStartIndex = 1;
+
+		for (int currIndex = 1; currIndex < json.length() - 1; currIndex++) {
+			switch (json.charAt(currIndex)) {
+			case ',':
+				if (braceCount == 0 && currIndex - 1 > objStartIndex) {
+					rowList.add(json.substring(objStartIndex, currIndex));
+					objStartIndex = currIndex + 1;
+				}
+				break;
+			case '(':
+			case '{':
+			case '[':
+				braceCount++;
+				break;
+			case ')':
+			case '}':
+			case ']':
+				braceCount--;
+				break;
+			}
+		}
+
+		if (braceCount != 0)
+			throw new ParseException("Invalid JSON array", 0);
+		return rowList;
+	}
 
 }
