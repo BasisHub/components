@@ -435,6 +435,11 @@ public class ResultSetJsonMapper {
 		if (json.startsWith("[") && json.endsWith("]")) {
 			json = json.substring(1, json.length()-1);
 		}
+		
+		// NOTE: To make sure the last element gets parsed
+		if (!json.endsWith(",")) {
+			json = json + ",";
+		}
 
 		ArrayList<String> rowList = new ArrayList<String>();
 		int braceCount = 0, objStartIndex = 0;

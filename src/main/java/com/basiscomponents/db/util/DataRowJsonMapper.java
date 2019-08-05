@@ -100,8 +100,8 @@ public class DataRowJsonMapper {
 			} else {
 				handleOldFormat(navigation, dr);
 			}
-			if (root.has(ResultSetJsonMapper.ATTRIBUTES)) {
-				Iterator<Map.Entry<String, JsonNode>> elements = root.get(ResultSetJsonMapper.ATTRIBUTES).fields();
+			if (root.get(0).has(ResultSetJsonMapper.ATTRIBUTES)) {
+				Iterator<Map.Entry<String, JsonNode>> elements = root.get(0).get(ResultSetJsonMapper.ATTRIBUTES).fields();
 				while (elements.hasNext()) {
 					Map.Entry<String, JsonNode> entry = elements.next();
 					dr.setAttribute(entry.getKey(), entry.getValue().asText());

@@ -18,7 +18,7 @@ import java.util.List;
 import static com.basiscomponents.constants.SpecialCharacterConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DataRowFromJsonTest {
+public class DataRowJsonMapperTest {
 
 	private String json;
 	private DataRow dr;
@@ -37,7 +37,7 @@ public class DataRowFromJsonTest {
 	@Test
 	public void dataRowFromJsonFullCorrectTest() throws IOException, ParseException {
 		json = "{\"datarow\":[{\"name\":\"John\", \"age\": 31, \"city\":\"New York\"}]}";
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals("John", dr.getFieldValue("name"));
 		assertEquals("New York", dr.getFieldValue("city"));
 	}
@@ -52,39 +52,39 @@ public class DataRowFromJsonTest {
 	public void dataRowFromJsonFromatViolationTest() throws IOException, ParseException {
 
 		// Violating the format should result in a JsonParseException
-		assertThrows(JsonParseException.class, () -> DataRowFromJsonProvider.fromJson("Hi", new DataRow()));
+		assertThrows(JsonParseException.class, () -> DataRowJsonMapper.fromJson("Hi", new DataRow()));
 
 		// Missing { brackets
 		assertThrows(JsonParseException.class,
-				() -> DataRowFromJsonProvider.fromJson("{\"name\":\"John\", \"city\":\"New York\"", new DataRow()));
+				() -> DataRowJsonMapper.fromJson("{\"name\":\"John\", \"city\":\"New York\"", new DataRow()));
 		assertThrows(MismatchedInputException.class,
-				() -> DataRowFromJsonProvider.fromJson("\"name\":\"John\", \"city\":\"New York\"}", new DataRow()));
+				() -> DataRowJsonMapper.fromJson("\"name\":\"John\", \"city\":\"New York\"}", new DataRow()));
 		assertThrows(JsonParseException.class,
-				() -> DataRowFromJsonProvider.fromJson(
+				() -> DataRowJsonMapper.fromJson(
 						"{\"age\": 31, \"meta\":{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}",
 						new DataRow()));
 
 		// Missing meta annotation
 		assertThrows(JsonParseException.class,
-				() -> DataRowFromJsonProvider.fromJson(
+				() -> DataRowJsonMapper.fromJson(
 						"{\"age\": 31, :{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
 						new DataRow()));
 
 		// Missing : colon
 		assertThrows(JsonParseException.class,
-				() -> DataRowFromJsonProvider.fromJson(
+				() -> DataRowJsonMapper.fromJson(
 						"{\"age\": 31, meta{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
 						new DataRow()));
 
 		// Missing " quote
 		assertThrows(JsonParseException.class,
-				() -> DataRowFromJsonProvider.fromJson(
+				() -> DataRowJsonMapper.fromJson(
 						"{\"age\": 31, meta:{\"age:{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
 						new DataRow()));
 
 		// Missing data
 		assertThrows(JsonParseException.class,
-				() -> DataRowFromJsonProvider.fromJson(
+				() -> DataRowJsonMapper.fromJson(
 						"{\"age\": , meta:{\"age\":{\"ColumnType\":\"4\", \"dataBase\":\"myDataBase\"}}}",
 						new DataRow()));
 	}
@@ -99,32 +99,32 @@ public class DataRowFromJsonTest {
 	public void dataRowFromJsonSpecialCasesTest() throws IOException, ParseException {
 
 		// An empty String results in a empty DataRow
-		dr = DataRowFromJsonProvider.fromJson("", new DataRow());
+		dr = DataRowJsonMapper.fromJson("", new DataRow());
 		assertTrue(dr.isEmpty());
 
 		// An empty Json String
-		dr1 = DataRowFromJsonProvider.fromJson("{}", new DataRow());
+		dr1 = DataRowJsonMapper.fromJson("{}", new DataRow());
 		assertTrue(dr1.isEmpty());
 
 		// Empty String as an Integer
 		sb = new StringBuilder("");
 		sb.append("{\"int\": \"\", \"meta\":{\"int\":{\"ColumnType\":\"" + java.sql.Types.INTEGER + "\"}}}");
 		json = sb.toString();
-		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr1 = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals(0, dr1.getFieldValue("int"));
 
 		// Nulling a DataField
 		sb = new StringBuilder("");
 		sb.append("{\"int\": null, \"meta\":{\"int\":{\"ColumnType\":\"" + java.sql.Types.INTEGER + "\"}}}");
 		json = sb.toString();
-		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr1 = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals(null, dr1.getFieldValue("int"));
 
 		// Convert characters below chr(32)
 		char c = 27;
 		String s = "" + c;
 		json = "{\"char\":\"" + c + "\"}";
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals(s, dr.getFieldValue("char"));
 	}
 
@@ -137,7 +137,7 @@ public class DataRowFromJsonTest {
 	@Test
 	public void dataRowFromJsonSimpleTest() throws IOException, ParseException {
 		json = "{\"name\":\"John\", \"city\":\"New York\"}";
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals("John", dr.getFieldValue("name"));
 		assertEquals("New York", dr.getFieldValue("city"));
 	}
@@ -151,7 +151,7 @@ public class DataRowFromJsonTest {
 	@Test
 	public void dataRowFromJsonTypesWithoutMetaDataTest() throws IOException, ParseException {
 		json = "{\"name\":\"John\", \"age\": 31, \"city\":\"New York\", \"double\": 42.1337, \"truth\": false}";
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals("John", dr.getFieldValue("name"));
 		assertEquals("New York", dr.getFieldValue("city"));
 		assertEquals(false, dr.getFieldValue("truth"));
@@ -173,7 +173,7 @@ public class DataRowFromJsonTest {
 
 		// Without MetaData
 		json = "{\"name\":\"John\", \"city\":\"New York\", \"datarow\":{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}}";
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals("John", dr.getFieldValue("name"));
 		assertEquals("New York", dr.getFieldValue("city"));
 
@@ -188,7 +188,7 @@ public class DataRowFromJsonTest {
 		sb.append("{\"name\":\"John\", \"datarow\":{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}, \"meta\":{\"name\":{\"ColumnType\":\"");
 		sb.append(java.sql.Types.VARCHAR);
 		sb.append("\"}, \"datarow\":{\"ColumnType\":\"-974\"}}}");
-		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr1 = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals("John", dr1.getFieldValue("name"));
 
 		// Checking the nested DataRow
@@ -210,7 +210,7 @@ public class DataRowFromJsonTest {
 
 		// Without MetaData
 		json = "{\"name\":\"John\", \"resultset\":[{\"name\":\"John\", \"double\": 42.1337, \"truth\": false}]}";
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals("John", dr.getFieldValue("name"));
 
 		// Checking the nested ResultSet
@@ -225,7 +225,7 @@ public class DataRowFromJsonTest {
 		sb.append(java.sql.Types.VARCHAR);
 		sb.append("\"}, \"resultset\":{\"ColumnType\":\"-975\"}}}");
 		json = sb.toString();
-		dr1 = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr1 = DataRowJsonMapper.fromJson(json, new DataRow());
 		assertEquals("John", dr1.getFieldValue("name"));
 
 		// Checking the nested ResultSet
@@ -262,7 +262,7 @@ public class DataRowFromJsonTest {
 		sb.append("\"}, \"name4\":{\"ColumnType\":\"");
 		sb.append(java.sql.Types.VARCHAR + "\"}}}");
 		json = sb.toString();
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 
 		assertEquals(FRENCH_SPECIAL_CHARACTERS, dr.getFieldValue("name1"));
 		assertEquals(GERMAN_SPECIAL_CHARACTERS, dr.getFieldValue("name2"));
@@ -295,7 +295,7 @@ public class DataRowFromJsonTest {
 		sb.append("\"}, \"date\":{\"ColumnType\":\"");
 		sb.append(java.sql.Types.DATE + "\"}}}");
 		json = sb.toString();
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 
 		assertEquals(true, dr.getFieldValue("truth"));
 		assertEquals(31, dr.getFieldValue("age"));
@@ -329,7 +329,7 @@ public class DataRowFromJsonTest {
 		sb = new StringBuilder("");
 		sb.append("{\"list\":[\"hello\", \"world\"], \"meta\":{\"list\":{\"ColumnType\":\"-973\"}}}");
 		json = sb.toString();
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 
 		List<String> l = new ArrayList<String>();
 		l.add("hello");
@@ -341,7 +341,7 @@ public class DataRowFromJsonTest {
 		sb.append(
 				"{\"list1\":[\"hello\", \"world\"], \"list2\":[\"bye\", \"world\"], \"meta\":{\"list1\":{\"ColumnType\":\"-973\"}, \"list2\":{\"ColumnType\":\"-973\"}}}");
 		json = sb.toString();
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 
 		List<String> l1 = new ArrayList<String>();
 		l1.add("hello");
@@ -367,7 +367,7 @@ public class DataRowFromJsonTest {
 		sb.append("{\"age\": 31, \"meta\":{\"age\":{\"ColumnType\":\"");
 		sb.append(java.sql.Types.INTEGER + "\", \"dataBase\":\"myDataBase\"}}}");
 		json = sb.toString();
-		dr = DataRowFromJsonProvider.fromJson(json, new DataRow());
+		dr = DataRowJsonMapper.fromJson(json, new DataRow());
 
 		String s = String.format("%d", java.sql.Types.INTEGER);
 		assertEquals(s, dr.getFieldAttribute("age", "ColumnType"));
