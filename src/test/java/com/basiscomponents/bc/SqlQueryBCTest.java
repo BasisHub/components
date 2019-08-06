@@ -75,14 +75,14 @@ public class SqlQueryBCTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void sqlQueryBCGetLastRetrieveStatement() throws SQLException {
+	public void sqlQueryBCGetLastRetrieveStatementTest() throws SQLException {
 
 		SqlQueryBC sqlQuery = new SqlQueryBC(conToSQLRetrieve);
 
 		// A statement is executed with retrieve
 		sql = "SELECT * FROM REGISTRATION";
 		TracingConfiguration.setTraceLastRetrieve(true);
-		rs = sqlQuery.retrieve(sql, null);
+		rs = sqlQuery.retrieve(sql);
 
 		assertEquals("SELECT * FROM REGISTRATION", sqlQuery.getLastRetrieve().substring(7));
 	}
@@ -93,7 +93,7 @@ public class SqlQueryBCTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void sqlQueryBCGetLastExecuteStatement() throws SQLException {
+	public void sqlQueryBCGetLastExecuteStatementTest() throws SQLException {
 
 		SqlQueryBC sqlQuery = new SqlQueryBC(conToSQLRetrieve);
 
@@ -106,7 +106,7 @@ public class SqlQueryBCTest {
 	}
 
 	@Test
-	public void sqlQueryBCGetLastSQLStatement() throws SQLException {
+	public void sqlQueryBCGetLastSQLStatementTest() throws SQLException {
 
 		SqlQueryBC sqlQuery = new SqlQueryBC(conToSQLRetrieve);
 
