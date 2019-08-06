@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataField;
@@ -49,18 +50,8 @@ public class ResultSetJsonMapper {
 		ResultSet rs = new ResultSet();
 
 		// Check if first row contains meta data. If so then use it as template row.
-		DataRow metaRow = null;
-		ArrayList<String> rows = null;
-		try {
-			metaRow = DataRowJsonMapper.metaDataFromJson(cleanString);
-			rows = splitJsonArray(cleanString);
-			for (String rowJson : rows) {
-				rs.add(DataRowJsonMapper.fromJson(rowJson, metaRow));
-			}
-		} catch (Exception ex) {
-			System.err.println("Error encountered while parsing meta data: " + ex.getMessage());
-			ex.printStackTrace();
-		}
+		DataRow metaRow = DataRowJsonMapper.metaDataFromJson(cleanString);
+		splitJsonArray(cleanString, rowJson -> rs.add(DataRowJsonMapper.fromJson(rowJson, metaRow)));
 
 		return rs;
 	}
@@ -431,24 +422,23 @@ public class ResultSetJsonMapper {
 		return Optional.of(atr);
 	}
 
-	private static ArrayList<String> splitJsonArray(String json) throws ParseException {
+	private static void splitJsonArray(String json, SplitJsonCallback<String> callback) throws ParseException, IOException {
 		if (json.startsWith("[") && json.endsWith("]")) {
-			json = json.substring(1, json.length()-1);
+			json = json.substring(1, json.length() - 1);
 		}
-		
+
 		// NOTE: To make sure the last element gets parsed
 		if (!json.endsWith(",")) {
 			json = json + ",";
 		}
 
-		ArrayList<String> rowList = new ArrayList<String>();
 		int braceCount = 0, objStartIndex = 0;
 
 		for (int currIndex = 0; currIndex < json.length(); currIndex++) {
 			switch (json.charAt(currIndex)) {
 			case ',':
 				if (braceCount == 0 && currIndex - 1 > objStartIndex) {
-					rowList.add(json.substring(objStartIndex, currIndex));
+					callback.call(json.substring(objStartIndex, currIndex));
 					objStartIndex = currIndex + 1;
 				}
 				break;
@@ -467,7 +457,10 @@ public class ResultSetJsonMapper {
 
 		if (braceCount != 0)
 			throw new ParseException("Invalid JSON array", 0);
-		return rowList;
 	}
 
+	@FunctionalInterface
+	private interface SplitJsonCallback<T> {
+		void call(T t) throws IOException, ParseException;
+	}
 }

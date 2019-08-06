@@ -57,8 +57,8 @@ public class DataRowJsonMapper {
 	 * @throws Exception      Gets thrown in case the JSON could not be parsed / is
 	 *                        invalid
 	 */
-	public static DataRow fromJson(final String in, final DataRow meta) 
-			throws IOException, ParseException {
+	@SuppressWarnings("unchecked")
+	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
 		String input = in;
 		if (input.length() < 2) {
 			return new DataRow();
@@ -100,12 +100,9 @@ public class DataRowJsonMapper {
 			} else {
 				handleOldFormat(navigation, dr);
 			}
-			if (root.get(0).has(ResultSetJsonMapper.ATTRIBUTES)) {
-				Iterator<Map.Entry<String, JsonNode>> elements = root.get(0).get(ResultSetJsonMapper.ATTRIBUTES).fields();
-				while (elements.hasNext()) {
-					Map.Entry<String, JsonNode> entry = elements.next();
-					dr.setAttribute(entry.getKey(), entry.getValue().asText());
-				}
+			if (navigationMap.containsKey(ResultSetJsonMapper.ATTRIBUTES)) {
+				((HashMap<String, String>) navigationMap.get(ResultSetJsonMapper.ATTRIBUTES))
+						.forEach((key, value) -> dr.setAttribute(key, value));
 			}
 			return dr;
 		}
