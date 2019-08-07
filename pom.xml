@@ -162,6 +162,14 @@
 	    </dependency>
 	
 		<dependency>
+		<groupId>com.google</groupId>
+		<artifactId>guava</artifactId>
+		<version>28.0</version>
+		<scope>system</scope>
+		<systemPath>${jar-directory}/guava-28.0-jre.jar</systemPath>
+	    </dependency>
+	
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
 			<version>1.18</version>
