@@ -20,7 +20,7 @@ public class ResultSetExporterTest {
 	@Test
 	public void simpleResultSetExporterExcelTest() throws Exception {
 		ResultSet rs = ResultSetProvider.createDefaultResultSet();
-		OutputStream out = new FileOutputStream("./src/test/testExcelExports/test1.xlsx");
+		OutputStream out = new FileOutputStream("./src/test/testExports/test1.xlsx");
 		SheetConfiguration sheetConfig = new SheetConfiguration();
 		sheetConfig.addColumn("LISTFIELD", 300, true);
 		ResultSetExporter.writeXLSX(rs, out, true, false, "myLabel", null, sheetConfig);
@@ -50,9 +50,24 @@ public class ResultSetExporterTest {
 		links.put("feld1", "/rest/test/{feld1}");
 		links.put("feld2", "/rest/test/{feld1}/{feld2}");
 
-		FileWriter fw = new FileWriter("./src/test/testHTMLFiles/test.html");
+		FileWriter fw = new FileWriter("./src/test/testExports/test.html");
 		ResultSetExporter.writeHTML(rs, fw, links);
 		fw.flush();
 		fw.close();
 	}
+
+	/**
+	 * Simple test of the ResultSetExporter's Excel writing method
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void simpleResultSetExporterTextFileTest() throws Exception {
+		ResultSet rs = ResultSetProvider.createDefaultResultSet();
+		FileWriter fw = new FileWriter("./src/test/testExports/test.txt");
+		ResultSetExporter.writeTXT(rs, fw);
+		fw.flush();
+		fw.close();
+	}
+
 }
