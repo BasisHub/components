@@ -32,11 +32,11 @@ public class ResultSetJoiner {
 	/**
 	 * Performs a Left-Join on two ResultSet.
 	 * 
-	 * @param left:             The left part of the join
-	 * @param right:            The right part of the join
-	 * @param joinFieldName:    The FieldName which should be used to join
-	 * @param targetFieldNames: The FieldNames which should be joined into the left
-	 *                          ResultSet
+	 * @param left:          The left part of the join
+	 * @param rights:        The right side of the join represented as a Map, which
+	 *                       maps the right-sided ResultSets to the fieldNames which
+	 *                       should be joined
+	 * @param joinFieldName: The FieldName which should be used to join
 	 * 
 	 * @return The left-joined ResultSet as an Result of the two input ResultSets
 	 * @throws ParseException
