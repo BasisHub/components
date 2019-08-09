@@ -113,4 +113,30 @@ public class ResultSetProvider {
 
 	}
 
+	public static ResultSet createAnotherRightResultSetForLeftJoinTesting() throws ParseException {
+
+		ResultSet rs = new ResultSet();
+		DataRow dr1 = new DataRow();
+		DataRow dr2 = new DataRow();
+		DataRow dr3 = new DataRow();
+
+		dr1.setFieldValue("PLZ", "66132");
+		dr1.setFieldValue("Stadt", "Moskau");
+		dr1.setFieldValue("Minister", "Dimitri");
+		rs.add(dr1);
+
+		dr2.setFieldValue("PLZ", "66122");
+		dr2.setFieldValue("Stadt", "Wien");
+		dr2.setFieldValue("Minister", "Huber");
+		rs.add(dr2);
+
+		dr3.setFieldValue("PLZ", "66156");
+		dr3.setFieldValue("Stadt", "Konz");
+		dr3.setFieldValue("Minister", "Peter");
+		rs.add(dr3);
+
+		return rs;
+
+	}
+
 }
