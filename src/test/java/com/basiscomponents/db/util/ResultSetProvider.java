@@ -1,6 +1,8 @@
 package com.basiscomponents.db.util;
 
+import java.sql.Date;
 import java.text.ParseException;
+import java.util.ArrayList;
 
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
@@ -67,6 +69,7 @@ public class ResultSetProvider {
 		DataRow dr1 = new DataRow();
 		DataRow dr2 = new DataRow();
 		DataRow dr3 = new DataRow();
+		DataRow dr4 = new DataRow();
 
 		dr1.setFieldValue("Name", "Heinz");
 		dr1.setFieldValue("Alter", 53);
@@ -82,6 +85,11 @@ public class ResultSetProvider {
 		dr3.setFieldValue("Alter", 50);
 		dr3.setFieldValue("PLZ", "66156");
 		rs.add(dr3);
+		
+		dr4.setFieldValue("Name", "unkown");
+		dr4.setFieldValue("Alter", 49);
+		dr4.setFieldValue("PLZ", "66134");
+		rs.add(dr4);
 
 		return rs;
 
@@ -133,6 +141,39 @@ public class ResultSetProvider {
 		dr3.setFieldValue("PLZ", "66156");
 		dr3.setFieldValue("Stadt", "Konz");
 		dr3.setFieldValue("Minister", "Peter");
+		rs.add(dr3);
+
+		return rs;
+
+	}
+
+	public static ResultSet createMoreTypesRightResultSetForLeftJoinTesting() throws ParseException {
+
+		ResultSet rs = new ResultSet();
+		DataRow dr1 = new DataRow();
+		DataRow dr2 = new DataRow();
+		DataRow dr3 = new DataRow();
+
+		dr1.setFieldValue("PLZ", "66132");
+		dr1.setFieldValue("Double", 54.45);
+		dr1.setFieldValue("Long", Long.valueOf("5454544355464354"));
+		dr1.setFieldValue("Date", new Date(System.currentTimeMillis()));
+		dr1.setFieldValue("List", new ArrayList<String>().add("hi"));
+		rs.add(dr1);
+
+		dr2.setFieldValue("PLZ", "66122");
+		dr2.setFieldValue("Double", 54.45);
+		dr2.setFieldValue("Long", Long.valueOf("5454544355464354"));
+		dr2.setFieldValue("Date", new Date(System.currentTimeMillis()));
+		dr2.setFieldValue("List", new ArrayList<String>().add("hi"));
+		rs.add(dr2);
+
+		dr3.setFieldValue("PLZ", "66156");
+		dr3.setFieldValue("Double", 54.45);
+		dr3.setFieldValue("Long", Long.valueOf("5454544355464354"));
+
+		dr3.setFieldValue("Date", new Date(System.currentTimeMillis()));
+		dr3.setFieldValue("List", new ArrayList<String>().add("hi"));
 		rs.add(dr3);
 
 		return rs;
