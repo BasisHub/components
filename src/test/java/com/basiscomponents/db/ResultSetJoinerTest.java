@@ -166,4 +166,31 @@ public class ResultSetJoinerTest {
 
 	}
 
+	/**
+	 * More complex types are tested.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void moreTypesResultSetJoinerTest() throws Exception {
+
+		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(),
+				ResultSetProvider.createMoreTypesRightResultSetForLeftJoinTesting(), "PLZ", null, null);
+
+		assertTrue(rs.get(0).getFieldNames().size() == 7);
+
+		assertEquals(54.45, rs.get(0).getFieldValue("Double"));
+		assertEquals(54.45, rs.get(1).getFieldValue("Double"));
+		assertEquals(54.45, rs.get(2).getFieldValue("Double"));
+
+		assertEquals(Long.valueOf("5454544355464354"), rs.get(0).getFieldValue("Long"));
+		assertEquals(Long.valueOf("5454544355464354"), rs.get(1).getFieldValue("Long"));
+		assertEquals(Long.valueOf("5454544355464354"), rs.get(2).getFieldValue("Long"));
+
+		assertEquals(new ArrayList<String>().add("hi"), rs.get(0).getFieldValue("List"));
+		assertEquals(new ArrayList<String>().add("hi"), rs.get(1).getFieldValue("List"));
+		assertEquals(new ArrayList<String>().add("hi"), rs.get(2).getFieldValue("List"));
+
+	}
+
 }

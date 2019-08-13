@@ -290,7 +290,6 @@ public class ResultSetProvider {
 		dr3.setFieldValue("PLZ", "66156");
 		dr3.setFieldValue("Double", 54.45);
 		dr3.setFieldValue("Long", Long.valueOf("5454544355464354"));
-
 		dr3.setFieldValue("Date", new Date(System.currentTimeMillis()));
 		dr3.setFieldValue("List", new ArrayList<String>().add("hi"));
 		rs.add(dr3);

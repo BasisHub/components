@@ -39,8 +39,10 @@ public class TestDataBaseConstants {
 		ArrayList<String> conList = new ArrayList<String>();
 		for (int i = 0; i < fieldArray.length; i++) {
 			try {
-				if (((String) fieldArray[i].get(null)).contains("jdbc")) {
-					conList.add((String) fieldArray[i].get(null));
+				if (fieldArray[i].get(null) instanceof java.lang.String) {
+					if (((String) fieldArray[i].get(null)).contains("jdbc")) {
+						conList.add((String) fieldArray[i].get(null));
+					}
 				}
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
