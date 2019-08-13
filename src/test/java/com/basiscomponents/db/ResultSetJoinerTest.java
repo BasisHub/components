@@ -32,10 +32,15 @@ public class ResultSetJoinerTest {
 		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
 		assertEquals("St. Wendel", rs.get(1).getFieldValue("Ort"));
 		assertEquals("Dillingen", rs.get(2).getFieldValue("Ort"));
+		assertThrows(DataFieldNotFoundException.class, () -> rs.get(3).getFieldValue("Ort"));
+		assertEquals("Dillingen", rs.get(4).getFieldValue("Ort"));
 
 		assertEquals("Elias", rs.get(0).getFieldValue("Buergermeister"));
 		assertEquals("Sascha", rs.get(1).getFieldValue("Buergermeister"));
 		assertEquals("Dude", rs.get(2).getFieldValue("Buergermeister"));
+		assertThrows(DataFieldNotFoundException.class, () -> rs.get(3).getFieldValue("Buergermeister"));
+		assertThrows(DataFieldNotFoundException.class, () -> rs.get(4).getFieldValue("Buergermeister"));
+
 	}
 
 	/**
@@ -109,6 +114,55 @@ public class ResultSetJoinerTest {
 		assertEquals("St. Wendel", rs.get(1).getFieldValue("Ort"));
 		assertEquals("Dillingen", rs.get(2).getFieldValue("Ort"));
 		assertEquals("test", rs.get(3).getFieldValue("Ort"));
+		assertEquals("test", rs.get(3).getFieldValue("Buergermeister"));
+
+	}
+
+	/**
+	 * One ResultSets is joined into the left sided one. One entry cannot be matched
+	 * with the right ResultSet, but the empty fields are written with a test
+	 * string.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void partlyEmptyFieldsWithDefaultResultSetJoinerTest() throws Exception {
+
+		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(),
+				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ", null, "test");
+		assertTrue(rs.get(0).getFieldNames().size() == 5);
+
+		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
+		assertEquals("St. Wendel", rs.get(1).getFieldValue("Ort"));
+		assertEquals("Dillingen", rs.get(2).getFieldValue("Ort"));
+		assertEquals("test", rs.get(3).getFieldValue("Ort"));
+		assertEquals("test", rs.get(3).getFieldValue("Buergermeister"));
+		assertEquals("Dillingen", rs.get(4).getFieldValue("Ort"));
+		assertEquals("test", rs.get(4).getFieldValue("Buergermeister"));
+
+	}
+
+	/**
+	 * One ResultSets is joined into the left sided one. One entry cannot be matched
+	 * with the right ResultSet, but the empty fields are written with a test
+	 * string.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void partlyEmptyFieldsWithoutDefaultResultSetJoinerTest() throws Exception {
+
+		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(),
+				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ", null, null);
+		assertTrue(rs.get(0).getFieldNames().size() == 5);
+
+		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
+		assertEquals("St. Wendel", rs.get(1).getFieldValue("Ort"));
+		assertEquals("Dillingen", rs.get(2).getFieldValue("Ort"));
+		assertThrows(DataFieldNotFoundException.class, () -> rs.get(3).getFieldValue("Ort"));
+		assertThrows(DataFieldNotFoundException.class, () -> rs.get(3).getFieldValue("Buergermeister"));
+		assertEquals("Dillingen", rs.get(4).getFieldValue("Ort"));
+		assertThrows(DataFieldNotFoundException.class, () -> rs.get(3).getFieldValue("Buergermeister"));
 
 	}
 

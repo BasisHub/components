@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.basiscomponents.db.exception.DataFieldNotFoundException;
+
 public class ResultSetJoiner {
 
 	private ResultSetJoiner() {
@@ -65,7 +67,7 @@ public class ResultSetJoiner {
 		for (DataRow dr : right) {
 			if (leftData.contains(dr.getFieldValue(joinFieldName))) {
 			targetData.put(dr.getFieldValue(joinFieldName),
-					getObjectValuesInOrderFromTargetFields(dr, targetFieldNames));
+						getObjectValuesInOrderFromTargetFields(dr, targetFieldNames, writeEmptyFields));
 			}
 		}
 
@@ -88,8 +90,8 @@ public class ResultSetJoiner {
 				if (writeEmptyFields == null) {
 					continue;
 				} else {
+					currentJoinItems = new ArrayList<>();
 					for (int i = 0; i < targetFieldNames.size(); i++) {
-						currentJoinItems = new ArrayList<>();
 						currentJoinItems.add(writeEmptyFields);
 					}
 				}
@@ -101,11 +103,17 @@ public class ResultSetJoiner {
 
 	}
 
-	private static List<Object> getObjectValuesInOrderFromTargetFields(DataRow dr, List<String> targetFieldNames) {
+	private static List<Object> getObjectValuesInOrderFromTargetFields(DataRow dr, List<String> targetFieldNames, String writeEmptyFields) {
 
 		List<Object> targetObjects = new ArrayList<>();
 		for (int i = 0; i < targetFieldNames.size(); i++) {
-			targetObjects.add(dr.getFieldValue(targetFieldNames.get(i)));
+			try {
+				targetObjects.add(dr.getFieldValue(targetFieldNames.get(i)));
+			} catch (DataFieldNotFoundException e) {
+				if (writeEmptyFields != null) {
+					targetObjects.add(writeEmptyFields);
+				}
+			}
 		}
 
 		return targetObjects;

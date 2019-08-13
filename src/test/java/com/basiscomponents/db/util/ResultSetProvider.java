@@ -70,6 +70,7 @@ public class ResultSetProvider {
 		DataRow dr2 = new DataRow();
 		DataRow dr3 = new DataRow();
 		DataRow dr4 = new DataRow();
+		DataRow dr5 = new DataRow();
 
 		dr1.setFieldValue("Name", "Heinz");
 		dr1.setFieldValue("Alter", 53);
@@ -90,6 +91,11 @@ public class ResultSetProvider {
 		dr4.setFieldValue("Alter", 49);
 		dr4.setFieldValue("PLZ", "66000");
 		rs.add(dr4);
+
+		dr5.setFieldValue("Name", "unkown2");
+		dr5.setFieldValue("Alter", 50);
+		dr5.setFieldValue("PLZ", "66001");
+		rs.add(dr5);
 
 		return rs;
 
@@ -119,6 +125,7 @@ public class ResultSetProvider {
 		DataRow dr19 = new DataRow();
 		DataRow dr20 = new DataRow();
 		DataRow dr21 = new DataRow();
+		DataRow dr22 = new DataRow();
 
 		dr1.setFieldValue("PLZ", "66132");
 		dr1.setFieldValue("Ort", "Saarbruecken");
@@ -224,6 +231,10 @@ public class ResultSetProvider {
 		dr21.setFieldValue("Ort", "Dillingen");
 		dr21.setFieldValue("Buergermeister", "Dude");
 		rs.add(dr21);
+
+		dr22.setFieldValue("PLZ", "66001");
+		dr22.setFieldValue("Ort", "Dillingen");
+		rs.add(dr22);
 
 		return rs;
 
