@@ -88,7 +88,7 @@ public class ResultSetProvider {
 		
 		dr4.setFieldValue("Name", "unkown");
 		dr4.setFieldValue("Alter", 49);
-		dr4.setFieldValue("PLZ", "66134");
+		dr4.setFieldValue("PLZ", "66000");
 		rs.add(dr4);
 
 		return rs;
@@ -101,6 +101,24 @@ public class ResultSetProvider {
 		DataRow dr1 = new DataRow();
 		DataRow dr2 = new DataRow();
 		DataRow dr3 = new DataRow();
+		DataRow dr4 = new DataRow();
+		DataRow dr5 = new DataRow();
+		DataRow dr6 = new DataRow();
+		DataRow dr7 = new DataRow();
+		DataRow dr8 = new DataRow();
+		DataRow dr9 = new DataRow();
+		DataRow dr10 = new DataRow();
+		DataRow dr11 = new DataRow();
+		DataRow dr12 = new DataRow();
+		DataRow dr13 = new DataRow();
+		DataRow dr14 = new DataRow();
+		DataRow dr15 = new DataRow();
+		DataRow dr16 = new DataRow();
+		DataRow dr17 = new DataRow();
+		DataRow dr18 = new DataRow();
+		DataRow dr19 = new DataRow();
+		DataRow dr20 = new DataRow();
+		DataRow dr21 = new DataRow();
 
 		dr1.setFieldValue("PLZ", "66132");
 		dr1.setFieldValue("Ort", "Saarbruecken");
@@ -116,6 +134,96 @@ public class ResultSetProvider {
 		dr3.setFieldValue("Ort", "Dillingen");
 		dr3.setFieldValue("Buergermeister", "Dude");
 		rs.add(dr3);
+
+		dr4.setFieldValue("PLZ", "66133");
+		dr4.setFieldValue("Ort", "Saarbruecken");
+		dr4.setFieldValue("Buergermeister", "Elias");
+		rs.add(dr4);
+
+		dr5.setFieldValue("PLZ", "66134");
+		dr5.setFieldValue("Ort", "St. Wendel");
+		dr5.setFieldValue("Buergermeister", "Sascha");
+		rs.add(dr5);
+
+		dr6.setFieldValue("PLZ", "66135");
+		dr6.setFieldValue("Ort", "Dillingen");
+		dr6.setFieldValue("Buergermeister", "Dude");
+		rs.add(dr6);
+
+		dr7.setFieldValue("PLZ", "66136");
+		dr7.setFieldValue("Ort", "Saarbruecken");
+		dr7.setFieldValue("Buergermeister", "Elias");
+		rs.add(dr7);
+
+		dr8.setFieldValue("PLZ", "66137");
+		dr8.setFieldValue("Ort", "St. Wendel");
+		dr8.setFieldValue("Buergermeister", "Sascha");
+		rs.add(dr8);
+
+		dr9.setFieldValue("PLZ", "66138");
+		dr9.setFieldValue("Ort", "Dillingen");
+		dr9.setFieldValue("Buergermeister", "Dude");
+		rs.add(dr9);
+
+		dr10.setFieldValue("PLZ", "66139");
+		dr10.setFieldValue("Ort", "Saarbruecken");
+		dr10.setFieldValue("Buergermeister", "Elias");
+		rs.add(dr10);
+
+		dr11.setFieldValue("PLZ", "66140");
+		dr11.setFieldValue("Ort", "St. Wendel");
+		dr11.setFieldValue("Buergermeister", "Sascha");
+		rs.add(dr11);
+
+		dr12.setFieldValue("PLZ", "66141");
+		dr12.setFieldValue("Ort", "Dillingen");
+		dr12.setFieldValue("Buergermeister", "Dude");
+		rs.add(dr12);
+
+		dr13.setFieldValue("PLZ", "66142");
+		dr13.setFieldValue("Ort", "Saarbruecken");
+		dr13.setFieldValue("Buergermeister", "Elias");
+		rs.add(dr13);
+
+		dr14.setFieldValue("PLZ", "66143");
+		dr14.setFieldValue("Ort", "St. Wendel");
+		dr14.setFieldValue("Buergermeister", "Sascha");
+		rs.add(dr14);
+
+		dr15.setFieldValue("PLZ", "66144");
+		dr15.setFieldValue("Ort", "Dillingen");
+		dr15.setFieldValue("Buergermeister", "Dude");
+		rs.add(dr15);
+
+		dr16.setFieldValue("PLZ", "66145");
+		dr16.setFieldValue("Ort", "Saarbruecken");
+		dr16.setFieldValue("Buergermeister", "Elias");
+		rs.add(dr16);
+
+		dr17.setFieldValue("PLZ", "66146");
+		dr17.setFieldValue("Ort", "St. Wendel");
+		dr17.setFieldValue("Buergermeister", "Sascha");
+		rs.add(dr17);
+
+		dr18.setFieldValue("PLZ", "66147");
+		dr18.setFieldValue("Ort", "Dillingen");
+		dr18.setFieldValue("Buergermeister", "Dude");
+		rs.add(dr18);
+
+		dr19.setFieldValue("PLZ", "66148");
+		dr19.setFieldValue("Ort", "Saarbruecken");
+		dr19.setFieldValue("Buergermeister", "Elias");
+		rs.add(dr19);
+
+		dr20.setFieldValue("PLZ", "66149");
+		dr20.setFieldValue("Ort", "St. Wendel");
+		dr20.setFieldValue("Buergermeister", "Sascha");
+		rs.add(dr20);
+
+		dr21.setFieldValue("PLZ", "66150");
+		dr21.setFieldValue("Ort", "Dillingen");
+		dr21.setFieldValue("Buergermeister", "Dude");
+		rs.add(dr21);
 
 		return rs;
 

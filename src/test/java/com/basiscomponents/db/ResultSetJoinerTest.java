@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -24,8 +23,10 @@ public class ResultSetJoinerTest {
 	 */
 	@Test
 	public void mostBasicOneResultSetJoinerTest() throws Exception {
+
 		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(),
-				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ", null);
+				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ", null, null);
+
 		assertTrue(rs.get(0).getFieldNames().size() == 5);
 
 		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
@@ -46,12 +47,12 @@ public class ResultSetJoinerTest {
 	 */
 	@Test
 	public void notAllFieldsResultSetJoinerTest() throws Exception {
+
 		List<String> myList = new ArrayList<String>();
 		myList.add("Ort");
-		HashMap<ResultSet, List<String>> temp = new HashMap<>();
-		temp.put(ResultSetProvider.createRightResultSetForLeftJoinTesting(), myList);
 		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(),
-				temp, "PLZ", null);
+				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ",
+				myList, null);
 		assertTrue(rs.get(0).getFieldNames().size() == 4);
 
 		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
@@ -67,6 +68,7 @@ public class ResultSetJoinerTest {
 	 */
 	@Test
 	public void unperfectJoinResultSetJoinerTest() throws Exception {
+
 		DataRow dr = new DataRow();
 		dr.setFieldValue("Name", "Hans");
 		dr.setFieldValue("Alter", 45);
@@ -74,7 +76,7 @@ public class ResultSetJoinerTest {
 		ResultSet left = ResultSetProvider.createLeftResultSetForLeftJoinTesting();
 		left.add(dr);
 		ResultSet rs = ResultSetJoiner.leftJoin(left,
-				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ", null);
+				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ", null, null);
 		assertTrue(rs.get(0).getFieldNames().size() == 5);
 
 		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
@@ -88,57 +90,6 @@ public class ResultSetJoinerTest {
 		assertThrows(DataFieldNotFoundException.class, () -> rs.get(3).getFieldValue("Buergermeister"));
 	}
 
-	/**
-	 * Multiple ResultSets are joined into the left one, without any limitations.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void moreComplexResultSetJoinerTest() throws Exception {
-		List<ResultSet> temp = new ArrayList<ResultSet>();
-		temp.add(ResultSetProvider.createRightResultSetForLeftJoinTesting());
-		temp.add(ResultSetProvider.createAnotherRightResultSetForLeftJoinTesting());
-		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(), temp, "PLZ",
-				null);
-		assertTrue(rs.get(0).getFieldNames().size() == 7);
-
-		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
-		assertEquals("St. Wendel", rs.get(1).getFieldValue("Ort"));
-		assertEquals("Dillingen", rs.get(2).getFieldValue("Ort"));
-
-		assertEquals("Moskau", rs.get(0).getFieldValue("Stadt"));
-		assertEquals("Wien", rs.get(1).getFieldValue("Stadt"));
-		assertEquals("Konz", rs.get(2).getFieldValue("Stadt"));
-	}
-
-	/**
-	 * Multiple ResultSets are joined into the left sided one. One of the right side
-	 * also has an limitation of the fields which should be joined.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void moreComplexResultSetJoinerTest2() throws Exception {
-
-		HashMap<ResultSet, List<String>> temp = new HashMap<>();
-
-		temp.put(ResultSetProvider.createRightResultSetForLeftJoinTesting(), null);
-		List<String> tempList = new ArrayList<>();
-		tempList.add("Stadt");
-		temp.put(ResultSetProvider.createAnotherRightResultSetForLeftJoinTesting(), tempList);
-
-		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(), temp, "PLZ",
-				null);
-		assertTrue(rs.get(0).getFieldNames().size() == 6);
-
-		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
-		assertEquals("St. Wendel", rs.get(1).getFieldValue("Ort"));
-		assertEquals("Dillingen", rs.get(2).getFieldValue("Ort"));
-
-		assertEquals("Moskau", rs.get(0).getFieldValue("Stadt"));
-		assertEquals("Wien", rs.get(1).getFieldValue("Stadt"));
-		assertEquals("Konz", rs.get(2).getFieldValue("Stadt"));
-	}
 
 	/**
 	 * One ResultSets is joined into the left sided one. One entry cannot be matched
@@ -151,7 +102,7 @@ public class ResultSetJoinerTest {
 	public void emptyFieldsResultSetJoinerTest() throws Exception {
 
 		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(),
-				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ", "test");
+				ResultSetProvider.createRightResultSetForLeftJoinTesting(), "PLZ", null, "test");
 		assertTrue(rs.get(0).getFieldNames().size() == 5);
 
 		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
@@ -160,53 +111,5 @@ public class ResultSetJoinerTest {
 		assertEquals("test", rs.get(3).getFieldValue("Ort"));
 
 	}
-
-
-//	/**
-//	 * Multiple ResultSets are joined into the left one, without any limitations.
-//	 * 
-//	 * @throws Exception
-//	 */
-//	@Test
-//	public void JoinConfigurationResultSetJoinerTest() throws Exception {
-//
-//		HashMap<ResultSet, List<String>> temp = new HashMap<>();
-//
-//		temp.put(ResultSetProvider.createRightResultSetForLeftJoinTesting(), null);
-//		List<String> tempList = new ArrayList<>();
-//		tempList.add("Stadt");
-//		temp.put(ResultSetProvider.createAnotherRightResultSetForLeftJoinTesting(), tempList);
-//
-//		JoinFunction<DataRow, List, ArrayList, Void> myFunction = (dr, items, names) -> {
-//			if (items == null) {
-//				for (int i = 0; names.size() < i; i++) {
-//					items.add("");
-//				}
-//			}
-//
-//			for (int i = 0; i < items.size(); i++) {
-//				try {
-//					dr.setFieldValue((String) names.get(i), items.get(i));
-//				} catch (ParseException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		};
-//		
-//		JoinConfiguration jConfig = new JoinConfiguration("PLZ", myFunction);
-//
-//		ResultSet rs = ResultSetJoiner.leftJoin(ResultSetProvider.createLeftResultSetForLeftJoinTesting(), temp,
-//				jConfig);
-//		System.out.println(rs.toJson());
-//		assertTrue(rs.get(0).getFieldNames().size() == 7);
-//
-//		assertEquals("Saarbruecken", rs.get(0).getFieldValue("Ort"));
-//		assertEquals("St. Wendel", rs.get(1).getFieldValue("Ort"));
-//		assertEquals("Dillingen", rs.get(2).getFieldValue("Ort"));
-//
-//		assertEquals("Moskau", rs.get(0).getFieldValue("Stadt"));
-//		assertEquals("Wien", rs.get(1).getFieldValue("Stadt"));
-//		assertEquals("Konz", rs.get(2).getFieldValue("Stadt"));
-//	}
 
 }

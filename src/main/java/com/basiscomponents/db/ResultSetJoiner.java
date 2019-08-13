@@ -14,68 +14,63 @@ public class ResultSetJoiner {
 	/**
 	 * @See @MainLeftJoinMethod
 	 */
-	public static ResultSet leftJoin(ResultSet left, ResultSet right, String joinFieldName, String writeEmptyFields)
-			throws ParseException {
-		Map<ResultSet, List<String>> temp = new HashMap<>();
-		temp.put(right, null);
-		return ResultSetJoiner.leftJoin(left, temp, joinFieldName, writeEmptyFields);
+	public static ResultSet leftJoin(ResultSet left, ResultSet right, String joinFieldName) throws ParseException {
+		return ResultSetJoiner.leftJoin(left, right, joinFieldName, null, null);
 	}
 
 	/**
 	 * @See @MainLeftJoinMethod
 	 */
-	public static ResultSet leftJoin(ResultSet left, List<ResultSet> rights, String joinFieldName,
-			String writeEmptyFields)
-			throws ParseException {
-		Map<ResultSet, List<String>> temp = new HashMap<>();
-		for (ResultSet rs: rights) {
-			temp.put(rs, null);
-		}
-		return ResultSetJoiner.leftJoin(left, temp, joinFieldName, writeEmptyFields);
+	public static ResultSet leftJoin(ResultSet left, ResultSet right, String joinFieldName,
+			List<String> targetFieldNames) throws ParseException {
+		return ResultSetJoiner.leftJoin(left, right, joinFieldName, targetFieldNames, null);
 	}
 
 	/**
-	 * Performs a Left-Join on two or more ResultSets.
+	 * Performs a Left-Join on two ResultSets.
 	 * 
 	 * @MainLeftJoinMethod
-	 * @param left:          The left part of the join
-	 * @param rights:        The right side of the join represented as a Map, which
-	 *                       maps the right-sided ResultSets to the fieldNames which
-	 *                       should be joined
-	 * @param joinFieldName: The FieldName which should be used to join
+	 * @param left:             left ResultSet of the join
+	 * @param right:            right ResultSet of the join
+	 * @param joinFieldName:    FieldName which should be used to join
+	 * @param targetFieldNames: FieldNames of the right ResultSet which should be
+	 *                          joined, if null all fields are joined
+	 * @param writeEmptyFields: if not null, empty fields which didn't find a match
+	 *                          to join are written with this String if null, these
+	 *                          fields are not written
 	 * 
-	 * @return The left-joined ResultSet as an Result of the two input ResultSets
+	 * @return The left-joined ResultSet as an result of the two input ResultSets
 	 * @throws ParseException
 	 */
-	public static ResultSet leftJoin(final ResultSet left, final Map<ResultSet, List<String>> rights,
-			final String joinFieldName, final String writeEmptyFields)
+	public static ResultSet leftJoin(ResultSet left, ResultSet right, String joinFieldName,
+			List<String> targetFieldNames, String writeEmptyFields)
 			throws ParseException {
 		
 		ResultSet result = left.clone();
-		List<String> targetFieldNames;
 
-		// Iterating over the right sided ResultSets of the join
-		for (ResultSet currentRight : rights.keySet()) {
-
-			targetFieldNames = rights.get(currentRight);
-
-			// If the targeFieldNames are not specified, all fields will be joined
-			if (targetFieldNames == null || targetFieldNames.isEmpty()) {
-				targetFieldNames = currentRight.getColumnNames();
-				targetFieldNames.remove(joinFieldName);
-			}
-
-			// Building an HashMap out of the right ResultSet and the targetNames
-			Map<Object, List<Object>> targetData = new HashMap<>();
-			for (DataRow dr : currentRight) {
-				targetData.put(dr.getFieldValue(joinFieldName),
-						getObjectValuesInOrderFromTargetFields(dr, targetFieldNames));
-			}
-
-			// Joining the left ResultSet with the data from the right ResultSet
-			performJoin(result, targetData, joinFieldName, writeEmptyFields, targetFieldNames);
-
+		// If the targeFieldNames are not specified, all fields will be joined
+		if (targetFieldNames == null || targetFieldNames.isEmpty()) {
+			targetFieldNames = right.getColumnNames();
+			targetFieldNames.remove(joinFieldName);
 		}
+
+		// Building an HashMap out of the right ResultSet and the targetNames
+		Map<Object, List<Object>> targetData = new HashMap<>();
+		List<Object> leftData = new ArrayList<>();
+		// The leftData list is used to build a dynamic HasMap which only contains the
+		// data of the right ResultSet which is actually needed
+		for (DataRow dr : left) {
+			leftData.add(dr.getFieldValue(joinFieldName));
+		}
+		for (DataRow dr : right) {
+			if (leftData.contains(dr.getFieldValue(joinFieldName))) {
+			targetData.put(dr.getFieldValue(joinFieldName),
+					getObjectValuesInOrderFromTargetFields(dr, targetFieldNames));
+			}
+		}
+
+		// Joining the left ResultSet with the data from the right ResultSet
+		performJoin(result, targetData, joinFieldName, writeEmptyFields, targetFieldNames);
 
 		return result;
 	}
@@ -116,57 +111,5 @@ public class ResultSetJoiner {
 		return targetObjects;
 
 	}
-
-//	/**
-//	 * Performs a left join. @See @MainLeftJoinMethod This method only differs from
-//	 * the main one, considering the use of the JoinConfiguration here.
-//	 * 
-//	 * 
-//	 * @param left:    The left part of the join
-//	 * @param rights:  The right side of the join represented as a Map, which maps
-//	 *                 the right-sided ResultSets to the fieldNames which should be
-//	 *                 joined
-//	 * @param jConfig: A ConfigurationClass with has to be filled with the main
-//	 *                 joinField and a function which decides how to perform the
-//	 *                 join in detail.
-//	 * @return
-//	 * @throws ParseException
-//	 */
-//	public static ResultSet leftJoin(final ResultSet left, final Map<ResultSet, List<String>> rights,
-//			final JoinConfiguration jConfig) throws ParseException {
-//
-//		ResultSet result = left.clone();
-//		List<String> targetFieldNames;
-//		List<Object> currentJoinItems;
-//		String joinFieldName = jConfig.getJoinFieldName();
-//
-//		// Iterating over the right sided ResultSets of the join
-//		for (ResultSet currentRight : rights.keySet()) {
-//
-//			targetFieldNames = rights.get(currentRight);
-//
-//			// If the targeFieldNames are not specified, all fields will be joined
-//			if (targetFieldNames == null || targetFieldNames.isEmpty()) {
-//				targetFieldNames = currentRight.get(0).getFieldNames();
-//				targetFieldNames.remove(joinFieldName);
-//			}
-//
-//			// Building an HashMap out of the right ResultSet and the targetNames
-//			Map<Object, List<Object>> targetData = new HashMap<>();
-//			for (DataRow dr : currentRight) {
-//				targetData.put(dr.getFieldValue(joinFieldName),
-//						getObjectValuesInOrderFromTargetFields(dr, targetFieldNames));
-//			}
-//
-//			// Joining the left ResultSet with the data from the right ResultSet
-//			for (DataRow dr : result) {
-//				currentJoinItems = targetData.get(dr.getFieldValue(joinFieldName));
-//				jConfig.applyJoinFunction(dr, currentJoinItems, targetFieldNames);
-//			}
-//
-//		} // Iterating over the right sided ResultSets of the join
-//
-//		return result;
-//	}
 
 }
