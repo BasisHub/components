@@ -12,3 +12,7 @@ To set up the components project in your IDE, you will need some dependencies. T
 3. Import the Project as Mavan Project. select the Maven profile you want to use (winbbjlib/unixbbjlib) if your bbj installation is on a different part change the pom.xml profile, but make sure not to commit this change.
 5. Use https://github.com/BasisHub/components/issues to report and track your issues. We're looking forward to your pull requests!
 
+conventions
+--------
+1. From now on commits should be written as [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
+2. The branching should be done via [git flow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
