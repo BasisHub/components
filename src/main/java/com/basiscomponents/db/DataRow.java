@@ -114,6 +114,31 @@ public class DataRow implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Returns a DataRow from a plain JSON String
+	 * 
+	 * @param in
+	 *       A JSON string to be parsed into a new DataRow object
+	 * @return DataRow
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public static DataRow fromJson(String in) throws IOException, ParseException {
+		return fromJson(in, null);
+	}
+	
+	/**
+	 * Returns a DataRow from a plain JSON String, honoring the types of an additional meta DataRow 
+	 * 
+	 * @param in
+	 * 			A JSON string to be parsed into a new DataRow object
+	 * @param meta
+	 * 			A DataRow serving as meta object to define the desirec types 
+	 * @return  DataRow
+	 * 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
 	public static DataRow fromJson(String in, DataRow meta) throws IOException, ParseException {
 		return DataRowJsonMapper.fromJson(in, meta);
 	}
