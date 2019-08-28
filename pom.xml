@@ -91,11 +91,18 @@
 		</dependency>
 
 		<dependency>
+		<groupId>com.basis.lib</groupId>
+		<artifactId>BBjUtil.jar</artifactId>
+		<scope>system</scope>
+		<version>1.0</version>
+		<systemPath>${jar-directory}/BBjUtil.jar</systemPath>
+	</dependency>
+		<dependency>
 			<groupId>com.basis.lib</groupId>
-			<artifactId>BBjUtil.jar</artifactId>
+			<artifactId>BBjSql.jar</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${jar-directory}/BBjUtil.jar</systemPath>
+			<systemPath>${jar-directory}/BBjSql.jar</systemPath>
 		</dependency>
 
 		<dependency>

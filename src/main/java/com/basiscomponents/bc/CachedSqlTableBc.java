@@ -42,4 +42,10 @@ public class CachedSqlTableBc extends SqlTableBC {
 		this.created = 0;
 		return super.write(dr);
 	}
+
+	@Override
+	public void remove(final DataRow r) throws Exception {
+		this.created = 0;
+		super.remove(r);
+	}
 }
