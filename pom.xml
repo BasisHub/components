@@ -160,13 +160,12 @@
 			<scope>system</scope>
 			<systemPath>${jar-directory}/BBjFilesystem.jar</systemPath>
 		</dependency>
-		guava-28.0-jre.jar
 		<dependency>
 			<groupId>com.google</groupId>
 			<artifactId>guava</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/poi-4.1.0.jar</systemPath>
+			<systemPath>${jar-directory}/guava-28.0-jre.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.basis.lib</groupId>
