@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -32,14 +33,17 @@ public class DataRowJsonMapper {
 	 *
 	 * @param in The JSON String
 	 * @return the DataRow object created based on the JSOn String's content
-	 * @throws ParseException
+	 * 
 	 * @throws IOException
+	 * @throws ParseException
 	 * @throws JsonParseException
+	 * @throws JsonMappingException
 	 *
 	 * @throws Exception          Gets thrown in case the JSON could not be parsed /
 	 *                            is invalid
 	 */
-	public static DataRow fromJson(final String in) throws IOException, ParseException {
+	public static DataRow fromJson(final String in)
+			throws IOException, ParseException, JsonParseException, JsonMappingException {
 		return fromJson(in, null);
 	}
 
@@ -51,14 +55,18 @@ public class DataRowJsonMapper {
 	 * @param meta A DataRow that will be used to determine the field types if not
 	 *             given in the meta section of the JSON String
 	 * @return the DataRow object created based on the JSOn String's content
-	 * @throws ParseException
+	 * 
 	 * @throws IOException
+	 * @throws ParseException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
 	 *
 	 * @throws Exception      Gets thrown in case the JSON could not be parsed / is
 	 *                        invalid
 	 */
 	@SuppressWarnings("unchecked")
-	public static DataRow fromJson(final String in, final DataRow meta) throws IOException, ParseException {
+	public static DataRow fromJson(final String in, final DataRow meta) 
+			throws IOException, ParseException, JsonParseException, JsonMappingException {
 		String input = in;
 		if (input.length() < 2) {
 			return new DataRow();
@@ -393,6 +401,8 @@ public class DataRowJsonMapper {
 	}
 
 	private static String wrapInJsonArray(String input) {
+		input = input.trim(); // NOTE: Important to disregard leading/trailing spaces
+		
 		if (input.startsWith("{") && input.endsWith("}")) {
 			return "[" + input + "]";
 		}
