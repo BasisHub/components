@@ -13,8 +13,8 @@ import com.basiscomponents.db.ResultSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,12 +72,12 @@ public class JLibResultSetImporter {
 	 */
 	private HashMap<Integer, String> initFieldNameMap(TemplatedString templatedStr) {
 		HashMap<Integer, String> indexList = new HashMap<>();
+
 		List<String> fieldNameList = Arrays.asList(templatedStr.getFieldNames().toString().split("\n"));
-		Iterator<String> it = fieldNameList.iterator();
 		int counter = 0;
 
-		while (it.hasNext()) {
-			indexList.put(counter, it.next());
+		for (String fieldName:fieldNameList) {
+			indexList.put(counter, fieldName);
 			counter++;
 		}
 
@@ -136,36 +136,25 @@ public class JLibResultSetImporter {
 		}
 
 		fieldNameMap = new HashMap<>();
-
-		@SuppressWarnings("unchecked")
 		List<String> fieldNameList = fieldSelection.getFieldNames();
+		setFieldSelection(fieldNameList);
+	}
+
+	public void setFieldSelection(Collection<String> fieldSelection) {
 
 		List<String> templatedStringFieldNameList = Arrays
 				.asList(templatedString.getFieldNames().toString().split("\n"));
-		Iterator<String> it = templatedStringFieldNameList.iterator();
-
-		Iterator<String> requestedFieldNameIterator;
-
-		String currentFieldName;
-		String currentRequestedFieldName;
 		int currentFieldIndex = 0;
 
-		while (it.hasNext()) {
-			currentFieldName = it.next();
-
-			requestedFieldNameIterator = fieldNameList.iterator();
-			while (requestedFieldNameIterator.hasNext()) {
-				currentRequestedFieldName = requestedFieldNameIterator.next();
-
+		for (String currentFieldName:templatedStringFieldNameList) {
+			for (String currentRequestedFieldName :fieldSelection) {
 				if (currentRequestedFieldName.equalsIgnoreCase(currentFieldName)) {
 					fieldNameMap.put(currentFieldIndex, currentFieldName);
 				}
 			}
-
 			currentFieldIndex++;
 		}
 	}
-
 	/**
 	 * Returns a ResultSet object with the content of the Data file based on the
 	 * specified filter, offset, field selection.
@@ -176,7 +165,7 @@ public class JLibResultSetImporter {
 	 * @throws NoSuchFieldException
 	 * @throws Exception
 	 */
-	public ResultSet retrieve() throws IndexOutOfBoundsException, NoSuchFieldException, Exception {
+	public ResultSet retrieve() throws Exception {
 		if (fieldNameMap == null || fieldNameMap.isEmpty() || templatedString == null) {
 			return null;
 		}
@@ -186,6 +175,7 @@ public class JLibResultSetImporter {
 
 		// Opening the file & checking out a license
 		FilePosition pos = connectionManager.open(fileName, true, true); // params: filePath, readOnly, useRemote
+
 
 		FilePosition endPos = null;
 		ResultSet rs = new ResultSet();
@@ -372,7 +362,7 @@ public class JLibResultSetImporter {
 	 * @throws NoSuchFieldException
 	 * @throws BBjException
 	 */
-	private DataRow getDataRowFromRecord(Set<Entry<Integer, String>> entrySet, TemplatedString templatedStr,
+	private DataRow getDataRowFromRecord(final Set<Entry<Integer, String>> entrySet, TemplatedString templatedStr,
 			List<Integer> numericFieldIndeces) throws NoSuchFieldException, BBjException {
 
 		DataRow dr = new DataRow();
@@ -418,20 +408,16 @@ public class JLibResultSetImporter {
 	 * @throws IndexOutOfBoundsException
 	 * @throws NoSuchFieldException
 	 */
-	private List<Integer> initNumericFieldsIndeces(TemplatedString templatedString, Map<Integer, String> fieldMap)
+	private List<Integer> initNumericFieldsIndeces(final TemplatedString templatedString, final Map<Integer, String> fieldMap)
 			throws NoSuchFieldException {
-		Iterator<Entry<Integer, String>> it = fieldMap.entrySet().iterator();
 		ArrayList<Integer> indexList = new ArrayList<>();
 
 		int index = 0;
 		int type;
-		Entry<Integer, String> entry;
 
-		while (it.hasNext()) {
-			entry = it.next();
-			type = templatedString.getFieldType(entry.getKey());
-
-			if (type == 'B' || type == 'D' || type == 'F' || type == 'N' || type == 'X' || type == 'Y') {
+		for (Integer key:fieldMap.keySet()) {
+			type = templatedString.getFieldType(key);
+			if (isNumericType(type)) {
 				indexList.add(index);
 			}
 
@@ -439,6 +425,10 @@ public class JLibResultSetImporter {
 		}
 
 		return indexList;
+	}
+
+	private static boolean isNumericType(final int type) {
+		return type == 'B' || type == 'D' || type == 'F' || type == 'N' || type == 'X' || type == 'Y';
 	}
 
 	/**
@@ -454,16 +444,12 @@ public class JLibResultSetImporter {
 	 * 
 	 * @throws Exception
 	 */
-	private void initColumnMetadata(ResultSet rs, TemplatedString templatedStr, Map<Integer, String> fieldMap)
-			throws Exception {
-		Iterator<Entry<Integer, String>> it = fieldMap.entrySet().iterator();
+	private void initColumnMetadata(ResultSet rs, TemplatedString templatedStr, Map<Integer, String> fieldMap) throws Exception {
 		int columnIndex;
 		String columnName;
 		char type;
-		Entry<Integer, String> entry;
+		for (Entry<Integer, String> entry:fieldMap.entrySet()) {
 
-		while (it.hasNext()) {
-			entry = it.next();
 			columnName = entry.getValue();
 			columnIndex = rs.addColumn(columnName);
 
@@ -476,7 +462,6 @@ public class JLibResultSetImporter {
 			case 'C':
 				rs.setColumnType(columnIndex, java.sql.Types.VARCHAR);
 				break;
-
 			case 'D':
 				rs.setColumnType(columnIndex, java.sql.Types.DOUBLE);
 				break;
