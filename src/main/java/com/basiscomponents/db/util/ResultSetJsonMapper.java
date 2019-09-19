@@ -316,7 +316,7 @@ public class ResultSetJsonMapper {
 
 		default:
 			// this is a noop - TODO
-			System.err.println("unknown column type: " + fieldType);
+			System.err.println("Resutset::toJson unknown column type: " + fieldType);
 			break;
 
 		}// switch
