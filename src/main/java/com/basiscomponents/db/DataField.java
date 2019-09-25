@@ -180,6 +180,9 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Integer</code> object.
 	 */
 	public Integer getInt() {
+		if(this.Value != null && getClassName() == "java.lang.Double"){
+			return ((Double)this.Value).intValue();
+		}
 		return (Integer) this.Value;
 	}
 
@@ -325,7 +328,10 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as byte array.
 	 */
 	public byte[] getBytes() {
-		return (byte[]) this.Value;
+		if(this.Value instanceof byte[]) {
+			return (byte[]) this.Value;
+		}
+		return this.getString().getBytes();
 	}
 
 	/**

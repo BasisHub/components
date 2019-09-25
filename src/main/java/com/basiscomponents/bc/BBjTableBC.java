@@ -3,16 +3,19 @@ package com.basiscomponents.bc;
 import com.basis.startup.type.BBjException;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.exporter.JlibResultSetExporter;
 import com.basiscomponents.db.importer.JLibResultSetImporter;
 
 import java.util.Collection;
 
 public class BBjTableBC implements BusinessComponent{
 
-	JLibResultSetImporter importer;
+	private final JlibResultSetExporter exporter;
+	private final JLibResultSetImporter importer;
 
 	public BBjTableBC(String filePath, String template){
 		importer = new com.basiscomponents.db.importer.JLibResultSetImporter();
+		exporter = new JlibResultSetExporter(filePath,template);
 		try {
 			importer.setFile(filePath,template);
 		} catch (BBjException e) {
@@ -61,7 +64,7 @@ public class BBjTableBC implements BusinessComponent{
 
 	@Override
 	public DataRow write(DataRow row) throws Exception {
-		return null;
+		return exporter.write(row);
 	}
 
 	@Override

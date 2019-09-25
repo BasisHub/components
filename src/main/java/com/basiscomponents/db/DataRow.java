@@ -994,8 +994,9 @@ public class DataRow implements java.io.Serializable {
 		} else if (typeName != null) {
 			switch (typeName) {
 			case "com.basis.bbj.client.datatypes.BBjVector": 
-			case "java.util.ArrayList":  
-				type = -973;
+			case "java.util.ArrayList":
+			case "java.util.List":
+					type = -973;
 				break;
 			case "com.basiscomponents.db.DataRow":
 				type = -974;
@@ -1943,6 +1944,14 @@ public class DataRow implements java.io.Serializable {
 				}
 			});
 		}
+	}
+	private String toString(String delimiter){
+		StringBuilder sb =new StringBuilder();
+		for(Entry<String, DataField> df:this.dataFields.entrySet()){
+			sb.append(df.toString());
+			sb.append(delimiter);
+		}
+		return sb.toString();
 	}
 
 }

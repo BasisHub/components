@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import static com.basiscomponents.db.util.JLibUtil.*;
+
 /**
  * Imports the data of a Data File into a com.basiscomponents.db.ResultSet
  * object using the BASIS JLib.
@@ -183,7 +185,7 @@ public class JLibResultSetImporter {
 		TemplatedString templatedStr = templatedString;
 		List<Integer> numericFieldIndeces = new ArrayList<>();
 		if (fieldNameMap != null && !fieldNameMap.isEmpty()) {
-			numericFieldIndeces = initNumericFieldsIndeces(templatedStr, fieldNameMap);
+			numericFieldIndeces = getNumericFieldsIndeces(templatedStr, fieldNameMap);
 		}
 
 		Set<Entry<Integer, String>> entrySet = fieldNameMap.entrySet();
@@ -393,43 +395,7 @@ public class JLibResultSetImporter {
 		return dr;
 	}
 
-	/**
-	 * Parses the given Templated String using the given field names(Map) and
-	 * returns a list of indexes with the field's defined as Numeric fields in the
-	 * templated String.
-	 * 
-	 * @param templatedString
-	 *            The Templated String to parse.
-	 * @param fieldMap
-	 *            The name of the fields
-	 * 
-	 * @return A list with the field indexes which are defined as Numeric fields.
-	 * 
-	 * @throws IndexOutOfBoundsException
-	 * @throws NoSuchFieldException
-	 */
-	private List<Integer> initNumericFieldsIndeces(final TemplatedString templatedString, final Map<Integer, String> fieldMap)
-			throws NoSuchFieldException {
-		ArrayList<Integer> indexList = new ArrayList<>();
 
-		int index = 0;
-		int type;
-
-		for (Integer key:fieldMap.keySet()) {
-			type = templatedString.getFieldType(key);
-			if (isNumericType(type)) {
-				indexList.add(index);
-			}
-
-			index++;
-		}
-
-		return indexList;
-	}
-
-	private static boolean isNumericType(final int type) {
-		return type == 'B' || type == 'D' || type == 'F' || type == 'N' || type == 'X' || type == 'Y';
-	}
 
 	/**
 	 * Initializes the given ResultSet object's metadata(Column types) based on the
@@ -499,22 +465,7 @@ public class JLibResultSetImporter {
 		}
 	}
 
-	/**
-	 * Returns true if the given byte Array is empty, false otherwise.
-	 * 
-	 * @param buffer
-	 *            The byte Array
-	 * 
-	 * @return True if the byte Array is empty, false otherwise.
-	 */
-	private Boolean isRecordEmpty(byte[] buffer) {
-		for (byte b : buffer) {
-			if (b != 0) {
-				return false;
-			}
-		}
-		return true;
-	}
+
 
 	/**
 	 * Returns a byte Array with the keys from the given FilePosition object as
