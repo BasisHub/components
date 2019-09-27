@@ -38,6 +38,10 @@ public class JLibUtil {
 			return StringBuilder::new;
 		}
 
+		/**
+		 * Transforms the DataFields to their String representation
+ 		 * @return
+		 */
 		@Override
 		public BiConsumer<StringBuilder, DFWrapper> accumulator() {
 			return (builder,b)->{
@@ -64,6 +68,10 @@ public class JLibUtil {
 			};
 		}
 
+		/**
+		 * Combining two elements
+		 * @return
+		 */
 		@Override
 		public BinaryOperator<StringBuilder> combiner() {
 			return (x,y)-> {
@@ -71,6 +79,11 @@ public class JLibUtil {
 				return x;
 			};
 		}
+
+		/**
+		 * what to do with the last Element
+		 * @return
+		 */
 
 		@Override
 		public Function<StringBuilder, byte[]> finisher() {
@@ -135,6 +148,14 @@ public class JLibUtil {
 
 		return indexList;
 	}
+
+	/**
+	 * Converts a DataRow into a byte Array, so it can be written into a BBjTable
+	 * TODO there is still somethin off with the Size of the Number strings, see the Unit Test for JlibUtil
+	 * @param dr the DataRow to transform
+	 * @param bbjtemplate the Template to transform the DataRow into
+	 * @return
+	 */
 	public static byte[] toByteArray(DataRow dr, final TemplatedString bbjtemplate) {
 		List<String> templatedStringFieldNameList = Arrays
 				.asList(bbjtemplate.getFieldNames().toString().split("\n"));

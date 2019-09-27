@@ -14,7 +14,7 @@ public class BBjTableBC implements BusinessComponent{
 	private final JLibResultSetImporter importer;
 
 	public BBjTableBC(String filePath, String template){
-		importer = new com.basiscomponents.db.importer.JLibResultSetImporter();
+		importer = new JLibResultSetImporter();
 		exporter = new JlibResultSetExporter(filePath,template);
 		try {
 			importer.setFile(filePath,template);
@@ -66,21 +66,18 @@ public class BBjTableBC implements BusinessComponent{
 	public DataRow write(DataRow row) throws Exception {
 		return exporter.write(row);
 	}
-
+	//TODO
 	@Override
 	public ResultSet validateRemove(DataRow dr) {
 		return null;
 	}
-
+	//TODO
 	@Override
 	public void remove(DataRow row) throws Exception {
-
-
 	}
 
 	@Override
 	public DataRow getNewObjectTemplate(DataRow conditions) {
-
 		return null;
 	}
 }
