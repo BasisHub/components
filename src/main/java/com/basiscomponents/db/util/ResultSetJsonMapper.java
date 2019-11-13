@@ -1,19 +1,5 @@
 package com.basiscomponents.db.util;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.TimeZone;
-import java.util.function.Consumer;
-
 import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
@@ -23,6 +9,18 @@ import com.basiscomponents.json.ComponentsCharacterEscapes;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.TimeZone;
 
 public class ResultSetJsonMapper {
 
@@ -318,7 +316,7 @@ public class ResultSetJsonMapper {
 
 		default:
 			// this is a noop - TODO
-			System.err.println("unknown column type: " + fieldType);
+			System.err.println("Resutset::toJson unknown column type: " + fieldType);
 			break;
 
 		}// switch
@@ -419,7 +417,7 @@ public class ResultSetJsonMapper {
 		} catch (Exception e) {
 			atr = null;
 		}
-		return Optional.of(atr);
+		return Optional.ofNullable(atr);
 	}
 
 	private static void splitJsonArray(String json, SplitJsonCallback<String> callback) throws ParseException, IOException {
