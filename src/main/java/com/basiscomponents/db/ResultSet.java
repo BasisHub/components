@@ -77,6 +77,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	private SQLResultSet sqlResultSet = null;
 	private static final Logger LOGGER = Logger.getLogger(ResultSet.class.getName());
+	
+	private ResultSetListener mListener;
+
 
 	public ResultSet() {
 	}
@@ -286,6 +289,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	}
 
+	
+	public void registerResultSetListener(ResultSetListener mListener) 
+	{ 
+		this.mListener = mListener; 
+	} 
+
+
 	/**
 	 * Initializes the ResultSet using the metadata and Data from the given java.sql.ResultSet.
 	 * 
@@ -413,6 +423,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		int rowId = 0;
 		while (rs.next()) {
 			DataRow dr = DataRow.newInstance(this);
+			
 			Iterator<HashMap.Entry<Integer, String>> it = columns.entrySet().iterator();
 			column = 0;
 			while (it.hasNext()) {
@@ -431,8 +442,13 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			}
 
 			dr.setRowID(rowId);
-			this.DataRows.add(dr);
-			rowId++;
+			if (this.mListener != null) { 
+				dr = mListener.processRow(dr); 
+			} 
+			if (dr != null) {
+				this.DataRows.add(dr);
+				rowId++;
+			}
 		}
 
 		// Add meta data to the first row only
