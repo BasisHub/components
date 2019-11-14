@@ -83,7 +83,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	public ResultSet() {
 	}
-	private ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<DataRow> dataRows,
+	
+	public ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<DataRow> dataRows,
 			List<String> keyColumns) {
 		this.MetaData = new ArrayList<>(metaData);
 		this.ColumnNames = new ArrayList<>(columnNames);
@@ -91,7 +92,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		this.KeyColumns = new ArrayList<>(keyColumns);
 	}
 
-	private ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<String> keyColumns) {
+	public ResultSet(List<HashMap<String, Object>> metaData, List<String> columnNames, List<String> keyColumns) {
 		this.MetaData = new ArrayList<>(metaData);
 		this.ColumnNames = new ArrayList<>(columnNames);
 		this.KeyColumns = new ArrayList<>(keyColumns);
@@ -2022,7 +2023,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception Gets thrown in case the JSON String could not be created.
 	 */
 	public String toJson() throws Exception {
-			return toJson(true,null, true);
+			return toJson(true, null, true);
 	}
 
 	/**
