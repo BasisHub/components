@@ -99,6 +99,9 @@ public class SQLHelper {
 			case java.sql.Types.TIMESTAMP:
 				prep.setTimestamp(index, o.getTimestamp());
 				break;
+			case java.sql.Types.TIME:
+				prep.setTime(index, o.getTime());
+				break;
 			case java.sql.Types.OTHER:
 				/// this is an auto-generated key. set as string and hope for the best
 				if (isBasisDBMS && o.getValue() == null)

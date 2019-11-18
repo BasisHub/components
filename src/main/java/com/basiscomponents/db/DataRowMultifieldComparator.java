@@ -122,6 +122,12 @@ public class DataRowMultifieldComparator implements Comparator<DataRow> {
 					java.sql.Timestamp t2 = f2.getTimestamp();
 					returnVal = t1.compareTo(t2) * direction;
 					break;
+				case java.sql.Types.TIME:
+				case java.sql.Types.TIME_WITH_TIMEZONE:
+					java.sql.Time tm1 = f1.getTime();
+					java.sql.Time tm2 = f2.getTime();
+					returnVal = tm1.compareTo(tm2) * direction;
+					break;
 			}
 
 			if (returnVal != 0) return returnVal;

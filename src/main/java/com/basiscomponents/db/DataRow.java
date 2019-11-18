@@ -10,9 +10,8 @@ import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowJsonMapper;
 import com.basiscomponents.db.util.DataRowMatcher;
 import com.basiscomponents.db.util.JRDataSourceAdapter;
+import com.basiscomponents.db.util.SqlTypeNames;
 import com.basiscomponents.db.util.TemplateParser;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.google.gson.JsonElement;
 import net.sf.jasperreports.engine.JRDataSource;
 
 import javax.xml.bind.DatatypeConverter;
@@ -32,7 +31,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
-import static com.basiscomponents.db.util.SqlTypeNames.isNumericType;
 
 /**
  * A DataRow is a container object with key/value pairs. Each key being a String
@@ -1721,21 +1719,19 @@ public class DataRow implements java.io.Serializable {
 
 			templatedString.append(resultSet.getColumnName(index) + ":");
 
-			if (!isNumericType(sqlType)) {
+			if (!SqlTypeNames.isNumericType(sqlType)) {
 				templatedString.append("C");
 
-				if (sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE
+				if (sqlType == java.sql.Types.BOOLEAN || sqlType == java.sql.Types.BIT) {
+					precision = 1;
+				} else if (sqlType == java.sql.Types.DATE || sqlType == 9) {
+					precision = 9; // (rlance: why 9?)
+				} else if (sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE
 						|| sqlType == 11) {
-					precision = 21;
+					precision = 23; // max. YYYY-MM-DD hh:mm:ss.000
 				}
 			} else {
 				templatedString.append("N");
-
-				if (sqlType == java.sql.Types.BOOLEAN) {
-					precision = 1;
-				} else if (sqlType == 9 || sqlType == java.sql.Types.DATE) {
-					precision = 9;
-				}
 			}
 
 			templatedString.append("(");
@@ -1767,20 +1763,6 @@ public class DataRow implements java.io.Serializable {
 	 * @throws Exception
 	 */
 	public String getString() throws Exception {
-		ArrayList<Integer> numericTypeCodeList = new ArrayList<Integer>();
-		numericTypeCodeList.add(java.sql.Types.BIGINT);
-		numericTypeCodeList.add(java.sql.Types.TINYINT);
-		numericTypeCodeList.add(java.sql.Types.INTEGER);
-		numericTypeCodeList.add(java.sql.Types.SMALLINT);
-		numericTypeCodeList.add(java.sql.Types.NUMERIC);
-		numericTypeCodeList.add(java.sql.Types.DOUBLE);
-		numericTypeCodeList.add(java.sql.Types.FLOAT);
-		numericTypeCodeList.add(java.sql.Types.DECIMAL);
-		numericTypeCodeList.add(java.sql.Types.REAL);
-		numericTypeCodeList.add(java.sql.Types.BOOLEAN);
-		numericTypeCodeList.add(java.sql.Types.BIT);
-		numericTypeCodeList.add(java.sql.Types.DATE);
-		numericTypeCodeList.add(9); // Basis DATE
 
 		String template = getTemplate();
 		TemplatedString stringTemplate = new TemplatedString(template);
@@ -1794,37 +1776,40 @@ public class DataRow implements java.io.Serializable {
 			String fieldName = entry.getKey();
 			DataField field = entry.getValue();
 
-			if (numericTypeCodeList.contains(fieldType)) {
+			if (SqlTypeNames.isNumericType(fieldType)) {
 				if (field.getValue() == null) {
-					if (fieldType == java.sql.Types.DATE)
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(-1));
-					else
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));
+					stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));
 				} else {
-					if (fieldType == java.sql.Types.BOOLEAN) {
+					if (fieldType == java.sql.Types.BIGINT || fieldType == java.sql.Types.TINYINT
+							|| fieldType == java.sql.Types.INTEGER || fieldType == java.sql.Types.SMALLINT) {
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getInt()));
+					} else if (fieldType == java.sql.Types.DOUBLE) {
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getDouble()));
+					} else {
+						stringTemplate.setFieldValue(fieldName, new BasisNumber(field.getValue().toString()));
+					}
+				}
+			} else {
+				if (field.getValue() == null) {
+					if (fieldType == java.sql.Types.DATE) {
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(-1));
+					} else if (fieldType == java.sql.Types.BOOLEAN || fieldType == java.sql.Types.BIT) {
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));						
+					}
+				} else {
+					if (fieldType == java.sql.Types.BOOLEAN || fieldType == java.sql.Types.BIT) {
 						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getBoolean() ? 1 : 0));
 					} else if (fieldType == 9) {
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getInt()));
+						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getInt())); // BASIS Date
 					} else if (fieldType == java.sql.Types.DATE) {
 						Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(field.getDate().getTime()));
 						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(ret2.doubleValue()));
 					} else {
-						if (fieldType == java.sql.Types.BIGINT || fieldType == java.sql.Types.TINYINT
-								|| fieldType == java.sql.Types.INTEGER || fieldType == java.sql.Types.SMALLINT) {
-							stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getInt()));
-						} else if (fieldType == java.sql.Types.DOUBLE) {
-							stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getDouble()));
-						} else {
-							stringTemplate.setFieldValue(fieldName, new BasisNumber(field.getValue().toString()));
-						}
+						stringTemplate.setFieldValue(fieldName, field.toString());
 					}
 				}
-			} else {
-				if (field.getValue() != null)
-					stringTemplate.setFieldValue(fieldName, field.toString());
 			}
 		}
-
 		return stringTemplate.getString().toString();
 	}
 

@@ -21,10 +21,6 @@ public class SqlTypeNames {
 		numericTypeCodeList.add(java.sql.Types.FLOAT);
 		numericTypeCodeList.add(java.sql.Types.DECIMAL);
 		numericTypeCodeList.add(java.sql.Types.REAL);
-		numericTypeCodeList.add(java.sql.Types.BOOLEAN);
-		numericTypeCodeList.add(java.sql.Types.BIT);
-		numericTypeCodeList.add(java.sql.Types.DATE);
-		numericTypeCodeList.add(9); // Basis DATE
 
 		typeNameMap.put(java.sql.Types.ARRAY, "ARRAY");
 		typeNameMap.put(java.sql.Types.BIGINT, "BIGINT");

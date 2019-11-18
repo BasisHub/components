@@ -2059,7 +2059,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings) throws Exception {
 		if (addIndexColumn!=null)
 			createIndex();
-		return toJson(meta , addIndexColumn, trimStrings, false);
+		return toJson(meta, addIndexColumn, trimStrings, false);
 	}
 	/**
 	 *
@@ -2072,7 +2072,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes) throws Exception {
 		if (addIndexColumn!=null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this,meta , addIndexColumn, trimStrings, writeDataRowAttributes);
+		return ResultSetJsonMapper.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes);
 	}
 	/**
 	 * Returns this ResultSet as a JRDataSource

@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.basiscomponents.db.config.export.SheetConfiguration;
+import com.basiscomponents.db.util.SqlTypeNames;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -648,17 +649,6 @@ public class ResultSetExporter {
 				}
 			}
 
-			ArrayList<Integer> numericTypes = new ArrayList<Integer>();
-			numericTypes.add(java.sql.Types.BIGINT);
-			numericTypes.add(java.sql.Types.DOUBLE);
-			numericTypes.add(java.sql.Types.NUMERIC);
-			numericTypes.add(java.sql.Types.INTEGER);
-			numericTypes.add(java.sql.Types.DECIMAL);
-			numericTypes.add(java.sql.Types.FLOAT);
-			numericTypes.add(java.sql.Types.REAL);
-			numericTypes.add(java.sql.Types.TINYINT);
-			numericTypes.add(java.sql.Types.SMALLINT);
-
 			DataRow currentRow;
 			String currentFieldName;
 			while (it.hasNext()) {
@@ -675,10 +665,10 @@ public class ResultSetExporter {
 					cell = row.createCell(cellIndex);
 					columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
 					if (currentRow.contains(currentFieldName)) {
-						if (numericTypes.contains(columnType)) {
+						if (SqlTypeNames.isNumericType(columnType)) {
 							cell.setCellType(CellType.NUMERIC);
 							cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
-						} else if (columnType == java.sql.Types.BOOLEAN) {
+						} else if (columnType == java.sql.Types.BOOLEAN || columnType == java.sql.Types.BIT) {
 							cell.setCellType(CellType.BOOLEAN);
 							cell.setCellValue(currentRow.getField(currentFieldName).getBoolean());
 						} else if (columnType == java.sql.Types.BINARY || columnType == java.sql.Types.LONGVARBINARY

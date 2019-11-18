@@ -217,7 +217,7 @@ public class DataRowJsonMapper {
 				break;
 			case java.sql.Types.TIMESTAMP:
 			case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
-			case (int) 11:
+			case (int) 11: // BASIS Timestamp
 				String tss = fieldObj.toString();
 				if (!tss.contains("T")) {
 					tss += "T00:00:00.0";
@@ -225,8 +225,12 @@ public class DataRowJsonMapper {
 				java.sql.Timestamp ts = (java.sql.Timestamp) DataField.convertType(tss, fieldType);
 				dr.addDataField(fieldName, fieldType, new DataField(ts));
 				break;
+			case java.sql.Types.TIME:
+			case java.sql.Types.TIME_WITH_TIMEZONE:
+				dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
+				break;
 			case java.sql.Types.DATE:
-			case (int) 9:
+			case (int) 9: // BASIS Date
 				tss = fieldObj.toString();
 				dr.addDataField(fieldName, fieldType,
 						new DataField((java.sql.Date) DataField.convertType(tss, fieldType)));
@@ -247,8 +251,6 @@ public class DataRowJsonMapper {
 			case java.sql.Types.ROWID:
 			case java.sql.Types.SQLXML:
 			case java.sql.Types.STRUCT:
-			case java.sql.Types.TIME:
-			case java.sql.Types.TIME_WITH_TIMEZONE:
 			case java.sql.Types.VARBINARY:
 			default:
 				break;

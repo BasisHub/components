@@ -224,12 +224,11 @@ public class ResultSetJsonMapper {
 				jsonGenerator.writeStringField(fieldName, "");
 			else
 				jsonGenerator.writeBooleanField(fieldName, value.getBoolean());
-
 			break;
 
 		case java.sql.Types.TIMESTAMP:
 		case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
-		case 11:
+		case 11: // BASIS Timestamp
 			if (value.getTimestamp() == null)
 				jsonGenerator.writeStringField(fieldName, "");
 			else {
@@ -281,8 +280,9 @@ public class ResultSetJsonMapper {
 				jsonGenerator.writeStringField(fieldName, str_ts);
 			}
 			break;
+			
 		case java.sql.Types.DATE:
-		case 9:
+		case 9: // BASIS Date
 			if (value.getDate() == null)
 				jsonGenerator.writeStringField(fieldName, "");
 			else {
@@ -290,6 +290,15 @@ public class ResultSetJsonMapper {
 				// adding T00:00:00 for JavaScript to understand the correct order of day and
 				// month
 				// see https://github.com/BBj-Plugins/BBjGridExWidget/issues/89
+			}
+			break;
+
+		case java.sql.Types.TIME:
+		case java.sql.Types.TIME_WITH_TIMEZONE:
+			if (value.getTime() == null)
+				jsonGenerator.writeStringField(fieldName, "");
+			else {
+				jsonGenerator.writeStringField(fieldName, value.getTime().toString());
 			}
 			break;
 
@@ -310,8 +319,6 @@ public class ResultSetJsonMapper {
 		case java.sql.Types.ROWID:
 		case java.sql.Types.SQLXML:
 		case java.sql.Types.STRUCT:
-		case java.sql.Types.TIME:
-		case java.sql.Types.TIME_WITH_TIMEZONE:
 		case java.sql.Types.VARBINARY:
 
 		default:
