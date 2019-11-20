@@ -871,8 +871,24 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @param column The column index
 	 */
 	public void removeColumn(int column) {
-		this.ColumnNames.remove(column);
-		this.MetaData.remove(column);
+		String name = getColumnName(column);
+		if (!name.isEmpty()) {
+			this.ColumnNames.remove(column);
+			this.MetaData.remove(column);
+			if (this.KeyColumns != null && this.KeyColumns.contains(name))
+				this.KeyColumns.remove(name);
+		}
+	}
+
+	/**
+	 * Removes the column with the given name.
+	 * 
+	 * @param name The column name
+	 */
+	public void removeColumn(String name) {
+		int column = getColumnIndex(name);
+		if (column != -1)
+			removeColumn(column);
 	}
 
 	/**
