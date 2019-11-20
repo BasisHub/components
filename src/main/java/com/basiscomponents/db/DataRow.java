@@ -847,9 +847,6 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param fieldName
 	 *            The name of the field to remove.
-	 *
-	 * @throws Exception
-	 *             The field name doesn't exist.
 	 */
 	public void removeField(String fieldName) {
 
@@ -1902,7 +1899,7 @@ public class DataRow implements java.io.Serializable {
 	 * Object also contains
 	 * 
 	 * @param datarow
-	 *            the Datarow to copie the attributes from
+	 *            the DataRow from which to copy the attributes
 	 */
 	public void copyAttributes(DataRow datarow) {
 		if (datarow != null) {
