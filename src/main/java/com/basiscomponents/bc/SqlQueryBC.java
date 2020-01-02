@@ -17,8 +17,7 @@ public class SqlQueryBC {
 	/**
 	 * default Constructor only with url
 	 * 
-	 * @param url
-	 *            the {@code url} to connect to
+	 * @param url the {@code url} to connect to
 	 */
 	public SqlQueryBC(String url) {
 		this.connectionHelper = new SqlConnectionHelper(url);
@@ -27,16 +26,12 @@ public class SqlQueryBC {
 	/**
 	 * default constuctor setting fields
 	 * 
-	 * @param driver
-	 *            the classname of the driver in use
-	 * @param url
-	 *            the {@code url} to connect to
-	 * @param user
-	 *            username for the given sql connection
-	 * @param password
-	 *            password for the given connection
-	 * @throws ClassNotFoundException
-	 *             if the given driver can not be found by {@link ClassLoader}
+	 * @param driver   the classname of the driver in use
+	 * @param url      the {@code url} to connect to
+	 * @param user     username for the given sql connection
+	 * @param password password for the given connection
+	 * @throws ClassNotFoundException if the given driver can not be found by
+	 *                                {@link ClassLoader}
 	 */
 	public SqlQueryBC(String driver, String url, String user, String password) throws ClassNotFoundException {
 		this.connectionHelper = new SqlConnectionHelper(url, user, password, driver);
@@ -45,10 +40,9 @@ public class SqlQueryBC {
 	/**
 	 * Contructor with a {@link Connection} to use
 	 * 
-	 * @param con
-	 *            the {@link Connection} to use to interact with
-	 * @throws SQLException
-	 *             if {@link Connection#isClosed()} throws a {@link SQLException}
+	 * @param con the {@link Connection} to use to interact with
+	 * @throws SQLException if {@link Connection#isClosed()} throws a
+	 *                      {@link SQLException}
 	 */
 	public SqlQueryBC(Connection con) throws SQLException {
 		this.connectionHelper = new SqlConnectionHelper(con);
@@ -190,7 +184,7 @@ public class SqlQueryBC {
 
 		public static void traceRetrieve(String string) {
 			if (TracingConfiguration.isTraceLastRetrieve()) {
-				lastExecute = string;
+				lastRetrieve = string;
 			}
 		}
 
