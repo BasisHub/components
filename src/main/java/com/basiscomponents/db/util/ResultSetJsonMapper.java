@@ -184,8 +184,14 @@ public class ResultSetJsonMapper {
 			break;
 
 		case java.sql.Types.TINYINT:
-		case java.sql.Types.INTEGER:
 		case java.sql.Types.SMALLINT:
+			if (value.getShort() == null)
+				jsonGenerator.writeNumberField(fieldName, 0);
+			else
+				jsonGenerator.writeNumberField(fieldName, value.getShort().intValue());
+			break;
+
+		case java.sql.Types.INTEGER:
 			if (value.getInt() == null)
 				jsonGenerator.writeNumberField(fieldName, 0);
 			else
