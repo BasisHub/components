@@ -16,3 +16,7 @@ conventions
 --------
 1. From now on commits should be written as [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
 2. The branching should be done via [git flow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
+
+JavaDoc
+-------
+https://basishub.github.io/components/javadoc/

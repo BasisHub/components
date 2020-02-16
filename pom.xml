@@ -45,7 +45,7 @@
 			</activation>
 
 			<properties>
-				<jar-directory>C:/bbj/lib</jar-directory>
+				<jar-directory>C:/bbx/lib</jar-directory>
 			</properties>
 		</profile>
 		<profile>
@@ -283,7 +283,7 @@
 				<version>1.5.0</version>
 				<executions>
 					<execution>
-						<phase>validate</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>java</goal>
 						</goals>

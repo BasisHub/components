@@ -180,6 +180,8 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Integer</code> object.
 	 */
 	public Integer getInt() {
+		if (this.Value instanceof Short)
+			return ((Short) this.Value).intValue();
 		return (Integer) this.Value;
 	}
 
