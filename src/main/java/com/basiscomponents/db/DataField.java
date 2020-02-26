@@ -182,6 +182,8 @@ public class DataField implements java.io.Serializable {
 	public Integer getInt() {
 		if (this.Value instanceof Short)
 			return ((Short) this.Value).intValue();
+		if (this.Value instanceof Long)
+			return ((Long) this.Value).intValue();
 		return (Integer) this.Value;
 	}
 
