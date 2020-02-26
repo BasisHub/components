@@ -32,8 +32,8 @@
 			</activation>
 
 			<properties>
-				<jar-directory>/mnt/jenkins/workspace/Basis_19.21_Components/components/jars</jar-directory>
-				<reportOutputDirectory>/mnt/jenkins/workspace/Basis_19.21_Components/components</reportOutputDirectory>
+				<jar-directory>/mnt/jenkins/workspace/Basis_19.22_Components/components/jars</jar-directory>
+				<reportOutputDirectory>/mnt/jenkins/workspace/Basis_19.22_Components/components</reportOutputDirectory>
 			</properties>
 		</profile>
 
