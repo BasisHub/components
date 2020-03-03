@@ -496,6 +496,7 @@ public class ResultSetExporter {
 				writeXLSX(rs, new FileOutputStream(outputFile), writeHeader, false, "Sheet", ar, sheetConfig);
 
 				os.flush();
+				os.close();
 			}
 		}
 	}
@@ -525,6 +526,7 @@ public class ResultSetExporter {
 						AttributesRecord);
 
 				os.flush();
+				os.close();
 			}
 		}
 	}
