@@ -173,12 +173,20 @@ public class DataFieldConverter {
 		case java.sql.Types.TIME:
 			if (classname.equals("java.sql.Time"))
 				return o;
-			if (classname.equals(JAVA_LANG_STRING))
-				try {
-					return new java.sql.Time(new SimpleDateFormat("HH:mm:ss").parse((String) o).getTime());
-				} catch (ParseException e) {
-					throw new IllegalStateException("Time [" + o + "] could not be parsed", e);
+			if (classname.equals(JAVA_LANG_STRING)) {
+				String timestr = (String) o;
+				if (timestr.contains("T"))
+					timestr=timestr.substring(timestr.indexOf('T')+1);
+				if (timestr.contains("+"))
+					timestr=timestr.substring(0,timestr.indexOf('+'));
+					try {
+						return new java.sql.Time(new SimpleDateFormat("HH:mm:ss").parse(timestr).getTime());
+					} catch (ParseException e) {
+						throw new IllegalStateException("Time [" + o + "] could not be parsed", e);
+
 				}
+				
+			}
 			break;
 		case java.sql.Types.TIMESTAMP:
 			if (classname.equals("java.sql.Timestamp"))
