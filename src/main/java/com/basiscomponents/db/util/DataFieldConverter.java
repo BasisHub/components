@@ -255,6 +255,7 @@ public class DataFieldConverter {
 			break;
 		case java.sql.Types.INTEGER:
 		case java.sql.Types.SMALLINT:
+		case java.sql.Types.TINYINT:
 			/*
 			 * Columns with an unsigned numeric type in MySQL are treated as the next
 			 * 'larger' Java type that the signed variant of the MySQL:
@@ -330,9 +331,6 @@ public class DataFieldConverter {
 				ret = 1.0;
 			else
 				ret = 0.0;
-			break;
-		case java.sql.Types.TINYINT:
-			ret = field.getInt().doubleValue();
 			break;
 		default:
 			ret = null;

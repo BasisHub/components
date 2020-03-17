@@ -2649,10 +2649,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 					KeyTemplate.setInt(colName, rs.getInt(col));
 					break;
 				case java.sql.Types.TINYINT: // I(1)/U(1)
-					KeyTemplate.setInt(colName, rs.getInt(col));
-					break;
 				case java.sql.Types.SMALLINT: // I(2)/U(2)
-					KeyTemplate.setInt(colName, rs.getShort(col));
+					KeyTemplate.setInt(colName, ((Short) rs.getShort(col)).intValue());
 					break;
 				case java.sql.Types.BIGINT: // I(8)/U(8)
 					KeyTemplate.setLong(colName, rs.getLong(col));

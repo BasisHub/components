@@ -57,7 +57,6 @@ public class DataRowMultifieldComparator implements Comparator<DataRow> {
 			else if (val2 == null)
 				return 1 * direction;
 
-
 			try {
 				fieldType = dr1.getFieldType(field);
 			} catch (Exception e) {
@@ -84,8 +83,12 @@ public class DataRowMultifieldComparator implements Comparator<DataRow> {
 					returnVal = Long.compare(lng1, lng2) * direction;
 					break;
 				case java.sql.Types.TINYINT:
-				case java.sql.Types.INTEGER:
 				case java.sql.Types.SMALLINT:
+					short sht1 = f1.getShort();
+					short sht2 = f2.getShort();
+					returnVal = Short.compare(sht1, sht2) * direction;
+					break;
+				case java.sql.Types.INTEGER:
 				case 9:
 				case 11:
 					int int1 = f1.getInt();

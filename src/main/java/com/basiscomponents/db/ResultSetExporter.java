@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -497,6 +496,7 @@ public class ResultSetExporter {
 				writeXLSX(rs, new FileOutputStream(outputFile), writeHeader, false, "Sheet", ar, sheetConfig);
 
 				os.flush();
+				os.close();
 			}
 		}
 	}
@@ -526,6 +526,7 @@ public class ResultSetExporter {
 						AttributesRecord);
 
 				os.flush();
+				os.close();
 			}
 		}
 	}
