@@ -1,9 +1,11 @@
-package com.basiscomponents.db.datarowtest;
+package com.basiscomponents.db.resultSetJsonTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.text.ParseException;
+import java.util.TimeZone;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.basiscomponents.db.DataField;
@@ -22,6 +24,12 @@ class JsonIsoFormatTest {
 
 	
 	final long millis = new Long("1584468576772");
+
+	//set timezone to Europe/Amsterdam for testing, as the assertions are hard-coded
+	@BeforeEach
+	void setTimeZoneForTesting() {
+		TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"));
+	}
 	
 	@Test
 	void testIsoFormats() throws Exception {
@@ -38,7 +46,6 @@ class JsonIsoFormatTest {
 		DataRow dr2 = DataRow.fromJson(json);
 		String json2 = dr2.toJsonObject(true, null, false).toString();
 		assertEquals(json,json2);
-			
 	}
 
 	@Test
