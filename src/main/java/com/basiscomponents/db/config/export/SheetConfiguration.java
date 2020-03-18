@@ -11,6 +11,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 public class SheetConfiguration {
 	List<ColumnConfiguration> columnConfigs;
 
+	//Sheet name, like for Excel
+	String SheetName="Output";
+
+
 	public SheetConfiguration() {
 		this.columnConfigs = new ArrayList<ColumnConfiguration>();
 	}
@@ -183,5 +187,27 @@ public class SheetConfiguration {
 	 */
 	private boolean validateIndex(int index) {
 		return index >= 0 && index <= columnConfigs.size();
+	}
+	
+	
+	/**
+	 * 
+	 * returns the sheet name configured for excel sheets
+	 * 
+	 * @return sheet name
+	 * 
+	 */
+	public String getSheetName() {
+		return SheetName;
+	}
+
+	/**
+	 * 
+	 * sets the Sheet Name for Excel Sheet Pages
+	 * 
+	 * @param sheetName: the name
+	 */
+	public void setSheetName(String sheetName) {
+		SheetName = sheetName;
 	}
 }

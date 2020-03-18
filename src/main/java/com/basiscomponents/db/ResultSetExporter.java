@@ -493,7 +493,7 @@ public class ResultSetExporter {
 		if (outputFile != null) {
 			try (FileOutputStream os = new FileOutputStream(outputFile)) {
 
-				writeXLSX(rs, new FileOutputStream(outputFile), writeHeader, false, "Sheet", ar, sheetConfig);
+				writeXLSX(rs, os, writeHeader, false, sheetConfig.getSheetName(), ar, sheetConfig);
 
 				os.flush();
 				os.close();
@@ -522,7 +522,7 @@ public class ResultSetExporter {
 		if (outputFile != null) {
 			try (FileOutputStream os = new FileOutputStream(outputFile)) {
 
-				writeXLSX(rs, new FileOutputStream(outputFile), writeHeader, useLabelIfPresent, sheetName,
+				writeXLSX(rs, os, writeHeader, useLabelIfPresent, sheetName,
 						AttributesRecord);
 
 				os.flush();
