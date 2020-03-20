@@ -33,7 +33,6 @@ class ConfigurationsBCTest {
 		ClassLoader classLoader = getClass().getClassLoader();
 		
         URL resource = classLoader.getResource("testconfigs");
-        System.out.println(resource.getFile());
 		this.bc.setConfigFile(resource.getFile());
 		this.bc.setUserName(this.bc.getAdminUser());
 	}

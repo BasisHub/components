@@ -50,4 +50,12 @@ public class ColumnConfigurationBuilder {
 		}
 		return columnConfiguration;
 	}
+	
+//	###################################################################################
+
+	public ColumnConfigurationBuilder setFieldName(String fieldName) {
+		this.columnConfiguration.setFieldName(fieldName);
+		return this;
+	}
+	
 }
