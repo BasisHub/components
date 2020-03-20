@@ -43,11 +43,11 @@ public class DataRowMultifieldComparator implements Comparator<DataRow> {
 			Object val2 = null;
 
 			try {
-				val1 = dr1.getDataField(field).getObject();
+				val1 = dr1.getField(field,false).getObject();
 			} catch(Exception ex) {}
 
 			try {
-				val2 = dr2.getDataField(field).getObject();
+				val2 = dr2.getField(field,false).getObject();
 			} catch (Exception ex) {}
 
 			if (val1 == null && val2 == null)
@@ -63,8 +63,8 @@ public class DataRowMultifieldComparator implements Comparator<DataRow> {
 				fieldType = java.sql.Types.CHAR;
 			}
 
-			DataField f1 = dr1.getDataField(field);
-			DataField f2 = dr2.getDataField(field);
+			DataField f1 = dr1.getField(field,false);
+			DataField f2 = dr2.getField(field,false);
 
 			switch(fieldType) {
 				case java.sql.Types.CHAR:

@@ -19,11 +19,11 @@ public class DataFieldComparator implements java.util.Comparator<DataRow> {
 		Object val2 = null;
 
 		try {
-			val1 = dr1.getDataField(fieldName).getObject();
+			val1 = dr1.getField(fieldName,false).getObject();
 		} catch(Exception ex) {}
 
 		try {
-			val2 = dr2.getDataField(fieldName).getObject();
+			val2 = dr2.getField(fieldName,false).getObject();
 		} catch (Exception ex) {}
 
 		if (val1 == null && val2 == null)
@@ -41,8 +41,8 @@ public class DataFieldComparator implements java.util.Comparator<DataRow> {
 		}
 
 		int returnVal=0;
-		DataField f1 = dr1.getDataField(fieldName);
-		DataField f2 = dr2.getDataField(fieldName);
+		DataField f1 = dr1.getField(fieldName,false);
+		DataField f2 = dr2.getField(fieldName,false);
 
 		switch(fieldType) {
 		case java.sql.Types.CHAR:

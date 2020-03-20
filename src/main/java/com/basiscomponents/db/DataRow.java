@@ -1129,9 +1129,12 @@ public class DataRow implements java.io.Serializable {
 	 *            The name of the field7
 	 *
 	 * @return dataField The DataField value for the given field name.
+	 * 
+	 * @see getField
+	 * @deprecated
 	 */
 	public DataField getDataField(String fieldName) {
-		return this.dataFields.get(fieldName);
+		return getField(fieldName,false);
 	}
 
 	@Override
@@ -1258,7 +1261,7 @@ public class DataRow implements java.io.Serializable {
 			String f = it.next();
 			try {
 				if (fOverwrite || !contains(f))
-					this.addDataField(f, dataRow.getFieldType(f), dataRow.getDataField(f));
+					this.addDataField(f, dataRow.getFieldType(f), dataRow.getField(f,false));
 			} catch (Exception e) {
 				// Auto-generated catch block
 				e.printStackTrace();

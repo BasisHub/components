@@ -1642,7 +1642,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			// Auto-generated catch block
 			e.printStackTrace();
 		}
-		return this.currentDataRow.getDataField(name);
+		return this.currentDataRow.getField(name,false);
 	}
 
 	/**
