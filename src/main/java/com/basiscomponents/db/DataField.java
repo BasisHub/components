@@ -1,5 +1,6 @@
 package com.basiscomponents.db;
 
+import com.basis.util.common.BasisNumber;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.google.gson.annotations.Expose;
@@ -211,7 +212,7 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Long</code> object.
 	 */
 	public Long getLong() {
-		if (this.Value != null && getClassName() == "java.lang.Integer") {
+		if (this.Value != null && (getClassName() == "java.lang.Integer")) {
 			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
@@ -227,12 +228,20 @@ public class DataField implements java.io.Serializable {
 	 *         object.
 	 */
 	public BigDecimal getBigDecimal() {
-		if (this.Value != null && getClassName() == "java.lang.Double") {
+		
+		if (this.Value != null && (getClassName() == "java.lang.Double")) {
 			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
 			return new BigDecimal((Double) this.Value);
 		}
+		if (this.Value != null && (getClassName().contains("BasisNumber"))) {
+			com.basis.util.common.BasisNumber val = com.basis.util.common.BasisNumber
+					.getBasisNumber((com.basis.startup.type.BBjNumber) this.Value);
+
+			return new BigDecimal(val.doubleValue());
+		}
+		
 		return (BigDecimal) this.Value;
 	}
 
@@ -251,8 +260,8 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Float</code> object.
 	 */
 	public Float getFloat() {
-		if (this.Value != null && getClassName() == "java.lang.Double") {
-			// make this work the same as STR(Boolean.TRUE) in BBj
+		if (this.Value != null && (getClassName() == "java.lang.Double" || getClassName().contains("BasisNumber")|| getClassName().contains("BasisInt"))) {
+				// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
 			return new Float((Double) this.Value);
@@ -292,7 +301,10 @@ public class DataField implements java.io.Serializable {
 					return null;
 			}
 		}
-		return (Date) this.Value;
+		if (getClassName().equals("java.sql.Date"))
+			return (Date)this.Value;
+	
+		return null;
 	}
 
 	/**
@@ -301,7 +313,9 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.sql.Time</code> object.
 	 */
 	public Time getTime() {
-		return (Time) this.Value;
+		if (getClassName().equals("java.sql.Time"))
+			return (Time)this.Value;
+		return null;		
 	}
 
 	/**
@@ -320,7 +334,9 @@ public class DataField implements java.io.Serializable {
 			if (s.isEmpty())
 				return null;
 		}
-		return (Timestamp) this.Value;
+		if (getClassName().equals("java.sql.Timestamp"))
+			return (Timestamp)this.Value;
+		return null;						
 	}
 
 	/**
@@ -387,6 +403,13 @@ public class DataField implements java.io.Serializable {
 			if (this.Value.getClass().equals(java.lang.Double.class)) {
 				return ((Double) this.Value > 0);
 			}
+			
+			if (this.Value != null && (getClassName().contains("BasisNumber"))) {
+				com.basis.util.common.BasisNumber val = com.basis.util.common.BasisNumber
+						.getBasisNumber((com.basis.startup.type.BBjNumber) this.Value);
+				return (val.doubleValue()>0);
+			}
+			
 
 		}
 		return (Boolean) this.Value;
