@@ -10,6 +10,8 @@ import org.apache.poi.ss.usermodel.Sheet;
  */
 public class SheetConfiguration {
 	List<ColumnConfiguration> columnConfigs;
+	private ReportDetails reportDetails;
+	private float fontSize;
 
 	public SheetConfiguration() {
 		this.columnConfigs = new ArrayList<ColumnConfiguration>();
@@ -184,4 +186,44 @@ public class SheetConfiguration {
 	private boolean validateIndex(int index) {
 		return index >= 0 && index <= columnConfigs.size();
 	}
+	
+//	---------------------------------------------------------------------------------
+	
+	public List<ColumnConfiguration> getColumnConfigurations(){
+		return this.columnConfigs;
+	}
+	
+	public SheetConfiguration(ReportDetails reportDetails, float fontSize) {
+		this.reportDetails = reportDetails;
+		this.fontSize = fontSize;
+	}
+	
+	public void insertColumn(String header, int width, String fieldName, int index) throws Exception {
+		ColumnConfigurationBuilder colConfigBuilder = new ColumnConfigurationBuilder().setHeader(header)
+				.setWidth(width).setFieldName(fieldName);
+		insertNewColumn(header, colConfigBuilder, index);
+	}
+	
+	public void addColumn(String header, int width, String fieldName) throws Exception {
+		ColumnConfigurationBuilder colConfigBuilder = new ColumnConfigurationBuilder().setHeader(header)
+				.setWidth(width).setFieldName(fieldName);
+		insertNewColumn(header, colConfigBuilder, columnConfigs.size());
+	}
+	
+	public void setReportDetails(ReportDetails reportDetails) {
+		this.reportDetails = reportDetails;
+	}
+	
+	public ReportDetails getReportDetails() {
+		return this.reportDetails;
+	}
+	
+	public void setFontSize(float fontSize) {
+		this.fontSize = fontSize;
+	}
+	
+	public float getFontSize() {
+		return this.fontSize;
+	}
+	
 }

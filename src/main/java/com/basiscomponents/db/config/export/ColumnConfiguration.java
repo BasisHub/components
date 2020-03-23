@@ -7,10 +7,17 @@ package com.basiscomponents.db.config.export;
 public class ColumnConfiguration {
 	private String header = null;
 	private int width = -1; // Negative value to indicate default column width
+	private String fieldName;
 
 	public ColumnConfiguration(String header, int width) {
 		this.header = header;
 		this.width = width;
+	}
+	
+	public ColumnConfiguration(String header, int width, String fieldName, String fieldType) {
+		this.header = header;
+		this.width = width;
+		this.fieldName = fieldName;
 	}
 
 	public ColumnConfiguration(String header) {
@@ -38,4 +45,13 @@ public class ColumnConfiguration {
 	public void setWidth(int width) {
 		this.width = width;
 	}
+	
+	public String getFieldName() {
+		return this.fieldName;
+	}
+	
+	public void setFieldName(String fieldName) {
+		this.fieldName = fieldName;
+	}
+	
 }
