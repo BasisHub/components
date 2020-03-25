@@ -7,6 +7,7 @@ import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.fieldconverter.ConversionRuleSet;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -372,7 +373,7 @@ public class ResultSetJsonMapper {
 						}
 						String value = null;
 						
-						if (crs != null && "ColumnType".equals(entry.getKey()) && crs.containsKey(c)) {
+						if (crs != null && "ColumnType".equals(entry.getKey()) && crs.containsKey(c) && crs.get(c) != null) {
 							value = Integer.toString(crs.get(c).getTargetFieldType());
 						}
 						else 

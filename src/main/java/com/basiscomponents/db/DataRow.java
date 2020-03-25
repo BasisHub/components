@@ -16,7 +16,6 @@ import com.basiscomponents.db.util.SqlTypeNames;
 import com.basiscomponents.db.util.TemplateParser;
 import net.sf.jasperreports.engine.JRDataSource;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +30,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.xml.bind.DatatypeConverter;
 
 import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
 
@@ -285,7 +286,7 @@ public class DataRow implements java.io.Serializable {
 	public void setFieldValue(final String name, Object value, ConversionRuleSet crs) throws ParseException {
 		if (value != null) 
 		{
-			if (crs != null && crs.containsKey(name))
+			if (crs != null && crs.containsKey(name) && crs.get(name) != null)
 				value = crs.get(name).serialize(new DataField(value)).getObject();
 			
 			String c = value.getClass().getCanonicalName();
@@ -456,11 +457,11 @@ public class DataRow implements java.io.Serializable {
 		DataField field = this.dataFields.get(name);
 		if (field == null && !(silent))
 			throw new DataFieldNotFoundException("Field " + name + " does not exist");
+		
 		IConversionRule cr;
-		if (field != null && crs != null && crs.containsKey(name)) {
-			cr = crs.get(name);
-			return cr.deserialize(field);
-		}
+		if (field != null && crs != null && crs.containsKey(name) && crs.get(name) != null)
+			return crs.get(name).deserialize(field);
+
 		return field;
 	}
 
@@ -688,7 +689,7 @@ public class DataRow implements java.io.Serializable {
 	 */
 	public int getFieldType(String name, ConversionRuleSet crs) {
 		
-		if (crs != null && crs.containsKey(name))
+		if (crs != null && crs.containsKey(name) && crs.get(name) != null)
 			return crs.get(name).getTargetFieldType();
 		
 		int column = getColumnIndex(name);
