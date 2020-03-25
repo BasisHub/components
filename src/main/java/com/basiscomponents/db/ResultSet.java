@@ -81,7 +81,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	
 	private ResultSetListener mListener;
 
-	private ConversionRuleSet conversionruleset;
+	private ConversionRuleSet crs;
 
 
 	public ResultSet() {
@@ -2091,7 +2091,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes) throws Exception {
 		if (addIndexColumn!=null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes, this.conversionruleset);
+		return ResultSetJsonMapper.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes, this.crs);
 	}
 	/**
 	 * Returns this ResultSet as a JRDataSource
@@ -2901,7 +2901,6 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		System.out.println("-------------------ResultSet End-------------------------");
 	}
 
-
 	/**
 	 * 
 	 * @param rs2: the resultset to merge in
@@ -2930,33 +2929,32 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * 
-	 * set a global conversion rule set which is honored
-	 * for standard output methods, like print and toJson
-	 * Note: for setting and getting data directly with DataRow objects,
-	 * you will still need to pass the rule set with the setField... and getField methods
+	 * Sets a global conversion rule set which is honored
+	 * for standard output methods, like print and toJson.
+	 * Note: For setting and getting data directly with DataRow objects,
+	 * you will still need to pass the rule set with the setField... and getField methods.
 	 * 
-	 * @param conversionruleset
+	 * @param crs
 	 */
-	public void setConversionRuleSet(ConversionRuleSet conversionruleset) {
-		this.conversionruleset = conversionruleset;
+	public void setConversionRuleSet(ConversionRuleSet crs) {
+		this.crs = crs;
 	}
 
 	/**
 	 * 
-	 * set a global conversion rule set which is honored
-	 * for standard output methods, like print and toJson
+	 * Clears a global conversion rule set
 	 * 
 	 */
 	public void clearConversionRuleSet() {
-		this.conversionruleset = null;
+		this.crs = null;
 	}	
 
 	/**
 	 * 
-	 * @return the current ConversionRuleSet, or null if none is set
+	 * @return The current ConversionRuleSet or null, if none is set
 	 */
 	public ConversionRuleSet getConversionRuleSet() {
-		return conversionruleset;
+		return this.crs;
 	}
 	
 }

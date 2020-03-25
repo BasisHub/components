@@ -54,10 +54,11 @@ public class ResultSetJsonMapper {
 
 		return rs;
 	}
+
 	public static String toJson(ResultSet rs, boolean meta, String addIndexColumn, boolean f_trimStrings,
 			boolean writeDataRowAttributes) throws IOException {
 			
-			return toJson(rs,meta,addIndexColumn,f_trimStrings, writeDataRowAttributes,null);
+			return toJson(rs, meta, addIndexColumn, f_trimStrings, writeDataRowAttributes, null);
 	}
 
 	public static String toJson(ResultSet rs, boolean meta, String addIndexColumn, boolean f_trimStrings,
@@ -82,7 +83,7 @@ public class ResultSetJsonMapper {
 				}
 
 				for (String fn : dr.getFieldNames()) {
-					dataFieldToJson(dr.getField(fn, true, crs), fn, dr.getFieldType(fn,crs), meta, addIndexColumn, f_trimStrings,
+					dataFieldToJson(dr.getField(fn, true, crs), fn, dr.getFieldType(fn, crs), meta, addIndexColumn, f_trimStrings,
 							jsonGenerator);
 
 				} // while on fields
@@ -371,7 +372,7 @@ public class ResultSetJsonMapper {
 						}
 						String value = null;
 						
-						if (crs != null && "ColumnType".equals(entry.getKey()) && crs.containsKey(c)){
+						if (crs != null && "ColumnType".equals(entry.getKey()) && crs.containsKey(c)) {
 							value = Integer.toString(crs.get(c).getTargetFieldType());
 						}
 						else 

@@ -2,15 +2,15 @@ package com.basiscomponents.db.fieldconverter;
 
 import com.basiscomponents.db.DataField;
 
-public class FieldConverter_StringBoolean implements IConversionRule {
-	
-	
-	
+public class StringBoolean implements IConversionRule {
+
 	String trueString, falseString;
-	
-	private FieldConverter_StringBoolean() {}
-	
-	public FieldConverter_StringBoolean(String trueString, String falseString) {
+
+	@SuppressWarnings("unused")
+	private StringBoolean() {
+	}
+
+	public StringBoolean(String trueString, String falseString) {
 		this.trueString = trueString;
 		this.falseString = falseString;
 	}
@@ -24,18 +24,21 @@ public class FieldConverter_StringBoolean implements IConversionRule {
 	}
 
 	@Override
-	public DataField deSerialize(DataField field) {
+	public DataField deserialize(DataField field) {
 		if (field.getObject().equals(trueString))
 			return new DataField(Boolean.TRUE);
 		else
 			return new DataField(Boolean.FALSE);
-		
 	}
 
 	@Override
 	public int getTargetFieldType() {
-		return 16;
+		return 16; // java.sql.Types.BOOLEAN
 	}
-	
+
+	@Override
+	public int getSourceFieldType() {
+		return 12; // java.sql.Types.VARCHAR
+	}
 
 }

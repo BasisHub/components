@@ -265,7 +265,7 @@ public class DataRow implements java.io.Serializable {
 	 *             if a DataField cannot been parsed
 	 */
 	public void setFieldValue(final String name, Object value) throws ParseException {
-		setFieldValue(name,value,null);
+		setFieldValue(name, value, null);
 	}
 	
 	/**
@@ -277,16 +277,16 @@ public class DataRow implements java.io.Serializable {
 	 *            The name of the field
 	 * @param value
 	 *            The value of the field
-	 * @param conversionruleset
+	 * @param crs
 	 *            An optional rule set for field type conversions
 	 * @throws ParseException
 	 *             if a DataField cannot been parsed
 	 */
-	public void setFieldValue(final String name, Object value, ConversionRuleSet conversionruleset) throws ParseException {
+	public void setFieldValue(final String name, Object value, ConversionRuleSet crs) throws ParseException {
 		if (value != null) 
 		{
-			if (conversionruleset != null && conversionruleset.containsKey(name))
-				value = conversionruleset.get(name).serialize(new DataField(value)).getObject();
+			if (crs != null && crs.containsKey(name))
+				value = crs.get(name).serialize(new DataField(value)).getObject();
 			
 			String c = value.getClass().getCanonicalName();
 			if (c.contains("BBjNumber") || c.contains("BBjInt")) {
@@ -399,15 +399,15 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param name
 	 *            The field's name
-	 * @param conversionruleset 
+	 * @param crs 
 	 *            A rule set for converting the field type / content            
 	 * @return dataField The DataField object
 	 *
 	 * @throws Exception
 	 *             No field with the specified name exists
 	 */
-	public DataField getField(String name, ConversionRuleSet conversionruleset) {
-		return getField(name, false, conversionruleset);
+	public DataField getField(String name, ConversionRuleSet crs) {
+		return getField(name, false, crs);
 	}	
 
 	/**
@@ -429,7 +429,7 @@ public class DataRow implements java.io.Serializable {
 	 *             value is false
 	 */
 	public DataField getField(String name, Boolean silent) {
-		return getField(name,silent,null);
+		return getField(name, silent, null);
 	}
 
 	/**
@@ -444,7 +444,7 @@ public class DataRow implements java.io.Serializable {
 	 * @param silent
 	 *            Boolean value indicating whether the eventual exception should be
 	 *            suppressed or not
-	 * @param conversionruleset 
+	 * @param crs 
 	 *            A rule set for converting the field type / content
 	 * @return dataField The DataField
 	 *
@@ -452,14 +452,14 @@ public class DataRow implements java.io.Serializable {
 	 *             No field with the specified name exists and the specified boolean
 	 *             value is false
 	 */
-	public DataField getField(String name, Boolean silent, ConversionRuleSet conversionruleset) {
+	public DataField getField(String name, Boolean silent, ConversionRuleSet crs) {
 		DataField field = this.dataFields.get(name);
 		if (field == null && !(silent))
 			throw new DataFieldNotFoundException("Field " + name + " does not exist");
 		IConversionRule cr;
-		if (field != null && conversionruleset != null && conversionruleset.containsKey(name)) {
-			cr = conversionruleset.get(name);
-			return cr.deSerialize(field);
+		if (field != null && crs != null && crs.containsKey(name)) {
+			cr = crs.get(name);
+			return cr.deserialize(field);
 		}
 		return field;
 	}
@@ -678,6 +678,8 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param name
 	 *            The name of the field.
+	 * @param crs 
+	 *            A rule set for converting the field type / content
 	 *
 	 * @return The value of the ColumnType property for the field name.
 	 *
@@ -691,8 +693,6 @@ public class DataRow implements java.io.Serializable {
 		
 		int column = getColumnIndex(name);
 		return this.resultSet.getColumnType(column);
-		
-		
 	}
 	
 	/**

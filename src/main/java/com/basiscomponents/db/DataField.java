@@ -1,5 +1,6 @@
 package com.basiscomponents.db;
 
+import com.basis.startup.type.BBjNumber;
 import com.basis.util.common.BasisNumber;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
@@ -236,9 +237,7 @@ public class DataField implements java.io.Serializable {
 			return new BigDecimal((Double) this.Value);
 		}
 		if (this.Value != null && (getClassName().contains("BasisNumber"))) {
-			com.basis.util.common.BasisNumber val = com.basis.util.common.BasisNumber
-					.getBasisNumber((com.basis.startup.type.BBjNumber) this.Value);
-
+			BasisNumber val = BasisNumber.getBasisNumber((BBjNumber) this.Value);
 			return new BigDecimal(val.doubleValue());
 		}
 		
@@ -260,8 +259,8 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Float</code> object.
 	 */
 	public Float getFloat() {
-		if (this.Value != null && (getClassName() == "java.lang.Double" || getClassName().contains("BasisNumber")|| getClassName().contains("BasisInt"))) {
-				// make this work the same as STR(Boolean.TRUE) in BBj
+		if (this.Value != null && (getClassName() == "java.lang.Double" || getClassName().contains("BasisNumber") || getClassName().contains("BasisInt"))) {
+			// make this work the same as STR(Boolean.TRUE) in BBj
 			// for compatibility reasons.
 			// If it's a problem, we might introduce a COMPAT flag later.
 			return new Float((Double) this.Value);
@@ -315,6 +314,7 @@ public class DataField implements java.io.Serializable {
 	public Time getTime() {
 		if (getClassName().equals("java.sql.Time"))
 			return (Time)this.Value;
+
 		return null;		
 	}
 
@@ -336,6 +336,7 @@ public class DataField implements java.io.Serializable {
 		}
 		if (getClassName().equals("java.sql.Timestamp"))
 			return (Timestamp)this.Value;
+
 		return null;						
 	}
 
@@ -405,9 +406,8 @@ public class DataField implements java.io.Serializable {
 			}
 			
 			if (this.Value != null && (getClassName().contains("BasisNumber"))) {
-				com.basis.util.common.BasisNumber val = com.basis.util.common.BasisNumber
-						.getBasisNumber((com.basis.startup.type.BBjNumber) this.Value);
-				return (val.doubleValue()>0);
+				BasisNumber val = BasisNumber.getBasisNumber((BBjNumber) this.Value);
+				return (val.doubleValue() > 0);
 			}
 			
 
