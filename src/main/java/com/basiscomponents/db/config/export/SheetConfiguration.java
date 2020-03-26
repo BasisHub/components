@@ -187,41 +187,91 @@ public class SheetConfiguration {
 		return index >= 0 && index <= columnConfigs.size();
 	}
 	
-//	---------------------------------------------------------------------------------
-	
+	/**
+	 * Gets the column configuration
+	 * 
+	 * @return	returns the column configuration
+	 */
 	public List<ColumnConfiguration> getColumnConfigurations(){
 		return this.columnConfigs;
 	}
 	
+	/**
+	 * initializes the sheet configuration
+	 * 
+	 * @param reportDetails	ReportDetails class object that contains all the needed information to export a result set
+	 * 						from barista to pdf
+	 * @param fontSize		the sheet configuration's font size
+	 */
 	public SheetConfiguration(ReportDetails reportDetails, float fontSize) {
 		this.reportDetails = reportDetails;
 		this.fontSize = fontSize;
 	}
 	
+	/**
+	 * Creates a new column and inserts it into given position abstracted away from
+	 * exposed methods
+	 * 
+	 * @param header		label of the new column to be added
+	 * @param width			the column width
+	 * @param fieldName		the column's field name
+	 * @param index			position of the new column with 0-based indexing
+	 * 
+	 * @throws Exception	in case of invalid index or any parameter found invalid
+	 */
 	public void insertColumn(String header, int width, String fieldName, int index) throws Exception {
 		ColumnConfigurationBuilder colConfigBuilder = new ColumnConfigurationBuilder().setHeader(header)
 				.setWidth(width).setFieldName(fieldName);
 		insertNewColumn(header, colConfigBuilder, index);
 	}
 	
+	/**
+	 * Appends a new column to the back of the list of columns
+	 * 
+	 * @param header		label of the new column to be added
+	 * @param width			the column width
+	 * @param fieldName		the column's field name
+	 * 
+	 * @throws Exception	in case of invalid index or any parameter found invalid
+	 */
 	public void addColumn(String header, int width, String fieldName) throws Exception {
 		ColumnConfigurationBuilder colConfigBuilder = new ColumnConfigurationBuilder().setHeader(header)
 				.setWidth(width).setFieldName(fieldName);
 		insertNewColumn(header, colConfigBuilder, columnConfigs.size());
 	}
 	
+	/**
+	 * Sets the report details
+	 * 
+	 * @param reportDetails	the report details class object
+	 */
 	public void setReportDetails(ReportDetails reportDetails) {
 		this.reportDetails = reportDetails;
 	}
 	
+	/**
+	 * Gets the report details
+	 * 
+	 * @return	returns the report details
+	 */
 	public ReportDetails getReportDetails() {
 		return this.reportDetails;
 	}
 	
+	/**
+	 * Sets the font size
+	 * 
+	 * @param fontSize	the font size
+	 */
 	public void setFontSize(float fontSize) {
 		this.fontSize = fontSize;
 	}
 	
+	/**
+	 * Gets the font size
+	 * 
+	 * @return	returns the font size
+	 */
 	public float getFontSize() {
 		return this.fontSize;
 	}

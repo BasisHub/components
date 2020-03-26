@@ -31,7 +31,7 @@ public class ColumnConfiguration {
 	}
 
 	public String getHeader() {
-		return header;
+		return this.header;
 	}
 
 	protected void setHeader(String header) {
