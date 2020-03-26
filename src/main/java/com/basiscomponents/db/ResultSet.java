@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import com.basis.util.common.BasisNumber;
 import com.basis.util.common.Template;
 import com.basis.util.common.TemplateInfo;
+import com.basiscomponents.db.fieldconverter.ConversionRuleSet;
 import com.basiscomponents.db.sql.SQLResultSet;
 import com.basiscomponents.db.util.BBTemplateProvider;
 import com.basiscomponents.db.util.JRDataSourceAdapter;
@@ -79,6 +80,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	private static final Logger LOGGER = Logger.getLogger(ResultSet.class.getName());
 	
 	private ResultSetListener mListener;
+
+	private ConversionRuleSet crs;
 
 
 	public ResultSet() {
@@ -2088,7 +2091,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	public String toJson(boolean meta, String addIndexColumn, boolean trimStrings, boolean writeDataRowAttributes) throws Exception {
 		if (addIndexColumn!=null)
 			createIndex();
-		return ResultSetJsonMapper.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes);
+		return ResultSetJsonMapper.toJson(this, meta, addIndexColumn, trimStrings, writeDataRowAttributes, this.crs);
 	}
 	/**
 	 * Returns this ResultSet as a JRDataSource
@@ -2892,17 +2895,12 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	}
 	
 
-	/**
-	 * Prints the ResultSet's content to the standard output stream.
-	 * If this method is called from a BBj context, the ResultSet's content
-	 * will be printed in the Debug.log file.
-	 */
 	public void print() {
 		System.out.println("-------------------ResultSet-----------------------------");
 		this.DataRows.stream().forEach(System.out::println);
 		System.out.println("-------------------ResultSet End-------------------------");
 	}
-	
+
 	/**
 	 * 
 	 * @param rs2: the resultset to merge in
@@ -2929,4 +2927,34 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		//optimization potential: always search in the smaller ResultSet
 	}
 
+	/**
+	 * 
+	 * Sets a global conversion rule set which is honored
+	 * for standard output methods, like print and toJson.
+	 * Note: For setting and getting data directly with DataRow objects,
+	 * you will still need to pass the rule set with the setField... and getField methods.
+	 * 
+	 * @param crs
+	 */
+	public void setConversionRuleSet(ConversionRuleSet crs) {
+		this.crs = crs;
+	}
+
+	/**
+	 * 
+	 * Clears a global conversion rule set
+	 * 
+	 */
+	public void clearConversionRuleSet() {
+		this.crs = null;
+	}	
+
+	/**
+	 * 
+	 * @return The current ConversionRuleSet or null, if none is set
+	 */
+	public ConversionRuleSet getConversionRuleSet() {
+		return this.crs;
+	}
+	
 }

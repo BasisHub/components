@@ -5,6 +5,8 @@ import com.basis.util.common.BasisNumber;
 import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
 import com.basiscomponents.db.exception.DataFieldNotFoundException;
+import com.basiscomponents.db.fieldconverter.ConversionRuleSet;
+import com.basiscomponents.db.fieldconverter.IConversionRule;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowJsonMapper;
@@ -14,7 +16,6 @@ import com.basiscomponents.db.util.SqlTypeNames;
 import com.basiscomponents.db.util.TemplateParser;
 import net.sf.jasperreports.engine.JRDataSource;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -29,6 +30,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.xml.bind.DatatypeConverter;
 
 import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
 
@@ -263,8 +266,29 @@ public class DataRow implements java.io.Serializable {
 	 *             if a DataField cannot been parsed
 	 */
 	public void setFieldValue(final String name, Object value) throws ParseException {
-
-		if (value != null) {
+		setFieldValue(name, value, null);
+	}
+	
+	/**
+	 * 
+	 * Sets the specified value for the field with the specified name. In case no
+	 * field with the specified name exists, then the field will be created.
+	 *
+	 * @param name
+	 *            The name of the field
+	 * @param value
+	 *            The value of the field
+	 * @param crs
+	 *            An optional rule set for field type conversions
+	 * @throws ParseException
+	 *             if a DataField cannot been parsed
+	 */
+	public void setFieldValue(final String name, Object value, ConversionRuleSet crs) throws ParseException {
+		if (value != null) 
+		{
+			if (crs != null && crs.containsKey(name) && crs.get(name) != null)
+				value = crs.get(name).serialize(new DataField(value)).getObject();
+			
 			String c = value.getClass().getCanonicalName();
 			if (c.contains("BBjNumber") || c.contains("BBjInt")) {
 				value = Double.parseDouble(value.toString());
@@ -366,8 +390,26 @@ public class DataRow implements java.io.Serializable {
 	 *             No field with the specified name exists
 	 */
 	public DataField getField(String name) {
-		return getField(name, false);
+		return getField(name, false, null);
 	}
+	
+	/**
+	 * Returns the DataField object for the specified field name.<br>
+	 * <br>
+	 * Throws an Exception if no field with the specified name exists.
+	 *
+	 * @param name
+	 *            The field's name
+	 * @param crs 
+	 *            A rule set for converting the field type / content            
+	 * @return dataField The DataField object
+	 *
+	 * @throws Exception
+	 *             No field with the specified name exists
+	 */
+	public DataField getField(String name, ConversionRuleSet crs) {
+		return getField(name, false, crs);
+	}	
 
 	/**
 	 * Returns the DataField object for the specified field name.
@@ -388,9 +430,38 @@ public class DataRow implements java.io.Serializable {
 	 *             value is false
 	 */
 	public DataField getField(String name, Boolean silent) {
+		return getField(name, silent, null);
+	}
+
+	/**
+	 * Returns the DataField object for the specified field name.
+	 *
+	 * In case no field with the specified field name exists, depending on the
+	 * specified boolean value, either an Exception is thrown or not. In fact, this
+	 * boolean value indicates whether the Exception should be suppressed or not.
+	 *
+	 * @param name
+	 *            The field name
+	 * @param silent
+	 *            Boolean value indicating whether the eventual exception should be
+	 *            suppressed or not
+	 * @param crs 
+	 *            A rule set for converting the field type / content
+	 * @return dataField The DataField
+	 *
+	 * @throws Exception
+	 *             No field with the specified name exists and the specified boolean
+	 *             value is false
+	 */
+	public DataField getField(String name, Boolean silent, ConversionRuleSet crs) {
 		DataField field = this.dataFields.get(name);
 		if (field == null && !(silent))
 			throw new DataFieldNotFoundException("Field " + name + " does not exist");
+		
+		IConversionRule cr;
+		if (field != null && crs != null && crs.containsKey(name) && crs.get(name) != null)
+			return crs.get(name).deserialize(field);
+
 		return field;
 	}
 
@@ -601,6 +672,30 @@ public class DataRow implements java.io.Serializable {
 		return this.resultSet.getColumnType(column);
 	}
 
+	/**
+	 * 
+	 * Returns the value of the ColumnType property from the metadata for the field
+	 * with the given name.
+	 *
+	 * @param name
+	 *            The name of the field.
+	 * @param crs 
+	 *            A rule set for converting the field type / content
+	 *
+	 * @return The value of the ColumnType property for the field name.
+	 *
+	 * @throws RuntimeException
+	 *             The specified column name doesn't exist
+	 */
+	public int getFieldType(String name, ConversionRuleSet crs) {
+		
+		if (crs != null && crs.containsKey(name) && crs.get(name) != null)
+			return crs.get(name).getTargetFieldType();
+		
+		int column = getColumnIndex(name);
+		return this.resultSet.getColumnType(column);
+	}
+	
 	/**
 	 * Returns the value of the ColumnTypeName property from the metadata for the
 	 * field with the given name or an empty string in case the property isn't set.
