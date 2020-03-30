@@ -1,22 +1,12 @@
 package com.basiscomponents.db;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import com.basiscomponents.db.config.export.SheetConfiguration;
-import com.basiscomponents.db.util.SqlTypeNames;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Provides static methods to export a {@link com.basiscomponents.db.ResultSet
@@ -87,101 +77,7 @@ public class ResultSetExporter {
 	 */
 	public static void writeXML(ResultSet resultSet, String rootTagName, String entityName, Writer writer)
 			throws Exception {
-		int indent = 0;
-
-		writer.write("<" + rootTagName + ">\n");
-		indent++;
-
-		DataRow row;
-		Iterator<String> rit;
-		String fieldName, fieldValue;
-
-		List<String> fieldnames = resultSet.getColumnNames();
-		Iterator<DataRow> it = resultSet.iterator();
-		while (it.hasNext()) {
-			writer.write(getIndent(indent) + "<" + entityName + ">\n");
-			indent++;
-
-			row = it.next();
-			rit = fieldnames.iterator();
-			while (rit.hasNext()) {
-				fieldName = rit.next();
-
-				if (fieldName.contains("%")) {
-					// TODO filter out all field names that are invalid tag names
-					continue;
-				}
-
-				fieldValue = "";
-
-				try {
-					fieldValue = row.getFieldAsString(fieldName).trim();
-					writer.write(getIndent(indent) + "<" + fieldName + ">");
-					writer.write(escapeHTML(fieldValue));
-					writer.write("</" + fieldName + ">\n");
-				} catch (Exception e) {
-					writer.write(getIndent(indent) + "<" + fieldName + " null=\"true\" />\n");
-				}
-			}
-			indent--;
-
-			writer.write(getIndent(indent) + "</" + entityName + ">\n");
-
-		}
-		indent--;
-
-		writer.write("</" + rootTagName + ">\n");
-	}
-
-	private static String getIndent(int indent) {
-		if (indent <= 0) {
-			return "";
-		}
-
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = 0; i < indent; i++) {
-			sb.append("    ");
-		}
-
-		return sb.toString();
-	}
-
-	/**
-	 * Replaces all characters from the given String whose ascii decimal value is
-	 * >127 by the ascii decimal value preceeded by "&#" and followed by ";"(Without
-	 * the quotes).
-	 * 
-	 * Additionally replaces the following characters using the same mechanism:
-	 * ",&,',&lt;,&gt;<br>
-	 * <br>
-	 * For example, the following String: <br>
-	 * <br>
-	 * &lt;p&gt;Let's write a "Hello World" program!&lt;/p&gt;<br>
-	 * <br>
-	 * would become:<br>
-	 * <br>
-	 * &amp;#60;p&amp;#62;Let&amp;#38;s write a &amp;#34;Hello World&amp;#34;
-	 * program!&amp;#60;/p&amp;#62;<br>
-	 * <br>
-	 * 
-	 * @param s The String whose special characters should be replaced
-	 * 
-	 * @return The String with the escaped characters
-	 */
-	public static String escapeHTML(String s) {
-		StringBuilder out = new StringBuilder(Math.max(16, s.length()));
-		for (int i = 0; i < s.length(); i++) {
-			char c = s.charAt(i);
-			if (c > 127 || c == 34 || c == 38 || c == 39 || c == 60 || c == 62) {
-				out.append("&#");
-				out.append((int) c);
-				out.append(';');
-			} else {
-				out.append(c);
-			}
-		}
-		return out.toString();
+		XmlExport.writeXML(resultSet, rootTagName, entityName, writer);
 	}
 
 	/**
@@ -259,81 +155,7 @@ public class ResultSetExporter {
 	 * @throws Exception
 	 */
 	public static void writeHTML(ResultSet resultSet, Writer writer, HashMap<String, String> links) throws Exception {
-
-		writer.write("<table>\n");
-
-		if (resultSet.size() > 0) {
-
-			List<String> fieldnames = resultSet.getColumnNames();
-
-			Iterator<DataRow> it = resultSet.iterator();
-			DataRow r = resultSet.get(0);
-
-			writer.write("<thead>");
-
-			Iterator<String> rit = fieldnames.iterator();
-			while (rit.hasNext()) {
-				String f = rit.next();
-				writer.write("<th>");
-				writer.write(f);
-				writer.write("</th>");
-
-			}
-
-			writer.write("</thead>\n");
-
-			while (it.hasNext()) {
-
-				writer.write("<tr>");
-
-				r = it.next();
-				rit = fieldnames.iterator();
-				while (rit.hasNext()) {
-					String f = rit.next();
-					String fv = "";
-					try {
-
-						String link = null;
-						if (links != null)
-							link = links.get(f);
-
-						fv = r.getFieldAsString(f).trim();
-						writer.write("<td>");
-						if (link != null) {
-							link = link.replace("{key}", fv);
-
-							Iterator<String> inner_rit = fieldnames.iterator();
-							while (inner_rit.hasNext()) {
-								String inner_f = (String) inner_rit.next();
-								String inner_fv = "";
-								try {
-									inner_fv = r.getFieldAsString(inner_f).trim();
-
-								} catch (Exception e) {
-								}
-								link = link.replace("{" + inner_f + "}", inner_fv);
-							}
-							writer.write("<a href='" + link + "'>");
-
-						}
-						writer.write(fv);
-						if (link != null)
-							writer.write("</a>");
-						writer.write("</td>");
-					} catch (Exception e) {
-						writer.write("<td class='missing'>");
-						writer.write("");
-						writer.write("</td>");
-					}
-
-				}
-
-				writer.write("</tr>\n");
-
-			}
-		}
-		writer.write("</table>\n");
-
+		HtmlExport.writeHTML(resultSet, writer, links);
 	}
 
 	/**
@@ -366,51 +188,7 @@ public class ResultSetExporter {
 	 * @throws Exception
 	 */
 	public static void writeTXT(ResultSet resultSet, Writer writer) throws Exception {
-
-		// TODO maybe do a variation where this can be set:
-		String delim = "\t";
-		Boolean writeHeader = true;
-
-		if (resultSet.size() > 0) {
-
-			List<String> fieldnames = resultSet.getColumnNames();
-			Iterator<DataRow> it = resultSet.iterator();
-
-			DataRow r = resultSet.get(0);
-
-			Iterator<String> rit = fieldnames.iterator();
-			if (writeHeader) {
-
-				while (rit.hasNext()) {
-					String f = rit.next();
-					writer.write(f);
-					writer.write(delim);
-
-				}
-				writer.write("\n");
-			}
-
-			while (it.hasNext()) {
-
-				r = it.next();
-				rit = fieldnames.iterator();
-				while (rit.hasNext()) {
-					String f = rit.next();
-					String fv = "";
-					try {
-						fv = r.getFieldAsString(f).trim();
-					} catch (Exception e) {
-					}
-					writer.write(fv);
-					writer.write(delim);
-
-				}
-
-				writer.write("\n");
-
-			}
-		}
-
+		TxtExport.writeTXT(resultSet, writer);
 	}
 
 	/**
@@ -604,99 +382,7 @@ public class ResultSetExporter {
 	 */
 	public static void writeXLSX(ResultSet rs, OutputStream out, boolean writeHeader, boolean useLabelIfPresent,
 			String sheetName, DataRow AttributesRecord, SheetConfiguration sheetConfig) throws Exception {
-
-		try (Workbook wb = new SXSSFWorkbook(400)) {
-			Sheet sheet = wb.createSheet(sheetName);
-
-			Row row;
-			Cell cell;
-
-			if (rs == null || rs.isEmpty()) {
-				row = sheet.createRow(0);
-				cell = row.createCell(0);
-
-				if (rs == null) {
-					cell.setCellValue("null ResultSet");
-				} else {
-					cell.setCellValue("Empty ResultSet");
-				}
-
-				wb.write(out);
-
-				return;
-			}
-
-			List<String> fieldnames;
-			if (sheetConfig == null) {
-				fieldnames = rs.getColumnNames();
-			} else {
-				sheet = sheetConfig.getConfiguredSheet(sheet);
-				fieldnames = sheetConfig.getColumnNamesOrdered();
-			}
-			Iterator<DataRow> it = rs.iterator();
-			Iterator<String> fieldNameIterator;
-
-			int rowIndex = 0;
-			int cellIndex = 0;
-
-			if (writeHeader) {
-				fieldNameIterator = fieldnames.iterator();
-				row = sheet.createRow(rowIndex);
-				rowIndex++;
-
-				while (fieldNameIterator.hasNext()) {
-					cell = row.createCell(cellIndex);
-					String fieldname = fieldNameIterator.next();
-					String label = fieldname;
-					if (useLabelIfPresent) {
-						try {
-							label = AttributesRecord.getFieldAttribute(fieldname, "LABEL");
-						} finally {
-						}
-					}
-					cell.setCellValue(label);
-					cellIndex++;
-				}
-			}
-
-			DataRow currentRow;
-			String currentFieldName;
-			while (it.hasNext()) {
-				fieldNameIterator = fieldnames.iterator();
-
-				row = sheet.createRow(rowIndex);
-				rowIndex++;
-
-				cellIndex = 0;
-				currentRow = it.next();
-				int columnType;
-				while (fieldNameIterator.hasNext()) {
-					currentFieldName = fieldNameIterator.next();
-					cell = row.createCell(cellIndex);
-					columnType = rs.getColumnType(rs.getColumnIndex(currentFieldName));
-					if (currentRow.contains(currentFieldName)) {
-						if (SqlTypeNames.isNumericType(columnType)) {
-							cell.setCellType(CellType.NUMERIC);
-							cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
-						} else if (columnType == java.sql.Types.BOOLEAN || columnType == java.sql.Types.BIT) {
-							cell.setCellType(CellType.BOOLEAN);
-							cell.setCellValue(currentRow.getField(currentFieldName).getBoolean());
-						} else if (columnType == java.sql.Types.BINARY || columnType == java.sql.Types.LONGVARBINARY
-								|| columnType == java.sql.Types.VARBINARY) {
-							cell.setCellType(CellType.STRING);
-							cell.setCellValue(new String(currentRow.getField(currentFieldName).getBytes()));
-						} else {
-							cell.setCellType(CellType.STRING);
-							cell.setCellValue(currentRow.getFieldAsString(currentFieldName));
-						}
-					}
-					cellIndex++;
-				}
-			}
-
-			wb.write(out);
-
-		}
+		XlsxExport.writeXLSX(rs, out, writeHeader, useLabelIfPresent, sheetName, AttributesRecord, sheetConfig);
 	}
 
 	/**
