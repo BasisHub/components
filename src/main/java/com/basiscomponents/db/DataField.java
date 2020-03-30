@@ -370,22 +370,24 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Boolean</code> object.
 	 */
 	public Boolean getBoolean() {
-
-		if (this.Value != null) {
-			if (this.Value.getClass().equals(java.lang.String.class)) {
-				return ("trueTRUE1".indexOf((String) this.Value) >= 0);
-			}
-
-			if (this.Value.getClass().equals(java.lang.Integer.class)) {
-				return ((Integer) this.Value > 0);
-			}
-
-			if (this.Value.getClass().equals(java.lang.Double.class)) {
-				return ((Double) this.Value > 0);
-			}
-
+		if (this.Value == null) {
+			return false;
 		}
-		return (Boolean) this.Value;
+		
+		if (this.Value.getClass().equals(java.lang.String.class)) {
+			return ("true1".indexOf(((String) this.Value).toLowerCase()) >= 0);
+		}
+	
+		if (this.Value.getClass().equals(java.lang.Integer.class)) {
+			return ((Integer) this.Value > 0);
+		}
+	
+		if (this.Value.getClass().equals(java.lang.Double.class)) {
+			return ((Double) this.Value > 0);
+		}
+		
+		return (boolean) this.Value;
+
 	}
 
 	/**

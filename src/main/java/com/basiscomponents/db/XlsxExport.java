@@ -111,12 +111,7 @@ public class XlsxExport {
 							cell.setCellValue(currentRow.getFieldAsNumber(currentFieldName));
 						} else if (columnType == java.sql.Types.BOOLEAN || columnType == java.sql.Types.BIT) {
 							cell.setCellType(CellType.BOOLEAN);
-							// check if data field is null. if it is, set cell to false
-							if (currentRow.getField(currentFieldName).toString() != "") {
-								cell.setCellValue(currentRow.getField(currentFieldName).getBoolean());
-							}else {
-								cell.setCellValue(false);
-							}
+							cell.setCellValue(currentRow.getField(currentFieldName).getBoolean());
 						} else if (columnType == java.sql.Types.BINARY || columnType == java.sql.Types.LONGVARBINARY
 								|| columnType == java.sql.Types.VARBINARY) {
 							cell.setCellType(CellType.STRING);
