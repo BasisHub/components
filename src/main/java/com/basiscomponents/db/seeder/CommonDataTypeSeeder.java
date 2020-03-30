@@ -5,7 +5,6 @@ import com.basiscomponents.db.DataRow;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
@@ -49,6 +48,7 @@ public class CommonDataTypeSeeder {
 		ResultSet rs = new ResultSet();
 		int i = 0;
 		while(i < resultSetSize) {
+			System.out.println("durchlauf: " + i);
 			DataRow dr = createDataRow(i);
 			rs.add(dr);
 			i++;
@@ -117,7 +117,7 @@ public class CommonDataTypeSeeder {
 	 * @return	returns the created DataField
 	 */
 	private DataField createVarcharDataField() {
-		int rnd = (int) (Math.round(Math.random() * (this.jsonObjList.size()) - 1));
+		int rnd = (int) (Math.round(Math.random() * (this.jsonObjList.size() - 1)));
 		String s = this.jsonObjList.get(rnd).toString();
 		return new DataField(s);
 	}
