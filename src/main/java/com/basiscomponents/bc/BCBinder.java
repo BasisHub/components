@@ -37,7 +37,7 @@ public class BCBinder {
     
     private void setRS(ResultSet rs) {
     	this.rs = rs;
-    	this.onUpdateData();
+    	this.onSetData();
 	}
 
     public DataRow getAttributesRecord() {
@@ -56,22 +56,22 @@ public class BCBinder {
     public void retrieve() throws Exception {
         this.rs = this.bc.retrieve();
         this.rs.createIndex();
-        onUpdateData();
+        onSetData();
     }
     
-    public void onUpdateData() {
+    public void onSetData() {
         Iterator<BCBound> it = boundComponents.iterator();
         while (it.hasNext()) {
             BCBound o = it.next();
-            o.onUpdateData();
+            o.onSetData();
         }
     }
 
-    public void onUpdateSelection() {
+    public void onSetSelection() {
         Iterator<BCBound> it = boundComponents.iterator();
         while (it.hasNext()) {
             BCBound o = it.next();
-            o.onUpdateSelection();
+            o.onSetSelection();
         }
     }
     
@@ -80,15 +80,32 @@ public class BCBinder {
 	}
     
     public void setSelection(ArrayList<String> sel) {
-        this.selection = sel;
-        onUpdateSelection();
+    	if (canSetSelection()) {
+    		this.selection = sel;
+    		onSetSelection();
+    	}
 	}
     
     public void setSelection(String rowKey) {
-    	selection.clear();
-    	selection.add(rowKey);
-    	onUpdateSelection();
+    	if (canSetSelection()) {
+	    	selection.clear();
+	    	selection.add(rowKey);
+	    	onSetSelection();
+    	}
 	}
 
+    public Boolean canSetSelection() {
+    	Boolean can=true;
+
+        Iterator<BCBound> it = boundComponents.iterator();
+        while (it.hasNext()) {
+            BCBound o = it.next();
+            if (!o.canSetSelection())
+            	return false;
+        }
+    	
+		return true;
+    	
+    }
     
 }

@@ -7,8 +7,10 @@ public interface BCBound {
 
     public void setBinder(BCBinder binder);
     
-    public void onUpdateSelection();
+    public Boolean canSetSelection();
     
-    public void onUpdateData();
+    public void onSetSelection();
+    
+    public void onSetData();
 	
 }
