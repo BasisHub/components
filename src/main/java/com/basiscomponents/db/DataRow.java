@@ -51,7 +51,7 @@ public class DataRow implements java.io.Serializable {
 
 	private byte[] rowKey = new byte[0];
 
-	private int rowID;
+	private int rowID=-1;
 
 	private String template;
 
