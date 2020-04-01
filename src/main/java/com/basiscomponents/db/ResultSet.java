@@ -726,6 +726,23 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			return -1;
 		}
 	}
+	
+	/**
+	 * 
+	 * returns the zero-based index of a row in the ResultSet
+	 * if the ResultSet is indexed and the DataRow contains a rowKey, then the rowKey is used
+	 * for finding the record in the index. Else the routine iterates
+	 * the ResultSet and performs an .equals on each DataRow to see if there is a match
+	 * based on the field contents. 
+	 * @param rowKey - the rowKey as String for which the index is desired
+	 * @return - the index of the DataRow in the ResultSet, or -1 if no match is found
+	 */
+	public int indexOf(String rowKey) {
+		if (isIndexed && rowKey.length()>0) {
+			return rowIndex.get(rowKey);
+		}
+		return -1;
+	}	
 
 	/**
 	 * Clears the ResultSet by removing all DataRow objects.
