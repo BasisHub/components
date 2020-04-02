@@ -13,6 +13,10 @@ public class SheetConfiguration {
 	private ReportDetails reportDetails;
 	private float fontSize;
 
+	//Sheet name, like for Excel
+	String SheetName="Output";
+
+
 	public SheetConfiguration() {
 		this.columnConfigs = new ArrayList<ColumnConfiguration>();
 	}
@@ -187,6 +191,29 @@ public class SheetConfiguration {
 		return index >= 0 && index <= columnConfigs.size();
 	}
 	
+
+	
+	/**
+	 * 
+	 * returns the sheet name configured for excel sheets
+	 * 
+	 * @return sheet name
+	 * 
+	 */
+	public String getSheetName() {
+		return SheetName;
+	}
+
+	/**
+	 * 
+	 * sets the Sheet Name for Excel Sheet Pages
+	 * 
+	 * @param sheetName: the name
+	 */
+	public void setSheetName(String sheetName) {
+		SheetName = sheetName;
+	}
+
 	/**
 	 * Gets the column configuration
 	 * 
@@ -276,4 +303,5 @@ public class SheetConfiguration {
 		return this.fontSize;
 	}
 	
+
 }

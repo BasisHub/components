@@ -45,7 +45,7 @@
 			</activation>
 
 			<properties>
-				<jar-directory>C:/bbj/lib</jar-directory>
+				<jar-directory>C:/bbx/lib</jar-directory>
 			</properties>
 		</profile>
 		<profile>

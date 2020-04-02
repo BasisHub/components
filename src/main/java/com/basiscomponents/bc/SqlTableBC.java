@@ -91,8 +91,7 @@ public class SqlTableBC implements BusinessComponent {
 	 * @param password the password of the database user.
 	 * @throws ClassNotFoundException thrown if the JDBC driver could not be found.
 	 */
-	public SqlTableBC(String driver, String url, String user, String password)
-			throws ClassNotFoundException {
+	public SqlTableBC(String driver, String url, String user, String password) throws ClassNotFoundException {
 		this.connectionHelper = new SqlConnectionHelper(url, user, password, driver);
 	}
 
@@ -101,10 +100,12 @@ public class SqlTableBC implements BusinessComponent {
 	 * <p>
 	 * Creates a new SqlTableBC object using a database connection.
 	 * <p>
-	 * <b>NOTE</b>: SqlTableBC will not close the connection (after reading or writing).
+	 * <b>NOTE</b>: SqlTableBC will not close the connection (after reading or
+	 * writing).
 	 *
 	 * @param con the database connection to the database.
-	 * @throws SQLException thrown if the connection status (con.isCloses()) cannot be determined
+	 * @throws SQLException thrown if the connection status (con.isCloses()) cannot
+	 *                      be determined
 	 */
 	public SqlTableBC(Connection con) throws SQLException {
 		connectionHelper = new SqlConnectionHelper(con);
@@ -113,8 +114,8 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * Returns a database connection.
 	 * <p>
-	 * If {@link #SqlTableBC(Connection con)} was used, the connection passed in the constructor will
-	 * be returned.<br>
+	 * If {@link #SqlTableBC(Connection con)} was used, the connection passed in the
+	 * constructor will be returned.<br>
 	 * Otherwise a new connection, using the database URL, will be created.
 	 *
 	 * @return a {@link Connection} to the database.
@@ -130,8 +131,8 @@ public class SqlTableBC implements BusinessComponent {
 	 * This method reads the JDBC metadata for the table.<br>
 	 * The metadata can be retrieved bye the {@link #getAttributesRecord()} method.
 	 * <p>
-	 * <b>NOTE</b>: if a custom retrieve SQL statement was set, then this will be used for the
-	 * metadata generation.
+	 * <b>NOTE</b>: if a custom retrieve SQL statement was set, then this will be
+	 * used for the metadata generation.
 	 *
 	 * @param table the table for reading and writing data.
 	 * @see #getAttributesRecord()
@@ -147,12 +148,14 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * Sets a custom retrieve SQL statement.
 	 * <p>
-	 * A custom retrieve SQL statement can be set when a more complex select statement is needed (f.g.
-	 * to retrieve foreign key values). The SQL statement can be a prepared statement. Parameters can
-	 * be set with {@link #setRetrieveParameters(DataRow)}.
+	 * A custom retrieve SQL statement can be set when a more complex select
+	 * statement is needed (f.g. to retrieve foreign key values). The SQL statement
+	 * can be a prepared statement. Parameters can be set with
+	 * {@link #setRetrieveParameters(DataRow)}.
 	 * <p>
-	 * <b>NOTE</b>: if a custom retrieve SQL statement is used, a table name need to be set (using
-	 * {@link #setTable(String)}) for writing/removing data from the main table.
+	 * <b>NOTE</b>: if a custom retrieve SQL statement is used, a table name need to
+	 * be set (using {@link #setTable(String)}) for writing/removing data from the
+	 * main table.
 	 *
 	 * @param sql the custom retrieve SQL statement.
 	 * @see #setRetrieveParameters(DataRow)
@@ -164,15 +167,17 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * Sets a custom retrieve SQL prepared statement.
 	 * <p>
-	 * A custom retrieve SQL statement can be set when a more complex select statement is needed (f.g.
-	 * to retrieve foreign key values).<br>
+	 * A custom retrieve SQL statement can be set when a more complex select
+	 * statement is needed (f.g. to retrieve foreign key values).<br>
 	 * <p>
-	 * Prepared values (question marks in the SQL statement) can be passed within a DataRow.<br>
-	 * The field count and field type in the DataRow should match the count and the type of the
-	 * question mark in the prepared select statement.
+	 * Prepared values (question marks in the SQL statement) can be passed within a
+	 * DataRow.<br>
+	 * The field count and field type in the DataRow should match the count and the
+	 * type of the question mark in the prepared select statement.
 	 * <p>
-	 * <b>NOTE</b>: if a custom retrieve SQL statement is used, a table name need to be set (using
-	 * {@link #setTable(String)}) for writing/removing data from the main table.
+	 * <b>NOTE</b>: if a custom retrieve SQL statement is used, a table name need to
+	 * be set (using {@link #setTable(String)}) for writing/removing data from the
+	 * main table.
 	 *
 	 * @param sql        the custom retrieve SQL statement.
 	 * @param retrieveDr the data row with values for the prepared statement.
@@ -193,8 +198,8 @@ public class SqlTableBC implements BusinessComponent {
 
 	/**
 	 * Get the database specific quote string character.<br>
-	 * <b>NOTE</b>: the quote string character is returned from the JDBC driver and it is determined
-	 * in the setTable(String) method.
+	 * <b>NOTE</b>: the quote string character is returned from the JDBC driver and
+	 * it is determined in the setTable(String) method.
 	 *
 	 * @return the database specific quote string character.
 	 */
@@ -217,19 +222,23 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setFilter(final DataRow filter) {
 		if (filter == null) {
 			this.filter = new DataRow();
 		} else {
 			DataRow f = filter.clone();
-			Map<String, DataField> rgxs = f.getFieldNames().stream()
-					.map(x -> new KeyValuePair<>(x, filter.getField(x)))
-					.filter(x -> x.getValue().getString().startsWith("regex:"))
-					// .peek(x -> System.out.println(x.getValue().getString()))
-					.collect(Collectors.toMap(KeyValuePair::getKey, KeyValuePair::getValue));
+			try {
+				Map<String, DataField> rgxs = f.getFieldNames().stream()
+						.map(x -> new KeyValuePair<>(x, filter.getField(x)))
+						.filter(x -> x.getValue().getString().startsWith("regex:"))
+						// .peek(x -> System.out.println(x.getValue().getString()))
+						.collect(Collectors.toMap(KeyValuePair::getKey, KeyValuePair::getValue));
 
-			this.regexes = rgxs;
-			rgxs.forEach((k, v) -> f.removeField(k));
+				this.regexes = rgxs;
+				rgxs.forEach((k, v) -> f.removeField(k));
+			} catch (Exception e) {
+			}
 			this.filter = f;
 		}
 	}
@@ -246,6 +255,7 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setFieldSelection(DataRow fieldSelection) {
 		this.fieldSelection = fieldSelection;
 	}
@@ -253,6 +263,7 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setFieldSelection(Collection<String> fieldSelection) {
 		if (fieldSelection == null) {
 			this.fieldSelection = null;
@@ -281,6 +292,7 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setScope(String scope) {
 		this.scope = scope;
 	}
@@ -304,8 +316,8 @@ public class SqlTableBC implements BusinessComponent {
 
 	/**
 	 * Sets the scope definition.<br>
-	 * The scope definition is a HashMap with the scope name as key and an ArrayList with field names
-	 * as value.
+	 * The scope definition is a HashMap with the scope name as key and an ArrayList
+	 * with field names as value.
 	 *
 	 * @param scopes the HashMap with the scope definitions
 	 */
@@ -316,6 +328,7 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ResultSet retrieve() throws Exception {
 		return retrieve(-1, -1);
 	}
@@ -324,18 +337,15 @@ public class SqlTableBC implements BusinessComponent {
 	 * {@inheritDoc}
 	 */
 	// TODO Still too complex
+	@Override
 	public ResultSet retrieve(final int first, final int last) throws Exception {
 		checkIndeces(first, last);
 		checkFilter(filter);
 
 		DataRow filterRow = filter.clone();
-		List<DataRowRegexMatcher> regexmatchers = Optional.ofNullable(regexes)
-				.orElseGet(HashMap::new)
-				.entrySet()
-				.stream()
-				.map(x -> new DataRowRegexMatcher(x.getKey(), x.getValue().getString()))
+		List<DataRowRegexMatcher> regexmatchers = Optional.ofNullable(regexes).orElseGet(HashMap::new).entrySet()
+				.stream().map(x -> new DataRowRegexMatcher(x.getKey(), x.getValue().getString()))
 				.collect(Collectors.toList());
-
 
 		final ResultSet retrs;
 
@@ -364,7 +374,8 @@ public class SqlTableBC implements BusinessComponent {
 		return retrs;
 	}
 
-	private ResultSet retrieveDataRows(int first, int last, final DataRow filterRow, final CloseableWrapper<Connection> connw) throws Exception {
+	private ResultSet retrieveDataRows(int first, int last, final DataRow filterRow,
+			final CloseableWrapper<Connection> connw) throws Exception {
 		ResultSet retrs;
 		Connection conn = connw.getCloseable();
 		StringBuilder sql;
@@ -404,7 +415,8 @@ public class SqlTableBC implements BusinessComponent {
 			if (com.basiscomponents.bc.util.Constants.MYSQL_DBMS.equals(dbconfig.getDbType()))
 				sql.append(" as s ");
 		} else
-			sql = new StringBuilder("SELECT " + sqlfields + " FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString());
+			sql = new StringBuilder("SELECT " + sqlfields + " FROM " + dbconfig.getDbQuoteString() + table
+					+ dbconfig.getDbQuoteString());
 
 		if (filterRow != null && !filterRow.getFieldNames().isEmpty()) {
 			StringBuilder wh = new StringBuilder("");
@@ -430,28 +442,27 @@ public class SqlTableBC implements BusinessComponent {
 
 		if (first >= 0 && last >= first) {
 			switch (dbconfig.getDbType()) {
-				case BASIS_DBMS:
-					sql.append(" LIMIT " + (first + 1) + "," + (last - first + 1));
-					break;
-				case MYSQL_DBMS:
-					sql.append(" LIMIT " + first + "," + (last - first + 1));
-					break;
-				case "MICROSOFT SQL SERVER":
-					// OFFSET is available since MS SQL Server 2012 (version 11)
-					int dbVersion = Integer
-							.parseInt(conn.getMetaData().getDatabaseProductVersion().replaceAll("(\\d+)\\..*", "$1"));
-					if (dbVersion >= 11) {
-						sql = new StringBuilder("SELECT * FROM (" + sql + ") T ORDER BY (SELECT NULL) OFFSET " + first
-								+ " ROWS FETCH NEXT " + (last - first + 1) + " ROWS ONLY");
-					} else {
-						throw new UnsupportedOperationException(
-								"Pagination is not supported or not implemented with the " + dbconfig.getDbType() + " (version "
-										+ dbVersion + ") database.");
-					}
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							"Pagination is not supported or not implemented with the " + dbconfig.getDbType() + " database.");
+			case BASIS_DBMS:
+				sql.append(" LIMIT " + (first + 1) + "," + (last - first + 1));
+				break;
+			case MYSQL_DBMS:
+				sql.append(" LIMIT " + first + "," + (last - first + 1));
+				break;
+			case "MICROSOFT SQL SERVER":
+				// OFFSET is available since MS SQL Server 2012 (version 11)
+				int dbVersion = Integer
+						.parseInt(conn.getMetaData().getDatabaseProductVersion().replaceAll("(\\d+)\\..*", "$1"));
+				if (dbVersion >= 11) {
+					sql = new StringBuilder("SELECT * FROM (" + sql + ") T ORDER BY (SELECT NULL) OFFSET " + first
+							+ " ROWS FETCH NEXT " + (last - first + 1) + " ROWS ONLY");
+				} else {
+					throw new UnsupportedOperationException("Pagination is not supported or not implemented with the "
+							+ dbconfig.getDbType() + " (version " + dbVersion + ") database.");
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException("Pagination is not supported or not implemented with the "
+						+ dbconfig.getDbType() + " database.");
 			}
 		}
 		dbconfig.setSqlStatement(sql.toString());
@@ -490,6 +501,7 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ResultSet validateWrite(DataRow dr) {
 
 		if (dr == null || dr.getColumnCount() == 0) {
@@ -531,10 +543,10 @@ public class SqlTableBC implements BusinessComponent {
 		return rs;
 	}
 
-
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public DataRow write(DataRow dr) throws Exception {
 		ResultSet errors = validateWrite(dr);
 		checkErrors(errors);
@@ -568,15 +580,14 @@ public class SqlTableBC implements BusinessComponent {
 
 	// TODO reduce CC of this Method
 
-
 	private static void checkErrors(ResultSet errors) throws SQLException {
 		if (errors.size() > 0) {
 			StringBuilder errMsg = new StringBuilder();
 			for (int i = 0; i < errors.size(); i++) {
 				DataRow dr = errors.get(i);
 				if (dr.getFieldAsString("TYPE").equals(ERROR))
-					errMsg.append("\n" + dr.getFieldAsString("TYPE") + " on column "
-							+ dr.getFieldAsString("FIELD_NAME") + ": " + dr.getFieldAsString("MESSAGE"));
+					errMsg.append("\n" + dr.getFieldAsString("TYPE") + " on column " + dr.getFieldAsString("FIELD_NAME")
+							+ ": " + dr.getFieldAsString("MESSAGE"));
 			}
 			if (errMsg.length() > 0) {
 				throw new SQLException(errMsg.substring(1));
@@ -588,6 +599,7 @@ public class SqlTableBC implements BusinessComponent {
 	 * {@inheritDoc}
 	 */
 	// TODO To be implemented
+	@Override
 	public ResultSet validateRemove(DataRow dr) {
 		return new ResultSet();
 	}
@@ -595,6 +607,7 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void remove(DataRow r) throws Exception {
 		ResultSet errors = validateRemove(r);
 		checkErrors(errors);
@@ -605,8 +618,8 @@ public class SqlTableBC implements BusinessComponent {
 			throw new SQLException("Missing primary column for table \"" + table + "\"");
 		}
 
-		StringBuilder sql =
-				new StringBuilder("DELETE FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString() + " ");
+		StringBuilder sql = new StringBuilder(
+				"DELETE FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString() + " ");
 
 		StringBuilder wh = new StringBuilder("");
 		for (String pkfieldname : dbconfig.getPrimaryKeys()) {
@@ -615,17 +628,17 @@ public class SqlTableBC implements BusinessComponent {
 		sql.append(WHERE + wh.substring(5));
 		dbconfig.setSqlStatement(sql.toString());
 		try (CloseableWrapper<Connection> connw = getConnection();
-		     PreparedStatement prep = connw.getCloseable().prepareStatement(dbconfig.getSqlStatement())) {
+				PreparedStatement prep = connw.getCloseable().prepareStatement(dbconfig.getSqlStatement())) {
 			setSqlParams(prep, r, dbconfig.getPrimaryKeys(), BASIS_DBMS.equals(dbconfig.getDbType()));
 			prep.execute();
 		}
 
 	}
 
-
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public DataRow getAttributesRecord() {
 		return attributesRecord.clone();
 	}
@@ -633,6 +646,7 @@ public class SqlTableBC implements BusinessComponent {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public DataRow getNewObjectTemplate(DataRow conditions) {
 		return getAttributesRecord();
 	}
@@ -641,14 +655,14 @@ public class SqlTableBC implements BusinessComponent {
 	 * Executes a SQL query statement and returns the result as a {@link ResultSet}.
 	 *
 	 * @param sql    the query statement.
-	 * @param params if not null or empty the values from this DataRow will be used to set prepared
-	 *               parameters in the sql statement.
+	 * @param params if not null or empty the values from this DataRow will be used
+	 *               to set prepared parameters in the sql statement.
 	 * @return the query result as {@link ResultSet}.
 	 */
 	public ResultSet retrieve(String sql, DataRow params) {
 
 		try (CloseableWrapper<Connection> connw = getConnection();
-		     PreparedStatement prep = connw.getCloseable().prepareStatement(sql)) {
+				PreparedStatement prep = connw.getCloseable().prepareStatement(sql)) {
 			// Set params if there are any
 			if (params != null) {
 				setParameters(params, prep);
@@ -663,12 +677,11 @@ public class SqlTableBC implements BusinessComponent {
 		return null;
 	}
 
-
 	/**
-	 * Adds a field mapping. If a custom retrieve SQL statement with alias names is used, a field
-	 * mapping can be added.<br>
-	 * The field mapping is internally used when the where clause (filters) are created (on retrieve)
-	 * and on insert/update and deleting data.
+	 * Adds a field mapping. If a custom retrieve SQL statement with alias names is
+	 * used, a field mapping can be added.<br>
+	 * The field mapping is internally used when the where clause (filters) are
+	 * created (on retrieve) and on insert/update and deleting data.
 	 *
 	 * @param bcFieldName the alias name
 	 * @param dbFieldName the table field name
@@ -683,16 +696,16 @@ public class SqlTableBC implements BusinessComponent {
 	 * <p>
 	 * TODO APICHANGE to Map instead of HasMap
 	 *
-	 * @return a HashMap with field mappings. Where key is the alias name and value is the table field
-	 * name.
+	 * @return a HashMap with field mappings. Where key is the alias name and value
+	 *         is the table field name.
 	 */
 	public Map<String, String> getMappings() {
 		return dbconfig.getMappings();
 	}
 
 	/**
-	 * Gets the mapping for a field. If no mapping exists, then the alias field name (bcFieldName) is
-	 * returned.
+	 * Gets the mapping for a field. If no mapping exists, then the alias field name
+	 * (bcFieldName) is returned.
 	 *
 	 * @param bcFieldName the alias field name.
 	 * @return the table field name.
@@ -702,22 +715,24 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 	/**
-	 * Sets if values of character fields should be automatically truncated on validation to the field
-	 * length defined in the table.
+	 * Sets if values of character fields should be automatically truncated on
+	 * validation to the field length defined in the table.
 	 * <p>
-	 * <b>NOTE</b>: only character fields that are not primary keys will be truncated!
+	 * <b>NOTE</b>: only character fields that are not primary keys will be
+	 * truncated!
 	 *
-	 * @param truncate <code>true</code> - all character fields (except primary keys) will be
-	 *                 truncated in the {@link #validateWrite(DataRow)} method. <code>false</code> - don't
-	 *                 truncate character fields.
+	 * @param truncate <code>true</code> - all character fields (except primary
+	 *                 keys) will be truncated in the
+	 *                 {@link #validateWrite(DataRow)} method. <code>false</code> -
+	 *                 don't truncate character fields.
 	 */
 	public void setTruncateFieldValues(boolean truncate) {
 		truncateFieldValues = truncate;
 	}
 
 	/**
-	 * Returns the last executed sql statement. The last executed sql statement is set after a
-	 * retrieve, write or delete.
+	 * Returns the last executed sql statement. The last executed sql statement is
+	 * set after a retrieve, write or delete.
 	 * <p>
 	 *
 	 * @return the last executed sql statement.
@@ -727,9 +742,10 @@ public class SqlTableBC implements BusinessComponent {
 	}
 
 	/**
-	 * Returns a DataRow with fields (the values are not used) which are allowed for filtering. This
-	 * method returns a clone of the attributes record plus additionally added fields. Additional
-	 * fields can be added using the registerFilterField method.
+	 * Returns a DataRow with fields (the values are not used) which are allowed for
+	 * filtering. This method returns a clone of the attributes record plus
+	 * additionally added fields. Additional fields can be added using the
+	 * registerFilterField method.
 	 *
 	 * @return a DataRow with fields used for filtering.
 	 * @see #registerFilterField(String fieldName)
@@ -844,21 +860,20 @@ public class SqlTableBC implements BusinessComponent {
 		}
 	}
 
-
 	private PreparedStatement createMetadataStatement(Connection conn) throws SQLException {
 		PreparedStatement stmt;
 		if (retrieveSql != null && !retrieveSql.equals("")) {
 
 			switch (dbconfig.getDbType()) {
-				case BASIS_DBMS:
-					stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
-					break;
-				case MYSQL_DBMS:
-					stmt = conn.prepareStatement(retrieveSql + " LIMIT 0");
-					break;
-				default:
-					stmt = conn.prepareStatement("SELECT * FROM (" + retrieveSql + ") WHERE 1=0");
-					break;
+			case BASIS_DBMS:
+				stmt = conn.prepareStatement("SELECT TOP 1 * FROM (" + retrieveSql + ")");
+				break;
+			case MYSQL_DBMS:
+				stmt = conn.prepareStatement(retrieveSql + " LIMIT 0");
+				break;
+			default:
+				stmt = conn.prepareStatement("SELECT * FROM (" + retrieveSql + ") WHERE 1=0");
+				break;
 
 			}
 			if (retrieveParams != null && retrieveParams.getColumnCount() > 0) {
@@ -870,11 +885,11 @@ public class SqlTableBC implements BusinessComponent {
 			}
 		} else {
 			if (BASIS_DBMS.equals(dbconfig.getDbType())) {
-				stmt =
-						conn.prepareStatement("SELECT TOP 1 * FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString());
-			} else {
 				stmt = conn.prepareStatement(
-						"SELECT * FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString() + " WHERE 1=0");
+						"SELECT TOP 1 * FROM " + dbconfig.getDbQuoteString() + table + dbconfig.getDbQuoteString());
+			} else {
+				stmt = conn.prepareStatement("SELECT * FROM " + dbconfig.getDbQuoteString() + table
+						+ dbconfig.getDbQuoteString() + " WHERE 1=0");
 			}
 		}
 		return stmt;

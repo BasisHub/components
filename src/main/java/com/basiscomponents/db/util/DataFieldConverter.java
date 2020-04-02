@@ -173,12 +173,20 @@ public class DataFieldConverter {
 		case java.sql.Types.TIME:
 			if (classname.equals("java.sql.Time"))
 				return o;
-			if (classname.equals(JAVA_LANG_STRING))
-				try {
-					return new java.sql.Time(new SimpleDateFormat("HH:mm:ss").parse((String) o).getTime());
-				} catch (ParseException e) {
-					throw new IllegalStateException("Time [" + o + "] could not be parsed", e);
+			if (classname.equals(JAVA_LANG_STRING)) {
+				String timestr = (String) o;
+				if (timestr.contains("T"))
+					timestr=timestr.substring(timestr.indexOf('T')+1);
+				if (timestr.contains("+"))
+					timestr=timestr.substring(0,timestr.indexOf('+'));
+					try {
+						return new java.sql.Time(new SimpleDateFormat("HH:mm:ss").parse(timestr).getTime());
+					} catch (ParseException e) {
+						throw new IllegalStateException("Time [" + o + "] could not be parsed", e);
+
 				}
+				
+			}
 			break;
 		case java.sql.Types.TIMESTAMP:
 			if (classname.equals("java.sql.Timestamp"))
@@ -255,6 +263,7 @@ public class DataFieldConverter {
 			break;
 		case java.sql.Types.INTEGER:
 		case java.sql.Types.SMALLINT:
+		case java.sql.Types.TINYINT:
 			/*
 			 * Columns with an unsigned numeric type in MySQL are treated as the next
 			 * 'larger' Java type that the signed variant of the MySQL:
@@ -330,9 +339,6 @@ public class DataFieldConverter {
 				ret = 1.0;
 			else
 				ret = 0.0;
-			break;
-		case java.sql.Types.TINYINT:
-			ret = field.getInt().doubleValue();
 			break;
 		default:
 			ret = null;
