@@ -28,7 +28,6 @@ public class JRDataSourceAdapter implements JRDataSource {
 	ResultSet rs;
 	Iterator<DataRow> it;
 	DataRow currRow;
-//	boolean allString = false;
 	
 	/**
 	 * public constructor
@@ -37,11 +36,6 @@ public class JRDataSourceAdapter implements JRDataSource {
 	public JRDataSourceAdapter(ResultSet rs) {
 		it = rs.iterator();
 	}
-	
-//	public JRDataSourceAdapter(ResultSet rs, boolean allString) {
-//		it = rs.iterator();
-//		this.allString = allString;
-//	}
 	
 	private JRDataSourceAdapter() {
 	}
@@ -56,17 +50,10 @@ public class JRDataSourceAdapter implements JRDataSource {
 		Object o = null; 
 		try {
 			o=currRow.getField(field.getName()).getObject();
-//			if(!this.allString) {
-				if (o.getClass().equals(com.basiscomponents.db.ResultSet.class)) {
-					o=new JRDataSourceAdapter((ResultSet) o);
-				}
-//			}else {
-//				if (o.getClass().equals(com.basiscomponents.db.ResultSet.class)) {
-//					o=new JRDataSourceAdapter((ResultSet) o, true);
-//				}else {
-//					o = o.toString();
-//				}
-//			}
+			
+			if (o.getClass().equals(com.basiscomponents.db.ResultSet.class)) {
+				o=new JRDataSourceAdapter((ResultSet) o);
+			}
 			
 		}
 		catch (Exception e) {

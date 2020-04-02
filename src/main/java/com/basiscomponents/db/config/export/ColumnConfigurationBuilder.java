@@ -38,17 +38,6 @@ public class ColumnConfigurationBuilder {
 	}
 
 	/**
-	 * Sets the field name
-	 * 
-	 * @param fieldName name of the field
-	 * @return ColumnConfigurationBuilder object to allow chaining
-	 */
-	public ColumnConfigurationBuilder setFieldName(String fieldName) {
-		this.columnConfiguration.setFieldName(fieldName);
-		return this;
-	}
-	
-	/**
 	 * Builds the ColumnConfiguration object
 	 * 
 	 * @return ColumnConfiguration constructed
@@ -61,5 +50,4 @@ public class ColumnConfigurationBuilder {
 		}
 		return columnConfiguration;
 	}
-	
 }
