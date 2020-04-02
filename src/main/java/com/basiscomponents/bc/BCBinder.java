@@ -11,7 +11,7 @@ import com.basiscomponents.db.ResultSet;
 
 public class BCBinder {
 
-    private ArrayList<BCBound> boundComponents = new ArrayList<>();
+    private ArrayList<IBCBound> boundComponents = new ArrayList<>();
     private BusinessComponent bc;
     
     private ResultSet rs;
@@ -76,7 +76,7 @@ public class BCBinder {
 		this.attributes_rec = attributes_rec;
 	}
     
-    public void register(BCBound component) {
+    public void register(IBCBound component) {
         boundComponents.add(component);
         component.setBinder(this);
     }
@@ -88,17 +88,17 @@ public class BCBinder {
     }
     
     public void onSetData() {
-        Iterator<BCBound> it = boundComponents.iterator();
+        Iterator<IBCBound> it = boundComponents.iterator();
         while (it.hasNext()) {
-            BCBound o = it.next();
+            IBCBound o = it.next();
             o.onSetData();
         }
     }
 
     public void onSetSelection() {
-        Iterator<BCBound> it = boundComponents.iterator();
+        Iterator<IBCBound> it = boundComponents.iterator();
         while (it.hasNext()) {
-            BCBound o = it.next();
+            IBCBound o = it.next();
             o.onSetSelection();
         }
     }
@@ -160,9 +160,9 @@ public class BCBinder {
     public Boolean canSetSelection() {
     	Boolean can=true;
 
-        Iterator<BCBound> it = boundComponents.iterator();
+        Iterator<IBCBound> it = boundComponents.iterator();
         while (it.hasNext()) {
-            BCBound o = it.next();
+            IBCBound o = it.next();
             if (!o.canSetSelection())
             	return false;
         }
@@ -177,9 +177,9 @@ public class BCBinder {
     }
     
     public void sendSignal(int signal, Object payload) {
-        Iterator<BCBound> it = boundComponents.iterator();
+        Iterator<IBCBound> it = boundComponents.iterator();
         while (it.hasNext()) {
-            BCBound o = it.next();
+            IBCBound o = it.next();
             o.onSignal(signal, payload);  
         }
     }

@@ -392,6 +392,7 @@ public class DataField implements java.io.Serializable {
 	 */
 	public Boolean getBoolean() {
 
+
 		if (this.Value != null) {
 			if (this.Value.getClass().equals(java.lang.String.class)) {
 				return ("trueTRUE1".indexOf((String) this.Value) >= 0);
@@ -412,7 +413,17 @@ public class DataField implements java.io.Serializable {
 			
 
 		}
-		return (Boolean) this.Value;
+	
+		if (this.Value.getClass().equals(java.lang.Integer.class)) {
+			return ((Integer) this.Value > 0);
+		}
+	
+		if (this.Value.getClass().equals(java.lang.Double.class)) {
+			return ((Double) this.Value > 0);
+		}
+		
+		return (boolean) this.Value;
+
 	}
 
 	/**
