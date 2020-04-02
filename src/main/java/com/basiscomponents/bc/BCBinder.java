@@ -15,10 +15,38 @@ public class BCBinder {
     private BusinessComponent bc;
     
     private ResultSet rs;
-    private DataRow attributes_rec    ;
+    private DataRow attributes_rec;
+    private ArrayList<String> selection = new ArrayList<>();
+    
+    
+    //selection constants
+    
+    public static final int SEL_FIRST 	        = 501;
+                                                
+    public static final int SEL_PREVIOUS        = 502;
+                                                
+    public static final int SEL_NEXT 	        = 503;
+                                                
+    public static final int SEL_LAST 	        = 504;
+                                                
+    //signals
+    
+    //signal that data should be saved
+    public static final int SIGNAL_SAVE         = 901;
+                                                
+    //signal that a new record should be added 
+    public static final int SIGNAL_NEW          = 902;
+    
+    //signal that delete should occur (on current selection)
+    public static final int SIGNAL_DELETE       = 903;
 
+    //signal that components should render themselved blank
+    public static final int SIGNAL_BLANK        = 904;
+
+    //to announce that there is dirty (unsaved) data
+    public static final int SIGNAL_DIRTY        = 904;
 	
-	private ArrayList<String> selection = new ArrayList<>();
+	
 
     private BCBinder() {}
     
@@ -93,6 +121,41 @@ public class BCBinder {
 	    	onSetSelection();
     	}
 	}
+    
+    public void setSelection(int direction) {
+
+    	if (getRS() != null && getRS().size()>0) {
+    		
+    	int i;
+    	
+    	switch (direction) {
+	    	case SEL_FIRST:
+	            setSelection(getRS().get(0).getRowKey());
+	    		break;
+	    	case SEL_PREVIOUS:
+	            //select first if nothing was selected
+	            if (getSelection() == null || getSelection().size()==0) 
+	            	setSelection(getRS().get(0).getRowKey());
+
+	            i = Math.max(0,getRS().indexOf((String)getSelection().get(0))-1);
+	            setSelection(getRS().get(i).getRowKey());
+	    		
+	    		break;
+	    	case SEL_NEXT:
+	            //select first if nothing was selected
+	            if (getSelection() == null || getSelection().size()==0) 
+	            	setSelection(getRS().get(0).getRowKey());
+
+	            i = Math.min(getRS().size()-1,getRS().indexOf((String)getSelection().get(0))+1);
+	            setSelection(getRS().get(i).getRowKey());	            
+	            
+	    		break;
+	    	case SEL_LAST:
+	            setSelection(getRS().get(rs.size()-1).getRowKey());
+	    		break;
+   			}
+    	}    	
+   	}
 
     public Boolean canSetSelection() {
     	Boolean can=true;
@@ -105,7 +168,20 @@ public class BCBinder {
         }
     	
 		return true;
-    	
+		
+    }
+
+    
+    public void sendSignal(int signal) {
+    	sendSignal(signal,null);
+    }
+    
+    public void sendSignal(int signal, Object payload) {
+        Iterator<BCBound> it = boundComponents.iterator();
+        while (it.hasNext()) {
+            BCBound o = it.next();
+            o.onSignal(signal, payload);  
+        }
     }
     
 }

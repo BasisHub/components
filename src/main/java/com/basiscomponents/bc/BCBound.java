@@ -12,5 +12,7 @@ public interface BCBound {
     public void onSetSelection();
     
     public void onSetData();
+    
+    public void onSignal(int signal, Object payload);
 	
 }
