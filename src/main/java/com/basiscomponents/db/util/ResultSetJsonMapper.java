@@ -466,21 +466,28 @@ public class ResultSetJsonMapper {
 					objStartIndex = currIndex + 1;
 				}
 				break;
-			case '(':
+//			case '(':
+// why round?				
 			case '{':
 			case '[':
 				braceCount++;
+				System.out.print(json.charAt(currIndex));
 				break;
-			case ')':
+//			case ')':
+// why round?
 			case '}':
 			case ']':
 				braceCount--;
+				System.out.print(json.charAt(currIndex));
 				break;
 			}
 		}
 
-		if (braceCount != 0)
+		if (braceCount != 0) {
+			
+			System.err.println(braceCount);
 			throw new ParseException("Invalid JSON array", 0);
+		}
 	}
 
 	@FunctionalInterface
