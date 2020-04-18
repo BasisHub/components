@@ -4,8 +4,10 @@ import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.fieldconverter.ConversionRuleSet;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.json.ComponentsCharacterEscapes;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -56,6 +58,12 @@ public class ResultSetJsonMapper {
 
 	public static String toJson(ResultSet rs, boolean meta, String addIndexColumn, boolean f_trimStrings,
 			boolean writeDataRowAttributes) throws IOException {
+			
+			return toJson(rs, meta, addIndexColumn, f_trimStrings, writeDataRowAttributes, null);
+	}
+
+	public static String toJson(ResultSet rs, boolean meta, String addIndexColumn, boolean f_trimStrings,
+			boolean writeDataRowAttributes, ConversionRuleSet crs) throws IOException {
 
 		JsonFactory jf = new JsonFactory();
 		jf.setCharacterEscapes(new ComponentsCharacterEscapes());
@@ -76,7 +84,7 @@ public class ResultSetJsonMapper {
 				}
 
 				for (String fn : dr.getFieldNames()) {
-					dataFieldToJson(dr.getField(fn, true), fn, dr.getFieldType(fn), meta, addIndexColumn, f_trimStrings,
+					dataFieldToJson(dr.getField(fn, true, crs), fn, dr.getFieldType(fn, crs), meta, addIndexColumn, f_trimStrings,
 							jsonGenerator);
 
 				} // while on fields
@@ -84,7 +92,7 @@ public class ResultSetJsonMapper {
 					writeDataRowAttributes(dr.getAttributes(), jsonGenerator);
 				}
 				if (meta) {
-					metaDone = writeMeta(rs, addIndexColumn, jsonGenerator, metaDone, dr);
+					metaDone = writeMeta(rs, addIndexColumn, jsonGenerator, metaDone, dr, crs);
 				}
 
 				jsonGenerator.writeEndObject();
@@ -292,7 +300,7 @@ public class ResultSetJsonMapper {
 			if (value.getDate() == null)
 				jsonGenerator.writeStringField(fieldName, "");
 			else {
-				jsonGenerator.writeStringField(fieldName, value.getDate().toString() + "T00:00:00");
+				jsonGenerator.writeStringField(fieldName, value.getDate().toString() + "T00:00:00+01:00");
 				// adding T00:00:00 for JavaScript to understand the correct order of day and
 				// month
 				// see https://github.com/BBj-Plugins/BBjGridExWidget/issues/89
@@ -304,7 +312,7 @@ public class ResultSetJsonMapper {
 			if (value.getTime() == null)
 				jsonGenerator.writeStringField(fieldName, "");
 			else {
-				jsonGenerator.writeStringField(fieldName, value.getTime().toString());
+				jsonGenerator.writeStringField(fieldName, "1970-01-01T"+value.getTime().toString()+"+00:00");
 			}
 			break;
 
@@ -336,7 +344,7 @@ public class ResultSetJsonMapper {
 	}
 
 	private static boolean writeMeta(ResultSet resultSet, String indexColumn, JsonGenerator jsonGenerator,
-			boolean metaDone, DataRow dr) throws IOException {
+			boolean metaDone, DataRow dr, ConversionRuleSet crs) throws IOException {
 		if (!metaDone) {
 			jsonGenerator.writeFieldName("meta");
 
@@ -364,8 +372,13 @@ public class ResultSetJsonMapper {
 							continue;
 						}
 						String value = null;
-						if (entry.getValue() != null)
-							value = entry.getValue().toString();
+						
+						if (crs != null && "ColumnType".equals(entry.getKey()) && crs.containsKey(c) && crs.get(c) != null) {
+							value = Integer.toString(crs.get(c).getTargetFieldType());
+						}
+						else 
+							if (entry.getValue() != null)
+								value = entry.getValue().toString();
 
 						jsonGenerator.writeStringField(entry.getKey(), value);
 					}
@@ -453,21 +466,28 @@ public class ResultSetJsonMapper {
 					objStartIndex = currIndex + 1;
 				}
 				break;
-			case '(':
+//			case '(':
+// why round?				
 			case '{':
 			case '[':
 				braceCount++;
+
 				break;
-			case ')':
+//			case ')':
+// why round?
 			case '}':
 			case ']':
 				braceCount--;
+
 				break;
 			}
 		}
 
-		if (braceCount != 0)
+		if (braceCount != 0) {
+			
+
 			throw new ParseException("Invalid JSON array", 0);
+		}
 	}
 
 	@FunctionalInterface

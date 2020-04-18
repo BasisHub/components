@@ -3,6 +3,7 @@ package com.basiscomponents.db.util;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.util.StringDateTimeGuesser;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -227,7 +228,12 @@ public class DataRowJsonMapper {
 				break;
 			case java.sql.Types.TIME:
 			case java.sql.Types.TIME_WITH_TIMEZONE:
-				dr.addDataField(fieldName, fieldType, new DataField(fieldObj));
+				tss = fieldObj.toString();
+				if (!tss.contains("T")) {
+					tss += "T00:00:00.0";
+				}
+				java.sql.Time tm = (java.sql.Time) DataField.convertType(tss, fieldType);
+				dr.addDataField(fieldName, fieldType, new DataField(tm));
 				break;
 			case java.sql.Types.DATE:
 			case (int) 9: // BASIS Date
@@ -353,7 +359,8 @@ public class DataRowJsonMapper {
 						attributes.addDataField(fieldName, -973, new DataField(null));
 					break;
 				default:
-					attributes.addDataField(fieldName, java.sql.Types.VARCHAR, new DataField(null));
+					int t = StringDateTimeGuesser.guessType((String)hm.get(fieldName));
+					attributes.addDataField(fieldName, t, new DataField(null));
 					break;
 
 				}
