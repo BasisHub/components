@@ -471,21 +471,21 @@ public class ResultSetJsonMapper {
 			case '{':
 			case '[':
 				braceCount++;
-				System.out.print(json.charAt(currIndex));
+
 				break;
 //			case ')':
 // why round?
 			case '}':
 			case ']':
 				braceCount--;
-				System.out.print(json.charAt(currIndex));
+
 				break;
 			}
 		}
 
 		if (braceCount != 0) {
 			
-			System.err.println(braceCount);
+
 			throw new ParseException("Invalid JSON array", 0);
 		}
 	}

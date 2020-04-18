@@ -14,9 +14,20 @@ import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.util.JLibDataFileHandler;
 import com.google.common.base.Strings;
 
+/**
+ * Will handle a VKEYED config file that will store and provide configurations. This is currently used in the configuration widget plugin.
+ * It ill handle a config file that will store and provide configurations for different users, setting and programs. The BC will not create the VKEYED config file.
+ * the key fields are
+ * -REALM: where the configuration is being used
+ * -KEYX: program name
+ * -USERID: username of the configuration owner
+ * -SETTING: name of the configuration. a user can have multiple settings
+ * @author jcorea
+ *
+ */
 public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	
-	protected static final String DEFAULT_TEMPLATE_CONFIG_FILE 	= "REALM:C(3*=10):DESCRIPTION=Realm:,KEYX:C(40*=10):DESCRIPTION=Key:,USERID:C(5*=10):DESCRIPTION=UserID:,SETTING:C(40*=10):DESCRIPTION=Setting:,CR_MONT:C(10*=10):DESCRIPTION=created_user:,CR_TS_LD:C(14*=10):DESCRIPTION=created_timestamp:,MOD_MONT:C(10*=10):DESCRIPTION=modification_user:,MOD_TS_LD:C(14*=10):DESCRIPTION=modification_timestamp:,CONFIG:C(1*=10):DESCRIPTION=Configuration_payload:";
+	protected static final String DEFAULT_TEMPLATE_CONFIG_FILE 	= "REALM:C(3*=10):DESCRIPTION=Realm:,KEYX:C(40*=10):DESCRIPTION=Key:,USERID:C(64*=10):DESCRIPTION=UserID:,SETTING:C(40*=10):DESCRIPTION=Setting:,CR_MONT:C(10*=10):DESCRIPTION=createduser:,CR_TS_LD:C(14*=10):DESCRIPTION=createdtimestamp:,MOD_MONT:C(10*=10):DESCRIPTION=modificationuser:,MOD_TS_LD:C(14*=10):DESCRIPTION=modificationtimestamp:,CONFIG:C(1*=10):DESCRIPTION=Configurationpayload:";
 	
 	protected static final String SCOPE_DEFAULT 				= "B";
 	protected static final String SCOPE_NOSCOPE 				= "";
@@ -163,14 +174,17 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 			DataRow attributes = DataRow.fromTemplate(ConfigurationsBC.templateConfigFile);
 			setFieldLengthAttribute(attributes);
 			setFieldLabelAttribute(attributes);
+			//Keys
 			attributes.setFieldAttribute(FIELD_NAME_REALM,   	"EDITABLE", "2");
 			attributes.setFieldAttribute(FIELD_NAME_KEYX,    	"EDITABLE", "2");
 			attributes.setFieldAttribute(FIELD_NAME_SETTING, 	"EDITABLE", "2");
 			attributes.setFieldAttribute(FIELD_NAME_USERID,  	"EDITABLE", "2");
+			//non editable fields
 			attributes.setFieldAttribute(FIELD_NAME_CREA_USER,  "EDITABLE", "0");
 			attributes.setFieldAttribute(FIELD_NAME_CREA_DT,  	"EDITABLE", "0");
 			attributes.setFieldAttribute(FIELD_NAME_MOD_USER,  	"EDITABLE", "0");
 			attributes.setFieldAttribute(FIELD_NAME_MOD_DT,  	"EDITABLE", "0");
+			//editable non key field
 			attributes.setFieldAttribute(FIELD_NAME_CONFIG,		"EDITABLE", "1");
 			ConfigurationsBC.attributes = attributes;
 		}
@@ -336,7 +350,7 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		keyx = dr.getFieldAsString(FIELD_NAME_KEYX);
 		keyx = Strings.padEnd(keyx, 40, ' ');
 		userid = dr.getFieldAsString(FIELD_NAME_USERID);
-		userid = Strings.padEnd(userid, 5, ' ');
+		userid = Strings.padEnd(userid, 64, ' ');
 		setting = dr.getFieldAsString(FIELD_NAME_SETTING);
 		setting = Strings.padEnd(setting, 40, ' ');
 		String knum;
@@ -393,6 +407,13 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		return rs;
 	}
 	
+	/**
+	 * generates error message for validation methods.
+	 * @param fieldName
+	 * @param type
+	 * @param message
+	 * @return
+	 */
 	protected DataRow validationErrorMessage(String fieldName, String type, String message) {
 		DataRow dr = new DataRow();
 		try {
@@ -487,6 +508,11 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		return errorRS;
 	}
 
+	/**
+	 * throws a validation error if the validation has failed. Does only affect methods where validation is called (e.g. write(), remove() etc.). The validate methods will instead return Boolean.FALSE
+	 * @param validation
+	 * @throws Exception
+	 */
 	protected void throwValidation(ResultSet validation) throws Exception {
 		if (validation == null || validation.isEmpty()) {
 			return;
@@ -513,14 +539,18 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		String now = dtf.format(nowLDT);  
 		String key = getKNUMString(0, dr);
 		DataRow oldEntry = find(dr);
+		//add knum key
 		dr.setFieldValue(JLibDataFileHandler.FILTER_VALUE, key);
 		dr.setFieldValue(JLibDataFileHandler.FILTER_KNUM,  0);
+		//update modification date/user
 		dr.setFieldValue(FIELD_NAME_MOD_DT, now);
 		dr.setFieldValue(FIELD_NAME_MOD_USER, this.userName);
 		if (oldEntry.isEmpty()) {
+			//set creation fields to now and this user
 			dr.setFieldValue(FIELD_NAME_CREA_DT, now);
 			dr.setFieldValue(FIELD_NAME_CREA_USER, this.userName);
 		} else {
+			//remove keys because already provided via FILTER_VALUE KNUM key
 			dr.removeField(FIELD_NAME_REALM);
 			dr.removeField(FIELD_NAME_KEYX);
 			dr.removeField(FIELD_NAME_SETTING);
@@ -546,6 +576,7 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		DataRow previousFilter = getFilter();
 		DataRow previousFieldSelection = getFieldSelection();
 		DataRow keys = new DataRow();
+		//set keys
 		keys.setFieldValue(FIELD_NAME_REALM, dr.getFieldAsString(FIELD_NAME_REALM));
 		keys.setFieldValue(FIELD_NAME_KEYX, dr.getFieldAsString(FIELD_NAME_KEYX));
 		keys.setFieldValue(FIELD_NAME_SETTING, dr.getFieldAsString(FIELD_NAME_SETTING));
@@ -558,6 +589,7 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		}catch (Exception e) {
 			printDebug(e.getMessage());
 		}
+		//reset filter
 		setFilter(previousFilter);
 		setFieldSelection(previousFieldSelection);
 		if (rs == null || rs.isEmpty()) {
@@ -586,6 +618,13 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		return errorRS;
 	}
 	
+	/**
+	 * returns true if this datarow can be modified. checks the username which is set with setUserName().
+	 * if the username does not equal the userid field in the datarow, this returns false, unless the adminuser is set.
+	 * The admin user can modify all configurations. 
+	 * @param dr
+	 * @return
+	 */
 	public Boolean canModify(DataRow dr) {
 		if (this.userName.equals(this.adminUser.trim())) {
 			return true;
@@ -620,7 +659,7 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		try {
 			dataFileHandler.remove(dr);
 		} catch (Exception e) {
-			Exception newExc = new Exception("Record could not be deleted: " + e.getClass());
+			Exception newExc = new Exception("Record could not be deleted: " + e.getClass() + e.getMessage());
 			newExc.initCause(e);
 			throw newExc;
 		}
@@ -722,6 +761,16 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		}
 	}
 	
+	/**
+	 * returns the availlable configurations the user can access with the current filter.
+	 * conditions are:
+	 * -only filtered realm
+	 * -only filtered keyx
+	 * -only when match with set userid OR default userid
+	 * -ignore settings filter (all settings should be shown)
+	 * @return ResultSet with availlable Configurations
+	 * @throws Exception
+	 */
 	public ResultSet getAvaillableConfigurations() throws Exception {
 		DataRow previousFilter 	 = getFilter();
 		if (!previousFilter.contains(ConfigurationsBC.FIELD_NAME_REALM) || !previousFilter.contains(ConfigurationsBC.FIELD_NAME_KEYX)) {
@@ -733,24 +782,29 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 			DataRow filter = new DataRow();
 			String realm = previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_REALM);
 			String key = previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_KEYX);
+			//set filter for default user id and retrieve
 			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_REALM, realm);
 			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_KEYX, key);
 			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_USERID, "");
 			setFilter(filter);
 			ResultSet defaultConfig = retrieve();
-			if (!previousFilter.contains(ConfigurationsBC.FIELD_NAME_USERID) || previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_USERID).trim().contentEquals("")) {
+			//if user was admin, we only need the default configuration. return it
+			if (!previousFilter.contains(ConfigurationsBC.FIELD_NAME_USERID) || previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_USERID).trim().contentEquals(getAdminUser())) {
 				setFilter(previousFilter);
 				setFieldSelection(previousFieldSel);
 				return defaultConfig;
 			}
+			//set filter for set user id and retrieve
 			String userid = previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_USERID);
 			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_USERID, userid);
 			setFilter(filter);
 			ResultSet userConfig = retrieve();
+			//merge default and set configuration
 			ResultSet availlableConfigs = mergeResultSetsOnKeys(userConfig, defaultConfig);
-			
+			//reset filter and fied selection
 			setFilter(previousFilter);
 			setFieldSelection(previousFieldSel);
+			//return merged configuration
 			return availlableConfigs;
 		}catch (Exception e) {
 			setFilter(previousFilter);
@@ -759,9 +813,16 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		}
 	}
 	
+	/**
+	 * merges 2 resultsets
+	 * @param rs1
+	 * @param rs2
+	 * @return
+	 */
 	protected ResultSet mergeResultSetsOnKeys(ResultSet rs1, ResultSet rs2) {
 		ResultSet largerRS;
 		ResultSet smallerRS;
+		//determine which is rs smaller
 		if (rs1.size() > rs2.size()) {
 			largerRS = rs1;
 			smallerRS = rs2;
@@ -769,6 +830,7 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 			largerRS = rs2;
 			smallerRS = rs1;
 		}
+		//merge smaller into larger rs
 		ResultSet mergedRS = largerRS.clone();
 		for (DataRow smallerDR : smallerRS) {
 			boolean found = false;
@@ -788,39 +850,30 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	public static void main(String[] args) {
 		try {
 			ConfigurationsBC bc = new ConfigurationsBC();
-			bc.setConfigFile("C:\\Users\\FOO\\Documents\\00tempConfigscanbedeleted");
-//			bc.setConfigFile("C:\\Users\\FOO\\Projekte\\Prodin\\data\\P3DCONF001");
+			bc.setConfigFile("C:\\bbj\\cfg\\configurationWidgetConfigs");
 			bc.setUserName("");
 //			System.out.println(bc.getAttributesRecord().toJson());
 			DataRow writeDr = new DataRow();
 			writeDr.setFieldValue(FIELD_NAME_REALM,  "DBO");
 			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test1");
-			writeDr.setFieldValue(FIELD_NAME_USERID, "");
+			writeDr.setFieldValue(FIELD_NAME_USERID, "JC");
 			writeDr.setFieldValue(FIELD_NAME_SETTING,"");
 			writeDr.setFieldValue(FIELD_NAME_CONFIG, "{\"TEST\":\"Default\"}");
 			bc.write(writeDr);
+			writeDr.setFieldValue(FIELD_NAME_REALM,  "DBO");
+			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test1");
+			writeDr.setFieldValue(FIELD_NAME_USERID, "JC");
+			writeDr.setFieldValue(FIELD_NAME_SETTING,"");
+			writeDr.setFieldValue(FIELD_NAME_CONFIG, "{\"TEST\":\"Default2\"}");
+			bc.write(writeDr);
 			bc.remove(writeDr);
-//			writeDr.setFieldValue(FIELD_NAME_REALM,  "DBO");
-//			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test1");
-//			writeDr.setFieldValue(FIELD_NAME_USERID, "JE");
-//			writeDr.setFieldValue(FIELD_NAME_SETTING,"myview");
-//			writeDr.setFieldValue(FIELD_NAME_CONFIG, "{\"TEST\":\"JD\"}");
-//			bc.write(writeDr);
-////			writeDr.setFieldValue(FIELD_NAME_REALM,  "DBO");
-////			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test1");
-////			writeDr.setFieldValue(FIELD_NAME_USERID, "JC");
-////			writeDr.setFieldValue(FIELD_NAME_SETTING,"My fav setting");
-////			writeDr.setFieldValue(FIELD_NAME_CONFIG, "{\"TEST\":\"JC fav\"}");
-////			bc.write(writeDr);
-//			DataRow fieldSelection = new DataRow();
-//			fieldSelection.setFieldValue(FIELD_NAME_CONFIG, "");
-//			fieldSelection.setFieldValue(FIELD_NAME_USERID, "");
-//			fieldSelection.setFieldValue(FIELD_NAME_CREA_USER, "");
+//			bc.remove(writeDr);
+//			writeDr.setFieldVaCdValue(FIELD_NAME_CREA_USER, "");
 			DataRow filter = new DataRow();
 			filter.setFieldValue(FIELD_NAME_REALM,  "DBO");
-			filter.setFieldValue(FIELD_NAME_KEYX,   "Test");
-			filter.setFieldValue(FIELD_NAME_USERID, "AA");
-			filter.setFieldValue(FIELD_NAME_SETTING,"my setting 1");
+			filter.setFieldValue(FIELD_NAME_KEYX,   "Test1");
+			filter.setFieldValue(FIELD_NAME_USERID, "JC");
+			filter.setFieldValue(FIELD_NAME_SETTING,"");
 			bc.setFilter(filter);
 //			bc.setFieldSelection(fieldSelection);
 			ResultSet rs;
@@ -833,7 +886,8 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 				System.out.println(dataRow.toString());
 			}
 //			bc.remove(filter);
-//			System.out.println(rs.size());
+			System.out.println(rs.size());
+			
 //			System.out.println(bc.getAttributesRecord().toJson());
 			
 		} catch (Exception e) {

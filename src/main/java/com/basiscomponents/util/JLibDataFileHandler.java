@@ -266,6 +266,11 @@ public class JLibDataFileHandler {
 		return currentDataRow;
 	}
 	
+	/**
+	 * cuts the leading tail of zeros at the end of the array and returns a smaller array
+	 * @param record array to be trimmed
+	 * @return smaller byte array that is a trimmed version of the original one.
+	 */
 	protected byte[] cutEmptyTailInRecord(byte[] record) {
 		for (int i = record.length - 1; i >= 0; i--) {
 			if (record[i] == 0) {
@@ -700,7 +705,8 @@ public class JLibDataFileHandler {
 			keys = new byte[1][size];
 		} else if (((pos.getFileType() & Filesystem.TYPEMASK) == Filesystem.MKEYED_FILE)
 				|| ((pos.getFileType() & Filesystem.TYPEMASK) == Filesystem.VKEYED_FILE)
-				|| ((pos.getFileType() & Filesystem.TYPEMASK) == Filesystem.XKEYED_FILE)) {
+				|| ((pos.getFileType() & Filesystem.TYPEMASK) == Filesystem.XKEYED_FILE))
+		{
 			List<KeyDescription> keyDesc = pos.getKeyDescriptions();
 			keys = new byte[keyDesc.size()][];
 			KeyDescription desc;
