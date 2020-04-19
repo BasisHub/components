@@ -220,9 +220,14 @@ public class ResultSetJsonMapper {
 		case java.sql.Types.DOUBLE:
 		case java.sql.Types.FLOAT:
 			if (value.getDouble() == null)
-				jsonGenerator.writeNumberField(fieldName, 0.0);
+				jsonGenerator.writeNumberField(fieldName, 0);
 			else
-				jsonGenerator.writeNumberField(fieldName, value.getDouble().doubleValue());
+			{
+				if (value.getDouble().doubleValue() % 1 == 0)
+					jsonGenerator.writeNumberField(fieldName, value.getDouble().intValue());
+				else
+					jsonGenerator.writeNumberField(fieldName, value.getDouble().doubleValue());
+			}
 			break;
 
 		case java.sql.Types.REAL:
