@@ -266,7 +266,7 @@ public class DataRow implements java.io.Serializable {
 	 *             if a DataField cannot been parsed
 	 */
 	public void setFieldValue(final String name, Object value) throws ParseException {
-		setFieldValue(name, value, null);
+		setFieldValueC(name, value, null);
 	}
 	
 	/**
@@ -283,7 +283,7 @@ public class DataRow implements java.io.Serializable {
 	 * @throws ParseException
 	 *             if a DataField cannot been parsed
 	 */
-	public void setFieldValue(final String name, Object value, ConversionRuleSet crs) throws ParseException {
+	public void setFieldValueC(final String name, Object value, ConversionRuleSet crs) throws ParseException {
 		if (value != null) 
 		{
 			if (crs != null && crs.containsKey(name) && crs.get(name) != null)
