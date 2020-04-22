@@ -1801,50 +1801,9 @@ public class DataRow implements java.io.Serializable {
 			return template;
 		}
 
+		template = resultSet.getBBTemplate();
+		return template;
 
-		StringBuilder templatedString = new StringBuilder();
-
-		int sqlType;
-		int precision;
-
-		int size = this.resultSet.getColumnCount();
-		for (int index = 0; index < size; index++) {
-			sqlType = resultSet.getColumnType(index);
-			precision = resultSet.getPrecision(index);
-
-			templatedString.append(resultSet.getColumnName(index) + ":");
-
-			if (!SqlTypeNames.isNumericType(sqlType)) {
-				templatedString.append("C");
-
-				if (sqlType == java.sql.Types.BOOLEAN || sqlType == java.sql.Types.BIT) {
-					precision = 1;
-				} else if (sqlType == java.sql.Types.DATE || sqlType == 9) {
-					precision = 9; // (rlance: why 9?)
-				} else if (sqlType == java.sql.Types.TIMESTAMP || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE
-						|| sqlType == 11) {
-					precision = 23; // max. YYYY-MM-DD hh:mm:ss.000
-				}
-			} else {
-				templatedString.append("N");
-			}
-
-			templatedString.append("(");
-
-			if (precision == 0) {
-				// Using the backspace character as delimiter ($08$)
-				templatedString.append("1*=8");
-			} else {
-				templatedString.append(precision);
-			}
-
-			templatedString.append(")");
-
-			if (index + 1 < size) {
-				templatedString.append(",");
-			}
-		}
-		return templatedString.toString();
 	}
 
 	/**
@@ -1870,40 +1829,205 @@ public class DataRow implements java.io.Serializable {
 			fieldType = getFieldType(entry.getKey());
 			String fieldName = entry.getKey();
 			DataField field = entry.getValue();
+			int colType = resultSet.getColumnType(resultSet.getColumnIndex(fieldName));
 
-			if (SqlTypeNames.isNumericType(fieldType)) {
-				if (field.getValue() == null) {
-					stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));
-				} else {
-					if (fieldType == java.sql.Types.BIGINT || fieldType == java.sql.Types.TINYINT
-							|| fieldType == java.sql.Types.INTEGER || fieldType == java.sql.Types.SMALLINT) {
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getInt()));
-					} else if (fieldType == java.sql.Types.DOUBLE) {
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getDouble()));
-					} else {
-						stringTemplate.setFieldValue(fieldName, new BasisNumber(field.getValue().toString()));
-					}
-				}
-			} else {
-				if (field.getValue() == null) {
-					if (fieldType == java.sql.Types.DATE) {
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(-1));
-					} else if (fieldType == java.sql.Types.BOOLEAN || fieldType == java.sql.Types.BIT) {
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(0));						
-					}
-				} else {
-					if (fieldType == java.sql.Types.BOOLEAN || fieldType == java.sql.Types.BIT) {
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getBoolean() ? 1 : 0));
-					} else if (fieldType == 9) {
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(field.getInt())); // BASIS Date
-					} else if (fieldType == java.sql.Types.DATE) {
-						Integer ret2 = com.basis.util.BasisDate.jul(new java.util.Date(field.getDate().getTime()));
-						stringTemplate.setFieldValue(fieldName, BasisNumber.valueOf(ret2.doubleValue()));
-					} else {
-						stringTemplate.setFieldValue(fieldName, field.toString());
-					}
-				}
-			}
+			switch (colType) {
+			case java.sql.Types.NULL:
+				stringTemplate.setFieldValue(fieldName, "");
+				break;
+			case java.sql.Types.CHAR:
+			case java.sql.Types.VARCHAR:
+			case java.sql.Types.LONGVARCHAR:
+			case java.sql.Types.NCHAR:
+			case java.sql.Types.NVARCHAR:
+			case java.sql.Types.LONGNVARCHAR:
+			case java.sql.Types.TIME:
+			case java.sql.Types.TIMESTAMP:				
+				stringTemplate.setFieldValue(fieldName, getFieldAsString(fieldName));
+				break;
+				
+			case java.sql.Types.INTEGER:
+			case java.sql.Types.TINYINT:
+			case java.sql.Types.SMALLINT:
+			case java.sql.Types.BIGINT:
+			case java.sql.Types.BIT:
+			case java.sql.Types.BOOLEAN:
+			case java.sql.Types.DECIMAL:
+			case java.sql.Types.NUMERIC:
+			case java.sql.Types.DOUBLE:
+			case java.sql.Types.FLOAT:
+			case java.sql.Types.REAL:
+			case java.sql.Types.DATE:
+				System.out.println(fieldName+" "+getFieldAsNumber(fieldName));
+				stringTemplate.setFieldValue(fieldName, new BasisNumber(getFieldAsNumber(fieldName)));				
+				break;
+
+
+//FIXME
+//			case java.sql.Types.BINARY:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=BINARY");
+//				break;
+//			case java.sql.Types.VARBINARY:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=VARBINARY");
+//				break;
+//			case java.sql.Types.LONGVARBINARY:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=LONGVARBINARY");
+//				break;
+//			case java.sql.Types.BLOB:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=BLOB");
+//				break;
+//			case java.sql.Types.CLOB:
+//				if (prec <= 0) {
+//					s.append(C_1);
+//				} else {
+//					if (prec <= 32767) {
+//						s.append("C(").append(prec.toString()).append(PE_10);
+//					} else {
+//						s.append("C(32767+=10)");
+//					}
+//				}
+//				if (extendedInfo)
+//					s.append(":sqltype=CLOB");
+//				break;
+//			case java.sql.Types.NCLOB:
+//				if (prec <= 0) {
+//					s.append(C_1);
+//				} else {
+//					if (prec <= 32767) {
+//						s.append("C(").append(prec.toString()).append(PE_10);
+//					} else {
+//						s.append("C(32767+=10)");
+//					}
+//				}
+//				if (extendedInfo)
+//					s.append(":sqltype=NCLOB");
+//				break;
+//			case 9: // ODBC Date
+//				s.append("C(10)");
+//				if (extendedInfo)
+//					s.append(":sqltype=ODBC_DATE");
+//				break;
+//			case 11: // ODBC Timestamp
+//				s.append("C(19)");
+//				if (extendedInfo)
+//					s.append(":sqltype=ODBC_TIMESTAMP");
+//				break;
+//			case java.sql.Types.ARRAY:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=ARRAY");
+//				break;
+//			case java.sql.Types.JAVA_OBJECT:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=JAVA_OBJECT");
+//				break;
+//			case java.sql.Types.OTHER:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=OTHER");
+//				break;
+//			case java.sql.Types.REF:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=REF");
+//				break;
+//			case java.sql.Types.DATALINK: // (think URL)
+//				s.append("C(").append(prec.toString()).append("*)");
+//				if (extendedInfo)
+//					s.append(":sqltype=DATALINK");
+//				break;
+//			case java.sql.Types.DISTINCT:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=DISTINCT");
+//				break;
+//			case java.sql.Types.STRUCT:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=STRUCT");
+//				break;
+//			case java.sql.Types.ROWID:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=ROWID");
+//				break;
+//			case java.sql.Types.SQLXML:
+//				if (prec > 0) {
+//					prec = java.lang.Math.min(prec, 32767);
+//				} else {
+//					prec = 32767;
+//				}
+//				s.append("O(").append(prec.toString()).append(")");
+//				if (extendedInfo)
+//					s.append(":sqltype=SQLXML");
+//				break;
+			default:
+				throw new Exception("field Type "+fieldType+ " for field "+fieldName+" not implemented!");
+			}			
 		}
 		return stringTemplate.getString().toString();
 	}
@@ -1986,6 +2110,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public void setTemplate(String template) {
+		System.out.println("force template "+template);
 		if (this.template == null) {
 			this.template = template;
 			this.templateChanged = false;
