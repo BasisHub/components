@@ -1842,7 +1842,24 @@ public class DataRow implements java.io.Serializable {
 			case java.sql.Types.NVARCHAR:
 			case java.sql.Types.LONGNVARCHAR:
 			case java.sql.Types.TIME:
-			case java.sql.Types.TIMESTAMP:				
+			case java.sql.Types.TIMESTAMP:	
+			case java.sql.Types.BINARY:
+			case java.sql.Types.VARBINARY:
+			case java.sql.Types.LONGVARBINARY:
+			case java.sql.Types.BLOB:
+			case java.sql.Types.CLOB:
+			case java.sql.Types.NCLOB:
+			case 9: // ODBC Date
+			case 11: // ODBC Timestamp
+			case java.sql.Types.ARRAY:
+			case java.sql.Types.JAVA_OBJECT:
+			case java.sql.Types.OTHER:
+			case java.sql.Types.REF:
+			case java.sql.Types.DATALINK: // (think URL)
+			case java.sql.Types.DISTINCT:
+			case java.sql.Types.STRUCT:
+			case java.sql.Types.ROWID:
+			case java.sql.Types.SQLXML:				
 				stringTemplate.setFieldValue(fieldName, getFieldAsString(fieldName));
 				break;
 				
@@ -1863,168 +1880,6 @@ public class DataRow implements java.io.Serializable {
 				break;
 
 
-//FIXME
-//			case java.sql.Types.BINARY:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=BINARY");
-//				break;
-//			case java.sql.Types.VARBINARY:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=VARBINARY");
-//				break;
-//			case java.sql.Types.LONGVARBINARY:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=LONGVARBINARY");
-//				break;
-//			case java.sql.Types.BLOB:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=BLOB");
-//				break;
-//			case java.sql.Types.CLOB:
-//				if (prec <= 0) {
-//					s.append(C_1);
-//				} else {
-//					if (prec <= 32767) {
-//						s.append("C(").append(prec.toString()).append(PE_10);
-//					} else {
-//						s.append("C(32767+=10)");
-//					}
-//				}
-//				if (extendedInfo)
-//					s.append(":sqltype=CLOB");
-//				break;
-//			case java.sql.Types.NCLOB:
-//				if (prec <= 0) {
-//					s.append(C_1);
-//				} else {
-//					if (prec <= 32767) {
-//						s.append("C(").append(prec.toString()).append(PE_10);
-//					} else {
-//						s.append("C(32767+=10)");
-//					}
-//				}
-//				if (extendedInfo)
-//					s.append(":sqltype=NCLOB");
-//				break;
-//			case 9: // ODBC Date
-//				s.append("C(10)");
-//				if (extendedInfo)
-//					s.append(":sqltype=ODBC_DATE");
-//				break;
-//			case 11: // ODBC Timestamp
-//				s.append("C(19)");
-//				if (extendedInfo)
-//					s.append(":sqltype=ODBC_TIMESTAMP");
-//				break;
-//			case java.sql.Types.ARRAY:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=ARRAY");
-//				break;
-//			case java.sql.Types.JAVA_OBJECT:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=JAVA_OBJECT");
-//				break;
-//			case java.sql.Types.OTHER:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=OTHER");
-//				break;
-//			case java.sql.Types.REF:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=REF");
-//				break;
-//			case java.sql.Types.DATALINK: // (think URL)
-//				s.append("C(").append(prec.toString()).append("*)");
-//				if (extendedInfo)
-//					s.append(":sqltype=DATALINK");
-//				break;
-//			case java.sql.Types.DISTINCT:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=DISTINCT");
-//				break;
-//			case java.sql.Types.STRUCT:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=STRUCT");
-//				break;
-//			case java.sql.Types.ROWID:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=ROWID");
-//				break;
-//			case java.sql.Types.SQLXML:
-//				if (prec > 0) {
-//					prec = java.lang.Math.min(prec, 32767);
-//				} else {
-//					prec = 32767;
-//				}
-//				s.append("O(").append(prec.toString()).append(")");
-//				if (extendedInfo)
-//					s.append(":sqltype=SQLXML");
-//				break;
 			default:
 				throw new Exception("field Type "+fieldType+ " for field "+fieldName+" not implemented!");
 			}			
