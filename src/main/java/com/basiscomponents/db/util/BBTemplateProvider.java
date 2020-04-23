@@ -210,7 +210,7 @@ public class BBTemplateProvider {
 			isNum = true;
 			break;
 		case java.sql.Types.DATE:
-			s.append("I(7)");
+			s.append("I(4)");
 			if (extendedInfo)
 				s.append(":sqltype=DATE");
 			break;
