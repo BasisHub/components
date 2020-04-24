@@ -407,5 +407,18 @@ public class ResultSetExporter {
 	public static File exportToPDF(String outputFileName, String filePath, ResultSet rs, SheetConfiguration sheetConfig, boolean baristaMode, int fitTo, boolean landscapeMode) {
 		return PdfExport.exportToPDF(outputFileName, filePath, rs, sheetConfig, baristaMode, fitTo, landscapeMode);
 	}
+	
+	/**
+	 * Exports the content of the given ResultSet from a BBjGridExWidget
+	 * 
+	 * @param outputFileName    The name + path of the PDF file
+	 * @param customReport		The name + path of the custom report
+	 * @param resultSet         The ResultSet to export.
+	 * 
+	 * @return The final exported PDF file
+	 */
+	public static File exportToPDFByCustomReport(String outputFileName, String customReport, ResultSet rs) {
+		return PdfExport.exportToPDF(outputFileName, customReport, rs);
+	}
 
 }
