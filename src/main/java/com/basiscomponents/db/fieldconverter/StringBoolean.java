@@ -15,6 +15,10 @@ public class StringBoolean implements IConversionRule {
 		this.falseString = falseString;
 	}
 
+	/**
+	 * Convert from external (target) type value to internal (source) type value
+	 * "going down"
+	 */
 	@Override
 	public DataField serialize(DataField field) {
 		if (field.getBoolean())
@@ -23,6 +27,10 @@ public class StringBoolean implements IConversionRule {
 			return new DataField(falseString);
 	}
 
+	/**
+	 * Convert from internal (source) type value to external (target) type value
+	 * "going up"
+	 */
 	@Override
 	public DataField deserialize(DataField field) {
 		if (field.getObject().equals(trueString))
