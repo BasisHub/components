@@ -12,6 +12,7 @@ import com.basiscomponents.db.export.SheetConfiguration;
 import com.basiscomponents.db.export.TxtExport;
 import com.basiscomponents.db.export.XlsxExport;
 import com.basiscomponents.db.export.XmlExport;
+import com.basiscomponents.db.export.CsvExport;
 
 /**
  * Provides static methods to export a {@link com.basiscomponents.db.ResultSet
@@ -406,6 +407,10 @@ public class ResultSetExporter {
 	 */
 	public static File exportToPDF(String outputFileName, String filePath, ResultSet rs, SheetConfiguration sheetConfig, boolean baristaMode, int fitTo, boolean landscapeMode) {
 		return PdfExport.exportToPDF(outputFileName, filePath, rs, sheetConfig, baristaMode, fitTo, landscapeMode);
+	}
+	
+	public static void exportToCSV(File outputFile, ResultSet rs) {
+		CsvExport.exportToCSV(outputFile, rs);
 	}
 
 }
