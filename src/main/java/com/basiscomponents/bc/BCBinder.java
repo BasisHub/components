@@ -141,14 +141,15 @@ public class BCBinder {
 	}
 
 	/**
-	 * Performs the retrieve of the bound BC, create indexes in the result set,
-	 * checks keys in current selection list are in the result set, and invokes the
-	 * onSetData() of all bound components.
+	 * Performs the retrieve of the bound BC, gets the corresponding attributes record that describes what's in the result set,
+	 * creates indexes in the result set, checks keys in current selection list are in the result set,
+	 * and invokes the onSetData() of all bound components so they can react.
 	 *
 	 * @throws Exception
 	 */
 	public void retrieve() throws Exception {
 		this.rs = this.bc.retrieve();
+		this.attributes_rec = this.bc.getAttributesRecord();
 		this.rs.createIndex();
 		updateSelection();
 		onSetData();
