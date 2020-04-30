@@ -68,7 +68,9 @@ public class BCBinder {
 	/**
 	 * Signal directive that there is dirty (unsaved) data
 	 */
-	public static final int SIGNAL_DIRTY = 904;
+	public static final int SIGNAL_DIRTY = 905;
+	
+	public static final int SIGNAL_ERROR = 906;
 
 	@SuppressWarnings("unused")
 	private BCBinder() {
@@ -318,13 +320,7 @@ public class BCBinder {
 			IBCBound o = it.next();
 			o.onSignal(signal, payload);
 		}
-		try {
-			handleSignal(signal, payload);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
+		handleSignal(signal, payload);
 	}
 
 	/**
@@ -335,19 +331,23 @@ public class BCBinder {
 	 * @param payload
 	 * @throws Exception
 	 */
-	protected void handleSignal(int signal, Object payload) throws Exception {
-		switch (signal) {
-		case SIGNAL_SAVE:
-			write();
-			break;
-		case SIGNAL_DELETE:
-			deleteSelectedRows();
-			break;
-		case SIGNAL_NEW:
-			setSelection(SEL_DESELECT);
-			break;
-		default:
-			break;
+	protected void handleSignal(int signal, Object payload)  {
+		try {
+			switch (signal) {
+			case SIGNAL_SAVE:
+				write();
+				break;
+			case SIGNAL_DELETE:
+				deleteSelectedRows();
+				break;
+			case SIGNAL_NEW:
+				setSelection(SEL_DESELECT);
+				break;
+			default:
+				break;
+			}
+		} catch (Exception e) {
+			sendSignal(BCBinder.SIGNAL_ERROR, e.getMessage());
 		}
 	}
 
