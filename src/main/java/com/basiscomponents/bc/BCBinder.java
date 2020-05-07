@@ -358,18 +358,11 @@ public class BCBinder {
 	 * @throws Exception
 	 */
 	protected DataRow getDataRowForWrite() throws Exception {
-		List<String> selection = getSelection();
-		DataRow writeDR;
-		// if exactly one item is selected, that item is overwritten, else a new entry
-		// is being assembled
-//		if (selection.size() == 1) {
-//			writeDR = getRS().get(selection.get(0));
-//		} else {
-			writeDR = new DataRow();
-//		}
+		DataRow writeDR = new DataRow();
 		Iterator<IBCBound> it = boundComponents.iterator();
-		// collect fields from all bound components that provide such; merge them with
-		// data row
+		
+		// collect fields from all bound components that provide such
+		// merge them with data row
 		while (it.hasNext()) {
 			IBCBound o = it.next();
 			DataRow fields = o.getFieldsForWrite();
@@ -378,6 +371,7 @@ public class BCBinder {
 			}
 			writeDR.mergeRecord(fields, true);
 		}
+		
 		return writeDR;
 	}
 
