@@ -68,7 +68,9 @@ public class BCBinder {
 	/**
 	 * Signal directive that there is dirty (unsaved) data
 	 */
-	public static final int SIGNAL_DIRTY = 904;
+	public static final int SIGNAL_DIRTY = 905;
+	
+	public static final int SIGNAL_ERROR = 906;
 
 	@SuppressWarnings("unused")
 	private BCBinder() {
@@ -139,14 +141,15 @@ public class BCBinder {
 	}
 
 	/**
-	 * Performs the retrieve of the bound BC, create indexes in the result set,
-	 * checks keys in current selection list are in the result set, and invokes the
-	 * onSetData() of all bound components.
+	 * Performs the retrieve of the bound BC, gets the corresponding attributes record that describes what's in the result set,
+	 * creates indexes in the result set, checks keys in current selection list are in the result set,
+	 * and invokes the onSetData() of all bound components so they can react.
 	 *
 	 * @throws Exception
 	 */
 	public void retrieve() throws Exception {
 		this.rs = this.bc.retrieve();
+		this.attributes_rec = this.bc.getAttributesRecord();
 		this.rs.createIndex();
 		updateSelection();
 		onSetData();
@@ -318,13 +321,7 @@ public class BCBinder {
 			IBCBound o = it.next();
 			o.onSignal(signal, payload);
 		}
-		try {
-			handleSignal(signal, payload);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
+		handleSignal(signal, payload);
 	}
 
 	/**
@@ -335,19 +332,23 @@ public class BCBinder {
 	 * @param payload
 	 * @throws Exception
 	 */
-	protected void handleSignal(int signal, Object payload) throws Exception {
-		switch (signal) {
-		case SIGNAL_SAVE:
-			write();
-			break;
-		case SIGNAL_DELETE:
-			deleteSelectedRows();
-			break;
-		case SIGNAL_NEW:
-			setSelection(SEL_DESELECT);
-			break;
-		default:
-			break;
+	protected void handleSignal(int signal, Object payload)  {
+		try {
+			switch (signal) {
+			case SIGNAL_SAVE:
+				write();
+				break;
+			case SIGNAL_DELETE:
+				deleteSelectedRows();
+				break;
+			case SIGNAL_NEW:
+				setSelection(SEL_DESELECT);
+				break;
+			default:
+				break;
+			}
+		} catch (Exception e) {
+			sendSignal(BCBinder.SIGNAL_ERROR, e.getMessage());
 		}
 	}
 
@@ -358,18 +359,11 @@ public class BCBinder {
 	 * @throws Exception
 	 */
 	protected DataRow getDataRowForWrite() throws Exception {
-		List<String> selection = getSelection();
-		DataRow writeDR;
-		// if exactly one item is selected, that item is overwritten, else a new entry
-		// is being assembled
-		if (selection.size() == 1) {
-			writeDR = getRS().get(selection.get(0));
-		} else {
-			writeDR = new DataRow();
-		}
+		DataRow writeDR = new DataRow();
 		Iterator<IBCBound> it = boundComponents.iterator();
-		// collect fields from all bound components that provide such; merge them with
-		// data row
+		
+		// collect fields from all bound components that provide such
+		// merge them with data row
 		while (it.hasNext()) {
 			IBCBound o = it.next();
 			DataRow fields = o.getFieldsForWrite();
@@ -378,6 +372,7 @@ public class BCBinder {
 			}
 			writeDR.mergeRecord(fields, true);
 		}
+		
 		return writeDR;
 	}
 
