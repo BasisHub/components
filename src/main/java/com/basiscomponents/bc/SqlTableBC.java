@@ -895,4 +895,16 @@ public class SqlTableBC implements BusinessComponent {
 		return stmt;
 	}
 
+	@Override
+	public BusinessComponent getLookup(String fieldName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResultSet retrieveLookup(String fieldName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
