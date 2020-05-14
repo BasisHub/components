@@ -899,6 +899,18 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	public DataRow getScope() {
 		return this.scope;
 	}
+
+	@Override
+	public BusinessComponent getLookup(String fieldName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResultSet retrieveLookup(String fieldName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 }
