@@ -124,4 +124,20 @@ public interface BusinessComponent {
 	public default DataRow getAllowedFilter() {
 		return getAttributesRecord();
 	}
+	
+	/**
+	 * returns a bc that contains data providing predefined values for a field. for example a lookup for a field "country" could
+	 * return a countryBC which can retrieve values to fill a ListButton with. the lookup bc should provide a field "DESC" as well as exactly one field with EDITABLE=2.
+	 * other fields are ignored.
+	 * @param fieldName
+	 * @return
+	 */
+	public BusinessComponent getLookup(String fieldName);
+	
+	/**
+	 * like getLookup, but instead returns a resultset containg the lookup data.
+	 * @param fieldName
+	 * @return
+	 */
+	public ResultSet retrieveLookup(String fieldName) ;
 }
