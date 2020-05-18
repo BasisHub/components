@@ -4,8 +4,10 @@ import com.basiscomponents.db.DataRow;;
 public interface IBCBound {
 
     public void setBinder(BCBinder binder);
-    
+
     public Boolean canSetSelection();
+
+    public Boolean canTerminate();
     
     public void onSetSelection();
     
