@@ -127,17 +127,19 @@ public interface BusinessComponent {
 	
 	/**
 	 * returns a bc that contains data providing predefined values for a field. for example a lookup for a field "country" could
-	 * return a countryBC which can retrieve values to fill a ListButton with. the lookup bc should provide a field "DESC" as well as exactly one field with EDITABLE=2.
+	 * return a countryBC which can retrieve values to fill a ListButton with.
 	 * other fields are ignored.
-	 * @param fieldName
-	 * @return
+	 * @param fieldName the field to retrieve the Lookup for
+	 * @param dr current datarow
+	 * @return the lookup BC
 	 */
-	public BusinessComponent getLookup(String fieldName);
+	public BusinessComponent getLookup(String fieldName, DataRow dr);
 	
 	/**
 	 * like getLookup, but instead returns a resultset containg the lookup data.
-	 * @param fieldName
-	 * @return
+	 * @param fieldName the field to retrieve the Lookup for
+	 * @param dr current datarow
+	 * @return the retrieved resultset from the lookup
 	 */
-	public ResultSet retrieveLookup(String fieldName) ;
+	public ResultSet getLookupData(String fieldName, DataRow dr) ;
 }

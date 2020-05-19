@@ -70,7 +70,27 @@ public class BCBinder {
 	 */
 	public static final int SIGNAL_DIRTY = 905;
 	
+	/**
+	 * Signal directive that an error has occured in the BC
+	 */
 	public static final int SIGNAL_ERROR = 906;
+	
+
+	
+	/**
+	 * Signal directive that the program wants to terminate
+	 */
+	public static final int SIGNAL_INITIATE_TERMINATE = 907;
+	
+	/**
+	 * Signal directive that the program wants to terminate
+	 */
+	public static final int SIGNAL_TERMINATE = 908;
+	
+	/**
+	 * Signal directive that the program WILL terminate
+	 */
+	public static final int SIGNAL_DESTROY = 909;
 
 	@SuppressWarnings("unused")
 	private BCBinder() {
@@ -344,12 +364,29 @@ public class BCBinder {
 			case SIGNAL_NEW:
 				setSelection(SEL_DESELECT);
 				break;
+			case SIGNAL_INITIATE_TERMINATE:
+				terminate();
+				break;
 			default:
 				break;
 			}
 		} catch (Exception e) {
 			sendSignal(BCBinder.SIGNAL_ERROR, e.getMessage());
 		}
+	}
+	
+	protected void terminate() {
+		Iterator<IBCBound> it = boundComponents.iterator();
+		// collect fields from all bound components that provide such; merge them with
+		// data row
+		while (it.hasNext()) {
+			IBCBound o = it.next();
+			if (!o.canTerminate()) {
+				return;
+			}
+		}
+		sendSignal(BCBinder.SIGNAL_TERMINATE);
+		sendSignal(BCBinder.SIGNAL_DESTROY);
 	}
 
 	/**

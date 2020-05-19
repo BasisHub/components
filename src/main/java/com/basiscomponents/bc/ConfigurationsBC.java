@@ -901,13 +901,13 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	}
 
 	@Override
-	public BusinessComponent getLookup(String fieldName) {
+	public BusinessComponent getLookup(String fieldName, DataRow dr) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ResultSet retrieveLookup(String fieldName) {
+	public ResultSet getLookupData(String fieldName, DataRow dr) {
 		// TODO Auto-generated method stub
 		return null;
 	}
