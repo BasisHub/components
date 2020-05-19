@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
+import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.util.StringDateTimeGuesser;
 
@@ -106,5 +107,18 @@ class JsonIsoFormatTest {
 		String json2 = dr2.toJsonObject(true,null,false).toString();
 		assertEquals(json_meta_compare2, json2);
 		
+	}
+
+	@Test
+	void testOffsetInJson() throws Exception {
+	
+	TimeZone.setDefault(TimeZone.getTimeZone("America/Montreal"));
+	ResultSet rs = new ResultSet();
+	DataRow dr = new DataRow();
+	dr.setFieldValue("DATE",java.sql.Types.DATE,"2020-03-03");
+	dr.setFieldValue("TIMESTAMP",java.sql.Types.TIMESTAMP,"2020-03-03 13:00:00");
+	rs.addItem(dr);
+	String exp = "[{\"DATE\":\"2020-03-03T00:00:00-05:00\",\"TIMESTAMP\":\"2020-03-03T13:00:00.0-05:00\",\"meta\":{\"DATE\":{\"ColumnType\":\"91\"},\"TIMESTAMP\":{\"ColumnType\":\"93\"}}}]";
+	assertEquals(exp,rs.toJson());
 	}
 }

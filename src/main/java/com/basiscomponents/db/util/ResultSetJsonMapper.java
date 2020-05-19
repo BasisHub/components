@@ -292,6 +292,7 @@ public class ResultSetJsonMapper {
 			sb.append('0');
 		    sb.append(m);
 		}
+		
 		str_ts += sb.toString();
 
 		// -------------end timezone handling -------------------
@@ -305,7 +306,48 @@ public class ResultSetJsonMapper {
 	    if (value.getDate() == null)
 		jsonGenerator.writeStringField(fieldName, "");
 	    else {
-		jsonGenerator.writeStringField(fieldName, value.getDate().toString() + "T00:00:00+01:00");
+	    	
+			// calculate the offset of the timezone
+			// TODO: finish according to
+			// https://github.com/BBj-Plugins/BBjGridExWidget/issues/38
+			// potentially externalize into a static utility method and add unit tests.
+
+			TimeZone tz = TimeZone.getDefault();
+
+			int offset = tz.getRawOffset();
+
+			// add daylight saving time
+			if (tz.useDaylightTime() && tz.inDaylightTime(value.getDate())) {
+			    offset = offset + tz.getDSTSavings();
+			}
+
+			int h = (offset / 3600000);
+			int m = Math.abs(offset) - Math.abs(h * 3600000);
+
+			StringBuilder sb = new StringBuilder();
+			if (h >= 0)
+			    sb.append('+');
+			else {
+			    sb.append('-');
+			    h *= -1;
+			}
+
+			if (h < 10)
+			    sb.append('0');
+
+			sb.append(h);
+			sb.append(':');
+			if (m == 0)
+			    sb.append("00");
+			else {
+			    if (m < 10)
+				sb.append('0');
+			    sb.append(m);
+			}
+			
+			// -------------end timezone handling -------------------
+			
+		jsonGenerator.writeStringField(fieldName, value.getDate().toString() + "T00:00:00"+sb.toString());
 		// adding T00:00:00 for JavaScript to understand the correct order of day and
 		// month
 		// see https://github.com/BBj-Plugins/BBjGridExWidget/issues/89
