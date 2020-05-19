@@ -254,6 +254,8 @@ public class ResultSetJsonMapper {
 
 		java.sql.Timestamp ts = value.getTimestamp();
 		String str_ts = ts.toString().replaceFirst(" ", "T");
+		if (str_ts.endsWith(".0"))
+			str_ts = str_ts.substring(0,str_ts.length()-2);
 
 		// calculate the offset of the timezone
 		// TODO: finish according to
@@ -296,7 +298,6 @@ public class ResultSetJsonMapper {
 		str_ts += sb.toString();
 
 		// -------------end timezone handling -------------------
-
 		jsonGenerator.writeStringField(fieldName, str_ts);
 	    }
 	    break;
@@ -359,7 +360,48 @@ public class ResultSetJsonMapper {
 	    if (value.getTime() == null)
 		jsonGenerator.writeStringField(fieldName, "");
 	    else {
-		jsonGenerator.writeStringField(fieldName, "1970-01-01T" + value.getTime().toString() + "+00:00");
+	    	
+	    	// calculate the offset of the timezone
+	    				// TODO: finish according to
+	    				// https://github.com/BBj-Plugins/BBjGridExWidget/issues/38
+	    				// potentially externalize into a static utility method and add unit tests.
+
+	    				TimeZone tz = TimeZone.getDefault();
+
+	    				int offset = tz.getRawOffset();
+
+//	    				// add daylight saving time
+//	    				if (tz.useDaylightTime() && tz.inDaylightTime(value.getDate())) {
+//	    				    offset = offset + tz.getDSTSavings();
+//	    				}
+
+	    				int h = (offset / 3600000);
+	    				int m = Math.abs(offset) - Math.abs(h * 3600000);
+
+	    				StringBuilder sb = new StringBuilder();
+	    				if (h >= 0)
+	    				    sb.append('+');
+	    				else {
+	    				    sb.append('-');
+	    				    h *= -1;
+	    				}
+
+	    				if (h < 10)
+	    				    sb.append('0');
+
+	    				sb.append(h);
+	    				sb.append(':');
+	    				if (m == 0)
+	    				    sb.append("00");
+	    				else {
+	    				    if (m < 10)
+	    					sb.append('0');
+	    				    sb.append(m);
+	    				}
+	    				
+	    				// -------------end timezone handling -------------------	    	
+	    				
+		jsonGenerator.writeStringField(fieldName, "1970-01-01T" + value.getTime().toString() + sb.toString());
 	    }
 	    break;
 

@@ -16,11 +16,11 @@ import com.basiscomponents.util.StringDateTimeGuesser;
 
 class JsonIsoFormatTest {
 
-	final String json_meta_compare = new String("{\"SOMETIMESTAMP\":\"2020-03-17T19:09:36.772+01:00\",\"SOMEDATE\":\"2020-03-17T00:00:00+01:00\",\"SOMETIME\":\"1970-01-01T19:09:36+00:00\",\"meta\":{\"SOMETIMESTAMP\":{\"ColumnType\":\"93\"},\"SOMEDATE\":{\"ColumnType\":\"91\"},\"SOMETIME\":{\"ColumnType\":\"92\"}}}");
-	final String json_plain_compare = new String("{\"SOMETIMESTAMP\":\"2020-03-17T19:09:36.772+01:00\",\"SOMEDATE\":\"2020-03-17T00:00:00+01:00\",\"SOMETIME\":\"1970-01-01T19:09:36+00:00\"}");
+	final String json_meta_compare = new String("{\"SOMETIMESTAMP\":\"2020-03-17T19:09:36.772+01:00\",\"SOMEDATE\":\"2020-03-17T00:00:00+01:00\",\"SOMETIME\":\"1970-01-01T19:09:36+01:00\",\"meta\":{\"SOMETIMESTAMP\":{\"ColumnType\":\"93\"},\"SOMEDATE\":{\"ColumnType\":\"91\"},\"SOMETIME\":{\"ColumnType\":\"92\"}}}");
+	final String json_plain_compare = new String("{\"SOMETIMESTAMP\":\"2020-03-17T19:09:36.772+01:00\",\"SOMEDATE\":\"2020-03-17T00:00:00+01:00\",\"SOMETIME\":\"1970-01-01T19:09:36+01:00\"}");
 
-	final String json_meta_compare2 = new String("{\"SOMETIMESTAMP\":\"x020-03-17T19:09:36.772+01:00\",\"SOMEDATE\":\"x020-03-17T00:00:00+01:00\",\"SOMETIME\":\"x970-01-01T19:09:36+00:00\",\"meta\":{\"SOMETIMESTAMP\":{\"ColumnType\":\"12\"},\"SOMEDATE\":{\"ColumnType\":\"12\"},\"SOMETIME\":{\"ColumnType\":\"12\"}}}");
-	final String json_plain_compare2 = new String("{\"SOMETIMESTAMP\":\"x020-03-17T19:09:36.772+01:00\",\"SOMEDATE\":\"x020-03-17T00:00:00+01:00\",\"SOMETIME\":\"x970-01-01T19:09:36+00:00\"}");
+	final String json_meta_compare2 = new String("{\"SOMETIMESTAMP\":\"x020-03-17T19:09:36.772+01:00\",\"SOMEDATE\":\"x020-03-17T00:00:00+01:00\",\"SOMETIME\":\"x970-01-01T19:09:36+01:00\",\"meta\":{\"SOMETIMESTAMP\":{\"ColumnType\":\"12\"},\"SOMEDATE\":{\"ColumnType\":\"12\"},\"SOMETIME\":{\"ColumnType\":\"12\"}}}");
+	final String json_plain_compare2 = new String("{\"SOMETIMESTAMP\":\"x020-03-17T19:09:36.772+01:00\",\"SOMEDATE\":\"x020-03-17T00:00:00+01:00\",\"SOMETIME\":\"x970-01-01T19:09:36+01:00\"}");
 
 
 	
@@ -63,7 +63,7 @@ class JsonIsoFormatTest {
 		assertEquals("java.sql.Date",o.getClass().getCanonicalName());
 		assertEquals("2020-03-17",o.toString());
 		
-		String SOMETIME=		"1970-01-01T19:09:36+00:00";
+		String SOMETIME=		"1970-01-01T19:09:36+01:00";
 		o = StringDateTimeGuesser.guess(SOMETIME);
 		assertEquals("java.sql.Time",o.getClass().getCanonicalName());
 		assertEquals("19:09:36",o.toString());
@@ -100,7 +100,9 @@ class JsonIsoFormatTest {
 	@Test
 	void testIsoFormatJsonGuessing() throws Exception {
 		DataRow dr = DataRow.fromJson(json_plain_compare);
+
 		String json = dr.toJsonObject(true,null,false).toString();
+	
 		assertEquals(json_meta_compare, json);
 		
 		DataRow dr2 = DataRow.fromJson(json_plain_compare2);
@@ -118,7 +120,18 @@ class JsonIsoFormatTest {
 	dr.setFieldValue("DATE",java.sql.Types.DATE,"2020-03-03");
 	dr.setFieldValue("TIMESTAMP",java.sql.Types.TIMESTAMP,"2020-03-03 13:00:00");
 	rs.addItem(dr);
-	String exp = "[{\"DATE\":\"2020-03-03T00:00:00-05:00\",\"TIMESTAMP\":\"2020-03-03T13:00:00.0-05:00\",\"meta\":{\"DATE\":{\"ColumnType\":\"91\"},\"TIMESTAMP\":{\"ColumnType\":\"93\"}}}]";
+	String exp = "[{\"DATE\":\"2020-03-03T00:00:00-05:00\",\"TIMESTAMP\":\"2020-03-03T13:00:00-05:00\",\"meta\":{\"DATE\":{\"ColumnType\":\"91\"},\"TIMESTAMP\":{\"ColumnType\":\"93\"}}}]";
 	assertEquals(exp,rs.toJson());
 	}
+	
+	@Test
+	void testOffsetInJsonParsing() throws Exception {
+		TimeZone.setDefault(TimeZone.getTimeZone("America/Montreal"));
+		DataRow dr = new DataRow();
+		dr.setFieldValue("TIMESTAMP",java.sql.Types.TIMESTAMP,"1970-01-01T13:00:00+01:00");
+		dr.setFieldValue("TIME",java.sql.Types.TIME,"13:00:00+01:00");
+		String exp = "[{\"TIMESTAMP\":\"1970-01-01T07:00:00-05:00\",\"TIME\":\"1970-01-01T07:00:00-05:00\",\"meta\":{\"TIMESTAMP\":{\"ColumnType\":\"93\"},\"TIME\":{\"ColumnType\":\"92\"}}}]";
+		assertEquals(exp,dr.toJson());
+	}
+	
 }

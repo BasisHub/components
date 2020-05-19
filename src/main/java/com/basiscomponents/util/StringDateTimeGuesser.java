@@ -14,7 +14,7 @@ public class StringDateTimeGuesser {
 				return DataFieldConverter.convertType(input,92);
 		
 			case 25:
-				if (input.startsWith("1970-01-01T") && input.endsWith("+00:00"))
+				if (input.startsWith("1970-01-01T") && input.substring(19,20).equals("+"))
 					return DataFieldConverter.convertType(input,92);
 				
 				if (input.substring(10,19).equals("T00:00:00"))
@@ -45,7 +45,7 @@ public class StringDateTimeGuesser {
 				 DataFieldConverter.convertType(input,92);
 				 return 92;
 			case 25:
-				if (input.startsWith("1970-01-01T") && input.endsWith("+00:00")) {
+				if (input.startsWith("1970-01-01T") && input.substring(19,20).equals("+")) {
 					DataFieldConverter.convertType(input,92);
 					return 92;
 					}

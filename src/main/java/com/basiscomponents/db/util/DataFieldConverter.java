@@ -5,6 +5,7 @@ import com.basiscomponents.db.ResultSet;
 
 import java.math.BigDecimal;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -175,12 +176,15 @@ public class DataFieldConverter {
 				return o;
 			if (classname.equals(JAVA_LANG_STRING)) {
 				String timestr = (String) o;
+				String timemask="HH:mm:ss";
 				if (timestr.contains("T"))
 					timestr=timestr.substring(timestr.indexOf('T')+1);
-				if (timestr.contains("+"))
-					timestr=timestr.substring(0,timestr.indexOf('+'));
+				if (timestr.contains("+")) {
+					timemask+="X";
+				}
 					try {
-						return new java.sql.Time(new SimpleDateFormat("HH:mm:ss").parse(timestr).getTime());
+						Time t = new java.sql.Time(new SimpleDateFormat(timemask).parse(timestr).getTime());
+						return t;
 					} catch (ParseException e) {
 						throw new IllegalStateException("Time [" + o + "] could not be parsed", e);
 
@@ -200,10 +204,14 @@ public class DataFieldConverter {
 				if (tmpstr.isEmpty())
 					return null;
 				
-				// split off timezone
-				// TODO: detect timezone by offset and adjust the timestamp accordingly
-				// TODO: find a better performing implementation
-
+				DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+				try {
+					String t = tmpstr.replace("T"," ");
+					return new java.sql.Timestamp(format.parse(t).getTime());
+				} catch (ParseException e) {
+				}
+				
+				// old implementation as fallback
 				String tz_offs = "";
 				if (p.contains("+")) {
 					tz_offs = tmpstr.substring(p.indexOf('+'));
