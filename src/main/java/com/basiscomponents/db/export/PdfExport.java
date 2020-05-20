@@ -120,6 +120,33 @@ public class PdfExport {
 		// merging the created pdf files to one file
 		return mergePDFFiles(tempFileList, outputFileName, filePath);
 	}
+	
+	/**
+	 * Exports the content of the given ResultSet from a BBjGridExWidget
+	 * 
+	 * @param outputFileName
+	 *            The name + path of the PDF file
+	 * @param reportName
+	 * 			  The name + path of the report
+	 * @param resultSet
+	 *            The ResultSet to export.
+	 * 
+	 * @return The final exported PDF file
+	 */
+	public static File exportToPDF(String outputFileName, String reportName, ResultSet rs) {
+		File outputFile = null;
+		try {
+			outputFile = new File(outputFileName);
+			JasperReport report = JasperCompileManager.compileReport(reportName);
+			JRDataSource jrDataSource = rs.toJRDataSource();
+			JasperPrint jasperPrint = JasperFillManager.fillReport(report, new HashMap(), jrDataSource);
+			JasperExportManager.exportReportToPdfFile(jasperPrint, outputFile.getAbsolutePath());
+		} catch (JRException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return outputFile;
+	}
 
 	/**
 	 * Compiles a list of jasper reports, fills them with the result set data and
@@ -201,7 +228,7 @@ public class PdfExport {
 
 		// save document
 		try {
-			document.save(filePath + outputFileName + ".pdf");
+			document.save(filePath + outputFileName);
 			document.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -228,7 +255,7 @@ public class PdfExport {
 		}
 
 		// return the new build pdf
-		file = new File(filePath + outputFileName + ".pdf");
+		file = new File(filePath + outputFileName);
 		return file;
 	}
 
