@@ -8,13 +8,22 @@ public class StringDateTimeGuesser {
 	
 		try {
 			
+			System.out.println(input+" "+input.length());
 			switch (input.length()) {
 			
 			case 8:
 				return DataFieldConverter.convertType(input,92);
 		
+			case 20:
+				if (input.endsWith("Z"))
+					return DataFieldConverter.convertType(input,93);
+
+			case 11:
+				if (input.endsWith("Z"))
+					return DataFieldConverter.convertType(input,91);
+				
 			case 25:
-				if (input.startsWith("1970-01-01T") && input.endsWith("+00:00"))
+				if (input.startsWith("1970-01-01T") && input.substring(19,20).equals("+"))
 					return DataFieldConverter.convertType(input,92);
 				
 				if (input.substring(10,19).equals("T00:00:00"))
@@ -44,8 +53,18 @@ public class StringDateTimeGuesser {
 			case 8:
 				 DataFieldConverter.convertType(input,92);
 				 return 92;
+			case 11:
+				if (input.endsWith("Z")) {
+					DataFieldConverter.convertType(input,91);
+					return 91;
+				}
+			case 20:
+				if (input.endsWith("Z")) {
+					DataFieldConverter.convertType(input,93);
+					return 93;
+					}
 			case 25:
-				if (input.startsWith("1970-01-01T") && input.endsWith("+00:00")) {
+				if (input.startsWith("1970-01-01T") && input.substring(19,20).equals("+")) {
 					DataFieldConverter.convertType(input,92);
 					return 92;
 					}

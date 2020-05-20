@@ -449,12 +449,12 @@ public class ResultSetJSonConversionTest {
 	ResultSet rs0 = ResultSetProvider.createNestedDataRowsResultSet();
 	DataRow dr0 = rs0.get(0);
 	String s = rs0.toJson();
-	System.out.println(rs0.toJson());
+
 	assertFalse(s.isEmpty());
 	try {
 	    ResultSet rs1 = ResultSet.fromJson(s);
 	    DataRow newDr0 = rs1.get(0);
-	    System.out.println(newDr0.toJson());
+
 	    equalityAsStringDataRowTest(dr0, newDr0, s);
 	    equalityAsNumberDataRowTest(dr0, newDr0, s);
 	    equalityAsValueDataRowTest(dr0, newDr0, s, true);

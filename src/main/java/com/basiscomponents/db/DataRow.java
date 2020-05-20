@@ -17,6 +17,7 @@ import com.basiscomponents.db.util.TemplateParser;
 import net.sf.jasperreports.engine.JRDataSource;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -54,6 +55,8 @@ public class DataRow implements java.io.Serializable {
 	private int rowID=-1;
 
 	private String template;
+	
+	private String template_override;
 
 	private boolean templateChanged;
 
@@ -290,9 +293,13 @@ public class DataRow implements java.io.Serializable {
 				value = crs.get(name).serialize(new DataField(value)).getObject();
 			
 			String c = value.getClass().getCanonicalName();
-			if (c.contains("BBjNumber") || c.contains("BBjInt")) {
-				value = Double.parseDouble(value.toString());
+			if (c.contains("BBjNumber") ) {
+				value = new BigDecimal(value.toString());
 			}
+			if (c.contains("BBjInt")) {
+				value = Integer.parseInt(value.toString());
+			}
+			
 		}
 
 		DataField field = null;
@@ -1797,6 +1804,10 @@ public class DataRow implements java.io.Serializable {
 	 * @return a BBj String Template with the values defined in this DataRow.
 	 */
 	public String getTemplate() {
+		
+		if (template_override != null)
+			return template_override;
+		
 		if (!templateChanged) {
 			return template;
 		}
@@ -1868,6 +1879,10 @@ public class DataRow implements java.io.Serializable {
 			case java.sql.Types.SMALLINT:
 			case java.sql.Types.BIGINT:
 			case java.sql.Types.BIT:
+				stringTemplate.setFieldValue(fieldName, new BasisNumber(getField(fieldName).getInt()));				
+				break;
+				
+				
 			case java.sql.Types.BOOLEAN:
 			case java.sql.Types.DECIMAL:
 			case java.sql.Types.NUMERIC:
@@ -1875,8 +1890,7 @@ public class DataRow implements java.io.Serializable {
 			case java.sql.Types.FLOAT:
 			case java.sql.Types.REAL:
 			case java.sql.Types.DATE:
-				System.out.println(fieldName+" "+getFieldAsNumber(fieldName));
-				stringTemplate.setFieldValue(fieldName, new BasisNumber(getFieldAsNumber(fieldName)));				
+				stringTemplate.setFieldValue(fieldName, new BasisNumber(getField(fieldName).getBigDecimal()));				
 				break;
 
 
@@ -1958,6 +1972,10 @@ public class DataRow implements java.io.Serializable {
 				break;
 
 			default:
+				System.out.println(tmpl.getTemplateString());
+				System.out.println(tmpl.getString());
+				System.out.println(name);
+				System.out.println(tmpl.getFieldAsString(name));
 				this.setFieldValue(name, tmpl.getFieldAsString(name));
 				break;
 			}
@@ -1965,11 +1983,13 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public void setTemplate(String template) {
-		System.out.println("force template "+template);
-		if (this.template == null) {
-			this.template = template;
-			this.templateChanged = false;
-		}
+		
+		template_override = template;
+		
+//		if (this.template == null) {
+//			this.template = template;
+//			this.templateChanged = false;
+//		}
 	}
 
 	/**
