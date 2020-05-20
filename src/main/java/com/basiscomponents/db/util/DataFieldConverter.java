@@ -204,6 +204,15 @@ public class DataFieldConverter {
 				if (tmpstr.isEmpty())
 					return null;
 				
+				if (tmpstr.length() == 20 && tmpstr.endsWith("Z")) {
+					DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					try {
+						String t = tmpstr.replace("T"," ");
+						return new java.sql.Timestamp(format.parse(t).getTime());
+					} catch (ParseException e) {
+					}
+				}
+				
 				DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
 				try {
 					String t = tmpstr.replace("T"," ");

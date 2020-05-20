@@ -58,6 +58,11 @@ class JsonIsoFormatTest {
 		assertEquals("java.sql.Timestamp",o.getClass().getCanonicalName());
 		assertEquals(millis,((java.sql.Timestamp)(o)).getTime());
 		
+		String SOMETIMESTAMPA=	"2020-02-26T03:22:31Z";
+		o = StringDateTimeGuesser.guess(SOMETIMESTAMPA);
+		assertEquals("java.sql.Timestamp",o.getClass().getCanonicalName());
+		assertEquals("2020-02-26 03:22:31.0",o.toString());		
+		
 		String SOMEDATE=		"2020-03-17T00:00:00+01:00";
 		o = StringDateTimeGuesser.guess(SOMEDATE);
 		assertEquals("java.sql.Date",o.getClass().getCanonicalName());
@@ -72,12 +77,14 @@ class JsonIsoFormatTest {
 		o = StringDateTimeGuesser.guess(SOMETIME2);
 		assertEquals("java.sql.Time",o.getClass().getCanonicalName());
 		assertEquals("19:20:36",o.toString());
+
 		
 		
 		String SOMETIMESTAMP1=	"x020-03-17T19:09:36.772+01:00";
 		o = StringDateTimeGuesser.guess(SOMETIMESTAMP1);
 		assertEquals("java.lang.String",o.getClass().getCanonicalName());
 		assertEquals("x020-03-17T19:09:36.772+01:00",o.toString());
+
 
 		
 		String SOMEDATE1=		"x020-03-17T00:00:00+01:00";
@@ -132,6 +139,15 @@ class JsonIsoFormatTest {
 		dr.setFieldValue("TIME",java.sql.Types.TIME,"13:00:00+01:00");
 		String exp = "[{\"TIMESTAMP\":\"1970-01-01T07:00:00-05:00\",\"TIME\":\"1970-01-01T07:00:00-05:00\",\"meta\":{\"TIMESTAMP\":{\"ColumnType\":\"93\"},\"TIME\":{\"ColumnType\":\"92\"}}}]";
 		assertEquals(exp,dr.toJson());
+	}
+	
+	@Test
+	void testStringLiteralsEndingOnZ() throws Exception {
+	
+	String json = "[{\"CREATED_AT\":\"2020-02-26T03:22:31Z\",\"LAST_LOGIN\":\"2020-01-16Z\",\"LAST_SEEN\":\"08:46:06\"}]";
+	String exp = "[{\"CREATED_AT\":\"2020-02-26T03:22:31+01:00\",\"LAST_LOGIN\":\"2020-01-16T00:00:00+01:00\",\"LAST_SEEN\":\"1970-01-01T00:00:00+01:00\",\"meta\":{\"CREATED_AT\":{\"ColumnType\":\"93\"},\"LAST_LOGIN\":{\"ColumnType\":\"91\"},\"LAST_SEEN\":{\"ColumnType\":\"92\"}}}]";
+	ResultSet rs = ResultSet.fromJson(json);
+	assertEquals(exp, rs.toJson());
 	}
 	
 }
