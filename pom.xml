@@ -17,6 +17,9 @@
 		<project-root>${basedir}</project-root>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>dd-MM-yyyy HH:mm</maven.build.timestamp.format>
+		
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<profiles>
@@ -39,7 +42,7 @@
 
 		<!-- default build profile, active by default -->
 		<profile>
-			<id>winbbjlib</id>
+			<id>winbbxlib</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -48,6 +51,18 @@
 				<jar-directory>C:/bbx/lib</jar-directory>
 			</properties>
 		</profile>
+		
+		<profile>
+			<id>winbbjlib</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			
+			<properties>
+				<jar-directory>C:/bbj/lib</jar-directory>
+			</properties>
+		</profile>
+		
 		<profile>
 			<id>unixbbjlib</id>
 			<activation>
@@ -60,6 +75,12 @@
 	</profiles>
 
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+		<dependency>
+		    <groupId>javax.xml.bind</groupId>
+		    <artifactId>jaxb-api</artifactId>
+		    <version>2.3.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.basis.lib</groupId>
@@ -205,6 +226,7 @@
 			<scope>system</scope>
 			<systemPath>${jar-directory}/netty-all-4.1.43.Final.jar</systemPath>
 		</dependency>
+		
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
@@ -304,6 +326,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 			</plugin>
+			
 			<!-- Set a JDK compiler level -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
