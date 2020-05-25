@@ -762,19 +762,19 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	}
 	
 	/**
-	 * returns the availlable configurations the user can access with the current filter.
+	 * returns the available configurations the user can access with the current filter.
 	 * conditions are:
 	 * -only filtered realm
 	 * -only filtered keyx
 	 * -only when match with set userid OR default userid
 	 * -ignore settings filter (all settings should be shown)
-	 * @return ResultSet with availlable Configurations
+	 * @return ResultSet with available Configurations
 	 * @throws Exception
 	 */
-	public ResultSet getAvaillableConfigurations() throws Exception {
+	public ResultSet getAvailableConfigurations() throws Exception {
 		DataRow previousFilter 	 = getFilter();
 		if (!previousFilter.contains(ConfigurationsBC.FIELD_NAME_REALM) || !previousFilter.contains(ConfigurationsBC.FIELD_NAME_KEYX)) {
-			return new ResultSet();//No key and/or realm: no availlable config to be configured
+			return new ResultSet();//No key and/or realm: no available config to be configured
 		}
 		DataRow previousFieldSel = getFieldSelection();
 		try {
@@ -800,12 +800,12 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 			setFilter(filter);
 			ResultSet userConfig = retrieve();
 			//merge default and set configuration
-			ResultSet availlableConfigs = mergeResultSetsOnKeys(userConfig, defaultConfig);
+			ResultSet availableConfigs = mergeResultSetsOnKeys(userConfig, defaultConfig);
 			//reset filter and fied selection
 			setFilter(previousFilter);
 			setFieldSelection(previousFieldSel);
 			//return merged configuration
-			return availlableConfigs;
+			return availableConfigs;
 		}catch (Exception e) {
 			setFilter(previousFilter);
 			setFieldSelection(previousFieldSel);
@@ -879,7 +879,7 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 			ResultSet rs;
 //			long millis = System.currentTimeMillis();
 //			rs = bc.retrieve();
-			rs = bc.getAvaillableConfigurations();
+			rs = bc.getAvailableConfigurations();
 //			millis = System.currentTimeMillis() - millis;
 //			System.out.println("retrieve execution time: " + millis);
 			for (DataRow dataRow : rs) {
