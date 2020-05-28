@@ -15,8 +15,6 @@ public class BCBinder {
 	private ResultSet rs;
 	private DataRow attributes_rec;
 	private ArrayList<String> selection = new ArrayList<>();
-	
-	private int DebugLevel = 0;
 
 	// direction constants
 
@@ -108,26 +106,6 @@ public class BCBinder {
 		this.attributes_rec = bc.getAttributesRecord();
 	}
 
-	/**
-	 * 
-	 * @return the debug level which is currently set
-	 */
-	public int getDebugLevel() {
-		return DebugLevel;
-	}
-
-	/**
-	 * 
-	 * set the debug level of operations done by the BCBinder
-	 * @param debugLevel: 0=no debug, 1=moderate debug 
-	 * 
-	 */
-	public void setDebugLevel(int debugLevel) {
-		if (debugLevel>=0 && debugLevel<2)
-		DebugLevel = debugLevel;
-	}
-
-	
 	/**
 	 *
 	 * @return bound BC
@@ -425,11 +403,7 @@ public class BCBinder {
 		// merge them with data row
 		while (it.hasNext()) {
 			IBCBound o = it.next();
-			
 			DataRow fields = o.getFieldsForWrite();
-			if (DebugLevel>0)
-				writeDebug(o.toString()+" getFieldsForWrite returned "+fields.toJson());
-			
 			if (fields == null || fields.isEmpty()) {
 				continue;
 			}
@@ -441,6 +415,8 @@ public class BCBinder {
 
 	/**
 	 * Called by handleSignal(int signal, Object payload) on SIGNAL_SAVE
+	 * Writes data from components to the bc. components provide data with the getDataRowForWrite() method.
+	 * after that, the new datarow is being integrated into the result set of the binder, either via addition or replacement.
 	 *
 	 * @throws Exception
 	 */
@@ -449,20 +425,21 @@ public class BCBinder {
 		if (dr.isEmpty()) {
 			return;
 		}
-		if (DebugLevel>0)
-			writeDebug(" write "+dr.toJson());
-		
 		DataRow newDR = bc.write(dr);
-		// if selection size is 1 that means record was overwritten. remove the old one
+		String rowID;
+		// if selection size is 1 that means record was overwritten. merge old with new. Else add dr to resultset
 		if (selection.size() == 1) {
-			rs.remove(getSelection().get(0));
+			rowID = getSelection().get(0);
+			DataRow oldDr = rs.get(rowID);
+			oldDr.mergeRecord(newDR, true);
+		} else {
+			selection.clear();
+			rs.add(newDR);
+			rowID = rs.get(rs.indexOf(newDR)).getRowKey();
+			selection.add(rowID);
 		}
-		selection.clear();
-		rs.add(newDR);
-		String newRowID = rs.get(rs.indexOf(newDR)).getRowKey();
-		selection.add(newRowID);
 		setRS(rs);
-		setSelection(newRowID);
+		setSelection(rowID);
 	}
 
 	/**
@@ -512,16 +489,4 @@ public class BCBinder {
 		setRS(rs);
 	}
 
-	/**
-	 * 
-	 * write to debug logging
-	 * 
-	 * @param the debug output
-	 */
-	private void writeDebug(String string) {
-		string = "BCBinder: "+bc.getClass()+" "+string;
-		System.out.println(string);
-	}
-
-	
 }
