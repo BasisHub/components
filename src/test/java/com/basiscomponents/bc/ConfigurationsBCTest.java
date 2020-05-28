@@ -362,22 +362,22 @@ class ConfigurationsBCTest {
 //		bc.write(test5);
 //		bc.write(test6);
 //		bc.setFilter(test1);
-//		ResultSet availlableConfigurations = bc.getAvaillableConfigurations();
+//		ResultSet availableConfigurations = bc.getAvailableConfigurations();
 //		
 //		// Testing if the write was successful 
-//		assertNotNull(availlableConfigurations);
+//		assertNotNull(availableConfigurations);
 //		// must have at least the 5 right configurations that were added above (might contain more from other test methods)
-//		assertTrue(availlableConfigurations.size() >= 5);
+//		assertTrue(availableConfigurations.size() >= 5);
 //		// these must be included because they are user related configuration
-//		assertTrue(checkIfRsContainsKeys(availlableConfigurations, test1), "DataRow missing in availlable config: " + test1.toJson(false));
-//		assertTrue(checkIfRsContainsKeys(availlableConfigurations, test2), "DataRow missing in availlable config: " + test2.toJson(false));
-//		assertTrue(checkIfRsContainsKeys(availlableConfigurations, test4), "DataRow missing in availlable config: " + test4.toJson(false));
+//		assertTrue(checkIfRsContainsKeys(availableConfigurations, test1), "DataRow missing in available config: " + test1.toJson(false));
+//		assertTrue(checkIfRsContainsKeys(availableConfigurations, test2), "DataRow missing in available config: " + test2.toJson(false));
+//		assertTrue(checkIfRsContainsKeys(availableConfigurations, test4), "DataRow missing in available config: " + test4.toJson(false));
 //		// these must be included because they are default configuration
-//		assertTrue(checkIfRsContainsKeys(availlableConfigurations, test5), "DataRow missing in availlable config: " + test5.toJson(false));
-//		assertTrue(checkIfRsContainsKeys(availlableConfigurations, test6), "DataRow missing in availlable config: " + test6.toJson(false));
+//		assertTrue(checkIfRsContainsKeys(availableConfigurations, test5), "DataRow missing in available config: " + test5.toJson(false));
+//		assertTrue(checkIfRsContainsKeys(availableConfigurations, test6), "DataRow missing in available config: " + test6.toJson(false));
 //		
 //		// The expected response is false, because the record to write has a different user name which should not be allowed
-//		assertFalse(checkIfRsContainsKeys(availlableConfigurations, test3), "Wrong DataRow included in availlable config: " + test3.toJson(false));//must not be in it; wrong user
+//		assertFalse(checkIfRsContainsKeys(availableConfigurations, test3), "Wrong DataRow included in available config: " + test3.toJson(false));//must not be in it; wrong user
 //	}
 //	
 //	/**

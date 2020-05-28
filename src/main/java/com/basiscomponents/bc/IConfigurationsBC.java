@@ -98,16 +98,16 @@ public interface IConfigurationsBC extends BusinessComponent{
 	public ResultSet getEffectiveConfiguration();
 	
 	/**
-	 * returns the availlable configurations the user can access with the current filter.
+	 * returns the available configurations the user can access with the current filter.
 	 * conditions are:
 	 * -only filtered realm
 	 * -only filtered keyx
 	 * -only when match with set userid OR default userid
 	 * -ignore settings filter (all settings should be shown)
-	 * @return ResultSet with availlable Configurations
+	 * @return ResultSet with available Configurations
 	 * @throws Exception
 	 */
-	public ResultSet getAvaillableConfigurations() throws Exception;
+	public ResultSet getAvailableConfigurations() throws Exception;
 	
 	
 	/**
