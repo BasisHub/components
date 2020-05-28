@@ -920,4 +920,10 @@ public class SqlTableBC implements BusinessComponent {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		String x = this.getClass().getCanonicalName();
+		return x;
+	}
+	
 }
