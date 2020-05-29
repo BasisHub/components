@@ -435,7 +435,8 @@ public class DataRowJsonMapper {
 		int i = 0;
 
 		while (i < input.length()) {
-			if (input.charAt(i) < 31) {
+			char c = input.charAt(i);
+			if (c < 31 && c != 10 && c != 13 && c != 9 ) {
 				String hex = String.format("%04x", (int) input.charAt(i));
 				input = input.substring(0, i) + "\\u" + hex + input.substring(i + 1);
 			}
