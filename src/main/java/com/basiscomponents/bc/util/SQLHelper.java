@@ -84,6 +84,7 @@ public class SQLHelper {
 			case java.sql.Types.LONGNVARCHAR:
 			case java.sql.Types.CHAR:
 			case java.sql.Types.VARCHAR:
+			case java.sql.Types.LONGVARBINARY:
 				if (isBasisDBMS && o.getValue() == null)
 					prep.setString(index, "");
 				else

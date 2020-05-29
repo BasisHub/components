@@ -8,6 +8,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 public class DataFieldConverter {
@@ -18,6 +19,7 @@ public class DataFieldConverter {
 	private static final String JAVA_LANG_INTEGER = "java.lang.Integer";
 	private static final String JAVA_LANG_BOOLEAN = "java.lang.Boolean";
 	private static final String JAVA_LANG_STRING = "java.lang.String";
+	private static final String BYTE_ARRAY = "byte[]";
 
 	private DataFieldConverter() {
 	}
@@ -25,10 +27,8 @@ public class DataFieldConverter {
 
 		if (o == null)
 			return null;
-
-		String classname = o.getClass().getName();
+		String classname = o.getClass().getCanonicalName();
 		String tmpstr = o.toString();
-
 		if (classname.contains("DataField")) {
 			throw new IllegalArgumentException("Setting a DataField into a DataField is not supported");
 		}
@@ -52,6 +52,9 @@ public class DataFieldConverter {
 				return (Boolean) o ? "1" : "0";
 			if (classname.equals(JAVA_MATH_BIG_DECIMAL))
 				return ((BigDecimal) o).stripTrailingZeros().toPlainString();
+			if (classname.equals(BYTE_ARRAY)) {
+				return new String((byte[])o);
+				}
 			if (!classname.equals(JAVA_LANG_STRING))
 				return o.toString();
 			else

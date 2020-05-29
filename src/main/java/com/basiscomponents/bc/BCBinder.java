@@ -15,6 +15,8 @@ public class BCBinder {
 	private ResultSet rs;
 	private DataRow attributes_rec;
 	private ArrayList<String> selection = new ArrayList<>();
+	
+	private int DebugLevel = 0;
 
 	// direction constants
 
@@ -106,6 +108,26 @@ public class BCBinder {
 		this.attributes_rec = bc.getAttributesRecord();
 	}
 
+	/**
+	 * 
+	 * @return the debug level which is currently set
+	 */
+	public int getDebugLevel() {
+		return DebugLevel;
+	}
+
+	/**
+	 * 
+	 * set the debug level of operations done by the BCBinder
+	 * @param debugLevel: 0=no debug, 1=moderate debug 
+	 * 
+	 */
+	public void setDebugLevel(int debugLevel) {
+		if (debugLevel>=0 && debugLevel<2)
+		DebugLevel = debugLevel;
+	}
+
+	
 	/**
 	 *
 	 * @return bound BC
@@ -404,6 +426,9 @@ public class BCBinder {
 		while (it.hasNext()) {
 			IBCBound o = it.next();
 			DataRow fields = o.getFieldsForWrite();
+			if (DebugLevel>0)
+				writeDebug(o.toString()+" getFieldsForWrite returned "+fields.toJson());
+			
 			if (fields == null || fields.isEmpty()) {
 				continue;
 			}
@@ -425,6 +450,9 @@ public class BCBinder {
 		if (dr.isEmpty()) {
 			return;
 		}
+		if (DebugLevel>0)
+			writeDebug(" write "+dr.toJson());
+		
 		DataRow newDR = bc.write(dr);
 		String rowID;
 		// if selection size is 1 that means record was overwritten. merge old with new. Else add dr to resultset
@@ -489,4 +517,16 @@ public class BCBinder {
 		setRS(rs);
 	}
 
+	/**
+	 * 
+	 * write to debug logging
+	 * 
+	 * @param the debug output
+	 */
+	private void writeDebug(String string) {
+		string = "BCBinder: "+bc.getClass()+" "+string;
+		System.out.println(string);
+	}
+
+	
 }
