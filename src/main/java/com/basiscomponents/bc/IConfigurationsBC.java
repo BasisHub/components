@@ -175,4 +175,10 @@ public interface IConfigurationsBC extends BusinessComponent{
 	 * @return
 	 */
 	public String getFieldNameConfig();
+	
+	/**
+	 * returns the current filter of the bc
+	 * @return
+	 */
+	public DataRow getFilter();
 }

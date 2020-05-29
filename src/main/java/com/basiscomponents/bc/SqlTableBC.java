@@ -810,13 +810,26 @@ public class SqlTableBC implements BusinessComponent {
 						}
 						attributesRecord.setFieldAttribute(field, entry.getKey(), value);
 					}
+					
+					//check if field is contained in JDBC table meta data
+					if (!metaData.contains(field)) {
+						//field is not in JDBC meta data for the table, so it's probably a function or JOINed field
+						attributesRecord.setFieldAttribute(field, "EDITABLE", "0");
+						continue;
+					}
+					
 					if (metaData.getFieldAttributes(field).containsKey("REMARKS"))
 						attributesRecord.setFieldAttribute(field, "REMARKS",
 								metaData.getFieldAttribute(field, "REMARKS"));
-					if (dbconfig.containsPrimaryKey(getMapping(field)))
+					
+					if (dbconfig.containsPrimaryKey(getMapping(field))) {
 						attributesRecord.setFieldAttribute(field, "EDITABLE", "2");
+					} else {
+						attributesRecord.setFieldAttribute(field, "EDITABLE", "1");
+					}
+						
 				} catch (Exception ex) {
-					// do nothing
+					ex.printStackTrace();
 				}
 			}
 
@@ -907,4 +920,10 @@ public class SqlTableBC implements BusinessComponent {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		String x = this.getClass().getCanonicalName();
+		return x;
+	}
+	
 }

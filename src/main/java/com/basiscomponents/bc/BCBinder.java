@@ -415,6 +415,8 @@ public class BCBinder {
 
 	/**
 	 * Called by handleSignal(int signal, Object payload) on SIGNAL_SAVE
+	 * Writes data from components to the bc. components provide data with the getDataRowForWrite() method.
+	 * after that, the new datarow is being integrated into the result set of the binder, either via addition or replacement.
 	 *
 	 * @throws Exception
 	 */
@@ -424,16 +426,20 @@ public class BCBinder {
 			return;
 		}
 		DataRow newDR = bc.write(dr);
-		// if selection size is 1 that means record was overwritten. remove the old one
+		String rowID;
+		// if selection size is 1 that means record was overwritten. merge old with new. Else add dr to resultset
 		if (selection.size() == 1) {
-			rs.remove(getSelection().get(0));
+			rowID = getSelection().get(0);
+			DataRow oldDr = rs.get(rowID);
+			oldDr.mergeRecord(newDR, true);
+		} else {
+			selection.clear();
+			rs.add(newDR);
+			rowID = rs.get(rs.indexOf(newDR)).getRowKey();
+			selection.add(rowID);
 		}
-		selection.clear();
-		rs.add(newDR);
-		String newRowID = rs.get(rs.indexOf(newDR)).getRowKey();
-		selection.add(newRowID);
 		setRS(rs);
-		setSelection(newRowID);
+		setSelection(rowID);
 	}
 
 	/**
