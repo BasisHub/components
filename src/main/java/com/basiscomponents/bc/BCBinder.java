@@ -393,7 +393,7 @@ public class BCBinder {
 				break;
 			}
 		} catch (Exception e) {
-			sendSignal(BCBinder.SIGNAL_ERROR, e.getMessage());
+			sendSignal(BCBinder.SIGNAL_ERROR, e);
 		}
 	}
 	
