@@ -224,7 +224,7 @@
 			<artifactId>netty</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/netty-all-4.1.43.Final.jar</systemPath>
+			<systemPath>${jar-directory}/netty-all-4.1.50.Final.jar</systemPath>
 		</dependency>
 		
 		<dependency>
@@ -276,7 +276,7 @@
 		    <groupId>com.google.protobuf</groupId>
 		    <artifactId>protobuf-java</artifactId>
 			<scope>test</scope>
-		    <version>3.7.1</version>
+		    <version>3.12.2</version>
 		</dependency>
 		<dependency>
 		    <groupId>io.prometheus</groupId>
