@@ -33,7 +33,8 @@ public class ResultSetExporterTest {
 		ReportDetails reportDetails = new ReportDetails(0, "reportName", "reportTable", "0001");
 		SheetConfiguration sheetConfig = new SheetConfiguration(reportDetails, 7);
 		
-		File file = ResultSetExporter.exportToPDF("myTestFile", "", rs, sheetConfig, false, 0, true);
+		File file = new File("myTestFile");
+		file = ResultSetExporter.exportToPDF(file, rs, sheetConfig, false, 0, true);
 		
 		if (file.length() > 0) {
 			return true;
@@ -49,7 +50,8 @@ public class ResultSetExporterTest {
 		ReportDetails reportDetails = new ReportDetails(0, "reportName", "reportTable", "0001");
 		SheetConfiguration sheetConfig = new SheetConfiguration(reportDetails, 7);
 		
-		File file = ResultSetExporter.exportToPDF("myTestFile", "", rs, sheetConfig, false, 0, true);
+		File file = new File("myTestFile");
+		file = ResultSetExporter.exportToPDF(file, rs, sheetConfig, false, 0, true);
 		
 		FileChannel channel = new RandomAccessFile(file.getAbsolutePath(), "rw").getChannel();
 
