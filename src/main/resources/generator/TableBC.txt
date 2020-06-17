@@ -4,8 +4,8 @@ import com.basiscomponents.bc.SqlTableBC;
 
 public class [[class]] extends SqlTableBC{
 
-    public [[class]](String Url) throws ClassNotFoundException{
-        super(Url);
+    public [[class]]() throws Exception{
+        super(Database.getConnection());
         setTable("[[table]]");
     }
 

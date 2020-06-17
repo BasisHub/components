@@ -12,16 +12,18 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class SqlBCGen {
 
 	private static String Tpl;
 
-	public static void gen(String Driver, String Url, String User, String Password, String packageName,
+	public static ArrayList<String> gen(String Driver, String Url, String User, String Password, String packageName,
 			String outputDir) throws FileNotFoundException {
 
+		ArrayList<String> classes = new ArrayList<>(); 
 		if (Tpl == null) {
-			SqlBCGen.loadTpl(SqlBCGen.class.getResourceAsStream("/com/basiscomponents/bc/gen/TableBC.txt"));
+			SqlBCGen.loadTpl(SqlBCGen.class.getResourceAsStream("generator/TableBC.txt"));
 		}
 
 		try {
@@ -31,18 +33,20 @@ public class SqlBCGen {
 				String[] types = { "TABLE" };
 				ResultSet rs = dbmd.getTables(null, null, "%", types);
 				while (rs.next()) {
-					SqlBCGen.genClass(rs.getString("TABLE_NAME"), packageName, outputDir);
+					String classname = SqlBCGen.genClass(rs.getString("TABLE_NAME"), packageName, outputDir);
+					classes.add(classname);
 				}
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		return classes;
 	}
 
-	public static void gen(String driver, String url, String user, String password, String packageName,
+	public static ArrayList<String> gen(String driver, String url, String user, String password, String packageName,
 			String outputDir, String templatePath) throws FileNotFoundException {
 		SqlBCGen.loadTpl(new java.io.FileInputStream(templatePath));
-		gen(driver, url, user, password, packageName, outputDir);
+		return gen(driver, url, user, password, packageName, outputDir);
 	}
 
 	private static void loadTpl(InputStream is) {
@@ -62,12 +66,12 @@ public class SqlBCGen {
 		SqlBCGen.Tpl = out.toString();
 	}
 
-	private static void genClass(String tableName, String packageName, String outputDir) throws FileNotFoundException {
+	private static String  genClass(String tableName, String packageName, String outputDir) throws FileNotFoundException {
 
 		String className = SqlBCGen.toCamelCase(tableName) + "BC";
 		if (new File(outputDir + className + ".java").exists()) {
 			System.out.println(outputDir + className + ".java already exists. Skipping...");
-			return;
+			return packageName+"."+className;
 		}
 
 		System.out.println("generating: " + tableName);
@@ -79,6 +83,7 @@ public class SqlBCGen {
 		PrintWriter out = new PrintWriter(outputDir + className + ".java");
 		out.println(tmp);
 		out.close();
+		return packageName+"."+className;
 	}
 
 	private static String toCamelCase(String tableName) {
