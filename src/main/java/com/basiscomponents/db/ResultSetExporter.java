@@ -14,6 +14,8 @@ import com.basiscomponents.db.export.TxtExport;
 import com.basiscomponents.db.export.XlsxExport;
 import com.basiscomponents.db.export.XmlExport;
 
+import net.sf.jasperreports.engine.JasperPrint;
+
 /**
  * Provides static methods to export a {@link com.basiscomponents.db.ResultSet
  * com.basiscomponents.db.ResultSet} in the following formats:
@@ -396,31 +398,42 @@ public class ResultSetExporter {
 	/**
 	 * Exports the content of the given ResultSet from a BBjGridExWidget
 	 * 
-	 * @param outputFileName    The name of the PDF file
-	 * @param resultSet         The ResultSet to export.
-	 * @param writeHeader       The sheet configuration for the report
-	 * @param baristaMode		indicator if the Barista header should be displayed or not
-	 * @param sheetName         content fitting indicator
-	 * @param landscapeMode     indicator if the PDF should be created in landscape mode or else in portrait mode
+	 * @param file    			The output file.
+	 * @param rs		        The ResultSet to export.
+	 * @param sheetConfig       The sheet configuration for the report
+	 * @param baristaMode		Indicator if the Barista header should be displayed or not
+	 * @param fitTo		        Content fitting indicator
+	 * @param landscapeMode     Indicator if the PDF should be created in landscape mode or else in portrait mode
 	 * 
 	 * @return The final exported PDF file
 	 */
-	public static File exportToPDF(String outputFileName, String filePath, ResultSet rs, SheetConfiguration sheetConfig, boolean baristaMode, int fitTo, boolean landscapeMode) {
-		return PdfExport.exportToPDF(outputFileName, filePath, rs, sheetConfig, baristaMode, fitTo, landscapeMode);
+	public static File exportToPDF(File file, ResultSet rs, SheetConfiguration sheetConfig, boolean baristaMode, int fitTo, boolean landscapeMode) {
+//		return PdfExport.exportToPDF(file, rs, sheetConfig, baristaMode, fitTo, landscapeMode);
+		JasperPrint jasperPrint = PdfExport.exportToJasperPrint(file, rs, sheetConfig, baristaMode, fitTo, landscapeMode);
+		return PdfExport.writePdf(file, jasperPrint);
 	}
 	
 	/**
 	 * Exports the content of the given ResultSet from a BBjGridExWidget
 	 * 
-	 * @param outputFileName    The name + path of the PDF file
-	 * @param customReport		The name + path of the custom report
+	 * @param outputFile		The output file
+	 * @param customReport		The custom report file
 	 * @param resultSet         The ResultSet to export.
 	 * 
 	 * @return The final exported PDF file
 	 */
-	public static File exportToPDFByCustomReport(String outputFileName, String customReport, ResultSet rs) {
-		return PdfExport.exportToPDF(outputFileName, customReport, rs);
+	public static File exportToPDFByCustomReport(File outputFile, File customReport, ResultSet rs) {
+		return PdfExport.exportToPDF(outputFile, customReport, rs);
 	}
+	
+	public static JasperPrint exportToJasperPrint(File file, ResultSet rs, SheetConfiguration sheetConfig, boolean baristaMode, int fitTo, boolean landscapeMode) {
+		return PdfExport.exportToJasperPrint(file, rs, sheetConfig, baristaMode, fitTo, landscapeMode);
+	}
+	
+	public static File exportToPdf(File file, JasperPrint jasperPrint) {
+		return PdfExport.writePdf(file, jasperPrint);
+	}
+	
 	
 	/**
 	 * Exports the content of the given ResultSet from a BBjGridExWidget

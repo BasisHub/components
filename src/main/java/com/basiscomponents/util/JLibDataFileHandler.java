@@ -184,82 +184,94 @@ public class JLibDataFileHandler {
 		}
 		// retrieving the connection manager object
 		ConnectionMgr connectionManager = getConnectionMgr();
+		FilePosition pos;
 		// Opening the file & checking out a license
-		FilePosition pos = connectionManager.open(fileName, false, true); // params: filePath, readOnly, useRemote
-		TemplatedString templatedStr = templatedString;
-//		TemplatedString templatedStrNewRecord = templatedString.clone();
-		List<Integer> numericFieldIndeces = new ArrayList<>();
-		numericFieldIndeces = initNumericFieldsIndeces(templatedStr, fieldNameMap);
-
-		Set<Entry<Integer, String>> entrySet = fieldNameMap.entrySet();
-
-		byte[] record = null;
-		byte[] oldRecord = null;
-		// Check for record size and allocate buffer.
-		if ((pos.getFileType() & Filesystem.TYPEMASK) == Filesystem.VKEYED_FILE) {
-			record = new byte[3000];
-			oldRecord = new byte[3000];
-		} else if (pos.getRecordSize() > 0) {
-			record = new byte[pos.getRecordSize()];
-			oldRecord = new byte[pos.getRecordSize()];
-		} else {
-			record = new byte[100];
-			oldRecord = new byte[100];
+		try {
+			pos = connectionManager.open(fileName, false, true); // params: filePath, readOnly, useRemote
+		}catch (Exception e) {
+			connectionManager.clear();
+			throw e;
 		}
-		// Array with the keys for that FilePosition in the first dimension
-		// and a byte array with the key length in the second dimension
-		byte[][] keys = getKeys(pos);
 		DataRow currentDataRow;
-		byte[] value = dr.getFieldAsString(FILTER_VALUE).getBytes();
-		int knum = 0;
-		if (dr.contains(FILTER_KNUM)) {
-			try {
-				knum = Integer.valueOf(dr.getFieldAsString(FILTER_KNUM));
-				if (knum < 0 || knum >= keys.length) {
+		try {
+			TemplatedString templatedStr = templatedString;
+	//		TemplatedString templatedStrNewRecord = templatedString.clone();
+			List<Integer> numericFieldIndeces = new ArrayList<>();
+			numericFieldIndeces = initNumericFieldsIndeces(templatedStr, fieldNameMap);
+	
+			Set<Entry<Integer, String>> entrySet = fieldNameMap.entrySet();
+	
+			byte[] record = null;
+			byte[] oldRecord = null;
+			// Check for record size and allocate buffer.
+			if ((pos.getFileType() & Filesystem.TYPEMASK) == Filesystem.VKEYED_FILE) {
+				record = new byte[3000];
+				oldRecord = new byte[3000];
+			} else if (pos.getRecordSize() > 0) {
+				record = new byte[pos.getRecordSize()];
+				oldRecord = new byte[pos.getRecordSize()];
+			} else {
+				record = new byte[100];
+				oldRecord = new byte[100];
+			}
+			// Array with the keys for that FilePosition in the first dimension
+			// and a byte array with the key length in the second dimension
+			byte[][] keys = getKeys(pos);
+			byte[] value = dr.getFieldAsString(FILTER_VALUE).getBytes();
+			int knum = 0;
+			if (dr.contains(FILTER_KNUM)) {
+				try {
+					knum = Integer.valueOf(dr.getFieldAsString(FILTER_KNUM));
+					if (knum < 0 || knum >= keys.length) {
+						knum = 0;
+					}
+				} catch (NumberFormatException e) {
 					knum = 0;
 				}
-			} catch (NumberFormatException e) {
-				knum = 0;
 			}
-		}
-		try {
-			int currentRecordSize = pos.findByKey(new byte[1], 0, 1, value, 0, value.length, knum, 0, 0);
-			record = new byte[currentRecordSize];
-			pos.readByKey(record, 0, record.length, value, 0, value.length, knum, 0, 0);
-			oldRecord = record.clone();
+			try {
+				int currentRecordSize = pos.findByKey(new byte[1], 0, 1, value, 0, value.length, knum, 0, 0);
+				record = new byte[currentRecordSize];
+				pos.readByKey(record, 0, record.length, value, 0, value.length, knum, 0, 0);
+				oldRecord = record.clone();
+			} catch (Exception e) {
+	//			e.printStackTrace();
+			}
+			if (!isRecordEmpty(oldRecord)) { // update
+				record = cutEmptyTailInRecord(record);
+				templatedStr.setValue(record);
+				for (String fieldName : dr.getFieldNames()) { // update field values in templates String
+					if (fieldName.equals(FILTER_VALUE) || fieldName.equals(FILTER_KNUM)) {
+						continue;
+					}
+					templatedString.setFieldValue(fieldName, dr.getFieldAsString(fieldName));
+				}
+				record = templatedStr.getBytes();
+				
+				pos.updateWithoutPosition(ByteBuffer.wrap(oldRecord), ByteBuffer.wrap(record), 0);
+			} else { // new record
+				int numFields = templatedStr.getNumFields();
+				record = new byte[numFields];
+				for (int i = 0; i < numFields; i++) {
+					record[i] = 10;
+				}
+				templatedStr.setValue(record);
+				for (String fieldName : dr.getFieldNames()) { // update field values in templates String
+					if (fieldName.equals(FILTER_VALUE) || fieldName.equals(FILTER_KNUM)) {
+						continue;
+					}
+					templatedString.setFieldValue(fieldName, dr.getFieldAsString(fieldName));
+				}
+				record = templatedStr.getBytes();
+				pos.writeWithoutPosition(ByteBuffer.wrap(record), 0, true, 0, false);
+			}
+			currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
+			// Closing the open file connection
 		} catch (Exception e) {
-//			e.printStackTrace();
+			pos.close();
+			connectionManager.clear();
+			throw e;
 		}
-		if (!isRecordEmpty(oldRecord)) { // update
-			record = cutEmptyTailInRecord(record);
-			templatedStr.setValue(record);
-			for (String fieldName : dr.getFieldNames()) { // update field values in templates String
-				if (fieldName.equals(FILTER_VALUE) || fieldName.equals(FILTER_KNUM)) {
-					continue;
-				}
-				templatedString.setFieldValue(fieldName, dr.getFieldAsString(fieldName));
-			}
-			record = templatedStr.getBytes();
-			
-			pos.updateWithoutPosition(ByteBuffer.wrap(oldRecord), ByteBuffer.wrap(record), 0);
-		} else { // new record
-			int numFields = templatedStr.getNumFields();
-			record = new byte[numFields];
-			for (int i = 0; i < numFields; i++) {
-				record[i] = 10;
-			}
-			templatedStr.setValue(record);
-			for (String fieldName : dr.getFieldNames()) { // update field values in templates String
-				if (fieldName.equals(FILTER_VALUE) || fieldName.equals(FILTER_KNUM)) {
-					continue;
-				}
-				templatedString.setFieldValue(fieldName, dr.getFieldAsString(fieldName));
-			}
-			record = templatedStr.getBytes();
-			pos.writeWithoutPosition(ByteBuffer.wrap(record), 0, true, 0, false);
-		}
-		currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
-		// Closing the open file connection
 		pos.close();
 		// Checking the license back in
 		connectionManager.clear();
@@ -288,12 +300,19 @@ public class JLibDataFileHandler {
 			return;
 		}
 		ConnectionMgr connectionManager = getConnectionMgr();
-		FilePosition pos = connectionManager.open(fileName, false, true); // params: filePath, readOnly, useRemote
+		FilePosition pos;
+		try {
+			pos = connectionManager.open(fileName, false, true); // params: filePath, readOnly, useRemote
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			connectionManager.clear();
+			throw e1;
+		}
 		try {
 			byte[] value = dr.getFieldAsString(FILTER_VALUE).getBytes();
 	//						pos.findByKey(new byte[1], 0, 1, value, 0, value.length, knum, 0, 0);
 			pos.removeByKey(ByteBuffer.wrap(value), false, 0);
-		} catch (FilesystemException e) {
+		} catch (Exception e) {
 			pos.close();
 			connectionManager.clear();
 			throw e;
@@ -319,169 +338,184 @@ public class JLibDataFileHandler {
 		
 		// retrieving the connection manager object
 		ConnectionMgr connectionManager = getConnectionMgr();
-
-		// Opening the file & checking out a license
-		FilePosition pos = connectionManager.open(fileName, true, true); // params: filePath, readOnly, useRemote
-
+		FilePosition pos;
 		FilePosition endPos = null;
 		ResultSet rs = new ResultSet();
-
-		TemplatedString templatedStr = templatedString;
-		List<Integer> numericFieldIndeces = new ArrayList<>();
-		if (fieldNameMap != null && !fieldNameMap.isEmpty()) {
-			numericFieldIndeces = initNumericFieldsIndeces(templatedStr, fieldNameMap);
-		}
-
-		Set<Entry<Integer, String>> entrySet = fieldNameMap.entrySet();
-		initColumnMetadata(rs, templatedStr, fieldNameMap);
-
-		byte[] record = null;
-		byte[] endRecord = null;
-		// Check for record size and allocate buffer.
-		if (pos.getRecordSize() > 0) {
-			record = new byte[pos.getRecordSize()];
-			endRecord = new byte[pos.getRecordSize()];
-		} else {
-			record = new byte[100];
-			endRecord = new byte[100];
-		}
-
-		// Array with the keys for that FilePosition in the first dimension
-		// and a byte array with the key length in the second dimension
-		byte[][] keys = getKeys(pos);
-		byte[][] lastRecordKeys = getKeys(pos);
-
-		DataRow currentDataRow;
-		int knum = 0;
 		try {
-			if (filter != null) {
-				if (filter.contains(FILTER_KNUM)) {
-					int filterKnum;
-
-					try {
-						filterKnum = Integer.valueOf(filter.getFieldAsString(FILTER_KNUM));
-						if (0 <= filterKnum && filterKnum < keys.length) {
-							knum = filterKnum;
+			// Opening the file & checking out a license
+			pos = connectionManager.open(fileName, true, true); // params: filePath, readOnly, useRemote
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			connectionManager.clear();
+			throw e1;
+		}
+		try {
+	
+			TemplatedString templatedStr = templatedString;
+			List<Integer> numericFieldIndeces = new ArrayList<>();
+			if (fieldNameMap != null && !fieldNameMap.isEmpty()) {
+				numericFieldIndeces = initNumericFieldsIndeces(templatedStr, fieldNameMap);
+			}
+	
+			Set<Entry<Integer, String>> entrySet = fieldNameMap.entrySet();
+			initColumnMetadata(rs, templatedStr, fieldNameMap);
+	
+			byte[] record = null;
+			byte[] endRecord = null;
+			// Check for record size and allocate buffer.
+			if (pos.getRecordSize() > 0) {
+				record = new byte[pos.getRecordSize()];
+				endRecord = new byte[pos.getRecordSize()];
+			} else {
+				record = new byte[100];
+				endRecord = new byte[100];
+			}
+	
+			// Array with the keys for that FilePosition in the first dimension
+			// and a byte array with the key length in the second dimension
+			byte[][] keys = getKeys(pos);
+			byte[][] lastRecordKeys = getKeys(pos);
+	
+			DataRow currentDataRow;
+			int knum = 0;
+			try {
+				if (filter != null) {
+					if (filter.contains(FILTER_KNUM)) {
+						int filterKnum;
+	
+						try {
+							filterKnum = Integer.valueOf(filter.getFieldAsString(FILTER_KNUM));
+							if (0 <= filterKnum && filterKnum < keys.length) {
+								knum = filterKnum;
+							}
+						} catch (NumberFormatException e) {
+							// Do nothing in case the given KNUM value is not an integer value
 						}
-					} catch (NumberFormatException e) {
-						// Do nothing in case the given KNUM value is not an integer value
 					}
-				}
-
-				// trying to read the record with the given key
-				if (filter.contains(FILTER_VALUE)) {
-					byte[] value = filter.getFieldAsString(FILTER_VALUE).getBytes();
-					record = new byte[1];
-					try {
-						int currentRecordSize = pos.findByKey(new byte[1], 0, 1, value, 0, value.length, knum, 0, 0);
-						record = new byte[currentRecordSize];
-						pos.readByKey(record, 0, record.length, value, 0, value.length, knum, 0, 0);
-					} catch (FilesystemKeyException e) {
+	
+					// trying to read the record with the given key
+					if (filter.contains(FILTER_VALUE)) {
+						byte[] value = filter.getFieldAsString(FILTER_VALUE).getBytes();
+						record = new byte[1];
+						try {
+							int currentRecordSize = pos.findByKey(new byte[1], 0, 1, value, 0, value.length, knum, 0, 0);
+							record = new byte[currentRecordSize];
+							pos.readByKey(record, 0, record.length, value, 0, value.length, knum, 0, 0);
+						} catch (FilesystemKeyException e) {
+							// Closing the open file connection
+							pos.close();
+							// Checking the license back in
+							connectionManager.clear();
+							return null;
+						}
+						if (!isRecordEmpty(record)) {
+							templatedStr.setValue(record);
+	
+							currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
+							
+							if (currentDataRow != null) {
+								rs.add(currentDataRow);
+							}
+	
+							// Closing the open file connection
+							pos.close();
+							// Checking the license back in
+							connectionManager.clear();
+	
+							return rs;
+						}
 						// Closing the open file connection
 						pos.close();
-
 						// Checking the license back in
 						connectionManager.clear();
 						return null;
 					}
-					if (!isRecordEmpty(record)) {
-						templatedStr.setValue(record);
-
-						currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
-						
-						if (currentDataRow != null) {
-							rs.add(currentDataRow);
+	
+					if (filter.contains(FILTER_RANGE_FROM) && filter.contains(FILTER_RANGE_TO)) {
+						byte[] startKey = filter.getFieldAsString(FILTER_RANGE_FROM).getBytes();
+	
+						if (startKey != null) {
+							try {
+								pos.readByKey(record, 0, record.length, startKey, 0, startKey.length, knum, 0, 0);
+							} catch (Exception e) {
+								// The record could not be read
+							}
 						}
-
-						// Closing the open file connection
-						pos.close();
-
-						// Checking the license back in
-						connectionManager.clear();
-
-						return rs;
-					}
-					return null;
-				}
-
-				if (filter.contains(FILTER_RANGE_FROM) && filter.contains(FILTER_RANGE_TO)) {
-					byte[] startKey = filter.getFieldAsString(FILTER_RANGE_FROM).getBytes();
-
-					if (startKey != null) {
-						try {
-							pos.readByKey(record, 0, record.length, startKey, 0, startKey.length, knum, 0, 0);
-						} catch (Exception e) {
-							// The record could not be read
-						}
-					}
-
-					byte[] endKey = filter.getFieldAsString(FILTER_RANGE_TO).getBytes();
-					if (endKey != null) {
-						endPos = connectionManager.open(fileName, true, true);
-						try {
-							endPos.readByKey(endRecord, 0, endRecord.length, endKey, 0, endKey.length, knum, 0, 0);
-						} catch (Exception e) {
-
+	
+						byte[] endKey = filter.getFieldAsString(FILTER_RANGE_TO).getBytes();
+						if (endKey != null) {
+							endPos = connectionManager.open(fileName, true, true);
+							try {
+								endPos.readByKey(endRecord, 0, endRecord.length, endKey, 0, endKey.length, knum, 0, 0);
+							} catch (Exception e) {
+	
+							}
 						}
 					}
 				}
-			}
-
-			// boolean value indicating whether the last record should be saved in the
-			// ResultSet or not
-			boolean includeLastRecord = true;
-			if (endPos != null) {
-				endPos.getNumKey(lastRecordKeys[knum], lastRecordKeys[knum].length, knum);
-				if (isRecordEmpty(endRecord)) {
-					includeLastRecord = false;
-				}
-			}
-
-			boolean complete = false;
-			boolean readPerOffset = false;
-
-			if (offsetStart >= 0) {
-				readPerOffset = true;
-
-				// move the file pointer to the offset position
-				pos.read(record, record.length, offsetStart - 1L, 5, false);
-			}
-			byte[] dummy = new byte[1];
-			while (!complete) {
+	
+				// boolean value indicating whether the last record should be saved in the
+				// ResultSet or not
+				boolean includeLastRecord = true;
 				if (endPos != null) {
-					pos.getNumKey(keys[knum], keys[knum].length, knum);
-
-					if (Arrays.equals(keys[knum], lastRecordKeys[knum])) {
-						complete = true;
-						if (!includeLastRecord) {
+					endPos.getNumKey(lastRecordKeys[knum], lastRecordKeys[knum].length, knum);
+					if (isRecordEmpty(endRecord)) {
+						includeLastRecord = false;
+					}
+				}
+	
+				boolean complete = false;
+				boolean readPerOffset = false;
+	
+				if (offsetStart >= 0) {
+					readPerOffset = true;
+	
+					// move the file pointer to the offset position
+					pos.read(record, record.length, offsetStart - 1L, 5, false);
+				}
+				byte[] dummy = new byte[1];
+				while (!complete) {
+					if (endPos != null) {
+						pos.getNumKey(keys[knum], keys[knum].length, knum);
+	
+						if (Arrays.equals(keys[knum], lastRecordKeys[knum])) {
+							complete = true;
+							if (!includeLastRecord) {
+								break;
+							}
+						}
+					}
+					int currentRecordSize = pos.read(dummy, 1, 0, 5, false);
+					record = new byte[currentRecordSize];
+					pos.read(record, record.length, 1, 5, false);
+					templatedStr.setValue(record);
+					currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
+					if (currentDataRow != null) {
+						rs.add(currentDataRow);
+					}
+					if (readPerOffset) {
+						// read the records while the offset count is not reached
+						if (rs.size() >= offsetCount) {
 							break;
 						}
 					}
 				}
-				int currentRecordSize = pos.read(dummy, 1, 0, 5, false);
-				record = new byte[currentRecordSize];
-				pos.read(record, record.length, 1, 5, false);
-				templatedStr.setValue(record);
-				currentDataRow = getDataRowFromRecord(entrySet, templatedStr, numericFieldIndeces);
-				if (currentDataRow != null) {
-					rs.add(currentDataRow);
+	
+				if (rs.size() > 0) {
+					rs.get(0).setFieldValue("X-Total-Count", pos.getRecordCount());
 				}
-				if (readPerOffset) {
-					// read the records while the offset count is not reached
-					if (rs.size() >= offsetCount) {
-						break;
-					}
-				}
+	
+			} catch (FilesystemEOFException ex) {
+				// End of iteration...
 			}
-
-			if (rs.size() > 0) {
-				rs.get(0).setFieldValue("X-Total-Count", pos.getRecordCount());
+		}catch (Exception e) {
+			pos.close();
+			if (endPos != null) {
+				endPos.close();
 			}
-
-		} catch (FilesystemEOFException ex) {
-			// End of iteration...
+			connectionManager.clear();
+			throw e;
 		}
-
 		// closing the open file connection
 		pos.close();
 

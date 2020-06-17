@@ -23,6 +23,7 @@ import com.basiscomponents.db.ResultSetExporter;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRPrintPage;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -34,19 +35,150 @@ public class PdfExport {
 	private static final int PDF_WIDTH_LANDSCAPE = 802;
 	private static final int PDF_WIDTH_PORTRAIT = 555;
 	private static final int PDF_OFFSET = 5;
-	private static final String USER_HOME = System.getProperty("user.home")+"/";
+	private static final String USER_HOME = System.getProperty("user.home");
 	private static final String PDF_FIELD_VALUE_ALIGNTMENT_LEFT = "Left";
 	private static final String PDF_FIELD_VALUE_ALIGNTMENT_RIGHT = "Right";
 	private static final int PDF_EXPORT_NO_FIT = 0;
 	private static final int PDF_EXPORT_FIT_TO_WIDTH = 1;
 	private static final int PDF_EXPORT_FIT_TO_HEIGHT = 2;
 	private static final int PDF_EXPORT_FIT_TO_PAGE = 3;
+	
+	public static JasperPrint exportToJasperPrint(File outputFile, ResultSet rs, SheetConfiguration sheetConfig, boolean baristaMode, int fitTo, boolean landscapeMode) {
+		int sheetWidth;
+		if (landscapeMode) {
+			sheetWidth = PDF_WIDTH_LANDSCAPE;
+		} else {
+			sheetWidth = PDF_WIDTH_PORTRAIT;
+		}
+		
+		String filePath = outputFile.getParent();
+		if(filePath == null || filePath.trim().isEmpty()) {
+			filePath = USER_HOME;
+		}
 
+		ArrayList<SheetConfiguration> sheetConfigList;
+		switch (fitTo) {
+		// splitting the original sheetConfiguration in multiple ones since there are
+		// possibly too many columns to fit on just one page.
+		case PDF_EXPORT_NO_FIT:
+			sheetConfigList = fitNormal(sheetConfig, sheetWidth);
+			break;
+		// editing the columnConfiguration; fitting all columns on one page.
+		case PDF_EXPORT_FIT_TO_WIDTH:
+		case PDF_EXPORT_FIT_TO_PAGE:
+			sheetConfigList = fitToWidth(sheetConfig, sheetWidth);
+			break;
+		default:
+			sheetConfigList = fitNormal(sheetConfig, sheetWidth);
+			break;
+		}
+
+		// getting the column field types
+		DataRow fieldTypes = getFieldTypes(sheetConfig, rs);
+
+		// creating a list of temporary jrxml files
+		ArrayList<File> tempJRXMLList = new ArrayList<File>();
+		String report;
+		File tempJRXML;
+		if (sheetConfigList.size() <= 0) {
+			// creating a jrxml file (a report; placing columns and so on)
+			report = buildReport(sheetConfig, fieldTypes, rs, landscapeMode, 0, fitTo, baristaMode);
+			tempJRXML = writeTempJRXML(report, filePath, 0);
+			tempJRXMLList.add(tempJRXML);
+		} else {
+			int i = 0;
+			while (i < sheetConfigList.size()) {
+				report = buildReport(sheetConfigList.get(i), fieldTypes, rs, landscapeMode, i, fitTo,
+						baristaMode);
+				tempJRXML = writeTempJRXML(report, filePath, i);
+				tempJRXMLList.add(tempJRXML);
+				i++;
+			}
+		}
+
+		int i = 0;
+		JasperPrint jasperPrint = null;
+		while (i < tempJRXMLList.size()) {
+			JRDataSource jrDataSource = rs.toJRDataSource(); //jrDataSource gets consumed; have to rebuild every time.
+			String jrxmlPath = tempJRXMLList.get(i).getAbsolutePath();
+			JasperPrint tempJasperPrint = fillReport(jrxmlPath, jrDataSource);
+			if (jasperPrint == null) {
+				jasperPrint = tempJasperPrint;
+			}else {
+				if(tempJasperPrint != null) {
+					List<JRPrintPage> pages = tempJasperPrint.getPages();
+					for (int j = 0 ; j < pages.size() ; j++) {
+					    JRPrintPage object = (JRPrintPage)pages.get(j);
+					    jasperPrint.addPage(object);
+					}
+				}
+			}
+			i++;
+		}
+		System.out.println("pages: " + jasperPrint.getPages().size());
+		return jasperPrint;
+	}
+	
+	/**
+	 * Fills the report with all the data
+	 * 
+	 * @param jrxmlPath
+	 *            The .jrxml file to compile
+	 * @param jrDataSource
+	 *            The data source that holds all the data fill the report with
+	 * 
+	 * @return The final exported PDF file
+	 */
+	public static JasperPrint fillReport(String jrxmlPath, JRDataSource jrDataSource) {
+		JasperPrint jasperPrint;
+		try {
+			JasperReport report = JasperCompileManager.compileReport(jrxmlPath);
+			jasperPrint = JasperFillManager.fillReport(report, new HashMap(), jrDataSource);
+			
+			File file = new File(jrxmlPath);
+			if (file.canRead()) {
+				file.delete();
+			}
+		} catch (JRException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			jasperPrint = null;
+		}
+		return jasperPrint;
+	}
+	
+	/**
+	 * Writes the Pdf file
+	 * 
+	 * @param outputFile
+	 *            The output file
+	 * @param jasperPrint
+	 *            The Jasper Print that holds all the data to write
+	 * 
+	 * @return The final exported PDF file
+	 */
+	public static File writePdf(File outputFile, JasperPrint jasperPrint) {
+		String filePath = outputFile.getParent();
+		if(filePath == null || filePath.trim().isEmpty()) {
+			filePath = USER_HOME;
+		}
+		File file = null;
+		file = new File(filePath + System.getProperty("file.separator") + outputFile.getName());
+		try {
+			file.createNewFile();
+			JasperExportManager.exportReportToPdfFile(jasperPrint, file.getAbsolutePath());
+		} catch (JRException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return file;
+	}
+	
 	/**
 	 * Exports the content of the given ResultSet from a BBjGridExWidget
 	 * 
-	 * @param outputFileName
-	 *            The name of the PDF file
+	 * @param file
+	 *            The output file
 	 * @param resultSet
 	 *            The ResultSet to export.
 	 * @param sheetConfig
@@ -61,7 +193,7 @@ public class PdfExport {
 	 * 
 	 * @return The final exported PDF file
 	 */
-	public static File exportToPDF(String outputFileName, String filePath, ResultSet rs, SheetConfiguration sheetConfig,
+	public static File exportToPDF(File outputFile, ResultSet rs, SheetConfiguration sheetConfig,
 			boolean baristaMode, int fitTo, boolean landscapeMode) {
 		int sheetWidth;
 		if (landscapeMode) {
@@ -70,6 +202,7 @@ public class PdfExport {
 			sheetWidth = PDF_WIDTH_PORTRAIT;
 		}
 		
+		String filePath = outputFile.getParent();
 		if(filePath == null || filePath.trim().isEmpty()) {
 			filePath = USER_HOME;
 		}
@@ -115,17 +248,17 @@ public class PdfExport {
 		}
 
 		// creating the PDF files out of the tempJRXML files
-		ArrayList<File> tempFileList = writePDFs(tempJRXMLList, outputFileName, filePath, rs);
+		ArrayList<File> tempFileList = writePDFs(tempJRXMLList, outputFile, rs);
 
 		// merging the created pdf files to one file
-		return mergePDFFiles(tempFileList, outputFileName, filePath);
+		return mergePDFFiles(tempFileList, outputFile);
 	}
 	
 	/**
 	 * Exports the content of the given ResultSet from a BBjGridExWidget
 	 * 
-	 * @param outputFileName
-	 *            The name + path of the PDF file
+	 * @param file
+	 *            The output File
 	 * @param reportName
 	 * 			  The name + path of the report
 	 * @param resultSet
@@ -133,11 +266,10 @@ public class PdfExport {
 	 * 
 	 * @return The final exported PDF file
 	 */
-	public static File exportToPDF(String outputFileName, String reportName, ResultSet rs) {
-		File outputFile = null;
+	public static File exportToPDF(File outputFile, File customReport, ResultSet rs) {
 		try {
-			outputFile = new File(outputFileName);
-			JasperReport report = JasperCompileManager.compileReport(reportName);
+			String outputFileName = outputFile.getPath() + System.getProperty("file.separator") + outputFile.getName();
+			JasperReport report = JasperCompileManager.compileReport(customReport.getPath());
 			JRDataSource jrDataSource = rs.toJRDataSource();
 			JasperPrint jasperPrint = JasperFillManager.fillReport(report, new HashMap(), jrDataSource);
 			JasperExportManager.exportReportToPdfFile(jasperPrint, outputFile.getAbsolutePath());
@@ -154,23 +286,27 @@ public class PdfExport {
 	 * 
 	 * @param tempJRXMLList
 	 *            List of temporary jrxml files
-	 * @param outputFileName
-	 *            The name of the PDF file
+	 * @param file
+	 *            The output file
 	 * @param resultSet
 	 *            The ResultSet to export
 	 * 
 	 * @return List of exported PDF files
 	 */
-	private static ArrayList<File> writePDFs(ArrayList<File> tempJRXMLList, String outputFileName, String filePath, ResultSet rs) {
+	private static ArrayList<File> writePDFs(ArrayList<File> tempJRXMLList, File outputFile, ResultSet rs) {
 		int i = 0;
-		File file = null;
 		ArrayList<File> tempFileList = new ArrayList<File>();
+		String filePath = outputFile.getParent();
+		if(filePath == null || filePath.trim().isEmpty()) {
+			filePath = USER_HOME;
+		}
+		File file = null;
 		while (i < tempJRXMLList.size()) {
-			file = new File(filePath + outputFileName + "__" + i + ".pdf");
+			file = new File(filePath + System.getProperty("file.separator") + outputFile.getName() + "__" + i + ".pdf");
 			try {
 				file.createNewFile();
-				filePath = tempJRXMLList.get(i).getAbsolutePath();
-				JasperReport report = JasperCompileManager.compileReport(filePath);
+				String jrxmlPath = tempJRXMLList.get(i).getAbsolutePath();
+				JasperReport report = JasperCompileManager.compileReport(jrxmlPath);
 				JRDataSource jrDataSource = rs.toJRDataSource();
 				JasperPrint jasperPrint = JasperFillManager.fillReport(report, new HashMap(), jrDataSource);
 				JasperExportManager.exportReportToPdfFile(jasperPrint, file.getAbsolutePath());
@@ -190,15 +326,16 @@ public class PdfExport {
 	 * 
 	 * @param tempFileList
 	 *            List of temporary PDF files
-	 * @param outputFileName
-	 *            The name of the output PDF file
+	 * @param file
+	 *            The output file
 	 * 
 	 * @return Merged PDF file
 	 */
-	private static File mergePDFFiles(ArrayList<File> tempFileList, String outputFileName, String filePath) {
+	private static File mergePDFFiles(ArrayList<File> tempFileList, File outputFile) {
 		int i = 0;
-		File file;
 		ArrayList<PDDocument> pdDocumentsList = new ArrayList<PDDocument>();
+		File file = null;
+		
 		while (i < tempFileList.size()) {
 			file = tempFileList.get(i);
 			PDDocument tempDoc;
@@ -225,10 +362,15 @@ public class PdfExport {
 			}
 			page++;
 		}
+		
+		String filePath = outputFile.getParent();
+		if(filePath == null || filePath.trim().isEmpty()) {
+			filePath = USER_HOME;
+		}
 
 		// save document
 		try {
-			document.save(filePath + outputFileName);
+			document.save(filePath + System.getProperty("file.separator") + outputFile.getName());
 			document.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -255,7 +397,7 @@ public class PdfExport {
 		}
 
 		// return the new build pdf
-		file = new File(filePath + outputFileName);
+		file = new File(filePath + System.getProperty("file.separator") + outputFile.getName());
 		return file;
 	}
 
@@ -267,8 +409,8 @@ public class PdfExport {
 	 * @param sheetConfig
 	 *            The sheet configuration which consists of all the data needed for
 	 *            a report.
-	 * @param outputFileName
-	 *            The name of the output PDF file
+	 * @param sheetWidth
+	 *            The sheet width
 	 * 
 	 * @return List of sheet configurations
 	 */
@@ -312,8 +454,8 @@ public class PdfExport {
 	 * @param sheetConfig
 	 *            The sheet configuration which consists of all the data needed for
 	 *            a report.
-	 * @param outputFileName
-	 *            The name of the output PDF file
+	 * @param sheetWidth
+	 *            The sheet width
 	 * 
 	 * @return List of sheet configurations
 	 */
@@ -354,21 +496,12 @@ public class PdfExport {
 	/**
 	 * Places the columns and their respective headers on the report.
 	 * 
-	 * @param outputFileName
-	 *            The name of the PDF file
+	 * @param sheetConfig
+	 *            The sheet configuration for the report
 	 * @param fieldTypes
 	 *            The DataField field types
 	 * @param resultSet
 	 *            The ResultSet to export.
-	 * @param sheetConfig
-	 *            The sheet configuration for the report
-	 * @param baristaMode
-	 *            indicator if the Barista header should be displayed or not
-	 * @param fitTo
-	 *            content fitting indicator
-	 * @param landscapeMode
-	 *            indicator if the PDF should be created in landscape mode or else
-	 *            in portrait mode
 	 * 
 	 * @return The build report as string
 	 */
@@ -557,7 +690,7 @@ public class PdfExport {
 	}
 	
 	private static File writeTempJRXML(String report, String filePath, int index) {
-		File tempJRXML = new File(filePath + "tempJRXML__" + index + ".jrxml");
+		File tempJRXML = new File(filePath + System.getProperty("file.separator") + "tempJRXML__" + index + ".jrxml");
 		tempJRXML.deleteOnExit();
 		try { // try with resources
 			tempJRXML.createNewFile();

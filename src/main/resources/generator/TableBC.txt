@@ -1,0 +1,17 @@
+package [[package]];
+
+import com.basiscomponents.bc.SqlTableBC;
+
+public class [[class]] extends SqlTableBC{
+
+    public [[class]]() throws Exception{
+        super(Database.getConnection());
+        setTable("[[table]]");
+    }
+
+    public [[class]](String Driver, String Url, String User, String Password) throws ClassNotFoundException {
+        super(Driver, Url, User, Password);
+        setTable("[[table]]");
+    }
+
+}

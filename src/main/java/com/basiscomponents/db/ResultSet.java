@@ -2884,9 +2884,29 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 				DataRow r = it.next();
 				String idx = r.getRowKey(); 
 				if (idx.isEmpty()) {
+					
+					if (KeyColumns.isEmpty()) {
+					
 					//TODO: if the ResultSet has a primary index, like from JDBC, use these fields only!					
 					idx = java.util.UUID.nameUUIDFromBytes(r.toString().getBytes()).toString();
-
+					
+					}
+					
+					else   {
+						Iterator<String> itf = KeyColumns.iterator();
+						while (itf.hasNext()){
+							String x = "<NULL>";
+							String f = itf.next();
+							try {
+								x = r.getFieldAsString(f);
+							} catch (Exception e) {
+									System.err.println("warning: element "+f+" missing in record, RowKey may be broken");
+									};
+							idx += x;
+							if (itf.hasNext())
+								idx += "\000";
+						}
+					}
 					// workaround if there are true duplicate rows
 					if (rowIndex.containsKey(idx)) {
 						idx += '-';
