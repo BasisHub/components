@@ -146,8 +146,10 @@ public class ArcGen {
 
             if (ctrl.equals("INPUTE")) {
             	
-            	String x="X";
-            	String fill = x.repeat((Math.min(100,col_size)));
+            	String fill="";
+            	int siz = Math.min(100,col_size);
+            	for (int i=0; i<siz; i++)
+            		fill += "X";
 
                 writer.append("            MASK \"");
                 writer.append(fill);
