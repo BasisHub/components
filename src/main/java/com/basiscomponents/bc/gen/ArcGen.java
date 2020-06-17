@@ -147,9 +147,13 @@ public class ArcGen {
             if (ctrl.equals("INPUTE")) {
             	
             	String x="X";
-                writer.append("            MASK \""+x.repeat((Math.min(100,col_size)))+"\"");
+            	String fill = x.repeat((Math.min(100,col_size)));
+
+                writer.append("            MASK \"");
+                writer.append(fill);
+                writer.append("\"");
                 writer.append(LF);
-//                rem TODO: choose a better control for very large fields, like a CEdit
+// rem TODO: choose a better control for very large fields, like a CEdit
             }
 
             writer.append("            NAME \""+col_name+"\"");
