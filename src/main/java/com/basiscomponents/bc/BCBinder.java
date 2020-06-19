@@ -384,6 +384,7 @@ public class BCBinder {
 				deleteSelectedRows();
 				break;
 			case SIGNAL_NEW:
+			case SIGNAL_BLANK:
 				setSelection(SEL_DESELECT);
 				break;
 			case SIGNAL_INITIATE_TERMINATE:
