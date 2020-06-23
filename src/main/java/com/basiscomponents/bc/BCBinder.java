@@ -12,7 +12,7 @@ public class BCBinder {
 	private ArrayList<IBCBound> boundComponents = new ArrayList<>();
 	private BusinessComponent bc;
 
-	private ResultSet rs;
+	private ResultSet rs = new ResultSet();
 	private DataRow attributes_rec;
 	private ArrayList<String> selection = new ArrayList<>();
 	
@@ -418,7 +418,7 @@ public class BCBinder {
 	 * @return DataRow
 	 * @throws Exception
 	 */
-	protected DataRow getDataRowForWrite() throws Exception {
+	public DataRow getDataRowForWrite() throws Exception {
 		DataRow writeDR = new DataRow();
 		Iterator<IBCBound> it = boundComponents.iterator();
 		
