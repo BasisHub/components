@@ -60,6 +60,7 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	protected boolean debug = false;
 	
 	protected String adminUser = "";
+	protected String factoryDefaultUser = "_$";
 	
 
 	public ConfigurationsBC() {
@@ -262,6 +263,14 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	 */
 	public void setAdminUser(String adminUser) {
 		this.adminUser = adminUser;
+	}
+	
+	public String getFactoryDefaultUser() {
+		return this.factoryDefaultUser;
+	}
+	
+	public void setFactoryDefaultUser(String factoryDefaultUser) {
+		this.factoryDefaultUser = factoryDefaultUser;
 	}
 
 	@Override
@@ -626,14 +635,23 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	 * @return
 	 */
 	public Boolean canModify(DataRow dr) {
-		if (this.userName.equals(this.adminUser.trim())) {
+		String userName = null;
+		if (dr.contains(FIELD_NAME_USERID)) {
+			userName = dr.getFieldAsString(FIELD_NAME_USERID).trim();
+		}
+		if (this.userName.equals(this.factoryDefaultUser.trim())) {//factory user can edit everything
 			return true;
 		}
-		if (!dr.contains(FIELD_NAME_USERID)) {
+		if (userName != null && this.factoryDefaultUser.equals(userName)) {//bc user is not factoryDefault (checked before) and user in dataRow IS factoryDefault: not allowed
 			return false;
 		}
-		String userName = dr.getFieldAsString(FIELD_NAME_USERID).trim();
-		if (this.userName.equals(userName)) {
+		if (this.userName.equals(this.adminUser.trim())) {// nonfactory related: admin can edit anything
+			return true;
+		}
+		if (userName == null) {//if userName is not set and no admin or factory default, then not allowed
+			return false;
+		}
+		if (this.userName.equals(userName)) {//normal user can edit his own entrys and nothing else
 			return true;
 		}
 		return false;
@@ -727,18 +745,53 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		filters.add(FIELD_NAME_USERID );
 		for (String fieldDefault : filters) {
 			try {
-				filter.setFieldValue(fieldDefault, "");
+				if (FIELD_NAME_SETTING.equals(fieldDefault)) {
+					filter.setFieldValue(fieldDefault, this.adminUser);
+				} else {
+					filter.setFieldValue(fieldDefault, "");
+				}
 				setFilter(filter);
 				rs = retrieve();
 			} catch (Exception e) {
 				printDebug(e.getMessage());
 			}
 			if (rs != null && !rs.isEmpty()) {
-				printDebug("found after defaulting " + fieldDefault);
+				printDebug("found after admin defaulting " + fieldDefault);
 				try {printDebug("filter: " + getFilter().toJson());} catch (Exception e) {}
 				setFilter(previousFilter);
 				return rs;
 			}
+		}
+		
+		try {//try factory default with setting from filter
+			filter.setFieldValue(FIELD_NAME_USERID, this.factoryDefaultUser);
+			if (previousFilter.contains(FIELD_NAME_SETTING)) {
+				filter.setFieldValue(FIELD_NAME_SETTING, previousFilter.getFieldAsString(FIELD_NAME_SETTING));
+			}
+			setFilter(filter);
+			rs = retrieve();
+		} catch (Exception e) {
+			printDebug(e.getMessage());
+		}
+		if (rs != null && !rs.isEmpty()) {
+			printDebug("found after factory defaulting FIELD_NAME_USERID");
+			try {printDebug("filter: " + getFilter().toJson());} catch (Exception e) {}
+			setFilter(previousFilter);
+			return rs;
+		}
+		
+		try {//try factory default with empty setting
+			filter.setFieldValue(FIELD_NAME_SETTING, "");
+			setFilter(filter);
+			rs = retrieve();
+		} catch (Exception e) {
+			printDebug(e.getMessage());
+		}
+		if (rs != null && !rs.isEmpty()) {
+			printDebug("found after factory defaulting FIELD_NAME_SETTING");
+			try {printDebug("filter: " + getFilter().toJson());} catch (Exception e) {}
+			setFilter(previousFilter);
+			return rs;
 		}
 		printDebug("not found.");
 		try {printDebug("filter: " + getFilter().toJson());} catch (Exception e) {}
@@ -782,12 +835,19 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 			DataRow filter = new DataRow();
 			String realm = previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_REALM);
 			String key = previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_KEYX);
+			//set filter for factory default and retrieve
+			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_REALM, realm);
+			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_KEYX, key);
+			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_USERID, this.factoryDefaultUser);
+			setFilter(filter);
+			ResultSet factoryDefaultConfig = retrieve();
 			//set filter for default user id and retrieve
 			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_REALM, realm);
 			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_KEYX, key);
 			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_USERID, "");
 			setFilter(filter);
 			ResultSet defaultConfig = retrieve();
+			defaultConfig = mergeResultSetsOnKeys(factoryDefaultConfig, defaultConfig); // merge factory default with default config
 			//if user was admin, we only need the default configuration. return it
 			if (!previousFilter.contains(ConfigurationsBC.FIELD_NAME_USERID) || previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_USERID).trim().contentEquals(getAdminUser())) {
 				setFilter(previousFilter);
@@ -855,31 +915,47 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 //			System.out.println(bc.getAttributesRecord().toJson());
 			DataRow writeDr = new DataRow();
 			writeDr.setFieldValue(FIELD_NAME_REALM,  "DBO");
-			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test1");
+			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test2");
 			writeDr.setFieldValue(FIELD_NAME_USERID, "JC");
 			writeDr.setFieldValue(FIELD_NAME_SETTING,"");
 			writeDr.setFieldValue(FIELD_NAME_CONFIG, "{\"TEST\":\"Default\"}");
 			bc.write(writeDr);
+			bc.remove(writeDr);
 			writeDr.setFieldValue(FIELD_NAME_REALM,  "DBO");
-			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test1");
-			writeDr.setFieldValue(FIELD_NAME_USERID, "JC");
+			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test2");
+			writeDr.setFieldValue(FIELD_NAME_USERID, "MN");
+			writeDr.setFieldValue(FIELD_NAME_SETTING,"");
+			writeDr.setFieldValue(FIELD_NAME_CONFIG, "{\"TEST\":\"Default\"}");
+			bc.write(writeDr);
+			writeDr.setFieldValue(FIELD_NAME_REALM,  "DBO");
+			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test2");
+			writeDr.setFieldValue(FIELD_NAME_USERID, "");
 			writeDr.setFieldValue(FIELD_NAME_SETTING,"");
 			writeDr.setFieldValue(FIELD_NAME_CONFIG, "{\"TEST\":\"Default2\"}");
 			bc.write(writeDr);
 			bc.remove(writeDr);
+			writeDr.setFieldValue(FIELD_NAME_REALM,  "DBO");
+			writeDr.setFieldValue(FIELD_NAME_KEYX,   "Test2");
+			writeDr.setFieldValue(FIELD_NAME_USERID, "_$");
+			writeDr.setFieldValue(FIELD_NAME_SETTING,"");
+			writeDr.setFieldValue(FIELD_NAME_CONFIG, "{\"TEST\":\"factoryDefault2\"}");
+			bc.setUserName("_$");
+			bc.write(writeDr);
+			bc.setUserName("");
 //			bc.remove(writeDr);
 //			writeDr.setFieldVaCdValue(FIELD_NAME_CREA_USER, "");
 			DataRow filter = new DataRow();
 			filter.setFieldValue(FIELD_NAME_REALM,  "DBO");
-			filter.setFieldValue(FIELD_NAME_KEYX,   "Test1");
+			filter.setFieldValue(FIELD_NAME_KEYX,   "Test2");
 			filter.setFieldValue(FIELD_NAME_USERID, "JC");
-			filter.setFieldValue(FIELD_NAME_SETTING,"");
+			filter.setFieldValue(FIELD_NAME_SETTING,"asd");
 			bc.setFilter(filter);
 //			bc.setFieldSelection(fieldSelection);
 			ResultSet rs;
 //			long millis = System.currentTimeMillis();
 //			rs = bc.retrieve();
-			rs = bc.getAvailableConfigurations();
+//			rs = bc.getAvailableConfigurations();
+			rs = bc.getEffectiveConfiguration();
 //			millis = System.currentTimeMillis() - millis;
 //			System.out.println("retrieve execution time: " + millis);
 			for (DataRow dataRow : rs) {
