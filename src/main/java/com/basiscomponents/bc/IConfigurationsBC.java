@@ -79,6 +79,18 @@ public interface IConfigurationsBC extends BusinessComponent{
 	 */
 	public void setAdminUser(String adminUser);
 	
+	/**
+	 * returns the user which can set factory defaults. Default is "_$"
+	 * @return current factory default user
+	 */
+	public String getFactoryDefaultUser();
+	
+	/**
+	 * returns the user which can set factory defaults. Default is "_$"
+	 * @return current factory default user
+	 */
+	public void setFactoryDefaultUser(String factoryDefaultUser);
+	
 	
 	/**
 	 * returns true if this datarow can be modified. checks the username which is set with setUserName().
@@ -181,4 +193,5 @@ public interface IConfigurationsBC extends BusinessComponent{
 	 * @return
 	 */
 	public DataRow getFilter();
+	
 }
