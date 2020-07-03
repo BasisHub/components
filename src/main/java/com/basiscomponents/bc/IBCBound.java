@@ -16,5 +16,7 @@ public interface IBCBound {
     public void onSignal(int signal, Object payload);
     
     public DataRow getFieldsForWrite();
+    
+    public DataRow getFieldsForFieldSelection();
 	
 }

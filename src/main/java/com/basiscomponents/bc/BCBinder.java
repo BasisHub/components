@@ -15,6 +15,7 @@ public class BCBinder {
 	private ResultSet rs = new ResultSet();
 	private DataRow attributes_rec;
 	private ArrayList<String> selection = new ArrayList<>();
+	private DataRow fieldSelection = new DataRow();
 	
 	private int DebugLevel = 0;
 
@@ -190,11 +191,27 @@ public class BCBinder {
 	 * @throws Exception
 	 */
 	public void retrieve() throws Exception {
+		this.updateFieldSelection();
+		this.bc.setFieldSelection(this.fieldSelection);
+		
 		this.rs = this.bc.retrieve();
 		this.attributes_rec = this.bc.getAttributesRecord();
 		this.rs.createIndex();
 		updateSelection();
 		onSetData();
+	}
+	
+	private void updateFieldSelection() {
+		DataRow fieldSelection = new DataRow();
+		
+		Iterator<IBCBound> it = boundComponents.iterator();
+		while (it.hasNext()) {
+			IBCBound o = it.next();
+			DataRow componentFieldSelection = o.getFieldsForFieldSelection();
+			fieldSelection.mergeRecord(componentFieldSelection, true);
+		}
+		
+		this.fieldSelection = fieldSelection;
 	}
 
 	/**
