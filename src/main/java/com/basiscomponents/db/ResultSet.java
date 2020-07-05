@@ -177,6 +177,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * records that match the clause. The clause syntax is similar to an SQL WHERE clause.
 	 * 
 	 * CAUTION: this method is experimental!!
+	 * It only understands "equals" and basic statements, no full SQL.
+	 * Searching for volunteers to implant full SQL where clause parsing.
 	 * 
 	 * @param queryClause: the query
 	 * @return ResultSet: the records that match the query clause
@@ -191,6 +193,8 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * records that match the clause. The clause syntax is similar to an SQL WHERE clause.
 	 * 
 	 * CAUTION: this method is experimental!!
+	 * It only understands "equals" and basic statements, no full SQL.
+	 * Searching for volunteers to implant full SQL where clause parsing.
 	 * 
 	 * @param QueryClause: the query
 	 * @param caseSensitive whether the filter query should be case sensitive or not
