@@ -275,14 +275,5 @@ public class PropertyReader {
 		return null;
 	}
 
-	public static void main(String[] args) {
-		PropertyReader r = new PropertyReader(
-				"/GitHub/Concordia/webfleet/app/i18n/attributeListProperties",
-				"fr");
-		System.out.println(r.getAttributes("AUTREINT"));
-		System.out.println(r.getResultSet("AUTREINT"));
-		System.out.println(r.getAttribute("AUTREINT", "04"));
-		System.out.println(r.getAttribute("AUTREINT", 4));
-	}
 
 }
