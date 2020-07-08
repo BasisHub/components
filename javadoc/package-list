@@ -17,10 +17,12 @@ com.basiscomponents.db.seeder
 com.basiscomponents.db.sql
 com.basiscomponents.db.tree
 com.basiscomponents.db.util
+com.basiscomponents.i18n
 com.basiscomponents.json
 com.basiscomponents.lucene
 com.basiscomponents.rest
 com.basiscomponents.ui.layout
+com.basiscomponents.ui.theming
 com.basiscomponents.util
 net.miginfocom.layout
 org.java_websocket
