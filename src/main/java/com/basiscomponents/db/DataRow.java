@@ -1,20 +1,6 @@
 package com.basiscomponents.db;
 
-import com.basis.bbj.datatypes.TemplatedString;
-import com.basis.util.common.BasisNumber;
-import com.basis.util.common.TemplateInfo;
-import com.basiscomponents.db.constants.ConstantsResolver;
-import com.basiscomponents.db.exception.DataFieldNotFoundException;
-import com.basiscomponents.db.fieldconverter.ConversionRuleSet;
-import com.basiscomponents.db.fieldconverter.IConversionRule;
-import com.basiscomponents.db.model.Attribute;
-import com.basiscomponents.db.util.DataFieldConverter;
-import com.basiscomponents.db.util.DataRowJsonMapper;
-import com.basiscomponents.db.util.DataRowMatcher;
-import com.basiscomponents.db.util.JRDataSourceAdapter;
-import com.basiscomponents.db.util.SqlTypeNames;
-import com.basiscomponents.db.util.TemplateParser;
-import net.sf.jasperreports.engine.JRDataSource;
+import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -34,7 +20,21 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.DatatypeConverter;
 
-import static com.basiscomponents.db.util.DataRowMatcherProvider.createMatcher;
+import com.basis.bbj.datatypes.TemplatedString;
+import com.basis.util.common.BasisNumber;
+import com.basis.util.common.TemplateInfo;
+import com.basiscomponents.db.constants.ConstantsResolver;
+import com.basiscomponents.db.exception.DataFieldNotFoundException;
+import com.basiscomponents.db.fieldconverter.ConversionRuleSet;
+import com.basiscomponents.db.fieldconverter.IConversionRule;
+import com.basiscomponents.db.model.Attribute;
+import com.basiscomponents.db.util.DataFieldConverter;
+import com.basiscomponents.db.util.DataRowJsonMapper;
+import com.basiscomponents.db.util.DataRowMatcher;
+import com.basiscomponents.db.util.JRDataSourceAdapter;
+import com.basiscomponents.db.util.TemplateParser;
+
+import net.sf.jasperreports.engine.JRDataSource;
 
 /**
  * A DataRow is a container object with key/value pairs. Each key being a String
