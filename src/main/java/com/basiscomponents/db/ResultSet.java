@@ -2907,8 +2907,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			String idx=""; 
 
 			if (KeyColumns.isEmpty()) {
-				// don't create a fresh hash row key if there was one before  
-				if (r.getRowKey() == null || r.getRowKey().isBlank())
+				// don't create a fresh hash row key if there was one before
+				idx = r.getRowKey();
+				if (idx  == null || idx.equals(""))
 					idx = java.util.UUID.nameUUIDFromBytes(r.toString().getBytes()).toString();
 				else
 					idx = r.getRowKey(); 
