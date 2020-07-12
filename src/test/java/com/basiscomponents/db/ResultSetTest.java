@@ -1,15 +1,15 @@
 package com.basiscomponents.db;
 
-import static com.basiscomponents.db.util.ResultSetProvider.createDefaultResultSet;
-import static org.junit.Assert.assertThrows;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.junit.jupiter.api.Test;
 
 import junit.framework.Assert;
 
@@ -32,7 +32,7 @@ public class ResultSetTest {
 	}
 	@Test
 	public void testOmittedAttributes() throws Exception {
-		ResultSet rs = createDefaultResultSet(false);
+		ResultSet rs = com.basiscomponents.db.util.ResultSetProvider.createDefaultResultSet(false);
 		rs.get(0).setAttribute("BGCOLOR","Black");
 		HashMap<String, String> attributes = rs.get(0).getAttributes();
 		assertTrue(attributes.containsKey("BGCOLOR"));
