@@ -17,6 +17,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -510,17 +511,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		this.DataRows.add(dr);
 		this.mergeDataRowFields(dr);
 		if (isIndexed) {
-			//TODO: if the ResultSet has a primary index, like from JDBC, use these fields only!					
-			String idx = java.util.UUID.nameUUIDFromBytes(dr.toString().getBytes()).toString();
-
-			// workaround if there are true duplicate rows
-			if (rowIndex.containsKey(idx)) {
-				idx += '-';
-				idx += (size()-1);
-			}
-
-			dr.setRowKey(idx);
-			rowIndex.put(idx, size()-1);
+			rowIndex.put(computeRowKey(dr), size()-1);
 		}
 	}
 
@@ -652,9 +643,17 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 
 	/**
 	 * @param keyColumns the keyColumns to set
+	 * @throws ParseException 
 	 */
-	public void setKeyColumns(ArrayList<String> keyColumns) {
+	public void setKeyColumns(ArrayList<String> keyColumns) throws ParseException {
+		ArrayList<String> k_cols_tmp = this.KeyColumns;
 		this.KeyColumns = keyColumns;
+		if (isIndexed) {
+			//rebuild only if the keyColumns are different
+			if (!keyColumns.equals(k_cols_tmp)) {
+				reCreateIndex();
+			}
+		}
 	}
 
 	/**
@@ -764,6 +763,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * @throws Exception 
 	 */
 	public DataRow get(String rowkey) throws Exception {
+
 		if (!isIndexed) 
 			throw new Exception("ResultSet is not indexed!");
 		
@@ -801,9 +801,17 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @param row The index of the DataRow.
 	 * @param dr The DataRow to set.
+	 * @throws ParseException 
 	 */
-	public void set(int row, DataRow dr) {
+	public void set(int row, DataRow dr) throws ParseException {
 		this.DataRows.set(row, dr);
+		
+		// update rowIndex
+		if (isIndexed) {
+			//maybe there is a more clever way
+			//however, to just update the one entry, the old index needs to be known
+			reCreateIndex();
+		}
 	}
 
 	/**
@@ -811,8 +819,9 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 	 * 
 	 * @param row The index of the DataRow.
 	 * @param dr The DataRow to set.
+	 * @throws ParseException 
 	 */
-	public void setItem(int row, DataRow dr) {
+	public void setItem(int row, DataRow dr) throws ParseException {
 		set(row, dr);
 	}
 
@@ -2886,39 +2895,7 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 			int i=0;
 			while (it.hasNext()) {
 				DataRow r = it.next();
-				String idx = r.getRowKey(); 
-				if (idx.isEmpty()) {
-					
-					if (KeyColumns.isEmpty()) {
-					
-					//TODO: if the ResultSet has a primary index, like from JDBC, use these fields only!					
-					idx = java.util.UUID.nameUUIDFromBytes(r.toString().getBytes()).toString();
-					
-					}
-					
-					else   {
-						Iterator<String> itf = KeyColumns.iterator();
-						while (itf.hasNext()){
-							String x = "<NULL>";
-							String f = itf.next();
-							try {
-								x = r.getFieldAsString(f);
-							} catch (Exception e) {
-									System.err.println("warning: element "+f+" missing in record, RowKey may be broken");
-									};
-							idx += x;
-							if (itf.hasNext())
-								idx += "\000";
-						}
-					}
-					// workaround if there are true duplicate rows
-					if (rowIndex.containsKey(idx)) {
-						idx += '-';
-						idx += i;
-					}
-					
-					r.setRowKey(idx);
-				}
+				String idx = computeRowKey(r);
 				rowIndex.put(idx, i);
 				i++;
 			}
@@ -2926,9 +2903,49 @@ public class ResultSet implements java.io.Serializable, Iterable<DataRow> {
 		}
 	}
 	
-	private void reCreateIndex() throws ParseException {
+	private String computeRowKey(DataRow r) {
+			String idx=""; 
+
+			if (KeyColumns.isEmpty()) {
+				// don't create a fresh hash row key if there was one before
+				idx = r.getRowKey();
+				if (idx  == null || idx.equals(""))
+					idx = java.util.UUID.nameUUIDFromBytes(r.toString().getBytes()).toString();
+				else
+					idx = r.getRowKey(); 
+			}
+			else   {
+				Iterator<String> itf = KeyColumns.iterator();
+				while (itf.hasNext()){
+					String x = "<NULL>";
+					String f = itf.next();
+					try {
+						x = r.getFieldAsString(f);
+					} catch (Exception e) {
+							System.err.println("warning: element "+f+" missing in record, RowKey may be broken");
+							};
+					idx += x;
+					if (itf.hasNext())
+						idx += "\000";
+				}
+			}
+			// if there are true duplicate rows
+			if(rowIndex.containsKey(idx)) {
+				int i=1;
+				String orig_idx = new String(idx);
+				while (rowIndex.containsKey(idx)) {
+					idx = orig_idx+'-' + (i++);
+					}
+			}
+			
+			r.setRowKey(idx);
+		
+		return idx;
+		
+	}
+
+	public void reCreateIndex() throws ParseException {
 		if (isIndexed) {
-		// re-create index since the row numbers change
 		// this might be improved later if necessary
 			isIndexed=false;
 			createIndex();
