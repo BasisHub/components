@@ -85,7 +85,57 @@ public class ResultSetExporter {
 	 */
 	public static void writeXML(ResultSet resultSet, String rootTagName, String entityName, Writer writer)
 			throws Exception {
-		XmlExport.writeXML(resultSet, rootTagName, entityName, writer);
+		XmlExport.writeXML(resultSet, rootTagName, entityName, writer, null, false);
+	}
+	
+	/**
+	 * Uses the given Writer object to write the ResultSet's content as XML to the
+	 * output stream. The given root tag name will be used as the XML's root tag,
+	 * and the give entity name will be used as surrounding tag for each of the
+	 * ResultSet's DataRow objects. <br>
+	 * <br>
+	 * Usage:<br>
+	 * 
+	 * <pre>
+	 * StringWriter w = new StringWriter();
+	 * ResultSet rs = new ResultSet();
+	 * 
+	 * DataRow dr = new DataRow();
+	 * dr.setFieldValue("feld1", "TEST1");
+	 * dr.setFieldValue("feld2", "TEST2");
+	 * rs.add(dr);
+	 * 
+	 * dr = new DataRow();
+	 * dr.setFieldValue("feld1", "TEST1");
+	 * dr.setFieldValue("feld3", "TEST3");
+	 * rs.add(dr);
+	 * 
+	 * ResultSetExporter.writeXML(rs, "articles", "article", w);
+	 * w.flush();
+	 * w.close();
+	 * 
+	 * System.out.println(w.toString());
+	 * 
+	 * FileWriter fw = new FileWriter("D:/test.xml");
+	 * ResultSetExporter.writeXML(rs, "articles", "article", fw);
+	 * fw.flush();
+	 * fw.close();
+	 * </pre>
+	 * 
+	 * @param resultSet   The ResultSet object whose content will be written in XML
+	 *                    format.
+	 * @param rootTagName The name of the XML Root Tag to use.
+	 * @param entityName  The name of the XML tag to use for each DataRow of the
+	 *                    ResultSet.
+	 * @param writer      The Writer object used to write the XML.
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
+	 * 
+	 * @throws Exception Gets thrown in case the XML could not be written.
+	 */
+	public static void writeXML(ResultSet resultSet, String rootTagName, String entityName, Writer writer, DataRow baseDR, boolean useLabel)
+			throws Exception {
+		XmlExport.writeXML(resultSet, rootTagName, entityName, writer, baseDR, useLabel);
 	}
 
 	/**
@@ -124,7 +174,46 @@ public class ResultSetExporter {
 	 * @throws Exception Gets thrown in case the HTML could not be written
 	 */
 	public static void writeHTML(ResultSet resultSet, Writer writer) throws Exception {
-		ResultSetExporter.writeHTML(resultSet, writer, null);
+		ResultSetExporter.writeHTML(resultSet, writer, null, null, false);
+	}
+	
+	/**
+	 * Uses the given Writer object to write the ResultSet's content as HTML
+	 * &lt;table&gt; element to the output stream. <br>
+	 * <br>
+	 * Example Usage with an FileWriter object:<br>
+	 * 
+	 * <pre>
+	 * ResultSet rs = new ResultSet();
+	 * 
+	 * DataRow dr = new DataRow();
+	 * dr.setFieldValue("feld1", "TEST1");
+	 * dr.setFieldValue("feld2", "TEST2");
+	 * rs.add(dr);
+	 * 
+	 * dr = new DataRow();
+	 * dr.setFieldValue("feld1", "TEST1");
+	 * dr.setFieldValue("feld3", "TEST3");
+	 * rs.add(dr);
+	 * 
+	 * HashMap<String, String> links = new HashMap<>();
+	 * links.put("feld1", "/rest/test/{feld1}");
+	 * links.put("feld2", "/rest/test/{feld1}/{feld2}");
+	 * 
+	 * FileWriter fw = new FileWriter("D:/test.html");
+	 * ResultSetExporter.writeHTML(rs, fw, links);
+	 * fw.flush();
+	 * fw.close();
+	 * </pre>
+	 * 
+	 * @param resultSet The ResultSet to export.
+	 * @param writer    A java.io.Writer Instance.
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
+	 * @throws Exception
+	 */
+	public static void writeHTML(ResultSet resultSet, Writer writer, DataRow baseDR, boolean useLabel) throws Exception {
+		HtmlExport.writeHTML(resultSet, writer, null, baseDR, useLabel);
 	}
 
 	/**
@@ -163,7 +252,48 @@ public class ResultSetExporter {
 	 * @throws Exception
 	 */
 	public static void writeHTML(ResultSet resultSet, Writer writer, HashMap<String, String> links) throws Exception {
-		HtmlExport.writeHTML(resultSet, writer, links);
+		ResultSetExporter.writeHTML(resultSet, writer, links, null, false);
+	}
+	
+	/**
+	 * Uses the given Writer object to write the ResultSet's content as HTML
+	 * &lt;table&gt; element to the output stream. <br>
+	 * <br>
+	 * Example Usage with an FileWriter object:<br>
+	 * 
+	 * <pre>
+	 * ResultSet rs = new ResultSet();
+	 * 
+	 * DataRow dr = new DataRow();
+	 * dr.setFieldValue("feld1", "TEST1");
+	 * dr.setFieldValue("feld2", "TEST2");
+	 * rs.add(dr);
+	 * 
+	 * dr = new DataRow();
+	 * dr.setFieldValue("feld1", "TEST1");
+	 * dr.setFieldValue("feld3", "TEST3");
+	 * rs.add(dr);
+	 * 
+	 * HashMap<String, String> links = new HashMap<>();
+	 * links.put("feld1", "/rest/test/{feld1}");
+	 * links.put("feld2", "/rest/test/{feld1}/{feld2}");
+	 * 
+	 * FileWriter fw = new FileWriter("D:/test.html");
+	 * ResultSetExporter.writeHTML(rs, fw, links);
+	 * fw.flush();
+	 * fw.close();
+	 * </pre>
+	 * 
+	 * @param resultSet The ResultSet to export.
+	 * @param writer    A java.io.Writer Instance.
+	 * @param links     A HashMap with field name / URL pattern pairs, like
+	 *                  http://xyz/a/{key}/gy.
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
+	 * @throws Exception
+	 */
+	public static void writeHTML(ResultSet resultSet, Writer writer, HashMap<String, String> links, DataRow baseDR, boolean useLabel) throws Exception {
+		HtmlExport.writeHTML(resultSet, writer, links, baseDR, useLabel);
 	}
 
 	/**
@@ -196,7 +326,42 @@ public class ResultSetExporter {
 	 * @throws Exception
 	 */
 	public static void writeTXT(ResultSet resultSet, Writer writer) throws Exception {
-		TxtExport.writeTXT(resultSet, writer);
+		ResultSetExporter.writeTXT(resultSet, writer, null, false);
+	}
+	
+	/**
+	 * Uses the given Writer object to write the ResultSet's content as plain text
+	 * to the output stream. <br>
+	 * <br>
+	 * Example Usage with an FileWriter object:<br>
+	 * 
+	 * <pre>
+	 * ResultSet rs = new ResultSet();
+	 * 
+	 * DataRow dr = new DataRow();
+	 * dr.setFieldValue("feld1", "TEST1");
+	 * dr.setFieldValue("feld2", "TEST2");
+	 * rs.add(dr);
+	 * 
+	 * dr = new DataRow();
+	 * dr.setFieldValue("feld1", "TEST1");
+	 * dr.setFieldValue("feld3", "TEST3");
+	 * rs.add(dr);
+	 * 
+	 * FileWriter fw = new FileWriter("D:/test.txt");
+	 * ResultSetExporter.writeTXT(rs, fw);
+	 * fw.flush();
+	 * fw.close();
+	 * </pre>
+	 * 
+	 * @param resultSet The ResultSet to export.
+	 * @param writer    A java.io.Writer Instance.
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
+	 * @throws Exception
+	 */
+	public static void writeTXT(ResultSet resultSet, Writer writer, DataRow baseDR, Boolean useLabel) throws Exception {
+		TxtExport.writeTXT(resultSet, writer, baseDR, useLabel);
 	}
 
 	/**
@@ -445,6 +610,18 @@ public class ResultSetExporter {
 	 */
 	public static void exportToCSV(File outputFile, ResultSet rs) {
 		CsvExport.exportToCSV(outputFile, rs);
+	}
+	
+	/**
+	 * Method to export a result set to a CSV file
+	 * 
+	 * @param outputFile	the ouput file
+	 * @param rs			the result set that holds the data to export
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
+	 */
+	public static void exportToCSV(File outputFile, ResultSet rs, DataRow baseDR, boolean useLabel) {
+		CsvExport.exportToCSV(outputFile, rs, baseDR, useLabel);
 	}
 
 }

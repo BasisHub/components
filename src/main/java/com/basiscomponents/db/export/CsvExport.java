@@ -66,6 +66,66 @@ public class CsvExport {
 	}
 	
 	/**
+	 * Method to export a result set to a CSV file
+	 * 
+	 * @param outputFile	the ouput file
+	 * @param rs			the result set that holds the data to export
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
+	 */
+	public static void exportToCSV(File outputFile, ResultSet rs, DataRow baseDR, boolean useLabel) {
+		if (rs == null || rs.isEmpty()) {
+			return;
+		}
+		
+		String exportString = buildExportString(rs, baseDR, useLabel);
+		exportToFile(outputFile, exportString);
+	}
+	
+	/**
+	 * Method to build the CSV export String
+	 * 
+	 * @param rs			the result set that holds the data to export
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
+	 */
+	public static String buildExportString(ResultSet rs, DataRow baseDR, boolean useLabel) {
+		String exportString = "";
+		
+		DataRow dr = rs.get(0);
+		BBArrayList<String> fieldNames = baseDR.getFieldNames();
+		
+		for (int i = 0 ; i < fieldNames.size() ; i++) {
+			String header = null;
+			String fieldName = fieldNames.get(i);
+			DataField df = baseDR.getField(fieldName);
+			if (useLabel) {
+				header = df.getAttribute("LABEL");
+			}
+			if (header == null) {
+				header = fieldName;
+			}
+			exportString += "\"" + header.trim() + "\",";
+		}
+		
+		exportString = exportString.substring(0, exportString.length()-1);
+		exportString += "\r\n";
+		
+		for (int i = 0 ; i < rs.size() ; i++) {
+			dr = rs.get(i);
+			for (int j = 0 ; j < fieldNames.size() ; j++) {
+				String fieldName = fieldNames.get(j);
+				String val = dr.getFieldAsString(fieldName);
+				exportString += "\"" + val.trim() + "\",";
+			}
+			exportString = exportString.substring(0, exportString.length()-1);
+			exportString += "\r\n";
+		}
+		
+		return exportString;
+	}
+	
+	/**
 	 * Method to export the export string to the given file
 	 * 
 	 * @param outputFile	the ouput file

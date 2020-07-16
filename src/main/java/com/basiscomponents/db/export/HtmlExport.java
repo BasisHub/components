@@ -43,15 +43,22 @@ public class HtmlExport {
 	 * @param writer    A java.io.Writer Instance.
 	 * @param links     A HashMap with field name / URL pattern pairs, like
 	 *                  http://xyz/a/{key}/gy.
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
 	 * @throws Exception
 	 */
-	public static void writeHTML(ResultSet resultSet, Writer writer, HashMap<String, String> links) throws Exception {
+	public static void writeHTML(ResultSet resultSet, Writer writer, HashMap<String, String> links, DataRow baseDR, boolean useLabel) throws Exception {
 
 		writer.write("<table>\n");
 
 		if (resultSet.size() > 0) {
-
-			List<String> fieldnames = resultSet.getColumnNames();
+			
+			List<String> fieldnames;
+			if (baseDR != null) {
+				fieldnames = baseDR.getFieldNames();
+			}else{
+				fieldnames = resultSet.getColumnNames();
+			}
 
 			Iterator<DataRow> it = resultSet.iterator();
 			DataRow r = resultSet.get(0);
@@ -62,7 +69,18 @@ public class HtmlExport {
 			while (rit.hasNext()) {
 				String f = rit.next();
 				writer.write("<th>");
-				writer.write(f);
+				
+				if (useLabel) {
+					String label = baseDR.getFieldAttribute(f, "LABEL");
+					if (label != null) {
+						writer.write(baseDR.getFieldAttribute(f, "LABEL"));
+					}else {
+						writer.write(f);
+					}
+				}else {
+					writer.write(f);
+				}
+				
 				writer.write("</th>");
 
 			}

@@ -49,10 +49,12 @@ public class XmlExport {
 	 * @param entityName  The name of the XML tag to use for each DataRow of the
 	 *                    ResultSet.
 	 * @param writer      The Writer object used to write the XML.
+	 * @param baseDR		the data row, that holds the column sequence and the column labels (if available)
+	 * @param useLabel		indicates if the label instead of the field name should be used
 	 * 
 	 * @throws Exception Gets thrown in case the XML could not be written.
 	 */
-	public static void writeXML(ResultSet resultSet, String rootTagName, String entityName, Writer writer)
+	public static void writeXML(ResultSet resultSet, String rootTagName, String entityName, Writer writer, DataRow baseDR, boolean useLabel)
 			throws Exception {
 		int indent = 0;
 
@@ -63,7 +65,13 @@ public class XmlExport {
 		Iterator<String> rit;
 		String fieldName, fieldValue;
 
-		List<String> fieldnames = resultSet.getColumnNames();
+		List<String> fieldnames;
+		if (baseDR != null) {
+			fieldnames = baseDR.getFieldNames();
+		}else {
+			fieldnames = resultSet.getColumnNames();
+		}
+		
 		Iterator<DataRow> it = resultSet.iterator();
 		while (it.hasNext()) {
 			writer.write(getIndent(indent) + "<" + entityName + ">\n");
@@ -83,9 +91,23 @@ public class XmlExport {
 
 				try {
 					fieldValue = row.getFieldAsString(fieldName).trim();
-					writer.write(getIndent(indent) + "<" + fieldName + ">");
-					writer.write(escapeHTML(fieldValue));
-					writer.write("</" + fieldName + ">\n");
+					
+					if (useLabel) {
+						String tag;
+						String label = baseDR.getFieldAttribute(fieldName, "LABEL");
+						if (label != null) {
+							tag = label;
+						}else {
+							tag = fieldName;
+						}
+						writer.write(getIndent(indent) + "<" + tag + ">");
+						writer.write(escapeHTML(fieldValue));
+						writer.write("</" + tag + ">\n");
+					}else {
+						writer.write(getIndent(indent) + "<" + fieldName + ">");
+						writer.write(escapeHTML(fieldValue));
+						writer.write("</" + fieldName + ">\n");
+					}
 				} catch (Exception e) {
 					writer.write(getIndent(indent) + "<" + fieldName + " null=\"true\" />\n");
 				}

@@ -115,7 +115,6 @@ public class PdfExport {
 			}
 			i++;
 		}
-		System.out.println("pages: " + jasperPrint.getPages().size());
 		return jasperPrint;
 	}
 	
@@ -711,8 +710,6 @@ public class PdfExport {
 		}
 		return tempJRXML;
 	}
-	
-	
 
 	/**
 	 * Calculates the font size for the report, if the report should fit to height.
