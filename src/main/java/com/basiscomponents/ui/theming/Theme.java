@@ -19,7 +19,6 @@ import com.basis.startup.type.sysgui.BBjColor;
 
 public class Theme {
 	
-	
 	public static final int PRIMARY=100;
 	public static final int SECONDARY=102;
 	public static final int ON_PRIMARY=103;
@@ -112,32 +111,30 @@ public class Theme {
 
 		int sz;
 		switch (type) {
-		case "h1":
-			sz=96;
-			break;
-		case "h2":
-			sz=60;
-			break;			
-		case "h3":
-			sz=48;
-			break;			
-		case "h4":
-			sz=34;
-			break;			
-		case "h5":
-			sz=20;
-			break;			
-		case "h6":
-			sz=13;
-			break;				
-		default:
-			sz=12;
-			break;
-	}	
-		
+			case "h1":
+				sz=96;
+				break;
+			case "h2":
+				sz=60;
+				break;			
+			case "h3":
+				sz=48;
+				break;			
+			case "h4":
+				sz=34;
+				break;			
+			case "h5":
+				sz=20;
+				break;			
+			case "h6":
+				sz=13;
+				break;				
+			default:
+				sz=12;
+				break;
+		}	
 		
 		return bbjapi.getSysGui().makeFont(font,sz,style);
-
 	}
 	
 	//-------------------icons------------------------------------------------
@@ -178,7 +175,6 @@ public class Theme {
 		}
 		return bbjapi.getSysGui().getImageManager().loadImageFromFile(ico.getAbsolutePath());
 	}
-
 	
 	public static void setPropertyPath(String path) {
 		propertyPath = path;
@@ -189,7 +185,6 @@ public class Theme {
 		Theme.bbjapi = api;
 		themeInstance = null;
 	}
-
 	
 	public static Theme getInstance(String propertyPath, BBjAPI bbjapi) throws IOException, BBjException {
 		setPropertyPath(propertyPath);
@@ -197,7 +192,6 @@ public class Theme {
 		return getInstance();
 	}
 
-	
 	public static Theme getInstance() throws IOException {
 		if (themeInstance == null) {
 			
@@ -208,19 +202,12 @@ public class Theme {
 		}
 		return themeInstance;
 	}
-
-	
 	
 	public static void main(String[] args) throws Exception {
-		
 		Theme.setPropertyPath("C:\\bbx\\plugins\\BusinessUIComponents\\configurations\\ui.properties");
 		Theme t = Theme.getInstance();
 		System.out.println(t.getBBjBackgroundColor());
 		System.out.println(t.getBBjImage("IC_NEW",Theme.ON_PRIMARY));
-		
-		
-		
-
 	}
 
 }

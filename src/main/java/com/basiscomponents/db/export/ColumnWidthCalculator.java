@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import com.basiscomponents.db.BBArrayList;
+import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.lowagie.text.DocumentException;
@@ -24,11 +25,12 @@ public class ColumnWidthCalculator {
 	 * @param rs				the result set which contains representative data rows
 	 * @param fontSize			the font size that is used to calculate the column width
 	 * @param calculateAllRows	indicator if the perfect column width should be calculated for all rows in the result set
+	 * @param useLabel			indicates if the label instead of the field name should be used
 	 * 
 	 * @return	returns a data row which contains the width for each column (data field)
 	 */
-	public static DataRow calculateColumnWidths(ResultSet rs, float fontSize, boolean calculateAllRows) {
-		return calculateColumnWidths(rs, "", fontSize, -1, calculateAllRows);
+	public static DataRow calculateColumnWidths(ResultSet rs, float fontSize, boolean calculateAllRows, boolean useLabel) {
+		return calculateColumnWidths(rs, "", fontSize, -1, calculateAllRows, useLabel);
 	}
 	
 	/**
@@ -40,7 +42,20 @@ public class ColumnWidthCalculator {
 	 * @return	returns a data row which contains the width for each column (data field)
 	 */
 	public static DataRow calculateColumnWidths(ResultSet rs, float fontSize) {
-		return calculateColumnWidths(rs, "", fontSize, -1, false);
+		return calculateColumnWidths(rs, "", fontSize, -1, false, false);
+	}
+	
+	/**
+	 * Calculates the column widths
+	 * 
+	 * @param rs				the result set which contains representative data rows
+	 * @param fontSize			the font size that is used to calculate the column width
+	 * @param useLabel			indicates if the label instead of the field name should be used
+	 * 
+	 * @return	returns a data row which contains the width for each column (data field)
+	 */
+	public static DataRow calculateColumnWidths(ResultSet rs, float fontSize, boolean useLabel) {
+		return calculateColumnWidths(rs, "", fontSize, -1, false, useLabel);
 	}
 	
 	/**
@@ -81,10 +96,11 @@ public class ColumnWidthCalculator {
 	 * @param fontSize			the font size that is used to calculate the column width
 	 * @param rowsToCheck		the number of rows that should be used to calculate the column width
 	 * @param calculateAllRows	indicator if the perfect column width should be calculated for all rows in the result set
+	 * @param useLabel			indicates if the label instead of the field name should be used
 	 * 
 	 * @return	returns a data row which contains the width for each column (data field)
 	 */
-	public static DataRow calculateColumnWidths(ResultSet rs, String fontResourcePath, float fontSize, int rowsToCheck, boolean calculateAllRows) {
+	public static DataRow calculateColumnWidths(ResultSet rs, String fontResourcePath, float fontSize, int rowsToCheck, boolean calculateAllRows, boolean useLabel) {
 		if(rs.isEmpty()) {
 			return new DataRow();
 		}
@@ -109,15 +125,22 @@ public class ColumnWidthCalculator {
 		}else {
 			rowsToCalculate = rowsToCheck;
 		}
-
-		BBArrayList<String> fieldNames = rs.get(0).getFieldNames();
+		
+		DataRow baseDR = rs.get(0);
+		BBArrayList<String> fieldNames = baseDR.getFieldNames();
 		DataRow dr = new DataRow();
 		int i = 0;
 		while(i < fieldNames.size()) {
 			try {
 				dr.setFieldValue(fieldNames.get(i), 0);
+				DataField field = dr.getField(fieldNames.get(i));
+				if (useLabel) {
+					field.setAttribute("LABEL", baseDR.getFieldAttribute(fieldNames.get(i), "LABEL"));
+				}
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			i++;
@@ -134,7 +157,7 @@ public class ColumnWidthCalculator {
 		
 		// check each header's length
 		baseFont = loadBaseFont(BASIS_BASE_FONT_BOLD_RESOURCE_PATH);
-		dr = calculateHeaderWidth(fieldNames, dr, baseFont, fontSize);
+		dr = calculateHeaderWidth(fieldNames, dr, baseFont, fontSize, useLabel);
 		return dr;
 	}
 	
@@ -161,8 +184,8 @@ public class ColumnWidthCalculator {
 				String fieldValue = tempDR.getFieldAsString(fieldName);
 				try {
 					float valueWidth = baseFont.getWidthPoint(fieldValue.trim(), fontSize);
-					if(valueWidth > dr.getFieldAsNumber(fieldName).floatValue()) {
-						int val = (int) Math.ceil(valueWidth);
+					int val = (int) Math.ceil(valueWidth + fontSize * 0.4); // 0.4 modifier cuz the calculation is not precise enough
+					if(val > dr.getFieldAsNumber(fieldName)) {
 						dr.setFieldValue(fieldName, val);
 					}
 				} catch (ParseException e) {
@@ -171,7 +194,7 @@ public class ColumnWidthCalculator {
 				}
 				j++;	
 			}
-		i++;
+			i++;
 		}
 		return dr;
 	}
@@ -183,17 +206,31 @@ public class ColumnWidthCalculator {
 	 * @param dr				the data row that is used to fill the calculated field width in
 	 * @param baseFont			the base font that is used to calculate the field width
 	 * @param fontSize			the font size that is used to calculate the field width
+	 * @param useLabel			indicates if the label instead of the field name should be used
 	 *
 	 * @return	returns a data row containing the field widths
 	 */
-	private static DataRow calculateHeaderWidth(BBArrayList<String> fieldNames, DataRow dr, BaseFont baseFont, float fontSize) {
+	private static DataRow calculateHeaderWidth(BBArrayList<String> fieldNames, DataRow dr, BaseFont baseFont, float fontSize, boolean useLabel) {
 		fontSize += 2; // because the header is BOLD
 		int numberOfFieldNames = fieldNames.size();
 		int i = 0;
 		while(i < numberOfFieldNames) {
 			String fieldName = fieldNames.get(i);
+			
+			
 			try {
-				float valueWidth = baseFont.getWidthPoint(fieldName.trim(), fontSize);
+				float valueWidth = 0.0f;
+				if (useLabel) {
+					DataField dataField = dr.getField(fieldName);
+					String label = dataField.getAttribute("LABEL");
+					
+					if (label != null) {
+						valueWidth = baseFont.getWidthPoint(label.trim(), fontSize);
+					}
+				}else {
+					valueWidth = baseFont.getWidthPoint(fieldName.trim(), fontSize);
+				}
+				
 				if(valueWidth > dr.getFieldAsNumber(fieldName).floatValue()) {
 					int val = (int) Math.ceil(valueWidth);
 					dr.setFieldValue(fieldName, val);

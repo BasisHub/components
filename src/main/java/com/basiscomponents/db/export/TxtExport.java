@@ -38,17 +38,22 @@ public class TxtExport {
 	 * @param writer    A java.io.Writer Instance.
 	 * @throws Exception
 	 */
-	public static void writeTXT(ResultSet resultSet, Writer writer) throws Exception {
+	public static void writeTXT(ResultSet resultSet, Writer writer, DataRow baseDR, boolean useLabel) throws Exception {
 
 		// TODO maybe do a variation where this can be set:
 		String delim = "\t";
 		Boolean writeHeader = true;
 
 		if (resultSet.size() > 0) {
+			List<String> fieldnames;
 
-			List<String> fieldnames = resultSet.getColumnNames();
+			if (baseDR != null) {
+				fieldnames = baseDR.getFieldNames();
+			}else {
+				fieldnames = resultSet.getColumnNames();
+			}
+			
 			Iterator<DataRow> it = resultSet.iterator();
-
 			DataRow r = resultSet.get(0);
 
 			Iterator<String> rit = fieldnames.iterator();
@@ -56,7 +61,16 @@ public class TxtExport {
 
 				while (rit.hasNext()) {
 					String f = rit.next();
-					writer.write(f);
+					if (useLabel) {
+						String label = baseDR.getFieldAttribute(f, "LABEL");
+						if (label != null) {
+							writer.write(label);
+						}else {
+							writer.write(f);
+						}
+					}else {
+						writer.write(f);
+					}
 					writer.write(delim);
 
 				}
