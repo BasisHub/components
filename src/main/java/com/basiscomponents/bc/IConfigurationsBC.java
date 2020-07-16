@@ -123,6 +123,19 @@ public interface IConfigurationsBC extends BusinessComponent{
 	
 	
 	/**
+	 * returns the shared configurations the user can access with the current filter.
+	 * conditions are:
+	 * -only filtered realm
+	 * -only filtered keyx
+	 * -only configs NOT owned by user
+	 * -shared with user via '*'
+	 * -ignore settings filter (all settings should be shown)
+	 * @return ResultSet with available Configurations
+	 * @throws Exception
+	 */
+	public ResultSet getSharedConfigs() throws Exception;
+	
+	/**
 	 * returns the default scope
 	 * @return
 	 */
@@ -187,11 +200,22 @@ public interface IConfigurationsBC extends BusinessComponent{
 	 * @return
 	 */
 	public String getFieldNameConfig();
+	/**
+	 * return the field name of the shared field
+	 * @return
+	 */
+	public String getFieldNameShared();
 	
 	/**
 	 * returns the current filter of the bc
 	 * @return
 	 */
 	public DataRow getFilter();
+	
+	/**
+	 * returns the current fieldselection of the bc
+	 * @return
+	 */
+	public DataRow getFieldSelection();
 	
 }

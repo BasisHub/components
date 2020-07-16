@@ -13,6 +13,7 @@ import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
 import com.basiscomponents.util.JLibDataFileHandler;
 import com.google.common.base.Strings;
+import com.lowagie.text.pdf.hyphenation.TernaryTree.Iterator;
 
 /**
  * Will handle a VKEYED config file that will store and provide configurations. This is currently used in the configuration widget plugin.
@@ -27,7 +28,7 @@ import com.google.common.base.Strings;
  */
 public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	
-	protected static final String DEFAULT_TEMPLATE_CONFIG_FILE 	= "REALM:C(3*=10):DESCRIPTION=Realm:,KEYX:C(40*=10):DESCRIPTION=Key:,USERID:C(64*=10):DESCRIPTION=UserID:,SETTING:C(40*=10):DESCRIPTION=Setting:,CR_MONT:C(10*=10):DESCRIPTION=createduser:,CR_TS_LD:C(14*=10):DESCRIPTION=createdtimestamp:,MOD_MONT:C(10*=10):DESCRIPTION=modificationuser:,MOD_TS_LD:C(14*=10):DESCRIPTION=modificationtimestamp:,CONFIG:C(1*=10):DESCRIPTION=Configurationpayload:";
+	protected static final String DEFAULT_TEMPLATE_CONFIG_FILE 	= "REALM:C(3*=10):DESCRIPTION=Realm:,KEYX:C(40*=10):DESCRIPTION=Key:,USERID:C(64*=10):DESCRIPTION=UserID:,SETTING:C(40*=10):DESCRIPTION=Setting:,CR_MONT:C(10*=10):DESCRIPTION=createduser:,CR_TS_LD:C(14*=10):DESCRIPTION=createdtimestamp:,MOD_MONT:C(10*=10):DESCRIPTION=modificationuser:,MOD_TS_LD:C(14*=10):DESCRIPTION=modificationtimestamp:,CONFIG:C(1*=10):DESCRIPTION=Configurationpayload:,SHARED:C(1*=10):DESCRIPTION=sharedwith:";
 	
 	protected static final String SCOPE_DEFAULT 				= "B";
 	protected static final String SCOPE_NOSCOPE 				= "";
@@ -42,6 +43,7 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	public static final String FIELD_NAME_MOD_USER              = "MOD_MONT";
 	public static final String FIELD_NAME_MOD_DT 	            = "MOD_TS_LD";
 	public static final String FIELD_NAME_CONFIG  	            = "CONFIG";
+	public static final String FIELD_NAME_SHARED  	            = "SHARED";
 	
 	protected static String templateConfigFile 					= ConfigurationsBC.DEFAULT_TEMPLATE_CONFIG_FILE;
 	
@@ -130,6 +132,10 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 	
 	public String getFieldNameConfig() {
 		return FIELD_NAME_CONFIG;
+	}
+	
+	public String getFieldNameShared() {
+		return FIELD_NAME_SHARED;
 	}
 	/**
 	 * sets 
@@ -869,6 +875,62 @@ public class ConfigurationsBC implements BusinessComponent,IConfigurationsBC {
 		}catch (Exception e) {
 			setFilter(previousFilter);
 			setFieldSelection(previousFieldSel);
+			throw e;
+		}
+	}
+	
+	/**
+	 * returns the shared configurations the user can access with the current filter.
+	 * conditions are:
+	 * -only filtered realm
+	 * -only filtered keyx
+	 * -only configs NOT owned by user
+	 * -shared with user via '*'
+	 * -ignore settings filter (all settings should be shown)
+	 * @return ResultSet with available Configurations
+	 * @throws Exception
+	 */
+	public ResultSet getSharedConfigs() throws Exception {
+		DataRow previousFilter 	 = getFilter();
+		if (!previousFilter.contains(ConfigurationsBC.FIELD_NAME_REALM) || !previousFilter.contains(ConfigurationsBC.FIELD_NAME_KEYX)) {
+			return new ResultSet();//No key and/or realm: no available config to be configured
+		}
+		DataRow previousFieldSel = getFieldSelection();
+		DataRow previousScope = getScope();
+		try {
+			setFieldSelection(new DataRow());
+			setScope(ConfigurationsBC.SCOPE_NOSCOPE);
+			DataRow filter = new DataRow();
+			String realm = previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_REALM);
+			String key = previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_KEYX);
+			//set filter for shared settings and retrieve
+			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_REALM, realm);
+			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_KEYX, key);
+			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_SHARED, "*");
+//			filter.setFieldValue(ConfigurationsBC.FIELD_NAME_USERID, this.factoryDefaultUser);
+			setFilter(filter);
+			ResultSet sharedConfig = retrieve();
+			//set filter for default user id and retrieve
+//			String userid = previousFilter.getFieldAsString(ConfigurationsBC.FIELD_NAME_USERID);
+			java.util.Iterator<DataRow> it = sharedConfig.iterator();
+			//removing configs owned by user, these are not relevant
+			ResultSet newRS = new ResultSet();
+			while (it.hasNext()) {
+				DataRow dr = it.next();
+				String currentUser = dr.getFieldAsString(ConfigurationsBC.FIELD_NAME_USERID).trim();
+				if (!currentUser.equals(this.userName) && (!currentUser.equals(this.adminUser)) && (!currentUser.equals(this.factoryDefaultUser))) {
+					newRS.add(dr);
+				}
+			}
+			//reset filter and fied selection
+			setFilter(previousFilter);
+			setFieldSelection(previousFieldSel);
+			this.scope = previousScope;
+			return newRS;
+		}catch (Exception e) {
+			setFilter(previousFilter);
+			setFieldSelection(previousFieldSel);
+			this.scope = previousScope;
 			throw e;
 		}
 	}
