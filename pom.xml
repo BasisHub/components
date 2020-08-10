@@ -404,7 +404,8 @@
 				<configuration>
 					<footer>${maven.build.timestamp}</footer>
 					<failOnError>false</failOnError>
-					<!-- <additionalparam>-Xdoclint:none</additionalparam> -->
+				        <doclint>none</doclint>
+						<!-- <additionalparam>-Xdoclint:none</additionalparam> --> 
 				</configuration>
 			</plugin>
 
