@@ -163,7 +163,7 @@ public class MultipartPost {
 
 	        // checks server's status code first
 	        int status = httpconn.getResponseCode();
-	        if (status == HttpURLConnection.HTTP_OK) {
+	        if (status >= 200 && status <= 299) {
 	            BufferedReader reader = new BufferedReader(new InputStreamReader(
 	                    httpconn.getInputStream()));
 	            String line = null;
