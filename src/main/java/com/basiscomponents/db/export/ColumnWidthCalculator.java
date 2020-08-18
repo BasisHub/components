@@ -7,6 +7,7 @@ import com.basiscomponents.db.BBArrayList;
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
 import com.basiscomponents.db.ResultSet;
+import com.basiscomponents.db.exception.DataFieldNotFoundException;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.BaseFont;
 
@@ -181,16 +182,18 @@ public class ColumnWidthCalculator {
 			int j = 0;
 			while(j < rowsToCalculate) {
 				DataRow tempDR = rs.get(j);
-				String fieldValue = tempDR.getFieldAsString(fieldName);
-				try {
-					float valueWidth = baseFont.getWidthPoint(fieldValue.trim(), fontSize);
-					int val = (int) Math.ceil(valueWidth + fontSize * 0.4); // 0.4 modifier cuz the calculation is not precise enough
-					if(val > dr.getFieldAsNumber(fieldName)) {
-						dr.setFieldValue(fieldName, val);
+				if (tempDR.contains(fieldName)){
+					String fieldValue = tempDR.getFieldAsString(fieldName);
+					try {
+						float valueWidth = baseFont.getWidthPoint(fieldValue.trim(), fontSize);
+						int val = (int) Math.ceil(valueWidth + fontSize * 0.5); // 0.5 modifier cuz the calculation is not precise enough
+						if(val > dr.getFieldAsNumber(fieldName)) {
+							dr.setFieldValue(fieldName, val);
+						}
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 				j++;	
 			}

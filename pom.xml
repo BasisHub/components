@@ -219,6 +219,7 @@
 			<scope>system</scope>
 			<systemPath>${project-root}/src/main/resources/build/BuildVersionGenerator.jar</systemPath>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.basis</groupId>
 			<artifactId>netty</artifactId>
@@ -260,13 +261,7 @@
   			<artifactId>mockito-core</artifactId>
   			<version>2.28.2</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
-		<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-surefire-plugin</artifactId>
-			<version>2.22.2</version>
-			<scope>test</scope>
-		</dependency>
+		
 		<dependency>
 		    <groupId>com.google.guava</groupId>
 		    <artifactId>guava</artifactId>
@@ -315,26 +310,54 @@
             <artifactId>itext</artifactId>
             <version>2.0.8</version>
         </dependency>	
+        
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
+	<dependency>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-surefire-plugin</artifactId>
+	    <version>3.0.0-M5</version>
+	</dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+	<dependency>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-compiler-plugin</artifactId>
+	<version>3.8.1</version>
+	</dependency>
+	
+	<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-javadoc-plugin -->
+	<dependency>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-javadoc-plugin</artifactId>
+	<version>3.2.0</version>
+	</dependency>
+
+	<!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
+	<dependency>
+	    <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>exec-maven-plugin</artifactId>
+	    <version>1.6.0</version>
+	</dependency>
+
 	</dependencies>
 	
-
 	<build>
 		<finalName>basiscomponents</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.0.0-M5</version>
 			</plugin>
 			
 			<!-- Set a JDK compiler level -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.8.1</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 
@@ -352,10 +375,10 @@
 			<plugin>
 				<artifactId>exec-maven-plugin</artifactId>
 				<groupId>org.codehaus.mojo</groupId>
-				<version>1.5.0</version>
+				<version>1.6.0</version>
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<phase>generate-sources</phase>
 						<goals>
 							<goal>java</goal>
 						</goals>
@@ -377,11 +400,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<version>3.2.0</version>
 				<configuration>
 					<footer>${maven.build.timestamp}</footer>
 					<failOnError>false</failOnError>
-					<additionalparam>-Xdoclint:none</additionalparam>
+				        <doclint>none</doclint>
+						<!-- <additionalparam>-Xdoclint:none</additionalparam> --> 
 				</configuration>
 			</plugin>
 
