@@ -152,9 +152,11 @@ public class Theme {
 		String path =prop.getProperty(iconPropertyKey);
 		if (bbjapi != null)
 			path = bbjapi.getFileSystem().resolvePath(path);
-
+		else
+			throw new BBjException("No BBjAPI()",17);
+		
 		File ico=null;
-		System.out.println(onWhichBackground);
+		
 		switch (onWhichBackground) {
 			case PRIMARY:
 				ico=IconColorizer.recolorImage(path, getPrimaryColorPalette().getHexColor());
