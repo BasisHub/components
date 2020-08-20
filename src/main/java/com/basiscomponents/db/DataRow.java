@@ -293,13 +293,9 @@ public class DataRow implements java.io.Serializable {
 				value = crs.get(name).serialize(new DataField(value)).getObject();
 			
 			String c = value.getClass().getCanonicalName();
-			if (c.contains("BBjNumber") ) {
+			if (c.contains("BasisNumber") ) {
 				value = new BigDecimal(value.toString());
 			}
-			if (c.contains("BBjInt")) {
-				value = Integer.parseInt(value.toString());
-			}
-			
 		}
 
 		DataField field = null;
@@ -355,8 +351,8 @@ public class DataRow implements java.io.Serializable {
 		if (value != null) {
 			c = value.getClass().getCanonicalName();
 		}
-		if (c.contains("BBjNumber") || c.contains("BBjInt")) {
-			value = Double.parseDouble(value.toString());
+		if (c.contains("BasisNumber"))  {
+			value = new BigDecimal(value.toString());
 		}
 
 		try {
