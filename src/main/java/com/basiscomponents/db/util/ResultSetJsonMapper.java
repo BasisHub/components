@@ -558,14 +558,16 @@ public class ResultSetJsonMapper {
 //			case '(':
 // why round?				
 	    case '{':
-	    case '[':
+//	    case '[':
+// why square?	    	
 		braceCount++;
 
 		break;
 //			case ')':
 // why round?
 	    case '}':
-	    case ']':
+//	    case ']':
+// why square?	    	
 		braceCount--;
 
 		break;
