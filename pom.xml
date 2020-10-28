@@ -162,7 +162,7 @@
 			<artifactId>jackson.jar</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${jar-directory}/jackson-all-2.9.4.jar</systemPath>
+			<systemPath>${jar-directory}/jackson-all-2.10.0.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.basis.lib</groupId>
@@ -233,7 +233,7 @@
 			<artifactId>jasperreports</artifactId>
 			<version>6.6.0</version>
 			<scope>system</scope>
-			<systemPath>${jar-directory}/jasperreports-javaflow-6.12.2.jar</systemPath>
+			<systemPath>${jar-directory}/jasperreports-javaflow-6.15.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
