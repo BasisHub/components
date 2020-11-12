@@ -1,6 +1,7 @@
 package com.basiscomponents.db.fieldconverter;
 
 import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
 
 public class StringYMD implements IConversionRule {
 
@@ -27,7 +28,7 @@ public class StringYMD implements IConversionRule {
 	 * "going down".
 	 */
 	@Override
-	public DataField serialize(DataField field) {
+	public DataField serialize(DataField field, DataRow dr) {
 		String val = field.getString().trim();
 
 		// YYYYMM (on disk)
@@ -58,7 +59,7 @@ public class StringYMD implements IConversionRule {
 	 * "going up".
 	 */
 	@Override
-	public DataField deserialize(DataField field) {
+	public DataField deserialize(DataField field, DataRow dr) {
 		String val = field.getString().trim();
 
 		// YYYYMM (on disk)

@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
 
 public class StringTimestamp implements IConversionRule {
 
@@ -13,13 +14,13 @@ public class StringTimestamp implements IConversionRule {
 	}
 
 	@Override
-	public DataField serialize(DataField field) {
+	public DataField serialize(DataField field, DataRow dr) {
 		return new DataField(sdf.format(field.getValue()));
 	}
 
 	@Override
-	public DataField deserialize(DataField field) {
-		
+	public DataField deserialize(DataField field, DataRow dr) {
+
 		String tmp = (String) field.getObject(); // example: 2019-08-10 18:01:15.0
 
 		try {

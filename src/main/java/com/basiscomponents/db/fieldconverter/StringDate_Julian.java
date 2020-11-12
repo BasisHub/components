@@ -2,6 +2,7 @@ package com.basiscomponents.db.fieldconverter;
 
 import com.basis.util.BasisDate;
 import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
 
 public class StringDate_Julian implements IConversionRule {
 
@@ -9,12 +10,12 @@ public class StringDate_Julian implements IConversionRule {
 	}
 
 	@Override
-	public DataField serialize(DataField field) {
+	public DataField serialize(DataField field, DataRow dr) {
 		return new DataField(BasisDate.jul((java.util.Date) field.getValue()));
 	}
 
 	@Override
-	public DataField deserialize(DataField field) {
+	public DataField deserialize(DataField field, DataRow dr) {
 		int tmp = Integer.valueOf((String) field.getObject().toString());
 
 		try {

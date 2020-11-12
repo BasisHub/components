@@ -26,7 +26,6 @@ import com.basis.util.common.TemplateInfo;
 import com.basiscomponents.db.constants.ConstantsResolver;
 import com.basiscomponents.db.exception.DataFieldNotFoundException;
 import com.basiscomponents.db.fieldconverter.ConversionRuleSet;
-import com.basiscomponents.db.fieldconverter.IConversionRule;
 import com.basiscomponents.db.model.Attribute;
 import com.basiscomponents.db.util.DataFieldConverter;
 import com.basiscomponents.db.util.DataRowJsonMapper;
@@ -55,7 +54,7 @@ public class DataRow implements java.io.Serializable {
 	private int rowID=-1;
 
 	private String template;
-	
+
 	private String template_override;
 
 	private boolean templateChanged;
@@ -120,7 +119,7 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Returns a DataRow from a plain JSON String
-	 * 
+	 *
 	 * @param in
 	 *       A JSON string to be parsed into a new DataRow object
 	 * @return DataRow
@@ -130,16 +129,16 @@ public class DataRow implements java.io.Serializable {
 	public static DataRow fromJson(String in) throws IOException, ParseException {
 		return fromJson(in, null);
 	}
-	
+
 	/**
-	 * Returns a DataRow from a plain JSON String, honoring the types of an additional meta DataRow 
-	 * 
+	 * Returns a DataRow from a plain JSON String, honoring the types of an additional meta DataRow
+	 *
 	 * @param in
 	 * 			A JSON string to be parsed into a new DataRow object
 	 * @param meta
-	 * 			A DataRow serving as meta object to define the desirec types 
+	 * 			A DataRow serving as meta object to define the desirec types
 	 * @return  DataRow
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws ParseException
 	 */
@@ -257,7 +256,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * 
+	 *
 	 * Sets the specified value for the field with the specified name. In case no
 	 * field with the specified name exists, then the field will be created.
 	 *
@@ -271,9 +270,9 @@ public class DataRow implements java.io.Serializable {
 	public void setFieldValue(final String name, Object value) throws ParseException {
 		setFieldValueC(name, value, null);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Sets the specified value for the field with the specified name. In case no
 	 * field with the specified name exists, then the field will be created.
 	 *
@@ -287,11 +286,11 @@ public class DataRow implements java.io.Serializable {
 	 *             if a DataField cannot been parsed
 	 */
 	public void setFieldValueC(final String name, Object value, ConversionRuleSet crs) throws ParseException {
-		if (value != null) 
+		if (value != null)
 		{
 			if (crs != null && crs.containsKey(name) && crs.get(name) != null)
-				value = crs.get(name).serialize(new DataField(value)).getObject();
-			
+				value = crs.get(name).serialize(new DataField(value), this).getObject();
+
 			String c = value.getClass().getCanonicalName();
 			if (c.contains("BasisNumber") ) {
 				value = new BigDecimal(value.toString());
@@ -395,7 +394,7 @@ public class DataRow implements java.io.Serializable {
 	public DataField getField(String name) {
 		return getField(name, false, null);
 	}
-	
+
 	/**
 	 * Returns the DataField object for the specified field name.<br>
 	 * <br>
@@ -403,8 +402,8 @@ public class DataRow implements java.io.Serializable {
 	 *
 	 * @param name
 	 *            The field's name
-	 * @param crs 
-	 *            A rule set for converting the field type / content            
+	 * @param crs
+	 *            A rule set for converting the field type / content
 	 * @return dataField The DataField object
 	 *
 	 * @throws Exception
@@ -412,7 +411,7 @@ public class DataRow implements java.io.Serializable {
 	 */
 	public DataField getField(String name, ConversionRuleSet crs) {
 		return getField(name, false, crs);
-	}	
+	}
 
 	/**
 	 * Returns the DataField object for the specified field name.
@@ -448,7 +447,7 @@ public class DataRow implements java.io.Serializable {
 	 * @param silent
 	 *            Boolean value indicating whether the eventual exception should be
 	 *            suppressed or not
-	 * @param crs 
+	 * @param crs
 	 *            A rule set for converting the field type / content
 	 * @return dataField The DataField
 	 *
@@ -460,10 +459,9 @@ public class DataRow implements java.io.Serializable {
 		DataField field = this.dataFields.get(name);
 		if (field == null && !(silent))
 			throw new DataFieldNotFoundException("Field " + name + " does not exist");
-		
-		IConversionRule cr;
+
 		if (field != null && crs != null && crs.containsKey(name) && crs.get(name) != null)
-			return crs.get(name).deserialize(field);
+			return crs.get(name).deserialize(field, this);
 
 		return field;
 	}
@@ -658,7 +656,7 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * 
+	 *
 	 * Returns the value of the ColumnType property from the metadata for the field
 	 * with the given name.
 	 *
@@ -676,13 +674,13 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	/**
-	 * 
+	 *
 	 * Returns the value of the ColumnType property from the metadata for the field
 	 * with the given name.
 	 *
 	 * @param name
 	 *            The name of the field.
-	 * @param crs 
+	 * @param crs
 	 *            A rule set for converting the field type / content
 	 *
 	 * @return The value of the ColumnType property for the field name.
@@ -691,14 +689,14 @@ public class DataRow implements java.io.Serializable {
 	 *             The specified column name doesn't exist
 	 */
 	public int getFieldType(String name, ConversionRuleSet crs) {
-		
+
 		if (crs != null && crs.containsKey(name) && crs.get(name) != null)
 			return crs.get(name).getTargetFieldType();
-		
+
 		int column = getColumnIndex(name);
 		return this.resultSet.getColumnType(column);
 	}
-	
+
 	/**
 	 * Returns the value of the ColumnTypeName property from the metadata for the
 	 * field with the given name or an empty string in case the property isn't set.
@@ -1011,7 +1009,7 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Method to retrieve all keys in the dataFields
-	 * 
+	 *
 	 * @return the set of keys in the dataFields
 	 */
 	public Set<String> keySet() {
@@ -1111,8 +1109,8 @@ public class DataRow implements java.io.Serializable {
 				type = java.sql.Types.VARBINARY;
 		} else if (typeName != null) {
 			switch (typeName) {
-			case "com.basis.bbj.client.datatypes.BBjVector": 
-			case "java.util.ArrayList":  
+			case "com.basis.bbj.client.datatypes.BBjVector":
+			case "java.util.ArrayList":
 				type = -973;
 				break;
 			case "com.basiscomponents.db.DataRow":
@@ -1227,7 +1225,7 @@ public class DataRow implements java.io.Serializable {
 	 *            The name of the field7
 	 *
 	 * @return dataField The DataField value for the given field name.
-	 * 
+	 *
 	 * @see getField
 	 * @deprecated
 	 */
@@ -1524,7 +1522,7 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Returns this DataRow as a JRDataSource
-	 * 
+	 *
 	 * @return JRDataSourceAdapter representing a ResultSet with this record
 	 */
 	public JRDataSource toJRDataSource() {
@@ -1571,7 +1569,7 @@ public class DataRow implements java.io.Serializable {
 	 * Resolve any [[CONSTANT]] type of string inside all String fields note: if the
 	 * CONSTANT contains "!CLEAR" the field will be removed from the DataRow (like
 	 * an STBL gets cleared)
-	 * 
+	 *
 	 * @param cr
 	 *            an instance of the ConstantsResolver class that holds the
 	 *            constants
@@ -1585,7 +1583,7 @@ public class DataRow implements java.io.Serializable {
 	 * Resolve any [[CONSTANT]] type of string inside all String fields note: if the
 	 * CONSTANT contains "!CLEAR" the field will be removed from the DataRow (like
 	 * an STBL gets cleared)
-	 * 
+	 *
 	 * @param cr
 	 *            an instance of the ConstantsResolver class that holds the
 	 *            constants
@@ -1679,7 +1677,7 @@ public class DataRow implements java.io.Serializable {
 	 * attribute value is empty (null or Empty String). If the value is set to true,
 	 * these fields are included. If it is set to false, those fields will be
 	 * ignored by the method.
-	 * 
+	 *
 	 * @see #getFieldsHavingAttribute(String)
 	 * @see #getFieldsHavingAttribute(String, boolean)
 	 *
@@ -1794,16 +1792,16 @@ public class DataRow implements java.io.Serializable {
 
 	/**
 	 * Returns a BBj String Template based on the values defined in this DataRow
-	 * 
+	 *
 	 * @see #getString()
-	 * 
+	 *
 	 * @return a BBj String Template with the values defined in this DataRow.
 	 */
 	public String getTemplate() {
-		
+
 		if (template_override != null)
 			return template_override;
-		
+
 		if (!templateChanged) {
 			return template;
 		}
@@ -1816,11 +1814,11 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Returns the record String to initialize a BBj Templated String based on the
 	 * values of this DataRow object.
-	 * 
+	 *
 	 * @see #getTemplate()
-	 * 
+	 *
 	 * @return the record to initialize the BBj Templated String.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public String getString() throws Exception {
@@ -1849,7 +1847,7 @@ public class DataRow implements java.io.Serializable {
 			case java.sql.Types.NVARCHAR:
 			case java.sql.Types.LONGNVARCHAR:
 			case java.sql.Types.TIME:
-			case java.sql.Types.TIMESTAMP:	
+			case java.sql.Types.TIMESTAMP:
 			case java.sql.Types.BINARY:
 			case java.sql.Types.VARBINARY:
 			case java.sql.Types.LONGVARBINARY:
@@ -1866,19 +1864,19 @@ public class DataRow implements java.io.Serializable {
 			case java.sql.Types.DISTINCT:
 			case java.sql.Types.STRUCT:
 			case java.sql.Types.ROWID:
-			case java.sql.Types.SQLXML:				
+			case java.sql.Types.SQLXML:
 				stringTemplate.setFieldValue(fieldName, getFieldAsString(fieldName));
 				break;
-				
+
 			case java.sql.Types.INTEGER:
 			case java.sql.Types.TINYINT:
 			case java.sql.Types.SMALLINT:
 			case java.sql.Types.BIGINT:
 			case java.sql.Types.BIT:
-				stringTemplate.setFieldValue(fieldName, new BasisNumber(getField(fieldName).getInt()));				
+				stringTemplate.setFieldValue(fieldName, new BasisNumber(getField(fieldName).getInt()));
 				break;
-				
-				
+
+
 			case java.sql.Types.BOOLEAN:
 			case java.sql.Types.DECIMAL:
 			case java.sql.Types.NUMERIC:
@@ -1886,13 +1884,13 @@ public class DataRow implements java.io.Serializable {
 			case java.sql.Types.FLOAT:
 			case java.sql.Types.REAL:
 			case java.sql.Types.DATE:
-				stringTemplate.setFieldValue(fieldName, new BasisNumber(getField(fieldName).getBigDecimal()));				
+				stringTemplate.setFieldValue(fieldName, new BasisNumber(getField(fieldName).getBigDecimal()));
 				break;
 
 
 			default:
 				throw new Exception("field Type "+fieldType+ " for field "+fieldName+" not implemented!");
-			}			
+			}
 		}
 		return stringTemplate.getString().toString();
 	}
@@ -1900,12 +1898,12 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Converts and returns the given String Template as DataRow object containing
 	 * the default field values.
-	 * 
+	 *
 	 * @see #fromTemplate(String, String)
-	 * 
+	 *
 	 * @param template
 	 *            The String Template
-	 * 
+	 *
 	 * @return a DataRow object created based on the given String Template
 	 */
 	public static DataRow fromTemplate(String template) {
@@ -1915,14 +1913,14 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Converts and returns the given String Template as DataRow object containing
 	 * the values of the given record String.
-	 * 
+	 *
 	 * @see #fromTemplate(String)
-	 * 
+	 *
 	 * @param template
 	 *            The String Template
 	 * @param record
 	 *            The record to set
-	 * 
+	 *
 	 * @return a DataRow object created based on the given String Template
 	 */
 	public static DataRow fromTemplate(String template, String record) {
@@ -1934,14 +1932,14 @@ public class DataRow implements java.io.Serializable {
 	 * the current DataRow object has already field definitions, then they will be
 	 * used to cast/convert the value to the required field type. Otherwise the type
 	 * from the templated string will be used.
-	 * 
+	 *
 	 * @param template
 	 *            The String Template
 	 * @param record
 	 *            The record to set
-	 * 
+	 *
 	 * @return a DataRow object created based on the given String Template
-	 * 
+	 *
 	 * @throws Exception
 	 *             Thrown when one of the templated string values doesn't match the
 	 *             field type of the DataRow.
@@ -1979,9 +1977,9 @@ public class DataRow implements java.io.Serializable {
 	}
 
 	public void setTemplate(String template) {
-		
+
 		template_override = template;
-		
+
 //		if (this.template == null) {
 //			this.template = template;
 //			this.templateChanged = false;
@@ -1991,7 +1989,7 @@ public class DataRow implements java.io.Serializable {
 	/**
 	 * Copies the attributes from the passed {@link DataRow} of all fields this
 	 * Object also contains
-	 * 
+	 *
 	 * @param datarow
 	 *            the DataRow from which to copy the attributes
 	 */
