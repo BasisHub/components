@@ -570,8 +570,33 @@ public class DataRow implements java.io.Serializable {
 		DataField field = getField(fieldName);
 		int column = this.resultSet.getColumnIndex(fieldName);
 		int type = this.resultSet.getColumnType(column);
-		return DataFieldConverter.fieldToNumber(resultSet, field, column, type);
+		Double tmp = DataFieldConverter.fieldToNumber(resultSet, field, column, type);
+		return tmp; 
 	}
+	
+	/**
+	 * Returns the value of the field with given name as a Double.
+	 *
+	 * @param fieldName
+	 *            The name of the field whose value should be returned as Double
+	 *
+	 * @return value The field's value as a BBjNumber (for use as a numeric variable in BBj)
+	 *
+	 * @throws Exception
+	 *             No field exists with the given name
+	 */
+	public BasisNumber getFieldAsBBjNumber(String fieldName) {
+
+		if (resultSet == null) {
+			throw new IllegalStateException("ResultSet does not exist");
+		}
+		DataField field = getField(fieldName);
+		int column = this.resultSet.getColumnIndex(fieldName);
+		int type = this.resultSet.getColumnType(column);
+		Double tmp = DataFieldConverter.fieldToNumber(resultSet, field, column, type);
+		BasisNumber val = BasisNumber.valueOf(tmp);
+		return val; 
+	}	
 
 	/**
 	 * Returns the index of the column with the specified name.<br>
