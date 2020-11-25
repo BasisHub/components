@@ -4,6 +4,7 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 
 import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
 
 public class StringTime_HMS implements IConversionRule {
 
@@ -28,7 +29,7 @@ public class StringTime_HMS implements IConversionRule {
 	 * "going down".
 	 */
 	@Override
-	public DataField serialize(DataField field) {
+	public DataField serialize(DataField field, DataRow dr) {
 		String val;
 		if (field.getValue() == null) {
 			val = "";
@@ -50,7 +51,7 @@ public class StringTime_HMS implements IConversionRule {
 	 * "going up".
 	 */
 	@Override
-	public DataField deserialize(DataField field) {
+	public DataField deserialize(DataField field, DataRow dr) {
 		String val = field.getString().trim();
 
 		if (mode == "HMS" && val.length() == 6) {

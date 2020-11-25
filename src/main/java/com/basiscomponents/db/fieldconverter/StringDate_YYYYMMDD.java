@@ -3,6 +3,7 @@ package com.basiscomponents.db.fieldconverter;
 import java.text.SimpleDateFormat;
 
 import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
 
 public class StringDate_YYYYMMDD implements IConversionRule {
 
@@ -12,12 +13,12 @@ public class StringDate_YYYYMMDD implements IConversionRule {
 	}
 
 	@Override
-	public DataField serialize(DataField field) {
+	public DataField serialize(DataField field, DataRow dr) {
 		return new DataField(sdf.format(field.getValue()));
 	}
 
 	@Override
-	public DataField deserialize(DataField field) {
+	public DataField deserialize(DataField field, DataRow dr) {
 		String tmp = (String) field.getObject();
 
 		if (tmp.trim().length() == 8) {

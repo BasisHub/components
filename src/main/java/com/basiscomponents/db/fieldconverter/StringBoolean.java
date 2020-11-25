@@ -1,6 +1,7 @@
 package com.basiscomponents.db.fieldconverter;
 
 import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
 
 public class StringBoolean implements IConversionRule {
 
@@ -20,7 +21,7 @@ public class StringBoolean implements IConversionRule {
 	 * "going down"
 	 */
 	@Override
-	public DataField serialize(DataField field) {
+	public DataField serialize(DataField field, DataRow dr) {
 		if (field.getBoolean())
 			return new DataField(trueString);
 		else
@@ -32,7 +33,7 @@ public class StringBoolean implements IConversionRule {
 	 * "going up"
 	 */
 	@Override
-	public DataField deserialize(DataField field) {
+	public DataField deserialize(DataField field, DataRow dr) {
 		if (field.getObject().equals(trueString))
 			return new DataField(Boolean.TRUE);
 		else

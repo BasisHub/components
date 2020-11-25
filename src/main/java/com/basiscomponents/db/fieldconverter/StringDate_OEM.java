@@ -9,6 +9,7 @@ import com.basis.dateformat.LegacyDateFormatBridge;
 import com.basis.startup.type.dateformat.BBjDateFormat;
 import com.basis.startup.type.dateformat.BBjDateFormatException;
 import com.basiscomponents.db.DataField;
+import com.basiscomponents.db.DataRow;
 
 
 public class StringDate_OEM implements IConversionRule, Serializable {
@@ -34,7 +35,7 @@ public class StringDate_OEM implements IConversionRule, Serializable {
 	 * "going down"
 	 */
 	@Override
-	public DataField serialize(DataField field) {
+	public DataField serialize(DataField field, DataRow dr) {
 		Date date = (Date) field.getValue();
 		String val = null;
 		if (date != null) {
@@ -57,7 +58,7 @@ public class StringDate_OEM implements IConversionRule, Serializable {
 	 * "going up"
 	 */
 	@Override
-	public DataField deserialize(DataField field) {
+	public DataField deserialize(DataField field, DataRow dr) {
 		String val = field.getObject().toString();
 		Date date = null;
 		if (val != null && !(val.trim().isEmpty())) {
