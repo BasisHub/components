@@ -1,7 +1,6 @@
 package com.basiscomponents.db.fieldconverter;
 
 import java.text.ParseException;
-import java.util.Arrays;
 
 import com.basiscomponents.db.DataField;
 import com.basiscomponents.db.DataRow;
@@ -59,22 +58,12 @@ public class BarListDesc implements IConversionRule {
 	public void setDesc(DataField field, DataRow dr) {
 		String desc = "";
 
-		// System.out.println("BarListDesc::setDesc:codeCol=" + codeCol); // "COST_METHOD"
-		// System.out.println("BarListDesc::setDesc:descCol=" + descCol); // "COST_METHOD_DESC"
-		// System.out.println("BarListDesc::setDesc:attr_ldat=" + attr_ldat); // "FIFO     ~FIFO  ;LIFO     ~LIFO  ;" (C(64)~C(20);..)
-		// System.out.println("BarListDesc::setDesc:attr_opts=" + attr_opts); // ""
-
 		if (!attr_ldat.isEmpty()) {
 			String code = dr.getFieldAsString(codeCol).trim();
-			// System.out.println("BarListDesc::setDesc:code=" + code); // "FIFO"
 			String[] descs = attr_ldat.split(";");
-			// System.out.println("BarListDesc::setDesc:descs=" + Arrays.toString(descs)); // [FIFO     ~FIFO  ,LIFO     ~LIFO  ]
 
 			for (String s : descs) {
-				// System.out.println("BarListDesc::setDesc:s=" + s); // "FIFO     ~FIFO  " (C(64)~C(20)
 				int i = s.lastIndexOf("~");
-				// System.out.println("BarListDesc::setDesc:s.lastIndexOf(\"~\")=" + i); // 64
-				// System.out.println("BarListDesc::setDesc:s.substring(i + 1).trim()=" + s.substring(i + 1).trim()); // "FIFO"
 				if (i != -1 && s.substring(i + 1).trim().equals(code)) {
 					desc = s.substring(0, i).trim();
 					if (attr_opts.indexOf("o") == -1 && attr_opts.indexOf("k") == -1) {
@@ -89,7 +78,6 @@ public class BarListDesc implements IConversionRule {
 			}
 		}
 		try {
-			// System.out.println("BarListDesc::setDesc:desc=" + desc); // "FIFO (FIFO)" (default format)
 			dr.setFieldValue(descCol, desc);
 		} catch (ParseException e) {
 			// do nothing
