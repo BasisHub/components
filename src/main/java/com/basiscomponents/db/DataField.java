@@ -204,6 +204,8 @@ public class DataField implements java.io.Serializable {
 	 * @return value The DataField's value as <code>java.lang.Short</code> object.
 	 */
 	public Short getShort() {
+		if (this.Value instanceof Integer)
+			return ((Integer) this.Value).shortValue();
 		return (Short) this.Value;
 	}
 
